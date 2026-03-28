@@ -65,7 +65,7 @@ def sitemap():
     from app.db import query
 
     pages = []
-    base = 'https://benovite.com'  # replace with actual domain
+    base = 'https://transit-serbia.com'  # TODO: replace with final domain
 
     pages.append(f'<url><loc>{base}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>')
     pages.append(f'<url><loc>{base}/rute/</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>')
