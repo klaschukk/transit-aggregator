@@ -2,44 +2,59 @@
 
 ## Программатические страницы
 
-### 1. Страницы городских пар (приоритет 1)
+### 1. Городские пары — главный приоритет
 URL: `/voznja/{from}-do-{to}/`
-Примеры: beograd-do-novi-sad, beograd-do-nis, novi-sad-do-nis
 
-**Целевые запросы:**
+Целевые запросы:
 - "beograd novi sad autobus"
 - "prevoz beograd nis cena"
 - "autobusi beograd subotica red voznje"
+- "kako doci od beograda do novog sada"
 
-Потенциал: 50+ городских пар × 3–5 вариантов запроса = 150–250 ключевых слов
+Потенциал: 50+ пар × 3–5 вариантов = **150–250 ключевых слов**
 
-### 2. Страницы маршрутов (приоритет 2)
+### 2. Страницы маршрутов
 URL: `/rute/{slug}/`
-Примеры: beograd-novi-sad, beograd-nis
 
-Целевые запросы: конкретные маршруты с расписанием
+Целевые запросы: конкретные маршруты с расписанием.
 
-### 3. Страницы остановок Белград (приоритет 3)
+### 3. Остановки Белград
 URL: `/gradski/beograd/stajaliste/{slug}/`
 
-Целевые запросы: "autobus stajaliste [название]", "linija [N] stajalista"
+Целевые запросы: "autobus stajaliste [название]", "gsp stajaliste"
+Потенциал: 2000+ остановок GSP = **2000+ страниц**
 
-### 4. Страницы линий (приоритет 4)
+### 4. Линии
 URL: `/gradski/beograd/linija/{num}/`
+
+Целевые запросы: "linija 11 beograd", "gsp linija 25 stajalista"
 
 ## Schema Markup
 
-- Главная страница: `WebSite` + `SearchAction`
-- Страница маршрута: `ItemList` + `BusTrip`/`TrainTrip`
-- Страница остановки: `BusStation`/`TrainStation`
-- Городская пара: `FAQPage` (частые вопросы о маршруте)
+| Страница | Schema |
+|---------|--------|
+| Главная | `WebSite` + `SearchAction` |
+| Маршрут | `ItemList` + `BusTrip`/`TrainTrip` |
+| Остановка | `BusStation` |
+| Городская пара | `FAQPage` |
 
-## Техническое SEO
+## Технический SEO — чеклист
 
-- [ ] sitemap.xml (все маршруты + остановки)
-- [ ] robots.txt
-- [ ] canonical URLs
-- [ ] hreflang (sr, en потом)
-- [ ] Open Graph tags
-- [ ] Core Web Vitals оптимизация
-- [ ] Мобильная версия (критично — 70%+ трафика с мобильных)
+- [ ] `sitemap.xml` (все маршруты + остановки)
+- [x] `robots.txt`
+- [x] Canonical URLs
+- [ ] hreflang (sr — сейчас, en — в будущем)
+- [ ] Open Graph теги
+- [ ] Core Web Vitals < 2.5s LCP
+- [ ] Mobile-first (приоритет)
+- [ ] Google Search Console подключение
+
+## Контентная стратегия
+
+Каждая страница городской пары генерирует:
+- Уникальный H1
+- Описание маршрута
+- FAQ блок (3–5 вопросов о маршруте)
+- Таблица рейсов (динамически из DuckDB)
+
+Всё из структурированных данных — ноль ручного труда.
