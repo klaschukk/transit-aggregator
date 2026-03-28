@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}{{ from_city }} → {{ to_city }} — red vožnje{% endblock %}
+{% block meta_description %}Red vožnje od {{ from_city }} do {{ to_city }}. Sve polasci, cene i prevoznici.{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>{{ from_city }} → {{ to_city }}</h1>
+
+  {% if results %}
+    <p class="route-meta">Pronađeno {{ results|length }} polazaka</p>
+    <table class="trips-table">
+      <thead>
+        <tr><th>Polazak</th><th>Dolazak</th><th>Trajanje</th><th>Prevoznik</th><th>Cena</th></tr>
+      </thead>
+      <tbody>
+        {% for trip in results %}
+        <tr>
+          <td class="trips-table__time">{{ trip.departure_time }}</td>
+          <td class="trips-table__time">{{ trip.arrival_time }}</td>
+          <td>{{ trip.duration_min // 60 }}h {{ trip.duration_min % 60 }}min</td>
+          <td>{{ trip.operator }}</td>
+          <td>{{ trip.price_rsd }} RSD</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% elif from_city and to_city %}
+    <p class="empty-state">
+      Nema direktnih polazaka za ovu rutu. Pokušajte na
+      <a href="https://www.busticket4.me" rel="nofollow">BusTicket4.me</a>.
+    </p>
+  {% else %}
+    <p>Unesite polazište i odredište da biste pronašli vožnje.</p>
+  {% endif %}
+</div>
+{% endblock %}

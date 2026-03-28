@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš'} %}
+
+{% block title %}Gradski prevoz {{ city_names[city] }} — sve linije i stajališta{% endblock %}
+{% block meta_description %}Red vožnje gradskog prevoza u {{ city_names[city] }}u. Linije, stajališta i polasci GSP-a.{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>Gradski prevoz {{ city_names[city] }}</h1>
+
+  {% if lines %}
+  <div class="lines-grid">
+    {% for line in lines %}
+    <a href="/gradski/{{ city }}/linija/{{ line.slug }}/" class="line-card"
+       style="--line-color: {{ line.color or '#2563eb' }}">
+      <span class="line-card__number">{{ line.number }}</span>
+      <span class="line-card__name">{{ line.name }}</span>
+      <span class="line-card__stops">{{ line.stop_count }} stajališta</span>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-state">Podaci o gradskom prevozu se učitavaju. Proverite ponovo uskoro.</p>
+  {% endif %}
+</div>
+{% endblock %}

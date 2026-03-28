@@ -3,9 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Transit Serbia{% endblock %}</title>
+    <title>{% block title %}Prevoz Srbija — Red vožnje i karte{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Pronađite red vožnje autobusa i vozova u Srbiji. Karte, cene i polasci za sve destinacije.{% endblock %}">
+    <link rel="canonical" href="{{ request.url }}">
+    {% if hreflang is defined %}
+    <link rel="alternate" hreflang="sr" href="{{ hreflang.sr }}">
+    {% endif %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block head_extra %}{% endblock %}
 </head>
 <body>
-{% block content %}{% endblock %}
+<header class="site-header">
+    <div class="container">
+        <a href="/" class="site-logo">🚌 Prevoz Srbija</a>
+        <nav class="site-nav">
+            <a href="/rute/">Sve rute</a>
+            <a href="/gradski/beograd/">Gradski prevoz</a>
+        </nav>
+    </div>
+</header>
+
+<main class="site-main">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+    <div class="container">
+        <p>© 2026 Prevoz Srbija. Podaci su informativnog karaktera.</p>
+        <p><small>Uvek proverite tačan red vožnje kod prevoznika.</small></p>
+    </div>
+</footer>
+
+{% block scripts %}{% endblock %}
 </body>
 </html>

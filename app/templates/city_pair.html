@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}{{ from_city }} do {{ to_city }} autobusom — cene i red vožnje{% endblock %}
+{% block meta_description %}Kako doći od {{ from_city }} do {{ to_city }}? Red vožnje autobusa, vozova i cene karata. Poredite prevoznike i kupite kartu online.{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>{{ from_city }} → {{ to_city }}</h1>
+
+  {% if route %}
+    <p class="route-summary">
+      Rastojanje: <strong>{{ route.distance_km }} km</strong> ·
+      Polazaka dnevno: <strong>{{ route.trip_count }}</strong>
+      {% if route.min_price_rsd %} · Cene od <strong>{{ (route.min_price_rsd / 117)|round|int }} €</strong>{% endif %}
+    </p>
+
+    <a href="/rute/{{ route.slug }}/" class="btn btn--primary">Pogledaj sve polaske</a>
+  {% else %}
+    <p>Direktna veza između {{ from_city }} i {{ to_city }} nije dostupna u bazi.
+       Proverite na <a href="https://www.busticket4.me" rel="nofollow">BusTicket4.me</a>
+       ili <a href="https://www.srbvoz.rs" rel="nofollow">Srbija Voz</a>.</p>
+  {% endif %}
+
+  <section class="travel-tips">
+    <h2>Saveti za putovanje</h2>
+    <ul>
+      <li>Proverite red vožnje direktno kod prevoznika pre putovanja.</li>
+      <li>Karte možete kupiti na <a href="https://www.busticket4.me" rel="nofollow">BusTicket4.me</a>.</li>
+      <li>Za vozove: <a href="https://www.srbvoz.rs" rel="nofollow">Srbija Voz</a>.</li>
+    </ul>
+  </section>
+</div>
+{% endblock %}

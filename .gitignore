@@ -1,5 +1,18 @@
-venv/
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+venv/
 .env
-*.db
+*.egg-info/
+
+# DuckDB and raw data (rebuilt by pipelines)
+data/dbs/
+data/raw/
+
+# OS
+.DS_Store
+*.swp
+
+# Logs
+*.log

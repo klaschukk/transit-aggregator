@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Sve rute — autobusi i vozovi u Srbiji{% endblock %}
+{% block meta_description %}Kompletna lista međugradskih autobuskih i voznih linija u Srbiji. Red vožnje, cene i prevoznici.{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>Sve rute u Srbiji</h1>
+  <p class="route-meta">{{ routes|length }} ruta u bazi</p>
+
+  {% if routes %}
+  <div class="route-grid">
+    {% for route in routes %}
+    <a href="/rute/{{ route.slug }}/" class="route-card">
+      <span class="route-card__cities">{{ route.from_city }} → {{ route.to_city }}</span>
+      <span class="route-card__meta">
+        {{ route.trip_count }} polazaka
+        {% if route.distance_km %} · {{ route.distance_km }} km{% endif %}
+        {% if route.min_price_rsd %} · od {{ (route.min_price_rsd / 117)|round|int }} €{% endif %}
+      </span>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-state">Podaci se učitavaju.</p>
+  {% endif %}
+</div>
+{% endblock %}

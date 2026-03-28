@@ -1,6 +1,79 @@
 {% extends "base.html" %}
-{% block title %}Transit Serbia{% endblock %}
+
+{% block title %}Red vožnje autobusa i vozova Srbija — Prevoz Srbija{% endblock %}
+{% block meta_description %}Pronađite autobus ili voz između gradova Srbije. Red vožnje, cene karata i polasci iz Beograda, Novog Sada, Niša i ostalih gradova.{% endblock %}
+
+{% block head_extra %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Prevoz Srbija",
+  "url": "{{ request.url_root }}",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "{{ request.url_root }}pretraga/?od={od}&do={do}",
+    "query-input": "required name=od required name=do"
+  }
+}
+</script>
+{% endblock %}
+
 {% block content %}
-<h1>Transit Serbia</h1>
-<p>Dolazi uskoro...</p>
+<section class="hero">
+  <div class="container">
+    <h1>Pronađite prevoz u Srbiji</h1>
+    <p class="hero__subtitle">Autobus, voz i avio — red vožnje i cene za sve destinacije</p>
+
+    <form class="search-form" action="/pretraga/" method="get">
+      <div class="search-form__row">
+        <div class="search-form__field">
+          <label for="od">Polazište</label>
+          <input type="text" id="od" name="od" placeholder="npr. Beograd" autocomplete="off" required>
+        </div>
+        <div class="search-form__field">
+          <label for="do">Odredište</label>
+          <input type="text" id="do" name="do" placeholder="npr. Novi Sad" autocomplete="off" required>
+        </div>
+        <div class="search-form__field">
+          <label for="datum">Datum</label>
+          <input type="date" id="datum" name="datum">
+        </div>
+        <button type="submit" class="btn btn--primary">Traži</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+{% if popular_routes %}
+<section class="popular-routes">
+  <div class="container">
+    <h2>Popularne rute</h2>
+    <div class="route-grid">
+      {% for route in popular_routes %}
+      <a href="/rute/{{ route.slug }}/" class="route-card">
+        <span class="route-card__cities">{{ route.from_city }} → {{ route.to_city }}</span>
+        <span class="route-card__meta">{{ route.trip_count }} polazaka · {{ route.distance_km }} km</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="city-transport">
+  <div class="container">
+    <h2>Gradski prevoz</h2>
+    <div class="city-grid">
+      <a href="/gradski/beograd/" class="city-card">
+        <span class="city-card__name">Beograd</span>
+        <span class="city-card__meta">GSP — sve linije i stajališta</span>
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/search.js') }}"></script>
 {% endblock %}

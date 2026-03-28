@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš'} %}
+
+{% block title %}Linija {{ line.number }} {{ city_names[city] }} — {{ line.name }}{% endblock %}
+{% block meta_description %}Red vožnje linije {{ line.number }} u {{ city_names[city] }}u. Stajališta: {{ line.name }}.{% endblock %}
+
+{% block content %}
+<div class="container">
+  <nav class="breadcrumb">
+    <a href="/">Početna</a> › <a href="/gradski/{{ city }}/">Gradski prevoz {{ city_names[city] }}</a> › Linija {{ line.number }}
+  </nav>
+
+  <h1>Linija {{ line.number }} — {{ line.name }}</h1>
+
+  {% if stops %}
+  <ol class="stops-list">
+    {% for stop in stops %}
+    <li class="stops-list__item">
+      <a href="/gradski/{{ city }}/stajaliste/{{ stop.slug }}/">{{ stop.name }}</a>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="empty-state">Nema podataka o stajalištima.</p>
+  {% endif %}
+</div>
+{% endblock %}
