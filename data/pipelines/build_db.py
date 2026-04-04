@@ -506,32 +506,93 @@ def _load_gtfs(conn: duckdb.DuckDBPyConnection) -> None:
     """)
     st_count = conn.execute("SELECT COUNT(*) FROM gtfs_stop_times").fetchone()[0]
 
-    # Step 5: Map gtfs stop_id → city_stop_id via GTFS stops.txt stop_code
+    # Step 5: Map gtfs stop_id → city_stop_id using multiple strategies
     stops_path = GTFS_DIR / 'stops.txt'
     if stops_path.exists():
-        # Build gtfs stop_id → stop_code from stops.txt
+        # Load GTFS stops into temp table (stop_id, stop_code, name, lat, lon)
         conn.execute(f"""
             CREATE TEMP TABLE _gtfs_stops AS
-            SELECT stop_id::VARCHAR AS gtfs_stop_id, stop_code::VARCHAR AS stop_code
+            SELECT stop_id::VARCHAR AS gtfs_stop_id,
+                   stop_code::VARCHAR AS stop_code,
+                   stop_name AS name,
+                   stop_lat::DOUBLE AS lat,
+                   stop_lon::DOUBLE AS lon
             FROM read_csv_auto('{stops_path}', header=true)
         """)
-        # Build code → city_stop_id temp table
+
+        # Strategy A: exact code match (bgprevoz API ID)
         conn.execute("""
             CREATE TEMP TABLE _code_map AS
             SELECT code, id AS city_stop_id FROM city_stops WHERE code IS NOT NULL
         """)
-        # Update city_stop_id in stop_times
         conn.execute("""
             UPDATE gtfs_stop_times SET city_stop_id = _code_map.city_stop_id
             FROM _gtfs_stops, _code_map
             WHERE gtfs_stop_times.stop_id = _gtfs_stops.gtfs_stop_id
               AND _gtfs_stops.stop_code = _code_map.code
         """)
+        mapped_a = conn.execute("SELECT COUNT(*) FROM gtfs_stop_times WHERE city_stop_id IS NOT NULL").fetchone()[0]
+        print(f"    Strategy A (exact code):  {mapped_a} rows mapped")
+
+        # Strategy B: neighbor code ±1 (Belgrade paired stops: odd/even sides of street)
+        # For unmapped stop_times, try code-1 and code+1
+        conn.execute("""
+            UPDATE gtfs_stop_times SET city_stop_id = _code_map.city_stop_id
+            FROM _gtfs_stops, _code_map
+            WHERE gtfs_stop_times.city_stop_id IS NULL
+              AND gtfs_stop_times.stop_id = _gtfs_stops.gtfs_stop_id
+              AND (CAST(_gtfs_stops.stop_code AS INTEGER) - 1)::VARCHAR = _code_map.code
+        """)
+        conn.execute("""
+            UPDATE gtfs_stop_times SET city_stop_id = _code_map.city_stop_id
+            FROM _gtfs_stops, _code_map
+            WHERE gtfs_stop_times.city_stop_id IS NULL
+              AND gtfs_stop_times.stop_id = _gtfs_stops.gtfs_stop_id
+              AND (CAST(_gtfs_stops.stop_code AS INTEGER) + 1)::VARCHAR = _code_map.code
+        """)
+        mapped_b = conn.execute("SELECT COUNT(*) FROM gtfs_stop_times WHERE city_stop_id IS NOT NULL").fetchone()[0]
+        print(f"    Strategy B (code ±1):     {mapped_b} rows mapped (+{mapped_b - mapped_a})")
+
+        # Strategy C: nearest city_stop by coordinates (< 100m) for remaining unmapped
+        # Build a mapping table for still-unmapped GTFS stop_ids
+        conn.execute("""
+            CREATE TEMP TABLE _unmapped_gtfs AS
+            SELECT DISTINCT st.stop_id AS gtfs_stop_id, gs.lat, gs.lon
+            FROM gtfs_stop_times st
+            JOIN _gtfs_stops gs ON gs.gtfs_stop_id = st.stop_id
+            WHERE st.city_stop_id IS NULL AND gs.lat IS NOT NULL
+        """)
+        # For each unmapped GTFS stop, find closest city_stop within ~100m
+        # Using degree approximation: 0.001° ≈ 111m
+        conn.execute("""
+            CREATE TEMP TABLE _coord_map AS
+            SELECT u.gtfs_stop_id,
+                   (SELECT cs.id FROM city_stops cs
+                    WHERE cs.lat IS NOT NULL
+                      AND ABS(cs.lat - u.lat) < 0.002
+                      AND ABS(cs.lon - u.lon) < 0.002
+                    ORDER BY (cs.lat - u.lat)*(cs.lat - u.lat) + (cs.lon - u.lon)*(cs.lon - u.lon)
+                    LIMIT 1) AS city_stop_id
+            FROM _unmapped_gtfs u
+        """)
+        conn.execute("""
+            UPDATE gtfs_stop_times SET city_stop_id = _coord_map.city_stop_id
+            FROM _coord_map
+            WHERE gtfs_stop_times.city_stop_id IS NULL
+              AND gtfs_stop_times.stop_id = _coord_map.gtfs_stop_id
+              AND _coord_map.city_stop_id IS NOT NULL
+        """)
+        mapped_c = conn.execute("SELECT COUNT(*) FROM gtfs_stop_times WHERE city_stop_id IS NOT NULL").fetchone()[0]
+        print(f"    Strategy C (coords <200m): {mapped_c} rows mapped (+{mapped_c - mapped_b})")
+
+        conn.execute("DROP TABLE IF EXISTS _coord_map")
+        conn.execute("DROP TABLE IF EXISTS _unmapped_gtfs")
         conn.execute("DROP TABLE _gtfs_stops")
         conn.execute("DROP TABLE _code_map")
 
     mapped = conn.execute("SELECT COUNT(*) FROM gtfs_stop_times WHERE city_stop_id IS NOT NULL").fetchone()[0]
-    print(f"  Loaded {st_count} stop_times ({mapped} mapped to city_stops, {mapped*100//st_count}%)")
+    unique_stops = conn.execute("SELECT COUNT(DISTINCT city_stop_id) FROM gtfs_stop_times WHERE city_stop_id IS NOT NULL").fetchone()[0]
+    print(f"  Loaded {st_count} stop_times ({mapped} mapped [{mapped*100//st_count}%], {unique_stops} unique stops)")
 
 
 def _load_sample_data(conn: duckdb.DuckDBPyConnection) -> None:
