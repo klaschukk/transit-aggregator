@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Autobuske i železničke stanice u Srbiji — Transit Srbija{% endblock %}
-{% block meta_description %}Lista autobuskih i železničkih stanica u Srbiji. {{ stations|length }} stanica.{% endblock %}
+{% block meta_description %}Lista autobuskih i železničkih stanica u Srbiji. {{ stations|length }} stanica — Beograd, Novi Sad, Niš i drugi gradovi.{% endblock %}
+
+{% block head_extra %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ItemList","name":"Stanice u Srbiji","numberOfItems":{{ stations|length }},"itemListElement":[{% for st in stations %}{"@type":"ListItem","position":{{ loop.index }},"item":{"@type":"{% if st.type == 'train' %}TrainStation{% else %}BusStation{% endif %}","name":"{{ st.name }}","addressLocality":"{{ st.city }}"}}{% if not loop.last %},{% endif %}{% endfor %}]}
+</script>
+{% endblock %}
 
 {% block content %}
 
@@ -8,27 +14,57 @@
 {% from '_partials/_empty_state.html' import empty_state %}
 {{ breadcrumb([{'url': '/', 'label': 'Početna'}, {'label': 'Stanice'}]) }}
 
-<div class="page-title">
+<div class="page-title fade-in">
   <h1>Autobuske i železničke stanice</h1>
   <p class="page-subtitle">{{ stations|length }} stanica u bazi</p>
 </div>
 
 {% if stations %}
-<div class="stations-grid">
-  {% for st in stations %}
-  <div class="station-card fade-in fade-in--d{{ loop.index0 % 5 }}">
+{# Group stations by city #}
+{% set ns = namespace(current_city='') %}
+{% for st in stations %}
+
+  {% if st.city != ns.current_city %}
+    {% if ns.current_city %}
+    </div>{# close previous station-group__cards #}
+    </section>
+    {% endif %}
+    {% set ns.current_city = st.city %}
+    <section class="station-group fade-in" id="{{ st.city_slug }}">
+      <h2 class="station-group__title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        {{ st.city }}
+        {% if st.route_count %}<span class="station-group__count">{{ st.route_count }} ruta</span>{% endif %}
+      </h2>
+      <div class="station-group__cards">
+  {% endif %}
+
+  <div class="station-card">
     <div class="station-card__icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="24" height="24">
-        <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
+        {% if st.type == 'train' %}
+        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
+        {% else %}
+        <rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/>
+        <circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/>
+        {% endif %}
       </svg>
     </div>
     <div class="station-card__info">
       <div class="station-card__name">{{ st.name }}</div>
-      <div class="station-card__city">{{ st.city }}</div>
+      <div class="station-card__meta">
+        {% if st.type == 'train' %}Železnička stanica{% elif st.type == 'bus' %}Autobuska stanica{% else %}Stanica{% endif %}
+        {% if st.code %} · {{ st.code }}{% endif %}
+      </div>
     </div>
   </div>
-  {% endfor %}
-</div>
+
+{% endfor %}
+{% if stations %}
+    </div>{# close last station-group__cards #}
+    </section>
+{% endif %}
+
 {% else %}
   {{ empty_state(icon='stop', text='Podaci se učitavaju') }}
 {% endif %}

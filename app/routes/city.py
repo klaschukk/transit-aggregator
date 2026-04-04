@@ -111,7 +111,7 @@ def stop_detail(city: str, stop_slug: str):
 
 @city_bp.route('/api/stop-arrivals')
 def api_stop_arrivals():
-    """Return lines at a stop with estimated next arrivals (headway model)."""
+    """Return lines at a stop with next arrivals from GTFS schedule."""
     stop_slug = request.args.get('slug', '').strip()
     if not stop_slug or not db_ready():
         return jsonify([])
@@ -120,6 +120,7 @@ def api_stop_arrivals():
     if not stop:
         return jsonify([])
 
+    # Get lines serving this stop
     lines = query("""
         SELECT cl.number, cl.name, cl.slug AS line_slug, cl.color, cls.stop_order
         FROM city_line_stops cls
@@ -134,26 +135,59 @@ def api_stop_arrivals():
 
     now = datetime.now()
     current_min = now.hour * 60 + now.minute
+    now_time = f'{now.hour:02d}:{now.minute:02d}:00'
+    service_id = _today_service()
+
+    # Try GTFS schedule: find next 2 departures per line at this stop
+    gtfs_arrivals = query("""
+        SELECT cl.number,
+               st.departure_time,
+               gt.direction_id
+        FROM gtfs_stop_times st
+        JOIN gtfs_trips gt ON gt.trip_id = st.trip_id
+        JOIN city_lines cl ON cl.id = gt.line_id
+        WHERE st.city_stop_id = ?
+          AND gt.service_id = ?
+          AND st.departure_time >= ?
+        ORDER BY cl.number, st.departure_time
+    """, [stop['id'], service_id, now_time])
+
+    # Group by line number: keep first 2 departures
+    gtfs_by_line: dict[str, list[str]] = {}
+    for row in gtfs_arrivals:
+        num = row['number']
+        if num not in gtfs_by_line:
+            gtfs_by_line[num] = []
+        if len(gtfs_by_line[num]) < 2:
+            gtfs_by_line[num].append(row['departure_time'])
 
     result = []
     for line in lines:
         name = line['name'] or ''
         direction = name.split('—')[-1].strip() if '—' in name else name
 
-        # Headway estimate based on time of day
-        if current_min < 360 or current_min > 1380:  # before 6am or after 11pm
-            headway = 30
-        elif current_min < 540 or (current_min > 900 and current_min < 1020):  # rush hours
-            headway = 6
+        departures = gtfs_by_line.get(line['number'])
+        if departures:
+            # Real GTFS times
+            mins1 = _time_to_min(departures[0]) - current_min
+            if mins1 < 0:
+                mins1 = 0
+            mins2 = _time_to_min(departures[1]) - current_min if len(departures) > 1 else mins1 + 15
+            if mins2 < mins1:
+                mins2 = mins1 + 15
         else:
-            headway = 10
-
-        # Offset by stop_order for realistic stagger
-        offset = (current_min + (line.get('stop_order') or 0) * 2) % headway
-        mins1 = headway - offset
-        if mins1 <= 0:
-            mins1 = 1
-        mins2 = mins1 + headway
+            # Fallback: headway estimate
+            if current_min < 360 or current_min > 1380:
+                headway = 30
+            elif current_min < 540 or (900 < current_min < 1020):
+                headway = 6
+            else:
+                headway = 10
+            offset = (current_min + (line.get('stop_order') or 0) * 2) % headway
+            mins1 = headway - offset
+            if mins1 <= 0:
+                mins1 = 1
+            mins2 = mins1 + headway
 
         result.append({
             'line': line['number'],
@@ -165,6 +199,12 @@ def api_stop_arrivals():
         })
 
     return jsonify(result)
+
+
+def _time_to_min(t: str) -> int:
+    """Convert HH:MM:SS to minutes since midnight. Handles 25:00:00 etc."""
+    parts = t.split(':')
+    return int(parts[0]) * 60 + int(parts[1])
 
 
 @city_bp.route('/api/city-stops')

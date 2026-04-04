@@ -80,9 +80,31 @@ def search():
     if not date or date == datetime.now().strftime('%Y-%m-%d'):
         results = [r for r in results if (r.get('departure_time') or '') >= now_time]
 
+    # Min price for summary header
+    min_price = None
+    if results:
+        prices = [r['price_rsd'] for r in results if r.get('price_rsd')]
+        min_price = min(prices) if prices else None
+
+    # Popular routes for search landing (when no query)
+    popular_routes = []
+    if not from_city and not to_city and db_ready():
+        popular_routes = query("""
+            SELECT r.slug, r.from_city, r.to_city, COUNT(t.id) as trip_count,
+                   MIN(t.price_rsd) as min_price_rsd
+            FROM routes r
+            LEFT JOIN trips t ON t.route_id = r.id
+            WHERE r.type = 'intercity'
+            GROUP BY r.id, r.slug, r.from_city, r.to_city
+            ORDER BY trip_count DESC
+            LIMIT 6
+        """)
+
     return render_template('search_results.html',
                            results=results, from_city=from_city,
-                           to_city=to_city, datum=date)
+                           to_city=to_city, datum=date,
+                           min_price=min_price,
+                           popular_routes=popular_routes)
 
 
 @main_bp.route('/api/cities')

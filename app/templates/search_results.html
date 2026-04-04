@@ -17,7 +17,7 @@
 {% from '_partials/_empty_state.html' import empty_state %}
 
 {% if from_city and to_city %}
-<!-- Results view -->
+<!-- ═══ Results view ═══ -->
 
 {{ breadcrumb([
   {'url': '/pretraga/', 'label': 'Pretraga'},
@@ -26,15 +26,37 @@
 
 <div class="page-title">
   <h1>{{ from_city }} → {{ to_city }}</h1>
-  <p class="page-subtitle">{% if results %}{{ results|length }} polazaka{% else %}Nema direktnih polazaka{% endif %}</p>
+  {% if results %}
+  <p class="page-subtitle">
+    {{ results|length }} polazaka
+    {%- if min_price %} · od {{ min_price }} RSD{% endif %}
+  </p>
+  {% else %}
+  <p class="page-subtitle">Nema direktnih polazaka</p>
+  {% endif %}
 </div>
 
 {% if results %}
 
-<button class="btn btn--outline filter-toggle" id="filterToggle">
-  <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M3 3a1 1 0 011-1h12a1 1 0 01.82 1.573l-4.82 7v4.427a1 1 0 01-.553.894l-2 1A1 1 0 018 16v-5.427L3.18 3.573A1 1 0 013 3z"/></svg>
-  Filteri
-</button>
+<!-- Sort bar + filter toggle -->
+<div class="sort-bar">
+  <div class="sort-bar__left">
+    <button class="btn btn--outline filter-toggle" id="filterToggle">
+      <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M3 3a1 1 0 011-1h12a1 1 0 01.82 1.573l-4.82 7v4.427a1 1 0 01-.553.894l-2 1A1 1 0 018 16v-5.427L3.18 3.573A1 1 0 013 3z"/></svg>
+      Filteri
+    </button>
+  </div>
+  <div class="sort-bar__right">
+    <span class="sort-bar__label">Sortiraj:</span>
+    <button class="sort-btn sort-btn--active" data-sort="time">Po vremenu</button>
+    <button class="sort-btn" data-sort="price">Po ceni</button>
+  </div>
+</div>
+
+<!-- Trip count (updates on filter) -->
+<div class="trip-count" id="tripCount" hidden>
+  Prikazano <strong id="tripVisible">0</strong> od <strong>{{ results|length }}</strong> polazaka
+</div>
 
 <div class="results-layout">
   {% set operators = results|map(attribute='operator')|unique|list %}
@@ -49,45 +71,65 @@
 </div>
 
 {% else %}
-  {{ empty_state(icon='search', text='Nema direktnih polazaka', sub=from_city ~ ' → ' ~ to_city) }}
-{% endif %}
-
-{% else %}
-<!-- Search landing -->
-
-<div class="page-title">
-  <h1>Pronađite prevoz</h1>
+<!-- No results — suggestions -->
+<div class="empty-state">
+  <div class="empty-state__icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+      <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+    </svg>
+  </div>
+  <div class="empty-state__text">Nema direktnih polazaka</div>
+  <div class="empty-state__sub">{{ from_city }} → {{ to_city }}</div>
 </div>
-
-<div class="search-landing">
-  {{ search_form() }}
-</div>
-
 <section class="section">
-  <h2 class="section__title">Popularne rute</h2>
-  <div class="popular-grid">
-    <a href="/pretraga/?od=Beograd&do=Novi+Sad" class="popular-card">
-      <span class="popular-card__from">Beograd</span>
-      <span class="popular-card__arrow">→</span>
-      <span class="popular-card__to">Novi Sad</span>
+  <h2 class="section__title">Pokušajte drugu rutu</h2>
+  <div class="search-landing">
+    {{ search_form(from_city=from_city, to_city=to_city) }}
+  </div>
+  <div class="see-also__grid" style="margin-top:16px">
+    <a href="/rute/" class="see-also__card">
+      <span class="see-also__card-title">Sve međugradske rute</span>
+      <span class="see-also__card-meta">Pregledajte sve dostupne linije</span>
     </a>
-    <a href="/pretraga/?od=Beograd&do=Ni%C5%A1" class="popular-card">
-      <span class="popular-card__from">Beograd</span>
-      <span class="popular-card__arrow">→</span>
-      <span class="popular-card__to">Niš</span>
-    </a>
-    <a href="/pretraga/?od=Beograd&do=Kragujevac" class="popular-card">
-      <span class="popular-card__from">Beograd</span>
-      <span class="popular-card__arrow">→</span>
-      <span class="popular-card__to">Kragujevac</span>
-    </a>
-    <a href="/pretraga/?od=Novi+Sad&do=Ni%C5%A1" class="popular-card">
-      <span class="popular-card__from">Novi Sad</span>
-      <span class="popular-card__arrow">→</span>
-      <span class="popular-card__to">Niš</span>
+    <a href="/gradski/beograd/" class="see-also__card">
+      <span class="see-also__card-title">Gradski prevoz Beograd</span>
+      <span class="see-also__card-meta">Linije, stajališta, mapa</span>
     </a>
   </div>
 </section>
+{% endif %}
+
+{% else %}
+<!-- ═══ Search landing ═══ -->
+
+<section class="search-hero">
+  <div class="search-hero__inner">
+    <h1 class="search-hero__title">Pronađite prevoz</h1>
+    <p class="search-hero__sub">Autobus ili voz između gradova Srbije</p>
+    <div class="search-hero__form">
+      {{ search_form() }}
+    </div>
+  </div>
+</section>
+
+{% if popular_routes %}
+<section class="section">
+  <h2 class="section__title">Popularne rute</h2>
+  <div class="popular-grid">
+    {% for route in popular_routes %}
+    <a href="/pretraga/?od={{ route.from_city|urlencode }}&do={{ route.to_city|urlencode }}" class="popular-card">
+      <span class="popular-card__from">{{ route.from_city }}</span>
+      <span class="popular-card__arrow">→</span>
+      <span class="popular-card__to">{{ route.to_city }}</span>
+      <span class="popular-card__meta">
+        {{ route.trip_count }} polazaka
+        {%- if route.min_price_rsd %} · od {{ route.min_price_rsd }} RSD{% endif %}
+      </span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 
 {% endif %}
 
@@ -96,15 +138,25 @@
 {% block scripts %}
 <script>
 (function() {
+  /* ── Filter toggle ── */
   var toggle = document.getElementById('filterToggle');
   var panel = document.getElementById('filterPanel');
+  var closeBtn = document.getElementById('filterClose');
   if (toggle && panel) {
     toggle.addEventListener('click', function() { panel.classList.toggle('is-open'); });
+  }
+  if (closeBtn && panel) {
+    closeBtn.addEventListener('click', function() { panel.classList.remove('is-open'); });
   }
 
   var cards = document.querySelectorAll('.trip-card');
   if (!cards.length) return;
 
+  var total = cards.length;
+  var countEl = document.getElementById('tripCount');
+  var visibleEl = document.getElementById('tripVisible');
+
+  /* ── Filters ── */
   document.querySelectorAll('.filter-panel input[type="checkbox"]').forEach(function(cb) {
     cb.addEventListener('change', applyFilters);
   });
@@ -127,7 +179,41 @@
       card.style.display = show ? '' : 'none';
       if (show) visible++;
     });
+
+    /* Update trip count */
+    if (countEl && visibleEl) {
+      countEl.hidden = (visible === total);
+      visibleEl.textContent = visible;
+    }
   }
+
+  /* ── Sort ── */
+  document.querySelectorAll('.sort-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelector('.sort-btn--active').classList.remove('sort-btn--active');
+      btn.classList.add('sort-btn--active');
+
+      var list = document.getElementById('tripList');
+      var items = Array.from(list.querySelectorAll('.trip-card'));
+      var sortBy = btn.dataset.sort;
+
+      items.sort(function(a, b) {
+        if (sortBy === 'price') {
+          var pa = a.querySelector('.trip-card__price');
+          var pb = b.querySelector('.trip-card__price');
+          var va = pa ? parseInt(pa.textContent.replace(/\D/g, '')) : 999999;
+          var vb = pb ? parseInt(pb.textContent.replace(/\D/g, '')) : 999999;
+          return va - vb;
+        }
+        /* default: by departure time text (HH:MM) */
+        var ta = (a.querySelector('.trip-card__time--depart') || {}).textContent || '99:99';
+        var tb = (b.querySelector('.trip-card__time--depart') || {}).textContent || '99:99';
+        return ta.trim().localeCompare(tb.trim());
+      });
+
+      items.forEach(function(item) { list.appendChild(item); });
+    });
+  });
 })();
 </script>
 {% endblock %}
