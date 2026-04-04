@@ -81,6 +81,42 @@
   {{ empty_state(icon='bus', text='Podaci se učitavaju...') }}
 {% endif %}
 
+<!-- Interlinking: top stops + intercity -->
+{% if top_stops %}
+<section class="see-also">
+  <h2 class="see-also__title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    Popularna stajališta
+  </h2>
+  <div class="see-also__list">
+    {% for s in top_stops %}
+    <a href="/gradski/{{ city }}/stajaliste/{{ s.slug }}/" class="see-also__link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      {{ s.name }}
+      <small>{{ s.line_count }} linija</small>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="see-also">
+  <h2 class="see-also__title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+    Međugradski prevoz
+  </h2>
+  <div class="see-also__grid">
+    <a href="/rute/" class="see-also__card">
+      <span class="see-also__card-title">Sve međugradske rute</span>
+      <span class="see-also__card-meta">Autobus i voz iz {{ city_label }}</span>
+    </a>
+    <a href="/pretraga/?od={{ city_label }}" class="see-also__card">
+      <span class="see-also__card-title">Polasci iz {{ city_label }}</span>
+      <span class="see-also__card-meta">Pretraži destinacije</span>
+    </a>
+  </div>
+</section>
+
 {% endblock %}
 
 {% block scripts %}

@@ -57,8 +57,18 @@ def route_detail(slug: str):
     wd = (today + timedelta(days=selected_day)).isoweekday()
     trips = [t for t in trips if str(wd) in (t.get('days_of_week') or '1234567')]
 
+    # Similar routes from the same origin city
+    similar_routes = query("""
+        SELECT slug, from_city, to_city, distance_km
+        FROM routes
+        WHERE from_city = ? AND slug != ? AND type = 'intercity'
+        ORDER BY to_city
+        LIMIT 4
+    """, [route['from_city'], slug]) if db_ready() else []
+
     return render_template('route_detail.html', route=route, trips=trips,
-                           days=days, selected_day=selected_day)
+                           days=days, selected_day=selected_day,
+                           similar_routes=similar_routes)
 
 
 @intercity_bp.route('/voznja/<from_city>-do-<to_city>/')

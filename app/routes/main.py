@@ -39,8 +39,21 @@ def index():
         row = query_one("SELECT COUNT(*) as c FROM operators")
         stats['operators'] = row['c'] if row else 0
 
+    # Popular city lines (by number of stops)
+    popular_lines = query("""
+        SELECT cl.number, cl.name, cl.slug, cl.color,
+               COUNT(cls.stop_id) as stop_count
+        FROM city_lines cl
+        JOIN city_line_stops cls ON cls.line_id = cl.id
+        WHERE cl.city = 'beograd'
+        GROUP BY cl.id, cl.number, cl.name, cl.slug, cl.color
+        ORDER BY stop_count DESC
+        LIMIT 4
+    """) if db_ready() else []
+
     return render_template('index.html', popular_routes=popular_routes,
-                           cities=cities_list, stats=stats)
+                           cities=cities_list, stats=stats,
+                           popular_lines=popular_lines)
 
 
 @main_bp.route('/pretraga/')

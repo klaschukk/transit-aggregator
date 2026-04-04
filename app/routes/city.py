@@ -29,8 +29,20 @@ def city_hub(city: str):
         row = query_one("SELECT COUNT(*) as c FROM city_stops WHERE city = ? AND lat IS NOT NULL", [city])
         stops_with_coords = row['c'] if row else 0
 
+    # Top stops by number of lines serving them
+    top_stops = query("""
+        SELECT cs.slug, cs.name, COUNT(cls.line_id) as line_count
+        FROM city_stops cs
+        JOIN city_line_stops cls ON cls.stop_id = cs.id
+        WHERE cs.city = ?
+        GROUP BY cs.slug, cs.name
+        ORDER BY line_count DESC
+        LIMIT 5
+    """, [city]) if db_ready() else []
+
     return render_template('city_transport.html', city=city, lines=lines,
-                           stops_with_coords=stops_with_coords)
+                           stops_with_coords=stops_with_coords,
+                           top_stops=top_stops)
 
 
 @city_bp.route('/gradski/<city>/linija/<line_slug>/')
@@ -78,8 +90,23 @@ def stop_detail(city: str, stop_slug: str):
 
     departures = []  # No GTFS schedule data yet
 
+    # Nearby stops by coordinates
+    nearby_stops = []
+    if stop.get('lat') and stop.get('lon'):
+        nearby_stops = query("""
+            SELECT slug, name, lat, lon
+            FROM city_stops
+            WHERE city = ?
+              AND lat BETWEEN ? - 0.005 AND ? + 0.005
+              AND lon BETWEEN ? - 0.005 AND ? + 0.005
+              AND slug != ?
+              AND lat IS NOT NULL
+            LIMIT 5
+        """, [city, stop['lat'], stop['lat'], stop['lon'], stop['lon'], stop_slug])
+
     return render_template('stop_detail.html', city=city, stop=stop,
-                           departures=departures, lines_at_stop=lines_at_stop)
+                           departures=departures, lines_at_stop=lines_at_stop,
+                           nearby_stops=nearby_stops)
 
 
 @city_bp.route('/api/stop-arrivals')
