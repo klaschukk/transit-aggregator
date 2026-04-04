@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Gradski prevoz u Srbiji — Transit Srbija{% endblock %}
+{% block meta_description %}Gradski prevoz u Srbiji — linije, stajališta i red vožnje. Beograd, Novi Sad, Niš. Autobus, tramvaj, trolejbus na jednom mestu.{% endblock %}
+
+{% block content %}
+
+{% from '_partials/_breadcrumb.html' import breadcrumb %}
+{{ breadcrumb([{'url': '/', 'label': 'Početna'}, {'label': 'Gradski prevoz'}]) }}
+
+<div class="page-title fade-in">
+  <h1>Gradski prevoz u Srbiji</h1>
+  <p class="page-subtitle">Linije, stajališta i red vožnje</p>
+</div>
+
+<div class="cards-grid fade-in fade-in--d1">
+  {% for city in cities %}
+  <a href="/gradski/{{ city.slug }}/" class="info-card" style="text-decoration:none">
+    <div class="info-card__heading">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18">
+        <rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/>
+        <circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/>
+      </svg>
+      {{ city.name }}
+    </div>
+    <p>{{ city.desc }}{% if city.lines %} · {{ city.lines }} linija{% endif %}</p>
+  </a>
+  {% endfor %}
+</div>
+
+{% endblock %}

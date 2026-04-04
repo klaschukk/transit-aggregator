@@ -152,6 +152,7 @@ def sitemap():
     pages = [
         url('/', 'daily', '1.0'),
         url('/rute/', 'weekly', '0.8'),
+        url('/gradski/', 'weekly', '0.7'),
         url('/gradski/beograd/', 'weekly', '0.8'),
         url('/prevoznici/', 'monthly', '0.5'),
         url('/autobuske-stanice/', 'monthly', '0.5'),
