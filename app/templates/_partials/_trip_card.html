@@ -1,0 +1,36 @@
+{# Trip card macro — reused in route_detail, city_pair, search_results #}
+{% macro trip_card(trip) %}
+<div class="trip-card"
+     data-type="{{ trip.type|default('bus') }}"
+     data-operator="{{ trip.operator|default('') }}"
+     data-hour="{{ trip.departure_time[:2] if trip.departure_time else '' }}">
+  <div class="trip-card__time trip-card__time--depart">
+    {{ trip.departure_time[:5] if trip.departure_time else '—' }}
+  </div>
+  <div class="trip-card__middle">
+    <div class="trip-card__route-line">
+      <span class="trip-card__route-dot"></span>
+      <span class="trip-card__route-seg"></span>
+      {% if trip.operator %}
+      <span class="trip-card__carrier">{{ trip.operator }}</span>
+      {% endif %}
+      <span class="trip-card__route-seg"></span>
+      <span class="trip-card__route-dot trip-card__route-dot--end"></span>
+    </div>
+    {% if trip.duration_min %}
+    <span class="trip-card__duration">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="11" height="11"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v4l2.5 1.5"/></svg>
+      {{ trip.duration_min // 60 }}h {{ trip.duration_min % 60 }}min
+    </span>
+    {% endif %}
+  </div>
+  <div class="trip-card__time trip-card__time--arrive">
+    {{ trip.arrival_time[:5] if trip.arrival_time else '' }}
+  </div>
+  {% if trip.price_rsd %}
+  <div class="trip-card__meta">
+    <span class="trip-card__price">{{ trip.price_rsd }} <small>RSD</small></span>
+  </div>
+  {% endif %}
+</div>
+{% endmacro %}

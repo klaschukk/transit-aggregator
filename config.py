@@ -6,20 +6,19 @@ BASE_DIR = Path(__file__).parent
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
-    COUNTRY = os.environ.get('COUNTRY', 'RS')
     DUCKDB_PATH = os.environ.get('DUCKDB_PATH', str(BASE_DIR / 'data' / 'dbs' / 'transit.duckdb'))
-    CACHE_TTL = int(os.environ.get('CACHE_TTL', '300'))  # 5 min default
+    BASE_URL = os.environ.get('BASE_URL', 'http://localhost:5000')
+    EUR_RSD_RATE = float(os.environ.get('EUR_RSD_RATE', '117'))
     DEBUG = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
 
 
 class ProductionConfig(Config):
     DEBUG = False
-    CACHE_TTL = 3600  # 1 hour in prod
+    BASE_URL = os.environ.get('BASE_URL', 'https://transit-serbia.com')
 
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    CACHE_TTL = 0  # no cache in dev
 
 
 config_map = {

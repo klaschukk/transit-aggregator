@@ -1,0 +1,26 @@
+{# Filter panel macro — reused in city_pair and search_results #}
+{% macro filter_panel(operators=[], show_type=true) %}
+<aside class="filter-panel" id="filterPanel">
+  <div class="filter-panel__header">
+    <div class="filter-panel__heading">Filteri</div>
+    <button class="filter-panel__close" id="filterClose" type="button">Zatvori</button>
+  </div>
+
+  {% if show_type %}
+  <div class="filter-group">
+    <span class="filter-group__label">Tip prevoza</span>
+    <label class="filter-check"><input type="checkbox" data-ftype="bus" checked> Autobus</label>
+    <label class="filter-check"><input type="checkbox" data-ftype="train" checked> Voz</label>
+  </div>
+  {% endif %}
+
+  {% if operators|length > 1 %}
+  <div class="filter-group">
+    <span class="filter-group__label">Prevoznik</span>
+    {% for op in operators %}
+    <label class="filter-check"><input type="checkbox" data-operator="{{ op }}" checked> {{ op }}</label>
+    {% endfor %}
+  </div>
+  {% endif %}
+</aside>
+{% endmacro %}

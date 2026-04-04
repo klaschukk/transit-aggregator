@@ -1,0 +1,34 @@
+{# Search form — reused on index.html and search_results.html #}
+{% macro search_form(from_city='', to_city='', datum='', action='/pretraga/') %}
+<form action="{{ action }}" method="get" class="journey-form" autocomplete="off">
+  <div class="journey-form__fields">
+    <div class="journey-form__field">
+      <span class="journey-form__dot journey-form__dot--from"></span>
+      <div class="journey-form__input-wrap">
+        <label class="journey-form__label" for="fromCity">OD</label>
+        <input class="journey-form__input js-city-input" id="fromCity" name="od" type="text"
+               value="{{ from_city }}" placeholder="Odakle?" autocomplete="off">
+        <div class="autocomplete" id="fromDropdown"></div>
+      </div>
+    </div>
+    <button type="button" class="journey-form__swap" id="swapBtn" aria-label="Zameni mesta">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+        <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>
+      </svg>
+    </button>
+    <div class="journey-form__field">
+      <span class="journey-form__dot journey-form__dot--to"></span>
+      <div class="journey-form__input-wrap">
+        <label class="journey-form__label" for="toCity">DO</label>
+        <input class="journey-form__input js-city-input" id="toCity" name="do" type="text"
+               value="{{ to_city }}" placeholder="Kuda?" autocomplete="off">
+        <div class="autocomplete" id="toDropdown"></div>
+      </div>
+    </div>
+  </div>
+  <div class="journey-form__actions">
+    <input class="journey-form__date" id="tripDate" name="datum" type="date" value="{{ datum }}">
+    <button type="submit" class="btn btn--accent">Pretraži</button>
+  </div>
+</form>
+{% endmacro %}

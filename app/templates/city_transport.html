@@ -1,27 +1,195 @@
 {% extends "base.html" %}
-
 {% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš'} %}
+{% set city_label = city_names.get(city, city|title) %}
+{% set type_labels = {'tram': 'Tramvaj', 'trolleybus': 'Trolejbus', 'night': 'Noćne linije', 'e-bus': 'E-bus', 'bus': 'Autobus'} %}
+{% set type_order = ['tram', 'trolleybus', 'e-bus', 'bus', 'night'] %}
 
-{% block title %}Gradski prevoz {{ city_names[city] }} — sve linije i stajališta{% endblock %}
-{% block meta_description %}Red vožnje gradskog prevoza u {{ city_names[city] }}u. Linije, stajališta i polasci GSP-a.{% endblock %}
+{% block title %}Gradski prevoz {{ city_label }} — linije i stajališta{% endblock %}
+{% block meta_description %}Red vožnje gradskog prevoza u {{ city_label }}u. {{ lines|length }} linija, stajališta i polasci.{% endblock %}
+
+{% block head_extra %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"CollectionPage","name":"Gradski prevoz {{ city_label }}","description":"{{ lines|length }} linija gradskog prevoza u {{ city_label }}u — autobus, tramvaj, trolejbus","about":{"@type":"City","name":"{{ city_label }}"}}
+</script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+{% endblock %}
 
 {% block content %}
-<div class="container">
-  <h1>Gradski prevoz {{ city_names[city] }}</h1>
 
-  {% if lines %}
-  <div class="lines-grid">
-    {% for line in lines %}
-    <a href="/gradski/{{ city }}/linija/{{ line.slug }}/" class="line-card"
-       style="--line-color: {{ line.color or '#2563eb' }}">
-      <span class="line-card__number">{{ line.number }}</span>
-      <span class="line-card__name">{{ line.name }}</span>
-      <span class="line-card__stops">{{ line.stop_count }} stajališta</span>
-    </a>
-    {% endfor %}
-  </div>
-  {% else %}
-  <p class="empty-state">Podaci o gradskom prevozu se učitavaju. Proverite ponovo uskoro.</p>
-  {% endif %}
+{% from '_partials/_breadcrumb.html' import breadcrumb %}
+{% from '_partials/_empty_state.html' import empty_state %}
+
+{{ breadcrumb([
+  {'url': '/', 'label': 'Početna'},
+  {'label': 'Gradski prevoz ' ~ city_label}
+]) }}
+
+<div class="page-title">
+  <h1>Gradski prevoz {{ city_label }}</h1>
+  <p class="page-subtitle">{{ lines|length }} linija · {{ stops_with_coords }} stajališta na mapi</p>
 </div>
+
+<!-- Map -->
+<div class="city-map-wrap">
+  <div class="city-map" id="cityMap"></div>
+</div>
+
+<!-- Search lines -->
+<div class="search-bar">
+  <svg class="search-bar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+    <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+  </svg>
+  <input class="search-bar__input" id="lineSearch" type="search" placeholder="Broj linije ili naziv..." autocomplete="off">
+</div>
+
+<!-- Type filter tabs -->
+<div class="filter-chips" id="typeFilter">
+  <button class="filter-chip filter-chip--active" data-type="all">Sve ({{ lines|length }})</button>
+  {% for t in type_order %}
+    {% set count = lines|selectattr('type', 'equalto', t)|list|length %}
+    {% if count > 0 %}
+    <button class="filter-chip" data-type="{{ t }}">{{ type_labels[t] }} ({{ count }})</button>
+    {% endif %}
+  {% endfor %}
+</div>
+
+<!-- Lines grouped by type -->
+{% if lines %}
+<div id="linesList">
+  {% for t in type_order %}
+    {% set group = lines|selectattr('type', 'equalto', t)|list %}
+    {% if group %}
+    <div class="line-group" data-group-type="{{ t }}">
+      <h2 class="line-group__title">{{ type_labels[t] }}</h2>
+      <div class="line-grid">
+        {% for line in group %}
+        <a href="/gradski/{{ city }}/linija/{{ line.slug }}/"
+           class="line-chip"
+           data-num="{{ line.number }}"
+           data-name="{{ line.name }}"
+           data-type="{{ line.type }}">
+          <span class="line-badge line-badge--sm"{% if line.color %} style="background:{{ line.color }}"{% endif %}>{{ line.number }}</span>
+          <span class="line-chip__name">{{ line.name }}</span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  {% endfor %}
+</div>
+{% else %}
+  {{ empty_state(icon='bus', text='Podaci se učitavaju...') }}
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+(function() {
+  /* ── Map ── */
+  if (typeof L === 'undefined' || !document.getElementById('cityMap')) return;
+  var map = L.map('cityMap', { zoomControl: false, attributionControl: false })
+    .setView([44.8176, 20.4569], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+  L.control.zoom({ position: 'topright' }).addTo(map);
+
+  /* ── Stops on map ── */
+  var busSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="14" height="14">'
+    + '<rect x="4" y="3" width="16" height="14" rx="3" fill="white"/>'
+    + '<path d="M4 12h16" stroke="rgba(255,255,255,.4)" stroke-width="1"/>'
+    + '<circle cx="8" cy="19" r="1.5" fill="white"/><circle cx="16" cy="19" r="1.5" fill="white"/>'
+    + '</svg>';
+
+  var stopIcon = L.divIcon({
+    className: 'stop-marker',
+    html: '<div class="stop-marker-dot">' + busSvg + '</div>',
+    iconSize: [28, 28], iconAnchor: [14, 14]
+  });
+  var stopMarkers = [];
+
+  function loadArrivals(slug, name, marker) {
+    fetch('/api/stop-arrivals?slug=' + encodeURIComponent(slug))
+      .then(function(r) { return r.json(); })
+      .then(function(arrivals) {
+        var html = '<div class="stop-popup">';
+        html += '<div class="stop-popup__name">' + name + '</div>';
+        if (arrivals.length) {
+          html += '<div class="stop-popup__lines">';
+          var shown = arrivals.slice(0, 6);
+          shown.forEach(function(a) {
+            html += '<span class="stop-popup__badge" style="background:' + a.color + '">' + a.line + '</span>';
+          });
+          if (arrivals.length > 6) html += '<span class="stop-popup__badge" style="background:#94a3b8">+' + (arrivals.length - 6) + '</span>';
+          html += '</div>';
+        }
+        html += '<a class="stop-popup__more" href="/gradski/{{ city }}/stajaliste/' + slug + '/">Polasci →</a>';
+        html += '</div>';
+        marker.setPopupContent(html);
+      })
+      .catch(function() {});
+  }
+
+  function loadStops() {
+    var b = map.getBounds();
+    if (map.getZoom() < 14) {
+      stopMarkers.forEach(function(m) { m.remove(); });
+      stopMarkers = [];
+      return;
+    }
+    fetch('/api/city-stops?sw_lat=' + b.getSouth() + '&sw_lon=' + b.getWest()
+        + '&ne_lat=' + b.getNorth() + '&ne_lon=' + b.getEast())
+      .then(function(r) { return r.json(); })
+      .then(function(stops) {
+        stopMarkers.forEach(function(m) { m.remove(); });
+        stopMarkers = [];
+        stops.forEach(function(s) {
+          if (!s.lat || !s.lon) return;
+          var m = L.marker([s.lat, s.lon], { icon: stopIcon })
+            .bindPopup('<b>' + s.name + '</b>', { maxWidth: 200, autoPanPadding: [20, 20] });
+          m.on('click', function() { loadArrivals(s.slug, s.name, m); });
+          m.addTo(map);
+          stopMarkers.push(m);
+        });
+      })
+      .catch(function() {});
+  }
+
+  var moveTimer = null;
+  map.on('moveend', function() {
+    clearTimeout(moveTimer);
+    moveTimer = setTimeout(loadStops, 300);
+  });
+  loadStops();
+
+  /* ── Search filter ── */
+  var input = document.getElementById('lineSearch');
+  var activeType = 'all';
+
+  function applyFilters() {
+    var q = (input ? input.value : '').toLowerCase();
+    document.querySelectorAll('[data-num]').forEach(function(el) {
+      var typeOk = activeType === 'all' || el.dataset.type === activeType;
+      var searchOk = !q || el.dataset.num.toLowerCase().includes(q) || el.dataset.name.toLowerCase().includes(q);
+      el.hidden = !(typeOk && searchOk);
+    });
+    document.querySelectorAll('.line-group').forEach(function(g) {
+      var hasVisible = g.querySelectorAll('[data-num]:not([hidden])').length > 0;
+      g.hidden = !hasVisible;
+    });
+  }
+
+  if (input) input.addEventListener('input', applyFilters);
+
+  /* ── Type filter tabs ── */
+  document.querySelectorAll('#typeFilter .filter-chip').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelector('#typeFilter .filter-chip--active').classList.remove('filter-chip--active');
+      btn.classList.add('filter-chip--active');
+      activeType = btn.dataset.type;
+      applyFilters();
+    });
+  });
+})();
+</script>
 {% endblock %}

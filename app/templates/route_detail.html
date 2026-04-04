@@ -1,76 +1,60 @@
 {% extends "base.html" %}
-
-{% block title %}{{ route.from_city }} — {{ route.to_city }}: red vožnje i karte{% endblock %}
-{% block meta_description %}Red vožnje autobusa i vozova od {{ route.from_city }} do {{ route.to_city }}. {{ route.trip_count }} polazaka, cene od {{ (route.min_price_rsd / 117)|round|int }} €.{% endblock %}
+{% block title %}{{ route.from_city }} → {{ route.to_city }} — red vožnje | Prevoz Srbija{% endblock %}
+{% block meta_description %}Red vožnje autobusa {{ route.from_city }} do {{ route.to_city }}. {{ route.trip_count }} polazaka dnevno.{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "ItemList",
-  "name": "Red vožnje {{ route.from_city }} — {{ route.to_city }}",
-  "itemListElement": [
-    {% for trip in trips %}
-    {
-      "@type": "BusTrip",
-      "name": "{{ trip.operator }} {{ route.from_city }}–{{ route.to_city }}",
-      "departureTime": "{{ trip.departure_time }}",
-      "arrivalTime": "{{ trip.arrival_time }}",
-      "departureBusStop": {"@type": "BusStation", "name": "{{ route.from_city }}"},
-      "arrivalBusStop": {"@type": "BusStation", "name": "{{ route.to_city }}"},
-      "provider": {"@type": "Organization", "name": "{{ trip.operator }}"}
-    }{% if not loop.last %},{% endif %}
-    {% endfor %}
-  ]
-}
+{"@context":"https://schema.org","@type":"ItemList","name":"Red vožnje {{ route.from_city }} — {{ route.to_city }}","itemListElement":[{% for trip in trips[:10] %}{"@type":"BusTrip","position":{{ loop.index }},"name":"{{ trip.operator }} {{ route.from_city }}–{{ route.to_city }}","departureTime":"{{ trip.departure_time }}","arrivalTime":"{{ trip.arrival_time }}","departureBusStop":{"@type":"BusStation","name":"{{ route.from_city }}"},"arrivalBusStop":{"@type":"BusStation","name":"{{ route.to_city }}"},"provider":{"@type":"Organization","name":"{{ trip.operator }}"}}{% if not loop.last %},{% endif %}{% endfor %}]}
 </script>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-  <nav class="breadcrumb">
-    <a href="/">Početna</a> › <a href="/rute/">Rute</a> › {{ route.from_city }} — {{ route.to_city }}
-  </nav>
 
-  <h1>{{ route.from_city }} — {{ route.to_city }}</h1>
-  <p class="route-meta">
-    Rastojanje: <strong>{{ route.distance_km }} km</strong> ·
-    Polazaka: <strong>{{ route.trip_count }}</strong> ·
-    Cene od: <strong>{{ (route.min_price_rsd / 117)|round|int }} €</strong>
-  </p>
+{% from '_partials/_breadcrumb.html' import breadcrumb %}
+{% from '_partials/_trip_card.html' import trip_card %}
+{% from '_partials/_stats_strip.html' import stats_strip %}
+{% from '_partials/_empty_state.html' import empty_state %}
 
-  {% if trips %}
-  <table class="trips-table">
-    <thead>
-      <tr>
-        <th>Polazak</th>
-        <th>Dolazak</th>
-        <th>Trajanje</th>
-        <th>Prevoznik</th>
-        <th>Cena</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for trip in trips %}
-      <tr>
-        <td class="trips-table__time">{{ trip.departure_time }}</td>
-        <td class="trips-table__time">{{ trip.arrival_time }}</td>
-        <td>{{ trip.duration_min // 60 }}h {{ trip.duration_min % 60 }}min</td>
-        <td>{{ trip.operator }}</td>
-        <td>{{ trip.price_rsd }} RSD</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <p class="empty-state">Nema podataka o polascima. Pokušajte direktno na sajtu prevoznika.</p>
-  {% endif %}
+{{ breadcrumb([
+  {'url': '/rute/', 'label': 'Sve rute'},
+  {'label': route.from_city ~ ' — ' ~ route.to_city}
+]) }}
 
-  <div class="route-info">
-    <h2>O ruti {{ route.from_city }} — {{ route.to_city }}</h2>
-    <p>Vožnja od {{ route.from_city }} do {{ route.to_city }} traje oko
-       {{ (route.distance_km / 80)|round|int }} sata autom ili autobusom,
-       zavisno od broja zaustavljanja.</p>
-  </div>
+<div class="page-title">
+  <h1>{{ route.from_city }} → {{ route.to_city }}</h1>
+  <p class="page-subtitle">Red vožnje autobusa i vozova</p>
 </div>
+
+{{ stats_strip([
+  {'value': route.distance_km, 'label': 'km'},
+  {'value': route.trip_count, 'label': 'polazaka dnevno'},
+] + ([{'value': (route.min_price_rsd / config.EUR_RSD_RATE)|round|int ~ '€', 'label': 'od'}] if route.min_price_rsd else [])) }}
+
+<!-- Day filter -->
+<div class="filter-chips">
+  {% set day_labels = ['Danas', 'Sutra', 'Prekosutra'] %}
+  {% for i in range(3) %}
+  <a href="?dan={{ i }}" class="filter-chip{% if selected_day == i %} filter-chip--active{% endif %}">
+    <span>{{ day_labels[i] }}</span>
+    <span class="filter-chip__sub">{{ days[i].strftime('%d.%m') }}</span>
+  </a>
+  {% endfor %}
+</div>
+
+{% if trips %}
+<div class="trip-list">
+  {% for trip in trips %}
+    {{ trip_card(trip) }}
+  {% endfor %}
+</div>
+
+<div class="seo-block">
+  <h2>O ruti {{ route.from_city }} — {{ route.to_city }}</h2>
+  <p>Vožnja od {{ route.from_city }} do {{ route.to_city }} iznosi oko {{ route.distance_km }} km.
+     Prosečno trajanje putovanja autobusom je oko {{ (route.distance_km / 80)|round|int }} sata.</p>
+</div>
+{% else %}
+  {{ empty_state(icon='search', text='Nema podataka o polascima', sub='Pokušajte drugi dan ili proverite kod prevoznika') }}
+{% endif %}
+
 {% endblock %}

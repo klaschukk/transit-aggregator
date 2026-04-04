@@ -1,79 +1,175 @@
 {% extends "base.html" %}
-
-{% block title %}Red vožnje autobusa i vozova Srbija — Prevoz Srbija{% endblock %}
-{% block meta_description %}Pronađite autobus ili voz između gradova Srbije. Red vožnje, cene karata i polasci iz Beograda, Novog Sada, Niša i ostalih gradova.{% endblock %}
+{% block title %}Transit Srbija — red vožnje autobusa, vozova i gradskog prevoza{% endblock %}
+{% block meta_description %}Pronađite autobus ili voz između gradova Srbije. Gradski prevoz Beograd — linije, stajališta, polasci. Besplatno, bez registracije.{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "Prevoz Srbija",
-  "url": "{{ request.url_root }}",
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": "{{ request.url_root }}pretraga/?od={od}&do={do}",
-    "query-input": "required name=od required name=do"
-  }
-}
+{"@context":"https://schema.org","@type":"WebSite","name":"Transit Srbija","url":"{{ config.BASE_URL }}/","potentialAction":{"@type":"SearchAction","target":"{{ config.BASE_URL }}/pretraga/?od={od}&do={do}","query-input":"required name=od required name=do"}}
 </script>
 {% endblock %}
 
+{% block main_class %}home-page{% endblock %}
+
 {% block content %}
+
+<!-- ═══════ HERO ═══════ -->
 <section class="hero">
-  <div class="container">
-    <h1>Pronađite prevoz u Srbiji</h1>
-    <p class="hero__subtitle">Autobus, voz i avio — red vožnje i cene za sve destinacije</p>
+  <div class="hero__bg"></div>
+  <div class="hero__inner container">
+    <h1 class="hero__title">Sve linije.<br>Svi polasci.<br>Jedno mesto.</h1>
+    <p class="hero__sub">Autobus, voz i gradski prevoz u Srbiji</p>
+    <div class="hero__form">
+      {% from '_partials/_search_form.html' import search_form %}
+      {{ search_form() }}
+    </div>
+  </div>
+</section>
 
-    <form class="search-form" action="/pretraga/" method="get">
-      <div class="search-form__row">
-        <div class="search-form__field">
-          <label for="od">Polazište</label>
-          <input type="text" id="od" name="od" placeholder="npr. Beograd" autocomplete="off" required>
-        </div>
-        <div class="search-form__field">
-          <label for="do">Odredište</label>
-          <input type="text" id="do" name="do" placeholder="npr. Novi Sad" autocomplete="off" required>
-        </div>
-        <div class="search-form__field">
-          <label for="datum">Datum</label>
-          <input type="date" id="datum" name="datum">
-        </div>
-        <button type="submit" class="btn btn--primary">Traži</button>
+<!-- ═══════ STATS ═══════ -->
+<section class="home-stats container fade-in">
+  <div class="home-stats__item">
+    <div class="home-stats__num">{{ stats.routes }}</div>
+    <div class="home-stats__label">ruta</div>
+  </div>
+  <div class="home-stats__item">
+    <div class="home-stats__num">{{ stats.lines }}</div>
+    <div class="home-stats__label">gradskih linija</div>
+  </div>
+  <div class="home-stats__item">
+    <div class="home-stats__num">{{ stats.stops }}</div>
+    <div class="home-stats__label">stajališta</div>
+  </div>
+  <div class="home-stats__item">
+    <div class="home-stats__num">{{ stats.operators }}</div>
+    <div class="home-stats__label">prevoznika</div>
+  </div>
+</section>
+
+<!-- ═══════ HOW IT WORKS ═══════ -->
+<section class="home-section container">
+  <h2 class="home-section__title">Kako radi?</h2>
+  <div class="how-it-works fade-in">
+    <div class="how-it-works__step">
+      <div class="how-it-works__num">1</div>
+      <div class="how-it-works__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="36">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
       </div>
-    </form>
-  </div>
-</section>
-
-{% if popular_routes %}
-<section class="popular-routes">
-  <div class="container">
-    <h2>Popularne rute</h2>
-    <div class="route-grid">
-      {% for route in popular_routes %}
-      <a href="/rute/{{ route.slug }}/" class="route-card">
-        <span class="route-card__cities">{{ route.from_city }} → {{ route.to_city }}</span>
-        <span class="route-card__meta">{{ route.trip_count }} polazaka · {{ route.distance_km }} km</span>
-      </a>
-      {% endfor %}
+      <div class="how-it-works__label">Pretražite</div>
+      <div class="how-it-works__desc">Unesite odakle i kuda putujete</div>
+    </div>
+    <div class="how-it-works__step">
+      <div class="how-it-works__num">2</div>
+      <div class="how-it-works__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="36">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 14l2 2 4-4"/>
+        </svg>
+      </div>
+      <div class="how-it-works__label">Uporedite</div>
+      <div class="how-it-works__desc">Vreme polaska, cene i prevoznici</div>
+    </div>
+    <div class="how-it-works__step">
+      <div class="how-it-works__num">3</div>
+      <div class="how-it-works__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="36">
+          <path d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+      <div class="how-it-works__label">Putujte</div>
+      <div class="how-it-works__desc">Tačan red vožnje, bez registracije</div>
     </div>
   </div>
 </section>
-{% endif %}
 
-<section class="city-transport">
-  <div class="container">
-    <h2>Gradski prevoz</h2>
-    <div class="city-grid">
-      <a href="/gradski/beograd/" class="city-card">
-        <span class="city-card__name">Beograd</span>
-        <span class="city-card__meta">GSP — sve linije i stajališta</span>
+<!-- ═══════ TWO COLUMNS: Routes + City ═══════ -->
+<section class="home-section container">
+  <div class="home-duo">
+
+    <!-- Intercity -->
+    <div class="home-duo__col">
+      <h2 class="home-section__title">Međugradski prevoz</h2>
+      {% if popular_routes %}
+      <div class="home-routes">
+        {% for route in popular_routes %}
+        <a href="/rute/{{ route.slug }}/" class="home-route">
+          <div class="home-route__cities">
+            <span class="home-route__from">{{ route.from_city }}</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+            <span class="home-route__to">{{ route.to_city }}</span>
+          </div>
+          {% if route.trip_count %}
+          <span class="home-route__meta">{{ route.trip_count }} polazaka</span>
+          {% endif %}
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <a href="/rute/" class="btn btn--outline home-duo__btn">Sve rute →</a>
+    </div>
+
+    <!-- City transport -->
+    <div class="home-duo__col">
+      <h2 class="home-section__title">Gradski prevoz</h2>
+      <a href="/gradski/beograd/" class="home-city-card">
+        <div class="home-city-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40">
+            <rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/>
+            <circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/>
+          </svg>
+        </div>
+        <div class="home-city-card__info">
+          <div class="home-city-card__name">Beograd</div>
+          <div class="home-city-card__desc">{{ stats.lines }} linija · {{ stats.stops }} stajališta</div>
+          <div class="home-city-card__sub">Autobus, tramvaj, trolejbus — mapa i polasci</div>
+        </div>
       </a>
+      <div class="home-features">
+        <div class="home-feature">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/><circle cx="12" cy="12" r="4"/></svg>
+          <span>Mapa sa stajalištima</span>
+        </div>
+        <div class="home-feature">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span>Red vožnje uživo</span>
+        </div>
+        <div class="home-feature">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <span>Pretraga linija</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════ BENEFITS ═══════ -->
+<section class="home-benefits">
+  <div class="container">
+    <div class="home-benefits__grid">
+      <div class="home-benefits__item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <div class="home-benefits__label">100% besplatno</div>
+        <div class="home-benefits__desc">Bez registracije, bez skrivenih troškova</div>
+      </div>
+      <div class="home-benefits__item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        <div class="home-benefits__label">Mobilni pristup</div>
+        <div class="home-benefits__desc">Optimizovano za telefon i tablet</div>
+      </div>
+      <div class="home-benefits__item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <div class="home-benefits__label">Aktuelni podaci</div>
+        <div class="home-benefits__desc">Redovno ažurirani redovi vožnje</div>
+      </div>
+      <div class="home-benefits__item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <div class="home-benefits__label">Sve na jednom mestu</div>
+        <div class="home-benefits__desc">Autobus, voz, tramvaj — cela Srbija</div>
+      </div>
     </div>
   </div>
 </section>
-{% endblock %}
 
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/search.js') }}"></script>
 {% endblock %}

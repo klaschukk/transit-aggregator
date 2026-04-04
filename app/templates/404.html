@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}404 — Stranica nije pronađena | Transit Srbija{% endblock %}
+
+{% block content %}
+
+<div class="error-page">
+  <!-- Lost bus illustration -->
+  <div class="error-page__illustration">
+    <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg" width="200" height="160">
+      <!-- Road -->
+      <rect x="0" y="120" width="200" height="4" rx="2" fill="#e2e8f0"/>
+      <rect x="30" y="121" width="16" height="2" rx="1" fill="#cbd5e1"/>
+      <rect x="70" y="121" width="16" height="2" rx="1" fill="#cbd5e1"/>
+      <rect x="110" y="121" width="16" height="2" rx="1" fill="#cbd5e1"/>
+      <rect x="150" y="121" width="16" height="2" rx="1" fill="#cbd5e1"/>
+      <!-- Bus body -->
+      <rect x="50" y="72" width="80" height="48" rx="8" fill="#0d9488"/>
+      <rect x="50" y="72" width="80" height="48" rx="8" stroke="#0f766e" stroke-width="2"/>
+      <!-- Windows -->
+      <rect x="58" y="80" width="18" height="16" rx="3" fill="#ccfbf1"/>
+      <rect x="82" y="80" width="18" height="16" rx="3" fill="#ccfbf1"/>
+      <rect x="106" y="80" width="18" height="16" rx="3" fill="#ccfbf1"/>
+      <!-- Stripe -->
+      <rect x="50" y="100" width="80" height="4" fill="#0f766e"/>
+      <!-- Headlights -->
+      <circle cx="56" cy="112" r="3" fill="#f59e0b"/>
+      <circle cx="124" cy="112" r="3" fill="#f59e0b"/>
+      <!-- Wheels -->
+      <circle cx="72" cy="120" r="8" fill="#334155"/>
+      <circle cx="72" cy="120" r="4" fill="#64748b"/>
+      <circle cx="108" cy="120" r="8" fill="#334155"/>
+      <circle cx="108" cy="120" r="4" fill="#64748b"/>
+      <!-- Question mark -->
+      <circle cx="150" cy="40" r="22" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+      <text x="150" y="48" text-anchor="middle" font-size="24" font-weight="800" fill="#d97706">?</text>
+      <!-- Signpost -->
+      <rect x="20" y="60" width="3" height="60" rx="1" fill="#94a3b8"/>
+      <rect x="8" y="58" width="28" height="16" rx="3" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1"/>
+      <path d="M36 66l-6-4v8z" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1"/>
+    </svg>
+  </div>
+
+  <h1 class="error-page__code">404</h1>
+  <p class="error-page__title">Stranica nije pronađena</p>
+  <p class="error-page__sub">Izgleda da je autobus skrenuo pogrešno. Proverite URL ili probajte pretragu.</p>
+
+  <!-- Search on 404 -->
+  <div class="error-page__search">
+    {% from '_partials/_search_form.html' import search_form %}
+    {{ search_form() }}
+  </div>
+
+  <div class="error-actions">
+    <a href="/" class="btn btn--primary">Početna</a>
+    <a href="/rute/" class="btn btn--outline">Sve rute</a>
+    <a href="/gradski/beograd/" class="btn btn--outline">Gradski prevoz</a>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,368 @@
+"""
+Scraper for intercity buses — busticket4.me JSON API.
+
+Uses the public bus-search API to fetch real schedules, prices, and carriers
+for intercity bus routes in Serbia.
+
+Pipeline:
+  1. GET  /api/proxy/cities           → resolve city name → API id
+  2. POST /api/proxy/bus-search       → fetch departures per city pair
+  3. Group by route, write nested JSON
+
+Output: data/raw/intercity/routes.json
+Format: [{from_city, to_city, slug, distance_km, trips: [
+    {departure, arrival, duration, price, operator, type}
+]}]
+"""
+import json
+import logging
+import re
+import time
+from datetime import date, timedelta
+from pathlib import Path
+
+import requests
+
+logging.basicConfig(level=logging.INFO, format='%(levelname)s %(message)s')
+log = logging.getLogger(__name__)
+
+BASE_URL = 'https://busticket4.me'
+RAW_DIR = Path(__file__).parent.parent / 'raw'
+OUT_DIR = RAW_DIR / 'intercity'
+CITY_CACHE_PATH = RAW_DIR / 'city_ids.json'
+
+HEADERS = {
+    'User-Agent': (
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
+        'Chrome/122.0 Safari/537.36'
+    ),
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+    'Accept-Language': 'sr,en;q=0.9',
+}
+
+# busticket4.me constants
+COMPANY_ID = 132
+SERBIA_COUNTRY_ID = 208
+
+# City pairs to scrape (Latin names)
+CITY_PAIRS: list[tuple[str, str]] = [
+    ('Beograd', 'Novi Sad'),
+    ('Beograd', 'Niš'),
+    ('Beograd', 'Kragujevac'),
+    ('Beograd', 'Subotica'),
+    ('Beograd', 'Čačak'),
+    ('Beograd', 'Kruševac'),
+    ('Beograd', 'Vranje'),
+    ('Beograd', 'Šabac'),
+    ('Beograd', 'Smederevo'),
+    ('Beograd', 'Valjevo'),
+    ('Beograd', 'Leskovac'),
+    ('Beograd', 'Zrenjanin'),
+    ('Beograd', 'Sombor'),
+    ('Beograd', 'Novi Pazar'),
+    ('Beograd', 'Pančevo'),
+    ('Beograd', 'Užice'),
+    ('Beograd', 'Jagodina'),
+    ('Beograd', 'Pirot'),
+    ('Novi Sad', 'Niš'),
+    ('Novi Sad', 'Subotica'),
+    ('Novi Sad', 'Kragujevac'),
+    ('Niš', 'Kragujevac'),
+    ('Niš', 'Leskovac'),
+    ('Niš', 'Vranje'),
+    ('Niš', 'Pirot'),
+]
+
+# Road distances (km) — used when API doesn't provide distance
+DISTANCES: dict[tuple[str, str], int] = {
+    ('Beograd', 'Novi Sad'): 90,
+    ('Beograd', 'Niš'): 250,
+    ('Beograd', 'Kragujevac'): 145,
+    ('Beograd', 'Subotica'): 185,
+    ('Beograd', 'Čačak'): 155,
+    ('Beograd', 'Kruševac'): 210,
+    ('Beograd', 'Vranje'): 340,
+    ('Beograd', 'Šabac'): 100,
+    ('Beograd', 'Smederevo'): 65,
+    ('Beograd', 'Valjevo'): 105,
+    ('Beograd', 'Leskovac'): 285,
+    ('Beograd', 'Zrenjanin'): 75,
+    ('Beograd', 'Sombor'): 200,
+    ('Beograd', 'Novi Pazar'): 285,
+    ('Beograd', 'Pančevo'): 20,
+    ('Beograd', 'Užice'): 200,
+    ('Beograd', 'Jagodina'): 140,
+    ('Beograd', 'Pirot'): 320,
+    ('Novi Sad', 'Niš'): 330,
+    ('Novi Sad', 'Subotica'): 100,
+    ('Novi Sad', 'Kragujevac'): 225,
+    ('Niš', 'Kragujevac'): 125,
+    ('Niš', 'Leskovac'): 40,
+    ('Niš', 'Vranje'): 100,
+    ('Niš', 'Pirot'): 70,
+}
+
+# Serbian Cyrillic → Latin transliteration (for matching API city names)
+_CYR_TO_LAT: dict[str, str] = {
+    'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'ђ': 'đ',
+    'е': 'e', 'ж': 'ž', 'з': 'z', 'и': 'i', 'ј': 'j', 'к': 'k',
+    'л': 'l', 'љ': 'lj', 'м': 'm', 'н': 'n', 'њ': 'nj', 'о': 'o',
+    'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'ћ': 'ć', 'у': 'u',
+    'ф': 'f', 'х': 'h', 'ц': 'c', 'ч': 'č', 'џ': 'dž', 'ш': 'š',
+}
+
+
+def _normalize(name: str) -> str:
+    """Normalize city name to lowercase ASCII for fuzzy matching."""
+    result = name.lower()
+    # Cyrillic → Latin
+    for cyr, lat in _CYR_TO_LAT.items():
+        result = result.replace(cyr, lat)
+    # Strip diacritics
+    for k, v in {'š': 's', 'đ': 'dj', 'ž': 'z', 'ć': 'c', 'č': 'c'}.items():
+        result = result.replace(k, v)
+    return result.strip()
+
+
+def _city_to_slug(name: str) -> str:
+    """Convert city name to URL slug."""
+    norm = _normalize(name)
+    return re.sub(r'[^a-z0-9]+', '-', norm).strip('-')
+
+
+def _get_distance(from_city: str, to_city: str) -> int:
+    return DISTANCES.get((from_city, to_city)) or DISTANCES.get((to_city, from_city)) or 0
+
+
+# ── City ID resolution ────────────────────────────────────────────────────
+
+def _load_city_cache() -> dict[str, int]:
+    """Load cached city name→id mapping."""
+    if CITY_CACHE_PATH.exists():
+        with open(CITY_CACHE_PATH, encoding='utf-8') as f:
+            return {k: int(v) for k, v in json.load(f).items()}
+    return {}
+
+
+def _save_city_cache(cache: dict[str, int]) -> None:
+    with open(CITY_CACHE_PATH, 'w', encoding='utf-8') as f:
+        json.dump(cache, f, ensure_ascii=False, indent=2)
+
+
+def fetch_cities_from_api(session: requests.Session) -> dict[str, dict]:
+    """Fetch all Serbian cities from API. Returns normalized_name → {code, name}."""
+    url = f'{BASE_URL}/api/proxy/cities'
+    try:
+        resp = session.get(url, headers=HEADERS, timeout=30)
+        resp.raise_for_status()
+        body = resp.json()
+        cities = body.get('data', []) if isinstance(body, dict) else body
+    except Exception as e:
+        log.error(f'Failed to fetch cities: {e}')
+        return {}
+
+    # Filter to Serbia (country_id=208) and build lookup
+    lookup: dict[str, dict] = {}
+    for city in cities:
+        if city.get('country_id') != SERBIA_COUNTRY_ID:
+            continue
+        norm = _normalize(city['name'])
+        lookup[norm] = {'code': int(city['code']), 'name': city['name']}
+    log.info(f'Fetched {len(lookup)} Serbian cities from API')
+    return lookup
+
+
+def resolve_city_ids(
+    session: requests.Session,
+    needed: set[str],
+) -> dict[str, int]:
+    """Return city_name → bt4_id for all needed cities."""
+    cache = _load_city_cache()
+
+    # Find which cities are missing from cache
+    missing = needed - set(cache.keys())
+    if not missing:
+        return {c: cache[c] for c in needed if c in cache}
+
+    log.info(f'Resolving {len(missing)} missing city IDs: {missing}')
+    api_cities = fetch_cities_from_api(session)
+
+    for city in missing:
+        norm = _normalize(city)
+        match = api_cities.get(norm)
+        if match:
+            cache[city] = match['code']
+            log.info(f'  {city} → id={match["code"]} (API name: {match["name"]})')
+        else:
+            log.warning(f'  {city} not found in API')
+
+    _save_city_cache(cache)
+    return {c: cache[c] for c in needed if c in cache}
+
+
+# ── Bus search API ────────────────────────────────────────────────────────
+
+def search_departures(
+    session: requests.Session,
+    from_city: str,
+    from_id: int,
+    to_city: str,
+    to_id: int,
+    travel_date: date,
+) -> list[dict]:
+    """Call bus-search API and return parsed trip dicts."""
+    url = f'{BASE_URL}/api/proxy/bus-search'
+    body = {
+        'departure_place_id': from_id,
+        'arrival_place_id': to_id,
+        'departure_place_name': from_city,
+        'arrival_place_name': to_city,
+        'departure_date': travel_date.strftime('%d.%m.%Y'),
+        'departure_country_id': SERBIA_COUNTRY_ID,
+        'arrival_country_id': SERBIA_COUNTRY_ID,
+        'return_ticket': 'NE',
+        'number_of_passengers': 1,
+        'company_admin_id': COMPANY_ID,
+        'company_id': COMPANY_ID,
+        'carrier_id': 0,
+        'carrier_parent_company_id': 0,
+        'affiliate_line_id': None,
+        'affiliate_id': None,
+        'ticket_type': 0,
+    }
+
+    try:
+        resp = session.post(url, json=body, headers=HEADERS, timeout=30)
+        resp.raise_for_status()
+        body_resp = resp.json()
+        data = body_resp.get('data', []) if isinstance(body_resp, dict) else body_resp
+    except Exception as e:
+        log.error(f'  bus-search failed {from_city}→{to_city}: {e}')
+        return []
+
+    if not isinstance(data, list):
+        log.warning(f'  Unexpected response type for {from_city}→{to_city}: {type(data)}')
+        return []
+
+    trips = []
+    for dep in data:
+        schedule = dep.get('schedule', {})
+        pricing = dep.get('pricing', {})
+        carrier = dep.get('carrier', {})
+        booking = dep.get('booking', {})
+
+        # Skip cancelled departures
+        if booking.get('departure_cancelled'):
+            continue
+
+        departure_time = schedule.get('departure_time', '')
+        arrival_time = schedule.get('arrival_time', '')
+        duration_min = schedule.get('duration_minutes', 0)
+
+        # Price is in RSD (currency_symbol="Din.")
+        price_rsd = int(pricing.get('ticket_price', 0) or 0)
+
+        # Carrier name comes uppercase — title-case it
+        operator_name = carrier.get('name', '').strip().title()
+
+        if departure_time and arrival_time:
+            trips.append({
+                'departure': departure_time[:5],  # HH:MM
+                'arrival': arrival_time[:5],
+                'duration': duration_min,
+                'price': price_rsd,
+                'operator': operator_name,
+                'type': 'bus',
+            })
+
+    return trips
+
+
+# ── Main ──────────────────────────────────────────────────────────────────
+
+def main() -> None:
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    session = requests.Session()
+
+    # Collect all unique cities needed
+    needed_cities = set()
+    for from_city, to_city in CITY_PAIRS:
+        needed_cities.add(from_city)
+        needed_cities.add(to_city)
+
+    # Resolve city IDs (cached + API fallback)
+    city_ids = resolve_city_ids(session, needed_cities)
+    log.info(f'Resolved {len(city_ids)}/{len(needed_cities)} city IDs')
+
+    # Search for tomorrow's date (to get a full day of departures)
+    travel_date = date.today() + timedelta(days=1)
+    log.info(f'Searching departures for {travel_date.isoformat()}\n')
+
+    routes: list[dict] = []
+    failed: list[str] = []
+
+    for from_city, to_city in CITY_PAIRS:
+        from_id = city_ids.get(from_city)
+        to_id = city_ids.get(to_city)
+
+        if not from_id or not to_id:
+            log.warning(f'Skipping {from_city}→{to_city}: missing city ID')
+            failed.append(f'{from_city}→{to_city}')
+            continue
+
+        log.info(f'{from_city} → {to_city} (ids: {from_id}→{to_id})')
+        trips = search_departures(session, from_city, from_id, to_city, to_id, travel_date)
+
+        if trips:
+            route = {
+                'from_city': from_city,
+                'to_city': to_city,
+                'slug': f'{_city_to_slug(from_city)}-{_city_to_slug(to_city)}',
+                'distance_km': _get_distance(from_city, to_city),
+                'trips': trips,
+            }
+            routes.append(route)
+            log.info(f'  → {len(trips)} departures')
+        else:
+            failed.append(f'{from_city}→{to_city}')
+            log.warning(f'  → 0 departures')
+
+        time.sleep(1.5)  # polite rate limiting
+
+    # Also write flat format for build_db.py compatibility
+    flat_trips = []
+    for route in routes:
+        for trip in route['trips']:
+            flat_trips.append({
+                'from_city': route['from_city'],
+                'to_city': route['to_city'],
+                'departure_time': trip['departure'],
+                'arrival_time': trip['arrival'],
+                'duration_min': trip['duration'],
+                'price_rsd': trip['price'],
+                'operator': trip['operator'],
+                'type': trip['type'],
+            })
+
+    # Save nested routes
+    routes_path = OUT_DIR / 'routes.json'
+    with open(routes_path, 'w', encoding='utf-8') as f:
+        json.dump(routes, f, ensure_ascii=False, indent=2)
+
+    # Save flat trips (backward compat with build_db.py)
+    flat_path = RAW_DIR / 'intercity_routes.json'
+    with open(flat_path, 'w', encoding='utf-8') as f:
+        json.dump(flat_trips, f, ensure_ascii=False, indent=2)
+
+    log.info(f'\n=== Done ===')
+    log.info(f'Routes   : {len(routes)}')
+    log.info(f'Trips    : {sum(len(r["trips"]) for r in routes)}')
+    if failed:
+        log.warning(f'Failed   : {", ".join(failed)}')
+    log.info(f'Saved    : {routes_path}')
+    log.info(f'Saved    : {flat_path}')
+
+
+if __name__ == '__main__':
+    main()

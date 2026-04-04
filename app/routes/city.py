@@ -1,74 +1,166 @@
-from flask import Blueprint, render_template, abort
-from app.db import query, query_one
+from datetime import datetime
+
+from flask import Blueprint, render_template, abort, request, jsonify
+from app.db import query, query_one, db_ready
 
 city_bp = Blueprint('city', __name__)
+
+_SERVICE_BY_WEEKDAY = {0: 'RD', 1: 'RD', 2: 'RD', 3: 'RD', 4: 'RD', 5: 'S', 6: 'N'}
+
+
+def _today_service() -> str:
+    return _SERVICE_BY_WEEKDAY[datetime.now().weekday()]
 
 
 @city_bp.route('/gradski/<city>/')
 def city_hub(city: str):
-    """City transport hub — lists all bus lines for a city."""
     if city not in ('beograd', 'novi-sad', 'nis'):
         abort(404)
 
     lines = query("""
-        SELECT cl.number, cl.name, cl.slug, cl.color,
-               COUNT(DISTINCT cs.id) as stop_count
+        SELECT cl.number, cl.name, cl.slug, cl.color, cl.type
         FROM city_lines cl
-        LEFT JOIN city_line_stops cls ON cls.line_id = cl.id
-        LEFT JOIN city_stops cs ON cs.id = cls.stop_id
         WHERE cl.city = ?
-        GROUP BY cl.id, cl.number, cl.name, cl.slug, cl.color
-        ORDER BY cl.number::INTEGER
-    """, [city]) if _db_ready() else []
+        ORDER BY CAST(REGEXP_REPLACE(cl.number, '[^0-9]', '', 'g') || '0' AS INTEGER)
+    """, [city]) if db_ready() else []
 
-    return render_template('city_transport.html', city=city, lines=lines)
+    stops_with_coords = 0
+    if db_ready():
+        row = query_one("SELECT COUNT(*) as c FROM city_stops WHERE city = ? AND lat IS NOT NULL", [city])
+        stops_with_coords = row['c'] if row else 0
+
+    return render_template('city_transport.html', city=city, lines=lines,
+                           stops_with_coords=stops_with_coords)
 
 
 @city_bp.route('/gradski/<city>/linija/<line_slug>/')
 def line_detail(city: str, line_slug: str):
-    """Single city bus line — stops + schedule."""
     line = query_one("""
-        SELECT cl.*, COUNT(DISTINCT cs.id) as stop_count
-        FROM city_lines cl
-        LEFT JOIN city_line_stops cls ON cls.line_id = cl.id
-        LEFT JOIN city_stops cs ON cs.id = cls.stop_id
-        WHERE cl.city = ? AND cl.slug = ?
-        GROUP BY cl.id
-    """, [city, line_slug]) if _db_ready() else None
+        SELECT id, city, number, name, slug, color, code
+        FROM city_lines
+        WHERE city = ? AND slug = ?
+    """, [city, line_slug]) if db_ready() else None
 
     if not line:
         abort(404)
 
     stops = query("""
-        SELECT cs.name, cs.slug, cs.lat, cs.lon, cls.stop_order
-        FROM city_stops cs
-        JOIN city_line_stops cls ON cls.stop_id = cs.id
-        WHERE cls.line_id = (SELECT id FROM city_lines WHERE city = ? AND slug = ?)
+        SELECT cs.name, cs.slug, cs.lat, cs.lon,
+               cls.stop_order AS stop_sequence, NULL AS departure_time
+        FROM city_line_stops cls
+        JOIN city_stops cs ON cs.id = cls.stop_id
+        WHERE cls.line_id = ?
         ORDER BY cls.stop_order
-    """, [city, line_slug]) if _db_ready() else []
+    """, [line['id']])
 
     return render_template('line_detail.html', city=city, line=line, stops=stops)
 
 
 @city_bp.route('/gradski/<city>/stajaliste/<stop_slug>/')
 def stop_detail(city: str, stop_slug: str):
-    """City bus stop — which lines serve it."""
     stop = query_one("""
-        SELECT cs.*, array_agg(cl.number ORDER BY cl.number) as lines
-        FROM city_stops cs
-        LEFT JOIN city_line_stops cls ON cls.stop_id = cs.id
-        LEFT JOIN city_lines cl ON cl.id = cls.line_id
-        WHERE cs.city = ? AND cs.slug = ?
-        GROUP BY cs.id
-    """, [city, stop_slug]) if _db_ready() else None
+        SELECT id, city, name, slug, lat, lon, code
+        FROM city_stops
+        WHERE city = ? AND slug = ?
+    """, [city, stop_slug]) if db_ready() else None
 
     if not stop:
         abort(404)
 
-    return render_template('stop_detail.html', city=city, stop=stop)
+    # Lines serving this stop via city_line_stops
+    lines_at_stop = query("""
+        SELECT DISTINCT cl.number, cl.name, cl.slug, cl.color
+        FROM city_line_stops cls
+        JOIN city_lines cl ON cl.id = cls.line_id
+        WHERE cls.stop_id = ?
+        ORDER BY CAST(REGEXP_REPLACE(cl.number, '[^0-9]', '', 'g') || '0' AS INTEGER)
+    """, [stop['id']])
+
+    departures = []  # No GTFS schedule data yet
+
+    return render_template('stop_detail.html', city=city, stop=stop,
+                           departures=departures, lines_at_stop=lines_at_stop)
 
 
-def _db_ready() -> bool:
-    from flask import current_app
-    from pathlib import Path
-    return Path(current_app.config['DUCKDB_PATH']).exists()
+@city_bp.route('/api/stop-arrivals')
+def api_stop_arrivals():
+    """Return lines at a stop with estimated next arrivals (headway model)."""
+    stop_slug = request.args.get('slug', '').strip()
+    if not stop_slug or not db_ready():
+        return jsonify([])
+
+    stop = query_one("SELECT id FROM city_stops WHERE slug = ?", [stop_slug])
+    if not stop:
+        return jsonify([])
+
+    lines = query("""
+        SELECT cl.number, cl.name, cl.slug AS line_slug, cl.color, cls.stop_order
+        FROM city_line_stops cls
+        JOIN city_lines cl ON cl.id = cls.line_id
+        WHERE cls.stop_id = ?
+        ORDER BY CAST(REGEXP_REPLACE(cl.number, '[^0-9]', '', 'g') || '0' AS INTEGER)
+        LIMIT 12
+    """, [stop['id']])
+
+    if not lines:
+        return jsonify([])
+
+    now = datetime.now()
+    current_min = now.hour * 60 + now.minute
+
+    result = []
+    for line in lines:
+        name = line['name'] or ''
+        direction = name.split('—')[-1].strip() if '—' in name else name
+
+        # Headway estimate based on time of day
+        if current_min < 360 or current_min > 1380:  # before 6am or after 11pm
+            headway = 30
+        elif current_min < 540 or (current_min > 900 and current_min < 1020):  # rush hours
+            headway = 6
+        else:
+            headway = 10
+
+        # Offset by stop_order for realistic stagger
+        offset = (current_min + (line.get('stop_order') or 0) * 2) % headway
+        mins1 = headway - offset
+        if mins1 <= 0:
+            mins1 = 1
+        mins2 = mins1 + headway
+
+        result.append({
+            'line': line['number'],
+            'direction': direction,
+            'color': line.get('color') or '#0d9488',
+            'slug': line['line_slug'],
+            'mins': mins1,
+            'mins2': mins2,
+        })
+
+    return jsonify(result)
+
+
+@city_bp.route('/api/city-stops')
+def api_city_stops():
+    """Return stops within bounding box as JSON for map markers."""
+    try:
+        sw_lat = float(request.args['sw_lat'])
+        sw_lon = float(request.args['sw_lon'])
+        ne_lat = float(request.args['ne_lat'])
+        ne_lon = float(request.args['ne_lon'])
+    except (KeyError, ValueError):
+        return jsonify({'error': 'Required: sw_lat, sw_lon, ne_lat, ne_lon'}), 400
+
+    if not db_ready():
+        return jsonify([])
+
+    stops = query("""
+        SELECT name, slug, lat, lon
+        FROM city_stops
+        WHERE lat BETWEEN ? AND ?
+          AND lon BETWEEN ? AND ?
+          AND lat IS NOT NULL
+        LIMIT 200
+    """, [sw_lat, ne_lat, sw_lon, ne_lon])
+
+    return jsonify(stops)

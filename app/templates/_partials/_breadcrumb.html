@@ -1,0 +1,18 @@
+{# Breadcrumb macro with BreadcrumbList JSON-LD #}
+{% macro breadcrumb(items) %}
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  {% for item in items %}
+    {% if item.url %}
+      <a href="{{ item.url }}" class="breadcrumb__link">{{ item.label }}</a>
+    {% else %}
+      <span class="breadcrumb__current">{{ item.label }}</span>
+    {% endif %}
+    {% if not loop.last %}
+      <span class="breadcrumb__sep" aria-hidden="true">›</span>
+    {% endif %}
+  {% endfor %}
+</nav>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{% for item in items %}{"@type":"ListItem","position":{{ loop.index }},"name":"{{ item.label }}"{% if item.url %},"item":"{{ config.BASE_URL }}{{ item.url }}"{% elif loop.last %},"item":"{{ config.BASE_URL }}{{ request.path }}"{% endif %}}{% if not loop.last %},{% endif %}{% endfor %}]}
+</script>
+{% endmacro %}

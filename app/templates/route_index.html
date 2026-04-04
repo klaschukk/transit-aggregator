@@ -1,28 +1,87 @@
 {% extends "base.html" %}
+{% block title %}Sve autobuske i vozne rute u Srbiji — Transit Srbija{% endblock %}
+{% block meta_description %}{{ routes|length if routes else 0 }} međugradskih ruta u Srbiji. Pronađite autobus ili voz, uporedite cene i vreme polaska.{% endblock %}
 
-{% block title %}Sve rute — autobusi i vozovi u Srbiji{% endblock %}
-{% block meta_description %}Kompletna lista međugradskih autobuskih i voznih linija u Srbiji. Red vožnje, cene i prevoznici.{% endblock %}
+{% block head_extra %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ItemList","name":"Međugradske rute u Srbiji","numberOfItems":{{ routes|length if routes else 0 }},"itemListElement":[{% for route in routes[:50] %}{"@type":"ListItem","position":{{ loop.index }},"url":"{{ config.BASE_URL }}/rute/{{ route.slug }}/","name":"{{ route.from_city }} — {{ route.to_city }}"}{% if not loop.last %},{% endif %}{% endfor %}]}
+</script>
+{% endblock %}
 
 {% block content %}
-<div class="container">
-  <h1>Sve rute u Srbiji</h1>
-  <p class="route-meta">{{ routes|length }} ruta u bazi</p>
 
-  {% if routes %}
-  <div class="route-grid">
-    {% for route in routes %}
-    <a href="/rute/{{ route.slug }}/" class="route-card">
-      <span class="route-card__cities">{{ route.from_city }} → {{ route.to_city }}</span>
-      <span class="route-card__meta">
-        {{ route.trip_count }} polazaka
-        {% if route.distance_km %} · {{ route.distance_km }} km{% endif %}
-        {% if route.min_price_rsd %} · od {{ (route.min_price_rsd / 117)|round|int }} €{% endif %}
-      </span>
-    </a>
-    {% endfor %}
-  </div>
-  {% else %}
-  <p class="empty-state">Podaci se učitavaju.</p>
-  {% endif %}
+{% from '_partials/_breadcrumb.html' import breadcrumb %}
+{% from '_partials/_empty_state.html' import empty_state %}
+{{ breadcrumb([{'url': '/', 'label': 'Početna'}, {'label': 'Sve rute'}]) }}
+
+<div class="page-title">
+  <h1>Međugradske rute</h1>
+  <p class="page-subtitle">{{ routes|length if routes else 0 }} ruta · autobus i voz</p>
 </div>
+
+<!-- Search filter -->
+<div class="search-bar">
+  <svg class="search-bar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+    <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+  </svg>
+  <input class="search-bar__input" id="routeFilter" type="search" placeholder="Pretraži po gradu..." autocomplete="off">
+</div>
+
+<div class="route-filter-info" id="filterInfo" hidden>
+  <span id="filterCount"></span> rezultata
+</div>
+
+{% if routes %}
+<div class="route-grid" id="routesList">
+  {% for route in routes %}
+  <a href="/rute/{{ route.slug }}/" class="route-card" data-text="{{ route.from_city }} {{ route.to_city }}">
+    <div class="route-card__cities">
+      <span class="route-card__from">{{ route.from_city }}</span>
+      <span class="route-card__arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+      </span>
+      <span class="route-card__to">{{ route.to_city }}</span>
+    </div>
+    <div class="route-card__meta">
+      {% if route.trip_count %}<span>{{ route.trip_count }} polazaka</span>{% endif %}
+      {% if route.distance_km %}<span>{{ route.distance_km }} km</span>{% endif %}
+      {% if route.min_price_rsd %}<span class="route-card__price">od {{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }}€</span>{% endif %}
+    </div>
+  </a>
+  {% endfor %}
+</div>
+<div id="routesEmpty" hidden>
+  {{ empty_state(icon='search', text='Nema rezultata za ovaj upit') }}
+</div>
+{% else %}
+  {{ empty_state(icon='bus', text='Nema dostupnih ruta', sub='Podaci se ažuriraju') }}
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  var filter = document.getElementById('routeFilter');
+  var cards = document.querySelectorAll('[data-text]');
+  var empty = document.getElementById('routesEmpty');
+  var info = document.getElementById('filterInfo');
+  var countEl = document.getElementById('filterCount');
+  if (!filter || !cards.length) return;
+  filter.addEventListener('input', function() {
+    var q = filter.value.toLowerCase();
+    var visible = 0;
+    cards.forEach(function(c) {
+      var ok = !q || c.dataset.text.toLowerCase().includes(q);
+      c.hidden = !ok;
+      if (ok) visible++;
+    });
+    if (empty) empty.hidden = visible > 0;
+    if (info && countEl) {
+      info.hidden = !q;
+      countEl.textContent = visible;
+    }
+  });
+})();
+</script>
 {% endblock %}

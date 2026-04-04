@@ -1,33 +1,154 @@
 {% extends "base.html" %}
+{% block title %}{{ from_city }} → {{ to_city }} — autobus i voz | Prevoz Srbija{% endblock %}
+{% block meta_description %}Kako doći od {{ from_city }} do {{ to_city }}? Red vožnje, cene karata i prevoznici.{% endblock %}
 
-{% block title %}{{ from_city }} do {{ to_city }} autobusom — cene i red vožnje{% endblock %}
-{% block meta_description %}Kako doći od {{ from_city }} do {{ to_city }}? Red vožnje autobusa, vozova i cene karata. Poredite prevoznike i kupite kartu online.{% endblock %}
+{% block head_extra %}
+{% if route %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TravelAction","fromLocation":{"@type":"City","name":"{{ from_city }}"},"toLocation":{"@type":"City","name":"{{ to_city }}"}}
+</script>
+{% endif %}
+{% endblock %}
 
 {% block content %}
-<div class="container">
+
+{% from '_partials/_breadcrumb.html' import breadcrumb %}
+{% from '_partials/_trip_card.html' import trip_card %}
+{% from '_partials/_stats_strip.html' import stats_strip %}
+{% from '_partials/_filter_panel.html' import filter_panel %}
+{% from '_partials/_empty_state.html' import empty_state %}
+
+{{ breadcrumb([
+  {'url': '/', 'label': 'Početna'},
+  {'url': '/rute/', 'label': 'Sve rute'},
+  {'label': from_city ~ ' → ' ~ to_city}
+]) }}
+
+<div class="page-title">
   <h1>{{ from_city }} → {{ to_city }}</h1>
-
-  {% if route %}
-    <p class="route-summary">
-      Rastojanje: <strong>{{ route.distance_km }} km</strong> ·
-      Polazaka dnevno: <strong>{{ route.trip_count }}</strong>
-      {% if route.min_price_rsd %} · Cene od <strong>{{ (route.min_price_rsd / 117)|round|int }} €</strong>{% endif %}
-    </p>
-
-    <a href="/rute/{{ route.slug }}/" class="btn btn--primary">Pogledaj sve polaske</a>
-  {% else %}
-    <p>Direktna veza između {{ from_city }} i {{ to_city }} nije dostupna u bazi.
-       Proverite na <a href="https://www.busticket4.me" rel="nofollow">BusTicket4.me</a>
-       ili <a href="https://www.srbvoz.rs" rel="nofollow">Srbija Voz</a>.</p>
-  {% endif %}
-
-  <section class="travel-tips">
-    <h2>Saveti za putovanje</h2>
-    <ul>
-      <li>Proverite red vožnje direktno kod prevoznika pre putovanja.</li>
-      <li>Karte možete kupiti na <a href="https://www.busticket4.me" rel="nofollow">BusTicket4.me</a>.</li>
-      <li>Za vozove: <a href="https://www.srbvoz.rs" rel="nofollow">Srbija Voz</a>.</li>
-    </ul>
-  </section>
+  <p class="page-subtitle">
+    {% if route %}{{ route.trip_count }} polazaka dnevno · {{ route.distance_km }} km{% endif %}
+    {% if route and route.min_price_rsd %} · od {{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }}€{% endif %}
+  </p>
 </div>
+
+{% if route and trips %}
+
+{{ stats_strip([
+  {'value': route.distance_km, 'label': 'km'},
+  {'value': route.trip_count, 'label': 'polazaka/dan'},
+] + ([{'value': (route.min_price_rsd / config.EUR_RSD_RATE)|round|int ~ '€', 'label': 'od'}] if route.min_price_rsd else [])) }}
+
+<button class="btn btn--outline filter-toggle" id="filterToggle">
+  <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M3 3a1 1 0 011-1h12a1 1 0 01.82 1.573l-4.82 7v4.427a1 1 0 01-.553.894l-2 1A1 1 0 018 16v-5.427L3.18 3.573A1 1 0 013 3z"/></svg>
+  Filteri
+</button>
+
+<div class="results-layout">
+  {% set operators = trips|map(attribute='operator')|unique|list %}
+  {{ filter_panel(operators=operators) }}
+  <div class="results-main">
+    <div class="trip-list" id="tripList">
+      {% for trip in trips %}
+        {{ trip_card(trip) }}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% elif route %}
+<a href="/rute/{{ route.slug }}/" class="btn btn--primary">Pogledaj sve polaske →</a>
+{% endif %}
+
+<!-- Info cards -->
+<div class="cards-grid">
+  <div class="info-card">
+    <div class="info-card__heading">Autobus</div>
+    <p>Autobuske linije između {{ from_city }} i {{ to_city }} voze svakodnevno.
+       Karte se kupuju na blagajni autobuske stanice.</p>
+  </div>
+  <div class="info-card">
+    <div class="info-card__heading">Voz</div>
+    <p>Vozovne veze proverite na sajtu Srbija Voz. Karte na stanicama ili online.</p>
+  </div>
+  <div class="info-card">
+    <div class="info-card__heading">Saveti</div>
+    <ul>
+      <li>Proverite red vožnje kod prevoznika pre putovanja.</li>
+      <li>Kupite kartu unapred u sezoni.</li>
+    </ul>
+  </div>
+</div>
+
+{% if not route %}
+  {{ empty_state(icon='search', text='Direktna veza nije u bazi', sub=from_city ~ ' → ' ~ to_city) }}
+{% endif %}
+
+<!-- FAQ (SEO rich snippets) -->
+<section class="faq-section">
+  <h2 class="section__title">Često postavljana pitanja</h2>
+  <div class="faq-list">
+    <details class="faq-item">
+      <summary class="faq-item__q">Koliko traje putovanje {{ from_city }} — {{ to_city }}?</summary>
+      <div class="faq-item__a">
+        {% if route and route.distance_km %}Rastojanje je oko {{ route.distance_km }} km. Prosečno trajanje autobusom je {{ (route.distance_km / 80)|round|int }}–{{ (route.distance_km / 60)|round|int }} sata.{% else %}Trajanje zavisi od prevoznika i tipa prevoza. Proverite kod prevoznika.{% endif %}
+      </div>
+    </details>
+    <details class="faq-item">
+      <summary class="faq-item__q">Koja je cena karte {{ from_city }} — {{ to_city }}?</summary>
+      <div class="faq-item__a">
+        {% if route and route.min_price_rsd %}Cene karata počinju od {{ route.min_price_rsd }} RSD (oko {{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }}€). Tačna cena zavisi od prevoznika.{% else %}Cene variraju u zavisnosti od prevoznika. Proverite na blagajni autobuske stanice.{% endif %}
+      </div>
+    </details>
+    <details class="faq-item">
+      <summary class="faq-item__q">Koliko polazaka dnevno ima {{ from_city }} — {{ to_city }}?</summary>
+      <div class="faq-item__a">
+        {% if route and route.trip_count %}Na ovoj ruti ima {{ route.trip_count }} polazaka dnevno. Autobusi voze od ranog jutra do kasno uveče.{% else %}Broj polazaka varira. Proverite aktuelni red vožnje.{% endif %}
+      </div>
+    </details>
+  </div>
+</section>
+
+{% if route %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Koliko traje putovanje {{ from_city }} — {{ to_city }}?","acceptedAnswer":{"@type":"Answer","text":"{% if route.distance_km %}Rastojanje je oko {{ route.distance_km }} km. Prosečno trajanje autobusom je {{ (route.distance_km / 80)|round|int }}–{{ (route.distance_km / 60)|round|int }} sata.{% else %}Trajanje zavisi od prevoznika.{% endif %}"}},{"@type":"Question","name":"Koja je cena karte {{ from_city }} — {{ to_city }}?","acceptedAnswer":{"@type":"Answer","text":"{% if route.min_price_rsd %}Cene karata počinju od {{ route.min_price_rsd }} RSD (oko {{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }}€).{% else %}Cene variraju u zavisnosti od prevoznika.{% endif %}"}},{"@type":"Question","name":"Koliko polazaka dnevno?","acceptedAnswer":{"@type":"Answer","text":"{% if route.trip_count %}{{ route.trip_count }} polazaka dnevno.{% else %}Broj polazaka varira.{% endif %}"}}]}
+</script>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  var toggle = document.getElementById('filterToggle');
+  var panel = document.getElementById('filterPanel');
+  if (toggle && panel) {
+    toggle.addEventListener('click', function() { panel.classList.toggle('is-open'); });
+  }
+
+  var cards = document.querySelectorAll('.trip-card');
+  if (!cards.length) return;
+
+  document.querySelectorAll('.filter-panel input[type="checkbox"]').forEach(function(cb) {
+    cb.addEventListener('change', applyFilters);
+  });
+
+  function applyFilters() {
+    cards.forEach(function(card) {
+      var type = card.dataset.type || 'bus';
+      var operator = card.dataset.operator || '';
+
+      var typeOk = true;
+      var ftypeCb = document.querySelector('[data-ftype="' + type + '"]');
+      if (ftypeCb && !ftypeCb.checked) typeOk = false;
+
+      var opOk = true;
+      var opCb = document.querySelector('[data-operator="' + operator + '"]');
+      if (opCb && !opCb.checked) opOk = false;
+
+      card.style.display = (typeOk && opOk) ? '' : 'none';
+    });
+  }
+})();
+</script>
 {% endblock %}

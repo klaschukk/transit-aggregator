@@ -1,32 +1,41 @@
+import logging
 import threading
+import time
 from pathlib import Path
 from typing import Any
 
 import duckdb
-from flask import current_app, g
+from flask import current_app
+
+logger = logging.getLogger(__name__)
+
+_lock = threading.Lock()
 
 
-_local = threading.local()
+def _db_path() -> str:
+    return current_app.config['DUCKDB_PATH']
 
 
-def get_db() -> duckdb.DuckDBPyConnection:
-    """Get a thread-local DuckDB read-only connection."""
-    if not hasattr(_local, 'conn') or _local.conn is None:
-        db_path = current_app.config['DUCKDB_PATH']
-        if Path(db_path).exists():
-            _local.conn = duckdb.connect(db_path, read_only=True)
-        else:
-            # Return in-memory DB for dev when db file doesn't exist yet
-            _local.conn = duckdb.connect(':memory:')
-    return _local.conn
+def db_ready() -> bool:
+    """Check if database file exists."""
+    return Path(_db_path()).exists()
 
 
 def query(sql: str, params: list[Any] | None = None) -> list[dict]:
-    """Execute a query and return list of dicts."""
-    conn = get_db()
-    result = conn.execute(sql, params or [])
-    columns = [desc[0] for desc in result.description]
-    return [dict(zip(columns, row)) for row in result.fetchall()]
+    """Execute a query and return list of dicts. Retries on DuckDB lock errors."""
+    for attempt in range(10):
+        try:
+            with _lock:
+                conn = duckdb.connect(_db_path(), read_only=True)
+                result = conn.execute(sql, params or [])
+                columns = [desc[0] for desc in result.description]
+                rows = [dict(zip(columns, row)) for row in result.fetchall()]
+                conn.close()
+                return rows
+        except duckdb.IOException:
+            logger.warning("DuckDB locked, attempt %d/10, retrying...", attempt + 1)
+            time.sleep(0.5)
+    return []
 
 
 def query_one(sql: str, params: list[Any] | None = None) -> dict | None:

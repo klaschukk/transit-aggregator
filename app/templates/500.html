@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Greška — Prevoz Srbija{% endblock %}
+
+{% block content %}
+{% from '_partials/_empty_state.html' import empty_state %}
+{{ empty_state(icon='bus', text='Došlo je do greške', sub='Pokušajte ponovo ili se vratite na početnu') }}
+<div class="error-actions">
+  <a href="/" class="btn btn--primary">Početna</a>
+</div>
+{% endblock %}

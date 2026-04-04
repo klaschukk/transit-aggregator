@@ -1,39 +1,124 @@
 <!DOCTYPE html>
 <html lang="sr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Prevoz Srbija — Red vožnje i karte{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}Pronađite red vožnje autobusa i vozova u Srbiji. Karte, cene i polasci za sve destinacije.{% endblock %}">
-    <link rel="canonical" href="{{ request.url }}">
-    {% if hreflang is defined %}
-    <link rel="alternate" hreflang="sr" href="{{ hreflang.sr }}">
-    {% endif %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    {% block head_extra %}{% endblock %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0d9488">
+<title>{% block title %}Prevoz Srbija{% endblock %}</title>
+<meta name="description" content="{% block meta_description %}Red vožnje autobusa i vozova u Srbiji.{% endblock %}">
+<link rel="canonical" href="{{ config.BASE_URL }}{{ request.path }}">
+<meta property="og:title" content="{{ self.title() }}">
+<meta property="og:description" content="{{ self.meta_description() }}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ config.BASE_URL }}{{ request.path }}">
+<meta property="og:site_name" content="Transit Srbija">
+<meta property="og:locale" content="sr_RS">
+{% block head_extra %}{% endblock %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
 </head>
 <body>
-<header class="site-header">
-    <div class="container">
-        <a href="/" class="site-logo">🚌 Prevoz Srbija</a>
-        <nav class="site-nav">
-            <a href="/rute/">Sve rute</a>
-            <a href="/gradski/beograd/">Gradski prevoz</a>
-        </nav>
-    </div>
-</header>
 
-<main class="site-main">
-    {% block content %}{% endblock %}
+{% include '_partials/_header.html' %}
+
+<main class="{% block main_class %}container{% endblock %}">
+  {% block content %}{% endblock %}
 </main>
 
-<footer class="site-footer">
-    <div class="container">
-        <p>© 2026 Prevoz Srbija. Podaci su informativnog karaktera.</p>
-        <p><small>Uvek proverite tačan red vožnje kod prevoznika.</small></p>
-    </div>
-</footer>
+{% include '_partials/_footer.html' %}
 
 {% block scripts %}{% endblock %}
+
+<script>
+/* Mobile nav toggle */
+(function() {
+  var btn = document.getElementById('navToggle');
+  var nav = document.querySelector('.site-nav');
+  if (btn && nav) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var open = nav.classList.toggle('is-open');
+      btn.setAttribute('aria-expanded', open);
+    });
+    /* Close nav on outside tap */
+    document.addEventListener('click', function(e) {
+      if (nav.classList.contains('is-open') && !nav.contains(e.target)) {
+        nav.classList.remove('is-open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+  /* Swap button */
+  var swap = document.getElementById('swapBtn');
+  if (swap) {
+    swap.addEventListener('click', function() {
+      var f = document.getElementById('fromCity'), t = document.getElementById('toCity');
+      if (f && t) { var tmp = f.value; f.value = t.value; t.value = tmp; }
+    });
+  }
+  /* Default date */
+  var dateInput = document.getElementById('tripDate');
+  if (dateInput && !dateInput.value) {
+    dateInput.value = new Date().toISOString().slice(0, 10);
+    dateInput.min = dateInput.value;
+  }
+
+  /* ── City autocomplete ── */
+  document.querySelectorAll('.js-city-input').forEach(function(input) {
+    var dropdown = input.parentElement.querySelector('.autocomplete');
+    if (!dropdown) return;
+    var timer = null;
+    var activeIdx = -1;
+
+    function show(items) {
+      if (!items.length) { dropdown.classList.remove('is-open'); return; }
+      dropdown.innerHTML = items.map(function(city, i) {
+        return '<div class="autocomplete__item" data-value="' + city + '">' +
+          '<svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>' +
+          city + '</div>';
+      }).join('');
+      dropdown.classList.add('is-open');
+      activeIdx = -1;
+    }
+
+    input.addEventListener('input', function() {
+      clearTimeout(timer);
+      var q = input.value.trim();
+      if (q.length < 1) { dropdown.classList.remove('is-open'); return; }
+      timer = setTimeout(function() {
+        fetch('/api/cities?q=' + encodeURIComponent(q))
+          .then(function(r) { return r.json(); })
+          .then(show)
+          .catch(function() {});
+      }, 150);
+    });
+
+    dropdown.addEventListener('click', function(e) {
+      var item = e.target.closest('.autocomplete__item');
+      if (!item) return;
+      input.value = item.dataset.value;
+      dropdown.classList.remove('is-open');
+      /* Focus next input */
+      var next = input.id === 'fromCity' ? document.getElementById('toCity') : document.getElementById('tripDate');
+      if (next) next.focus();
+    });
+
+    input.addEventListener('keydown', function(e) {
+      var items = dropdown.querySelectorAll('.autocomplete__item');
+      if (!items.length || !dropdown.classList.contains('is-open')) return;
+      if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, items.length - 1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, 0); }
+      else if (e.key === 'Enter' && activeIdx >= 0) { e.preventDefault(); items[activeIdx].click(); return; }
+      else return;
+      items.forEach(function(it, i) { it.classList.toggle('is-active', i === activeIdx); });
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.remove('is-open');
+      }
+    });
+  });
+})();
+</script>
 </body>
 </html>

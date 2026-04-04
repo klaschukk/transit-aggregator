@@ -1,37 +1,133 @@
 {% extends "base.html" %}
+{% block title %}{% if from_city and to_city %}{{ from_city }} → {{ to_city }} — Prevoz Srbija{% else %}Pretraga — Prevoz Srbija{% endif %}{% endblock %}
+{% block meta_description %}{% if from_city and to_city %}Red vožnje od {{ from_city }} do {{ to_city }}. Svi polasci i cene.{% else %}Pronađite autobus ili voz između gradova Srbije.{% endif %}{% endblock %}
 
-{% block title %}{{ from_city }} → {{ to_city }} — red vožnje{% endblock %}
-{% block meta_description %}Red vožnje od {{ from_city }} do {{ to_city }}. Sve polasci, cene i prevoznici.{% endblock %}
+{% block head_extra %}
+{% if from_city and to_city %}
+<meta name="robots" content="noindex, follow">
+{% endif %}
+{% endblock %}
 
 {% block content %}
-<div class="container">
-  <h1>{{ from_city }} → {{ to_city }}</h1>
 
-  {% if results %}
-    <p class="route-meta">Pronađeno {{ results|length }} polazaka</p>
-    <table class="trips-table">
-      <thead>
-        <tr><th>Polazak</th><th>Dolazak</th><th>Trajanje</th><th>Prevoznik</th><th>Cena</th></tr>
-      </thead>
-      <tbody>
-        {% for trip in results %}
-        <tr>
-          <td class="trips-table__time">{{ trip.departure_time }}</td>
-          <td class="trips-table__time">{{ trip.arrival_time }}</td>
-          <td>{{ trip.duration_min // 60 }}h {{ trip.duration_min % 60 }}min</td>
-          <td>{{ trip.operator }}</td>
-          <td>{{ trip.price_rsd }} RSD</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% elif from_city and to_city %}
-    <p class="empty-state">
-      Nema direktnih polazaka za ovu rutu. Pokušajte na
-      <a href="https://www.busticket4.me" rel="nofollow">BusTicket4.me</a>.
-    </p>
-  {% else %}
-    <p>Unesite polazište i odredište da biste pronašli vožnje.</p>
-  {% endif %}
+{% from '_partials/_breadcrumb.html' import breadcrumb %}
+{% from '_partials/_trip_card.html' import trip_card %}
+{% from '_partials/_search_form.html' import search_form %}
+{% from '_partials/_filter_panel.html' import filter_panel %}
+{% from '_partials/_empty_state.html' import empty_state %}
+
+{% if from_city and to_city %}
+<!-- Results view -->
+
+{{ breadcrumb([
+  {'url': '/pretraga/', 'label': 'Pretraga'},
+  {'label': from_city ~ ' → ' ~ to_city}
+]) }}
+
+<div class="page-title">
+  <h1>{{ from_city }} → {{ to_city }}</h1>
+  <p class="page-subtitle">{% if results %}{{ results|length }} polazaka{% else %}Nema direktnih polazaka{% endif %}</p>
 </div>
+
+{% if results %}
+
+<button class="btn btn--outline filter-toggle" id="filterToggle">
+  <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M3 3a1 1 0 011-1h12a1 1 0 01.82 1.573l-4.82 7v4.427a1 1 0 01-.553.894l-2 1A1 1 0 018 16v-5.427L3.18 3.573A1 1 0 013 3z"/></svg>
+  Filteri
+</button>
+
+<div class="results-layout">
+  {% set operators = results|map(attribute='operator')|unique|list %}
+  {{ filter_panel(operators=operators) }}
+  <div class="results-main">
+    <div class="trip-list" id="tripList">
+      {% for trip in results %}
+        {{ trip_card(trip) }}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% else %}
+  {{ empty_state(icon='search', text='Nema direktnih polazaka', sub=from_city ~ ' → ' ~ to_city) }}
+{% endif %}
+
+{% else %}
+<!-- Search landing -->
+
+<div class="page-title">
+  <h1>Pronađite prevoz</h1>
+</div>
+
+<div class="search-landing">
+  {{ search_form() }}
+</div>
+
+<section class="section">
+  <h2 class="section__title">Popularne rute</h2>
+  <div class="popular-grid">
+    <a href="/pretraga/?od=Beograd&do=Novi+Sad" class="popular-card">
+      <span class="popular-card__from">Beograd</span>
+      <span class="popular-card__arrow">→</span>
+      <span class="popular-card__to">Novi Sad</span>
+    </a>
+    <a href="/pretraga/?od=Beograd&do=Ni%C5%A1" class="popular-card">
+      <span class="popular-card__from">Beograd</span>
+      <span class="popular-card__arrow">→</span>
+      <span class="popular-card__to">Niš</span>
+    </a>
+    <a href="/pretraga/?od=Beograd&do=Kragujevac" class="popular-card">
+      <span class="popular-card__from">Beograd</span>
+      <span class="popular-card__arrow">→</span>
+      <span class="popular-card__to">Kragujevac</span>
+    </a>
+    <a href="/pretraga/?od=Novi+Sad&do=Ni%C5%A1" class="popular-card">
+      <span class="popular-card__from">Novi Sad</span>
+      <span class="popular-card__arrow">→</span>
+      <span class="popular-card__to">Niš</span>
+    </a>
+  </div>
+</section>
+
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  var toggle = document.getElementById('filterToggle');
+  var panel = document.getElementById('filterPanel');
+  if (toggle && panel) {
+    toggle.addEventListener('click', function() { panel.classList.toggle('is-open'); });
+  }
+
+  var cards = document.querySelectorAll('.trip-card');
+  if (!cards.length) return;
+
+  document.querySelectorAll('.filter-panel input[type="checkbox"]').forEach(function(cb) {
+    cb.addEventListener('change', applyFilters);
+  });
+
+  function applyFilters() {
+    var visible = 0;
+    cards.forEach(function(card) {
+      var type = card.dataset.type || 'bus';
+      var operator = card.dataset.operator || '';
+
+      var typeOk = true;
+      var ftypeCb = document.querySelector('[data-ftype="' + type + '"]');
+      if (ftypeCb && !ftypeCb.checked) typeOk = false;
+
+      var opOk = true;
+      var opCb = document.querySelector('[data-operator="' + operator + '"]');
+      if (opCb && !opCb.checked) opOk = false;
+
+      var show = typeOk && opOk;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+  }
+})();
+</script>
 {% endblock %}

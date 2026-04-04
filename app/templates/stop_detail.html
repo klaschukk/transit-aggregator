@@ -1,28 +1,131 @@
 {% extends "base.html" %}
-
 {% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš'} %}
+{% set city_label = city_names.get(city, city|title) %}
 
-{% block title %}Stajalište {{ stop.name }}, {{ city_names[city] }}{% endblock %}
-{% block meta_description %}Koje linije prolaze kroz stajalište {{ stop.name }} u {{ city_names[city] }}u.{% endblock %}
+{% block title %}Stajalište {{ stop.name }} — {{ city_label }}{% endblock %}
+{% block meta_description %}Koje linije prolaze kroz stajalište {{ stop.name }} u {{ city_label }}u. Red vožnje i dolasci.{% endblock %}
+
+{% block head_extra %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BusStop","name":"{{ stop.name }}","containedInPlace":{"@type":"City","name":"{{ city_label }}"}{% if stop.lat and stop.lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stop.lat }},"longitude":{{ stop.lon }}}{% endif %}}
+</script>
+{% if stop.lat and stop.lon %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+{% endif %}
+{% endblock %}
 
 {% block content %}
-<div class="container">
-  <nav class="breadcrumb">
-    <a href="/">Početna</a> › <a href="/gradski/{{ city }}/">Gradski prevoz {{ city_names[city] }}</a> › {{ stop.name }}
-  </nav>
 
-  <h1>{{ stop.name }}</h1>
-  <p class="route-meta">Stajalište u {{ city_names[city] }}u</p>
+{% from '_partials/_breadcrumb.html' import breadcrumb %}
+{% from '_partials/_empty_state.html' import empty_state %}
 
-  {% if stop.lines %}
-  <h2>Linije na ovom stajalištu</h2>
-  <div class="lines-grid">
-    {% for num in stop.lines %}
-    <a href="/gradski/{{ city }}/linija/linija-{{ num }}/" class="line-card">
-      <span class="line-card__number">{{ num }}</span>
+<!-- Mobile back button -->
+<div class="mobile-back">
+  <a href="/gradski/{{ city }}/" class="mobile-back__btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>
+    <span>Sve linije</span>
+  </a>
+</div>
+
+<!-- Stop header card -->
+<div class="stop-hero fade-in">
+  {% if stop.lat and stop.lon %}
+  <div class="stop-hero__map">
+    <div class="city-map" id="stopMap"></div>
+  </div>
+  {% endif %}
+  <div class="stop-hero__info">
+    <div class="stop-hero__icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
+        <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+      </svg>
+    </div>
+    <div>
+      <h1 class="stop-hero__name">{{ stop.name }}</h1>
+      <p class="stop-hero__meta">
+        {{ city_label }}{% if lines_at_stop %} · {{ lines_at_stop|length }} linija{% endif %}
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Lines & arrivals -->
+{% if lines_at_stop %}
+<div class="stop-lines fade-in fade-in--d1">
+  <h2 class="stop-lines__title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    Linije na stajalištu
+  </h2>
+  <div class="stop-lines__list" id="arrivalsList">
+    {% for line in lines_at_stop %}
+    <a href="/gradski/{{ city }}/linija/{{ line.slug }}/" class="stop-line-row fade-in fade-in--d{{ loop.index0 % 5 }}">
+      <span class="line-badge"{% if line.color %} style="background:{{ line.color }}"{% endif %}>{{ line.number }}</span>
+      <div class="stop-line-row__info">
+        <div class="stop-line-row__name">{{ line.name }}</div>
+      </div>
+      <span class="stop-line-row__eta" data-line="{{ line.number }}">
+        <span class="eta-skeleton"></span>
+      </span>
+      <svg class="stop-line-row__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M9 18l6-6-6-6"/></svg>
     </a>
     {% endfor %}
   </div>
-  {% endif %}
 </div>
+
+{% elif departures %}
+<div class="stop-lines fade-in fade-in--d1">
+  <h2 class="stop-lines__title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    Sledeći polasci danas
+  </h2>
+  <div class="stop-lines__list">
+    {% for dep in departures %}
+    <a href="/gradski/{{ city }}/linija/{{ dep.line_slug }}/" class="stop-line-row">
+      <span class="line-badge"{% if dep.color %} style="background:{{ dep.color }}"{% endif %}>{{ dep.number }}</span>
+      <div class="stop-line-row__info">
+        <div class="stop-line-row__name">{{ dep.headsign or dep.line_name }}</div>
+      </div>
+      <span class="eta eta--soon">{{ dep.departure_time[:5] }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+{% else %}
+  {{ empty_state(icon='stop', text='Nema podataka o linijama') }}
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+{% if stop.lat and stop.lon %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+(function() {
+  if (typeof L === 'undefined' || !document.getElementById('stopMap')) return;
+  var lat = {{ stop.lat }}, lon = {{ stop.lon }};
+  var map = L.map('stopMap', { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false }).setView([lat, lon], 16);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+  L.circleMarker([lat, lon], {
+    radius: 12, color: '#0d9488', fillColor: '#fff', fillOpacity: 1, weight: 3
+  }).addTo(map);
+})();
+</script>
+{% endif %}
+<script>
+(function() {
+  fetch('/api/stop-arrivals?slug={{ stop.slug }}')
+    .then(function(r) { return r.json(); })
+    .then(function(arrivals) {
+      arrivals.forEach(function(a) {
+        var el = document.querySelector('[data-line="' + a.line + '"]');
+        if (!el) return;
+        var txt = a.mins <= 1 ? 'sada' : a.mins + ' min';
+        var mod = a.mins <= 1 ? 'eta--now' : a.mins <= 10 ? 'eta--soon' : 'eta--later';
+        el.innerHTML = '<span class="eta ' + mod + '">' + txt + '</span>';
+      });
+    })
+    .catch(function() {});
+})();
+</script>
 {% endblock %}

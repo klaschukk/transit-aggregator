@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}O nama — Transit Srbija{% endblock %}
+{% block meta_description %}Transit Srbija — besplatni agregator javnog prevoza u Srbiji. Autobus, voz i gradski prevoz na jednom mestu.{% endblock %}
+
+{% block content %}
+
+{% from '_partials/_breadcrumb.html' import breadcrumb %}
+{{ breadcrumb([{'url': '/', 'label': 'Početna'}, {'label': 'O nama'}]) }}
+
+<div class="page-title">
+  <h1>O nama</h1>
+  <p class="page-subtitle">Besplatni agregator javnog prevoza u Srbiji</p>
+</div>
+
+<!-- Mission -->
+<section class="about-mission">
+  <div class="about-mission__icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      <path d="M9 12l2 2 4-4"/>
+    </svg>
+  </div>
+  <div class="about-mission__text">
+    <h2>Naša misija</h2>
+    <p>Sve informacije o javnom prevozu u Srbiji — na jednom mestu, besplatno i bez registracije.
+       Međugradski autobus, voz, gradski prevoz Beograda — pretražite, uporedite i putujte sa pouzdanim
+       informacijama.</p>
+    <p>Transit Srbija prikuplja i objedinjuje podatke iz različitih izvora kako bi vam uštedeo vreme
+       i olakšao planiranje putovanja.</p>
+  </div>
+</section>
+
+<!-- Data sources -->
+<section class="section">
+  <h2 class="section__title">Izvori podataka</h2>
+  <div class="about-sources">
+    <div class="about-source">
+      <div class="about-source__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
+          <rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/>
+          <circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/>
+        </svg>
+      </div>
+      <h3 class="about-source__name">GSP Beograd</h3>
+      <p class="about-source__desc">Gradski prevoz Beograda — linije autobusa, tramvaja, trolejbusa i stajališta.</p>
+    </div>
+    <div class="about-source">
+      <div class="about-source__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
+          <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+          <line x1="4" y1="22" x2="4" y2="15"/>
+        </svg>
+      </div>
+      <h3 class="about-source__name">Srbija Voz</h3>
+      <p class="about-source__desc">Železnički prevoz — redovi vožnje vozova između gradova Srbije.</p>
+    </div>
+    <div class="about-source">
+      <div class="about-source__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
+          <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+      </div>
+      <h3 class="about-source__name">Autobuske stanice</h3>
+      <p class="about-source__desc">Međugradski autobusi — polasci, dolasci, cene karata i prevoznici.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<section class="section">
+  <h2 class="section__title">U brojkama</h2>
+  <div class="about-stats">
+    <div class="about-stat">
+      <div class="about-stat__value">{{ stats.routes }}</div>
+      <div class="about-stat__label">Međugradskih ruta</div>
+    </div>
+    <div class="about-stat">
+      <div class="about-stat__value">{{ stats.lines }}</div>
+      <div class="about-stat__label">Gradskih linija</div>
+    </div>
+    <div class="about-stat">
+      <div class="about-stat__value">{{ stats.stops }}</div>
+      <div class="about-stat__label">Stajališta</div>
+    </div>
+    <div class="about-stat">
+      <div class="about-stat__value">{{ stats.operators }}</div>
+      <div class="about-stat__label">Prevoznika</div>
+    </div>
+  </div>
+</section>
+
+<!-- Disclaimer -->
+<section class="section">
+  <div class="seo-block">
+    <h2>Napomena</h2>
+    <p>Podaci prikazani na ovom sajtu su informativnog karaktera. Uvek proverite tačan red vožnje
+       direktno kod prevoznika pre putovanja. Transit Srbija ne prodaje karte niti posreduje u
+       prodaji — samo prikazujemo javno dostupne informacije.</p>
+  </div>
+</section>
+
+{% endblock %}

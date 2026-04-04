@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Kontakt — Transit Srbija{% endblock %}
+{% block meta_description %}Kontaktirajte Transit Srbija za pitanja, sugestije ili prijavu grešaka.{% endblock %}
+
+{% block content %}
+
+{% from '_partials/_breadcrumb.html' import breadcrumb %}
+{{ breadcrumb([{'url': '/', 'label': 'Početna'}, {'label': 'Kontakt'}]) }}
+
+<div class="page-title">
+  <h1>Kontakt</h1>
+  <p class="page-subtitle">Imate pitanje, sugestiju ili ste primetili grešku?</p>
+</div>
+
+<div class="contact-layout">
+  <!-- Contact form -->
+  <form class="contact-form" action="#" method="post">
+    <div class="contact-form__fields">
+      <div class="contact-form__group">
+        <label class="contact-form__label" for="contactName">Ime</label>
+        <input class="contact-form__input" id="contactName" name="ime" type="text"
+               placeholder="Vaše ime" required>
+      </div>
+      <div class="contact-form__group">
+        <label class="contact-form__label" for="contactEmail">Email</label>
+        <input class="contact-form__input" id="contactEmail" name="email" type="email"
+               placeholder="vas@email.com" required>
+      </div>
+      <div class="contact-form__group">
+        <label class="contact-form__label" for="contactMessage">Poruka</label>
+        <textarea class="contact-form__input contact-form__textarea" id="contactMessage"
+                  name="poruka" placeholder="Opišite vaše pitanje ili sugestiju..." rows="5" required></textarea>
+      </div>
+    </div>
+    <button type="submit" class="btn btn--primary contact-form__submit">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+        <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+      </svg>
+      Pošalji
+    </button>
+  </form>
+
+  <!-- Contact info sidebar -->
+  <aside class="contact-info">
+    <div class="contact-info__card">
+      <div class="contact-info__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="24" height="24">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+      </div>
+      <div>
+        <div class="contact-info__label">Email</div>
+        <div class="contact-info__value">info@transit-serbia.com</div>
+      </div>
+    </div>
+    <div class="contact-info__card">
+      <div class="contact-info__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="24" height="24">
+          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+        </svg>
+      </div>
+      <div>
+        <div class="contact-info__label">Odgovaramo u roku od</div>
+        <div class="contact-info__value">24 sata</div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+{% endblock %}
