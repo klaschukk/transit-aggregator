@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask import Blueprint, render_template, request, make_response, jsonify, Response, current_app
 
-from app.db import query, query_one, db_ready
+from app.db import query, query_one, cached_query, cached_query_one, db_ready
 
 main_bp = Blueprint('main', __name__)
 
@@ -10,7 +10,7 @@ main_bp = Blueprint('main', __name__)
 @main_bp.route('/')
 def index():
     """Homepage with search form."""
-    popular_routes = query("""
+    popular_routes = cached_query("""
         SELECT r.slug, r.from_city, r.to_city, r.distance_km, COUNT(t.id) as trip_count
         FROM routes r
         LEFT JOIN trips t ON t.route_id = r.id
@@ -20,7 +20,7 @@ def index():
         LIMIT 8
     """) if db_ready() else []
 
-    cities = query("""
+    cities = cached_query("""
         SELECT DISTINCT from_city as city FROM routes WHERE type = 'intercity'
         UNION
         SELECT DISTINCT to_city FROM routes WHERE type = 'intercity'
@@ -30,17 +30,18 @@ def index():
 
     stats = {'routes': 0, 'lines': 0, 'stops': 0, 'operators': 0}
     if db_ready():
-        row = query_one("SELECT COUNT(*) as c FROM routes WHERE type = 'intercity'")
-        stats['routes'] = row['c'] if row else 0
-        row = query_one("SELECT COUNT(*) as c FROM city_lines")
-        stats['lines'] = row['c'] if row else 0
-        row = query_one("SELECT COUNT(*) as c FROM city_stops")
-        stats['stops'] = row['c'] if row else 0
-        row = query_one("SELECT COUNT(*) as c FROM operators")
-        stats['operators'] = row['c'] if row else 0
+        row = cached_query_one("""
+            SELECT
+                (SELECT COUNT(*) FROM routes WHERE type = 'intercity') AS routes,
+                (SELECT COUNT(*) FROM city_lines) AS lines,
+                (SELECT COUNT(*) FROM city_stops) AS stops,
+                (SELECT COUNT(*) FROM operators) AS operators
+        """)
+        if row:
+            stats = dict(row)
 
     # Popular city lines (by number of stops)
-    popular_lines = query("""
+    popular_lines = cached_query("""
         SELECT cl.number, cl.name, cl.slug, cl.color,
                COUNT(cls.stop_id) as stop_count
         FROM city_lines cl
@@ -134,46 +135,80 @@ def health():
 
 @main_bp.route('/sitemap.xml')
 def sitemap():
+    """Generate sitemap with lastmod, proper priorities, filtered stops."""
+    from pathlib import Path
     base = current_app.config['BASE_URL']
-    pages = []
-    pages.append(f'<url><loc>{base}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>')
-    pages.append(f'<url><loc>{base}/rute/</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>')
-    pages.append(f'<url><loc>{base}/gradski/beograd/</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>')
-    pages.append(f'<url><loc>{base}/prevoznici/</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>')
-    pages.append(f'<url><loc>{base}/autobuske-stanice/</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>')
-    pages.append(f'<url><loc>{base}/o-nama/</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>')
-    pages.append(f'<url><loc>{base}/kontakt/</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>')
+
+    # DB lastmod: use file modification time
+    db_path = Path(current_app.config['DUCKDB_PATH'])
+    if db_path.exists():
+        lastmod = datetime.fromtimestamp(db_path.stat().st_mtime).strftime('%Y-%m-%d')
+    else:
+        lastmod = datetime.now().strftime('%Y-%m-%d')
+
+    def url(loc: str, freq: str, prio: str, mod: str = lastmod) -> str:
+        return f'<url><loc>{base}{loc}</loc><lastmod>{mod}</lastmod><changefreq>{freq}</changefreq><priority>{prio}</priority></url>'
+
+    pages = [
+        url('/', 'daily', '1.0'),
+        url('/rute/', 'weekly', '0.8'),
+        url('/gradski/beograd/', 'weekly', '0.8'),
+        url('/prevoznici/', 'monthly', '0.5'),
+        url('/autobuske-stanice/', 'monthly', '0.5'),
+        url('/o-nama/', 'monthly', '0.3'),
+        url('/kontakt/', 'monthly', '0.3'),
+    ]
 
     if db_ready():
+        # Intercity routes (all have trips — verified)
         routes = query("SELECT slug FROM routes WHERE type = 'intercity'")
         for r in routes:
-            pages.append(f'<url><loc>{base}/rute/{r["slug"]}/</loc><changefreq>daily</changefreq><priority>0.7</priority></url>')
+            pages.append(url(f'/rute/{r["slug"]}/', 'daily', '0.7'))
 
+        # SEO city-pair pages
         routes2 = query("SELECT from_city_slug, to_city_slug FROM routes WHERE type = 'intercity'")
         for r in routes2:
-            pages.append(f'<url><loc>{base}/voznja/{r["from_city_slug"]}-do-{r["to_city_slug"]}/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>')
+            pages.append(url(f'/voznja/{r["from_city_slug"]}-do-{r["to_city_slug"]}/', 'weekly', '0.6'))
 
+        # City lines
         lines = query("SELECT city, slug FROM city_lines")
         for line in lines:
-            pages.append(f'<url><loc>{base}/gradski/{line["city"]}/linija/{line["slug"]}/</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>')
+            pages.append(url(f'/gradski/{line["city"]}/linija/{line["slug"]}/', 'weekly', '0.5'))
 
+        # Stops: only those with 2+ lines (meaningful content, avoids thin pages)
         stops = query("""
-            SELECT DISTINCT cs.slug, cs.city FROM city_stops cs
-            WHERE cs.lat IS NOT NULL
-               OR cs.id IN (SELECT stop_id FROM city_line_stops)
+            SELECT cs.slug, cs.city
+            FROM city_stops cs
+            JOIN city_line_stops cls ON cls.stop_id = cs.id
+            GROUP BY cs.slug, cs.city
+            HAVING COUNT(cls.line_id) >= 2
         """)
         for s in stops:
-            pages.append(f'<url><loc>{base}/gradski/{s["city"]}/stajaliste/{s["slug"]}/</loc><changefreq>weekly</changefreq><priority>0.4</priority></url>')
+            pages.append(url(f'/gradski/{s["city"]}/stajaliste/{s["slug"]}/', 'weekly', '0.4'))
 
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     xml += '\n'.join(pages)
     xml += '\n</urlset>'
-    return Response(xml, mimetype='application/xml')
+    resp = make_response(xml)
+    resp.headers['Content-Type'] = 'application/xml'
+    resp.headers['Cache-Control'] = 'public, max-age=3600'
+    return resp
 
 
 @main_bp.route('/robots.txt')
 def robots():
     base = current_app.config['BASE_URL']
-    txt = f"User-agent: *\nAllow: /\nSitemap: {base}/sitemap.xml\n"
-    return Response(txt, mimetype='text/plain')
+    lines = [
+        'User-agent: *',
+        'Allow: /',
+        '',
+        'Disallow: /api/',
+        'Disallow: /health',
+        'Disallow: /pretraga/?*',
+        '',
+        f'Sitemap: {base}/sitemap.xml',
+    ]
+    resp = make_response('\n'.join(lines) + '\n')
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp

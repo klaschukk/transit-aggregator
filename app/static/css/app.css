@@ -1204,18 +1204,6 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 }
 
 @media (min-width: 768px) {
-  .hero { padding: 56px 20px 40px; margin: 0 calc(-1 * var(--text-base)); margin-bottom: 40px; }
-  .hero__title { font-size: var(--text-3xl); }
-  .hero__form { max-width: 700px; }
-  .hero .journey-form__fields {
-    display: flex;
-    border-radius: var(--radius-lg);
-  }
-  .hero .journey-form__field { flex: 1; }
-  .hero .journey-form__field + .journey-form__field { border-top: none; border-left: 1px solid var(--color-border); }
-  .hero .journey-form__swap { position: static; transform: none; }
-  .hero .journey-form__actions { margin-top: 12px; }
-
   .popular-grid { grid-template-columns: repeat(4, 1fr); gap: 12px; }
 
   .results-layout { flex-direction: row; align-items: flex-start; }
@@ -1808,7 +1796,6 @@ main { animation: fadeInUp .25s ease both; }
   .home-city-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
   .home-route:hover { background: var(--color-bg-alt); }
   .line-row:hover { background: var(--color-bg-alt); }
-  .line-chip:hover { background: var(--color-bg-alt); }
   .stop-row:hover { background: var(--color-bg-alt); }
   .arrival-row:hover { background: var(--color-bg-alt); }
   .stop-line-row:hover { background: var(--color-bg-alt); }
@@ -1825,20 +1812,24 @@ main { animation: fadeInUp .25s ease both; }
 
 /* ── 11. Skip-to-content link (accessibility) ── */
 .skip-link {
-  position: absolute;
+  position: fixed;
   top: -100%;
-  left: 16px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 200;
-  padding: 8px 16px;
-  background: var(--color-primary);
+  padding: 10px 24px;
+  background: var(--color-text);
   color: var(--color-bg);
   font-size: var(--text-sm);
   font-weight: 700;
-  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-  transition: top .2s;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  transition: top .25s ease;
+  text-decoration: none;
 }
 .skip-link:focus {
   top: 0;
+  outline: none;
 }
 
 /* ── 12. Print styles ── */
@@ -1917,6 +1908,15 @@ main { animation: fadeInUp .25s ease both; }
   h1, h2, h3 { break-after: avoid; }
   .page-title { break-after: avoid; }
 }
+
+/* ── Missing structural classes (semantic wrappers inside flex parents) ── */
+.breadcrumb__current { color: var(--color-text); font-weight: 600; }
+.site-logo__text { white-space: nowrap; }
+.carrier-section__info { flex: 1; min-width: 0; }
+.line-header__info { flex: 1; min-width: 0; }
+.station-card__info { flex: 1; min-width: 0; }
+.home-city-card__info { flex: 1; min-width: 0; }
+.search-hero__inner { text-align: center; max-width: 600px; margin: 0 auto; }
 
 /* ── Anchor nav (carrier page top links) ── */
 .anchor-nav {

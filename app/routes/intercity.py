@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 
-from flask import Blueprint, render_template, abort, request, current_app
+from flask import Blueprint, render_template, abort, request
 from app.db import query, query_one, db_ready
 
 intercity_bp = Blueprint('intercity', __name__)

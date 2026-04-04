@@ -1,3 +1,4 @@
+import hashlib
 import logging
 import threading
 import time
@@ -9,11 +10,25 @@ from flask import current_app
 
 logger = logging.getLogger(__name__)
 
-_lock = threading.Lock()
+# Thread-local persistent connections (one per gunicorn worker thread)
+_local = threading.local()
+
+# Simple in-memory TTL cache shared across requests within a worker
+_cache: dict[str, tuple[float, Any]] = {}
+_cache_lock = threading.Lock()
 
 
 def _db_path() -> str:
     return current_app.config['DUCKDB_PATH']
+
+
+def _get_conn() -> duckdb.DuckDBPyConnection:
+    """Return a persistent read-only connection for the current thread."""
+    conn = getattr(_local, 'conn', None)
+    if conn is None:
+        conn = duckdb.connect(_db_path(), read_only=True)
+        _local.conn = conn
+    return conn
 
 
 def db_ready() -> bool:
@@ -22,23 +37,53 @@ def db_ready() -> bool:
 
 
 def query(sql: str, params: list[Any] | None = None) -> list[dict]:
-    """Execute a query and return list of dicts. Retries on DuckDB lock errors."""
-    for attempt in range(10):
+    """Execute a read query and return list of dicts."""
+    try:
+        conn = _get_conn()
+        result = conn.execute(sql, params or [])
+        columns = [desc[0] for desc in result.description]
+        return [dict(zip(columns, row)) for row in result.fetchall()]
+    except duckdb.IOException:
+        # Connection went stale (e.g. DB rebuilt) — reconnect once
+        _local.conn = None
         try:
-            with _lock:
-                conn = duckdb.connect(_db_path(), read_only=True)
-                result = conn.execute(sql, params or [])
-                columns = [desc[0] for desc in result.description]
-                rows = [dict(zip(columns, row)) for row in result.fetchall()]
-                conn.close()
-                return rows
-        except duckdb.IOException:
-            logger.warning("DuckDB locked, attempt %d/10, retrying...", attempt + 1)
-            time.sleep(0.5)
-    return []
+            conn = _get_conn()
+            result = conn.execute(sql, params or [])
+            columns = [desc[0] for desc in result.description]
+            return [dict(zip(columns, row)) for row in result.fetchall()]
+        except Exception:
+            logger.exception("DuckDB query failed after reconnect")
+            return []
+    except Exception:
+        logger.exception("DuckDB query error")
+        _local.conn = None
+        return []
 
 
 def query_one(sql: str, params: list[Any] | None = None) -> dict | None:
     """Execute a query and return single row as dict, or None."""
     rows = query(sql, params)
+    return rows[0] if rows else None
+
+
+def cached_query(sql: str, params: list[Any] | None = None, ttl: int = 300) -> list[dict]:
+    """Query with in-memory TTL cache. Default 5 min."""
+    key = hashlib.md5((sql + str(params or [])).encode()).hexdigest()
+
+    with _cache_lock:
+        if key in _cache:
+            expires, data = _cache[key]
+            if time.time() < expires:
+                return data
+
+    data = query(sql, params)
+
+    with _cache_lock:
+        _cache[key] = (time.time() + ttl, data)
+
+    return data
+
+
+def cached_query_one(sql: str, params: list[Any] | None = None, ttl: int = 300) -> dict | None:
+    rows = cached_query(sql, params, ttl)
     return rows[0] if rows else None
