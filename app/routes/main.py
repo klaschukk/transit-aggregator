@@ -105,7 +105,9 @@ def api_cities():
 
 @main_bp.route('/health')
 def health():
-    return jsonify({'status': 'ok', 'service': 'transit-serbia'})
+    db_ok = db_ready()
+    status = 'ok' if db_ok else 'degraded'
+    return jsonify({'status': status, 'service': 'transit-serbia', 'db': db_ok})
 
 
 @main_bp.route('/sitemap.xml')

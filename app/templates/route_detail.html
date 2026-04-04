@@ -38,8 +38,8 @@
 </div>
 
 {{ stats_strip([
-  {'value': route.distance_km, 'label': 'km', 'icon': 'distance'},
-  {'value': route.trip_count, 'label': 'polazaka dnevno', 'icon': 'schedule'},
+  {'value': route.distance_km|default(0), 'label': 'km', 'icon': 'distance'},
+  {'value': route.trip_count|default(0), 'label': 'polazaka dnevno', 'icon': 'schedule'},
 ] + ([{'value': (route.min_price_rsd / config.EUR_RSD_RATE)|round|int ~ '€', 'label': 'od', 'icon': 'price'}] if route.min_price_rsd else [])) }}
 
 <!-- Day filter -->
@@ -66,8 +66,8 @@
   </div>
   <div class="seo-block__content">
     <h2>O ruti {{ route.from_city }} — {{ route.to_city }}</h2>
-    <p>Vožnja od {{ route.from_city }} do {{ route.to_city }} iznosi oko {{ route.distance_km }} km.
-       Prosečno trajanje putovanja autobusom je oko {{ (route.distance_km / 80)|round|int }} sata.</p>
+    <p>Vožnja od {{ route.from_city }} do {{ route.to_city }} iznosi oko {{ route.distance_km|default(0) }} km.
+       {% if route.distance_km %}Prosečno trajanje putovanja autobusom je oko {{ (route.distance_km / 80)|round|int }} sata.{% endif %}</p>
   </div>
 </div>
 {% else %}

@@ -29,7 +29,7 @@
 <div class="page-title fade-in">
   <h1>{{ from_city }} → {{ to_city }}</h1>
   <p class="page-subtitle">
-    {% if route %}{{ route.trip_count }} polazaka dnevno · {{ route.distance_km }} km{% endif %}
+    {% if route %}{{ route.trip_count|default(0) }} polazaka dnevno{% if route.distance_km %} · {{ route.distance_km }} km{% endif %}{% endif %}
     {% if route and route.min_price_rsd %} · od {{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }}€{% endif %}
   </p>
   <a href="/voznja/{{ to_city|lower|replace(' ','-') }}-do-{{ from_city|lower|replace(' ','-') }}/" class="reverse-route">
@@ -41,8 +41,8 @@
 {% if route and trips %}
 
 {{ stats_strip([
-  {'value': route.distance_km, 'label': 'km', 'icon': 'distance'},
-  {'value': route.trip_count, 'label': 'polazaka/dan', 'icon': 'schedule'},
+  {'value': route.distance_km|default(0), 'label': 'km', 'icon': 'distance'},
+  {'value': route.trip_count|default(0), 'label': 'polazaka/dan', 'icon': 'schedule'},
 ] + ([{'value': (route.min_price_rsd / config.EUR_RSD_RATE)|round|int ~ '€', 'label': 'od', 'icon': 'price'}] if route.min_price_rsd else [])) }}
 
 <button class="btn btn--outline filter-toggle" id="filterToggle">
