@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from flask import Blueprint, render_template, abort, request, jsonify
-from app.db import query, query_one, db_ready
+from app.db import query, query_one, cached_query, cached_query_one, db_ready
 
 city_bp = Blueprint('city', __name__)
 
@@ -17,7 +17,7 @@ def city_hub(city: str):
     if city not in ('beograd', 'novi-sad', 'nis'):
         abort(404)
 
-    lines = query("""
+    lines = cached_query("""
         SELECT cl.number, cl.name, cl.slug, cl.color, cl.type
         FROM city_lines cl
         WHERE cl.city = ?
@@ -26,11 +26,11 @@ def city_hub(city: str):
 
     stops_with_coords = 0
     if db_ready():
-        row = query_one("SELECT COUNT(*) as c FROM city_stops WHERE city = ? AND lat IS NOT NULL", [city])
+        row = cached_query_one("SELECT COUNT(*) as c FROM city_stops WHERE city = ? AND lat IS NOT NULL", [city])
         stops_with_coords = row['c'] if row else 0
 
     # Top stops by number of lines serving them
-    top_stops = query("""
+    top_stops = cached_query("""
         SELECT cs.slug, cs.name, COUNT(cls.line_id) as line_count
         FROM city_stops cs
         JOIN city_line_stops cls ON cls.stop_id = cs.id
@@ -65,7 +65,45 @@ def line_detail(city: str, line_slug: str):
         ORDER BY cls.stop_order
     """, [line['id']])
 
-    return render_template('line_detail.html', city=city, line=line, stops=stops)
+    # GTFS schedule: departure times from first stop, grouped by service day
+    schedule: dict[str, list[str]] = {'RD': [], 'S': [], 'N': []}
+    first_dep = None
+    last_dep = None
+
+    gtfs_count = cached_query_one(
+        "SELECT COUNT(*) as c FROM gtfs_trips WHERE line_id = ?",
+        [line['id']], ttl=3600
+    )
+    has_gtfs = (gtfs_count or {}).get('c', 0) > 0
+
+    if has_gtfs:
+        for sid in ('RD', 'S', 'N'):
+            deps = cached_query("""
+                SELECT DISTINCT st.departure_time
+                FROM gtfs_stop_times st
+                JOIN gtfs_trips gt ON gt.trip_id = st.trip_id
+                WHERE gt.line_id = ? AND st.stop_sequence = 1
+                  AND gt.service_id = ? AND gt.direction_id = 0
+                ORDER BY st.departure_time
+            """, [line['id'], sid], ttl=3600)
+            schedule[sid] = [d['departure_time'][:5] for d in deps]
+
+        # First/last service from workday schedule
+        if schedule['RD']:
+            first_dep = schedule['RD'][0]
+            last_dep = schedule['RD'][-1]
+
+    # Line type label
+    type_labels = {
+        'bus': 'Autobus', 'tram': 'Tramvaj', 'trolleybus': 'Trolejbus',
+        'night': 'Noćna linija', 'e-bus': 'E-bus', 'bg-voz': 'BG Voz',
+    }
+    line_type_label = type_labels.get(line.get('type', ''), 'Autobus')
+
+    return render_template('line_detail.html', city=city, line=line, stops=stops,
+                           schedule=schedule, has_gtfs=has_gtfs,
+                           first_dep=first_dep, last_dep=last_dep,
+                           line_type_label=line_type_label)
 
 
 @city_bp.route('/gradski/<city>/stajaliste/<stop_slug>/')

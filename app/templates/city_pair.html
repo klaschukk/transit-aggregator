@@ -66,22 +66,53 @@
 <a href="/rute/{{ route.slug }}/" class="btn btn--primary">Pogledaj sve polaske →</a>
 {% endif %}
 
+<!-- Route summary (unique per route) -->
+{% if route_info %}
+<div class="seo-block fade-in fade-in--d3">
+  <div class="seo-block__icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+  </div>
+  <div class="seo-block__content">
+    <h2>{{ from_city }} — {{ to_city }}: prevoz</h2>
+    <p>
+      {% if route.distance_km %}Rastojanje između {{ from_city }} i {{ to_city }} iznosi {{ route.distance_km }} km. {% endif %}
+      {% if route_info.duration_min and route_info.duration_max %}Putovanje traje od {{ route_info.duration_min // 60 }}h {{ route_info.duration_min % 60 }}min do {{ route_info.duration_max // 60 }}h {{ route_info.duration_max % 60 }}min u zavisnosti od prevoznika. {% endif %}
+      {% if route_info.operators %}Na ovoj ruti voze: {{ route_info.operators|join(', ') }}. {% endif %}
+      {% if route_info.price_min and route_info.price_max %}Cene karata kreću se od {{ route_info.price_min }} do {{ route_info.price_max }} RSD ({{ (route_info.price_min / config.EUR_RSD_RATE)|round|int }}–{{ (route_info.price_max / config.EUR_RSD_RATE)|round|int }}€). {% endif %}
+      {% if route_info.first_departure and route_info.last_departure %}Prvi polazak je u {{ route_info.first_departure }}, a poslednji u {{ route_info.last_departure }}.{% endif %}
+    </p>
+  </div>
+</div>
+{% endif %}
+
 <!-- Info cards -->
-<div class="cards-grid fade-in fade-in--d3">
+<div class="cards-grid fade-in fade-in--d4">
   <div class="info-card">
-    <div class="info-card__heading">Autobus</div>
-    <p>Autobuske linije između {{ from_city }} i {{ to_city }} voze svakodnevno.
-       Karte se kupuju na blagajni autobuske stanice.</p>
+    <div class="info-card__heading">Prevoznici</div>
+    {% if route_info and route_info.operators %}
+    <p>Na liniji {{ from_city }} — {{ to_city }} voze {{ route_info.operators|length }} prevoznika:
+       {{ route_info.operators|join(', ') }}.
+       {% if route_info.cheapest_operator %}Najjeftinije karte nudi {{ route_info.cheapest_operator }}.{% endif %}</p>
+    {% else %}
+    <p>Proverite kod prevoznika za aktuelne linije.</p>
+    {% endif %}
   </div>
   <div class="info-card">
-    <div class="info-card__heading">Voz</div>
-    <p>Vozovne veze proverite na sajtu Srbija Voz. Karte na stanicama ili online.</p>
+    <div class="info-card__heading">Cene</div>
+    {% if route_info and route_info.price_min %}
+    <p>Karte od {{ route_info.price_min }} RSD ({{ (route_info.price_min / config.EUR_RSD_RATE)|round|int }}€)
+       do {{ route_info.price_max }} RSD ({{ (route_info.price_max / config.EUR_RSD_RATE)|round|int }}€).
+       Kupite na blagajni autobuske stanice ili online.</p>
+    {% else %}
+    <p>Cene variraju po prevoznicima. Kupite karte na blagajni.</p>
+    {% endif %}
   </div>
   <div class="info-card">
     <div class="info-card__heading">Saveti</div>
     <ul>
-      <li>Proverite red vožnje kod prevoznika pre putovanja.</li>
-      <li>Kupite kartu unapred u sezoni.</li>
+      {% if route_info and route_info.first_departure %}<li>Prvi polazak u {{ route_info.first_departure }}, poslednji u {{ route_info.last_departure }}.</li>{% endif %}
+      <li>Kupite kartu unapred u sezoni i za vikende.</li>
+      {% if route.distance_km %}<li>Putovanje traje oko {{ (route.distance_km / 80)|round|int }}–{{ (route.distance_km / 60)|round|int }} sata autobusom.</li>{% endif %}
     </ul>
   </div>
 </div>
@@ -97,27 +128,39 @@
     <details class="faq-item">
       <summary class="faq-item__q">Koliko traje putovanje {{ from_city }} — {{ to_city }}?</summary>
       <div class="faq-item__a">
-        {% if route and route.distance_km %}Rastojanje je oko {{ route.distance_km }} km. Prosečno trajanje autobusom je {{ (route.distance_km / 80)|round|int }}–{{ (route.distance_km / 60)|round|int }} sata.{% else %}Trajanje zavisi od prevoznika i tipa prevoza. Proverite kod prevoznika.{% endif %}
+        {% if route_info and route_info.duration_min %}Putovanje od {{ from_city }} do {{ to_city }} traje od {{ route_info.duration_min // 60 }}h {{ route_info.duration_min % 60 }}min do {{ route_info.duration_max // 60 }}h {{ route_info.duration_max % 60 }}min.{% if route.distance_km %} Rastojanje je {{ route.distance_km }} km.{% endif %}{% elif route and route.distance_km %}Rastojanje je oko {{ route.distance_km }} km. Prosečno trajanje autobusom je {{ (route.distance_km / 80)|round|int }}–{{ (route.distance_km / 60)|round|int }} sata.{% else %}Trajanje zavisi od prevoznika i tipa prevoza.{% endif %}
       </div>
     </details>
     <details class="faq-item">
       <summary class="faq-item__q">Koja je cena karte {{ from_city }} — {{ to_city }}?</summary>
       <div class="faq-item__a">
-        {% if route and route.min_price_rsd %}Cene karata počinju od {{ route.min_price_rsd }} RSD (oko {{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }}€). Tačna cena zavisi od prevoznika.{% else %}Cene variraju u zavisnosti od prevoznika. Proverite na blagajni autobuske stanice.{% endif %}
+        {% if route_info and route_info.price_min %}Cene karata kreću se od {{ route_info.price_min }} do {{ route_info.price_max }} RSD ({{ (route_info.price_min / config.EUR_RSD_RATE)|round|int }}–{{ (route_info.price_max / config.EUR_RSD_RATE)|round|int }}€).{% if route_info.cheapest_operator %} Najjeftiniji prevoznik je {{ route_info.cheapest_operator }}.{% endif %}{% elif route and route.min_price_rsd %}Cene karata počinju od {{ route.min_price_rsd }} RSD (oko {{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }}€).{% else %}Cene variraju u zavisnosti od prevoznika.{% endif %}
       </div>
     </details>
     <details class="faq-item">
       <summary class="faq-item__q">Koliko polazaka dnevno ima {{ from_city }} — {{ to_city }}?</summary>
       <div class="faq-item__a">
-        {% if route and route.trip_count %}Na ovoj ruti ima {{ route.trip_count }} polazaka dnevno. Autobusi voze od ranog jutra do kasno uveče.{% else %}Broj polazaka varira. Proverite aktuelni red vožnje.{% endif %}
+        {% if route_info and route_info.first_departure %}Na ovoj ruti ima {{ route.trip_count|default(0) }} polazaka dnevno. Prvi polazak je u {{ route_info.first_departure }}, poslednji u {{ route_info.last_departure }}.{% if route_info.operators %} Voze: {{ route_info.operators|join(', ') }}.{% endif %}{% elif route and route.trip_count %}Na ovoj ruti ima {{ route.trip_count }} polazaka dnevno.{% else %}Broj polazaka varira. Proverite aktuelni red vožnje.{% endif %}
       </div>
     </details>
+    {% if route_info and route_info.operators %}
+    <details class="faq-item">
+      <summary class="faq-item__q">Koji prevoznici voze {{ from_city }} — {{ to_city }}?</summary>
+      <div class="faq-item__a">
+        Na liniji {{ from_city }} — {{ to_city }} voze {{ route_info.operators|length }} prevoznika: {{ route_info.operators|join(', ') }}.{% if route_info.cheapest_operator %} Najjeftiniji prevoznik je {{ route_info.cheapest_operator }} sa cenama od {{ route_info.price_min }} RSD.{% endif %}
+      </div>
+    </details>
+    {% endif %}
   </div>
 </section>
 
+{# FAQ JSON-LD with enriched answers #}
 {% if route %}
+{% set faq_duration %}{% if route_info and route_info.duration_min %}Putovanje traje od {{ route_info.duration_min // 60 }}h {{ route_info.duration_min % 60 }}min do {{ route_info.duration_max // 60 }}h {{ route_info.duration_max % 60 }}min.{% if route.distance_km %} Rastojanje je {{ route.distance_km }} km.{% endif %}{% elif route.distance_km %}Rastojanje je oko {{ route.distance_km }} km. Prosečno trajanje {{ (route.distance_km / 80)|round|int }}–{{ (route.distance_km / 60)|round|int }} sata.{% else %}Trajanje zavisi od prevoznika.{% endif %}{% endset %}
+{% set faq_price %}{% if route_info and route_info.price_min %}Od {{ route_info.price_min }} do {{ route_info.price_max }} RSD ({{ (route_info.price_min / config.EUR_RSD_RATE)|round|int }}–{{ (route_info.price_max / config.EUR_RSD_RATE)|round|int }}€).{% if route_info.cheapest_operator %} Najjeftiniji: {{ route_info.cheapest_operator }}.{% endif %}{% elif route.min_price_rsd %}Od {{ route.min_price_rsd }} RSD ({{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }}€).{% else %}Cene variraju.{% endif %}{% endset %}
+{% set faq_departures %}{% if route_info and route_info.first_departure %}{{ route.trip_count|default(0) }} polazaka dnevno. Prvi u {{ route_info.first_departure }}, poslednji u {{ route_info.last_departure }}.{% elif route.trip_count %}{{ route.trip_count }} polazaka dnevno.{% else %}Broj polazaka varira.{% endif %}{% endset %}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Koliko traje putovanje {{ from_city }} — {{ to_city }}?","acceptedAnswer":{"@type":"Answer","text":"{% if route.distance_km %}Rastojanje je oko {{ route.distance_km }} km. Prosečno trajanje autobusom je {{ (route.distance_km / 80)|round|int }}–{{ (route.distance_km / 60)|round|int }} sata.{% else %}Trajanje zavisi od prevoznika.{% endif %}"}},{"@type":"Question","name":"Koja je cena karte {{ from_city }} — {{ to_city }}?","acceptedAnswer":{"@type":"Answer","text":"{% if route.min_price_rsd %}Cene karata počinju od {{ route.min_price_rsd }} RSD (oko {{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }}€).{% else %}Cene variraju u zavisnosti od prevoznika.{% endif %}"}},{"@type":"Question","name":"Koliko polazaka dnevno?","acceptedAnswer":{"@type":"Answer","text":"{% if route.trip_count %}{{ route.trip_count }} polazaka dnevno.{% else %}Broj polazaka varira.{% endif %}"}}]}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Koliko traje putovanje {{ from_city }} — {{ to_city }}?","acceptedAnswer":{"@type":"Answer","text":"{{ faq_duration|striptags|trim }}"}},{"@type":"Question","name":"Koja je cena karte {{ from_city }} — {{ to_city }}?","acceptedAnswer":{"@type":"Answer","text":"{{ faq_price|striptags|trim }}"}},{"@type":"Question","name":"Koliko polazaka dnevno ima {{ from_city }} — {{ to_city }}?","acceptedAnswer":{"@type":"Answer","text":"{{ faq_departures|striptags|trim }}"}}{% if route_info and route_info.operators %},{"@type":"Question","name":"Koji prevoznici voze {{ from_city }} — {{ to_city }}?","acceptedAnswer":{"@type":"Answer","text":"Voze {{ route_info.operators|length }} prevoznika: {{ route_info.operators|join(', ') }}."}}{% endif %}]}
 </script>
 {% endif %}
 

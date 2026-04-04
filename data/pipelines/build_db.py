@@ -232,6 +232,9 @@ def _create_schema(conn: duckdb.DuckDBPyConnection) -> None:
     conn.execute("CREATE INDEX idx_stations_city ON stations (city_slug)")
     conn.execute("CREATE INDEX idx_gtfs_stop_times_trip ON gtfs_stop_times (trip_id)")
     conn.execute("CREATE INDEX idx_gtfs_stop_times_stop ON gtfs_stop_times (stop_id)")
+    conn.execute("CREATE INDEX idx_gtfs_stop_times_city_stop ON gtfs_stop_times (city_stop_id)")
+    conn.execute("CREATE INDEX idx_gtfs_trips_line ON gtfs_trips (line_id)")
+    conn.execute("CREATE INDEX idx_gtfs_trips_service ON gtfs_trips (service_id)")
     print("Schema created")
 
 

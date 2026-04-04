@@ -161,28 +161,28 @@ def sitemap():
 
     if db_ready():
         # Intercity routes (all have trips — verified)
-        routes = query("SELECT slug FROM routes WHERE type = 'intercity'")
+        routes = cached_query("SELECT slug FROM routes WHERE type = 'intercity'", ttl=3600)
         for r in routes:
             pages.append(url(f'/rute/{r["slug"]}/', 'daily', '0.7'))
 
         # SEO city-pair pages
-        routes2 = query("SELECT from_city_slug, to_city_slug FROM routes WHERE type = 'intercity'")
+        routes2 = cached_query("SELECT from_city_slug, to_city_slug FROM routes WHERE type = 'intercity'", ttl=3600)
         for r in routes2:
             pages.append(url(f'/voznja/{r["from_city_slug"]}-do-{r["to_city_slug"]}/', 'weekly', '0.6'))
 
         # City lines
-        lines = query("SELECT city, slug FROM city_lines")
+        lines = cached_query("SELECT city, slug FROM city_lines", ttl=3600)
         for line in lines:
             pages.append(url(f'/gradski/{line["city"]}/linija/{line["slug"]}/', 'weekly', '0.5'))
 
         # Stops: only those with 2+ lines (meaningful content, avoids thin pages)
-        stops = query("""
+        stops = cached_query("""
             SELECT cs.slug, cs.city
             FROM city_stops cs
             JOIN city_line_stops cls ON cls.stop_id = cs.id
             GROUP BY cs.slug, cs.city
             HAVING COUNT(cls.line_id) >= 2
-        """)
+        """, ttl=3600)
         for s in stops:
             pages.append(url(f'/gradski/{s["city"]}/stajaliste/{s["slug"]}/', 'weekly', '0.4'))
 

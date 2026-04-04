@@ -3,7 +3,7 @@
 {% set city_label = city_names.get(city, city|title) %}
 
 {% block title %}Linija {{ line.number }}: {{ line.name }} — {{ city_label }}{% endblock %}
-{% block meta_description %}Red vožnje linije {{ line.number }} u {{ city_label }}u. {{ stops|length if stops else 0 }} stajališta.{% endblock %}
+{% block meta_description %}Red vožnje linije {{ line.number }} ({{ line_type_label }}) u {{ city_label }}u. {{ stops|length if stops else 0 }} stajališta.{% if first_dep and last_dep %} Polasci od {{ first_dep }} do {{ last_dep }}.{% endif %}{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
@@ -15,6 +15,7 @@
 {% block content %}
 
 {% from '_partials/_breadcrumb.html' import breadcrumb %}
+{% from '_partials/_stats_strip.html' import stats_strip %}
 {% from '_partials/_empty_state.html' import empty_state %}
 
 <!-- Mobile back button -->
@@ -37,9 +38,16 @@
   </span>
   <div class="line-header__info">
     <h1 class="line-header__name">{{ line.name }}</h1>
-    <p class="line-header__meta">{{ stops|length if stops else 0 }} stajališta · {{ city_label }}</p>
+    <p class="line-header__meta">{{ line_type_label }} · {{ stops|length if stops else 0 }} stajališta · {{ city_label }}</p>
   </div>
 </div>
+
+<!-- Stats strip -->
+{{ stats_strip([
+  {'value': stops|length if stops else 0, 'label': 'stajališta', 'icon': 'stop'},
+  {'value': line_type_label, 'label': 'tip', 'icon': 'type'},
+] + ([{'value': first_dep ~ ' – ' ~ last_dep, 'label': 'polasci', 'icon': 'schedule'}] if first_dep and last_dep else [])
+) }}
 
 <!-- Map -->
 <div class="city-map-wrap">
@@ -74,19 +82,72 @@
   {{ empty_state(icon='stop', text='Nema podataka o stajalištima') }}
 {% endif %}
 
+<!-- ═══ GTFS Schedule ═══ -->
+{% if has_gtfs %}
+<section class="section schedule-section">
+  <h2 class="section__title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    Red vožnje — polasci od prvog stajališta
+  </h2>
+
+  {% set day_labels = {'RD': 'Radni dan', 'S': 'Subota', 'N': 'Nedelja'} %}
+  {% set day_icons = {'RD': 'work', 'S': 'sat', 'N': 'sun'} %}
+
+  <div class="schedule-tabs">
+    {% for sid in ['RD', 'S', 'N'] %}
+    <button class="schedule-tab{% if loop.first %} schedule-tab--active{% endif %}"
+            data-day="{{ sid }}">
+      {{ day_labels[sid] }}
+      {% if schedule[sid] %}<small>({{ schedule[sid]|length }})</small>{% endif %}
+    </button>
+    {% endfor %}
+  </div>
+
+  {% for sid in ['RD', 'S', 'N'] %}
+  <div class="schedule-grid{% if loop.first %} schedule-grid--active{% endif %}" data-schedule="{{ sid }}">
+    {% if schedule[sid] %}
+      {% for time in schedule[sid] %}
+      <span class="schedule-time">{{ time }}</span>
+      {% endfor %}
+    {% else %}
+      <p class="schedule-empty">Nema polazaka za ovaj dan</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  <p class="data-disclaimer">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="12" height="12"><circle cx="8" cy="8" r="7"/><path d="M8 5v3m0 3h.01"/></svg>
+    Prema zvaničnom rasporedu (smer A). Moguća odstupanja.
+  </p>
+</section>
+{% else %}
+<section class="section">
+  <div class="seo-block">
+    <div class="seo-block__icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    </div>
+    <div class="seo-block__content">
+      <h2>Red vožnje</h2>
+      <p>Tačan raspored za liniju {{ line.number }} trenutno nije dostupan.
+         Proverite na stajalištima ili na sajtu GSP Beograd.</p>
+    </div>
+  </div>
+</section>
+{% endif %}
+
 {% endblock %}
 
 {% block scripts %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
 (function() {
+  /* ── Map ── */
   if (typeof L === 'undefined' || !document.getElementById('lineMap')) return;
   var map = L.map('lineMap', { zoomControl: false, attributionControl: false })
     .setView([44.8176, 20.4569], 13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-  /* Plot stops on map */
   var coords = [];
   var lineColor = '{{ line.color or "#0d9488" }}';
   {% if stops %}
@@ -107,6 +168,17 @@
     L.polyline(coords, { color: lineColor, weight: 3, opacity: 0.6 }).addTo(map);
     map.fitBounds(coords, { padding: [30, 30] });
   }
+
+  /* ── Schedule tabs ── */
+  document.querySelectorAll('.schedule-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelector('.schedule-tab--active').classList.remove('schedule-tab--active');
+      tab.classList.add('schedule-tab--active');
+      document.querySelectorAll('.schedule-grid').forEach(function(g) {
+        g.classList.toggle('schedule-grid--active', g.dataset.schedule === tab.dataset.day);
+      });
+    });
+  });
 })();
 </script>
 {% endblock %}

@@ -95,7 +95,29 @@ def city_pair(from_city: str, to_city: str):
             ORDER BY t.departure_time
         """, [route['id']])
 
+    # Compute enrichment data from trips
+    route_info: dict = {}
+    if trips:
+        operators_list = sorted(set(t['operator'] for t in trips if t.get('operator')))
+        prices = [t['price_rsd'] for t in trips if t.get('price_rsd')]
+        durations = [t['duration_min'] for t in trips if t.get('duration_min')]
+        dep_times = [t['departure_time'] for t in trips if t.get('departure_time')]
+
+        route_info['operators'] = operators_list
+        route_info['price_min'] = min(prices) if prices else None
+        route_info['price_max'] = max(prices) if prices else None
+        route_info['duration_min'] = min(durations) if durations else None
+        route_info['duration_max'] = max(durations) if durations else None
+        route_info['first_departure'] = dep_times[0][:5] if dep_times else None
+        route_info['last_departure'] = dep_times[-1][:5] if dep_times else None
+
+        # Find cheapest operator
+        if prices:
+            cheapest_price = min(prices)
+            cheapest_trip = next((t for t in trips if t.get('price_rsd') == cheapest_price), None)
+            route_info['cheapest_operator'] = cheapest_trip['operator'] if cheapest_trip else None
+
     return render_template('city_pair.html',
-                           route=route, trips=trips,
+                           route=route, trips=trips, route_info=route_info,
                            from_city=from_city.replace('-', ' ').title(),
                            to_city=to_city.replace('-', ' ').title())
