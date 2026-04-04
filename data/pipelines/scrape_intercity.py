@@ -45,37 +45,46 @@ HEADERS = {
 COMPANY_ID = 132
 SERBIA_COUNTRY_ID = 208
 
-# City pairs to scrape (Latin names)
-CITY_PAIRS: list[tuple[str, str]] = [
-    ('Beograd', 'Novi Sad'),
-    ('Beograd', 'Niš'),
-    ('Beograd', 'Kragujevac'),
-    ('Beograd', 'Subotica'),
-    ('Beograd', 'Čačak'),
-    ('Beograd', 'Kruševac'),
-    ('Beograd', 'Vranje'),
-    ('Beograd', 'Šabac'),
-    ('Beograd', 'Smederevo'),
-    ('Beograd', 'Valjevo'),
-    ('Beograd', 'Leskovac'),
-    ('Beograd', 'Zrenjanin'),
-    ('Beograd', 'Sombor'),
-    ('Beograd', 'Novi Pazar'),
-    ('Beograd', 'Pančevo'),
-    ('Beograd', 'Užice'),
-    ('Beograd', 'Jagodina'),
-    ('Beograd', 'Pirot'),
-    ('Novi Sad', 'Niš'),
-    ('Novi Sad', 'Subotica'),
-    ('Novi Sad', 'Kragujevac'),
-    ('Niš', 'Kragujevac'),
-    ('Niš', 'Leskovac'),
-    ('Niš', 'Vranje'),
-    ('Niš', 'Pirot'),
+# All major Serbian cities (25 cities)
+ALL_CITIES: list[str] = [
+    'Beograd', 'Novi Sad', 'Niš', 'Kragujevac', 'Subotica',
+    'Zrenjanin', 'Pančevo', 'Čačak', 'Novi Pazar', 'Kraljevo',
+    'Smederevo', 'Leskovac', 'Užice', 'Vranje', 'Valjevo',
+    'Kruševac', 'Šabac', 'Sombor', 'Požarevac', 'Pirot',
+    'Zaječar', 'Kikinda', 'Sremska Mitrovica', 'Jagodina', 'Loznica',
 ]
 
-# Road distances (km) — used when API doesn't provide distance
+# Hub cities get paired with ALL other cities.
+# Non-hub cities get paired with hubs + regional neighbors.
+HUBS = {'Beograd', 'Novi Sad', 'Niš', 'Kragujevac', 'Subotica'}
+
+# Regional neighbors: city → set of nearby cities to also scrape
+NEIGHBORS: dict[str, set[str]] = {
+    'Zrenjanin': {'Kikinda', 'Pančevo', 'Sombor'},
+    'Pančevo': {'Zrenjanin', 'Smederevo'},
+    'Čačak': {'Kraljevo', 'Užice', 'Kruševac'},
+    'Novi Pazar': {'Kraljevo', 'Kruševac', 'Čačak'},
+    'Kraljevo': {'Čačak', 'Kruševac', 'Novi Pazar', 'Užice', 'Vranje'},
+    'Smederevo': {'Požarevac', 'Jagodina', 'Pančevo'},
+    'Leskovac': {'Vranje', 'Pirot', 'Kruševac'},
+    'Užice': {'Čačak', 'Valjevo', 'Kraljevo', 'Loznica'},
+    'Vranje': {'Leskovac', 'Pirot'},
+    'Valjevo': {'Šabac', 'Užice', 'Loznica'},
+    'Kruševac': {'Kraljevo', 'Čačak', 'Jagodina', 'Novi Pazar'},
+    'Šabac': {'Valjevo', 'Sremska Mitrovica', 'Loznica'},
+    'Sombor': {'Kikinda', 'Zrenjanin', 'Sremska Mitrovica'},
+    'Požarevac': {'Smederevo', 'Jagodina', 'Zaječar'},
+    'Pirot': {'Leskovac', 'Vranje', 'Zaječar'},
+    'Zaječar': {'Pirot', 'Požarevac'},
+    'Kikinda': {'Zrenjanin', 'Sombor'},
+    'Sremska Mitrovica': {'Šabac', 'Sombor'},
+    'Jagodina': {'Kruševac', 'Požarevac', 'Smederevo'},
+    'Loznica': {'Šabac', 'Valjevo', 'Užice'},
+}
+
+# Road distances (km) between Serbian cities
 DISTANCES: dict[tuple[str, str], int] = {
+    # From Beograd
     ('Beograd', 'Novi Sad'): 90,
     ('Beograd', 'Niš'): 250,
     ('Beograd', 'Kragujevac'): 145,
@@ -94,13 +103,75 @@ DISTANCES: dict[tuple[str, str], int] = {
     ('Beograd', 'Užice'): 200,
     ('Beograd', 'Jagodina'): 140,
     ('Beograd', 'Pirot'): 320,
+    ('Beograd', 'Kraljevo'): 185,
+    ('Beograd', 'Požarevac'): 80,
+    ('Beograd', 'Zaječar'): 250,
+    ('Beograd', 'Kikinda'): 150,
+    ('Beograd', 'Sremska Mitrovica'): 80,
+    ('Beograd', 'Loznica'): 145,
+    # From Novi Sad
     ('Novi Sad', 'Niš'): 330,
     ('Novi Sad', 'Subotica'): 100,
     ('Novi Sad', 'Kragujevac'): 225,
+    ('Novi Sad', 'Zrenjanin'): 75,
+    ('Novi Sad', 'Sombor'): 110,
+    ('Novi Sad', 'Kikinda'): 120,
+    ('Novi Sad', 'Sremska Mitrovica'): 55,
+    ('Novi Sad', 'Šabac'): 100,
+    ('Novi Sad', 'Valjevo'): 160,
+    ('Novi Sad', 'Čačak'): 240,
+    ('Novi Sad', 'Kraljevo'): 270,
+    # From Niš
     ('Niš', 'Kragujevac'): 125,
     ('Niš', 'Leskovac'): 40,
     ('Niš', 'Vranje'): 100,
     ('Niš', 'Pirot'): 70,
+    ('Niš', 'Zaječar'): 110,
+    ('Niš', 'Kruševac'): 75,
+    ('Niš', 'Jagodina'): 115,
+    ('Niš', 'Kraljevo'): 115,
+    ('Niš', 'Novi Pazar'): 200,
+    ('Niš', 'Požarevac'): 175,
+    # From Kragujevac
+    ('Kragujevac', 'Kraljevo'): 60,
+    ('Kragujevac', 'Čačak'): 70,
+    ('Kragujevac', 'Jagodina'): 55,
+    ('Kragujevac', 'Kruševac'): 75,
+    ('Kragujevac', 'Novi Pazar'): 155,
+    ('Kragujevac', 'Užice'): 130,
+    # From Subotica
+    ('Subotica', 'Sombor'): 85,
+    ('Subotica', 'Kikinda'): 80,
+    ('Subotica', 'Zrenjanin'): 130,
+    ('Subotica', 'Sremska Mitrovica'): 155,
+    # Regional
+    ('Čačak', 'Kraljevo'): 40,
+    ('Čačak', 'Užice'): 70,
+    ('Čačak', 'Kruševac'): 90,
+    ('Kraljevo', 'Kruševac'): 50,
+    ('Kraljevo', 'Novi Pazar'): 100,
+    ('Kraljevo', 'Užice'): 100,
+    ('Kraljevo', 'Vranje'): 200,
+    ('Kruševac', 'Jagodina'): 60,
+    ('Leskovac', 'Vranje'): 55,
+    ('Leskovac', 'Pirot'): 85,
+    ('Pirot', 'Zaječar'): 100,
+    ('Pirot', 'Vranje'): 130,
+    ('Požarevac', 'Zaječar'): 170,
+    ('Požarevac', 'Smederevo'): 40,
+    ('Požarevac', 'Jagodina'): 65,
+    ('Šabac', 'Sremska Mitrovica'): 50,
+    ('Šabac', 'Valjevo'): 55,
+    ('Šabac', 'Loznica'): 50,
+    ('Valjevo', 'Užice'): 90,
+    ('Valjevo', 'Loznica'): 65,
+    ('Sombor', 'Kikinda'): 110,
+    ('Sombor', 'Sremska Mitrovica'): 100,
+    ('Zrenjanin', 'Kikinda'): 55,
+    ('Zrenjanin', 'Pančevo'): 55,
+    ('Smederevo', 'Jagodina'): 90,
+    ('Loznica', 'Užice'): 110,
+    ('Novi Pazar', 'Kruševac'): 110,
 }
 
 # Serbian Cyrillic → Latin transliteration (for matching API city names)
@@ -133,6 +204,34 @@ def _city_to_slug(name: str) -> str:
 
 def _get_distance(from_city: str, to_city: str) -> int:
     return DISTANCES.get((from_city, to_city)) or DISTANCES.get((to_city, from_city)) or 0
+
+
+def _build_pairs() -> list[tuple[str, str]]:
+    """Generate city pairs to scrape.
+
+    Hubs get paired with ALL other cities.
+    Non-hubs get paired with all hubs + their regional neighbors.
+    Both directions are generated for hubs; only origin→hub for non-hubs
+    (the reverse hub→origin is already covered by hub expansion).
+    """
+    pairs: set[tuple[str, str]] = set()
+
+    for city in ALL_CITIES:
+        if city in HUBS:
+            # Hub → every other city
+            for other in ALL_CITIES:
+                if other != city:
+                    pairs.add((city, other))
+        else:
+            # Non-hub → all hubs
+            for hub in HUBS:
+                pairs.add((city, hub))
+            # Non-hub → regional neighbors
+            for neighbor in NEIGHBORS.get(city, set()):
+                if neighbor != city:
+                    pairs.add((city, neighbor))
+
+    return sorted(pairs)
 
 
 # ── City ID resolution ────────────────────────────────────────────────────
@@ -242,7 +341,6 @@ def search_departures(
         return []
 
     if not isinstance(data, list):
-        log.warning(f'  Unexpected response type for {from_city}→{to_city}: {type(data)}')
         return []
 
     trips = []
@@ -286,10 +384,13 @@ def main() -> None:
     session = requests.Session()
 
     # Collect all unique cities needed
-    needed_cities = set()
-    for from_city, to_city in CITY_PAIRS:
+    pairs = _build_pairs()
+    needed_cities: set[str] = set()
+    for from_city, to_city in pairs:
         needed_cities.add(from_city)
         needed_cities.add(to_city)
+
+    log.info(f'Cities: {len(needed_cities)}, pairs to scrape: {len(pairs)}')
 
     # Resolve city IDs (cached + API fallback)
     city_ids = resolve_city_ids(session, needed_cities)
@@ -300,21 +401,23 @@ def main() -> None:
     log.info(f'Searching departures for {travel_date.isoformat()}\n')
 
     routes: list[dict] = []
+    route_keys: set[tuple[str, str]] = set()
     failed: list[str] = []
+    skipped = 0
+    total = len(pairs)
 
-    for from_city, to_city in CITY_PAIRS:
+    for i, (from_city, to_city) in enumerate(pairs, 1):
         from_id = city_ids.get(from_city)
         to_id = city_ids.get(to_city)
 
         if not from_id or not to_id:
-            log.warning(f'Skipping {from_city}→{to_city}: missing city ID')
-            failed.append(f'{from_city}→{to_city}')
+            skipped += 1
             continue
 
-        log.info(f'{from_city} → {to_city} (ids: {from_id}→{to_id})')
         trips = search_departures(session, from_city, from_id, to_city, to_id, travel_date)
 
         if trips:
+            route_keys.add((from_city, to_city))
             route = {
                 'from_city': from_city,
                 'to_city': to_city,
@@ -323,12 +426,13 @@ def main() -> None:
                 'trips': trips,
             }
             routes.append(route)
-            log.info(f'  → {len(trips)} departures')
+            log.info(f'[{i}/{total}] {from_city} → {to_city}: {len(trips)} departures')
         else:
             failed.append(f'{from_city}→{to_city}')
-            log.warning(f'  → 0 departures')
+            if i % 50 == 0:
+                log.info(f'[{i}/{total}] progress... {len(routes)} routes so far')
 
-        time.sleep(1.5)  # polite rate limiting
+        time.sleep(0.5)
 
     # Also write flat format for build_db.py compatibility
     flat_trips = []
@@ -356,12 +460,13 @@ def main() -> None:
         json.dump(flat_trips, f, ensure_ascii=False, indent=2)
 
     log.info(f'\n=== Done ===')
-    log.info(f'Routes   : {len(routes)}')
-    log.info(f'Trips    : {sum(len(r["trips"]) for r in routes)}')
-    if failed:
-        log.warning(f'Failed   : {", ".join(failed)}')
-    log.info(f'Saved    : {routes_path}')
-    log.info(f'Saved    : {flat_path}')
+    log.info(f'Pairs scraped : {total}')
+    log.info(f'Skipped (no ID): {skipped}')
+    log.info(f'Routes found  : {len(routes)}')
+    log.info(f'Total trips   : {sum(len(r["trips"]) for r in routes)}')
+    log.info(f'Empty pairs   : {len(failed)}')
+    log.info(f'Saved         : {routes_path}')
+    log.info(f'Saved         : {flat_path}')
 
 
 if __name__ == '__main__':

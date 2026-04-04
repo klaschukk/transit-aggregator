@@ -22,28 +22,36 @@ DB_PATH = BASE_DIR / 'dbs' / 'transit.duckdb'
 
 # Approximate road distances (km) between Serbian cities
 DISTANCES: dict[tuple[str, str], int] = {
-    ('Beograd', 'Novi Sad'): 90,
-    ('Beograd', 'Niš'): 250,
-    ('Beograd', 'Kragujevac'): 145,
-    ('Beograd', 'Subotica'): 185,
-    ('Beograd', 'Čačak'): 155,
-    ('Beograd', 'Kruševac'): 210,
-    ('Beograd', 'Vranje'): 340,
-    ('Beograd', 'Šabac'): 100,
-    ('Beograd', 'Smederevo'): 65,
-    ('Beograd', 'Valjevo'): 105,
-    ('Beograd', 'Leskovac'): 285,
-    ('Beograd', 'Zrenjanin'): 75,
-    ('Beograd', 'Sombor'): 200,
-    ('Beograd', 'Novi Pazar'): 285,
-    ('Novi Sad', 'Niš'): 330,
-    ('Novi Sad', 'Subotica'): 100,
-    ('Novi Sad', 'Kragujevac'): 225,
-    ('Niš', 'Kragujevac'): 125,
-    ('Niš', 'Leskovac'): 40,
-    ('Niš', 'Vranje'): 100,
-    ('Nis', 'Vranje'): 100,
-    ('Nis', 'Kragujevac'): 125,
+    ('Beograd', 'Novi Sad'): 90, ('Beograd', 'Niš'): 250,
+    ('Beograd', 'Kragujevac'): 145, ('Beograd', 'Subotica'): 185,
+    ('Beograd', 'Čačak'): 155, ('Beograd', 'Kruševac'): 210,
+    ('Beograd', 'Vranje'): 340, ('Beograd', 'Šabac'): 100,
+    ('Beograd', 'Smederevo'): 65, ('Beograd', 'Valjevo'): 105,
+    ('Beograd', 'Leskovac'): 285, ('Beograd', 'Zrenjanin'): 75,
+    ('Beograd', 'Sombor'): 200, ('Beograd', 'Novi Pazar'): 285,
+    ('Beograd', 'Pančevo'): 20, ('Beograd', 'Užice'): 200,
+    ('Beograd', 'Jagodina'): 140, ('Beograd', 'Pirot'): 320,
+    ('Beograd', 'Kraljevo'): 185, ('Beograd', 'Požarevac'): 80,
+    ('Beograd', 'Zaječar'): 250, ('Beograd', 'Kikinda'): 150,
+    ('Beograd', 'Sremska Mitrovica'): 80, ('Beograd', 'Loznica'): 145,
+    ('Novi Sad', 'Niš'): 330, ('Novi Sad', 'Subotica'): 100,
+    ('Novi Sad', 'Kragujevac'): 225, ('Novi Sad', 'Zrenjanin'): 75,
+    ('Novi Sad', 'Sombor'): 110, ('Novi Sad', 'Kikinda'): 120,
+    ('Novi Sad', 'Sremska Mitrovica'): 55, ('Novi Sad', 'Šabac'): 100,
+    ('Niš', 'Kragujevac'): 125, ('Niš', 'Leskovac'): 40,
+    ('Niš', 'Vranje'): 100, ('Niš', 'Pirot'): 70,
+    ('Niš', 'Zaječar'): 110, ('Niš', 'Kruševac'): 75,
+    ('Niš', 'Jagodina'): 115, ('Niš', 'Kraljevo'): 115,
+    ('Niš', 'Novi Pazar'): 200, ('Niš', 'Požarevac'): 175,
+    ('Kragujevac', 'Kraljevo'): 60, ('Kragujevac', 'Čačak'): 70,
+    ('Kragujevac', 'Jagodina'): 55, ('Kragujevac', 'Kruševac'): 75,
+    ('Subotica', 'Sombor'): 85, ('Subotica', 'Kikinda'): 80,
+    ('Čačak', 'Kraljevo'): 40, ('Čačak', 'Užice'): 70,
+    ('Kraljevo', 'Kruševac'): 50, ('Kraljevo', 'Novi Pazar'): 100,
+    ('Leskovac', 'Vranje'): 55, ('Pirot', 'Zaječar'): 100,
+    ('Požarevac', 'Smederevo'): 40, ('Šabac', 'Loznica'): 50,
+    ('Šabac', 'Sremska Mitrovica'): 50, ('Valjevo', 'Užice'): 90,
+    ('Zrenjanin', 'Kikinda'): 55, ('Sombor', 'Kikinda'): 110,
 }
 
 
@@ -209,13 +217,12 @@ def _create_schema(conn: duckdb.DuckDBPyConnection) -> None:
     """)
     conn.execute("""
         CREATE TABLE gtfs_stop_times (
-            trip_id VARCHAR REFERENCES gtfs_trips(trip_id),
+            trip_id VARCHAR NOT NULL,
             stop_id VARCHAR NOT NULL,
             arrival_time VARCHAR,
             departure_time VARCHAR,
             stop_sequence INTEGER NOT NULL,
-            city_stop_id INTEGER REFERENCES city_stops(id),
-            PRIMARY KEY (trip_id, stop_sequence)
+            city_stop_id INTEGER REFERENCES city_stops(id)
         )
     """)
     conn.execute("CREATE INDEX idx_routes_slugs ON routes (from_city_slug, to_city_slug)")
@@ -445,69 +452,86 @@ def _load_stations(conn: duckdb.DuckDBPyConnection, stations_path: Path) -> None
 
 
 def _load_gtfs(conn: duckdb.DuckDBPyConnection) -> None:
-    """Load GTFS data (trips + stop_times) if available."""
+    """Load GTFS schedule data (trips + stop_times) using bulk DuckDB import."""
     trips_path = GTFS_DIR / 'trips.txt'
     stop_times_path = GTFS_DIR / 'stop_times.txt'
+    routes_path = GTFS_DIR / 'routes.txt'
 
     if not trips_path.exists() or not stop_times_path.exists():
         print("  No GTFS data found, skipping")
         return
 
-    import csv
+    # Step 1: Build route_id → line_id mapping via routes.txt route_short_name
+    route_to_line: dict[str, int] = {}
+    if routes_path.exists():
+        line_map: dict[str, int] = {}
+        for row in conn.execute("SELECT id, number FROM city_lines WHERE city = 'beograd'").fetchall():
+            line_map[row[1]] = row[0]
 
-    # Build line lookup: route_short_name → line_id
-    line_map: dict[str, int] = {}
-    rows = conn.execute("SELECT id, number FROM city_lines WHERE city = 'beograd'").fetchall()
-    for row in rows:
-        line_map[row[1]] = row[0]
+        import csv
+        with open(routes_path, encoding='utf-8') as f:
+            for row in csv.DictReader(f):
+                line_id = line_map.get(row.get('route_short_name', ''))
+                if line_id:
+                    route_to_line[row['route_id']] = line_id
+        print(f"  GTFS route→line mapping: {len(route_to_line)} matched")
 
-    # Build stop lookup: gtfs stop_id (code) → city_stop_id
-    stop_map: dict[str, int] = {}
-    rows = conn.execute("SELECT id, code FROM city_stops WHERE code IS NOT NULL").fetchall()
-    for row in rows:
-        stop_map[row[1]] = row[0]
+    # Step 2: Build gtfs stop_id → city_stop_id mapping via stop_code
+    stop_code_map: dict[str, int] = {}
+    for row in conn.execute("SELECT id, code FROM city_stops WHERE code IS NOT NULL").fetchall():
+        stop_code_map[row[1]] = row[0]
 
-    # Load trips
-    trip_count = 0
-    with open(trips_path, encoding='utf-8') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            trip_id = row['trip_id']
-            route_id = row.get('route_id', '')
-            service_id = row.get('service_id', '')
-            direction_id = int(row['direction_id']) if row.get('direction_id') else None
-            # Try to link to city_lines via route_short_name
-            line_id = line_map.get(row.get('route_short_name'))
-            try:
-                conn.execute(
-                    "INSERT OR IGNORE INTO gtfs_trips VALUES (?, ?, ?, ?, ?)",
-                    (trip_id, route_id, service_id, direction_id, line_id)
-                )
-                trip_count += 1
-            except Exception:
-                pass
+    # Step 3: Bulk load trips via DuckDB read_csv_auto
+    conn.execute(f"""
+        INSERT INTO gtfs_trips
+        SELECT trip_id, route_id, service_id, direction_id::INTEGER, NULL
+        FROM read_csv_auto('{trips_path}', header=true)
+    """)
+    trip_count = conn.execute("SELECT COUNT(*) FROM gtfs_trips").fetchone()[0]
 
-    # Load stop_times
-    st_count = 0
-    with open(stop_times_path, encoding='utf-8') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            trip_id = row['trip_id']
-            stop_id = row['stop_id']
-            arrival = row.get('arrival_time', '')
-            departure = row.get('departure_time', '')
-            seq = int(row.get('stop_sequence', 0))
-            city_stop_id = stop_map.get(stop_id)
-            try:
-                conn.execute(
-                    "INSERT OR IGNORE INTO gtfs_stop_times VALUES (?, ?, ?, ?, ?, ?)",
-                    (trip_id, stop_id, arrival, departure, seq, city_stop_id)
-                )
-                st_count += 1
-            except Exception:
-                pass
+    # Update line_id for matched routes
+    for route_id, line_id in route_to_line.items():
+        conn.execute(
+            "UPDATE gtfs_trips SET line_id = ? WHERE route_id = ?",
+            [line_id, route_id]
+        )
+    linked = conn.execute("SELECT COUNT(*) FROM gtfs_trips WHERE line_id IS NOT NULL").fetchone()[0]
+    print(f"  Loaded {trip_count} trips ({linked} linked to city_lines)")
 
-    print(f"  Loaded GTFS: {trip_count} trips, {st_count} stop_times")
+    # Step 4: Bulk load stop_times via DuckDB read_csv_auto
+    conn.execute(f"""
+        INSERT INTO gtfs_stop_times (trip_id, stop_id, arrival_time, departure_time, stop_sequence, city_stop_id)
+        SELECT trip_id, stop_id::VARCHAR, arrival_time, departure_time, stop_sequence::INTEGER, NULL
+        FROM read_csv_auto('{stop_times_path}', header=true)
+    """)
+    st_count = conn.execute("SELECT COUNT(*) FROM gtfs_stop_times").fetchone()[0]
+
+    # Step 5: Map gtfs stop_id → city_stop_id via GTFS stops.txt stop_code
+    stops_path = GTFS_DIR / 'stops.txt'
+    if stops_path.exists():
+        # Build gtfs stop_id → stop_code from stops.txt
+        conn.execute(f"""
+            CREATE TEMP TABLE _gtfs_stops AS
+            SELECT stop_id::VARCHAR AS gtfs_stop_id, stop_code::VARCHAR AS stop_code
+            FROM read_csv_auto('{stops_path}', header=true)
+        """)
+        # Build code → city_stop_id temp table
+        conn.execute("""
+            CREATE TEMP TABLE _code_map AS
+            SELECT code, id AS city_stop_id FROM city_stops WHERE code IS NOT NULL
+        """)
+        # Update city_stop_id in stop_times
+        conn.execute("""
+            UPDATE gtfs_stop_times SET city_stop_id = _code_map.city_stop_id
+            FROM _gtfs_stops, _code_map
+            WHERE gtfs_stop_times.stop_id = _gtfs_stops.gtfs_stop_id
+              AND _gtfs_stops.stop_code = _code_map.code
+        """)
+        conn.execute("DROP TABLE _gtfs_stops")
+        conn.execute("DROP TABLE _code_map")
+
+    mapped = conn.execute("SELECT COUNT(*) FROM gtfs_stop_times WHERE city_stop_id IS NOT NULL").fetchone()[0]
+    print(f"  Loaded {st_count} stop_times ({mapped} mapped to city_stops, {mapped*100//st_count}%)")
 
 
 def _load_sample_data(conn: duckdb.DuckDBPyConnection) -> None:

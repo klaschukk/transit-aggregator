@@ -22,9 +22,11 @@
 </head>
 <body>
 
+<a href="#main-content" class="skip-link">Preskoči na sadržaj</a>
+
 {% include '_partials/_header.html' %}
 
-<main class="{% block main_class %}container{% endblock %}">
+<main id="main-content" class="{% block main_class %}container{% endblock %}">
   {% block content %}{% endblock %}
 </main>
 
