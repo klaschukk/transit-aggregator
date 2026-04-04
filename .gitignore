@@ -9,11 +9,26 @@ venv/
 # DuckDB and raw data (rebuilt by pipelines)
 data/dbs/
 data/raw/
+data/gtfs/*.txt
+data/gtfs/*.html
+
+# Scraper progress/cache files
+*_progress.json
+city_ids.json
+suspicious_stops.json
+
+# Logs
+logs/
+*.log
 
 # OS
 .DS_Store
 *.swp
+Thumbs.db
 
-# Logs
-*.log
-benovite.com
+# IDE
+.vscode/
+.idea/
+
+# Other projects
+benovite.com/

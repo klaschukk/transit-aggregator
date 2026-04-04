@@ -1,58 +1,51 @@
-# CLAUDE.md — Transit Serbia Project Context
+# CLAUDE.md — Transit Serbia
 
-## Project Overview
+## Обзор
 
-**Transit Serbia** — сербский агрегатор общественного транспорта (programmatic SEO + реальные данные).
-Объединяет городской транспорт (GSP Белград) и межгородские автобусы/поезда в одном месте.
+**Transit Serbia** — бесплатный агрегатор общественного транспорта Сербии.
+Городской (GSP Белград) + межгородские автобусы/поезда. Programmatic SEO.
 
-- **Стек:** Flask + DuckDB + RKE2/K8s + ArgoCD + Cloudflare
-- **Цель:** €500/мес за первые 6 месяцев, €1000+/мес к месяцу 18
-- **Масштаб:** 10K–50K индексируемых страниц (городские пары, остановки, маршруты)
-- **Фаза:** Foundation (март 2026)
-- **Сервер:** montiko (Подгорица), K8s кластер: pumba/simba/timon
-- **GitLab:** https://gitlab.com/klaschukk/transit-aggregator
+- **URL:** http://81.28.248.71:5000/ (домен пока нет)
+- **Стек:** Flask + DuckDB + Gunicorn + systemd
+- **Цель:** 3000+ индексируемых страниц, AdSense монетизация
 
 ## Язык
 
-- Документация и общение: **русский**
-- Код, комментарии, коммиты: **английский**
-- Переменные и имена файлов: **английский**
+- Общение: **русский**
+- Код, коммиты, комментарии: **английский**
 
 ## Стек
 
 | Слой | Технология |
 |------|-----------|
-| Backend | Flask (Python) |
-| База данных | DuckDB (read-only, file-based) |
-| Инфра | RKE2/K8s (pumba/simba/timon) |
-| Деплой | ArgoCD (GitOps, по тегам) |
-| CDN/WAF | Cloudflare |
-| Аналитика | Umami (self-hosted) |
-| Монетизация | **Google AdSense only** |
-| Данные | Веб-скрапинг + GTFS |
-
-## Референсы дизайна и UX
-
-- **Transport Burgas** (Болгария) — мобильное приложение городского транспорта (50K+ загрузок, 3.7★).
-  Референс для UX городского транспорта: живые остановки, карта маршрута, список линий.
-- **BusTicket4.me** (Черногория/регион) — агрегатор межгородских автобусов.
-  Референс для формы поиска, таблицы рейсов, страниц маршрутов.
-
-Принцип: берём лучшее из обоих, адаптируем под веб (не мобильное приложение).
+| Backend | Flask (Python 3.12) |
+| БД | DuckDB (read-only, file-based) |
+| WSGI | Gunicorn (4 workers) |
+| Process | systemd (transit.service) |
+| Compression | flask-compress (gzip) |
+| Данные | Скраперы (bgprevoz, busticket4.me, srbijavoz) |
 
 ## URL архитектура
 
 ```
-/                               — главная, форма поиска
-/rute/                          — все маршруты
-/rute/{slug}/                   — расписание маршрута
-/voznja/{from}-do-{to}/         — SEO-страница городской пары
-/pretraga/                      — результаты поиска
-/gradski/{city}/                — городской транспорт (Белград)
-/gradski/{city}/linija/{slug}/  — линия
-/gradski/{city}/stajaliste/{slug}/ — остановка
-/sitemap.xml
+/                                    — главная (hero + поиск + популярные)
+/rute/                               — каталог маршрутов
+/rute/{slug}/                        — маршрут (расписание, цены)
+/voznja/{from}-do-{to}/              — SEO городская пара + FAQ
+/pretraga/?od=X&do=Y                 — результаты поиска
+/gradski/{city}/                     — городской транспорт (карта + линии)
+/gradski/{city}/linija/{slug}/       — линия (карта + остановки)
+/gradski/{city}/stajaliste/{slug}/   — остановка (линии + ETA)
+/prevoznici/                         — перевозчики
+/autobuske-stanice/                  — станции
+/o-nama/                             — о проекте
+/kontakt/                            — контакт
+/api/cities?q=                       — автокомплит городов
+/api/city-stops?sw_lat&sw_lon&ne_lat&ne_lon — остановки на карте
+/api/stop-arrivals?slug=             — ETA линий на остановке
+/sitemap.xml                         — 3145 URL
 /robots.txt
+/health                              — healthcheck (db status)
 ```
 
 ## Структура проекта
@@ -60,83 +53,95 @@
 ```
 transit/
 ├── CLAUDE.md
-├── README.md
-├── config.py              ← Flask конфиг (DuckDB путь, секреты)
-├── run.py                 ← dev-сервер
-├── requirements.txt
-├── docs/
-│   ├── 00_strategy/       ← roadmap.md, competitor_analysis.md
-│   ├── 01_brand/          ← brand.md
-│   ├── 02_data/           ← sources.md
-│   ├── 03_product/        ← page_templates.md
-│   ├── 04_seo/            ← seo_strategy.md
-│   ├── 05_monetization/   ← monetization_plan.md (AdSense only)
-│   ├── 06_tech/           ← infrastructure.md
-│   └── 07_legal/          ← legal.md
+├── config.py               ← Config + ProductionConfig (BASE_URL, EUR_RSD_RATE)
+├── run.py                   ← dev-сервер
+├── requirements.txt         ← Flask, DuckDB, flask-compress, requests, bs4
 ├── app/
-│   ├── __init__.py
-│   ├── db.py              ← DuckDB подключение (read-only)
+│   ├── __init__.py          ← create_app(), error handlers, gzip, caching
+│   ├── db.py                ← query(), query_one(), db_ready()
 │   ├── routes/
-│   │   ├── main.py        ← главная, поиск, sitemap, robots
-│   │   ├── intercity.py   ← межгородские маршруты
-│   │   └── city.py        ← городской транспорт
-│   ├── templates/         ← Jinja2 шаблоны
+│   │   ├── main.py          ← /, /pretraga/, /api/cities, sitemap, robots, health
+│   │   ├── intercity.py     ← /rute/, /rute/{slug}/, /voznja/
+│   │   ├── city.py          ← /gradski/, /api/city-stops, /api/stop-arrivals
+│   │   └── info.py          ← /o-nama/, /kontakt/, /prevoznici/, /autobuske-stanice/
+│   ├── templates/
+│   │   ├── base.html        ← layout: head, header include, main, footer include
+│   │   ├── _partials/       ← _header, _footer, _search_form, _trip_card, _filter_panel,
+│   │   │                       _breadcrumb (JSON-LD), _stats_strip, _empty_state
+│   │   ├── index.html       ← hero, stats, how-it-works, routes+city duo, benefits
+│   │   ├── route_index.html, route_detail.html, city_pair.html, search_results.html
+│   │   ├── city_transport.html, line_detail.html, stop_detail.html
+│   │   ├── carriers_index.html, stations_index.html
+│   │   ├── about.html, contact.html, 404.html, 500.html
+│   │   └── 23 шаблона всего
 │   └── static/
-│       ├── css/main.css   ← CSS custom properties + BEM
-│       └── js/search.js   ← автокомплит городов
+│       ├── css/app.css      ← единый CSS (~1650 строк), mobile-first, 0 !important
+│       └── favicon.svg
 ├── data/
 │   ├── pipelines/
-│   │   └── build_db.py    ← собирает transit.duckdb из raw данных
-│   ├── dbs/               ← transit.duckdb (gitignored)
-│   └── raw/               ← сырые данные (gitignored)
-└── scripts/
+│   │   ├── build_db.py      ← собирает transit.duckdb из raw/
+│   │   ├── scrape_gsp.py    ← GSP Белград (bgprevoz.rs API)
+│   │   ├── scrape_intercity.py ← busticket4.me API
+│   │   ├── scrape_srbvoz.py ← srbijavoz.rs
+│   │   ├── enrich_stops_coords.py ← OSM Overpass + Nominatim
+│   │   └── import_gtfs.py   ← GTFS feed import
+│   ├── dbs/transit.duckdb   ← рабочая БД (gitignored)
+│   └── raw/                 ← JSON от скраперов (gitignored)
+├── scripts/
+│   ├── healthcheck.sh       ← cron */5 min, auto-restart
+│   └── run_enrich_night.sh  ← cron 3:00 AM
+├── logs/                    ← access.log, error.log
+└── tests/                   ← pytest (WIP)
 ```
 
-## Ключевые решения
+## БД (DuckDB)
 
-1. **SEO-first** — каждое решение через призму SEO
-2. **Программатический контент** — страницы из структурированных данных
-3. **DuckDB read-only** — Flask только читает, пайплайны пересобирают
-4. **Мобильный приоритет** — 70%+ трафика с мобильных
-5. **AdSense only** — единственная монетизация, никакого affiliate
-6. **Скрапинг** — публичных API в Сербии нет
+| Таблица | Записей | Описание |
+|---------|---------|----------|
+| city_lines | 514 | Линии GSP (bus, tram, trolleybus, night, e-bus) |
+| city_stops | 2572 | Остановки (95% с координатами) |
+| city_line_stops | 12437 | Привязка остановок к линиям |
+| routes | 26 | Межгородские маршруты |
+| trips | 243 | Рейсы (время, цена, оператор) |
+| operators | 7 | Перевозчики |
+| stations | 10 | ЖД станции |
+| gtfs_trips | 0 | GTFS (WIP) |
+| gtfs_stop_times | 0 | GTFS (WIP) |
 
-## Источники данных
+## Инфраструктура
 
-| Источник | Данные | Доступ |
-|---------|--------|--------|
-| gsp.rs | Линии и остановки GSP Белград | Скрапинг |
-| srbijavoz.rs | Расписание поездов | Скрапинг |
-| busticket4.me | Межгородские автобусы | Скрапинг |
-| lasta.rs | Маршруты Lasta | Скрапинг |
-| OpenStreetMap | Координаты остановок | Overpass API (бесплатно) |
+```
+Сервер: 81.28.248.71 (montiko, Подгорица)
+Service: systemd transit.service (FLASK_ENV=production)
+Workers: gunicorn -w 4
+Logs: logs/access.log, logs/error.log
+Healthcheck: cron */5 min → auto-restart
+Enrich: cron 3:00 AM
+```
 
-## Конкуренты (кратко)
+## Конвенции
 
-| Сайт | Слабость | Наш ответ |
-|------|---------|-----------|
-| busticket4.me | Нет городского, платный | Бесплатно + всё в одном |
-| gsp.rs | Плохой UX, нет SEO | Современный мобильный UX |
-| srbijavoz.rs | SSL ошибки, неудобный | Агрегируем их данные |
-
-## Конвенции кода
-
-- Python: PEP 8, type hints, f-strings, макс 120 символов
-- Docstrings: Google style, только публичные функции
-- Templates: Jinja2, 2 пробела отступ
-- CSS: BEM naming, custom properties (--color-primary, --space-4)
+- Python: PEP 8, type hints, макс 120 символов
+- Templates: Jinja2, `{% include %}` для header/footer, `{% macro %}` для trip_card и т.д.
+- CSS: семантические переменные (--color-primary), mobile-first, 0 !important
 - Git: conventional commits (feat:, fix:, docs:, data:, infra:)
-- Ветки: feature/, fix/, data/, docs/
+- Inline styles: НОЛЬ (кроме динамического background:color на line-badge)
+- Emoji: НОЛЬ (SVG иконки)
 
-## Текущий статус (март 2026)
+## Текущий статус (апрель 2026)
 
-- [x] Flask скелет + DuckDB схема + sample data
-- [x] Все маршруты: межгородские + городской транспорт Белград
-- [x] CSS дизайн система + JS автокомплит
-- [x] sitemap.xml + robots.txt
-- [x] Документация (стратегия, SEO, монетизация, инфра, легаль, конкуренты)
-- [ ] Дизайн через uipro-cli
-- [ ] Скраперы (GSP, srbijavoz, busticket4.me)
-- [ ] Деплой K8s + ArgoCD
+- [x] Flask + DuckDB + все маршруты
+- [x] Единый CSS дизайн-система (app.css)
+- [x] 23 шаблона + 8 partials
+- [x] SEO: JSON-LD, OG, BreadcrumbList, FAQ schema, sitemap (3145 URL)
+- [x] Мобильная адаптивность (44px touch targets, focus-visible)
+- [x] Скраперы: GSP (bgprevoz), busticket4.me, srbijavoz
+- [x] Автокомплит городов (API)
+- [x] Карта с остановками (Leaflet)
+- [x] ETA на остановках (headway estimate)
+- [x] systemd + gunicorn + gzip + healthcheck
+- [ ] GTFS реальное расписание
+- [ ] 100+ межгородских маршрутов
 - [ ] Домен + Cloudflare
 - [ ] Google AdSense
+- [ ] Тесты (pytest)
