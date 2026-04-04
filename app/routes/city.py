@@ -48,7 +48,7 @@ def city_hub(city: str):
 @city_bp.route('/gradski/<city>/linija/<line_slug>/')
 def line_detail(city: str, line_slug: str):
     line = query_one("""
-        SELECT id, city, number, name, slug, color, code
+        SELECT id, city, number, name, slug, color, code, type
         FROM city_lines
         WHERE city = ? AND slug = ?
     """, [city, line_slug]) if db_ready() else None
@@ -119,14 +119,14 @@ def stop_detail(city: str, stop_slug: str):
 
     # Lines serving this stop via city_line_stops
     lines_at_stop = query("""
-        SELECT DISTINCT cl.number, cl.name, cl.slug, cl.color
+        SELECT DISTINCT cl.number, cl.name, cl.slug, cl.color, cl.type
         FROM city_line_stops cls
         JOIN city_lines cl ON cl.id = cls.line_id
         WHERE cls.stop_id = ?
         ORDER BY CAST(REGEXP_REPLACE(cl.number, '[^0-9]', '', 'g') || '0' AS INTEGER)
     """, [stop['id']])
 
-    departures = []  # No GTFS schedule data yet
+    departures = []
 
     # Nearby stops by coordinates
     nearby_stops = []
@@ -142,9 +142,56 @@ def stop_detail(city: str, stop_slug: str):
             LIMIT 5
         """, [city, stop['lat'], stop['lat'], stop['lon'], stop['lon'], stop_slug])
 
+    # Compute stop_info for SEO content enrichment
+    stop_info: dict = {}
+    stop_id = stop['id']
+
+    if lines_at_stop:
+        type_labels = {
+            'bus': 'autobus', 'tram': 'tramvaj', 'trolleybus': 'trolejbus',
+            'night': 'noćni', 'e-bus': 'e-bus', 'bg-voz': 'BG Voz',
+        }
+        line_types = sorted(set(t['type'] for t in lines_at_stop if t.get('type')))
+        stop_info['line_count'] = len(lines_at_stop)
+        stop_info['line_types'] = [type_labels.get(t, t) for t in line_types]
+
+    # GTFS: first/last departure and busiest lines (cached, heavy queries)
+    gtfs_stats = cached_query_one("""
+        SELECT MIN(st.departure_time) AS first_dep,
+               MAX(st.departure_time) AS last_dep
+        FROM gtfs_stop_times st
+        JOIN gtfs_trips gt ON gt.trip_id = st.trip_id
+        WHERE st.city_stop_id = ? AND gt.service_id = 'RD'
+    """, [stop_id], ttl=600)
+
+    if gtfs_stats and gtfs_stats.get('first_dep'):
+        stop_info['has_gtfs'] = True
+        fd = gtfs_stats['first_dep']
+        ld = gtfs_stats['last_dep']
+        stop_info['first_departure'] = fd[:5] if fd else None
+        # Normalize times > 24:00 for display
+        if ld and int(ld[:2]) >= 24:
+            h = int(ld[:2]) - 24
+            stop_info['last_departure'] = f'{h:02d}{ld[2:5]}'
+        else:
+            stop_info['last_departure'] = ld[:5] if ld else None
+
+        busiest = cached_query("""
+            SELECT cl.number, cl.name, COUNT(*) AS freq
+            FROM gtfs_stop_times st
+            JOIN gtfs_trips gt ON gt.trip_id = st.trip_id
+            JOIN city_lines cl ON cl.id = gt.line_id
+            WHERE st.city_stop_id = ? AND gt.service_id = 'RD'
+            GROUP BY cl.number, cl.name
+            ORDER BY freq DESC LIMIT 3
+        """, [stop_id], ttl=600)
+        stop_info['busiest_lines'] = busiest
+    else:
+        stop_info['has_gtfs'] = False
+
     return render_template('stop_detail.html', city=city, stop=stop,
                            departures=departures, lines_at_stop=lines_at_stop,
-                           nearby_stops=nearby_stops)
+                           nearby_stops=nearby_stops, stop_info=stop_info)
 
 
 @city_bp.route('/api/stop-arrivals')

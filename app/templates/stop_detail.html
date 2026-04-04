@@ -3,11 +3,11 @@
 {% set city_label = city_names.get(city, city|title) %}
 
 {% block title %}Stajalište {{ stop.name }} — {{ city_label }}{% endblock %}
-{% block meta_description %}Koje linije prolaze kroz stajalište {{ stop.name }} u {{ city_label }}u. Red vožnje i dolasci.{% endblock %}
+{% block meta_description %}Stajalište {{ stop.name }} u {{ city_label }}u.{% if stop_info and stop_info.line_count %} {{ stop_info.line_count }} linija ({{ stop_info.line_types|join(', ') }}).{% endif %}{% if stop_info and stop_info.first_departure %} Polasci od {{ stop_info.first_departure }} do {{ stop_info.last_departure }}.{% endif %}{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BusStop","name":"{{ stop.name }}","containedInPlace":{"@type":"City","name":"{{ city_label }}"}{% if stop.lat and stop.lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stop.lat }},"longitude":{{ stop.lon }}}{% endif %}}
+{"@context":"https://schema.org","@type":"BusStop","name":"{{ stop.name }}","containedInPlace":{"@type":"City","name":"{{ city_label }}"}{% if stop.lat and stop.lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stop.lat }},"longitude":{{ stop.lon }}}{% endif %}{% if stop_info and stop_info.first_departure %},"openingHours":"Mo-Fr {{ stop_info.first_departure }}-{{ stop_info.last_departure }}"{% endif %}{% if stop_info and stop_info.line_count %},"description":"{{ stop_info.line_count }} linija: {{ stop_info.line_types|join(', ') }}"{% endif %}}
 </script>
 {% if stop.lat and stop.lon %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
@@ -115,6 +115,24 @@
     {% endfor %}
   </div>
 </section>
+{% endif %}
+
+<!-- SEO content block (unique per stop) -->
+{% if stop_info and stop_info.line_count %}
+<div class="seo-block fade-in fade-in--d3">
+  <div class="seo-block__icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+  </div>
+  <div class="seo-block__content">
+    <h2>O stajalištu {{ stop.name }}</h2>
+    <p>Stajalište {{ stop.name }} se nalazi u {{ city_label }}u. Kroz ovo stajalište prolazi {{ stop_info.line_count }} linija gradskog prevoza
+      ({{ stop_info.line_types|join(', ') }}).
+      {% if stop_info.has_gtfs and stop_info.first_departure %}Prevoz saobraća od {{ stop_info.first_departure }} do {{ stop_info.last_departure }} radnim danom.{% endif %}
+      {% if stop_info.busiest_lines %}Najfrekventnije linije su
+        {% for bl in stop_info.busiest_lines %}{{ bl.number }} ({{ bl.name }}){% if not loop.last %}, {% endif %}{% endfor %}.{% endif %}
+    </p>
+  </div>
+</div>
 {% endif %}
 
 {% endblock %}

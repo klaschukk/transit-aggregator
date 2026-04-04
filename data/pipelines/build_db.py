@@ -247,39 +247,96 @@ def _load_operators(conn: duckdb.DuckDBPyConnection) -> None:
         (5, 'OZT', 'ozt', None, 'bus'),
         (6, 'LAB', 'lab', None, 'bus'),
         (7, 'B21', 'b21', None, 'bus'),
+        (8, 'Severtrans Sombor', 'severtrans', None, 'bus'),
+        (9, 'Jugoprevoz Kruševac', 'jugoprevoz-krusevac', None, 'bus'),
+        (10, 'Autoprevoz Čačak', 'autoprevoz-cacak', None, 'bus'),
+        (11, 'Kavim Raška', 'kavim-raska', None, 'bus'),
+        (12, 'Sandžaktrans', 'sandzaktrans', None, 'bus'),
+        (13, 'Frenki Komerc', 'frenki-komerc', None, 'bus'),
+        (14, 'Banbus', 'banbus', None, 'bus'),
+        (15, 'Sirmiumbus', 'sirmiumbus', None, 'bus'),
+        (16, 'Autoprevoz Kikinda', 'autoprevoz-kikinda', None, 'bus'),
     ]
     conn.executemany("INSERT INTO operators VALUES (?, ?, ?, ?, ?)", operators)
-    print(f"Loaded {len(operators)} operators")
+
+    # Auto-register operators from polazak.rs data
+    lasta_ops_path = RAW_DIR / 'lasta' / 'operators.json'
+    if lasta_ops_path.exists():
+        with open(lasta_ops_path, encoding='utf-8') as f:
+            polazak_ops = json.load(f)
+        next_id = len(operators) + 1
+        existing = {row[0] for row in conn.execute("SELECT name FROM operators").fetchall()}
+        for name, op_type in polazak_ops.items():
+            if name not in existing:
+                slug = city_to_slug(name)
+                conn.execute(
+                    "INSERT OR IGNORE INTO operators VALUES (?, ?, ?, ?, ?)",
+                    (next_id, name, slug, None, op_type if op_type in ('bus', 'train') else 'bus')
+                )
+                existing.add(name)
+                next_id += 1
+
+    total = conn.execute("SELECT COUNT(*) FROM operators").fetchone()[0]
+    print(f"Loaded {total} operators")
 
 
 def _load_intercity(conn: duckdb.DuckDBPyConnection,
                     intercity_path: Path,
                     srbvoz_path: Path) -> None:
-    """Load intercity bus + train trips into routes + trips tables."""
+    """Load intercity bus + train trips from all sources into routes + trips."""
     all_trips: list[dict] = []
 
+    # Source 1: busticket4.me
     if intercity_path.exists():
         with open(intercity_path, encoding='utf-8') as f:
             bus_trips = json.load(f)
         for t in bus_trips:
             t['type'] = 'bus'
+            t['_source'] = 'bt4'
         all_trips.extend(bus_trips)
-        print(f"  Bus trips: {len(bus_trips)}")
+        print(f"  busticket4.me trips: {len(bus_trips)}")
 
+    # Source 2: srbijavoz
     if srbvoz_path.exists():
         with open(srbvoz_path, encoding='utf-8') as f:
             train_trips = json.load(f)
+        for t in train_trips:
+            t['_source'] = 'srbvoz'
         all_trips.extend(train_trips)
-        print(f"  Train trips: {len(train_trips)}")
+        print(f"  Srbija Voz trips: {len(train_trips)}")
+
+    # Source 3: polazak.rs (via lasta.rs)
+    lasta_path = RAW_DIR / 'lasta' / 'trips.json'
+    if lasta_path.exists():
+        with open(lasta_path, encoding='utf-8') as f:
+            lasta_trips = json.load(f)
+        for t in lasta_trips:
+            t['_source'] = 'polazak'
+        all_trips.extend(lasta_trips)
+        print(f"  polazak.rs trips: {len(lasta_trips)}")
 
     if not all_trips:
         return
+
+    # Deduplicate: same from_city + to_city + departure_time → keep first
+    seen: set[tuple[str, str, str]] = set()
+    unique_trips: list[dict] = []
+    dupes = 0
+    for trip in all_trips:
+        key = (trip['from_city'], trip['to_city'], trip['departure_time'])
+        if key in seen:
+            dupes += 1
+            continue
+        seen.add(key)
+        unique_trips.append(trip)
+    if dupes:
+        print(f"  Deduplicated: {dupes} duplicate trips removed")
 
     # Build route registry: (from_city, to_city) → route_id
     route_registry: dict[tuple[str, str], int] = {}
     route_id = 1
 
-    for trip in all_trips:
+    for trip in unique_trips:
         key = (trip['from_city'], trip['to_city'])
         if key not in route_registry:
             from_slug = city_to_slug(trip['from_city'])
@@ -287,7 +344,6 @@ def _load_intercity(conn: duckdb.DuckDBPyConnection,
             slug = f'{from_slug}-{to_slug}'
             distance = get_distance(trip['from_city'], trip['to_city'])
 
-            # Check for slug collision (e.g. "Nis" vs "Niš" → same slug)
             existing = conn.execute(
                 "SELECT id FROM routes WHERE slug = ?", (slug,)
             ).fetchone()
@@ -302,24 +358,28 @@ def _load_intercity(conn: duckdb.DuckDBPyConnection,
                 route_registry[key] = route_id
                 route_id += 1
 
-    # Operator name → id map (Latin + Cyrillic variants)
-    op_map: dict[str, int] = {
-        'Lasta': 1, 'Lasta Beograd': 1, 'Ласта': 1, 'СП Ласта Београд': 1, 'СП ЛАСТА': 1,
-        'Niš-Ekspres': 2, 'NAISTURS': 2,
-        'Srbija Voz': 3,
-        'OZT': 5, 'LAB': 6, 'B21': 7,
-    }
-    default_bus_op = 4  # BusTicket4.me
+    # Build operator name → id map from DB
+    op_rows = conn.execute("SELECT id, name FROM operators").fetchall()
+    op_map: dict[str, int] = {name: oid for oid, name in op_rows}
+    # Add common aliases
+    op_map.update({
+        'Lasta Beograd': op_map.get('Lasta', 1),
+        'Ласта': op_map.get('Lasta', 1),
+        'СП Ласта Београд': op_map.get('Lasta', 1),
+        'СП ЛАСТА': op_map.get('Lasta', 1),
+        'Niš-Ekspres': op_map.get('Niš-Ekspres', 2),
+        'NAISTURS': op_map.get('Niš-Ekspres', 2),
+    })
+    default_op = op_map.get('BusTicket4.me', 4)
 
     trip_id = 1
-    for trip in all_trips:
+    for trip in unique_trips:
         route_id_val = route_registry.get((trip['from_city'], trip['to_city']))
         if not route_id_val:
             continue
         op_name = trip.get('operator', '')
-        op_id = op_map.get(op_name, default_bus_op)
+        op_id = op_map.get(op_name, default_op)
         price = trip.get('price_rsd') or 0
-        trip_type = trip.get('type', 'bus')
 
         conn.execute(
             "INSERT INTO trips VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",

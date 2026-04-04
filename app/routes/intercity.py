@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 
 from flask import Blueprint, render_template, abort, request
-from app.db import query, query_one, db_ready
+from app.db import query, query_one, cached_query, db_ready
 
 intercity_bp = Blueprint('intercity', __name__)
 
@@ -57,18 +57,35 @@ def route_detail(slug: str):
     wd = (today + timedelta(days=selected_day)).isoweekday()
     trips = [t for t in trips if str(wd) in (t.get('days_of_week') or '1234567')]
 
+    # Enrichment data from filtered trips
+    operators_on_route = sorted(set(t['operator'] for t in trips if t.get('operator')))
+    prices = [t['price_rsd'] for t in trips if t.get('price_rsd')]
+    price_min = min(prices) if prices else None
+    price_max = max(prices) if prices else None
+
+    # Reverse route slug
+    reverse_route = query_one("""
+        SELECT slug FROM routes
+        WHERE from_city = ? AND to_city = ? AND type = 'intercity'
+        LIMIT 1
+    """, [route['to_city'], route['from_city']]) if db_ready() else None
+    reverse_slug = reverse_route['slug'] if reverse_route else None
+
     # Similar routes from the same origin city
-    similar_routes = query("""
+    similar_routes = cached_query("""
         SELECT slug, from_city, to_city, distance_km
         FROM routes
         WHERE from_city = ? AND slug != ? AND type = 'intercity'
         ORDER BY to_city
         LIMIT 4
-    """, [route['from_city'], slug]) if db_ready() else []
+    """, [route['from_city'], slug], ttl=3600)
 
     return render_template('route_detail.html', route=route, trips=trips,
                            days=days, selected_day=selected_day,
-                           similar_routes=similar_routes)
+                           similar_routes=similar_routes,
+                           operators_on_route=operators_on_route,
+                           price_min=price_min, price_max=price_max,
+                           reverse_slug=reverse_slug)
 
 
 @intercity_bp.route('/voznja/<from_city>-do-<to_city>/')
