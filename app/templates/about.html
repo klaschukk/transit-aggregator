@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 {% block title %}O nama — Transit Srbija{% endblock %}
-{% block meta_description %}Transit Srbija — besplatni agregator javnog prevoza u Srbiji. Autobus, voz i gradski prevoz na jednom mestu.{% endblock %}
+{% block meta_description %}Transit Srbija — besplatni agregator javnog prevoza u Srbiji. Red vožnje autobusa, vozova i gradskog prevoza na jednom mestu. Bez registracije.{% endblock %}
+
+{% block head_extra %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"Transit Srbija","url":"{{ config.BASE_URL }}/","description":"Besplatni agregator javnog prevoza u Srbiji","areaServed":{"@type":"Country","name":"Serbia"}}
+</script>
+{% endblock %}
 
 {% block content %}
 

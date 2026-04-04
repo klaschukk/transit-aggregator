@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Kontakt — Transit Srbija{% endblock %}
-{% block meta_description %}Kontaktirajte Transit Srbija za pitanja, sugestije ili prijavu grešaka.{% endblock %}
+{% block meta_description %}Kontaktirajte Transit Srbija za pitanja o redu vožnje, sugestije ili prijavu grešaka u podacima. Odgovaramo u roku od 24 sata.{% endblock %}
+
+{% block head_extra %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ContactPage","name":"Kontakt — Transit Srbija","url":"{{ config.BASE_URL }}/kontakt/","mainEntity":{"@type":"Organization","name":"Transit Srbija","email":"info@transit-serbia.com"}}
+</script>
+{% endblock %}
 
 {% block content %}
 
