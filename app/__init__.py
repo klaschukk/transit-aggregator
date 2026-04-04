@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from config import config_map
 
 
@@ -20,6 +20,18 @@ def create_app(config_name: str | None = None) -> Flask:
     app.register_blueprint(intercity_bp)
     app.register_blueprint(city_bp)
     app.register_blueprint(info_bp)
+
+    # Gzip compression
+    from flask_compress import Compress
+    Compress(app)
+
+    # Static files caching
+    @app.after_request
+    def add_cache_headers(response):
+        if 'static' in (response.headers.get('Content-Location') or '') or \
+           request.path.startswith('/static/'):
+            response.headers['Cache-Control'] = 'public, max-age=86400'
+        return response
 
     # Error handlers
     @app.errorhandler(404)

@@ -946,6 +946,29 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   line-height: 1.6;
 }
 
+/* Carriers grid */
+.carriers-grid, .stations-grid {
+  display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 32px;
+}
+.carrier-card, .station-card {
+  display: flex; align-items: center; gap: 14px; padding: 16px 20px;
+  background: var(--color-bg); border: 1px solid var(--color-border);
+  border-radius: var(--radius-md); transition: box-shadow .15s;
+}
+.carrier-card__icon, .station-card__icon {
+  width: 48px; height: 48px; border-radius: var(--radius-md);
+  background: var(--color-primary-light); color: var(--color-primary);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.carrier-card__name, .station-card__name { font-weight: 700; font-size: var(--text-base); }
+.carrier-card__meta, .station-card__city { font-size: var(--text-sm); color: var(--color-text-muted); }
+@media (min-width: 640px) {
+  .carriers-grid, .stations-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 768px) {
+  .carriers-grid, .stations-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
 /* ETA badges */
 .eta { font-weight: 700; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
 .eta--now { color: #e53935; }

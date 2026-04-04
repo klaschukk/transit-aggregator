@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Autobuske i železničke stanice u Srbiji — Transit Srbija{% endblock %}
+{% block meta_description %}Lista autobuskih i železničkih stanica u Srbiji. {{ stations|length }} stanica.{% endblock %}
+
+{% block content %}
+
+{% from '_partials/_breadcrumb.html' import breadcrumb %}
+{% from '_partials/_empty_state.html' import empty_state %}
+{{ breadcrumb([{'url': '/', 'label': 'Početna'}, {'label': 'Stanice'}]) }}
+
+<div class="page-title">
+  <h1>Autobuske i železničke stanice</h1>
+  <p class="page-subtitle">{{ stations|length }} stanica u bazi</p>
+</div>
+
+{% if stations %}
+<div class="stations-grid">
+  {% for st in stations %}
+  <div class="station-card fade-in fade-in--d{{ loop.index0 % 5 }}">
+    <div class="station-card__icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="24" height="24">
+        <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+      </svg>
+    </div>
+    <div class="station-card__info">
+      <div class="station-card__name">{{ st.name }}</div>
+      <div class="station-card__city">{{ st.city }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+  {{ empty_state(icon='stop', text='Podaci se učitavaju') }}
+{% endif %}
+
+{% endblock %}

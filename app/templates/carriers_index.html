@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Prevoznici u Srbiji — Transit Srbija{% endblock %}
+{% block meta_description %}Lista autobuskih i železničkih prevoznika u Srbiji. Lasta, Niš-Ekspres, Srbija Voz i drugi.{% endblock %}
+
+{% block content %}
+
+{% from '_partials/_breadcrumb.html' import breadcrumb %}
+{{ breadcrumb([{'url': '/', 'label': 'Početna'}, {'label': 'Prevoznici'}]) }}
+
+<div class="page-title">
+  <h1>Prevoznici</h1>
+  <p class="page-subtitle">{{ operators|length }} prevoznika u bazi</p>
+</div>
+
+<div class="carriers-grid">
+  {% for op in operators %}
+  <div class="carrier-card fade-in fade-in--d{{ loop.index0 % 5 }}">
+    <div class="carrier-card__icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
+        {% if op.type == 'train' %}
+        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
+        {% else %}
+        <rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/>
+        <circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/>
+        {% endif %}
+      </svg>
+    </div>
+    <div class="carrier-card__info">
+      <div class="carrier-card__name">{{ op.name }}</div>
+      <div class="carrier-card__meta">{{ op.route_count }} ruta</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}
