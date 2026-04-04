@@ -13,6 +13,8 @@
 <meta property="og:url" content="{{ config.BASE_URL }}{{ request.path }}">
 <meta property="og:site_name" content="Transit Srbija">
 <meta property="og:locale" content="sr_RS">
+<link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon.svg') }}">
 {% block head_extra %}{% endblock %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
 </head>
@@ -70,7 +72,11 @@
     var activeIdx = -1;
 
     function show(items) {
-      if (!items.length) { dropdown.classList.remove('is-open'); return; }
+      if (!items.length) {
+        dropdown.innerHTML = '<div class="autocomplete__empty">Grad nije pronađen</div>';
+        dropdown.classList.add('is-open');
+        return;
+      }
       dropdown.innerHTML = items.map(function(city, i) {
         return '<div class="autocomplete__item" data-value="' + city + '">' +
           '<svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>' +

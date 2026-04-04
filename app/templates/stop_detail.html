@@ -70,6 +70,10 @@
     </a>
     {% endfor %}
   </div>
+  <p class="data-disclaimer">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="12" height="12"><circle cx="8" cy="8" r="7"/><path d="M8 5v3m0 3h.01"/></svg>
+    Prema rasporedu (procena)
+  </p>
 </div>
 
 {% elif departures %}
@@ -125,7 +129,11 @@
         el.innerHTML = '<span class="eta ' + mod + '">' + txt + '</span>';
       });
     })
-    .catch(function() {});
+    .catch(function() {
+      document.querySelectorAll('.eta-skeleton').forEach(function(s) {
+        s.parentElement.innerHTML = '<span class="eta eta--later">—</span>';
+      });
+    });
 })();
 </script>
 {% endblock %}

@@ -15,20 +15,32 @@
 {% from '_partials/_stats_strip.html' import stats_strip %}
 {% from '_partials/_empty_state.html' import empty_state %}
 
+<!-- Mobile back button -->
+<div class="mobile-back">
+  <a href="/rute/" class="mobile-back__btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>
+    <span>Sve rute</span>
+  </a>
+</div>
+
 {{ breadcrumb([
   {'url': '/rute/', 'label': 'Sve rute'},
   {'label': route.from_city ~ ' — ' ~ route.to_city}
 ]) }}
 
-<div class="page-title">
+<div class="page-title fade-in">
   <h1>{{ route.from_city }} → {{ route.to_city }}</h1>
   <p class="page-subtitle">Red vožnje autobusa i vozova</p>
+  <a href="/rute/{{ route.to_city|lower|replace(' ','-') }}-{{ route.from_city|lower|replace(' ','-') }}/" class="reverse-route">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+    {{ route.to_city }} → {{ route.from_city }}
+  </a>
 </div>
 
 {{ stats_strip([
-  {'value': route.distance_km, 'label': 'km'},
-  {'value': route.trip_count, 'label': 'polazaka dnevno'},
-] + ([{'value': (route.min_price_rsd / config.EUR_RSD_RATE)|round|int ~ '€', 'label': 'od'}] if route.min_price_rsd else [])) }}
+  {'value': route.distance_km, 'label': 'km', 'icon': 'distance'},
+  {'value': route.trip_count, 'label': 'polazaka dnevno', 'icon': 'schedule'},
+] + ([{'value': (route.min_price_rsd / config.EUR_RSD_RATE)|round|int ~ '€', 'label': 'od', 'icon': 'price'}] if route.min_price_rsd else [])) }}
 
 <!-- Day filter -->
 <div class="filter-chips">
@@ -42,16 +54,21 @@
 </div>
 
 {% if trips %}
-<div class="trip-list">
+<div class="trip-list fade-in fade-in--d2">
   {% for trip in trips %}
     {{ trip_card(trip) }}
   {% endfor %}
 </div>
 
-<div class="seo-block">
-  <h2>O ruti {{ route.from_city }} — {{ route.to_city }}</h2>
-  <p>Vožnja od {{ route.from_city }} do {{ route.to_city }} iznosi oko {{ route.distance_km }} km.
-     Prosečno trajanje putovanja autobusom je oko {{ (route.distance_km / 80)|round|int }} sata.</p>
+<div class="seo-block fade-in fade-in--d3">
+  <div class="seo-block__icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+  </div>
+  <div class="seo-block__content">
+    <h2>O ruti {{ route.from_city }} — {{ route.to_city }}</h2>
+    <p>Vožnja od {{ route.from_city }} do {{ route.to_city }} iznosi oko {{ route.distance_km }} km.
+       Prosečno trajanje putovanja autobusom je oko {{ (route.distance_km / 80)|round|int }} sata.</p>
+  </div>
 </div>
 {% else %}
   {{ empty_state(icon='search', text='Nema podataka o polascima', sub='Pokušajte drugi dan ili proverite kod prevoznika') }}

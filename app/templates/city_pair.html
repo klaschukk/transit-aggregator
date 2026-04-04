@@ -7,6 +7,8 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TravelAction","fromLocation":{"@type":"City","name":"{{ from_city }}"},"toLocation":{"@type":"City","name":"{{ to_city }}"}}
 </script>
+{% else %}
+<meta name="robots" content="noindex, follow">
 {% endif %}
 {% endblock %}
 
@@ -24,20 +26,24 @@
   {'label': from_city ~ ' → ' ~ to_city}
 ]) }}
 
-<div class="page-title">
+<div class="page-title fade-in">
   <h1>{{ from_city }} → {{ to_city }}</h1>
   <p class="page-subtitle">
     {% if route %}{{ route.trip_count }} polazaka dnevno · {{ route.distance_km }} km{% endif %}
     {% if route and route.min_price_rsd %} · od {{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }}€{% endif %}
   </p>
+  <a href="/voznja/{{ to_city|lower|replace(' ','-') }}-do-{{ from_city|lower|replace(' ','-') }}/" class="reverse-route">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+    {{ to_city }} → {{ from_city }}
+  </a>
 </div>
 
 {% if route and trips %}
 
 {{ stats_strip([
-  {'value': route.distance_km, 'label': 'km'},
-  {'value': route.trip_count, 'label': 'polazaka/dan'},
-] + ([{'value': (route.min_price_rsd / config.EUR_RSD_RATE)|round|int ~ '€', 'label': 'od'}] if route.min_price_rsd else [])) }}
+  {'value': route.distance_km, 'label': 'km', 'icon': 'distance'},
+  {'value': route.trip_count, 'label': 'polazaka/dan', 'icon': 'schedule'},
+] + ([{'value': (route.min_price_rsd / config.EUR_RSD_RATE)|round|int ~ '€', 'label': 'od', 'icon': 'price'}] if route.min_price_rsd else [])) }}
 
 <button class="btn btn--outline filter-toggle" id="filterToggle">
   <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M3 3a1 1 0 011-1h12a1 1 0 01.82 1.573l-4.82 7v4.427a1 1 0 01-.553.894l-2 1A1 1 0 018 16v-5.427L3.18 3.573A1 1 0 013 3z"/></svg>
@@ -48,7 +54,7 @@
   {% set operators = trips|map(attribute='operator')|unique|list %}
   {{ filter_panel(operators=operators) }}
   <div class="results-main">
-    <div class="trip-list" id="tripList">
+    <div class="trip-list fade-in fade-in--d2" id="tripList">
       {% for trip in trips %}
         {{ trip_card(trip) }}
       {% endfor %}
@@ -61,7 +67,7 @@
 {% endif %}
 
 <!-- Info cards -->
-<div class="cards-grid">
+<div class="cards-grid fade-in fade-in--d3">
   <div class="info-card">
     <div class="info-card__heading">Autobus</div>
     <p>Autobuske linije između {{ from_city }} i {{ to_city }} voze svakodnevno.
@@ -122,8 +128,12 @@
 (function() {
   var toggle = document.getElementById('filterToggle');
   var panel = document.getElementById('filterPanel');
+  var close = document.getElementById('filterClose');
   if (toggle && panel) {
     toggle.addEventListener('click', function() { panel.classList.toggle('is-open'); });
+  }
+  if (close && panel) {
+    close.addEventListener('click', function() { panel.classList.remove('is-open'); });
   }
 
   var cards = document.querySelectorAll('.trip-card');
