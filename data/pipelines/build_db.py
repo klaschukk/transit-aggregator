@@ -122,6 +122,7 @@ def build() -> None:
         _load_city_lines(conn, 'nis', nis_path)
         _load_stations(conn, stations_path)
         _load_gtfs(conn)
+        _cleanup(conn)
     else:
         print("No scraped data found — loading sample data...")
         _load_sample_data(conn)
@@ -509,26 +510,81 @@ def _load_city_lines(conn: duckdb.DuckDBPyConnection, city: str, lines_path: Pat
     max_line_id = conn.execute("SELECT COALESCE(MAX(id), 0) FROM city_lines").fetchone()[0]
     line_db_id = max_line_id + 1
 
+    # Get next stop ID
+    max_stop_id = conn.execute("SELECT COALESCE(MAX(id), 0) FROM city_stops").fetchone()[0]
+    stop_db_id = max_stop_id + 1
+
+    # Track stops by name to dedup
+    stop_name_to_id: dict[str, int] = {}
+
     count = 0
+    stop_count = 0
+    link_count = 0
     for line in lines:
         number = line.get('number', '')
         name = line.get('name', '')
         slug = city_to_slug(f'linija-{number}')
         line_type = line.get('type', 'bus')
         color = type_color(line_type)
+        current_line_id = line_db_id
 
         try:
             conn.execute(
                 "INSERT OR IGNORE INTO city_lines (id, city, number, name, slug, type, color) "
                 "VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (line_db_id, city, number, name, slug, line_type, color)
+                (current_line_id, city, number, name, slug, line_type, color)
             )
             count += 1
             line_db_id += 1
         except Exception as e:
             print(f"  Skip {city} line {number}: {e}")
+            continue
 
-    print(f"  Loaded {count} {city} lines")
+        # Load stops for this line
+        stops = line.get('stops', [])
+        for order, stop_data in enumerate(stops, 1):
+            # Handle both string and dict formats
+            if isinstance(stop_data, dict):
+                stop_name = stop_data.get('name', '')
+                lat = stop_data.get('lat')
+                lon = stop_data.get('lon')
+            else:
+                stop_name = str(stop_data).strip()
+                lat = None
+                lon = None
+
+            if not stop_name:
+                continue
+
+            stop_slug = city_to_slug(stop_name)
+            stop_key = f"{city}:{stop_slug}"
+
+            if stop_key not in stop_name_to_id:
+                try:
+                    conn.execute(
+                        "INSERT OR IGNORE INTO city_stops (id, city, name, slug, lat, lon) "
+                        "VALUES (?, ?, ?, ?, ?, ?)",
+                        (stop_db_id, city, stop_name, stop_slug, lat, lon)
+                    )
+                    stop_name_to_id[stop_key] = stop_db_id
+                    stop_db_id += 1
+                    stop_count += 1
+                except Exception:
+                    pass
+
+            sid = stop_name_to_id.get(stop_key)
+            if sid:
+                try:
+                    conn.execute(
+                        "INSERT OR IGNORE INTO city_line_stops (line_id, stop_id, stop_order) "
+                        "VALUES (?, ?, ?)",
+                        (current_line_id, sid, order)
+                    )
+                    link_count += 1
+                except Exception:
+                    pass
+
+    print(f"  Loaded {count} {city} lines, {stop_count} stops, {link_count} line-stop links")
 
 
 def _load_stations(conn: duckdb.DuckDBPyConnection, stations_path: Path) -> None:
@@ -696,6 +752,47 @@ def _load_gtfs(conn: duckdb.DuckDBPyConnection) -> None:
     mapped = conn.execute("SELECT COUNT(*) FROM gtfs_stop_times WHERE city_stop_id IS NOT NULL").fetchone()[0]
     unique_stops = conn.execute("SELECT COUNT(DISTINCT city_stop_id) FROM gtfs_stop_times WHERE city_stop_id IS NOT NULL").fetchone()[0]
     print(f"  Loaded {st_count} stop_times ({mapped} mapped [{mapped*100//st_count}%], {unique_stops} unique stops)")
+
+
+def _cleanup(conn: duckdb.DuckDBPyConnection) -> None:
+    """Remove orphan routes, operators, and NULL-departure trips."""
+    # Remove intercity routes with no trips
+    r1 = conn.execute("""
+        DELETE FROM routes
+        WHERE type = 'intercity'
+          AND id NOT IN (SELECT DISTINCT route_id FROM trips)
+    """).fetchone()[0]
+
+    # Remove duplicate routes (same from_city+to_city, keep the one with more trips)
+    r2 = conn.execute("""
+        DELETE FROM routes WHERE id IN (
+            SELECT r.id FROM routes r
+            JOIN (
+                SELECT from_city, to_city, MAX(trip_cnt) AS max_cnt
+                FROM (
+                    SELECT r2.id, r2.from_city, r2.to_city, COUNT(t.id) AS trip_cnt
+                    FROM routes r2 LEFT JOIN trips t ON t.route_id = r2.id
+                    WHERE r2.type = 'intercity'
+                    GROUP BY r2.id, r2.from_city, r2.to_city
+                ) GROUP BY from_city, to_city HAVING COUNT(*) > 1
+            ) dup ON r.from_city = dup.from_city AND r.to_city = dup.to_city
+            LEFT JOIN trips t ON t.route_id = r.id
+            WHERE r.type = 'intercity'
+            GROUP BY r.id, dup.max_cnt
+            HAVING COUNT(t.id) < dup.max_cnt
+        )
+    """).fetchone()[0]
+
+    # Remove trips with NULL departure_time
+    r3 = conn.execute("DELETE FROM trips WHERE departure_time IS NULL").fetchone()[0]
+
+    # Remove operators without any trips
+    r4 = conn.execute("""
+        DELETE FROM operators
+        WHERE id NOT IN (SELECT DISTINCT operator_id FROM trips WHERE operator_id IS NOT NULL)
+    """).fetchone()[0]
+
+    print(f"  Cleanup: -{r1} empty routes, -{r2} duplicate routes, -{r3} null trips, -{r4} orphan operators")
 
 
 def _load_sample_data(conn: duckdb.DuckDBPyConnection) -> None:
