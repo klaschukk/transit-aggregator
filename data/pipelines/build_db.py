@@ -112,6 +112,7 @@ def build() -> None:
 
     novi_sad_path = RAW_DIR / 'novi-sad' / 'lines.json'
     nis_path = RAW_DIR / 'nis' / 'lines.json'
+    kragujevac_path = RAW_DIR / 'kragujevac' / 'lines.json'
 
     if has_real_data:
         print("Loading real scraped data...")
@@ -120,6 +121,7 @@ def build() -> None:
         _load_gsp_lines(conn, gsp_path, gsp_stops_path)
         _load_city_lines(conn, 'novi-sad', novi_sad_path)
         _load_city_lines(conn, 'nis', nis_path)
+        _load_city_lines(conn, 'kragujevac', kragujevac_path)
         _load_stations(conn, stations_path)
         _load_gtfs(conn)
         _load_city_schedule(conn, 'novi-sad')

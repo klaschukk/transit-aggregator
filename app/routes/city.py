@@ -21,7 +21,7 @@ def city_index():
     if db_ready():
         row = cached_query_one("SELECT COUNT(*) as c FROM city_lines WHERE city = 'beograd'", ttl=3600)
         cities[0]['lines'] = row['c'] if row else 0
-        for slug, name in [('novi-sad', 'Novi Sad'), ('nis', 'Niš')]:
+        for slug, name in [('novi-sad', 'Novi Sad'), ('nis', 'Niš'), ('kragujevac', 'Kragujevac')]:
             row = cached_query_one(f"SELECT COUNT(*) as c FROM city_lines WHERE city = ?", [slug], ttl=3600)
             if row and row['c'] > 0:
                 cities.append({'slug': slug, 'name': name, 'desc': f'{row["c"]} linija', 'lines': row['c']})
@@ -30,7 +30,7 @@ def city_index():
 
 @city_bp.route('/gradski/<city>/')
 def city_hub(city: str):
-    if city not in ('beograd', 'novi-sad', 'nis'):
+    if city not in ('beograd', 'novi-sad', 'nis', 'kragujevac'):
         abort(404)
 
     lines = cached_query("""

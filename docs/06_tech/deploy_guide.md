@@ -8,21 +8,34 @@
 | App | Flask + Gunicorn (4 workers) |
 | DB | DuckDB (file-based, read-only at runtime) |
 | Service | systemd `transit.service` |
-| Port | 5000 |
+| Port | 5000 (proxied via nginx) |
 
-## Prerequisites for Domain Launch
+## 1. Domain Setup
 
-- [ ] Domain registered (e.g. `transit-serbia.com`)
-- [ ] DNS A record: `transit-serbia.com` → `81.28.248.71`
-- [ ] DNS A record: `www.transit-serbia.com` → `81.28.248.71`
-- [ ] nginx installed: `sudo apt install nginx`
+### DNS Records
 
-## nginx Configuration
+```
+A     transit-serbia.com      → 81.28.248.71
+A     www.transit-serbia.com  → 81.28.248.71
+```
+
+Wait for propagation (check with `dig transit-serbia.com`).
+
+### nginx Configuration
+
+```bash
+sudo nano /etc/nginx/sites-available/transit
+```
 
 ```nginx
 server {
     listen 80;
     server_name transit-serbia.com www.transit-serbia.com;
+
+    # Redirect www → non-www
+    if ($host = www.transit-serbia.com) {
+        return 301 https://transit-serbia.com$request_uri;
+    }
 
     location / {
         proxy_pass http://127.0.0.1:5000;
@@ -34,7 +47,7 @@ server {
 
     location /static/ {
         alias /home/klaschuk/transit/app/static/;
-        expires 7d;
+        expires 30d;
         add_header Cache-Control "public, immutable";
     }
 }
@@ -46,7 +59,7 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-## SSL (after DNS propagation)
+## 2. SSL Certificate
 
 ```bash
 sudo apt install certbot python3-certbot-nginx
@@ -58,30 +71,84 @@ Certbot auto-renews via systemd timer. Verify:
 sudo certbot renew --dry-run
 ```
 
-## Post-Domain Checklist
+## 3. Update Application Config
 
-- [ ] Update `config.py` — change `BASE_URL` from IP to `https://transit-serbia.com`
-- [ ] Restart service: `sudo systemctl restart transit`
-- [ ] Verify sitemap: `curl https://transit-serbia.com/sitemap.xml | head`
-- [ ] Verify robots.txt: `curl https://transit-serbia.com/robots.txt`
+Edit systemd service to set production environment:
 
-## Google Search Console
+```bash
+sudo nano /etc/systemd/system/transit.service
+```
+
+Add/update the `Environment` lines:
+
+```ini
+[Service]
+Environment=FLASK_ENV=production
+Environment=BASE_URL=https://transit-serbia.com
+Environment=SECRET_KEY=<generate-a-random-key>
+Environment=GA_TRACKING_ID=G-XXXXXXXXXX
+Environment=ADSENSE_ID=ca-pub-XXXXXXXXXX
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart transit
+```
+
+### Verify
+
+```bash
+curl -s https://transit-serbia.com/health
+curl -s https://transit-serbia.com/sitemap.xml | head -5
+curl -s https://transit-serbia.com/robots.txt
+```
+
+## 4. Google Analytics
+
+1. Go to https://analytics.google.com
+2. Create property for `transit-serbia.com`
+3. Get Measurement ID (format: `G-XXXXXXXXXX`)
+4. Set `GA_TRACKING_ID=G-XXXXXXXXXX` in systemd Environment
+5. Restart: `sudo systemctl restart transit`
+6. Verify: view source of homepage should contain `gtag.js`
+
+GA code in `base.html` is conditional — only loads when `GA_TRACKING_ID` is set.
+
+## 5. Google Search Console
 
 1. Go to https://search.google.com/search-console/
 2. Add property: `https://transit-serbia.com`
-3. Verify via DNS TXT record (recommended) or HTML file
+3. Verify ownership via DNS TXT record:
+   ```
+   TXT  transit-serbia.com  "google-site-verification=XXXX"
+   ```
 4. Submit sitemap: `https://transit-serbia.com/sitemap.xml`
 5. Request indexing for homepage
-6. Monitor Coverage report for errors
+6. Monitor Coverage report — fix any errors within 48h
 
-## Google AdSense (after 2-4 weeks of indexing)
+## 6. Google AdSense
 
+**Prerequisites** (apply after 2-4 weeks of indexed content):
+- 2500+ indexed pages
+- Original content on every page
+- Privacy policy page (add to /o-nama/ or create separate)
+- No thin/empty pages in index
+
+**Steps:**
 1. Apply at https://adsense.google.com
-2. Site must have: original content, privacy policy, sufficient pages
-3. Once approved, add ad code to `base.html` (before `</head>`)
-4. Recommended placements: between trip cards, after search results, sidebar
+2. Get Publisher ID (format: `ca-pub-XXXXXXXXXX`)
+3. Set `ADSENSE_ID=ca-pub-XXXXXXXXXX` in systemd Environment
+4. Restart: `sudo systemctl restart transit`
+5. AdSense JS loads automatically via `base.html`
+6. Configure ad units in AdSense dashboard
 
-## Data Pipeline
+**Recommended ad placements** (add manually later):
+- After search results header
+- Between trip card groups
+- Sidebar on desktop (filter panel area)
+- Before footer on content pages
+
+## 7. Data Pipeline
 
 ### Nightly Refresh (cron 2:00 AM)
 
@@ -94,28 +161,35 @@ scripts/nightly_refresh.sh
 ├── scrape_gspns.py      — Novi Sad city transit (gspns.co.rs)
 ├── scrape_naissus.py    — Niš city transit
 ├── build_db.py          — Rebuild transit.duckdb from raw data
-└── enrich_stops_coords.py — Geocode 50 stops (Overpass + Nominatim)
+└── enrich_stops_coords.py — Geocode 50 stops/night (Overpass + Nominatim)
+```
+
+### Crontab
+
+```
+0 2 * * *   /home/klaschuk/transit/scripts/nightly_refresh.sh
+*/5 * * * * /home/klaschuk/transit/scripts/healthcheck.sh
 ```
 
 ### Manual Commands
 
 ```bash
-# Run full refresh manually
+# Full refresh
 sudo bash scripts/nightly_refresh.sh
 
-# Run single scraper
+# Single scraper
 venv/bin/python3 -u data/pipelines/scrape_gsp.py
 
-# Rebuild DB only (stop service first!)
+# Rebuild DB (stop service first)
 sudo systemctl stop transit
 venv/bin/python3 -u data/pipelines/build_db.py
 sudo systemctl start transit
 
-# Check last refresh status
+# Last refresh status
 cat logs/last_refresh.txt
 ```
 
-## Monitoring
+## 8. Monitoring
 
 | What | How | Frequency |
 |------|-----|-----------|
@@ -124,9 +198,11 @@ cat logs/last_refresh.txt
 | Access logs | `logs/access.log` | continuous |
 | Error logs | `logs/error.log` | continuous |
 | Refresh logs | `logs/nightly_YYYYMMDD.log` | daily |
-| Last status | `logs/last_refresh.txt` | after each refresh |
+| Google Analytics | analytics.google.com | real-time |
+| Search Console | search.google.com/search-console | weekly |
+| Core Web Vitals | PageSpeed Insights | monthly |
 
-## Troubleshooting
+## 9. Troubleshooting
 
 ```bash
 # Service won't start
@@ -141,4 +217,27 @@ sudo systemctl restart transit
 
 # Check gunicorn workers
 ps aux | grep gunicorn
+
+# Check nginx errors
+sudo tail -50 /var/log/nginx/error.log
+
+# SSL certificate issues
+sudo certbot certificates
+sudo certbot renew --dry-run
 ```
+
+## 10. Post-Launch Checklist
+
+- [ ] Domain resolves correctly
+- [ ] HTTPS works (no mixed content)
+- [ ] HTTP redirects to HTTPS
+- [ ] www redirects to non-www
+- [ ] `config.py` BASE_URL updated to domain
+- [ ] sitemap.xml shows domain URLs
+- [ ] robots.txt shows domain sitemap
+- [ ] Google Search Console property verified
+- [ ] Sitemap submitted to GSC
+- [ ] Google Analytics tracking live
+- [ ] Healthcheck cron active
+- [ ] Nightly refresh cron active
+- [ ] All 11 page types return 200
