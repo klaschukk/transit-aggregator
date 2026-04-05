@@ -14,7 +14,7 @@ class Config:
 
 class ProductionConfig(Config):
     DEBUG = False
-    BASE_URL = os.environ.get('BASE_URL', 'https://transit-serbia.com')
+    BASE_URL = os.environ.get('BASE_URL', 'http://81.28.248.71')
 
 
 class DevelopmentConfig(Config):
