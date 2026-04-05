@@ -50,7 +50,9 @@ def index():
         ORDER BY COUNT(DISTINCT cl.id) DESC
     """) if db_ready() else []
 
-    city_labels = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš'}
+    # Only show Belgrade for now (Novi Sad/Niš not production-ready)
+    city_labels = {'beograd': 'Beograd'}
+    cities_data = [c for c in cities_data if c['city'] == 'beograd']
     for c in cities_data:
         c['label'] = city_labels.get(c['city'], c['city'].title())
 

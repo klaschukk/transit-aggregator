@@ -15,22 +15,20 @@ def _today_service() -> str:
 @city_bp.route('/gradski/')
 def city_index():
     """Landing page listing all cities with public transit."""
+    # Only Belgrade is production-ready
     cities = [
         {'slug': 'beograd', 'name': 'Beograd', 'desc': 'GSP — autobus, tramvaj, trolejbus', 'lines': 0},
     ]
     if db_ready():
         row = cached_query_one("SELECT COUNT(*) as c FROM city_lines WHERE city = 'beograd'", ttl=3600)
         cities[0]['lines'] = row['c'] if row else 0
-        for slug, name in [('novi-sad', 'Novi Sad'), ('nis', 'Niš'), ('kragujevac', 'Kragujevac')]:
-            row = cached_query_one(f"SELECT COUNT(*) as c FROM city_lines WHERE city = ?", [slug], ttl=3600)
-            if row and row['c'] > 0:
-                cities.append({'slug': slug, 'name': name, 'desc': f'{row["c"]} linija', 'lines': row['c']})
     return render_template('city_index.html', cities=cities)
 
 
 @city_bp.route('/gradski/<city>/')
 def city_hub(city: str):
-    if city not in ('beograd', 'novi-sad', 'nis', 'kragujevac'):
+    # Only Belgrade is fully ready — Novi Sad/Niš/Kragujevac will be added later
+    if city not in ('beograd',):
         abort(404)
 
     lines = cached_query("""
