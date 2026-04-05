@@ -23,7 +23,7 @@
 | WSGI | Gunicorn (4 workers) |
 | Process | systemd (transit.service) |
 | Compression | flask-compress (gzip) |
-| Данные | Скраперы (bgprevoz, busticket4.me, srbijavoz) |
+| Данные | Скраперы (bgprevoz, gspns, busticket4.me, srbijavoz, lasta, polazak) |
 
 ## URL архитектура
 
@@ -43,7 +43,7 @@
 /api/cities?q=                       — автокомплит городов
 /api/city-stops?sw_lat&sw_lon&ne_lat&ne_lon — остановки на карте
 /api/stop-arrivals?slug=             — ETA линий на остановке
-/sitemap.xml                         — 3145 URL
+/sitemap.xml                         — 3304 URL
 /robots.txt
 /health                              — healthcheck (db status)
 ```
@@ -81,10 +81,13 @@ transit/
 │   ├── pipelines/
 │   │   ├── build_db.py      ← собирает transit.duckdb из raw/
 │   │   ├── scrape_gsp.py    ← GSP Белград (bgprevoz.rs API)
+│   │   ├── scrape_gspns.py  ← JGSP Нови Сад (gspns.co.rs)
+│   │   ├── scrape_gspns_schedule.py ← расписание Нови Сад
 │   │   ├── scrape_intercity.py ← busticket4.me API
 │   │   ├── scrape_srbvoz.py ← srbijavoz.rs
+│   │   ├── scrape_lasta.py  ← lasta.rs / polazak.rs
 │   │   ├── enrich_stops_coords.py ← OSM Overpass + Nominatim
-│   │   └── import_gtfs.py   ← GTFS feed import
+│   │   └── import_gtfs.py   ← GTFS feed import (data.gov.rs)
 │   ├── dbs/transit.duckdb   ← рабочая БД (gitignored)
 │   └── raw/                 ← JSON от скраперов (gitignored)
 ├── scripts/
@@ -98,15 +101,15 @@ transit/
 
 | Таблица | Записей | Описание |
 |---------|---------|----------|
-| city_lines | 514 | Линии GSP (bus, tram, trolleybus, night, e-bus) |
-| city_stops | 2572 | Остановки (95% с координатами) |
-| city_line_stops | 12437 | Привязка остановок к линиям |
-| routes | 26 | Межгородские маршруты |
-| trips | 243 | Рейсы (время, цена, оператор) |
-| operators | 7 | Перевозчики |
+| city_lines | 651 | Линии: Белград 514, Нови Сад 61, Ниш 53 + пригород |
+| city_stops | 2867 | Остановки (94% с координатами) |
+| city_line_stops | 12938 | Привязка остановок к линиям |
+| routes | 334 | Межгородские маршруты |
+| trips | 2840 | Рейсы (время, цена, оператор) |
+| operators | 70 | Перевозчики (Lasta, Niš-Ekspres, Srbija Voz и др.) |
 | stations | 10 | ЖД станции |
-| gtfs_trips | 0 | GTFS (WIP) |
-| gtfs_stop_times | 0 | GTFS (WIP) |
+| gtfs_trips | 93991 | GTFS расписание (Белград + Нови Сад) |
+| gtfs_stop_times | 2317651 | Времена прибытия (96% mapped) |
 
 ## Инфраструктура
 
@@ -130,18 +133,19 @@ Enrich: cron 3:00 AM
 
 ## Текущий статус (апрель 2026)
 
-- [x] Flask + DuckDB + все маршруты
+- [x] Flask + DuckDB + 334 маршрута, 2840 рейсов
+- [x] 3 города: Белград (514), Нови Сад (61), Ниш (53 линии)
 - [x] Единый CSS дизайн-система (app.css)
 - [x] 23 шаблона + 8 partials
-- [x] SEO: JSON-LD, OG, BreadcrumbList, FAQ schema, sitemap (3145 URL)
+- [x] SEO: JSON-LD, OG, BreadcrumbList, FAQ schema, sitemap (3304 URL)
 - [x] Мобильная адаптивность (44px touch targets, focus-visible)
-- [x] Скраперы: GSP (bgprevoz), busticket4.me, srbijavoz
+- [x] Скраперы: bgprevoz, gspns, busticket4.me, srbijavoz, lasta, polazak
 - [x] Автокомплит городов (API)
 - [x] Карта с остановками (Leaflet)
-- [x] ETA на остановках (headway estimate)
+- [x] GTFS расписание Белград (87K trips) + Нови Сад (6.5K trips)
+- [x] ETA на остановках (GTFS + headway fallback)
 - [x] systemd + gunicorn + gzip + healthcheck
-- [ ] GTFS реальное расписание
-- [ ] 100+ межгородских маршрутов
+- [x] Connection pooling + TTL cache (0.04s response)
+- [x] 150+ тестов (pytest)
 - [ ] Домен + Cloudflare
 - [ ] Google AdSense
-- [ ] Тесты (pytest)
