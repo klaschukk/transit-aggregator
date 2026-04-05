@@ -659,6 +659,11 @@ def _load_gtfs(conn: duckdb.DuckDBPyConnection) -> None:
     print(f"  Loaded {trip_count} trips ({linked} linked to city_lines)")
 
     # Step 4: Bulk load stop_times via DuckDB read_csv_auto
+    # Force checkpoint before bulk load to prevent WAL issues
+    try:
+        conn.execute("CHECKPOINT")
+    except Exception:
+        pass
     conn.execute(f"""
         INSERT INTO gtfs_stop_times (trip_id, stop_id, arrival_time, departure_time, stop_sequence, city_stop_id)
         SELECT trip_id, stop_id::VARCHAR, arrival_time, departure_time, stop_sequence::INTEGER, NULL
