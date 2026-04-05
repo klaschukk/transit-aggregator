@@ -122,6 +122,7 @@ def build() -> None:
         _load_city_lines(conn, 'nis', nis_path)
         _load_stations(conn, stations_path)
         _load_gtfs(conn)
+        _load_city_schedule(conn, 'novi-sad')
         _cleanup(conn)
     else:
         print("No scraped data found — loading sample data...")
@@ -752,6 +753,82 @@ def _load_gtfs(conn: duckdb.DuckDBPyConnection) -> None:
     mapped = conn.execute("SELECT COUNT(*) FROM gtfs_stop_times WHERE city_stop_id IS NOT NULL").fetchone()[0]
     unique_stops = conn.execute("SELECT COUNT(DISTINCT city_stop_id) FROM gtfs_stop_times WHERE city_stop_id IS NOT NULL").fetchone()[0]
     print(f"  Loaded {st_count} stop_times ({mapped} mapped [{mapped*100//st_count}%], {unique_stops} unique stops)")
+
+
+def _load_city_schedule(conn: duckdb.DuckDBPyConnection, city: str) -> None:
+    """Load scraped schedule data (departure times) into gtfs_trips + gtfs_stop_times."""
+    schedule_path = RAW_DIR / city / 'schedule.json'
+    if not schedule_path.exists():
+        print(f"  No {city} schedule data, skipping")
+        return
+
+    with open(schedule_path, encoding='utf-8') as f:
+        schedules = json.load(f)
+
+    # Build line number → line_id mapping for this city
+    line_map: dict[str, int] = {}
+    for row in conn.execute(
+        "SELECT id, number FROM city_lines WHERE city = ?", [city]
+    ).fetchall():
+        line_map[row[1]] = row[0]
+
+    # Build line_id → ordered stop_ids for distributing stop_times
+    line_stops: dict[int, list[int]] = {}
+    for row in conn.execute("""
+        SELECT cls.line_id, cls.stop_id
+        FROM city_line_stops cls
+        JOIN city_lines cl ON cl.id = cls.line_id
+        WHERE cl.city = ?
+        ORDER BY cls.line_id, cls.stop_order
+    """, [city]).fetchall():
+        line_stops.setdefault(row[0], []).append(row[1])
+
+    trip_count = 0
+    st_count = 0
+
+    for entry in schedules:
+        line_number = entry['line_number']
+        service_id = entry['service']  # RD, S, N
+        line_id = line_map.get(line_number)
+        if not line_id:
+            continue
+
+        stops = line_stops.get(line_id, [])
+
+        for direction, times in [('A', entry.get('smer_a', [])), ('B', entry.get('smer_b', []))]:
+            for ti, dep_time in enumerate(times):
+                trip_id = f'{city}_{line_number}_{direction}_{service_id}_{ti}'
+                route_id = f'{city}_{line_number}'
+
+                conn.execute(
+                    "INSERT INTO gtfs_trips VALUES (?, ?, ?, ?, ?)",
+                    (trip_id, route_id, service_id, 0 if direction == 'A' else 1, line_id)
+                )
+                trip_count += 1
+
+                # Distribute departure across stops with 2-min intervals
+                if stops:
+                    for seq, stop_id in enumerate(stops):
+                        h, m = dep_time.split(':')
+                        total_min = int(h) * 60 + int(m) + seq * 2
+                        stop_h = total_min // 60
+                        stop_m = total_min % 60
+                        stop_time = f'{stop_h:02d}:{stop_m:02d}:00'
+
+                        conn.execute(
+                            "INSERT INTO gtfs_stop_times VALUES (?, ?, ?, ?, ?, ?)",
+                            (trip_id, f'{city}_stop_{stop_id}', stop_time, stop_time, seq + 1, stop_id)
+                        )
+                        st_count += 1
+                else:
+                    # No stops mapped — at least record the departure
+                    conn.execute(
+                        "INSERT INTO gtfs_stop_times VALUES (?, ?, ?, ?, ?, ?)",
+                        (trip_id, f'{city}_line_{line_number}', f'{dep_time}:00', f'{dep_time}:00', 1, None)
+                    )
+                    st_count += 1
+
+    print(f"  Loaded {city} schedule: {trip_count} trips, {st_count} stop_times")
 
 
 def _cleanup(conn: duckdb.DuckDBPyConnection) -> None:
