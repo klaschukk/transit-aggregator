@@ -1773,6 +1773,18 @@ main { animation: fadeInUp .25s ease both; }
   .see-also__grid { grid-template-columns: repeat(3, 1fr); }
 }
 
+/* Home cities grid */
+.home-cities-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.home-cities-grid .home-city-card {
+  padding: 14px 16px;
+  margin-bottom: 0;
+}
+
 /* Home popular lines */
 .home-lines {
   display: flex;

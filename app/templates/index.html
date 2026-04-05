@@ -40,8 +40,8 @@
     <div class="home-stats__label">stajališta</div>
   </div>
   <div class="home-stats__item">
-    <div class="home-stats__num">{{ stats.operators }}</div>
-    <div class="home-stats__label">prevoznika</div>
+    <div class="home-stats__num">{{ stats.cities }}</div>
+    <div class="home-stats__label">grada</div>
   </div>
 </section>
 
@@ -112,19 +112,22 @@
     <!-- City transport -->
     <div class="home-duo__col">
       <h2 class="home-section__title">Gradski prevoz</h2>
-      <a href="/gradski/beograd/" class="home-city-card">
-        <div class="home-city-card__icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40">
-            <rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/>
-            <circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/>
-          </svg>
-        </div>
-        <div class="home-city-card__info">
-          <div class="home-city-card__name">Beograd</div>
-          <div class="home-city-card__desc">{{ stats.lines }} linija · {{ stats.stops }} stajališta</div>
-          <div class="home-city-card__sub">Autobus, tramvaj, trolejbus — mapa i polasci</div>
-        </div>
-      </a>
+      <div class="home-cities-grid">
+        {% for c in cities_data %}
+        <a href="/gradski/{{ c.city }}/" class="home-city-card">
+          <div class="home-city-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
+              <rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/>
+              <circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/>
+            </svg>
+          </div>
+          <div class="home-city-card__info">
+            <div class="home-city-card__name">{{ c.label }}</div>
+            <div class="home-city-card__desc">{{ c.line_count }} linija{% if c.stop_count %} · {{ c.stop_count }} stajališta{% endif %}</div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
       {% if popular_lines %}
       <div class="home-lines">
         {% for line in popular_lines %}
@@ -135,20 +138,6 @@
         {% endfor %}
       </div>
       {% endif %}
-      <div class="home-features">
-        <div class="home-feature">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/><circle cx="12" cy="12" r="4"/></svg>
-          <span>Mapa sa stajalištima</span>
-        </div>
-        <div class="home-feature">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          <span>Red vožnje uživo</span>
-        </div>
-        <div class="home-feature">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-          <span>Pretraga linija</span>
-        </div>
-      </div>
     </div>
 
   </div>

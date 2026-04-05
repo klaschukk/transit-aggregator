@@ -28,17 +28,31 @@ def index():
     """) if db_ready() else []
     cities_list = [c['city'] for c in cities]
 
-    stats = {'routes': 0, 'lines': 0, 'stops': 0, 'operators': 0}
+    stats = {'routes': 0, 'lines': 0, 'stops': 0, 'cities': 0}
     if db_ready():
         row = cached_query_one("""
             SELECT
                 (SELECT COUNT(*) FROM routes WHERE type = 'intercity') AS routes,
                 (SELECT COUNT(*) FROM city_lines) AS lines,
                 (SELECT COUNT(*) FROM city_stops) AS stops,
-                (SELECT COUNT(*) FROM operators) AS operators
+                (SELECT COUNT(DISTINCT city) FROM city_lines) AS cities
         """)
         if row:
             stats = dict(row)
+
+    # Per-city stats for city cards
+    cities_data = cached_query("""
+        SELECT cl.city,
+               COUNT(DISTINCT cl.id) as line_count,
+               (SELECT COUNT(*) FROM city_stops cs WHERE cs.city = cl.city) as stop_count
+        FROM city_lines cl
+        GROUP BY cl.city
+        ORDER BY COUNT(DISTINCT cl.id) DESC
+    """) if db_ready() else []
+
+    city_labels = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš'}
+    for c in cities_data:
+        c['label'] = city_labels.get(c['city'], c['city'].title())
 
     # Popular city lines (by number of stops)
     popular_lines = cached_query("""
@@ -54,6 +68,7 @@ def index():
 
     return render_template('index.html', popular_routes=popular_routes,
                            cities=cities_list, stats=stats,
+                           cities_data=cities_data,
                            popular_lines=popular_lines)
 
 
