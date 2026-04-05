@@ -45,13 +45,21 @@ HEADERS = {
 COMPANY_ID = 132
 SERBIA_COUNTRY_ID = 208
 
-# All major Serbian cities (25 cities)
+# All Serbian cities with population > 20K (48 cities)
 ALL_CITIES: list[str] = [
+    # Original 25
     'Beograd', 'Novi Sad', 'Niš', 'Kragujevac', 'Subotica',
     'Zrenjanin', 'Pančevo', 'Čačak', 'Novi Pazar', 'Kraljevo',
     'Smederevo', 'Leskovac', 'Užice', 'Vranje', 'Valjevo',
     'Kruševac', 'Šabac', 'Sombor', 'Požarevac', 'Pirot',
     'Zaječar', 'Kikinda', 'Sremska Mitrovica', 'Jagodina', 'Loznica',
+    # New 23
+    'Vršac', 'Bor', 'Negotin', 'Priboj', 'Ivanjica',
+    'Gornji Milanovac', 'Aranđelovac', 'Smederevska Palanka',
+    'Mladenovac', 'Lazarevac', 'Obrenovac', 'Inđija',
+    'Stara Pazova', 'Ruma', 'Bačka Palanka', 'Apatin',
+    'Temerin', 'Vrbas', 'Bečej', 'Kanjiža', 'Senta', 'Ada',
+    'Novi Miloševo',
 ]
 
 # Hub cities get paired with ALL other cities.
@@ -80,6 +88,30 @@ NEIGHBORS: dict[str, set[str]] = {
     'Sremska Mitrovica': {'Šabac', 'Sombor'},
     'Jagodina': {'Kruševac', 'Požarevac', 'Smederevo'},
     'Loznica': {'Šabac', 'Valjevo', 'Užice'},
+    # New cities — neighbors
+    'Vršac': {'Pančevo', 'Zrenjanin'},
+    'Bor': {'Zaječar', 'Negotin', 'Požarevac'},
+    'Negotin': {'Zaječar', 'Bor'},
+    'Priboj': {'Užice', 'Novi Pazar'},
+    'Ivanjica': {'Čačak', 'Kraljevo', 'Užice'},
+    'Gornji Milanovac': {'Čačak', 'Kragujevac', 'Aranđelovac'},
+    'Aranđelovac': {'Kragujevac', 'Mladenovac', 'Gornji Milanovac'},
+    'Smederevska Palanka': {'Smederevo', 'Kragujevac', 'Mladenovac'},
+    'Mladenovac': {'Aranđelovac', 'Smederevska Palanka'},
+    'Lazarevac': {'Obrenovac', 'Valjevo', 'Aranđelovac'},
+    'Obrenovac': {'Lazarevac', 'Šabac'},
+    'Inđija': {'Stara Pazova', 'Sremska Mitrovica', 'Ruma'},
+    'Stara Pazova': {'Inđija', 'Ruma'},
+    'Ruma': {'Sremska Mitrovica', 'Inđija', 'Stara Pazova'},
+    'Bačka Palanka': {'Sombor', 'Vrbas'},
+    'Apatin': {'Sombor'},
+    'Temerin': {'Vrbas', 'Bečej'},
+    'Vrbas': {'Bačka Palanka', 'Temerin', 'Bečej'},
+    'Bečej': {'Vrbas', 'Temerin', 'Zrenjanin'},
+    'Kanjiža': {'Senta', 'Ada'},
+    'Senta': {'Kanjiža', 'Ada', 'Kikinda'},
+    'Ada': {'Senta', 'Kanjiža'},
+    'Novi Miloševo': {'Kikinda', 'Zrenjanin'},
 }
 
 # Road distances (km) between Serbian cities
@@ -172,6 +204,35 @@ DISTANCES: dict[tuple[str, str], int] = {
     ('Smederevo', 'Jagodina'): 90,
     ('Loznica', 'Užice'): 110,
     ('Novi Pazar', 'Kruševac'): 110,
+    # New cities — distances to hubs
+    ('Beograd', 'Vršac'): 85, ('Beograd', 'Bor'): 240,
+    ('Beograd', 'Negotin'): 260, ('Beograd', 'Priboj'): 280,
+    ('Beograd', 'Ivanjica'): 200, ('Beograd', 'Gornji Milanovac'): 120,
+    ('Beograd', 'Aranđelovac'): 75, ('Beograd', 'Smederevska Palanka'): 85,
+    ('Beograd', 'Mladenovac'): 55, ('Beograd', 'Lazarevac'): 55,
+    ('Beograd', 'Obrenovac'): 30, ('Beograd', 'Inđija'): 40,
+    ('Beograd', 'Stara Pazova'): 30, ('Beograd', 'Ruma'): 65,
+    ('Beograd', 'Bačka Palanka'): 120, ('Beograd', 'Apatin'): 200,
+    ('Beograd', 'Temerin'): 85, ('Beograd', 'Vrbas'): 120,
+    ('Beograd', 'Bečej'): 120, ('Beograd', 'Kanjiža'): 190,
+    ('Beograd', 'Senta'): 175, ('Beograd', 'Ada'): 160,
+    ('Beograd', 'Novi Miloševo'): 130,
+    ('Novi Sad', 'Inđija'): 40, ('Novi Sad', 'Stara Pazova'): 50,
+    ('Novi Sad', 'Ruma'): 60, ('Novi Sad', 'Bačka Palanka'): 40,
+    ('Novi Sad', 'Apatin'): 120, ('Novi Sad', 'Temerin'): 15,
+    ('Novi Sad', 'Vrbas'): 45, ('Novi Sad', 'Bečej'): 60,
+    ('Novi Sad', 'Kanjiža'): 120, ('Novi Sad', 'Senta'): 100,
+    ('Novi Sad', 'Ada'): 95, ('Novi Sad', 'Novi Miloševo'): 80,
+    ('Niš', 'Bor'): 170, ('Niš', 'Negotin'): 200,
+    ('Bor', 'Zaječar'): 50, ('Bor', 'Negotin'): 55,
+    ('Priboj', 'Užice'): 80, ('Priboj', 'Novi Pazar'): 100,
+    ('Ivanjica', 'Čačak'): 45, ('Ivanjica', 'Kraljevo'): 55,
+    ('Gornji Milanovac', 'Čačak'): 35, ('Gornji Milanovac', 'Kragujevac'): 50,
+    ('Aranđelovac', 'Kragujevac'): 55, ('Aranđelovac', 'Mladenovac'): 25,
+    ('Smederevska Palanka', 'Smederevo'): 30, ('Smederevska Palanka', 'Kragujevac'): 60,
+    ('Inđija', 'Stara Pazova'): 15, ('Ruma', 'Sremska Mitrovica'): 20,
+    ('Bačka Palanka', 'Sombor'): 80, ('Vrbas', 'Bečej'): 30,
+    ('Senta', 'Kikinda'): 50, ('Kanjiža', 'Senta'): 15,
 }
 
 # Serbian Cyrillic → Latin transliteration (for matching API city names)
