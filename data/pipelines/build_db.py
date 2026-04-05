@@ -110,11 +110,16 @@ def build() -> None:
 
     has_real_data = gsp_path.exists() or intercity_path.exists() or srbvoz_path.exists()
 
+    novi_sad_path = RAW_DIR / 'novi-sad' / 'lines.json'
+    nis_path = RAW_DIR / 'nis' / 'lines.json'
+
     if has_real_data:
         print("Loading real scraped data...")
         _load_operators(conn)
         _load_intercity(conn, intercity_path, srbvoz_path)
         _load_gsp_lines(conn, gsp_path, gsp_stops_path)
+        _load_city_lines(conn, 'novi-sad', novi_sad_path)
+        _load_city_lines(conn, 'nis', nis_path)
         _load_stations(conn, stations_path)
         _load_gtfs(conn)
     else:
@@ -489,6 +494,41 @@ def _load_gsp_lines(conn: duckdb.DuckDBPyConnection,
             print(f"  Skip line {number}: {e}")
 
     print(f"  Loaded {line_db_id - 1} GSP lines, {stop_db_id - 1} stops")
+
+
+def _load_city_lines(conn: duckdb.DuckDBPyConnection, city: str, lines_path: Path) -> None:
+    """Load city bus lines from a simple lines.json (Novi Sad, Niš, etc.)."""
+    if not lines_path.exists():
+        print(f"  No {city} lines data found, skipping")
+        return
+
+    with open(lines_path, encoding='utf-8') as f:
+        lines = json.load(f)
+
+    # Get next available IDs
+    max_line_id = conn.execute("SELECT COALESCE(MAX(id), 0) FROM city_lines").fetchone()[0]
+    line_db_id = max_line_id + 1
+
+    count = 0
+    for line in lines:
+        number = line.get('number', '')
+        name = line.get('name', '')
+        slug = city_to_slug(f'linija-{number}')
+        line_type = line.get('type', 'bus')
+        color = type_color(line_type)
+
+        try:
+            conn.execute(
+                "INSERT OR IGNORE INTO city_lines (id, city, number, name, slug, type, color) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (line_db_id, city, number, name, slug, line_type, color)
+            )
+            count += 1
+            line_db_id += 1
+        except Exception as e:
+            print(f"  Skip {city} line {number}: {e}")
+
+    print(f"  Loaded {count} {city} lines")
 
 
 def _load_stations(conn: duckdb.DuckDBPyConnection, stations_path: Path) -> None:
