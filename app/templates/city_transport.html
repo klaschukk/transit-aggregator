@@ -26,13 +26,15 @@
 
 <div class="page-title">
   <h1>Gradski prevoz {{ city_label }}</h1>
-  <p class="page-subtitle">{{ lines|length }} linija · {{ stops_with_coords }} stajališta na mapi</p>
+  <p class="page-subtitle">{{ lines|length }} linija{% if stops_with_coords %} · {{ stops_with_coords }} stajališta na mapi{% endif %}</p>
 </div>
 
-<!-- Map -->
+<!-- Map (only if stops have coordinates) -->
+{% if stops_with_coords %}
 <div class="city-map-wrap">
   <div class="city-map" id="cityMap"></div>
 </div>
+{% endif %}
 
 <!-- Search lines -->
 <div class="search-bar">
