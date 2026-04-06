@@ -24,23 +24,55 @@ def about():
 
 @info_bp.route('/kontakt/', methods=['GET', 'POST'])
 def contact():
-    from flask import request
+    from flask import request, current_app
     sent = False
     if request.method == 'POST':
         name = request.form.get('ime', '').strip()
         email = request.form.get('email', '').strip()
         message = request.form.get('poruka', '').strip()
         if name and email and message:
-            # Save to file for now (email integration later)
-            import datetime
-            with open('logs/contact_messages.log', 'a', encoding='utf-8') as f:
-                f.write(f"\n{'='*50}\n")
-                f.write(f"Date: {datetime.datetime.now().isoformat()}\n")
-                f.write(f"Name: {name}\n")
-                f.write(f"Email: {email}\n")
-                f.write(f"Message: {message}\n")
+            # Always log to file
+            import datetime, logging
+            log_path = current_app.root_path + '/../logs/contact_messages.log'
+            try:
+                with open(log_path, 'a', encoding='utf-8') as f:
+                    f.write(f"\n{'='*50}\n")
+                    f.write(f"Date: {datetime.datetime.now().isoformat()}\n")
+                    f.write(f"Name: {name}\nEmail: {email}\n")
+                    f.write(f"Message: {message}\n")
+            except Exception:
+                logging.exception("Failed to write contact log")
+
+            # Telegram notification (if configured)
+            _send_telegram_notification(name, email, message)
+
             sent = True
     return render_template('contact.html', sent=sent)
+
+
+def _send_telegram_notification(name: str, email: str, message: str) -> None:
+    """Send contact form notification via Telegram bot. Fails silently."""
+    from flask import current_app
+    token = current_app.config.get('TELEGRAM_BOT_TOKEN', '')
+    chat_id = current_app.config.get('TELEGRAM_CHAT_ID', '')
+    if not token or not chat_id:
+        return
+    try:
+        import requests as req
+        text = (
+            f"📩 Novo sporocilo sa transit-serbia.com\n\n"
+            f"Ime: {name}\n"
+            f"Email: {email}\n"
+            f"Poruka: {message[:500]}"
+        )
+        req.post(
+            f'https://api.telegram.org/bot{token}/sendMessage',
+            json={'chat_id': chat_id, 'text': text},
+            timeout=5,
+        )
+    except Exception:
+        import logging
+        logging.exception("Telegram notification failed")
 
 
 @info_bp.route('/prevoznici/')

@@ -1,0 +1,157 @@
+"""Integration tests — verify real data renders on pages."""
+
+import json
+import re
+
+
+def test_route_index_has_cards(client):
+    html = client.get("/rute/").data.decode()
+    count = html.count("route-card")
+    assert count > 0, "No route-card on /rute/"
+
+
+def test_route_detail_has_trips(client):
+    html = client.get("/rute/beograd-novi-sad/").data.decode()
+    count = html.count("trip-card")
+    assert count > 0, "No trip-card on route detail"
+
+
+def test_route_detail_has_stats(client):
+    html = client.get("/rute/beograd-novi-sad/").data.decode()
+    assert "stats-strip" in html
+
+
+def test_city_hub_has_lines(client):
+    html = client.get("/gradski/beograd/").data.decode()
+    count = html.count('data-num="')
+    assert count > 0, "No lines on city hub"
+
+
+def test_city_hub_has_map(client):
+    html = client.get("/gradski/beograd/").data.decode()
+    assert "cityMap" in html
+
+
+def test_stop_detail_has_lines(client):
+    html = client.get("/gradski/beograd/stajaliste/sajam/").data.decode()
+    count = html.count("stop-line-row")
+    assert count > 0, "No stop-line-row on stop detail"
+
+
+def test_stop_detail_has_seo_block(client):
+    html = client.get("/gradski/beograd/stajaliste/sajam/").data.decode()
+    assert "seo-block" in html, "No SEO block on stop detail"
+
+
+def test_line_detail_has_stops(client):
+    html = client.get("/gradski/beograd/linija/linija-2a/").data.decode()
+    count = html.count("stop-row")
+    assert count > 0, "No stop-row on line detail"
+
+
+def test_line_detail_has_map(client):
+    html = client.get("/gradski/beograd/linija/linija-2a/").data.decode()
+    assert "lineMap" in html
+
+
+def test_carriers_has_sections(client):
+    html = client.get("/prevoznici/").data.decode()
+    count = html.count("carrier-section")
+    assert count > 0, "No carrier-section on /prevoznici/"
+
+
+def test_carriers_has_route_links(client):
+    html = client.get("/prevoznici/").data.decode()
+    assert "carrier-route-link" in html
+
+
+def test_stations_has_cards(client):
+    html = client.get("/autobuske-stanice/").data.decode()
+    assert "station-card" in html
+
+
+def test_homepage_has_hero(client):
+    html = client.get("/").data.decode()
+    assert "hero__title" in html
+
+
+def test_homepage_has_stats(client):
+    html = client.get("/").data.decode()
+    assert "home-stats" in html
+
+
+def test_homepage_has_popular_routes(client):
+    html = client.get("/").data.decode()
+    assert "home-route" in html
+
+
+def test_city_pair_has_faq(client):
+    html = client.get("/voznja/beograd-do-novi-sad/").data.decode()
+    assert "faq-item" in html
+
+
+def test_city_pair_has_seo_block(client):
+    html = client.get("/voznja/beograd-do-novi-sad/").data.decode()
+    assert "seo-block" in html
+
+
+def test_search_results_has_trips(client):
+    html = client.get("/pretraga/?od=Beograd&do=Novi+Sad").data.decode()
+    # May have trips or empty state depending on time of day
+    assert "trip-card" in html or "empty-state" in html
+
+
+def test_api_arrivals_structure(client):
+    data = json.loads(client.get("/api/stop-arrivals?slug=sajam").data)
+    assert len(data) > 0
+    item = data[0]
+    assert "line" in item
+    assert "mins" in item
+    assert "direction" in item
+    assert isinstance(item["mins"], int)
+
+
+def test_api_arrivals_all_have_color(client):
+    data = json.loads(client.get("/api/stop-arrivals?slug=sajam").data)
+    for item in data:
+        assert item.get("color", "").startswith("#"), f"Bad color: {item}"
+
+
+def test_health_db_true(client):
+    data = json.loads(client.get("/health").data)
+    assert data["db"] is True
+    assert data["status"] == "ok"
+
+
+def test_sitemap_has_line_urls(client):
+    xml = client.get("/sitemap.xml").data.decode()
+    assert "/linija/" in xml
+
+
+def test_sitemap_has_stop_urls(client):
+    xml = client.get("/sitemap.xml").data.decode()
+    assert "/stajaliste/" in xml
+
+
+def test_sitemap_has_city_pair_urls(client):
+    xml = client.get("/sitemap.xml").data.decode()
+    assert "/voznja/" in xml
+
+
+def test_404_page_structure(client):
+    resp = client.get("/does-not-exist-xyz/")
+    assert resp.status_code == 404
+    html = resp.data.decode()
+    assert "<html" in html
+    assert "error-actions" in html or "empty-state" in html
+
+
+def test_gradski_index_has_cities(client):
+    html = client.get("/gradski/").data.decode()
+    assert "Beograd" in html
+
+
+def test_nis_hub_accessible(client):
+    resp = client.get("/gradski/nis/")
+    assert resp.status_code == 200
+    assert "Niš" in resp.data.decode() or "nis" in resp.data.decode()

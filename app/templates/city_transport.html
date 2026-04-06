@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš'} %}
+{% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš', 'kragujevac': 'Kragujevac'} %}
 {% set city_label = city_names.get(city, city|title) %}
-{% set type_labels = {'tram': 'Tramvaj', 'trolleybus': 'Trolejbus', 'night': 'Noćne linije', 'e-bus': 'E-bus', 'bus': 'Autobus'} %}
-{% set type_order = ['tram', 'trolleybus', 'e-bus', 'bus', 'night'] %}
+{% set type_labels = {'tram': 'Tramvaj', 'trolleybus': 'Trolejbus', 'night': 'Noćne linije', 'e-bus': 'E-bus', 'bus': 'Autobus', 'suburban': 'Prigradske linije', 'bg-voz': 'BG:Voz'} %}
+{% set type_order = ['tram', 'trolleybus', 'e-bus', 'bus', 'suburban', 'bg-voz', 'night'] %}
 
 {% block title %}Gradski prevoz {{ city_label }} — linije i stajališta{% endblock %}
 {% block meta_description %}Red vožnje gradskog prevoza u {{ city_label }}u. {{ lines|length }} linija, stajališta i polasci.{% endblock %}
@@ -33,6 +33,10 @@
 {% if stops_with_coords %}
 <div class="city-map-wrap">
   <div class="city-map" id="cityMap"></div>
+</div>
+<div class="schedule-disclaimer">
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><circle cx="8" cy="8" r="7"/><path d="M8 5v3m0 3h.01"/></svg>
+  Vreme dolaska na mapi je procena prema rasporedu. Moguća su odstupanja.
 </div>
 {% endif %}
 
@@ -127,8 +131,15 @@
 (function() {
   /* ── Map ── */
   if (typeof L === 'undefined' || !document.getElementById('cityMap')) return;
+  var cityCoords = {
+    'beograd': [44.8176, 20.4569],
+    'novi-sad': [45.2671, 19.8335],
+    'nis': [43.3209, 21.8958],
+    'kragujevac': [44.0128, 20.9114]
+  };
+  var center = cityCoords['{{ city }}'] || [44.8176, 20.4569];
   var map = L.map('cityMap', { zoomControl: false, attributionControl: false })
-    .setView([44.8176, 20.4569], 13);
+    .setView(center, 13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
   L.control.zoom({ position: 'topright' }).addTo(map);
 

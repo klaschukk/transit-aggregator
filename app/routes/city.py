@@ -21,7 +21,7 @@ def city_index():
     if db_ready():
         row = cached_query_one("SELECT COUNT(*) as c FROM city_lines WHERE city = 'beograd'", ttl=3600)
         cities[0]['lines'] = row['c'] if row else 0
-        for slug, name in [('novi-sad', 'Novi Sad'), ('nis', 'Niš')]:
+        for slug, name in [('novi-sad', 'Novi Sad'), ('nis', 'Niš'), ('kragujevac', 'Kragujevac')]:
             row = cached_query_one("SELECT COUNT(*) as c FROM city_lines WHERE city = ?", [slug], ttl=3600)
             if row and row['c'] > 0:
                 cities.append({'slug': slug, 'name': name, 'desc': f'{row["c"]} linija', 'lines': row['c']})
@@ -30,7 +30,7 @@ def city_index():
 
 @city_bp.route('/gradski/<city>/')
 def city_hub(city: str):
-    if city not in ('beograd', 'novi-sad', 'nis'):
+    if city not in ('beograd', 'novi-sad', 'nis', 'kragujevac'):
         abort(404)
 
     lines = cached_query("""
@@ -228,7 +228,6 @@ def api_stop_arrivals():
         JOIN city_lines cl ON cl.id = cls.line_id
         WHERE cls.stop_id = ?
         ORDER BY CAST(REGEXP_REPLACE(cl.number, '[^0-9]', '', 'g') || '0' AS INTEGER)
-        LIMIT 12
     """, [stop['id']])
 
     if not lines:
@@ -328,7 +327,7 @@ def api_city_stops():
         WHERE lat BETWEEN ? AND ?
           AND lon BETWEEN ? AND ?
           AND lat IS NOT NULL
-        LIMIT 200
+        LIMIT 500
     """, [sw_lat, ne_lat, sw_lon, ne_lon])
 
     return jsonify(stops)

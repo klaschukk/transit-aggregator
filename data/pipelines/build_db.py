@@ -509,6 +509,13 @@ def _load_city_lines(conn: duckdb.DuckDBPyConnection, city: str, lines_path: Pat
     with open(lines_path, encoding='utf-8') as f:
         lines = json.load(f)
 
+    # Load pre-geocoded stop coordinates if available
+    coords_path = lines_path.parent / 'stop_coords.json'
+    stop_coords: dict[str, dict] = {}
+    if coords_path.exists():
+        with open(coords_path, encoding='utf-8') as f:
+            stop_coords = json.load(f)
+
     # Get next available IDs
     max_line_id = conn.execute("SELECT COALESCE(MAX(id), 0) FROM city_lines").fetchone()[0]
     line_db_id = max_line_id + 1
@@ -555,6 +562,11 @@ def _load_city_lines(conn: duckdb.DuckDBPyConnection, city: str, lines_path: Pat
                 stop_name = str(stop_data).strip()
                 lat = None
                 lon = None
+
+            # Enrich from pre-geocoded coords
+            if lat is None and stop_name in stop_coords:
+                lat = stop_coords[stop_name].get('lat')
+                lon = stop_coords[stop_name].get('lon')
 
             if not stop_name:
                 continue

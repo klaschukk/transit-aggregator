@@ -12,6 +12,9 @@ class Config:
     DEBUG = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
     GA_TRACKING_ID = os.environ.get('GA_TRACKING_ID', '')
     ADSENSE_ID = os.environ.get('ADSENSE_ID', '')
+    CONTACT_EMAIL = os.environ.get('CONTACT_EMAIL', '')
+    TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+    TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '')
 
 
 class ProductionConfig(Config):
