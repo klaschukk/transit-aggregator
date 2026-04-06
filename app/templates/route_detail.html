@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ route.from_city }} → {{ route.to_city }} — red vožnje | Prevozni{% endblock %}
-{% block meta_description %}Red vožnje {{ route.from_city }} — {{ route.to_city }}. {{ route.trip_count }} polazaka dnevno{% if operators_on_route %}, prevoznici: {{ operators_on_route|join(', ') }}{% endif %}{% if price_min %}. Cene od {{ price_min }} RSD{% endif %}.{% endblock %}
+{% block meta_description %}Red vožnje {{ route.from_city }} — {{ route.to_city }}. {{ route.trip_count }} polazaka dnevno{% if operators_on_route %}, prevoznici: {{ operators_on_route[:3]|join(', ') }}{% if operators_on_route|length > 3 %} i dr{% endif %}{% endif %}{% if price_min %}. Od {{ price_min }} RSD{% endif %}.{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
