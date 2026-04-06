@@ -252,6 +252,20 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 }
 .data-disclaimer svg { flex-shrink: 0; }
 
+/* Schedule disclaimer */
+.schedule-disclaimer {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px;
+  background: var(--color-bg-alt);
+  border-left: 3px solid var(--color-border);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin: 12px 0;
+  line-height: 1.5;
+}
+.schedule-disclaimer svg { flex-shrink: 0; color: var(--color-text-muted); opacity: .6; }
+
 /* Section */
 .section { margin-bottom: 32px; }
 .section__title { margin-bottom: 16px; font-size: var(--text-lg); }
