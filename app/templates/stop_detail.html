@@ -27,6 +27,11 @@
   </a>
 </div>
 
+{{ breadcrumb([
+  {'url': '/gradski/' ~ city ~ '/', 'label': 'Gradski prevoz ' ~ city_label},
+  {'label': stop.name}
+]) }}
+
 <!-- Stop header card -->
 <div class="stop-hero fade-in">
   {% if stop.lat and stop.lon %}
@@ -154,15 +159,25 @@
 {% endif %}
 <script>
 (function() {
+  function fmtEta(mins) {
+    if (mins <= 1) return { txt: 'sada', cls: 'eta--now' };
+    if (mins < 60) return { txt: mins + ' min', cls: mins <= 10 ? 'eta--soon' : 'eta--later' };
+    var h = Math.floor(mins / 60), m = mins % 60;
+    return { txt: h + 'h ' + (m > 0 ? m + 'min' : ''), cls: 'eta--later' };
+  }
+
   fetch('/api/stop-arrivals?slug={{ stop.slug }}')
     .then(function(r) { return r.json(); })
     .then(function(arrivals) {
       arrivals.forEach(function(a) {
         var el = document.querySelector('[data-line="' + a.line + '"]');
         if (!el) return;
-        var txt = a.mins <= 1 ? 'sada' : a.mins + ' min';
-        var mod = a.mins <= 1 ? 'eta--now' : a.mins <= 10 ? 'eta--soon' : 'eta--later';
-        el.innerHTML = '<span class="eta ' + mod + '">' + txt + '</span>';
+        var f = fmtEta(a.mins);
+        el.innerHTML = '<span class="eta ' + f.cls + '">' + f.txt + '</span>';
+      });
+      /* Lines without ETA data — show dash */
+      document.querySelectorAll('.eta-skeleton').forEach(function(s) {
+        s.parentElement.innerHTML = '<span class="eta eta--later">—</span>';
       });
     })
     .catch(function() {
