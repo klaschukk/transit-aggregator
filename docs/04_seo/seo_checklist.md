@@ -1,4 +1,4 @@
-# SEO Checklist — Transit Serbia
+# SEO Checklist — Prevozni
 
 Pre-launch checklist for Google Search Console and organic search readiness.
 
@@ -7,7 +7,7 @@ Pre-launch checklist for Google Search Console and organic search readiness.
 - [ ] Domain registered and DNS configured
 - [ ] HTTPS certificate installed (Let's Encrypt / Certbot)
 - [ ] Domain resolves correctly (A record → 81.28.248.71)
-- [ ] `config.py` BASE_URL updated from IP to `https://transit-serbia.com`
+- [ ] `config.py` BASE_URL updated from IP to `https://prevozni.com`
 - [ ] systemd Environment updated with BASE_URL
 - [ ] Redirect HTTP → HTTPS (Certbot auto-configures)
 - [ ] Redirect www → non-www (nginx config)

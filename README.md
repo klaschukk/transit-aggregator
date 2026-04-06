@@ -1,4 +1,4 @@
-# Transit Srbija
+# Prevozni
 
 Free public transit aggregator for Serbia — intercity buses/trains + Belgrade city transport.
 
@@ -110,7 +110,7 @@ sudo systemctl status transit
 
 # Health check
 curl http://localhost:5000/health
-# {"status":"ok","db":true,"service":"transit-serbia"}
+# {"status":"ok","db":true,"service":"prevozni"}
 ```
 
 ## License

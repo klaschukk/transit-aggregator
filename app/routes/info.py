@@ -60,7 +60,7 @@ def _send_telegram_notification(name: str, email: str, message: str) -> None:
     try:
         import requests as req
         text = (
-            f"📩 Novo sporocilo sa transit-serbia.com\n\n"
+            f"📩 Novo sporocilo sa prevozni.com\n\n"
             f"Ime: {name}\n"
             f"Email: {email}\n"
             f"Poruka: {message[:500]}"

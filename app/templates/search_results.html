@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{% if from_city and to_city %}{{ from_city }} → {{ to_city }} — Prevoz Srbija{% else %}Pretraga — Prevoz Srbija{% endif %}{% endblock %}
+{% block title %}{% if from_city and to_city %}{{ from_city }} → {{ to_city }} — Prevozni{% else %}Pretraga — Prevozni{% endif %}{% endblock %}
 {% block meta_description %}{% if from_city and to_city %}Red vožnje od {{ from_city }} do {{ to_city }} — svi polasci, cene karata i prevoznici na jednom mestu.{% else %}Pretražite red vožnje autobusa i vozova između gradova Srbije. Uporedite polaske, cene i prevoznike. Besplatno.{% endif %}{% endblock %}
 
 {% block head_extra %}

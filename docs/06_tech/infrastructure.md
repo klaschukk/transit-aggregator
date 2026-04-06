@@ -74,7 +74,7 @@ sudo systemctl start transit
 
 - [ ] nginx reverse proxy (порт 80/443)
 - [ ] SSL сертификат (Let's Encrypt или Cloudflare)
-- [ ] Домен transit-serbia.com
+- [ ] Домен prevozni.com
 - [ ] Cloudflare CDN
 - [ ] Docker image для портативности
 - [ ] CI/CD (GitLab → auto deploy по тегам)

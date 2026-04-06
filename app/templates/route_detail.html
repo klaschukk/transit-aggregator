@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ route.from_city }} → {{ route.to_city }} — red vožnje | Transit Srbija{% endblock %}
+{% block title %}{{ route.from_city }} → {{ route.to_city }} — red vožnje | Prevozni{% endblock %}
 {% block meta_description %}Red vožnje {{ route.from_city }} — {{ route.to_city }}. {{ route.trip_count }} polazaka dnevno{% if operators_on_route %}, prevoznici: {{ operators_on_route|join(', ') }}{% endif %}{% if price_min %}. Cene od {{ price_min }} RSD{% endif %}.{% endblock %}
 
 {% block head_extra %}

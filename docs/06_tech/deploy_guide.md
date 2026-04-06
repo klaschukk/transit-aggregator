@@ -1,4 +1,4 @@
-# Deploy Guide — Transit Serbia
+# Deploy Guide — Prevozni
 
 ## Current Setup
 
@@ -15,11 +15,11 @@
 ### DNS Records
 
 ```
-A     transit-serbia.com      → 81.28.248.71
-A     www.transit-serbia.com  → 81.28.248.71
+A     prevozni.com      → 81.28.248.71
+A     www.prevozni.com  → 81.28.248.71
 ```
 
-Wait for propagation (check with `dig transit-serbia.com`).
+Wait for propagation (check with `dig prevozni.com`).
 
 ### nginx Configuration
 
@@ -30,11 +30,11 @@ sudo nano /etc/nginx/sites-available/transit
 ```nginx
 server {
     listen 80;
-    server_name transit-serbia.com www.transit-serbia.com;
+    server_name prevozni.com www.prevozni.com;
 
     # Redirect www → non-www
-    if ($host = www.transit-serbia.com) {
-        return 301 https://transit-serbia.com$request_uri;
+    if ($host = www.prevozni.com) {
+        return 301 https://prevozni.com$request_uri;
     }
 
     location / {
@@ -63,7 +63,7 @@ sudo systemctl reload nginx
 
 ```bash
 sudo apt install certbot python3-certbot-nginx
-sudo certbot --nginx -d transit-serbia.com -d www.transit-serbia.com
+sudo certbot --nginx -d prevozni.com -d www.prevozni.com
 ```
 
 Certbot auto-renews via systemd timer. Verify:
@@ -84,7 +84,7 @@ Add/update the `Environment` lines:
 ```ini
 [Service]
 Environment=FLASK_ENV=production
-Environment=BASE_URL=https://transit-serbia.com
+Environment=BASE_URL=https://prevozni.com
 Environment=SECRET_KEY=<generate-a-random-key>
 Environment=GA_TRACKING_ID=G-XXXXXXXXXX
 Environment=ADSENSE_ID=ca-pub-XXXXXXXXXX
@@ -98,15 +98,15 @@ sudo systemctl restart transit
 ### Verify
 
 ```bash
-curl -s https://transit-serbia.com/health
-curl -s https://transit-serbia.com/sitemap.xml | head -5
-curl -s https://transit-serbia.com/robots.txt
+curl -s https://prevozni.com/health
+curl -s https://prevozni.com/sitemap.xml | head -5
+curl -s https://prevozni.com/robots.txt
 ```
 
 ## 4. Google Analytics
 
 1. Go to https://analytics.google.com
-2. Create property for `transit-serbia.com`
+2. Create property for `prevozni.com`
 3. Get Measurement ID (format: `G-XXXXXXXXXX`)
 4. Set `GA_TRACKING_ID=G-XXXXXXXXXX` in systemd Environment
 5. Restart: `sudo systemctl restart transit`
@@ -117,12 +117,12 @@ GA code in `base.html` is conditional — only loads when `GA_TRACKING_ID` is se
 ## 5. Google Search Console
 
 1. Go to https://search.google.com/search-console/
-2. Add property: `https://transit-serbia.com`
+2. Add property: `https://prevozni.com`
 3. Verify ownership via DNS TXT record:
    ```
-   TXT  transit-serbia.com  "google-site-verification=XXXX"
+   TXT  prevozni.com  "google-site-verification=XXXX"
    ```
-4. Submit sitemap: `https://transit-serbia.com/sitemap.xml`
+4. Submit sitemap: `https://prevozni.com/sitemap.xml`
 5. Request indexing for homepage
 6. Monitor Coverage report — fix any errors within 48h
 

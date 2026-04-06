@@ -1,25 +1,25 @@
-# Domain Switch: transit-serbia.com
+# Domain Switch: prevozni.com
 
 ## Steps
 
-1. **Buy domain** transit-serbia.com
+1. **Buy domain** prevozni.com
 
 2. **DNS** — add A record:
    ```
-   transit-serbia.com     A  81.28.248.71
-   www.transit-serbia.com A  81.28.248.71
+   prevozni.com     A  81.28.248.71
+   www.prevozni.com A  81.28.248.71
    ```
 
 3. **Set BASE_URL** in systemd:
    ```bash
    sudo systemctl edit transit
    # Add under [Service]:
-   # Environment="BASE_URL=https://transit-serbia.com"
+   # Environment="BASE_URL=https://prevozni.com"
    ```
 
 4. **SSL certificate** via certbot:
    ```bash
-   sudo certbot --nginx -d transit-serbia.com -d www.transit-serbia.com
+   sudo certbot --nginx -d prevozni.com -d www.prevozni.com
    ```
 
 5. **Restart**:
@@ -29,11 +29,11 @@
    sudo nginx -s reload
    ```
 
-6. **Verify** — all should show `https://transit-serbia.com`:
+6. **Verify** — all should show `https://prevozni.com`:
    ```bash
-   curl -s https://transit-serbia.com/ | grep canonical
-   curl -s https://transit-serbia.com/sitemap.xml | head -5
-   curl -s https://transit-serbia.com/robots.txt
+   curl -s https://prevozni.com/ | grep canonical
+   curl -s https://prevozni.com/sitemap.xml | head -5
+   curl -s https://prevozni.com/robots.txt
    ```
 
 ## What changes automatically
