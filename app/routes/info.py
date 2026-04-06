@@ -22,9 +22,25 @@ def about():
     return render_template('about.html', stats=stats)
 
 
-@info_bp.route('/kontakt/')
+@info_bp.route('/kontakt/', methods=['GET', 'POST'])
 def contact():
-    return render_template('contact.html')
+    from flask import request
+    sent = False
+    if request.method == 'POST':
+        name = request.form.get('ime', '').strip()
+        email = request.form.get('email', '').strip()
+        message = request.form.get('poruka', '').strip()
+        if name and email and message:
+            # Save to file for now (email integration later)
+            import datetime
+            with open('logs/contact_messages.log', 'a', encoding='utf-8') as f:
+                f.write(f"\n{'='*50}\n")
+                f.write(f"Date: {datetime.datetime.now().isoformat()}\n")
+                f.write(f"Name: {name}\n")
+                f.write(f"Email: {email}\n")
+                f.write(f"Message: {message}\n")
+            sent = True
+    return render_template('contact.html', sent=sent)
 
 
 @info_bp.route('/prevoznici/')

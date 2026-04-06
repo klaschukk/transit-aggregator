@@ -18,9 +18,16 @@
   <p class="page-subtitle">Imate pitanje, sugestiju ili ste primetili grešku?</p>
 </div>
 
+{% if sent %}
+<div class="alert alert--success fade-in">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M5 13l4 4L19 7"/></svg>
+  Vaša poruka je uspešno poslata. Odgovorićemo u roku od 24 sata.
+</div>
+{% endif %}
+
 <div class="contact-layout">
   <!-- Contact form -->
-  <form class="contact-form" action="#" method="post">
+  <form class="contact-form" action="/kontakt/" method="post">
     <div class="contact-form__fields">
       <div class="contact-form__group">
         <label class="contact-form__label" for="contactName">Ime</label>

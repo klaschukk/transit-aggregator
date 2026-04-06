@@ -968,6 +968,15 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   line-height: 1.6;
 }
 
+/* Alert */
+.alert {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px; border-radius: var(--radius-md);
+  font-size: var(--text-sm); font-weight: 600; margin-bottom: 24px;
+}
+.alert--success { background: var(--color-primary-light); color: var(--color-primary-dark); }
+.alert--success svg { color: var(--color-primary); flex-shrink: 0; }
+
 /* ETA badges */
 .eta { font-weight: 700; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
 .eta--now { color: #e53935; }
