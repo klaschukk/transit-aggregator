@@ -7,7 +7,8 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TravelAction","fromLocation":{"@type":"City","name":"{{ from_city }}"},"toLocation":{"@type":"City","name":"{{ to_city }}"}}
 </script>
-{% else %}
+{% endif %}
+{% if not route or not trips %}
 <meta name="robots" content="noindex, follow">
 {% endif %}
 {% endblock %}

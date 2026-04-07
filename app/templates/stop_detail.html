@@ -2,8 +2,8 @@
 {% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš'} %}
 {% set city_label = city_names.get(city, city|title) %}
 
-{% block title %}Stajalište {{ stop.name }} — {{ city_label }} | Prevozni{% endblock %}
-{% block meta_description %}Stajalište {{ stop.name }} u {{ city_label }}u — red vožnje i polasci.{% if stop_info and stop_info.line_count %} {{ stop_info.line_count }} linija ({{ stop_info.line_types|join(', ') }}).{% endif %}{% if stop_info and stop_info.first_departure %} Polasci od {{ stop_info.first_departure }} do {{ stop_info.last_departure }}.{% endif %} Prevozni.com{% endblock %}
+{% block title %}Stajalište {{ stop.name|truncate(30, True, '…') }} — {{ city_label }} | Prevozni{% endblock %}
+{% block meta_description %}Stajalište {{ stop.name }} u {{ city_label }}u — red vožnje i polasci.{% if stop_info and stop_info.line_count %} {{ stop_info.line_count }} linija ({{ stop_info.line_types[:3]|join(', ') }}{% if stop_info.line_types|length > 3 %} i dr.{% endif %}).{% endif %}{% if stop_info and stop_info.first_departure %} Polasci od {{ stop_info.first_departure }} do {{ stop_info.last_departure }}.{% endif %} Prevozni.com{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">

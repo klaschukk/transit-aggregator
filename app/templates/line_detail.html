@@ -2,7 +2,7 @@
 {% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš'} %}
 {% set city_label = city_names.get(city, city|title) %}
 
-{% block title %}Linija {{ line.number }}: {{ line.name|truncate(35, True, '…') }} — {{ city_label }} | Prevozni{% endblock %}
+{% block title %}Linija {{ line.number }}: {{ line.name|truncate(25, True, '…') }} — {{ city_label }} | Prevozni{% endblock %}
 {% block meta_description %}Red vožnje linije {{ line.number }} ({{ line_type_label }}) u {{ city_label }}u. {{ stops|length if stops else 0 }} stajališta.{% if first_dep and last_dep %} Polasci od {{ first_dep }} do {{ last_dep }}.{% endif %}{% endblock %}
 
 {% block head_extra %}

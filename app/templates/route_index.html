@@ -34,7 +34,7 @@
 {% if routes %}
 <div class="route-grid" id="routesList">
   {% for route in routes %}
-  <a href="/rute/{{ route.slug }}/" class="route-card" data-text="{{ route.from_city }} {{ route.to_city }}">
+  <a href="/rute/{{ route.slug }}/" class="route-card{% if loop.index > 50 %} route-card--extra{% endif %}" data-text="{{ route.from_city }} {{ route.to_city }}"{% if loop.index > 50 %} hidden{% endif %}>
     <div class="route-card__cities">
       <span class="route-card__from">{{ route.from_city }}</span>
       <span class="route-card__arrow">
@@ -50,6 +50,11 @@
   </a>
   {% endfor %}
 </div>
+{% if routes|length > 50 %}
+<div id="showMoreWrap">
+  <button class="btn btn--outline" id="showMoreBtn" type="button">Prikaži još {{ routes|length - 50 }} ruta</button>
+</div>
+{% endif %}
 <div id="routesEmpty" hidden>
   {{ empty_state(icon='search', text='Nema rezultata za ovaj upit') }}
 </div>
@@ -67,20 +72,37 @@
   var empty = document.getElementById('routesEmpty');
   var info = document.getElementById('filterInfo');
   var countEl = document.getElementById('filterCount');
+  var showBtn = document.getElementById('showMoreBtn');
+  var showWrap = document.getElementById('showMoreWrap');
+  var expanded = false;
+
+  /* Show more button */
+  if (showBtn) {
+    showBtn.addEventListener('click', function() {
+      expanded = true;
+      cards.forEach(function(c) { c.hidden = false; });
+      showWrap.hidden = true;
+    });
+  }
+
   if (!filter || !cards.length) return;
   filter.addEventListener('input', function() {
     var q = filter.value.toLowerCase();
     var visible = 0;
     cards.forEach(function(c) {
-      var ok = !q || c.dataset.text.toLowerCase().includes(q);
-      c.hidden = !ok;
-      if (ok) visible++;
+      var isExtra = c.classList.contains('route-card--extra');
+      var matchesSearch = !q || c.dataset.text.toLowerCase().includes(q);
+      /* When searching, show all matching; when not searching, respect expanded state */
+      var show = q ? matchesSearch : (expanded || !isExtra);
+      c.hidden = !show;
+      if (show) visible++;
     });
     if (empty) empty.hidden = visible > 0;
     if (info && countEl) {
       info.hidden = !q;
       countEl.textContent = visible;
     }
+    if (showWrap) showWrap.hidden = !!q || expanded;
   });
 })();
 </script>

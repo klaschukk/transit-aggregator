@@ -3,7 +3,7 @@
 {% block meta_description %}Red vožnje {{ route.from_city }} — {{ route.to_city }}. {{ route.trip_count }} polazaka dnevno{% if operators_on_route %}, prevoznici: {{ operators_on_route[:3]|join(', ') }}{% if operators_on_route|length > 3 %} i dr{% endif %}{% endif %}{% if price_min %}. Od {{ price_min }} RSD{% endif %}.{% endblock %}
 
 {% block head_extra %}
-{% if request.args.get('dan') %}
+{% if request.args.get('dan') or not trips %}
 <meta name="robots" content="noindex, follow">
 {% endif %}
 <script type="application/ld+json">
