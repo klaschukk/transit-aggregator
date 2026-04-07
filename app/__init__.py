@@ -25,12 +25,13 @@ def create_app(config_name: str | None = None) -> Flask:
     from flask_compress import Compress
     Compress(app)
 
-    # Static files caching
+    # Cache headers
     @app.after_request
     def add_cache_headers(response):
-        if 'static' in (response.headers.get('Content-Location') or '') or \
-           request.path.startswith('/static/'):
+        if request.path.startswith('/static/'):
             response.headers['Cache-Control'] = 'public, max-age=86400'
+        elif 'text/html' in (response.content_type or ''):
+            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         return response
 
     # Error handlers
