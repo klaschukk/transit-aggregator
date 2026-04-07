@@ -107,8 +107,8 @@ transit/
 | Таблица | Записей | Описание |
 |---------|---------|----------|
 | city_lines | 651 | Линии: Белград 514, Нови Сад 61, Ниш 53, Крагуевац 23 |
-| city_stops | 4522 | Остановки (97% с координатами) |
-| city_line_stops | 22727 | Привязка остановок к линиям |
+| city_stops | 4522 | Остановки (96% с координатами) |
+| city_line_stops | 22727 | Привязка остановок к линиям (98% linked) |
 | routes | 335 | Межгородские маршруты (48 городов) |
 | trips | 2838 | Рейсы (время, цена, оператор) — dedup из 3 источников |
 | operators | 70 | Перевозчики (Lasta, Kavim, Jugoprevoz, Srbija Voz и др.) |
@@ -143,10 +143,10 @@ Enrich: cron 3:00 AM
 
 - [x] Flask + DuckDB + 335 маршрутов, 2838 рейсов, 70 операторов
 - [x] 4 города: Белград (514), Нови Сад (61), Ниш (53), Крагуевац (23 линии)
-- [x] 4522 остановки (97% GPS), 22727 line-stop links
+- [x] 4522 остановки (96% GPS), 22727 line-stop links (98% linked)
 - [x] Единый CSS дизайн-система (app.css)
 - [x] 23 шаблона + 8 partials
-- [x] SEO: JSON-LD, OG, BreadcrumbList, FAQ schema, sitemap (4632 URL)
+- [x] SEO: JSON-LD, OG, BreadcrumbList, FAQ schema, sitemap (4542 URL)
 - [x] Мобильная адаптивность (44px touch targets, focus-visible)
 - [x] Скраперы: bgprevoz, gspns, busticket4.me, srbijavoz, polazak.rs, naissus, kragujevac
 - [x] Автокомплит городов (API)

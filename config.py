@@ -15,6 +15,7 @@ class Config:
     CONTACT_EMAIL = os.environ.get('CONTACT_EMAIL', '')
     TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
     TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '')
+    YANDEX_VERIFICATION = os.environ.get('YANDEX_VERIFICATION', '')
 
 
 class ProductionConfig(Config):
