@@ -191,13 +191,14 @@ def sitemap():
         for line in lines:
             pages.append(url(f'/gradski/{line["city"]}/linija/{line["slug"]}/', 'weekly', '0.5'))
 
-        # Stops: only those with 2+ lines (meaningful content, avoids thin pages)
+        # Stops: only those with 2+ lines AND coordinates (meaningful content)
         stops = cached_query("""
-            SELECT cs.slug, cs.city
+            SELECT DISTINCT cs.slug, cs.city
             FROM city_stops cs
             JOIN city_line_stops cls ON cls.stop_id = cs.id
+            WHERE cs.lat IS NOT NULL
             GROUP BY cs.slug, cs.city
-            HAVING COUNT(cls.line_id) >= 2
+            HAVING COUNT(DISTINCT cls.line_id) >= 2
         """, ttl=3600)
         for s in stops:
             pages.append(url(f'/gradski/{s["city"]}/stajaliste/{s["slug"]}/', 'weekly', '0.4'))

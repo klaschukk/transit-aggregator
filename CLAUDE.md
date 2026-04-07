@@ -3,11 +3,11 @@
 ## Обзор
 
 **Prevozni** — бесплатный агрегатор общественного транспорта Сербии.
-Городской (GSP Белград) + межгородские автобусы/поезда. Programmatic SEO.
+Городской (4 города) + межгородские автобусы/поезда. Programmatic SEO.
 
-- **URL:** http://81.28.248.71:5000/ (домен пока нет)
-- **Стек:** Flask + DuckDB + Gunicorn + systemd
-- **Цель:** 3000+ индексируемых страниц, AdSense монетизация
+- **URL:** https://prevozni.com
+- **Стек:** Flask + DuckDB + Gunicorn + nginx + Cloudflare
+- **Цель:** 4600+ индексируемых страниц, AdSense монетизация
 
 ## Язык
 
@@ -20,16 +20,19 @@
 |------|-----------|
 | Backend | Flask (Python 3.12) |
 | БД | DuckDB (read-only, file-based) |
-| WSGI | Gunicorn (4 workers) |
+| WSGI | Gunicorn (2 workers, max-requests 500) |
+| Reverse proxy | nginx (Cloudflare-only access) |
+| SSL | Cloudflare (Full mode) |
 | Process | systemd (transit.service) |
-| Compression | flask-compress (gzip) |
-| Данные | Скраперы (bgprevoz, gspns, busticket4.me, srbijavoz, lasta, polazak) |
+| Compression | flask-compress (gzip) + nginx gzip |
+| Analytics | Umami |
+| Данные | Скраперы (bgprevoz, gspns, busticket4.me, srbijavoz, polazak.rs) |
 
 ## URL архитектура
 
 ```
 /                                    — главная (hero + поиск + популярные)
-/rute/                               — каталог маршрутов
+/rute/                               — каталог маршрутов (50 + "Prikaži još")
 /rute/{slug}/                        — маршрут (расписание, цены)
 /voznja/{from}-do-{to}/              — SEO городская пара + FAQ
 /pretraga/?od=X&do=Y                 — результаты поиска
@@ -41,9 +44,9 @@
 /o-nama/                             — о проекте
 /kontakt/                            — контакт
 /api/cities?q=                       — автокомплит городов
-/api/city-stops?sw_lat&sw_lon&ne_lat&ne_lon — остановки на карте
+/api/city-stops?sw_lat&sw_lon&ne_lat&ne_lon — остановки на карте (limit 500)
 /api/stop-arrivals?slug=             — ETA линий на остановке
-/sitemap.xml                         — 3304 URL
+/sitemap.xml                         — 4632 URL
 /robots.txt
 /health                              — healthcheck (db status)
 ```
@@ -53,12 +56,12 @@
 ```
 transit/
 ├── CLAUDE.md
-├── config.py               ← Config + ProductionConfig (BASE_URL, EUR_RSD_RATE)
+├── config.py               ← Config + ProductionConfig (BASE_URL=https://prevozni.com)
 ├── run.py                   ← dev-сервер
 ├── requirements.txt         ← Flask, DuckDB, flask-compress, requests, bs4
 ├── app/
 │   ├── __init__.py          ← create_app(), error handlers, gzip, caching
-│   ├── db.py                ← query(), query_one(), db_ready()
+│   ├── db.py                ← query(), query_one(), cached_query(), thread-local conn
 │   ├── routes/
 │   │   ├── main.py          ← /, /pretraga/, /api/cities, sitemap, robots, health
 │   │   ├── intercity.py     ← /rute/, /rute/{slug}/, /voznja/
@@ -75,17 +78,19 @@ transit/
 │   │   ├── about.html, contact.html, 404.html, 500.html
 │   │   └── 23 шаблона всего
 │   └── static/
-│       ├── css/app.css      ← единый CSS (~1650 строк), mobile-first, 0 !important
+│       ├── css/app.css      ← единый CSS, mobile-first, 0 !important
 │       └── favicon.svg
 ├── data/
 │   ├── pipelines/
-│   │   ├── build_db.py      ← собирает transit.duckdb из raw/
+│   │   ├── build_db.py      ← собирает transit.duckdb из raw/ (3 источника + dedup)
 │   │   ├── scrape_gsp.py    ← GSP Белград (bgprevoz.rs API)
 │   │   ├── scrape_gspns.py  ← JGSP Нови Сад (gspns.co.rs)
 │   │   ├── scrape_gspns_schedule.py ← расписание Нови Сад
-│   │   ├── scrape_intercity.py ← busticket4.me API
-│   │   ├── scrape_srbvoz.py ← srbijavoz.rs
-│   │   ├── scrape_lasta.py  ← lasta.rs / polazak.rs
+│   │   ├── scrape_intercity.py ← busticket4.me API (48 городов, 562 пары)
+│   │   ├── scrape_srbvoz.py ← srbijavoz.rs (поезда)
+│   │   ├── scrape_lasta.py  ← polazak.rs (302 маршрута, 68 операторов)
+│   │   ├── scrape_naissus.py ← JGP Ниш (jgpnis.rs + Overpass)
+│   │   ├── scrape_kragujevac.py ← Крагуевац (Overpass API)
 │   │   ├── enrich_stops_coords.py ← OSM Overpass + Nominatim
 │   │   └── import_gtfs.py   ← GTFS feed import (data.gov.rs)
 │   ├── dbs/transit.duckdb   ← рабочая БД (gitignored)
@@ -94,29 +99,32 @@ transit/
 │   ├── healthcheck.sh       ← cron */5 min, auto-restart
 │   └── run_enrich_night.sh  ← cron 3:00 AM
 ├── logs/                    ← access.log, error.log
-└── tests/                   ← pytest (WIP)
+└── tests/                   ← pytest (325 тестов)
 ```
 
 ## БД (DuckDB)
 
 | Таблица | Записей | Описание |
 |---------|---------|----------|
-| city_lines | 651 | Линии: Белград 514, Нови Сад 61, Ниш 53 + пригород |
-| city_stops | 2867 | Остановки (94% с координатами) |
-| city_line_stops | 12938 | Привязка остановок к линиям |
-| routes | 334 | Межгородские маршруты |
-| trips | 2840 | Рейсы (время, цена, оператор) |
-| operators | 70 | Перевозчики (Lasta, Niš-Ekspres, Srbija Voz и др.) |
+| city_lines | 651 | Линии: Белград 514, Нови Сад 61, Ниш 53, Крагуевац 23 |
+| city_stops | 4522 | Остановки (97% с координатами) |
+| city_line_stops | 22727 | Привязка остановок к линиям |
+| routes | 335 | Межгородские маршруты (48 городов) |
+| trips | 2838 | Рейсы (время, цена, оператор) — dedup из 3 источников |
+| operators | 70 | Перевозчики (Lasta, Kavim, Jugoprevoz, Srbija Voz и др.) |
 | stations | 10 | ЖД станции |
 | gtfs_trips | 93991 | GTFS расписание (Белград + Нови Сад) |
-| gtfs_stop_times | 2317651 | Времена прибытия (96% mapped) |
+| gtfs_stop_times | 2317651 | Времена прибытия (94% mapped) |
 
 ## Инфраструктура
 
 ```
+Домен: prevozni.com (Cloudflare DNS + proxy)
 Сервер: 81.28.248.71 (montiko, Подгорица)
+Reverse proxy: nginx (Cloudflare-only IPs, security headers)
+SSL: Cloudflare Full mode
 Service: systemd transit.service (FLASK_ENV=production)
-Workers: gunicorn -w 4
+Workers: gunicorn -w 2 --max-requests 500 --timeout 30
 Logs: logs/access.log, logs/error.log
 Healthcheck: cron */5 min → auto-restart
 Enrich: cron 3:00 AM
@@ -133,19 +141,22 @@ Enrich: cron 3:00 AM
 
 ## Текущий статус (апрель 2026)
 
-- [x] Flask + DuckDB + 334 маршрута, 2840 рейсов
-- [x] 3 города: Белград (514), Нови Сад (61), Ниш (53 линии)
+- [x] Flask + DuckDB + 335 маршрутов, 2838 рейсов, 70 операторов
+- [x] 4 города: Белград (514), Нови Сад (61), Ниш (53), Крагуевац (23 линии)
+- [x] 4522 остановки (97% GPS), 22727 line-stop links
 - [x] Единый CSS дизайн-система (app.css)
 - [x] 23 шаблона + 8 partials
-- [x] SEO: JSON-LD, OG, BreadcrumbList, FAQ schema, sitemap (3304 URL)
+- [x] SEO: JSON-LD, OG, BreadcrumbList, FAQ schema, sitemap (4632 URL)
 - [x] Мобильная адаптивность (44px touch targets, focus-visible)
-- [x] Скраперы: bgprevoz, gspns, busticket4.me, srbijavoz, lasta, polazak
+- [x] Скраперы: bgprevoz, gspns, busticket4.me, srbijavoz, polazak.rs, naissus, kragujevac
 - [x] Автокомплит городов (API)
-- [x] Карта с остановками (Leaflet)
+- [x] Карта с остановками (Leaflet, limit 500)
 - [x] GTFS расписание Белград (87K trips) + Нови Сад (6.5K trips)
 - [x] ETA на остановках (GTFS + headway fallback)
-- [x] systemd + gunicorn + gzip + healthcheck
+- [x] nginx + Cloudflare + gunicorn + gzip + healthcheck
 - [x] Connection pooling + TTL cache (0.04s response)
-- [x] 150+ тестов (pytest)
-- [ ] Домен + Cloudflare
+- [x] 325 тестов (pytest)
+- [x] Домен prevozni.com + Cloudflare SSL
+- [x] Umami analytics
+- [x] Telegram bot notifications (контакт-форма)
 - [ ] Google AdSense
