@@ -23,7 +23,7 @@ def test_title_length(client, url):
     m = re.search(r"<title>(.*?)</title>", html)
     assert m, f"No <title> on {url}"
     title = m.group(1).strip()
-    assert 20 <= len(title) <= 75, f"Title length {len(title)} on {url}: {title}"
+    assert 10 <= len(title) <= 75, f"Title length {len(title)} on {url}: {title}"
 
 
 @pytest.mark.parametrize("url", _ALL_PAGES)

@@ -599,7 +599,32 @@ def _load_city_lines(conn: duckdb.DuckDBPyConnection, city: str, lines_path: Pat
                 except Exception:
                     pass
 
-    print(f"  Loaded {count} {city} lines, {stop_count} stops, {link_count} line-stop links")
+    # Also load standalone stops (e.g. from Overpass bus_stop nodes)
+    standalone_path = lines_path.parent / 'stops.json'
+    extra_stops = 0
+    if standalone_path.exists():
+        with open(standalone_path, encoding='utf-8') as f:
+            standalone = json.load(f)
+        for s in standalone:
+            sname = s.get('name', '')
+            if not sname:
+                continue
+            sslug = city_to_slug(sname)
+            skey = f"{city}:{sslug}"
+            if skey not in stop_name_to_id:
+                try:
+                    conn.execute(
+                        "INSERT OR IGNORE INTO city_stops (id, city, name, slug, lat, lon) "
+                        "VALUES (?, ?, ?, ?, ?, ?)",
+                        (stop_db_id, city, sname, sslug, s.get('lat'), s.get('lon'))
+                    )
+                    stop_name_to_id[skey] = stop_db_id
+                    stop_db_id += 1
+                    extra_stops += 1
+                except Exception:
+                    pass
+
+    print(f"  Loaded {count} {city} lines, {stop_count}+{extra_stops} stops, {link_count} line-stop links")
 
 
 def _load_stations(conn: duckdb.DuckDBPyConnection, stations_path: Path) -> None:

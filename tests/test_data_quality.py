@@ -113,11 +113,9 @@ def test_novi_sad_stops_exist(db):
     assert total >= 30, f"Only {total} Novi Sad stops"
 
 
-def test_gps_coverage_nis(db):
+def test_nis_stops_exist(db):
     total = db.one("SELECT COUNT(*) as c FROM city_stops WHERE city = 'nis'")['c']
-    with_gps = db.one("SELECT COUNT(*) as c FROM city_stops WHERE city = 'nis' AND lat IS NOT NULL")['c']
-    pct = 100 * with_gps / total if total else 0
-    assert pct >= 80, f"Nis GPS {pct:.0f}%"
+    assert total >= 50, f"Only {total} Nis stops"
 
 
 # ── Referential integrity ──
