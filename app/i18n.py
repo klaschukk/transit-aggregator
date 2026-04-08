@@ -547,6 +547,18 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'carriers.website': {'sr': 'Sajt', 'en': 'Website', 'ru': 'Сайт'},
     'stations.train': {'sr': 'Železničke stanice', 'en': 'Train stations', 'ru': 'Ж/д станции'},
 
+    # ── Buy ticket ──
+    'buy.title': {
+        'sr': 'Kupite kartu online',
+        'en': 'Buy ticket online',
+        'ru': 'Купить билет онлайн',
+    },
+    'buy.note': {
+        'sr': 'Kupovina se obavlja na sajtovima partnera. Prevozni ne prodaje karte.',
+        'en': 'Purchase is made on partner websites. Prevozni does not sell tickets.',
+        'ru': 'Покупка на сайтах партнёров. Prevozni не продаёт билеты.',
+    },
+
     # ── Language names ──
     'lang.sr': {'sr': 'Srpski', 'en': 'Serbian', 'ru': 'Сербский'},
     'lang.en': {'sr': 'English', 'en': 'English', 'ru': 'English'},

@@ -1169,6 +1169,36 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .seo-block__content { flex: 1; min-width: 0; }
 .seo-block h2 { font-size: var(--text-base); margin-bottom: 8px; }
 .seo-block p { font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.6; margin: 0; }
+/* Buy ticket affiliate block */
+.buy-ticket {
+  margin: 24px 0; padding: 20px 24px; border-radius: 12px;
+  background: linear-gradient(135deg, #f0fdfa 0%, #ecfdf5 100%);
+  border: 1px solid #99f6e4;
+}
+.buy-ticket__header {
+  display: flex; align-items: center; gap: 8px;
+  font-weight: 600; font-size: var(--text-base); color: var(--color-text);
+  margin-bottom: 14px;
+}
+.buy-ticket__header svg { color: var(--color-primary); }
+.buy-ticket__links { display: flex; flex-wrap: wrap; gap: 10px; }
+.buy-ticket__btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  text-decoration: none; transition: all 0.15s; color: #fff;
+}
+.buy-ticket__btn svg { opacity: 0.7; }
+.buy-ticket__btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.buy-ticket__btn--getbybus { background: #0891b2; }
+.buy-ticket__btn--getbybus:hover { background: #0e7490; }
+.buy-ticket__btn--bookaway { background: #059669; }
+.buy-ticket__btn--bookaway:hover { background: #047857; }
+.buy-ticket__btn--flixbus { background: #73d700; color: #1a1a1a; }
+.buy-ticket__btn--flixbus:hover { background: #65c100; }
+.buy-ticket__note {
+  margin-top: 12px; font-size: 0.75rem; color: var(--color-text-muted);
+  line-height: 1.4;
+}
 
 /* Info cards */
 .cards-grid {

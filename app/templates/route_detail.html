@@ -58,6 +58,31 @@
   {% endfor %}
 </div>
 
+<!-- Buy ticket — always visible -->
+{% set _from_slug = route.from_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
+{% set _to_slug = route.to_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
+<div class="buy-ticket fade-in">
+  <div class="buy-ticket__header">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2 2 2 0 010 4 2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 00-2-2 2 2 0 010-4 2 2 0 002-2V7a2 2 0 00-2-2H5z"/></svg>
+    <span>{{ _('buy.title') }}</span>
+  </div>
+  <div class="buy-ticket__links">
+    <a href="https://getbybus.com/en/bus-from-{{ _from_slug }}-to-{{ _to_slug }}" target="_blank" rel="noopener nofollow" class="buy-ticket__btn buy-ticket__btn--getbybus">
+      GetByBus
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg>
+    </a>
+    <a href="https://www.bookaway.com/routes/{{ _from_slug }}-to-{{ _to_slug }}" target="_blank" rel="noopener nofollow" class="buy-ticket__btn buy-ticket__btn--bookaway">
+      Bookaway
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg>
+    </a>
+    <a href="https://shop.flixbus.com/search?departureCity={{ route.from_city|urlencode }}&arrivalCity={{ route.to_city|urlencode }}" target="_blank" rel="noopener nofollow" class="buy-ticket__btn buy-ticket__btn--flixbus">
+      FlixBus
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg>
+    </a>
+  </div>
+  <p class="buy-ticket__note">{{ _('buy.note') }}</p>
+</div>
+
 {% if trips %}
 
 <!-- Time-of-day filter + trip count -->

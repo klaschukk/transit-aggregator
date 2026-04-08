@@ -123,6 +123,7 @@ def build() -> None:
         _load_city_lines(conn, 'nis', nis_path)
         _load_city_lines(conn, 'kragujevac', kragujevac_path)
         _load_stations(conn, stations_path)
+        _load_balkan(conn)
         _load_gtfs(conn)
         _load_city_schedule(conn, 'novi-sad')
         _cleanup(conn)
@@ -797,6 +798,50 @@ def _load_gtfs(conn: duckdb.DuckDBPyConnection) -> None:
     mapped = conn.execute("SELECT COUNT(*) FROM gtfs_stop_times WHERE city_stop_id IS NOT NULL").fetchone()[0]
     unique_stops = conn.execute("SELECT COUNT(DISTINCT city_stop_id) FROM gtfs_stop_times WHERE city_stop_id IS NOT NULL").fetchone()[0]
     print(f"  Loaded {st_count} stop_times ({mapped} mapped [{mapped*100//st_count}%], {unique_stops} unique stops)")
+
+
+def _load_balkan(conn: duckdb.DuckDBPyConnection) -> None:
+    """Load international Balkan routes from balkan_routes.json."""
+    balkan_path = RAW_DIR / 'balkan_routes.json'
+    if not balkan_path.exists():
+        print("  No Balkan routes data, skipping")
+        return
+
+    with open(balkan_path, encoding='utf-8') as f:
+        routes = json.load(f)
+
+    max_route_id = conn.execute("SELECT COALESCE(MAX(id), 0) FROM routes").fetchone()[0]
+    route_id = max_route_id + 1
+
+    existing_slugs = set(r[0] for r in conn.execute("SELECT slug FROM routes").fetchall())
+    count = 0
+
+    for route in routes:
+        slug = route['slug']
+        if slug in existing_slugs:
+            continue
+        try:
+            conn.execute(
+                "INSERT INTO routes (id, slug, from_city, to_city, from_city_slug, to_city_slug, distance_km, type) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (route_id, slug, route['from_city'], route['to_city'],
+                 route['from_city_slug'], route['to_city_slug'],
+                 route.get('distance_km', 0), 'intercity')
+            )
+            # Add a placeholder trip so cleanup doesn't remove these
+            max_trip = conn.execute("SELECT COALESCE(MAX(id), 0) FROM trips").fetchone()[0] + 1
+            conn.execute(
+                "INSERT INTO trips (id, route_id, operator_id, departure_time, arrival_time, duration_min, price_rsd, days_of_week, is_active) "
+                "VALUES (?, ?, NULL, '08:00', '16:00', ?, 0, '1234567', true)",
+                (max_trip, route_id, route.get('distance_km', 0) * 60 // 80 if route.get('distance_km') else 0)
+            )
+            existing_slugs.add(slug)
+            route_id += 1
+            count += 1
+        except Exception:
+            pass
+
+    print(f"  Loaded {count} international Balkan routes")
 
 
 def _load_city_schedule(conn: duckdb.DuckDBPyConnection, city: str) -> None:
