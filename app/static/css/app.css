@@ -2209,3 +2209,42 @@ main { animation: fadeInUp .25s ease both; }
     --color-border: #334155;
   } */
 }
+
+/* ── UX Polish ── */
+
+/* Clickable cards — cursor pointer */
+a[class*="card"], a[class*="route"], a[class*="link"],
+.dest-card, .home-route, .home-city-card, .see-also__card,
+.line-card, .stop-row, .filter-chip, .time-chip,
+.home-lines__item { cursor: pointer; }
+
+/* Smooth hover lift for all cards */
+.dest-card, .see-also__card, .home-city-card, .home-route {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.dest-card:hover, .see-also__card:hover, .home-city-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+/* Reduced motion — respect user preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .fade-in { opacity: 1; transform: none; }
+}
+
+/* Better focus-visible for keyboard nav */
+a:focus-visible, button:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Smooth page feel */
+::selection { background: var(--color-primary-light); color: var(--color-text); }
