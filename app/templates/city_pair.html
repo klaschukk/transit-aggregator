@@ -23,7 +23,7 @@
 
 {{ breadcrumb([
   {'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')},
-  {'url': '/rute/', 'label': 'Sve rute'},
+  {'url': lang_prefix ~ '/rute/', 'label': _('route.all_routes')},
   {'label': from_city ~ ' → ' ~ to_city}
 ]) }}
 
@@ -33,7 +33,7 @@
     {% if route %}{{ route.trip_count|default(0) }} polazaka dnevno{% if route.distance_km %} · {{ route.distance_km }} km{% endif %}{% endif %}
     {% if route and route.min_price_rsd %} · od {{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }}€{% endif %}
   </p>
-  <a href="/voznja/{{ to_city|lower|replace(' ','-') }}-do-{{ from_city|lower|replace(' ','-') }}/" class="reverse-route">
+  <a href="{{ lang_prefix }}/voznja/{{ to_city|lower|replace(' ','-') }}-do-{{ from_city|lower|replace(' ','-') }}/" class="reverse-route">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
     {{ to_city }} → {{ from_city }}
   </a>
@@ -43,7 +43,7 @@
 
 {{ stats_strip([
   {'value': route.distance_km|default(0), 'label': 'km', 'icon': 'distance'},
-  {'value': route.trip_count|default(0), 'label': 'polazaka/dan', 'icon': 'schedule'},
+  {'value': route.trip_count|default(0), 'label': _('route.per_day'), 'icon': 'schedule'},
 ] + ([{'value': (route.min_price_rsd / config.EUR_RSD_RATE)|round|int ~ '€', 'label': 'od', 'icon': 'price'}] if route.min_price_rsd else [])) }}
 
 <button class="btn btn--outline filter-toggle" id="filterToggle">
@@ -64,7 +64,7 @@
 </div>
 
 {% elif route %}
-<a href="/rute/{{ route.slug }}/" class="btn btn--primary">Pogledaj sve polaske →</a>
+<a href="{{ lang_prefix }}/rute/{{ route.slug }}/" class="btn btn--primary">Pogledaj sve polaske →</a>
 {% endif %}
 
 <!-- Route summary (unique per route) -->

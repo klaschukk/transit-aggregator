@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Gradski prevoz u Srbiji — Prevozni{% endblock %}
-{% block meta_description %}Gradski prevoz u Srbiji — linije, stajališta i red vožnje. Beograd, Novi Sad, Niš. Autobus, tramvaj, trolejbus na jednom mestu.{% endblock %}
+{% block title %}{{ _('city_index.title') }} — Prevozni{% endblock %}
+{% block meta_description %}{{ _('city_index.title') }} — linije, stajališta i red vožnje. Beograd, Novi Sad, Niš. Autobus, tramvaj, trolejbus na jednom mestu.{% endblock %}
 
 {% block content %}
 
@@ -8,7 +8,7 @@
 {{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': 'Gradski prevoz'}]) }}
 
 <div class="page-title fade-in">
-  <h1>Gradski prevoz u Srbiji</h1>
+  <h1>{{ _('city_index.title') }}</h1>
   <p class="page-subtitle">Linije, stajališta i red vožnje</p>
 </div>
 

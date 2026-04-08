@@ -64,7 +64,7 @@
     {% if op.routes %}
     <div class="carrier-section__routes">
       {% for r in op.routes %}
-      <a href="/rute/{{ r.slug }}/" class="carrier-route-link">
+      <a href="{{ lang_prefix }}/rute/{{ r.slug }}/" class="carrier-route-link">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
         {{ r.from_city }} — {{ r.to_city }}
       </a>

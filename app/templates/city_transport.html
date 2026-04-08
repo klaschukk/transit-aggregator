@@ -69,7 +69,7 @@
       <h2 class="line-group__title">{{ type_labels[t] }}</h2>
       <div class="line-grid">
         {% for line in group %}
-        <a href="/gradski/{{ city }}/linija/{{ line.slug }}/"
+        <a href="{{ lang_prefix }}/gradski/{{ city }}/linija/{{ line.slug }}/"
            class="line-chip"
            data-num="{{ line.number }}"
            data-name="{{ line.name }}"
@@ -172,7 +172,7 @@
           if (arrivals.length > 6) html += '<span class="stop-popup__badge" style="background:#94a3b8">+' + (arrivals.length - 6) + '</span>';
           html += '</div>';
         }
-        html += '<a class="stop-popup__more" href="/gradski/{{ city }}/stajaliste/' + slug + '/">Polasci →</a>';
+        html += '<a class="stop-popup__more" href="{{ lang_prefix }}/gradski/{{ city }}/stajaliste/' + slug + '/">Polasci →</a>';
         html += '</div>';
         marker.setPopupContent(html);
       })

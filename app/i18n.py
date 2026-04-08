@@ -500,6 +500,53 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'stop.lines_here': {'sr': 'Linije na ovom stajalištu', 'en': 'Lines at this stop', 'ru': 'Линии на этой остановке'},
     'stop.next_arrivals': {'sr': 'Sledeći polasci', 'en': 'Next departures', 'ru': 'Ближайшие отправления'},
 
+    # ── Route detail / search ──
+    'route.daily_departures': {'sr': 'polazaka dnevno', 'en': 'departures daily', 'ru': 'рейсов в день'},
+    'route.per_day': {'sr': 'polazaka/dan', 'en': 'departures/day', 'ru': 'рейсов/день'},
+    'route.shown_of': {'sr': 'Prikazano', 'en': 'Shown', 'ru': 'Показано'},
+    'route.of': {'sr': 'od', 'en': 'of', 'ru': 'из'},
+    'route.km': {'sr': 'km', 'en': 'km', 'ru': 'км'},
+    'route.from_price': {'sr': 'od', 'en': 'from', 'ru': 'от'},
+    'route.see_reverse': {
+        'sr': 'Pogledajte i obrnuti smer',
+        'en': 'See also the reverse direction',
+        'ru': 'Смотрите также обратное направление',
+    },
+    'route.all_routes': {'sr': 'Sve rute', 'en': 'All routes', 'ru': 'Все маршруты'},
+    'route.filter_all': {'sr': 'Svi polasci', 'en': 'All departures', 'ru': 'Все рейсы'},
+    'route.workday': {'sr': 'Radnim danom', 'en': 'Weekdays', 'ru': 'Будни'},
+    'route.weekend': {'sr': 'Vikend', 'en': 'Weekend', 'ru': 'Выходные'},
+
+    # ── Search page ──
+    'search.departures_found': {'sr': 'polazaka', 'en': 'departures', 'ru': 'рейсов'},
+    'search.no_results_text': {
+        'sr': 'Nismo pronašli direktne polaske za ovaj pravac.',
+        'en': 'No direct departures found for this route.',
+        'ru': 'Прямых рейсов по этому маршруту не найдено.',
+    },
+
+    # ── Line detail ──
+    'line.timeline': {'sr': 'Trasa linije', 'en': 'Line route', 'ru': 'Маршрут линии'},
+    'line.schedule_title': {'sr': 'Red vožnje', 'en': 'Schedule', 'ru': 'Расписание'},
+    'line.departures_from': {'sr': 'Polasci od', 'en': 'Departures from', 'ru': 'Отправление от'},
+
+    # ── Stop detail ──
+    'stop.title': {'sr': 'Stajalište', 'en': 'Stop', 'ru': 'Остановка'},
+    'stop.on_map': {'sr': 'na mapi', 'en': 'on map', 'ru': 'на карте'},
+    'stop.nearby': {'sr': 'Obližnja stajališta', 'en': 'Nearby stops', 'ru': 'Ближайшие остановки'},
+
+    # ── City index ──
+    'city_index.title': {
+        'sr': 'Gradski prevoz u Srbiji',
+        'en': 'City transport in Serbia',
+        'ru': 'Городской транспорт Сербии',
+    },
+
+    # ── Carriers / Stations ──
+    'carriers.routes_count': {'sr': 'ruta', 'en': 'routes', 'ru': 'маршрутов'},
+    'carriers.website': {'sr': 'Sajt', 'en': 'Website', 'ru': 'Сайт'},
+    'stations.train': {'sr': 'Železničke stanice', 'en': 'Train stations', 'ru': 'Ж/д станции'},
+
     # ── Language names ──
     'lang.sr': {'sr': 'Srpski', 'en': 'Serbian', 'ru': 'Сербский'},
     'lang.en': {'sr': 'English', 'en': 'English', 'ru': 'English'},
