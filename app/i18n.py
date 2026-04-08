@@ -403,6 +403,103 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Главная',
     },
 
+    # ── Contact page ──
+    'contact.title': {'sr': 'Kontakt', 'en': 'Contact', 'ru': 'Контакт'},
+    'contact.subtitle': {
+        'sr': 'Imate pitanje, sugestiju ili ste primetili grešku?',
+        'en': 'Have a question, suggestion, or found an error?',
+        'ru': 'Есть вопрос, предложение или нашли ошибку?',
+    },
+    'contact.name': {'sr': 'Ime', 'en': 'Name', 'ru': 'Имя'},
+    'contact.name_ph': {'sr': 'Vaše ime', 'en': 'Your name', 'ru': 'Ваше имя'},
+    'contact.email': {'sr': 'Email', 'en': 'Email', 'ru': 'Email'},
+    'contact.message': {'sr': 'Poruka', 'en': 'Message', 'ru': 'Сообщение'},
+    'contact.message_ph': {
+        'sr': 'Opišite vaše pitanje ili sugestiju...',
+        'en': 'Describe your question or suggestion...',
+        'ru': 'Опишите ваш вопрос или предложение...',
+    },
+    'contact.send': {'sr': 'Pošalji', 'en': 'Send', 'ru': 'Отправить'},
+    'contact.response_time': {
+        'sr': 'Odgovaramo u roku od',
+        'en': 'We respond within',
+        'ru': 'Отвечаем в течение',
+    },
+    'contact.hours': {'sr': '24 sata', 'en': '24 hours', 'ru': '24 часов'},
+
+    # ── About page ──
+    'about.title': {'sr': 'O nama', 'en': 'About us', 'ru': 'О нас'},
+    'about.mission': {
+        'sr': 'Prevozni prikuplja i objedinjuje podatke iz različitih izvora kako bi vam uštedeo vreme pri planiranju putovanja kroz Srbiju.',
+        'en': 'Prevozni collects and aggregates data from various sources to save you time when planning travel through Serbia.',
+        'ru': 'Prevozni собирает и объединяет данные из различных источников, чтобы сэкономить ваше время при планировании поездок по Сербии.',
+    },
+    'about.disclaimer_title': {'sr': 'Napomena', 'en': 'Disclaimer', 'ru': 'Примечание'},
+    'about.disclaimer': {
+        'sr': 'Ovaj sajt prikuplja podatke iz javno dostupnih izvora i ne garantuje njihovu tačnost. Pre putovanja obavezno proverite red vožnje direktno kod prevoznika pre putovanja. Prevozni ne prodaje karte niti posreduje u prodaji prevoznih usluga.',
+        'en': 'This site collects data from publicly available sources and does not guarantee its accuracy. Always check the schedule directly with the carrier before traveling. Prevozni does not sell tickets.',
+        'ru': 'Сайт собирает данные из открытых источников и не гарантирует их точность. Перед поездкой обязательно проверяйте расписание у перевозчика. Prevozni не продает билеты.',
+    },
+
+    # ── See also / shared sections ──
+    'see_also.title': {'sr': 'Pogledajte još', 'en': 'See also', 'ru': 'Смотрите также'},
+    'see_also.all_routes': {'sr': 'Sve međugradske rute', 'en': 'All intercity routes', 'ru': 'Все междугородние маршруты'},
+    'see_also.all_routes_desc': {
+        'sr': 'Autobus i voz između gradova Srbije',
+        'en': 'Bus and train between Serbian cities',
+        'ru': 'Автобус и поезд между городами Сербии',
+    },
+    'see_also.city_beograd': {'sr': 'Gradski prevoz Beograd', 'en': 'Belgrade city transport', 'ru': 'Городской транспорт Белград'},
+    'see_also.city_desc': {'sr': 'Linije, stajališta, mapa', 'en': 'Lines, stops, map', 'ru': 'Линии, остановки, карта'},
+    'see_also.about': {'sr': 'O nama', 'en': 'About us', 'ru': 'О нас'},
+    'see_also.about_desc': {'sr': 'Misija i izvori podataka', 'en': 'Mission and data sources', 'ru': 'Миссия и источники данных'},
+
+    # ── Route pages ──
+    'route.schedule': {'sr': 'Red vožnje', 'en': 'Schedule', 'ru': 'Расписание'},
+    'route.reverse': {
+        'sr': 'Pogledajte i obrnuti smer',
+        'en': 'See the reverse direction',
+        'ru': 'Смотрите обратное направление',
+    },
+
+    # ── Search results ──
+    'search.title': {'sr': 'Pretraga', 'en': 'Search', 'ru': 'Поиск'},
+    'search.results_for': {'sr': 'Rezultati pretrage', 'en': 'Search results', 'ru': 'Результаты поиска'},
+    'search.no_results': {'sr': 'Nema rezultata', 'en': 'No results', 'ru': 'Нет результатов'},
+
+    # ── Error pages ──
+    'error.404_title': {'sr': 'Stranica nije pronađena', 'en': 'Page not found', 'ru': 'Страница не найдена'},
+    'error.404_text': {
+        'sr': 'Stranica koju tražite ne postoji ili je uklonjena.',
+        'en': 'The page you are looking for does not exist or has been removed.',
+        'ru': 'Страница, которую вы ищете, не существует или была удалена.',
+    },
+    'error.500_title': {'sr': 'Došlo je do greške', 'en': 'Something went wrong', 'ru': 'Произошла ошибка'},
+    'error.500_text': {
+        'sr': 'Pokušajte ponovo ili se vratite na početnu',
+        'en': 'Try again or go back to the homepage',
+        'ru': 'Попробуйте снова или вернитесь на главную',
+    },
+
+    # ── Carriers page ──
+    'carriers.title': {'sr': 'Prevoznici u Srbiji', 'en': 'Carriers in Serbia', 'ru': 'Перевозчики Сербии'},
+    'carriers.bus': {'sr': 'Autobuski prevoznici', 'en': 'Bus carriers', 'ru': 'Автобусные перевозчики'},
+    'carriers.train': {'sr': 'Železnički prevoznici', 'en': 'Train carriers', 'ru': 'Железнодорожные перевозчики'},
+
+    # ── Stations page ──
+    'stations.title': {'sr': 'Autobuske i železničke stanice', 'en': 'Bus and train stations', 'ru': 'Автобусные и ж/д станции'},
+
+    # ── Line detail ──
+    'line.stops': {'sr': 'stajališta', 'en': 'stops', 'ru': 'остановок'},
+    'line.direction_a': {'sr': 'Smer A', 'en': 'Direction A', 'ru': 'Направление А'},
+    'line.direction_b': {'sr': 'Smer B', 'en': 'Direction B', 'ru': 'Направление Б'},
+    'line.first_departure': {'sr': 'Prvi polazak', 'en': 'First departure', 'ru': 'Первый рейс'},
+    'line.last_departure': {'sr': 'Poslednji polazak', 'en': 'Last departure', 'ru': 'Последний рейс'},
+
+    # ── Stop detail ──
+    'stop.lines_here': {'sr': 'Linije na ovom stajalištu', 'en': 'Lines at this stop', 'ru': 'Линии на этой остановке'},
+    'stop.next_arrivals': {'sr': 'Sledeći polasci', 'en': 'Next departures', 'ru': 'Ближайшие отправления'},
+
     # ── Language names ──
     'lang.sr': {'sr': 'Srpski', 'en': 'Serbian', 'ru': 'Сербский'},
     'lang.en': {'sr': 'English', 'en': 'English', 'ru': 'English'},

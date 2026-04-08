@@ -5,7 +5,7 @@
 {% block content %}
 
 {% from '_partials/_breadcrumb.html' import breadcrumb %}
-{{ breadcrumb([{'url': '/', 'label': 'Početna'}, {'label': 'Gradski prevoz'}]) }}
+{{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': 'Gradski prevoz'}]) }}
 
 <div class="page-title fade-in">
   <h1>Gradski prevoz u Srbiji</h1>

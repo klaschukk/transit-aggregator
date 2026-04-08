@@ -1,24 +1,23 @@
 {% extends "base.html" %}
-{% block title %}O nama — Prevozni{% endblock %}
-{% block meta_description %}Prevozni — besplatni agregator javnog prevoza u Srbiji. Red vožnje autobusa, vozova i gradskog prevoza na jednom mestu. Bez registracije.{% endblock %}
+{% block title %}{{ _('about.title') }} — Prevozni{% endblock %}
+{% block meta_description %}{{ _('about.mission') }}{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Organization","name":"Prevozni","url":"{{ config.BASE_URL }}/","description":"Besplatni agregator javnog prevoza u Srbiji","areaServed":{"@type":"Country","name":"Serbia"}}
+{"@context":"https://schema.org","@type":"Organization","name":"Prevozni","url":"{{ config.BASE_URL }}/","description":"{{ _('footer.desc') }}","areaServed":{"@type":"Country","name":"Serbia"}}
 </script>
 {% endblock %}
 
 {% block content %}
 
 {% from '_partials/_breadcrumb.html' import breadcrumb %}
-{{ breadcrumb([{'url': '/', 'label': 'Početna'}, {'label': 'O nama'}]) }}
+{{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': _('about.title')}]) }}
 
 <div class="page-title">
-  <h1>O nama</h1>
-  <p class="page-subtitle">Besplatni agregator javnog prevoza u Srbiji</p>
+  <h1>{{ _('about.title') }}</h1>
+  <p class="page-subtitle">{{ _('footer.desc') }}</p>
 </div>
 
-<!-- Mission -->
 <section class="about-mission">
   <div class="about-mission__icon">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
@@ -27,100 +26,52 @@
     </svg>
   </div>
   <div class="about-mission__text">
-    <h2>Naša misija</h2>
-    <p>Sve informacije o javnom prevozu u Srbiji — na jednom mestu, besplatno i bez registracije.
-       Međugradski autobus, voz, gradski prevoz Beograda — pretražite, uporedite i putujte sa pouzdanim
-       informacijama.</p>
-    <p>Prevozni prikuplja i objedinjuje podatke iz različitih izvora kako bi vam uštedeo vreme
-       i olakšao planiranje putovanja.</p>
+    <p>{{ _('about.mission') }}</p>
   </div>
 </section>
 
-<!-- Data sources -->
 <section class="section">
-  <h2 class="section__title">Izvori podataka</h2>
-  <div class="about-sources">
-    <div class="about-source">
-      <div class="about-source__icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
-          <rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/>
-          <circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/>
-        </svg>
-      </div>
-      <h3 class="about-source__name">GSP Beograd</h3>
-      <p class="about-source__desc">Gradski prevoz Beograda — linije autobusa, tramvaja, trolejbusa i stajališta.</p>
-    </div>
-    <div class="about-source">
-      <div class="about-source__icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
-          <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
-          <line x1="4" y1="22" x2="4" y2="15"/>
-        </svg>
-      </div>
-      <h3 class="about-source__name">Srbija Voz</h3>
-      <p class="about-source__desc">Železnički prevoz — redovi vožnje vozova između gradova Srbije.</p>
-    </div>
-    <div class="about-source">
-      <div class="about-source__icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
-          <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/>
-          <circle cx="12" cy="10" r="3"/>
-        </svg>
-      </div>
-      <h3 class="about-source__name">Autobuske stanice</h3>
-      <p class="about-source__desc">Međugradski autobusi — polasci, dolasci, cene karata i prevoznici.</p>
-    </div>
-  </div>
-</section>
-
-<!-- Stats -->
-<section class="section">
-  <h2 class="section__title">U brojkama</h2>
   <div class="about-stats">
     <div class="about-stat">
       <div class="about-stat__value">{{ stats.routes }}</div>
-      <div class="about-stat__label">Međugradskih ruta</div>
+      <div class="about-stat__label">{{ _('common.routes') }}</div>
     </div>
     <div class="about-stat">
       <div class="about-stat__value">{{ stats.lines }}</div>
-      <div class="about-stat__label">Gradskih linija</div>
+      <div class="about-stat__label">{{ _('common.lines') }}</div>
     </div>
     <div class="about-stat">
       <div class="about-stat__value">{{ stats.stops }}</div>
-      <div class="about-stat__label">Stajališta</div>
+      <div class="about-stat__label">{{ _('common.stops') }}</div>
     </div>
     <div class="about-stat">
       <div class="about-stat__value">{{ stats.operators }}</div>
-      <div class="about-stat__label">Prevoznika</div>
+      <div class="about-stat__label">{{ _('footer.carriers') }}</div>
     </div>
   </div>
 </section>
 
-<!-- Disclaimer -->
 <section class="section">
   <div class="seo-block">
-    <h2>Napomena</h2>
-    <p>Podaci prikazani na ovom sajtu su informativnog karaktera. Uvek proverite tačan red vožnje
-       direktno kod prevoznika pre putovanja. Prevozni ne prodaje karte niti posreduje u
-       prodaji — samo prikazujemo javno dostupne informacije.</p>
+    <h2>{{ _('about.disclaimer_title') }}</h2>
+    <p>{{ _('about.disclaimer') }}</p>
   </div>
 </section>
 
-<!-- See also -->
 <section class="see-also">
-  <h2 class="see-also__title">Pogledajte još</h2>
+  <h2 class="see-also__title">{{ _('see_also.title') }}</h2>
   <div class="see-also__grid">
-    <a href="/rute/" class="see-also__card">
-      <span class="see-also__card-title">Sve međugradske rute</span>
-      <span class="see-also__card-meta">Autobus i voz između gradova Srbije</span>
+    <a href="{{ lang_prefix }}/rute/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('see_also.all_routes') }}</span>
+      <span class="see-also__card-meta">{{ _('see_also.all_routes_desc') }}</span>
     </a>
-    <a href="/gradski/beograd/" class="see-also__card">
-      <span class="see-also__card-title">Gradski prevoz Beograd</span>
-      <span class="see-also__card-meta">Linije, stajališta, mapa</span>
+    <a href="{{ lang_prefix }}/gradski/beograd/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('see_also.city_beograd') }}</span>
+      <span class="see-also__card-meta">{{ _('see_also.city_desc') }}</span>
     </a>
-    <a href="/kontakt/" class="see-also__card">
-      <span class="see-also__card-title">Kontakt</span>
-      <span class="see-also__card-meta">Pitanja i sugestije</span>
+    <a href="{{ lang_prefix }}/kontakt/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('contact.title') }}</span>
+      <span class="see-also__card-meta">{{ _('contact.subtitle') }}</span>
     </a>
   </div>
 </section>

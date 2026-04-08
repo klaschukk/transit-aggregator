@@ -87,13 +87,13 @@
     {{ search_form(from_city=from_city, to_city=to_city) }}
   </div>
   <div class="see-also__grid">
-    <a href="/rute/" class="see-also__card">
-      <span class="see-also__card-title">Sve međugradske rute</span>
+    <a href="{{ lang_prefix }}/rute/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('see_also.all_routes') }}</span>
       <span class="see-also__card-meta">Pregledajte sve dostupne linije</span>
     </a>
-    <a href="/gradski/beograd/" class="see-also__card">
-      <span class="see-also__card-title">Gradski prevoz Beograd</span>
-      <span class="see-also__card-meta">Linije, stajališta, mapa</span>
+    <a href="{{ lang_prefix }}/gradski/beograd/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('see_also.city_beograd') }}</span>
+      <span class="see-also__card-meta">{{ _('see_also.city_desc') }}</span>
     </a>
   </div>
 </section>
@@ -117,7 +117,7 @@
   <h2 class="section__title">Popularne rute</h2>
   <div class="popular-grid">
     {% for route in popular_routes %}
-    <a href="/pretraga/?od={{ route.from_city|urlencode }}&do={{ route.to_city|urlencode }}" class="popular-card">
+    <a href="{{ lang_prefix }}/pretraga/?od={{ route.from_city|urlencode }}&do={{ route.to_city|urlencode }}" class="popular-card">
       <span class="popular-card__from">{{ route.from_city }}</span>
       <span class="popular-card__arrow">→</span>
       <span class="popular-card__to">{{ route.to_city }}</span>

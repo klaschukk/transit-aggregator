@@ -12,7 +12,7 @@
 
 {% from '_partials/_breadcrumb.html' import breadcrumb %}
 {% from '_partials/_empty_state.html' import empty_state %}
-{{ breadcrumb([{'url': '/', 'label': 'Početna'}, {'label': 'Prevoznici'}]) }}
+{{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': 'Prevoznici'}]) }}
 
 <div class="page-title fade-in">
   <h1>Prevoznici</h1>

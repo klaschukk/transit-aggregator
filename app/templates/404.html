@@ -41,8 +41,8 @@
   </div>
 
   <h1 class="error-page__code">404</h1>
-  <p class="error-page__title">Stranica nije pronađena</p>
-  <p class="error-page__sub">Izgleda da je autobus skrenuo pogrešno. Proverite URL ili probajte pretragu.</p>
+  <p class="error-page__title">{{ _('error.404_title') }}</p>
+  <p class="error-page__sub">{{ _('error.404_text') }}</p>
 
   <!-- Search on 404 -->
   <div class="error-page__search">
@@ -51,9 +51,9 @@
   </div>
 
   <div class="error-actions">
-    <a href="/" class="btn btn--primary">Početna</a>
-    <a href="/rute/" class="btn btn--outline">Sve rute</a>
-    <a href="/gradski/beograd/" class="btn btn--outline">Gradski prevoz</a>
+    <a href="{{ lang_prefix }}/" class="btn btn--primary">{{ _('breadcrumb.home') }}</a>
+    <a href="{{ lang_prefix }}/rute/" class="btn btn--outline">{{ _('nav.all_routes') }}</a>
+    <a href="{{ lang_prefix }}/gradski/beograd/" class="btn btn--outline">{{ _('nav.city_transport') }}</a>
   </div>
 </div>
 

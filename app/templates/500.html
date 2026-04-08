@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Greška — Prevozni{% endblock %}
+{% block title %}{{ _('error.500_title') }} — Prevozni{% endblock %}
 
 {% block content %}
 {% from '_partials/_empty_state.html' import empty_state %}
-{{ empty_state(icon='bus', text='Došlo je do greške', sub='Pokušajte ponovo ili se vratite na početnu') }}
+{{ empty_state(icon='bus', text=_('error.500_title'), sub=_('error.500_text')) }}
 <div class="error-actions">
-  <a href="/" class="btn btn--primary">Početna</a>
+  <a href="{{ lang_prefix }}/" class="btn btn--primary">{{ _('breadcrumb.home') }}</a>
 </div>
 {% endblock %}

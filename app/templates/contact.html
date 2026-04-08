@@ -1,59 +1,57 @@
 {% extends "base.html" %}
-{% block title %}Kontakt — Prevozni{% endblock %}
-{% block meta_description %}Kontaktirajte Prevozni za pitanja o redu vožnje, sugestije ili prijavu grešaka u podacima. Odgovaramo u roku od 24 sata.{% endblock %}
+{% block title %}{{ _('contact.title') }} — Prevozni{% endblock %}
+{% block meta_description %}{{ _('contact.subtitle') }} info@prevozni.com{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"ContactPage","name":"Kontakt — Prevozni","url":"{{ config.BASE_URL }}/kontakt/","mainEntity":{"@type":"Organization","name":"Prevozni","email":"info@prevozni.com"}}
+{"@context":"https://schema.org","@type":"ContactPage","name":"{{ _('contact.title') }} — Prevozni","url":"{{ config.BASE_URL }}/kontakt/","mainEntity":{"@type":"Organization","name":"Prevozni","email":"info@prevozni.com"}}
 </script>
 {% endblock %}
 
 {% block content %}
 
 {% from '_partials/_breadcrumb.html' import breadcrumb %}
-{{ breadcrumb([{'url': '/', 'label': 'Početna'}, {'label': 'Kontakt'}]) }}
+{{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': _('contact.title')}]) }}
 
 <div class="page-title">
-  <h1>Kontakt</h1>
-  <p class="page-subtitle">Imate pitanje, sugestiju ili ste primetili grešku?</p>
+  <h1>{{ _('contact.title') }}</h1>
+  <p class="page-subtitle">{{ _('contact.subtitle') }}</p>
 </div>
 
 {% if sent %}
 <div class="alert alert--success fade-in">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M5 13l4 4L19 7"/></svg>
-  Vaša poruka je uspešno poslata. Odgovorićemo u roku od 24 sata.
+  {{ _('contact.title') }} OK
 </div>
 {% endif %}
 
 <div class="contact-layout">
-  <!-- Contact form -->
-  <form class="contact-form" action="/kontakt/" method="post">
+  <form class="contact-form" action="{{ lang_prefix }}/kontakt/" method="post">
     <div class="contact-form__fields">
       <div class="contact-form__group">
-        <label class="contact-form__label" for="contactName">Ime</label>
+        <label class="contact-form__label" for="contactName">{{ _('contact.name') }}</label>
         <input class="contact-form__input" id="contactName" name="ime" type="text"
-               placeholder="Vaše ime" required>
+               placeholder="{{ _('contact.name_ph') }}" required>
       </div>
       <div class="contact-form__group">
-        <label class="contact-form__label" for="contactEmail">Email</label>
+        <label class="contact-form__label" for="contactEmail">{{ _('contact.email') }}</label>
         <input class="contact-form__input" id="contactEmail" name="email" type="email"
-               placeholder="vas@email.com" required>
+               placeholder="you@email.com" required>
       </div>
       <div class="contact-form__group">
-        <label class="contact-form__label" for="contactMessage">Poruka</label>
+        <label class="contact-form__label" for="contactMessage">{{ _('contact.message') }}</label>
         <textarea class="contact-form__input contact-form__textarea" id="contactMessage"
-                  name="poruka" placeholder="Opišite vaše pitanje ili sugestiju..." rows="5" required></textarea>
+                  name="poruka" placeholder="{{ _('contact.message_ph') }}" rows="5" required></textarea>
       </div>
     </div>
     <button type="submit" class="btn btn--primary contact-form__submit">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
         <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
       </svg>
-      Pošalji
+      {{ _('contact.send') }}
     </button>
   </form>
 
-  <!-- Contact info sidebar -->
   <aside class="contact-info">
     <div class="contact-info__card">
       <div class="contact-info__icon">
@@ -74,28 +72,27 @@
         </svg>
       </div>
       <div>
-        <div class="contact-info__label">Odgovaramo u roku od</div>
-        <div class="contact-info__value">24 sata</div>
+        <div class="contact-info__label">{{ _('contact.response_time') }}</div>
+        <div class="contact-info__value">{{ _('contact.hours') }}</div>
       </div>
     </div>
   </aside>
 </div>
 
-<!-- See also -->
 <section class="see-also">
-  <h2 class="see-also__title">Pogledajte još</h2>
+  <h2 class="see-also__title">{{ _('see_also.title') }}</h2>
   <div class="see-also__grid">
-    <a href="/rute/" class="see-also__card">
-      <span class="see-also__card-title">Sve međugradske rute</span>
-      <span class="see-also__card-meta">Autobus i voz između gradova</span>
+    <a href="{{ lang_prefix }}/rute/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('see_also.all_routes') }}</span>
+      <span class="see-also__card-meta">{{ _('see_also.all_routes_desc') }}</span>
     </a>
-    <a href="/gradski/beograd/" class="see-also__card">
-      <span class="see-also__card-title">Gradski prevoz Beograd</span>
-      <span class="see-also__card-meta">Linije, stajališta, mapa</span>
+    <a href="{{ lang_prefix }}/gradski/beograd/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('see_also.city_beograd') }}</span>
+      <span class="see-also__card-meta">{{ _('see_also.city_desc') }}</span>
     </a>
-    <a href="/o-nama/" class="see-also__card">
-      <span class="see-also__card-title">O nama</span>
-      <span class="see-also__card-meta">Misija i izvori podataka</span>
+    <a href="{{ lang_prefix }}/o-nama/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('about.title') }}</span>
+      <span class="see-also__card-meta">{{ _('see_also.about_desc') }}</span>
     </a>
   </div>
 </section>
