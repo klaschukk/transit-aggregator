@@ -272,6 +272,137 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Точное расписание, без регистрации',
     },
 
+    # ── Benefits section ──
+    'benefits.free': {
+        'sr': '100% besplatno',
+        'en': '100% free',
+        'ru': '100% бесплатно',
+    },
+    'benefits.free_desc': {
+        'sr': 'Bez registracije, bez skrivenih troškova',
+        'en': 'No registration, no hidden fees',
+        'ru': 'Без регистрации, без скрытых платежей',
+    },
+    'benefits.mobile': {
+        'sr': 'Mobilni pristup',
+        'en': 'Mobile friendly',
+        'ru': 'Для мобильных',
+    },
+    'benefits.mobile_desc': {
+        'sr': 'Optimizovano za telefon i tablet',
+        'en': 'Optimized for phone and tablet',
+        'ru': 'Оптимизировано для телефона и планшета',
+    },
+    'benefits.realtime': {
+        'sr': 'Aktuelni podaci',
+        'en': 'Up-to-date data',
+        'ru': 'Актуальные данные',
+    },
+    'benefits.realtime_desc': {
+        'sr': 'Redovno ažurirani redovi vožnje',
+        'en': 'Regularly updated schedules',
+        'ru': 'Регулярно обновляемое расписание',
+    },
+    'benefits.allinone': {
+        'sr': 'Sve na jednom mestu',
+        'en': 'All in one place',
+        'ru': 'Всё в одном месте',
+    },
+    'benefits.allinone_desc': {
+        'sr': 'Autobus, voz, tramvaj — cela Srbija',
+        'en': 'Bus, train, tram — all of Serbia',
+        'ru': 'Автобус, поезд, трамвай — вся Сербия',
+    },
+
+    # ── City transport page ──
+    'city.title': {
+        'sr': 'Gradski prevoz',
+        'en': 'City transport',
+        'ru': 'Городской транспорт',
+    },
+    'city.lines_count': {
+        'sr': 'linija',
+        'en': 'lines',
+        'ru': 'линий',
+    },
+    'city.stops_on_map': {
+        'sr': 'stajališta na mapi',
+        'en': 'stops on map',
+        'ru': 'остановок на карте',
+    },
+    'city.popular_stops': {
+        'sr': 'Popularna stajališta',
+        'en': 'Popular stops',
+        'ru': 'Популярные остановки',
+    },
+    'city.intercity': {
+        'sr': 'Međugradski prevoz',
+        'en': 'Intercity transport',
+        'ru': 'Междугородний транспорт',
+    },
+    'city.all_intercity': {
+        'sr': 'Sve međugradske rute',
+        'en': 'All intercity routes',
+        'ru': 'Все междугородние маршруты',
+    },
+    'city.bus_train_from': {
+        'sr': 'Autobus i voz iz',
+        'en': 'Bus and train from',
+        'ru': 'Автобус и поезд из',
+    },
+    'city.departures_from': {
+        'sr': 'Polasci iz',
+        'en': 'Departures from',
+        'ru': 'Отправления из',
+    },
+    'city.search_dest': {
+        'sr': 'Pretraži destinacije',
+        'en': 'Search destinations',
+        'ru': 'Поиск направлений',
+    },
+    'city.eta_note': {
+        'sr': 'Vreme dolaska na mapi je procena prema rasporedu. Moguća su odstupanja.',
+        'en': 'Arrival times on the map are estimates based on the schedule. Deviations are possible.',
+        'ru': 'Время прибытия на карте — оценка по расписанию. Возможны отклонения.',
+    },
+    'city.search_line': {
+        'sr': 'Broj linije ili naziv...',
+        'en': 'Line number or name...',
+        'ru': 'Номер линии или название...',
+    },
+    'city.all': {
+        'sr': 'Sve',
+        'en': 'All',
+        'ru': 'Все',
+    },
+    'city.tram': {
+        'sr': 'Tramvaj',
+        'en': 'Tram',
+        'ru': 'Трамвай',
+    },
+    'city.trolleybus': {
+        'sr': 'Trolejbus',
+        'en': 'Trolleybus',
+        'ru': 'Троллейбус',
+    },
+    'city.bus': {
+        'sr': 'Autobus',
+        'en': 'Bus',
+        'ru': 'Автобус',
+    },
+    'city.night': {
+        'sr': 'Noćne linije',
+        'en': 'Night lines',
+        'ru': 'Ночные линии',
+    },
+
+    # ── Breadcrumbs ──
+    'breadcrumb.home': {
+        'sr': 'Početna',
+        'en': 'Home',
+        'ru': 'Главная',
+    },
+
     # ── Language names ──
     'lang.sr': {'sr': 'Srpski', 'en': 'Serbian', 'ru': 'Сербский'},
     'lang.en': {'sr': 'English', 'en': 'English', 'ru': 'English'},

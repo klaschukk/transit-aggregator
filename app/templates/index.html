@@ -123,7 +123,7 @@
           </div>
           <div class="home-city-card__info">
             <div class="home-city-card__name">{{ c.label }}</div>
-            <div class="home-city-card__desc">{{ c.line_count }} linija{% if c.stop_count %} · {{ c.stop_count }} stajališta{% endif %}</div>
+            <div class="home-city-card__desc">{{ c.line_count }} {{ _('city.lines_count') }}{% if c.stop_count %} · {{ c.stop_count }} {{ _('common.stops') }}{% endif %}</div>
           </div>
         </a>
         {% endfor %}
@@ -149,23 +149,23 @@
     <div class="home-benefits__grid">
       <div class="home-benefits__item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <div class="home-benefits__label">100% besplatno</div>
-        <div class="home-benefits__desc">Bez registracije, bez skrivenih troškova</div>
+        <div class="home-benefits__label">{{ _('benefits.free') }}</div>
+        <div class="home-benefits__desc">{{ _('benefits.free_desc') }}</div>
       </div>
       <div class="home-benefits__item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
-        <div class="home-benefits__label">Mobilni pristup</div>
-        <div class="home-benefits__desc">Optimizovano za telefon i tablet</div>
+        <div class="home-benefits__label">{{ _('benefits.mobile') }}</div>
+        <div class="home-benefits__desc">{{ _('benefits.mobile_desc') }}</div>
       </div>
       <div class="home-benefits__item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        <div class="home-benefits__label">Aktuelni podaci</div>
-        <div class="home-benefits__desc">Redovno ažurirani redovi vožnje</div>
+        <div class="home-benefits__label">{{ _('benefits.realtime') }}</div>
+        <div class="home-benefits__desc">{{ _('benefits.realtime_desc') }}</div>
       </div>
       <div class="home-benefits__item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        <div class="home-benefits__label">Sve na jednom mestu</div>
-        <div class="home-benefits__desc">Autobus, voz, tramvaj — cela Srbija</div>
+        <div class="home-benefits__label">{{ _('benefits.allinone') }}</div>
+        <div class="home-benefits__desc">{{ _('benefits.allinone_desc') }}</div>
       </div>
     </div>
   </div>

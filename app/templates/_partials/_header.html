@@ -16,22 +16,11 @@
           <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
         </svg>
       </a>
-      <!-- Language switcher -->
-      <div class="lang-switch">
-        <button class="lang-switch__btn" aria-label="Language">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16">
-            <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
-          </svg>
-          <span>{{ lang|upper }}</span>
-        </button>
-        <div class="lang-switch__menu">
-          {% for l in supported_langs %}
-          <a href="{{ lang_url(request.path | replace(lang_prefix, '', 1), l) }}"
-             class="lang-switch__item{% if l == lang %} lang-switch__item--active{% endif %}">
-            {{ _('lang.' + l) }}
-          </a>
-          {% endfor %}
-        </div>
+      <div class="lang-pill">
+        {%- set _clean = request.path | replace(lang_prefix, '', 1) if lang_prefix else request.path -%}
+        {%- for l in supported_langs -%}
+        <a href="{{ lang_url(_clean, l) }}" class="lang-pill__item{% if l == lang %} lang-pill__item--active{% endif %}">{{ l|upper }}</a>
+        {%- endfor -%}
       </div>
     </nav>
     <button class="site-nav-toggle" id="navToggle" aria-label="{{ _('nav.menu') }}" aria-expanded="false">
