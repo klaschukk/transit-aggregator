@@ -114,7 +114,7 @@
       <h2 class="home-section__title">{{ _('home.city_transport') }}</h2>
       <div class="home-cities-grid">
         {% for c in cities_data %}
-        <a href="/gradski/{{ c.city }}/" class="home-city-card">
+        <a href="{{ lang_prefix }}/gradski/{{ c.city }}/" class="home-city-card">
           <div class="home-city-card__icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
               <rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/>
@@ -131,7 +131,7 @@
       {% if popular_lines %}
       <div class="home-lines">
         {% for line in popular_lines %}
-        <a href="/gradski/beograd/linija/{{ line.slug }}/" class="home-lines__item">
+        <a href="{{ lang_prefix }}/gradski/beograd/linija/{{ line.slug }}/" class="home-lines__item">
           <span class="line-badge line-badge--sm"{% if line.color %} style="background:{{ line.color }}"{% endif %}>{{ line.number }}</span>
           <span class="home-lines__name">{{ line.name }}</span>
         </a>

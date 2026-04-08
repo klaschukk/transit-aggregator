@@ -20,7 +20,7 @@
 
 <!-- Mobile back button -->
 <div class="mobile-back">
-  <a href="/gradski/{{ city }}/" class="mobile-back__btn">
+  <a href="{{ lang_prefix }}/gradski/{{ city }}/" class="mobile-back__btn">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>
     <span>{{ _('city.all') }} {{ _('city.lines_count') }}</span>
   </a>
@@ -110,14 +110,14 @@
       <span class="schedule-time">{{ time }}</span>
       {% endfor %}
     {% else %}
-      <p class="schedule-empty">Nema polazaka za ovaj dan</p>
+      <p class="schedule-empty">{{ _('search.no_results') }}</p>
     {% endif %}
   </div>
   {% endfor %}
 
   <div class="schedule-disclaimer">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><circle cx="8" cy="8" r="7"/><path d="M8 5v3m0 3h.01"/></svg>
-    Vreme dolaska je procena prema rasporedu. Moguća su odstupanja — autobus može doći ranije ili kasnije.
+    {{ _('city.eta_note') }}
   </div>
 </section>
 {% else %}

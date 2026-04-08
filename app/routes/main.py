@@ -171,6 +171,7 @@ def sitemap():
         url('/gradski/beograd/', 'weekly', '0.8'),
         url('/prevoznici/', 'monthly', '0.5'),
         url('/autobuske-stanice/', 'monthly', '0.5'),
+        url('/destinacije/', 'weekly', '0.7'),
         url('/o-nama/', 'monthly', '0.3'),
         url('/kontakt/', 'monthly', '0.3'),
     ]

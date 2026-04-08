@@ -46,7 +46,7 @@
       <div class="carrier-section__info">
         <h2 class="carrier-section__name">{{ op.name }}</h2>
         <div class="carrier-section__meta">
-          {% if op.type == 'train' %}Železnički{% else %}Autobuski{% endif %} prevoznik · {{ op.route_count|default(0) }} ruta
+          {% if op.type == 'train' %}{{ _('carriers.train') }}{% else %}{{ _('carriers.bus') }}{% endif %} · {{ op.route_count|default(0) }} ruta
           {% if op.website %} · <a href="{{ op.website }}" target="_blank" rel="noopener">Sajt</a>{% endif %}
         </div>
       </div>

@@ -43,7 +43,7 @@
       <span class="route-card__to">{{ route.to_city }}</span>
     </div>
     <div class="route-card__meta">
-      {% if route.trip_count %}<span>{{ route.trip_count }} polazaka</span>{% endif %}
+      {% if route.trip_count %}<span>{{ route.trip_count }} {{ _('routes.departures') }}</span>{% endif %}
       {% if route.distance_km %}<span>{{ route.distance_km }} km</span>{% endif %}
       {% if route.min_price_rsd %}<span class="route-card__price">od {{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }}€</span>{% endif %}
     </div>
