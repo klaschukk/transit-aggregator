@@ -559,6 +559,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Покупка на сайтах партнёров. Prevozni не продаёт билеты.',
     },
 
+    # ── Day labels ──
+    'day.today': {'sr': 'Danas', 'en': 'Today', 'ru': 'Сегодня'},
+    'day.tomorrow': {'sr': 'Sutra', 'en': 'Tomorrow', 'ru': 'Завтра'},
+    'day.day_after': {'sr': 'Prekosutra', 'en': 'Day after', 'ru': 'Послезавтра'},
+
+    'route.similar': {'sr': 'Slične rute iz', 'en': 'Similar routes from', 'ru': 'Похожие маршруты из'},
+    'route.about': {'sr': 'O ruti', 'en': 'About route', 'ru': 'О маршруте'},
+
     # ── Language names ──
     'lang.sr': {'sr': 'Srpski', 'en': 'Serbian', 'ru': 'Сербский'},
     'lang.en': {'sr': 'English', 'en': 'English', 'ru': 'English'},

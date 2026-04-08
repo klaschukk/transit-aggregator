@@ -39,10 +39,11 @@ def route_detail(slug: str):
 
     trips = query("""
         SELECT t.departure_time, t.arrival_time, t.duration_min,
-               t.price_rsd, o.name as operator
+               t.price_rsd, COALESCE(o.name, '') as operator
         FROM trips t
-        JOIN operators o ON o.id = t.operator_id
+        LEFT JOIN operators o ON o.id = t.operator_id
         WHERE t.route_id = (SELECT id FROM routes WHERE slug = ?)
+          AND t.price_rsd > 0
         ORDER BY t.departure_time
     """, [slug]) if db_ready() else []
 

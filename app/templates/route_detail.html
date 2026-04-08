@@ -49,7 +49,7 @@
 
 <!-- Day filter -->
 <div class="filter-chips">
-  {% set day_labels = ['Danas', 'Sutra', 'Prekosutra'] %}
+  {% set day_labels = [_('day.today'), _('day.tomorrow'), _('day.day_after')] %}
   {% for i in range(3) %}
   <a href="?dan={{ i }}" class="filter-chip{% if selected_day == i %} filter-chip--active{% endif %}">
     <span>{{ day_labels[i] }}</span>
@@ -113,7 +113,7 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
   </div>
   <div class="seo-block__content">
-    <h2>O ruti {{ route.from_city }} — {{ route.to_city }}</h2>
+    <h2>{{ _('route.about') }} {{ route.from_city }} — {{ route.to_city }}</h2>
     <p>Vožnja od {{ route.from_city }} do {{ route.to_city }} iznosi oko {{ route.distance_km|default(0) }} km.
        {% if route.distance_km %}Prosečno trajanje putovanja autobusom je oko {{ (route.distance_km / 80)|round|int }} sata.{% endif %}
        {% if operators_on_route %}Na ovoj ruti voze: {{ operators_on_route|join(', ') }}.{% endif %}
@@ -124,7 +124,7 @@
   </div>
 </div>
 {% else %}
-  {{ empty_state(icon='search', text='Nema podataka o polascima', sub='Pokušajte drugi dan ili proverite kod prevoznika') }}
+  {{ empty_state(icon='search', text=_('search.no_results'), sub=_('buy.note')) }}
 {% endif %}
 
 <!-- Similar routes -->
@@ -132,7 +132,7 @@
 <section class="see-also">
   <h2 class="see-also__title">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
-    Slične rute iz {{ route.from_city }}
+    {{ _('route.similar') }} {{ route.from_city }}
   </h2>
   <div class="see-also__grid">
     {% for r in similar_routes %}
