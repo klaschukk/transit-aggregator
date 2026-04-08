@@ -20,7 +20,7 @@
     <p class="hero__sub">{{ _('home.hero_subtitle') }}</p>
     <div class="hero__form">
       {% from '_partials/_search_form.html' import search_form %}
-      {{ search_form() }}
+      {{ search_form(t={'from': _('home.search_from'), 'to': _('home.search_to'), 'btn': _('home.search_btn')}, prefix=lang_prefix) }}
     </div>
   </div>
 </section>
@@ -47,7 +47,7 @@
 
 <!-- ═══════ HOW IT WORKS ═══════ -->
 <section class="home-section container">
-  <h2 class="home-section__title">Kako radi?</h2>
+  <h2 class="home-section__title">{{ _('how.title') }}</h2>
   <div class="how-it-works fade-in">
     <div class="how-it-works__step">
       <div class="how-it-works__num">1</div>
@@ -56,8 +56,8 @@
           <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
         </svg>
       </div>
-      <div class="how-it-works__label">Pretražite</div>
-      <div class="how-it-works__desc">Unesite odakle i kuda putujete</div>
+      <div class="how-it-works__label">{{ _('how.step1') }}</div>
+      <div class="how-it-works__desc">{{ _('how.step1_desc') }}</div>
     </div>
     <div class="how-it-works__step">
       <div class="how-it-works__num">2</div>
@@ -67,8 +67,8 @@
           <rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 14l2 2 4-4"/>
         </svg>
       </div>
-      <div class="how-it-works__label">Uporedite</div>
-      <div class="how-it-works__desc">Vreme polaska, cene i prevoznici</div>
+      <div class="how-it-works__label">{{ _('how.step2') }}</div>
+      <div class="how-it-works__desc">{{ _('how.step2_desc') }}</div>
     </div>
     <div class="how-it-works__step">
       <div class="how-it-works__num">3</div>
@@ -77,8 +77,8 @@
           <path d="M5 13l4 4L19 7"/>
         </svg>
       </div>
-      <div class="how-it-works__label">Putujte</div>
-      <div class="how-it-works__desc">Tačan red vožnje, bez registracije</div>
+      <div class="how-it-works__label">{{ _('how.step3') }}</div>
+      <div class="how-it-works__desc">{{ _('how.step3_desc') }}</div>
     </div>
   </div>
 </section>
@@ -100,7 +100,7 @@
             <span class="home-route__to">{{ route.to_city }}</span>
           </div>
           {% if route.trip_count %}
-          <span class="home-route__meta">{{ route.trip_count }} polazaka</span>
+          <span class="home-route__meta">{{ route.trip_count }} {{ _('routes.departures') }}</span>
           {% endif %}
         </a>
         {% endfor %}

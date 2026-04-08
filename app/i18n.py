@@ -235,6 +235,43 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Нет данных о линиях',
     },
 
+    # ── How it works ──
+    'how.title': {
+        'sr': 'Kako radi?',
+        'en': 'How it works',
+        'ru': 'Как это работает',
+    },
+    'how.step1': {
+        'sr': 'Pretražite',
+        'en': 'Search',
+        'ru': 'Найдите',
+    },
+    'how.step1_desc': {
+        'sr': 'Unesite odakle i kuda putujete',
+        'en': 'Enter your origin and destination',
+        'ru': 'Введите откуда и куда едете',
+    },
+    'how.step2': {
+        'sr': 'Uporedite',
+        'en': 'Compare',
+        'ru': 'Сравните',
+    },
+    'how.step2_desc': {
+        'sr': 'Vreme polaska, cene i prevoznici',
+        'en': 'Departure times, prices and carriers',
+        'ru': 'Время отправления, цены и перевозчики',
+    },
+    'how.step3': {
+        'sr': 'Putujte',
+        'en': 'Travel',
+        'ru': 'Путешествуйте',
+    },
+    'how.step3_desc': {
+        'sr': 'Tačan red vožnje, bez registracije',
+        'en': 'Accurate schedules, no registration',
+        'ru': 'Точное расписание, без регистрации',
+    },
+
     # ── Language names ──
     'lang.sr': {'sr': 'Srpski', 'en': 'Serbian', 'ru': 'Сербский'},
     'lang.en': {'sr': 'English', 'en': 'English', 'ru': 'English'},

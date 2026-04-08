@@ -107,7 +107,7 @@
     <h1 class="search-hero__title">Pronađite prevoz</h1>
     <p class="search-hero__sub">Autobus ili voz između gradova Srbije</p>
     <div class="search-hero__form">
-      {{ search_form() }}
+      {{ search_form(t={'from': _('home.search_from'), 'to': _('home.search_to'), 'btn': _('home.search_btn')}, prefix=lang_prefix) }}
     </div>
   </div>
 </section>

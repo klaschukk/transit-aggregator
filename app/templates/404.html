@@ -47,7 +47,7 @@
   <!-- Search on 404 -->
   <div class="error-page__search">
     {% from '_partials/_search_form.html' import search_form %}
-    {{ search_form() }}
+    {{ search_form(t={'from': _('home.search_from'), 'to': _('home.search_to'), 'btn': _('home.search_btn')}, prefix=lang_prefix) }}
   </div>
 
   <div class="error-actions">
