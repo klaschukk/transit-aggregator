@@ -75,6 +75,12 @@ def _send_telegram_notification(name: str, email: str, message: str) -> None:
         logging.exception("Telegram notification failed")
 
 
+@info_bp.route('/destinacije/')
+def destinations():
+    """Top travel destinations page — SEO content magnet."""
+    return render_template('destinations.html')
+
+
 @info_bp.route('/prevoznici/')
 def carriers():
     """Carriers/operators page — cached, batch queries."""

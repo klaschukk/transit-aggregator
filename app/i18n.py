@@ -567,6 +567,91 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'route.similar': {'sr': 'Slične rute iz', 'en': 'Similar routes from', 'ru': 'Похожие маршруты из'},
     'route.about': {'sr': 'O ruti', 'en': 'About route', 'ru': 'О маршруте'},
 
+    # ── Destinations page ──
+    'dest.title': {
+        'sr': 'Top destinacije na Balkanu',
+        'en': 'Top Balkan destinations',
+        'ru': 'Лучшие направления на Балканах',
+    },
+    'dest.subtitle': {
+        'sr': 'Najpopularnija mesta za putovanje autobusom i vozom',
+        'en': 'Most popular places to travel by bus and train',
+        'ru': 'Самые популярные места для поездок на автобусе и поезде',
+    },
+    'dest.meta': {
+        'sr': 'Top destinacije na Balkanu — Srbija, Crna Gora, Bosna, Hrvatska, Mađarska. Autobuske i vozne veze. Prevozni.com',
+        'en': 'Top Balkan destinations — Serbia, Montenegro, Bosnia, Croatia, Hungary. Bus and train connections. Prevozni.com',
+        'ru': 'Лучшие направления на Балканах — Сербия, Черногория, Босния, Хорватия, Венгрия. Автобусное и ж/д сообщение.',
+    },
+    'dest.serbia': {'sr': 'Srbija', 'en': 'Serbia', 'ru': 'Сербия'},
+    'dest.montenegro': {'sr': 'Crna Gora', 'en': 'Montenegro', 'ru': 'Черногория'},
+    'dest.bosnia': {'sr': 'Bosna i Hercegovina', 'en': 'Bosnia & Herzegovina', 'ru': 'Босния и Герцеговина'},
+    'dest.croatia': {'sr': 'Hrvatska', 'en': 'Croatia', 'ru': 'Хорватия'},
+    'dest.hungary': {'sr': 'Mađarska', 'en': 'Hungary', 'ru': 'Венгрия'},
+    'dest.greece': {'sr': 'Grčka', 'en': 'Greece', 'ru': 'Греция'},
+    'dest.north_macedonia': {'sr': 'Severna Makedonija', 'en': 'North Macedonia', 'ru': 'Северная Македония'},
+    'dest.austria': {'sr': 'Austrija', 'en': 'Austria', 'ru': 'Австрия'},
+    'dest.beograd': {
+        'sr': 'Glavni grad Srbije. Kalemegdan, Knez Mihailova, Skadarlija, noćni život i bogata istorija.',
+        'en': 'Capital of Serbia. Kalemegdan fortress, Knez Mihailova street, Skadarlija, vibrant nightlife.',
+        'ru': 'Столица Сербии. Крепость Калемегдан, улица Кнез Михайлова, Скадарлия, ночная жизнь.',
+    },
+    'dest.budva': {
+        'sr': 'Biser crnogorskog primorja. Stari grad, plaže Mogren i Slovenska, žurke do zore.',
+        'en': 'Pearl of the Montenegrin coast. Old town, Mogren beach, Slovenska beach, parties till dawn.',
+        'ru': 'Жемчужина черногорского побережья. Старый город, пляжи Могрен и Словенска.',
+    },
+    'dest.herceg_novi': {
+        'sr': 'Grad na ulazu u Boku Kotorsku. Tvrđave, botanički vrtovi, kristalno čisto more.',
+        'en': 'City at the entrance to Bay of Kotor. Fortresses, botanical gardens, crystal clear sea.',
+        'ru': 'Город у входа в Которский залив. Крепости, ботанические сады, кристально чистое море.',
+    },
+    'dest.kotor': {
+        'sr': 'UNESCO grad u srcu Boke. Srednjovekovni zidovi, katedrale i pogled sa tvrđave Sv. Jovana.',
+        'en': 'UNESCO city in the heart of Boka. Medieval walls, cathedrals and views from St. John fortress.',
+        'ru': 'Город ЮНЕСКО в сердце Боки. Средневековые стены, соборы и вид с крепости Св. Иоанна.',
+    },
+    'dest.novi_sad': {
+        'sr': 'Drugi grad Srbije. Petrovaradinska tvrđava, EXIT festival, Fruška gora, Dunav.',
+        'en': 'Second city of Serbia. Petrovaradin fortress, EXIT festival, Fruška Gora, Danube.',
+        'ru': 'Второй город Сербии. Петроварадинская крепость, фестиваль EXIT, Фрушка Гора, Дунай.',
+    },
+    'dest.nis': {
+        'sr': 'Treći grad Srbije. Niška tvrđava, Ćele-kula, Medijana, Nišava i Niška Banja.',
+        'en': 'Third city of Serbia. Niš fortress, Skull Tower, Mediana, Nišava river and Niška Banja spa.',
+        'ru': 'Третий город Сербии. Нишская крепость, Челе-Кула, Медиана, река Нишава и курорт Нишка Баня.',
+    },
+    'dest.sarajevo': {
+        'sr': 'Glavni grad BiH. Baščaršija, Latinska ćuprija, Tunnel of Hope, mešavina kultura.',
+        'en': 'Capital of Bosnia. Baščaršija bazaar, Latin Bridge, Tunnel of Hope, cultural melting pot.',
+        'ru': 'Столица Боснии. Базар Башчаршия, Латинский мост, Тоннель надежды, смешение культур.',
+    },
+    'dest.dubrovnik': {
+        'sr': 'Biser Jadrana. Gradske zidine, Stari grad, Game of Thrones lokacije.',
+        'en': 'Pearl of the Adriatic. City walls, Old Town, Game of Thrones filming locations.',
+        'ru': 'Жемчужина Адриатики. Городские стены, Старый город, локации «Игры престолов».',
+    },
+    'dest.budapest': {
+        'sr': 'Glavni grad Mađarske. Termalni bazeni, Budimski zamak, Parlament, Dunav noću.',
+        'en': 'Capital of Hungary. Thermal baths, Buda Castle, Parliament, Danube by night.',
+        'ru': 'Столица Венгрии. Термальные купальни, Будайская крепость, Парламент, Дунай ночью.',
+    },
+    'dest.thessaloniki': {
+        'sr': 'Drugi grad Grčke. Bela kula, rimski forum, fantastična hrana i živahna obala.',
+        'en': 'Second city of Greece. White Tower, Roman forum, amazing food and vibrant waterfront.',
+        'ru': 'Второй город Греции. Белая башня, римский форум, потрясающая еда и набережная.',
+    },
+    'dest.skopje': {
+        'sr': 'Glavni grad S. Makedonije. Stari bazar, Kameni most, Kale tvrđava, Matka kanjon.',
+        'en': 'Capital of North Macedonia. Old Bazaar, Stone Bridge, Kale Fortress, Matka Canyon.',
+        'ru': 'Столица С. Македонии. Старый базар, Каменный мост, крепость Кале, каньон Матка.',
+    },
+    'dest.vienna': {
+        'sr': 'Austrijski glavni grad. Šenbrunn, Ringštrasse, Prater, kafane i klasična muzika.',
+        'en': 'Austrian capital. Schönbrunn, Ringstraße, Prater, coffee houses and classical music.',
+        'ru': 'Столица Австрии. Шёнбрунн, Рингштрассе, Пратер, кофейни и классическая музика.',
+    },
+
     # ── Language names ──
     'lang.sr': {'sr': 'Srpski', 'en': 'Serbian', 'ru': 'Сербский'},
     'lang.en': {'sr': 'English', 'en': 'English', 'ru': 'English'},
