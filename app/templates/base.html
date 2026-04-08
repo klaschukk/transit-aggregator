@@ -30,8 +30,8 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png">
 <link rel="manifest" href="/static/site.webmanifest">
 {% block head_extra %}{% endblock %}
-<link rel="preload" href="{{ url_for('static', filename='css/app.css') }}?v=5" as="style">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v=5">
+<link rel="preload" href="{{ url_for('static', filename='css/app.css') }}?v=6" as="style">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v=6">
 <script defer src="https://analytics.farmako.ro/umami" data-website-id="b8703518-4b58-4069-9a90-a4fb28cf3649"></script>
 {% if config.GA_TRACKING_ID %}
 <script async src="https://www.googletagmanager.com/gtag/js?id={{ config.GA_TRACKING_ID }}"></script>
@@ -61,17 +61,23 @@
   var btn = document.getElementById('navToggle');
   var nav = document.querySelector('.site-nav');
   if (btn && nav) {
+    var hamburger = '<path d="M3 12h18M3 6h18M3 18h18"/>';
+    var xIcon = '<path d="M18 6L6 18M6 6l12 12"/>';
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
       var open = nav.classList.toggle('is-open');
       btn.setAttribute('aria-expanded', open);
+      btn.querySelector('svg').innerHTML = open ? xIcon : hamburger;
+      document.body.style.overflow = open ? 'hidden' : '';
     });
-    /* Close nav on outside tap */
-    document.addEventListener('click', function(e) {
-      if (nav.classList.contains('is-open') && !nav.contains(e.target)) {
+    /* Close on link click */
+    nav.querySelectorAll('.site-nav__link').forEach(function(a) {
+      a.addEventListener('click', function() {
         nav.classList.remove('is-open');
         btn.setAttribute('aria-expanded', 'false');
-      }
+        btn.querySelector('svg').innerHTML = hamburger;
+        document.body.style.overflow = '';
+      });
     });
   }
   /* Swap button */

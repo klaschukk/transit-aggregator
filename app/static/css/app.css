@@ -146,44 +146,52 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .lang-pill__item--active:hover { background: var(--color-primary-dark, #0b7c71); color: #fff; }
 .site-nav-toggle {
   margin-left: auto;
-  width: 40px; height: 40px;
+  width: 44px; height: 44px;
   border-radius: var(--radius-sm);
   color: var(--color-text);
   display: flex; align-items: center; justify-content: center;
   transition: background .2s ease;
+  position: relative; z-index: 101;
 }
 .site-nav-toggle:hover { background: var(--color-bg-alt); }
-.site-nav-toggle svg { transition: transform .2s; }
-.site-nav-toggle[aria-expanded="true"] { background: var(--color-bg-alt); }
+.site-nav-toggle svg { transition: transform .3s ease; }
 .site-nav-toggle[aria-expanded="true"] svg { transform: rotate(90deg); }
 
-/* Mobile nav open */
+/* Mobile nav — fullscreen overlay */
 .site-nav.is-open {
   display: flex;
   flex-direction: column;
-  position: absolute;
-  top: var(--header-h);
-  left: 0;
-  right: 0;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
   background: var(--color-bg);
-  border-bottom: 1px solid var(--color-border);
-  padding: 8px 16px 16px;
-  box-shadow: var(--shadow-lg);
-  z-index: 99;
-  animation: slideDown .2s ease;
+  padding: 80px 24px 32px;
+  z-index: 100;
+  animation: navFadeIn .25s ease;
+  gap: 4px;
+  overflow-y: auto;
 }
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes navFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .site-nav.is-open .site-nav__link {
-  padding: 14px 12px;
-  font-size: var(--text-base);
+  padding: 16px 16px;
+  font-size: 1.1rem;
   font-weight: 600;
-  border-radius: var(--radius-sm);
-  transition: background .2s ease;
+  border-radius: 10px;
+  transition: background .15s ease;
+  display: flex; align-items: center; gap: 10px;
 }
+.site-nav.is-open .site-nav__link:hover,
 .site-nav.is-open .site-nav__link:active { background: var(--color-bg-alt); }
+.site-nav.is-open .site-nav__search { display: none; }
+.site-nav.is-open .lang-pill {
+  margin: 16px 0 0; align-self: flex-start;
+  border-radius: 8px; overflow: hidden;
+}
+.site-nav.is-open .lang-pill__item {
+  padding: 10px 16px; font-size: 0.85rem;
+}
 
 @media (min-width: 640px) {
   .site-nav { display: flex; }
