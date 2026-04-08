@@ -92,7 +92,7 @@
   </div>
   <div class="buy-ticket__links">
     <a href="https://getbybus.com/en/bus-from-{{ _from_slug }}-to-{{ _to_slug }}" target="_blank" rel="noopener nofollow" class="buy-ticket__btn buy-ticket__btn--getbybus">GetByBus <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg></a>
-    <a href="https://www.bookaway.com/routes/{{ _from_slug }}-to-{{ _to_slug }}" target="_blank" rel="noopener nofollow" class="buy-ticket__btn buy-ticket__btn--bookaway">Bookaway <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg></a>
+    <a href="https://www.bookaway.com/routes/{{ _from_slug }}-to-{{ _to_slug }}?offer_id=34&aff_id=4033" target="_blank" rel="noopener nofollow" class="buy-ticket__btn buy-ticket__btn--bookaway">Bookaway <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg></a>
     <a href="https://shop.flixbus.com/search?departureCity={{ from_city|urlencode }}&arrivalCity={{ to_city|urlencode }}" target="_blank" rel="noopener nofollow" class="buy-ticket__btn buy-ticket__btn--flixbus">FlixBus <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg></a>
   </div>
   <p class="buy-ticket__note">{{ _('buy.note') }}</p>
