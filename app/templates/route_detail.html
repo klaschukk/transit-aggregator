@@ -59,8 +59,27 @@
 </div>
 
 <!-- Buy ticket — always visible -->
-{% set _from_slug = route.from_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
-{% set _to_slug = route.to_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
+{% set _from_slug = route.from_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj')|replace('ș','s')|replace('ț','t') %}
+{% set _to_slug = route.to_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj')|replace('ș','s')|replace('ț','t') %}
+{% set _country_map = {
+  'beograd':'serbia','novi-sad':'serbia','nis':'serbia','subotica':'serbia','kragujevac':'serbia',
+  'uzice':'serbia','valjevo':'serbia','sabac':'serbia','cacak':'serbia','kraljevo':'serbia',
+  'krusevac':'serbia','leskovac':'serbia','vranje':'serbia','pirot':'serbia','sombor':'serbia',
+  'zrenjanin':'serbia','pancevo':'serbia','smederevo':'serbia','novi-pazar':'serbia',
+  'podgorica':'montenegro','budva':'montenegro','herceg-novi':'montenegro','bar':'montenegro',
+  'kotor':'montenegro','tivat':'montenegro','niksic':'montenegro','ulcinj':'montenegro',
+  'sarajevo':'bosnia-and-herzegovina','banja-luka':'bosnia-and-herzegovina','tuzla':'bosnia-and-herzegovina',
+  'mostar':'bosnia-and-herzegovina','trebinje':'bosnia-and-herzegovina',
+  'zagreb':'croatia','split':'croatia','dubrovnik':'croatia','rijeka':'croatia',
+  'skopje':'north-macedonia','ohrid':'north-macedonia',
+  'budapest':'hungary','szeged':'hungary',
+  'bucharest':'romania','timisoara':'romania',
+  'sofia':'bulgaria','plovdiv':'bulgaria',
+  'tirana':'albania','thessaloniki':'greece','athens':'greece',
+  'vienna':'austria','ljubljana':'slovenia',
+  'munich':'germany','frankfurt':'germany','berlin':'germany','stuttgart':'germany',
+} %}
+{% set _ba_country = _country_map.get(_to_slug, _country_map.get(_from_slug, 'serbia')) %}
 <div class="buy-ticket fade-in">
   <div class="buy-ticket__header">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2 2 2 0 010 4 2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 00-2-2 2 2 0 010-4 2 2 0 002-2V7a2 2 0 00-2-2H5z"/></svg>
@@ -71,7 +90,7 @@
       GetByBus
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg>
     </a>
-    <a href="https://www.bookaway.com/routes/{{ _from_slug }}-to-{{ _to_slug }}?offer_id=34&aff_id=4033" target="_blank" rel="noopener nofollow" class="buy-ticket__btn buy-ticket__btn--bookaway">
+    <a href="https://www.bookaway.com/routes/{{ _ba_country }}/{{ _from_slug }}-to-{{ _to_slug }}?offer_id=34&aff_id=4033" target="_blank" rel="noopener nofollow" class="buy-ticket__btn buy-ticket__btn--bookaway">
       Bookaway
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg>
     </a>
