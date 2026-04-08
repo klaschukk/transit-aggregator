@@ -130,6 +130,14 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .site-nav__search:hover { background: var(--color-bg-alt); color: var(--color-primary); }
 /* In mobile dropdown, search shows as text link — hide icon-only on mobile */
 .site-nav.is-open .site-nav__search { display: none; }
+/* Language switcher */
+.site-nav__lang { display: flex; gap: 2px; margin-left: 4px; }
+.site-nav__lang-link {
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 0.03em;
+  padding: 4px 6px; border-radius: 4px; color: var(--color-text-muted);
+  text-decoration: none; transition: background 0.15s;
+}
+.site-nav__lang-link:hover { background: var(--color-bg-alt); color: var(--color-primary); }
 .site-nav-toggle {
   margin-left: auto;
   width: 40px; height: 40px;

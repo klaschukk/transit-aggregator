@@ -10,6 +10,11 @@
 <title>{% block title %}Prevozni — red vožnje u Srbiji{% endblock %}</title>
 <meta name="description" content="{% block meta_description %}Red vožnje autobusa, vozova i gradskog prevoza u Srbiji. Pronađite polazak, uporedite cene i prevoznike. Besplatno, bez registracije.{% endblock %}">
 <link rel="canonical" href="{{ config.BASE_URL }}{{ request.path }}">
+{% set _clean_path = request.path | replace(lang_prefix, '', 1) if lang_prefix else request.path %}
+<link rel="alternate" hreflang="sr" href="{{ config.BASE_URL }}{{ _clean_path }}">
+<link rel="alternate" hreflang="en" href="{{ config.BASE_URL }}/en{{ _clean_path }}">
+<link rel="alternate" hreflang="ru" href="{{ config.BASE_URL }}/ru{{ _clean_path }}">
+<link rel="alternate" hreflang="x-default" href="{{ config.BASE_URL }}{{ _clean_path }}">
 <meta property="og:title" content="{{ self.title() }}">
 <meta property="og:description" content="{{ self.meta_description() }}">
 <meta property="og:type" content="website">

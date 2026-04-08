@@ -23,8 +23,9 @@ $VENV -u data/pipelines/scrape_gsp.py       >> "$LOG" 2>&1 || echo "WARN: scrape
 $VENV -u data/pipelines/scrape_intercity.py  >> "$LOG" 2>&1 || echo "WARN: scrape_intercity failed ($?)" >> "$LOG"
 $VENV -u data/pipelines/scrape_srbvoz.py     >> "$LOG" 2>&1 || echo "WARN: scrape_srbvoz failed ($?)" >> "$LOG"
 $VENV -u data/pipelines/scrape_lasta.py      >> "$LOG" 2>&1 || echo "WARN: scrape_lasta failed ($?)" >> "$LOG"
-$VENV -u data/pipelines/scrape_gspns.py      >> "$LOG" 2>&1 || echo "WARN: scrape_gspns failed ($?)" >> "$LOG"
-$VENV -u data/pipelines/scrape_naissus.py    >> "$LOG" 2>&1 || echo "WARN: scrape_naissus failed ($?)" >> "$LOG"
+$VENV -u data/pipelines/scrape_gspns.py           >> "$LOG" 2>&1 || echo "WARN: scrape_gspns failed ($?)" >> "$LOG"
+$VENV -u data/pipelines/scrape_gspns_schedule.py  >> "$LOG" 2>&1 || echo "WARN: scrape_gspns_schedule failed ($?)" >> "$LOG"
+$VENV -u data/pipelines/scrape_naissus.py         >> "$LOG" 2>&1 || echo "WARN: scrape_naissus failed ($?)" >> "$LOG"
 
 # Rebuild database — this is critical
 $VENV -u data/pipelines/build_db.py >> "$LOG" 2>&1
@@ -59,3 +60,6 @@ fi
 
 echo "=== DONE $(date) ===" >> "$LOG"
 echo "$STATUS $(date)" > "$PROJECT/logs/last_refresh.txt"
+
+# Cleanup logs older than 14 days
+find "$PROJECT/logs" -name "nightly_*.log" -mtime +14 -delete 2>/dev/null || true

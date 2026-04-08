@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Prevozni — red vožnje autobusa, vozova i gradskog prevoza{% endblock %}
+{% block title %}{{ _('home.title') }}{% endblock %}
 {% block meta_description %}Pronađite autobus ili voz između gradova Srbije. Gradski prevoz Beograd — linije, stajališta, polasci. Besplatno, bez registracije.{% endblock %}
 
 {% block head_extra %}
@@ -16,8 +16,8 @@
 <section class="hero">
   <div class="hero__bg"></div>
   <div class="hero__inner container">
-    <h1 class="hero__title">Sve linije.<br>Svi polasci.<br>Jedno mesto.</h1>
-    <p class="hero__sub">Autobus, voz i gradski prevoz u Srbiji</p>
+    <h1 class="hero__title">{{ _('home.hero_title') }}</h1>
+    <p class="hero__sub">{{ _('home.hero_subtitle') }}</p>
     <div class="hero__form">
       {% from '_partials/_search_form.html' import search_form %}
       {{ search_form() }}
@@ -29,19 +29,19 @@
 <section class="home-stats container fade-in">
   <div class="home-stats__item">
     <div class="home-stats__num">{{ stats.routes }}</div>
-    <div class="home-stats__label">ruta</div>
+    <div class="home-stats__label">{{ _('common.routes') }}</div>
   </div>
   <div class="home-stats__item">
     <div class="home-stats__num">{{ stats.lines }}</div>
-    <div class="home-stats__label">gradskih linija</div>
+    <div class="home-stats__label">{{ _('common.lines') }}</div>
   </div>
   <div class="home-stats__item">
     <div class="home-stats__num">{{ stats.stops }}</div>
-    <div class="home-stats__label">stajališta</div>
+    <div class="home-stats__label">{{ _('common.stops') }}</div>
   </div>
   <div class="home-stats__item">
     <div class="home-stats__num">{{ stats.cities }}</div>
-    <div class="home-stats__label">grada</div>
+    <div class="home-stats__label">{{ _('footer.cities') }}</div>
   </div>
 </section>
 
@@ -89,11 +89,11 @@
 
     <!-- Intercity -->
     <div class="home-duo__col">
-      <h2 class="home-section__title">Međugradski prevoz</h2>
+      <h2 class="home-section__title">{{ _('home.popular_routes') }}</h2>
       {% if popular_routes %}
       <div class="home-routes">
         {% for route in popular_routes %}
-        <a href="/rute/{{ route.slug }}/" class="home-route">
+        <a href="{{ lang_prefix }}/rute/{{ route.slug }}/" class="home-route">
           <div class="home-route__cities">
             <span class="home-route__from">{{ route.from_city }}</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
@@ -106,12 +106,12 @@
         {% endfor %}
       </div>
       {% endif %}
-      <a href="/rute/" class="btn btn--outline home-duo__btn">Sve rute →</a>
+      <a href="{{ lang_prefix }}/rute/" class="btn btn--outline home-duo__btn">{{ _('home.all_routes') }} →</a>
     </div>
 
     <!-- City transport -->
     <div class="home-duo__col">
-      <h2 class="home-section__title">Gradski prevoz</h2>
+      <h2 class="home-section__title">{{ _('home.city_transport') }}</h2>
       <div class="home-cities-grid">
         {% for c in cities_data %}
         <a href="/gradski/{{ c.city }}/" class="home-city-card">
