@@ -652,6 +652,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Столица Австрии. Шёнбрунн, Рингштрассе, Пратер, кофейни и классическая музика.',
     },
 
+    'nav.destinations': {'sr': 'Destinacije', 'en': 'Destinations', 'ru': 'Направления'},
+
     'dest.turkey': {'sr': 'Turska', 'en': 'Turkey', 'ru': 'Турция'},
     'dest.istanbul': {
         'sr': 'Najveći grad Turske. Aja Sofija, Plava džamija, Grand bazar, Bosfor i dva kontinenta.',
