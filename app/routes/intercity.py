@@ -8,7 +8,7 @@ intercity_bp = Blueprint('intercity', __name__)
 
 @intercity_bp.route('/rute/')
 def route_index():
-    routes = query("""
+    routes = cached_query("""
         SELECT r.slug, r.from_city, r.to_city, r.distance_km,
                COUNT(DISTINCT t.id) as trip_count,
                MIN(t.price_rsd) as min_price_rsd
