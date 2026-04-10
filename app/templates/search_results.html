@@ -85,7 +85,7 @@
 <!-- Buy ticket externally -->
 {% set _from_slug = from_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
 {% set _to_slug = to_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
-{% set _cm = {'beograd':'serbia','novi-sad':'serbia','nis':'serbia','subotica':'serbia','podgorica':'montenegro','budva':'montenegro','herceg-novi':'montenegro','bar':'montenegro','kotor':'montenegro','tivat':'montenegro','sarajevo':'bosnia-and-herzegovina','tuzla':'bosnia-and-herzegovina','mostar':'bosnia-and-herzegovina','zagreb':'croatia','split':'croatia','dubrovnik':'croatia','skopje':'north-macedonia','budapest':'hungary','sofia':'bulgaria','thessaloniki':'greece','vienna':'austria'} %}
+{% set _cm = {'beograd':'serbia','novi-sad':'serbia','nis':'serbia','subotica':'serbia','kragujevac':'serbia','podgorica':'montenegro','budva':'montenegro','herceg-novi':'montenegro','bar':'montenegro','kotor':'montenegro','tivat':'montenegro','niksic':'montenegro','ulcinj':'montenegro','sarajevo':'bosnia-and-herzegovina','tuzla':'bosnia-and-herzegovina','mostar':'bosnia-and-herzegovina','banja-luka':'bosnia-and-herzegovina','trebinje':'bosnia-and-herzegovina','zagreb':'croatia','split':'croatia','dubrovnik':'croatia','rijeka':'croatia','skopje':'north-macedonia','ohrid':'north-macedonia','budapest':'hungary','sofia':'bulgaria','thessaloniki':'greece','vienna':'austria','ljubljana':'slovenia','timisoara':'romania','bucharest':'romania','istanbul':'turkey','tirana':'albania'} %}
 {% set _ba_country = _cm.get(_to_slug, _cm.get(_from_slug, 'serbia')) %}
 <div class="buy-ticket">
   <div class="buy-ticket__header">

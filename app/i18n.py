@@ -652,6 +652,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Столица Австрии. Шёнбрунн, Рингштрассе, Пратер, кофейни и классическая музика.',
     },
 
+    'dest.turkey': {'sr': 'Turska', 'en': 'Turkey', 'ru': 'Турция'},
+    'dest.istanbul': {
+        'sr': 'Najveći grad Turske. Aja Sofija, Plava džamija, Grand bazar, Bosfor i dva kontinenta.',
+        'en': 'Largest city in Turkey. Hagia Sophia, Blue Mosque, Grand Bazaar, Bosphorus and two continents.',
+        'ru': 'Крупнейший город Турции. Айя-София, Голубая мечеть, Гранд-базар, Босфор и два континента.',
+    },
+
     # ── Language names ──
     'lang.sr': {'sr': 'Srpski', 'en': 'Serbian', 'ru': 'Сербский'},
     'lang.en': {'sr': 'English', 'en': 'English', 'ru': 'English'},
