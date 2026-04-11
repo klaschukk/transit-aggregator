@@ -39,6 +39,9 @@ if [ $BUILD_STATUS -ne 0 ]; then
   exit 1
 fi
 
+# Post-build: add Novi Sad OSM stops + line links
+$VENV -u scripts/enrich_post_build.py >> "$LOG" 2>&1 || true
+
 # Enrich stop coordinates (non-blocking, limit to 50 per night)
 $VENV -u data/pipelines/enrich_stops_coords.py enrich --limit 50 >> "$LOG" 2>&1 || true
 
