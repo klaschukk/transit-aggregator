@@ -828,13 +828,6 @@ def _load_balkan(conn: duckdb.DuckDBPyConnection) -> None:
                  route['from_city_slug'], route['to_city_slug'],
                  route.get('distance_km', 0), 'intercity')
             )
-            # Add a placeholder trip so cleanup doesn't remove these
-            max_trip = conn.execute("SELECT COALESCE(MAX(id), 0) FROM trips").fetchone()[0] + 1
-            conn.execute(
-                "INSERT INTO trips (id, route_id, operator_id, departure_time, arrival_time, duration_min, price_rsd, days_of_week, is_active) "
-                "VALUES (?, ?, NULL, '08:00', '16:00', ?, 0, '1234567', true)",
-                (max_trip, route_id, route.get('distance_km', 0) * 60 // 80 if route.get('distance_km') else 0)
-            )
             existing_slugs.add(slug)
             route_id += 1
             count += 1
@@ -922,12 +915,18 @@ def _load_city_schedule(conn: duckdb.DuckDBPyConnection, city: str) -> None:
 
 def _cleanup(conn: duckdb.DuckDBPyConnection) -> None:
     """Remove orphan routes, operators, and NULL-departure trips."""
-    # Remove intercity routes with no trips
+    # Remove domestic routes with no trips (keep international/balkan)
+    balkan_path = RAW_DIR / 'balkan_routes.json'
+    balkan_slugs = set()
+    if balkan_path.exists():
+        import json as _json
+        balkan_slugs = set(r['slug'] for r in _json.load(open(balkan_path)))
     r1 = conn.execute("""
         DELETE FROM routes
         WHERE type = 'intercity'
           AND id NOT IN (SELECT DISTINCT route_id FROM trips)
-    """).fetchone()[0]
+          AND slug NOT IN (SELECT unnest(?::VARCHAR[]))
+    """, [list(balkan_slugs)]).fetchone()[0]
 
     # Remove duplicate routes (same from_city+to_city, keep the one with more trips)
     r2 = conn.execute("""
