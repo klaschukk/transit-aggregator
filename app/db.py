@@ -38,24 +38,27 @@ def db_ready() -> bool:
 
 def query(sql: str, params: list[Any] | None = None) -> list[dict]:
     """Execute a read query and return list of dicts."""
+    p = params or []
     try:
         conn = _get_conn()
-        result = conn.execute(sql, params or [])
+        result = conn.execute(sql, p)
         columns = [desc[0] for desc in result.description]
         return [dict(zip(columns, row)) for row in result.fetchall()]
-    except duckdb.IOException:
-        # Connection went stale (e.g. DB rebuilt) — reconnect once
+    except duckdb.IOException as exc:
+        # Connection went stale (e.g. DB rebuilt) — reconnect once.
+        logger.warning("DuckDB IO error, reconnecting: %s | sql=%s params=%s", exc, sql, p)
         _local.conn = None
         try:
             conn = _get_conn()
-            result = conn.execute(sql, params or [])
+            result = conn.execute(sql, p)
             columns = [desc[0] for desc in result.description]
             return [dict(zip(columns, row)) for row in result.fetchall()]
-        except Exception:
-            logger.exception("DuckDB query failed after reconnect")
+        except duckdb.Error as exc2:
+            logger.error("DuckDB query failed after reconnect: %s | sql=%s params=%s",
+                         exc2, sql, p)
             return []
-    except Exception:
-        logger.exception("DuckDB query error")
+    except duckdb.Error as exc:
+        logger.error("DuckDB query error: %s | sql=%s params=%s", exc, sql, p)
         _local.conn = None
         return []
 

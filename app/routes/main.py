@@ -145,9 +145,30 @@ def api_cities():
 
 @main_bp.route('/health')
 def health():
+    import os
+    import tempfile
     db_ok = db_ready()
-    status = 'ok' if db_ok else 'degraded'
-    return jsonify({'status': status, 'service': 'prevozni', 'db': db_ok})
+
+    logs_ok = False
+    logs_dir = os.path.join(current_app.root_path, '..', 'logs')
+    try:
+        os.makedirs(logs_dir, exist_ok=True)
+        with tempfile.NamedTemporaryFile(
+            dir=logs_dir, prefix='.healthcheck-', delete=True
+        ) as f:
+            f.write(b'ok')
+        logs_ok = True
+    except OSError:
+        logs_ok = False
+
+    status = 'ok' if (db_ok and logs_ok) else 'degraded'
+    code = 200 if status == 'ok' else 503
+    return jsonify({
+        'status': status,
+        'service': 'prevozni',
+        'db': db_ok,
+        'logs_writable': logs_ok,
+    }), code
 
 
 @main_bp.route('/sitemap.xml')

@@ -1,7 +1,33 @@
 import os
+import subprocess
+from pathlib import Path
+
 from flask import Flask, render_template, request, g
 from config import config_map
 from .i18n import get_text, SUPPORTED_LANGS, DEFAULT_LANG
+
+
+def _compute_asset_version(root: Path) -> str:
+    """Git SHA (short) at startup, fallback to app.css mtime."""
+    try:
+        sha = subprocess.check_output(
+            ['git', 'rev-parse', '--short', 'HEAD'],
+            cwd=str(root),
+            stderr=subprocess.DEVNULL,
+            timeout=2,
+        ).decode().strip()
+        if sha:
+            return sha
+    except (subprocess.SubprocessError, OSError, FileNotFoundError):
+        pass
+    try:
+        css = root / 'app' / 'static' / 'css' / 'app.css'
+        return str(int(css.stat().st_mtime))
+    except OSError:
+        return 'dev'
+
+
+_ASSET_VERSION = _compute_asset_version(Path(__file__).parent.parent)
 
 
 def create_app(config_name: str | None = None) -> Flask:
@@ -76,6 +102,7 @@ def create_app(config_name: str | None = None) -> Flask:
             'clean_path': clean_path,
             'canonical_url': canonical_url,
             'hreflang_urls': hreflang_urls,
+            'asset_version': _ASSET_VERSION,
         }
 
     # ── URL rewriting: strip /en/ and /ru/ prefix, serve same views ──
