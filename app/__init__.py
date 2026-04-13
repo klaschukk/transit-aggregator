@@ -43,12 +43,39 @@ def create_app(config_name: str | None = None) -> Flask:
                 return path
             return f'/{target_lang}{path}'
 
+        # Path without any language prefix — used for canonical/hreflang construction.
+        path = request.path
+        if prefix and (path == prefix or path.startswith(prefix + '/')):
+            clean_path = path[len(prefix):] or '/'
+        else:
+            clean_path = path
+
+        # Per-variant self-referencing canonical:
+        #   sr (default) → BASE_URL + clean_path
+        #   en/ru        → BASE_URL + /{lang} + clean_path
+        base_url = app.config.get('BASE_URL', '')
+        if lang == DEFAULT_LANG:
+            canonical_url = base_url + clean_path
+        else:
+            canonical_url = f"{base_url}/{lang}{clean_path}"
+
+        hreflang_urls = {}
+        for l in SUPPORTED_LANGS:
+            if l == DEFAULT_LANG:
+                hreflang_urls[l] = base_url + clean_path
+            else:
+                hreflang_urls[l] = f"{base_url}/{l}{clean_path}"
+        hreflang_urls['x-default'] = base_url + clean_path
+
         return {
             '_': _,
             'lang': lang,
             'lang_prefix': prefix,
             'lang_url': lang_url,
             'supported_langs': SUPPORTED_LANGS,
+            'clean_path': clean_path,
+            'canonical_url': canonical_url,
+            'hreflang_urls': hreflang_urls,
         }
 
     # ── URL rewriting: strip /en/ and /ru/ prefix, serve same views ──

@@ -14,16 +14,15 @@
 <title>{% block title %}Prevozni — red vožnje u Srbiji{% endblock %}</title>
 <meta name="description" content="{% block meta_description %}Red vožnje autobusa, vozova i gradskog prevoza u Srbiji. Pronađite polazak, uporedite cene i prevoznike. Besplatno, bez registracije.{% endblock %}">
 <meta name="author" content="Prevozni">
-<link rel="canonical" href="{{ config.BASE_URL }}{{ request.path }}">
-{% set _clean_path = request.path | replace(lang_prefix, '', 1) if lang_prefix else request.path %}
-<link rel="alternate" hreflang="sr" href="{{ config.BASE_URL }}{{ _clean_path }}">
-<link rel="alternate" hreflang="en" href="{{ config.BASE_URL }}/en{{ _clean_path }}">
-<link rel="alternate" hreflang="ru" href="{{ config.BASE_URL }}/ru{{ _clean_path }}">
-<link rel="alternate" hreflang="x-default" href="{{ config.BASE_URL }}{{ _clean_path }}">
+<link rel="canonical" href="{{ canonical_url }}">
+<link rel="alternate" hreflang="sr" href="{{ hreflang_urls['sr'] }}">
+<link rel="alternate" hreflang="en" href="{{ hreflang_urls['en'] }}">
+<link rel="alternate" hreflang="ru" href="{{ hreflang_urls['ru'] }}">
+<link rel="alternate" hreflang="x-default" href="{{ hreflang_urls['x-default'] }}">
 <meta property="og:title" content="{{ self.title() }}">
 <meta property="og:description" content="{{ self.meta_description() }}">
 <meta property="og:type" content="website">
-<meta property="og:url" content="{{ config.BASE_URL }}{{ request.path }}">
+<meta property="og:url" content="{{ canonical_url }}">
 <meta property="og:site_name" content="Prevozni">
 <meta property="og:locale" content="{{ _og_locale }}">
 {%- for l in supported_langs if l != lang %}
