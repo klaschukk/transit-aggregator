@@ -102,6 +102,11 @@ def _send_telegram_notification(name: str, email: str, message: str) -> None:
         log.error("Telegram notification failed: %s (email=%s)", exc, safe_email)
 
 
+@info_bp.route('/privatnost/')
+def privacy():
+    return render_template('privacy.html')
+
+
 @info_bp.route('/destinacije/')
 def destinations():
     """Top travel destinations page — SEO content magnet."""

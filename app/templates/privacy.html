@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ _('privacy.title') }} — Prevozni{% endblock %}
+{% block meta_description %}{{ _('privacy.intro') }}{% endblock %}
+
+{% block content %}
+
+{% from '_partials/_breadcrumb.html' import breadcrumb %}
+{{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': _('privacy.title')}]) }}
+
+<div class="page-title">
+  <h1>{{ _('privacy.title') }}</h1>
+  <p class="page-subtitle">{{ _('privacy.intro') }}</p>
+</div>
+
+<section class="prose">
+  <h2>{{ _('privacy.cookies_h') }}</h2>
+  <p>{{ _('privacy.cookies_body') }}</p>
+
+  <h2>{{ _('privacy.analytics_h') }}</h2>
+  <p>{{ _('privacy.analytics_body') }}</p>
+
+  <h2>{{ _('privacy.contact_h') }}</h2>
+  <p>{{ _('privacy.contact_body') }}</p>
+
+  <h2>{{ _('privacy.rights_h') }}</h2>
+  <p>{{ _('privacy.rights_body') }}</p>
+</section>
+
+{% endblock %}

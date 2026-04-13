@@ -11,6 +11,11 @@ def create_app(config_name: str | None = None) -> Flask:
         config_name = os.environ.get('FLASK_ENV', 'default')
     app.config.from_object(config_map[config_name])
 
+    if config_name == 'production' and not app.config.get('SECRET_KEY'):
+        raise RuntimeError(
+            "SECRET_KEY environment variable must be set in production"
+        )
+
     # ── i18n: detect language from URL prefix ──
     @app.before_request
     def detect_language():

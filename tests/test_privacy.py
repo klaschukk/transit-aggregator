@@ -1,0 +1,51 @@
+"""Privacy page + production SECRET_KEY guard."""
+
+import os
+
+import pytest
+
+
+def test_privacy_page_sr(client):
+    resp = client.get("/privatnost/")
+    assert resp.status_code == 200
+    assert b"Privatnost" in resp.data or b"privacy" in resp.data.lower()
+
+
+def test_privacy_page_en(client):
+    resp = client.get("/en/privatnost/")
+    assert resp.status_code == 200
+    assert b"Privacy Policy" in resp.data
+
+
+def test_privacy_page_ru(client):
+    resp = client.get("/ru/privatnost/")
+    assert resp.status_code == 200
+
+
+def test_privacy_in_sitemap(client):
+    resp = client.get("/sitemap.xml")
+    assert b"/privatnost/" in resp.data
+
+
+def test_privacy_link_in_footer(client):
+    resp = client.get("/")
+    assert b"/privatnost/" in resp.data
+
+
+def test_production_requires_secret_key(monkeypatch):
+    from app import create_app
+    monkeypatch.delenv("SECRET_KEY", raising=False)
+    with pytest.raises(RuntimeError, match="SECRET_KEY"):
+        create_app("production")
+
+
+def test_production_ok_with_secret_key(monkeypatch):
+    from app import create_app
+    monkeypatch.setenv("SECRET_KEY", "x" * 32)
+    # Reload config module so ProductionConfig picks up the env var
+    import importlib, config as cfg
+    importlib.reload(cfg)
+    import app as app_pkg
+    importlib.reload(app_pkg)
+    app = app_pkg.create_app("production")
+    assert app.config["SECRET_KEY"] == "x" * 32

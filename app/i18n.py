@@ -76,6 +76,61 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'All rights reserved.',
         'ru': 'Все права защищены.',
     },
+    'footer.privacy': {
+        'sr': 'Privatnost',
+        'en': 'Privacy',
+        'ru': 'Конфиденциальность',
+    },
+    'privacy.title': {
+        'sr': 'Politika privatnosti',
+        'en': 'Privacy Policy',
+        'ru': 'Политика конфиденциальности',
+    },
+    'privacy.intro': {
+        'sr': 'Prevozni poštuje vašu privatnost. Ova stranica objašnjava koje podatke prikupljamo i kako ih koristimo.',
+        'en': 'Prevozni respects your privacy. This page explains what data we collect and how we use it.',
+        'ru': 'Prevozni уважает вашу конфиденциальность. Здесь описано, какие данные мы собираем и как используем.',
+    },
+    'privacy.cookies_h': {
+        'sr': 'Kolačići',
+        'en': 'Cookies',
+        'ru': 'Cookies',
+    },
+    'privacy.cookies_body': {
+        'sr': 'Koristimo samo neophodne kolačiće (npr. CSRF token). Ne koristimo reklamne niti praćeće kolačiće trećih strana.',
+        'en': 'We use only essential cookies (e.g. CSRF token). No third-party advertising or tracking cookies.',
+        'ru': 'Мы используем только необходимые cookies (например, CSRF-токен). Никаких рекламных или трекинговых cookies третьих сторон.',
+    },
+    'privacy.analytics_h': {
+        'sr': 'Analitika',
+        'en': 'Analytics',
+        'ru': 'Аналитика',
+    },
+    'privacy.analytics_body': {
+        'sr': 'Koristimo Umami analitiku — anonimne, agregirane statistike poseta bez kolačića i bez praćenja pojedinaca.',
+        'en': 'We use Umami analytics — anonymous, aggregated page view statistics with no cookies and no individual tracking.',
+        'ru': 'Мы используем Umami — анонимную агрегированную статистику посещений без cookies и отслеживания пользователей.',
+    },
+    'privacy.contact_h': {
+        'sr': 'Kontakt forma',
+        'en': 'Contact form',
+        'ru': 'Контактная форма',
+    },
+    'privacy.contact_body': {
+        'sr': 'Poruke iz kontakt forme se šalju preko Telegram bota i čuvaju u logovima radi odgovora. Ne delimo ih sa trećim stranama.',
+        'en': 'Messages from the contact form are sent via a Telegram bot and stored in logs so we can reply. They are not shared with third parties.',
+        'ru': 'Сообщения из контактной формы отправляются через Telegram-бот и сохраняются в логах для ответа. Третьим лицам не передаются.',
+    },
+    'privacy.rights_h': {
+        'sr': 'Vaša prava (GDPR)',
+        'en': 'Your rights (GDPR)',
+        'ru': 'Ваши права (GDPR)',
+    },
+    'privacy.rights_body': {
+        'sr': 'Imate pravo pristupa, ispravke i brisanja podataka. Za zahteve pišite na info@prevozni.com.',
+        'en': 'You have the right to access, rectify and erase your data. Email info@prevozni.com for requests.',
+        'ru': 'Вы имеете право на доступ, исправление и удаление данных. Запросы — на info@prevozni.com.',
+    },
     'footer.disclaimer': {
         'sr': 'Podaci su informativnog karaktera i preuzeti iz javno dostupnih izvora. Prevozni ne garantuje tačnost podataka — uvek proverite red vožnje direktno kod prevoznika. Ovaj sajt ne prodaje karte niti posreduje u prodaji prevoznih usluga.',
         'en': 'Data is for informational purposes and sourced from publicly available sources. Prevozni does not guarantee data accuracy — always check the schedule directly with the carrier. This site does not sell tickets.',

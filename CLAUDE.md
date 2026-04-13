@@ -117,6 +117,17 @@ transit/
 | gtfs_stop_times | 2317651 | Времена прибытия (94% mapped) |
 | international | 458 | Международные рейсы (Crna Gora, BiH, HR, TR, SI, MK) |
 
+## Deployment
+
+Production environment requires these env vars:
+
+- `FLASK_ENV=production`
+- `SECRET_KEY` — **обязателен** (при отсутствии app бросает RuntimeError на старте).
+  Сгенерировать: `python -c "import secrets; print(secrets.token_hex(32))"`.
+  Хранить в systemd unit (`Environment=`) или `.env` (не коммитить).
+- `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` — уведомления контакт-формы.
+- `DUCKDB_PATH` — путь к `transit.duckdb` (по умолчанию `data/dbs/transit.duckdb`).
+
 ## Инфраструктура
 
 ```

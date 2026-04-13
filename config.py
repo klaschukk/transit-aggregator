@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).parent
 
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or os.urandom(32).hex()
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-insecure-key-do-not-use-in-prod')
     DUCKDB_PATH = os.environ.get('DUCKDB_PATH', str(BASE_DIR / 'data' / 'dbs' / 'transit.duckdb'))
     BASE_URL = os.environ.get('BASE_URL', 'http://localhost:5000')
     EUR_RSD_RATE = max(1.0, float(os.environ.get('EUR_RSD_RATE', '117')))
@@ -21,6 +21,7 @@ class Config:
 class ProductionConfig(Config):
     DEBUG = False
     BASE_URL = os.environ.get('BASE_URL', 'https://prevozni.com')
+    SECRET_KEY = os.environ.get('SECRET_KEY', '')
 
 
 class DevelopmentConfig(Config):

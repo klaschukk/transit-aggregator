@@ -174,6 +174,7 @@ def sitemap():
         url('/destinacije/', 'weekly', '0.7'),
         url('/o-nama/', 'monthly', '0.3'),
         url('/kontakt/', 'monthly', '0.3'),
+        url('/privatnost/', 'monthly', '0.2'),
     ]
 
     if db_ready():
