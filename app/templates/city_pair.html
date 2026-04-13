@@ -113,7 +113,7 @@
     <ul>
       {% if route_info and route_info.first_departure %}<li>Prvi polazak u {{ route_info.first_departure }}, poslednji u {{ route_info.last_departure }}.</li>{% endif %}
       <li>Kupite kartu unapred u sezoni i za vikende.</li>
-      {% if route.distance_km %}<li>Putovanje traje oko {{ (route.distance_km / 80)|round|int }}–{{ (route.distance_km / 60)|round|int }} sata autobusom.</li>{% endif %}
+      {% if route_info and route_info.duration_min %}<li>Putovanje traje {{ route_info.duration_min // 60 }}h {{ route_info.duration_min % 60 }}min{% if route_info.duration_max != route_info.duration_min %}–{{ route_info.duration_max // 60 }}h {{ route_info.duration_max % 60 }}min{% endif %}.</li>{% endif %}
     </ul>
   </div>
 </div>
@@ -129,7 +129,7 @@
     <details class="faq-item">
       <summary class="faq-item__q">Koliko traje putovanje {{ from_city }} — {{ to_city }}?</summary>
       <div class="faq-item__a">
-        {% if route_info and route_info.duration_min %}Putovanje od {{ from_city }} do {{ to_city }} traje od {{ route_info.duration_min // 60 }}h {{ route_info.duration_min % 60 }}min do {{ route_info.duration_max // 60 }}h {{ route_info.duration_max % 60 }}min.{% if route.distance_km %} Rastojanje je {{ route.distance_km }} km.{% endif %}{% elif route and route.distance_km %}Rastojanje je oko {{ route.distance_km }} km. Prosečno trajanje autobusom je {{ (route.distance_km / 80)|round|int }}–{{ (route.distance_km / 60)|round|int }} sata.{% else %}Trajanje zavisi od prevoznika i tipa prevoza.{% endif %}
+        {% if route_info and route_info.duration_min %}Putovanje od {{ from_city }} do {{ to_city }} traje od {{ route_info.duration_min // 60 }}h {{ route_info.duration_min % 60 }}min do {{ route_info.duration_max // 60 }}h {{ route_info.duration_max % 60 }}min.{% if route and route.distance_km %} Rastojanje je {{ route.distance_km }} km.{% endif %}{% elif route and route.distance_km %}Rastojanje je oko {{ route.distance_km }} km. Tačno trajanje zavisi od prevoznika.{% else %}Trajanje zavisi od prevoznika i tipa prevoza.{% endif %}
       </div>
     </details>
     <details class="faq-item">
@@ -157,7 +157,7 @@
 
 {# FAQ JSON-LD with enriched answers #}
 {% if route %}
-{% set faq_duration %}{% if route_info and route_info.duration_min %}Putovanje traje od {{ route_info.duration_min // 60 }}h {{ route_info.duration_min % 60 }}min do {{ route_info.duration_max // 60 }}h {{ route_info.duration_max % 60 }}min.{% if route.distance_km %} Rastojanje je {{ route.distance_km }} km.{% endif %}{% elif route.distance_km %}Rastojanje je oko {{ route.distance_km }} km. Prosečno trajanje {{ (route.distance_km / 80)|round|int }}–{{ (route.distance_km / 60)|round|int }} sata.{% else %}Trajanje zavisi od prevoznika.{% endif %}{% endset %}
+{% set faq_duration %}{% if route_info and route_info.duration_min %}Putovanje traje od {{ route_info.duration_min // 60 }}h {{ route_info.duration_min % 60 }}min do {{ route_info.duration_max // 60 }}h {{ route_info.duration_max % 60 }}min.{% if route.distance_km %} Rastojanje je {{ route.distance_km }} km.{% endif %}{% elif route.distance_km %}Rastojanje je oko {{ route.distance_km }} km. Tačno trajanje zavisi od prevoznika.{% else %}Trajanje zavisi od prevoznika.{% endif %}{% endset %}
 {% set faq_price %}{% if route_info and route_info.price_min %}Od {{ route_info.price_min }} do {{ route_info.price_max }} RSD ({{ (route_info.price_min / config.EUR_RSD_RATE)|round|int }}–{{ (route_info.price_max / config.EUR_RSD_RATE)|round|int }}€).{% if route_info.cheapest_operator %} Najjeftiniji: {{ route_info.cheapest_operator }}.{% endif %}{% elif route.min_price_rsd %}Od {{ route.min_price_rsd }} RSD ({{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }}€).{% else %}Cene variraju.{% endif %}{% endset %}
 {% set faq_departures %}{% if route_info and route_info.first_departure %}{{ route.trip_count|default(0) }} polazaka dnevno. Prvi u {{ route_info.first_departure }}, poslednji u {{ route_info.last_departure }}.{% elif route.trip_count %}{{ route.trip_count }} polazaka dnevno.{% else %}Broj polazaka varira.{% endif %}{% endset %}
 <script type="application/ld+json">
