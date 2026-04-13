@@ -16,7 +16,7 @@
 
 <div class="page-title fade-in">
   <h1>Prevoznici</h1>
-  <p class="page-subtitle">{{ operators|length }} prevoznika u bazi</p>
+  <p class="page-subtitle">{{ total_operators|default(operators|length) }} prevoznika u bazi{% if total_pages and total_pages > 1 %} · strana {{ page }} / {{ total_pages }}{% endif %}</p>
 </div>
 
 <!-- Anchor nav -->
@@ -78,6 +78,18 @@
 </div>
 {% else %}
   {{ empty_state(icon='bus', text='Podaci se učitavaju') }}
+{% endif %}
+
+{% if total_pages and total_pages > 1 %}
+<nav class="pagination" aria-label="Paginacija">
+  {% if page > 1 %}
+  <a class="pagination__link" rel="prev" href="{{ lang_prefix }}/prevoznici/{% if page > 2 %}?page={{ page - 1 }}{% endif %}">← Prethodna</a>
+  {% endif %}
+  <span class="pagination__info">Strana {{ page }} / {{ total_pages }}</span>
+  {% if page < total_pages %}
+  <a class="pagination__link" rel="next" href="{{ lang_prefix }}/prevoznici/?page={{ page + 1 }}">Sledeća →</a>
+  {% endif %}
+</nav>
 {% endif %}
 
 {% endblock %}

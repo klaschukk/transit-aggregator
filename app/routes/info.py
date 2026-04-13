@@ -115,7 +115,14 @@ def destinations():
 
 @info_bp.route('/prevoznici/')
 def carriers():
-    """Carriers/operators page — cached, batch queries."""
+    """Carriers/operators page — cached, batch queries, paginated."""
+    from flask import request
+    try:
+        page = max(1, int(request.args.get('page', '1')))
+    except ValueError:
+        page = 1
+    per_page = 50
+
     operators = cached_query("""
         SELECT o.id, o.name, o.slug, o.website, o.type,
                COUNT(DISTINCT t.route_id) as route_count
@@ -154,7 +161,20 @@ def carriers():
         op['cities'] = cities_by_op.get(op['id'], [])[:8]
         op['routes'] = routes_by_op.get(op['id'], [])[:6]
 
-    return render_template('carriers_index.html', operators=operators)
+    total = len(operators)
+    total_pages = max(1, (total + per_page - 1) // per_page)
+    if page > total_pages:
+        page = total_pages
+    start = (page - 1) * per_page
+    page_operators = operators[start:start + per_page]
+
+    return render_template(
+        'carriers_index.html',
+        operators=page_operators,
+        total_operators=total,
+        page=page,
+        total_pages=total_pages,
+    )
 
 
 @info_bp.route('/autobuske-stanice/')
