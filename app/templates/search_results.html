@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{% if from_city and to_city %}{{ from_city }} → {{ to_city }} — Prevozni{% else %}Pretraga — Prevozni{% endif %}{% endblock %}
+{% block title %}{% if from_city and to_city %}{{ from_city }} → {{ to_city }} — {{ _('search.results_for') }} — Prevozni{% else %}{{ _('search.title') }} — Prevozni{% endif %}{% endblock %}
 {% block meta_description %}{% if from_city and to_city %}Red vožnje od {{ from_city }} do {{ to_city }} — svi polasci, cene karata i prevoznici na jednom mestu.{% else %}Pretražite red vožnje autobusa i vozova između gradova Srbije. Uporedite polaske, cene i prevoznike. Besplatno.{% endif %}{% endblock %}
 
 {% block head_extra %}
@@ -20,7 +20,7 @@
 <!-- ═══ Results view ═══ -->
 
 {{ breadcrumb([
-  {'url': '/pretraga/', 'label': 'Pretraga'},
+  {'url': lang_prefix ~ '/pretraga/', 'label': _('search.title')},
   {'label': from_city ~ ' → ' ~ to_city}
 ]) }}
 
