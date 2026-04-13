@@ -325,6 +325,16 @@ def _load_intercity(conn: duckdb.DuckDBPyConnection,
         all_trips.extend(lasta_trips)
         print(f"  polazak.rs trips: {len(lasta_trips)}")
 
+    # Source 4: international routes (busticket4.me international)
+    intl_path = RAW_DIR / 'international_routes.json'
+    if intl_path.exists():
+        with open(intl_path, encoding='utf-8') as f:
+            intl_trips = json.load(f)
+        for t in intl_trips:
+            t['_source'] = 'intl'
+        all_trips.extend(intl_trips)
+        print(f"  International trips: {len(intl_trips)}")
+
     if not all_trips:
         return
 

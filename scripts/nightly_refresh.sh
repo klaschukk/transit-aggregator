@@ -26,6 +26,7 @@ $VENV -u data/pipelines/scrape_lasta.py      >> "$LOG" 2>&1 || echo "WARN: scrap
 $VENV -u data/pipelines/scrape_gspns.py           >> "$LOG" 2>&1 || echo "WARN: scrape_gspns failed ($?)" >> "$LOG"
 $VENV -u data/pipelines/scrape_gspns_schedule.py  >> "$LOG" 2>&1 || echo "WARN: scrape_gspns_schedule failed ($?)" >> "$LOG"
 $VENV -u data/pipelines/scrape_naissus.py         >> "$LOG" 2>&1 || echo "WARN: scrape_naissus failed ($?)" >> "$LOG"
+$VENV -u data/pipelines/scrape_international.py   >> "$LOG" 2>&1 || echo "WARN: scrape_international failed ($?)" >> "$LOG"
 
 # Rebuild database — this is critical
 $VENV -u data/pipelines/build_db.py >> "$LOG" 2>&1
