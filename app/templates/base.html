@@ -1,14 +1,19 @@
 <!DOCTYPE html>
-<html lang="sr">
+{% set _lang_html = {'sr':'sr','en':'en','ru':'ru'}[lang] %}
+{% set _og_locale = {'sr':'sr_RS','en':'en_US','ru':'ru_RU'}[lang] %}
+<html lang="{{ _lang_html }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0d9488">
+<meta name="robots" content="index, follow, max-image-preview:large">
 {% if config.YANDEX_VERIFICATION %}<meta name="yandex-verification" content="{{ config.YANDEX_VERIFICATION }}">{% endif %}
 <link rel="preconnect" href="https://unpkg.com" crossorigin>
 <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
+<link rel="dns-prefetch" href="https://www.bookaway.com">
 <title>{% block title %}Prevozni — red vožnje u Srbiji{% endblock %}</title>
 <meta name="description" content="{% block meta_description %}Red vožnje autobusa, vozova i gradskog prevoza u Srbiji. Pronađite polazak, uporedite cene i prevoznike. Besplatno, bez registracije.{% endblock %}">
+<meta name="author" content="Prevozni">
 <link rel="canonical" href="{{ config.BASE_URL }}{{ request.path }}">
 {% set _clean_path = request.path | replace(lang_prefix, '', 1) if lang_prefix else request.path %}
 <link rel="alternate" hreflang="sr" href="{{ config.BASE_URL }}{{ _clean_path }}">
@@ -20,18 +25,25 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{ config.BASE_URL }}{{ request.path }}">
 <meta property="og:site_name" content="Prevozni">
-<meta property="og:locale" content="sr_RS">
+<meta property="og:locale" content="{{ _og_locale }}">
+{%- for l in supported_langs if l != lang %}
+<meta property="og:locale:alternate" content="{{ {'sr':'sr_RS','en':'en_US','ru':'ru_RU'}[l] }}">
+{%- endfor %}
 <meta property="og:image" content="https://prevozni.com/static/img/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Prevozni — red vožnje Srbija">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ self.title() }}">
+<meta name="twitter:description" content="{{ self.meta_description() }}">
+<meta name="twitter:image" content="https://prevozni.com/static/img/og-image.png">
 <link rel="icon" type="image/svg+xml" href="/static/favicon/favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon/favicon-32x32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png">
 <link rel="manifest" href="/static/site.webmanifest">
 {% block head_extra %}{% endblock %}
-<link rel="preload" href="{{ url_for('static', filename='css/app.css') }}?v=9" as="style">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v=9">
+<link rel="preload" href="{{ url_for('static', filename='css/app.css') }}?v=10" as="style">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v=10">
 <script defer src="https://analytics.farmako.ro/umami" data-website-id="b8703518-4b58-4069-9a90-a4fb28cf3649"></script>
 {% if config.GA_TRACKING_ID %}
 <script async src="https://www.googletagmanager.com/gtag/js?id={{ config.GA_TRACKING_ID }}"></script>

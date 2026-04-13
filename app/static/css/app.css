@@ -1216,6 +1216,18 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .buy-ticket__btn--bookaway:hover { background: #047857; }
 .buy-ticket__btn--flixbus { background: #73d700; color: #1a1a1a; }
 .buy-ticket__btn--flixbus:hover { background: #65c100; }
+/* Trip-card hover polish */
+.trip-list .trip-card:hover {
+  background: var(--color-bg-alt);
+  transform: none;
+}
+.trip-card__price {
+  transition: transform 0.15s;
+}
+.trip-card:hover .trip-card__price {
+  transform: scale(1.05);
+}
+
 /* Destinations page */
 .dest-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-top: 24px; }
 .dest-card {

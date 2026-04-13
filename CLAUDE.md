@@ -106,15 +106,16 @@ transit/
 
 | Таблица | Записей | Описание |
 |---------|---------|----------|
-| city_lines | 651 | Линии: Белград 514, Нови Сад 61, Ниш 53, Крагуевац 23 |
-| city_stops | 4522 | Остановки (96% с координатами) |
-| city_line_stops | 22727 | Привязка остановок к линиям (98% linked) |
-| routes | 335 | Межгородские маршруты (48 городов) |
-| trips | 2838 | Рейсы (время, цена, оператор) — dedup из 3 источников |
-| operators | 70 | Перевозчики (Lasta, Kavim, Jugoprevoz, Srbija Voz и др.) |
+| city_lines | 610 | Линии: Белград 514, Нови Сад 61, Ниш 12, Крагуевац 23 |
+| city_stops | 3770 | Остановки (97% с координатами) |
+| city_line_stops | 14375 | Привязка остановок к линиям |
+| routes | 517 | Маршруты: 271 domestic + 246 international/info |
+| trips | 2777 | Рейсы (с реальными ценами и операторами) |
+| operators | 66 | Перевозчики (Lasta, Niš-Ekspres, OZLEM, Srbija Voz и др.) |
 | stations | 10 | ЖД станции |
 | gtfs_trips | 93991 | GTFS расписание (Белград + Нови Сад) |
 | gtfs_stop_times | 2317651 | Времена прибытия (94% mapped) |
+| international | 458 | Международные рейсы (Crna Gora, BiH, HR, TR, SI, MK) |
 
 ## Инфраструктура
 
@@ -159,4 +160,9 @@ Enrich: cron 3:00 AM
 - [x] Домен prevozni.com + Cloudflare SSL
 - [x] Umami analytics
 - [x] Telegram bot notifications (контакт-форма)
-- [ ] Google AdSense
+- [x] 3 языка: sr (default) + en + ru с full i18n
+- [x] 458 международных рейсов (Crna Gora, BiH, Hrvatska, Turska, Slovenija)
+- [x] Bookaway affiliate (offer_id=34, aff_id=4033) — buy кнопка везде
+- [x] Destinations page (14 топ направлений Балкан)
+- [x] hreflang × 3, og:locale:alternate, robots max-image-preview, Organization JSON-LD
+- [ ] Google AdSense (после 1000+ визитов/мес)
