@@ -9,9 +9,13 @@ from .i18n import get_text, SUPPORTED_LANGS, DEFAULT_LANG
 
 def _compute_asset_version(root: Path) -> str:
     """Git SHA (short) at startup, fallback to app.css mtime."""
+    git_bin = next(
+        (p for p in ('/usr/bin/git', '/usr/local/bin/git') if Path(p).exists()),
+        'git',
+    )
     try:
         sha = subprocess.check_output(
-            ['git', 'rev-parse', '--short', 'HEAD'],
+            [git_bin, 'rev-parse', '--short', 'HEAD'],
             cwd=str(root),
             stderr=subprocess.DEVNULL,
             timeout=2,

@@ -16,6 +16,9 @@ def _client_ip() -> str:
     return get_remote_address()
 
 
+# Note: memory:// storage is per-worker. With `gunicorn -w 4`, effective limit
+# is ~4× the declared value per IP. For stricter enforcement use redis:// or
+# memcached:// — requires external infra.
 limiter = Limiter(
     key_func=_client_ip,
     default_limits=[],
