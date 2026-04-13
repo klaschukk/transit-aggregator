@@ -21,13 +21,13 @@
 {% if sent %}
 <div class="alert alert--success fade-in">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M5 13l4 4L19 7"/></svg>
-  {{ _('contact.title') }} OK
+  {{ _('contact.sent_ok') }}
 </div>
 {% endif %}
 
 <div class="contact-layout">
   {% if error %}
-  <div class="alert alert--error">{{ error }}</div>
+  <div class="alert alert--error">{{ _(error) }}</div>
   {% endif %}
   <form class="contact-form" action="{{ lang_prefix }}/kontakt/" method="post">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

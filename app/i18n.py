@@ -481,6 +481,31 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Отвечаем в течение',
     },
     'contact.hours': {'sr': '24 sata', 'en': '24 hours', 'ru': '24 часов'},
+    'contact.sent_ok': {
+        'sr': 'Poruka je poslata. Hvala!',
+        'en': 'Message sent. Thanks!',
+        'ru': 'Сообщение отправлено. Спасибо!',
+    },
+    'contact.error.required': {
+        'sr': 'Molimo popunite sva polja.',
+        'en': 'Please fill in all fields.',
+        'ru': 'Пожалуйста, заполните все поля.',
+    },
+    'contact.error.name_too_long': {
+        'sr': 'Ime je predugačko (maksimum 100 karaktera).',
+        'en': 'Name is too long (max 100 characters).',
+        'ru': 'Имя слишком длинное (максимум 100 символов).',
+    },
+    'contact.error.email_invalid': {
+        'sr': 'Email adresa nije ispravna.',
+        'en': 'Email address is not valid.',
+        'ru': 'Некорректный email адрес.',
+    },
+    'contact.error.message_too_long': {
+        'sr': 'Poruka je predugačka (maksimum 500 karaktera).',
+        'en': 'Message is too long (max 500 characters).',
+        'ru': 'Сообщение слишком длинное (максимум 500 символов).',
+    },
 
     # ── About page ──
     'about.title': {'sr': 'O nama', 'en': 'About us', 'ru': 'О нас'},
