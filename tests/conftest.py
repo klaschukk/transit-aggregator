@@ -9,6 +9,7 @@ def app():
     """Create application for testing."""
     application = create_app("development")
     application.config["TESTING"] = True
+    application.config["WTF_CSRF_ENABLED"] = False
     yield application
 
 

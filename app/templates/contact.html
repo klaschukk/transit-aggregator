@@ -26,22 +26,27 @@
 {% endif %}
 
 <div class="contact-layout">
+  {% if error %}
+  <div class="alert alert--error">{{ error }}</div>
+  {% endif %}
   <form class="contact-form" action="{{ lang_prefix }}/kontakt/" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="contact-form__fields">
       <div class="contact-form__group">
         <label class="contact-form__label" for="contactName">{{ _('contact.name') }}</label>
         <input class="contact-form__input" id="contactName" name="ime" type="text"
-               placeholder="{{ _('contact.name_ph') }}" required>
+               placeholder="{{ _('contact.name_ph') }}" maxlength="100" required>
       </div>
       <div class="contact-form__group">
         <label class="contact-form__label" for="contactEmail">{{ _('contact.email') }}</label>
         <input class="contact-form__input" id="contactEmail" name="email" type="email"
-               placeholder="you@email.com" required>
+               placeholder="you@email.com" maxlength="100" required>
       </div>
       <div class="contact-form__group">
         <label class="contact-form__label" for="contactMessage">{{ _('contact.message') }}</label>
         <textarea class="contact-form__input contact-form__textarea" id="contactMessage"
-                  name="poruka" placeholder="{{ _('contact.message_ph') }}" rows="5" required></textarea>
+                  name="poruka" placeholder="{{ _('contact.message_ph') }}" rows="5"
+                  maxlength="500" required></textarea>
       </div>
     </div>
     <button type="submit" class="btn btn--primary contact-form__submit">

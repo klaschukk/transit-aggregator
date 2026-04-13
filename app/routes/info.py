@@ -1,8 +1,31 @@
+import html
+import logging
+import re
+
 from flask import Blueprint, render_template
 
 from app.db import query, query_one, cached_query, cached_query_one, db_ready
 
 info_bp = Blueprint('info', __name__)
+
+_EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
+NAME_MAX = 100
+EMAIL_MAX = 100
+MESSAGE_MAX = 500
+
+log = logging.getLogger(__name__)
+
+
+def _validate_contact(name: str, email: str, message: str) -> str | None:
+    if not name or not email or not message:
+        return 'contact.error.required'
+    if len(name) > NAME_MAX:
+        return 'contact.error.name_too_long'
+    if len(email) > EMAIL_MAX or not _EMAIL_RE.match(email):
+        return 'contact.error.email_invalid'
+    if len(message) > MESSAGE_MAX:
+        return 'contact.error.message_too_long'
+    return None
 
 
 @info_bp.route('/o-nama/')
@@ -26,53 +49,57 @@ def about():
 def contact():
     from flask import request, current_app
     sent = False
+    error = None
     if request.method == 'POST':
-        name = request.form.get('ime', '').strip()
-        email = request.form.get('email', '').strip()
-        message = request.form.get('poruka', '').strip()
-        if name and email and message:
-            # Always log to file
-            import datetime, logging
-            log_path = current_app.root_path + '/../logs/contact_messages.log'
-            try:
-                with open(log_path, 'a', encoding='utf-8') as f:
-                    f.write(f"\n{'='*50}\n")
-                    f.write(f"Date: {datetime.datetime.now().isoformat()}\n")
-                    f.write(f"Name: {name}\nEmail: {email}\n")
-                    f.write(f"Message: {message}\n")
-            except Exception:
-                logging.exception("Failed to write contact log")
+        name = request.form.get('ime', '').strip()[:NAME_MAX + 1]
+        email = request.form.get('email', '').strip()[:EMAIL_MAX + 1]
+        message = request.form.get('poruka', '').strip()[:MESSAGE_MAX + 1]
 
-            # Telegram notification (if configured)
-            _send_telegram_notification(name, email, message)
+        error = _validate_contact(name, email, message)
+        if error:
+            return render_template('contact.html', sent=False, error=error), 400
 
-            sent = True
-    return render_template('contact.html', sent=sent)
+        import datetime
+        log_path = current_app.root_path + '/../logs/contact_messages.log'
+        try:
+            with open(log_path, 'a', encoding='utf-8') as f:
+                f.write(f"\n{'='*50}\n")
+                f.write(f"Date: {datetime.datetime.now().isoformat()}\n")
+                f.write(f"Name: {name}\nEmail: {email}\n")
+                f.write(f"Message: {message}\n")
+        except OSError:
+            log.exception("Failed to write contact log")
+
+        _send_telegram_notification(name, email, message)
+        sent = True
+    return render_template('contact.html', sent=sent, error=error)
 
 
 def _send_telegram_notification(name: str, email: str, message: str) -> None:
-    """Send contact form notification via Telegram bot. Fails silently."""
+    """Send contact form notification via Telegram bot."""
     from flask import current_app
     token = current_app.config.get('TELEGRAM_BOT_TOKEN', '')
     chat_id = current_app.config.get('TELEGRAM_CHAT_ID', '')
     if not token or not chat_id:
         return
+    import requests as req
+    safe_name = html.escape(name)
+    safe_email = html.escape(email)
+    safe_message = html.escape(message[:MESSAGE_MAX])
+    text = (
+        f"Novo sporocilo sa prevozni.com\n\n"
+        f"Ime: {safe_name}\n"
+        f"Email: {safe_email}\n"
+        f"Poruka: {safe_message}"
+    )
     try:
-        import requests as req
-        text = (
-            f"📩 Novo sporocilo sa prevozni.com\n\n"
-            f"Ime: {name}\n"
-            f"Email: {email}\n"
-            f"Poruka: {message[:500]}"
-        )
         req.post(
             f'https://api.telegram.org/bot{token}/sendMessage',
             json={'chat_id': chat_id, 'text': text},
             timeout=5,
         )
-    except Exception:
-        import logging
-        logging.exception("Telegram notification failed")
+    except req.RequestException as exc:
+        log.error("Telegram notification failed: %s (email=%s)", exc, safe_email)
 
 
 @info_bp.route('/destinacije/')

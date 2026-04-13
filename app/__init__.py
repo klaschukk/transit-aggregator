@@ -75,6 +75,10 @@ def create_app(config_name: str | None = None) -> Flask:
     from flask_compress import Compress
     Compress(app)
 
+    # CSRF protection (flask-wtf). Runtime config WTF_CSRF_ENABLED can turn it off in tests.
+    from flask_wtf.csrf import CSRFProtect
+    CSRFProtect(app)
+
     # Cache headers
     @app.after_request
     def add_cache_headers(response):

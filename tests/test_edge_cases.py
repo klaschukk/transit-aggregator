@@ -143,7 +143,7 @@ def test_dot_dot_in_static(client):
 
 def test_post_to_kontakt(client):
     resp = client.post("/kontakt/", data={})
-    assert resp.status_code in (200, 405)
+    assert resp.status_code in (200, 400, 405)
 
 
 def test_post_to_api(client):
