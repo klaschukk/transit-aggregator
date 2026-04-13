@@ -123,43 +123,55 @@ def carriers():
         page = 1
     per_page = 50
 
-    operators = cached_query("""
-        SELECT o.id, o.name, o.slug, o.website, o.type,
-               COUNT(DISTINCT t.route_id) as route_count
+    # Single query: operators LEFT JOIN trips LEFT JOIN routes.
+    # We then aggregate cities/routes per operator in Python.
+    rows = cached_query("""
+        SELECT o.id AS op_id, o.name, o.slug, o.website, o.type,
+               r.id AS route_id, r.slug AS route_slug, r.from_city, r.to_city
         FROM operators o
         LEFT JOIN trips t ON t.operator_id = o.id
-        GROUP BY o.id, o.name, o.slug, o.website, o.type
-        ORDER BY route_count DESC
+        LEFT JOIN routes r ON r.id = t.route_id
+        ORDER BY o.id, r.from_city, r.to_city
     """, ttl=3600) if db_ready() else []
 
-    # Batch: all cities per operator in one query
-    all_cities = cached_query("""
-        SELECT DISTINCT t.operator_id, r.from_city AS city FROM routes r
-        JOIN trips t ON t.route_id = r.id
-        UNION
-        SELECT DISTINCT t.operator_id, r.to_city FROM routes r
-        JOIN trips t ON t.route_id = r.id
-        ORDER BY city
-    """, ttl=3600) if db_ready() else []
+    ops_by_id: dict = {}
+    for row in rows:
+        op_id = row['op_id']
+        op = ops_by_id.get(op_id)
+        if op is None:
+            op = {
+                'id': op_id,
+                'name': row['name'],
+                'slug': row['slug'],
+                'website': row['website'],
+                'type': row['type'],
+                'route_count': 0,
+                'cities': [],
+                'routes': [],
+                '_seen_routes': set(),
+                '_seen_cities': set(),
+            }
+            ops_by_id[op_id] = op
+        if row.get('route_id') and row['route_id'] not in op['_seen_routes']:
+            op['_seen_routes'].add(row['route_id'])
+            op['route_count'] += 1
+            if len(op['routes']) < 6:
+                op['routes'].append({
+                    'slug': row['route_slug'],
+                    'from_city': row['from_city'],
+                    'to_city': row['to_city'],
+                })
+            for city in (row['from_city'], row['to_city']):
+                if city and city not in op['_seen_cities']:
+                    op['_seen_cities'].add(city)
+                    if len(op['cities']) < 8:
+                        op['cities'].append({'city': city})
 
-    # Batch: all routes per operator
-    all_routes = cached_query("""
-        SELECT DISTINCT t.operator_id, r.slug, r.from_city, r.to_city
-        FROM routes r JOIN trips t ON t.route_id = r.id
-        ORDER BY r.from_city, r.to_city
-    """, ttl=3600) if db_ready() else []
+    for op in ops_by_id.values():
+        del op['_seen_routes']
+        del op['_seen_cities']
 
-    # Group by operator
-    cities_by_op: dict[int, list] = {}
-    for c in all_cities:
-        cities_by_op.setdefault(c['operator_id'], []).append(c)
-    routes_by_op: dict[int, list] = {}
-    for r in all_routes:
-        routes_by_op.setdefault(r['operator_id'], []).append(r)
-
-    for op in operators:
-        op['cities'] = cities_by_op.get(op['id'], [])[:8]
-        op['routes'] = routes_by_op.get(op['id'], [])[:6]
+    operators = sorted(ops_by_id.values(), key=lambda o: o['route_count'], reverse=True)
 
     total = len(operators)
     total_pages = max(1, (total + per_page - 1) // per_page)
