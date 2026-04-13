@@ -10,6 +10,7 @@ def app():
     application = create_app("development")
     application.config["TESTING"] = True
     application.config["WTF_CSRF_ENABLED"] = False
+    application.config["RATELIMIT_ENABLED"] = False
     yield application
 
 

@@ -2,6 +2,7 @@ from datetime import datetime
 
 from flask import Blueprint, render_template, abort, request, jsonify
 from app.db import query, query_one, cached_query, cached_query_one, db_ready
+from app.extensions import limiter
 
 city_bp = Blueprint('city', __name__)
 
@@ -211,6 +212,7 @@ def stop_detail(city: str, stop_slug: str):
 
 
 @city_bp.route('/api/stop-arrivals')
+@limiter.limit("30 per minute")
 def api_stop_arrivals():
     """Return lines at a stop with next arrivals from GTFS schedule."""
     stop_slug = request.args.get('slug', '').strip()
@@ -308,6 +310,7 @@ def _time_to_min(t: str) -> int:
 
 
 @city_bp.route('/api/city-stops')
+@limiter.limit("30 per minute")
 def api_city_stops():
     """Return stops within bounding box as JSON for map markers."""
     try:

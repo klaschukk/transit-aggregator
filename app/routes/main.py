@@ -3,6 +3,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, request, make_response, jsonify, Response, current_app
 
 from app.db import query, query_one, cached_query, cached_query_one, db_ready
+from app.extensions import limiter
 
 main_bp = Blueprint('main', __name__)
 
@@ -124,6 +125,7 @@ def search():
 
 
 @main_bp.route('/api/cities')
+@limiter.limit("30 per minute")
 def api_cities():
     """Return city list for autocomplete."""
     q = request.args.get('q', '').strip().lower()

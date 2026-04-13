@@ -84,6 +84,15 @@ def create_app(config_name: str | None = None) -> Flask:
     from flask_wtf.csrf import CSRFProtect
     CSRFProtect(app)
 
+    # Rate limiting
+    from .extensions import limiter
+    limiter.init_app(app)
+
+    from flask import jsonify
+    @app.errorhandler(429)
+    def ratelimit_handler(e):
+        return jsonify(error="rate_limit_exceeded", message=str(e.description)), 429
+
     # Cache headers
     @app.after_request
     def add_cache_headers(response):
