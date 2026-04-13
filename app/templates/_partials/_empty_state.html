@@ -3,17 +3,17 @@
 <div class="empty-state">
   <div class="empty-state__icon">
     {% if icon == 'search' %}
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" role="img" aria-label="{{ text }}">
       <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
     </svg>
     {% elif icon == 'bus' %}
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" role="img" aria-label="{{ text }}">
       <rect x="4" y="3" width="16" height="16" rx="3"/><path d="M4 11h16"/>
       <circle cx="8" cy="21" r="1"/><circle cx="16" cy="21" r="1"/>
       <path d="M8 19v-1m8 1v-1"/>
     </svg>
     {% elif icon == 'stop' %}
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" role="img" aria-label="{{ text }}">
       <rect x="6" y="2" width="12" height="20" rx="2"/>
       <path d="M10 18h4M6 7h12M6 12h12"/>
     </svg>
