@@ -745,6 +745,53 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'lang.sr': {'sr': 'Srpski', 'en': 'Serbian', 'ru': 'Сербский'},
     'lang.en': {'sr': 'English', 'en': 'English', 'ru': 'English'},
     'lang.ru': {'sr': 'Русский', 'en': 'Russian', 'ru': 'Русский'},
+
+    # ── Accessibility labels ──
+    'a11y.skip_to_content': {
+        'sr': 'Preskoči na sadržaj',
+        'en': 'Skip to content',
+        'ru': 'Перейти к содержимому',
+    },
+    'a11y.language_switcher': {
+        'sr': 'Izbor jezika',
+        'en': 'Language selector',
+        'ru': 'Выбор языка',
+    },
+    'a11y.search_form': {
+        'sr': 'Pretraga polazaka',
+        'en': 'Journey search',
+        'ru': 'Поиск поездок',
+    },
+    'a11y.swap_cities': {
+        'sr': 'Zameni polazište i odredište',
+        'en': 'Swap origin and destination',
+        'ru': 'Поменять местами пункты',
+    },
+    'a11y.trip_date': {
+        'sr': 'Datum putovanja',
+        'en': 'Trip date',
+        'ru': 'Дата поездки',
+    },
+    'a11y.filters': {
+        'sr': 'Filteri polazaka',
+        'en': 'Journey filters',
+        'ru': 'Фильтры поездок',
+    },
+    'a11y.city_map': {
+        'sr': 'Interaktivna mapa gradskih stajališta',
+        'en': 'Interactive city stops map',
+        'ru': 'Интерактивная карта городских остановок',
+    },
+    'a11y.line_map': {
+        'sr': 'Interaktivna mapa linije',
+        'en': 'Interactive line map',
+        'ru': 'Интерактивная карта линии',
+    },
+    'a11y.stop_map': {
+        'sr': 'Mapa lokacije stajališta',
+        'en': 'Stop location map',
+        'ru': 'Карта местоположения остановки',
+    },
 }
 
 SUPPORTED_LANGS = ('sr', 'en', 'ru')

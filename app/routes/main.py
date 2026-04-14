@@ -184,8 +184,28 @@ def sitemap():
     else:
         lastmod = datetime.now().strftime('%Y-%m-%d')
 
+    from app.i18n import SUPPORTED_LANGS, DEFAULT_LANG
+
+    def _loc_for(lang: str, loc: str) -> str:
+        if lang == DEFAULT_LANG:
+            return f'{base}{loc}'
+        return f'{base}/{lang}{loc}'
+
     def url(loc: str, freq: str, prio: str, mod: str = lastmod) -> str:
-        return f'<url><loc>{base}{loc}</loc><lastmod>{mod}</lastmod><changefreq>{freq}</changefreq><priority>{prio}</priority></url>'
+        # Emit one <url> per language, each with hreflang alternates (sr/en/ru + x-default).
+        alternates = ''.join(
+            f'<xhtml:link rel="alternate" hreflang="{l}" href="{_loc_for(l, loc)}"/>'
+            for l in SUPPORTED_LANGS
+        )
+        alternates += f'<xhtml:link rel="alternate" hreflang="x-default" href="{_loc_for(DEFAULT_LANG, loc)}"/>'
+        parts = []
+        for l in SUPPORTED_LANGS:
+            parts.append(
+                f'<url><loc>{_loc_for(l, loc)}</loc>'
+                f'<lastmod>{mod}</lastmod><changefreq>{freq}</changefreq><priority>{prio}</priority>'
+                f'{alternates}</url>'
+            )
+        return ''.join(parts)
 
     pages = [
         url('/', 'daily', '1.0'),
@@ -229,7 +249,7 @@ def sitemap():
             pages.append(url(f'/gradski/{s["city"]}/stajaliste/{s["slug"]}/', 'weekly', '0.4'))
 
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
     xml += '\n'.join(pages)
     xml += '\n</urlset>'
     resp = make_response(xml)
