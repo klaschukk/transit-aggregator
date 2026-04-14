@@ -19,8 +19,8 @@
   <p class="page-subtitle">{{ total_operators|default(operators|length) }} prevoznika u bazi{% if total_pages and total_pages > 1 %} · strana {{ page }} / {{ total_pages }}{% endif %}</p>
 </div>
 
-<!-- Anchor nav -->
-{% if operators %}
+<!-- Anchor nav — only when everything fits on one page, otherwise labels are misleading -->
+{% if operators and (not total_pages or total_pages <= 1) %}
 <nav class="anchor-nav fade-in fade-in--d1">
   {% for op in operators %}
   <a href="#{{ op.slug }}" class="anchor-nav__link">{{ op.name }}</a>
