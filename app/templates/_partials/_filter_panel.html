@@ -1,8 +1,8 @@
 {# Filter panel macro — reused in city_pair and search_results #}
 {% macro filter_panel(operators=[], show_type=true) %}
-<aside class="filter-panel" id="filterPanel">
+<aside class="filter-panel" id="filterPanel" aria-label="{{ _('a11y.filters') }}">
   <div class="filter-panel__header">
-    <div class="filter-panel__heading">Filteri</div>
+    <div class="filter-panel__heading" id="filterPanelHeading">Filteri</div>
     <button class="filter-panel__close" id="filterClose" type="button">Zatvori</button>
   </div>
 

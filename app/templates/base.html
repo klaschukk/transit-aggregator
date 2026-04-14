@@ -31,7 +31,7 @@
 <meta property="og:image" content="https://prevozni.com/static/img/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Prevozni — red vožnje Srbija">
+<meta property="og:image:alt" content="{{ _('meta.og_image_alt') }}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ self.title() }}">
 <meta name="twitter:description" content="{{ self.meta_description() }}">
@@ -113,7 +113,7 @@
 
     function show(items) {
       if (!items.length) {
-        dropdown.innerHTML = '<div class="autocomplete__empty">Grad nije pronađen</div>';
+        dropdown.innerHTML = '<div class="autocomplete__empty">{{ _('meta.city_not_found') }}</div>';
         dropdown.classList.add('is-open');
         return;
       }

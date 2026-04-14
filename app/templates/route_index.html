@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Sve autobuske i vozne rute u Srbiji — Prevozni{% endblock %}
-{% block meta_description %}{{ routes|length if routes else 0 }} međugradskih autobuskih i voznih ruta u Srbiji. Red vožnje, cene karata i prevoznici — Beograd, Novi Sad, Niš i drugi gradovi.{% endblock %}
+{% block title %}{{ _('route_index.title') }} — Prevozni{% endblock %}
+{% block meta_description %}{{ routes|length if routes else 0 }} {{ _('route_index.meta') }}{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
@@ -12,11 +12,11 @@
 
 {% from '_partials/_breadcrumb.html' import breadcrumb %}
 {% from '_partials/_empty_state.html' import empty_state %}
-{{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': 'Sve rute'}]) }}
+{{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': _('breadcrumb.all_routes')}]) }}
 
 <div class="page-title">
-  <h1>Međugradske rute</h1>
-  <p class="page-subtitle">{{ routes|length if routes else 0 }} ruta · autobus i voz</p>
+  <h1>{{ _('route_index.h1') }}</h1>
+  <p class="page-subtitle">{{ routes|length if routes else 0 }} {{ _('route_index.subtitle') }}</p>
 </div>
 
 <!-- Search filter -->
@@ -24,11 +24,11 @@
   <svg class="search-bar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
     <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
   </svg>
-  <input class="search-bar__input" id="routeFilter" type="search" placeholder="Pretraži po gradu..." autocomplete="off">
+  <input class="search-bar__input" id="routeFilter" type="search" placeholder="{{ _('route_index.filter_placeholder') }}" autocomplete="off">
 </div>
 
 <div class="route-filter-info" id="filterInfo" hidden>
-  <span id="filterCount"></span> rezultata
+  <span id="filterCount"></span> {{ _('route_index.results_suffix') }}
 </div>
 
 {% if routes %}
@@ -45,21 +45,21 @@
     <div class="route-card__meta">
       {% if route.trip_count %}<span>{{ route.trip_count }} {{ _('routes.departures') }}</span>{% endif %}
       {% if route.distance_km %}<span>{{ route.distance_km }} km</span>{% endif %}
-      {% if route.min_price_rsd %}<span class="route-card__price">od {{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }}€</span>{% endif %}
+      {% if route.min_price_rsd %}<span class="route-card__price">{{ _('route_index.from_price') }} {{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }}€</span>{% endif %}
     </div>
   </a>
   {% endfor %}
 </div>
 {% if routes|length > 50 %}
 <div id="showMoreWrap">
-  <button class="btn btn--outline" id="showMoreBtn" type="button">Prikaži još {{ routes|length - 50 }} ruta</button>
+  <button class="btn btn--outline" id="showMoreBtn" type="button">{{ _('route_index.show_more') }} {{ routes|length - 50 }} {{ _('route_index.show_more_suffix') }}</button>
 </div>
 {% endif %}
 <div id="routesEmpty" hidden>
-  {{ empty_state(icon='search', text='Nema rezultata za ovaj upit') }}
+  {{ empty_state(icon='search', text=_('route_index.no_results')) }}
 </div>
 {% else %}
-  {{ empty_state(icon='bus', text='Nema dostupnih ruta', sub='Podaci se ažuriraju') }}
+  {{ empty_state(icon='bus', text=_('route_index.no_routes'), sub=_('route_index.data_updating')) }}
 {% endif %}
 
 {% endblock %}
