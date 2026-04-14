@@ -10,7 +10,6 @@ Usage: python -u data/pipelines/scrape_balkan.py
 """
 import json
 import re
-import sys
 import time
 from pathlib import Path
 

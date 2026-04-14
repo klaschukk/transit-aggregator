@@ -381,10 +381,6 @@ def audit(conn: duckdb.DuckDBPyConnection) -> list[dict]:
 def enrich(conn: duckdb.DuckDBPyConnection, limit: int = 0) -> None:
     progress = load_progress()
     all_processed = set(progress['found'] + progress['not_found'])
-    prev_found = len(progress['found'])
-
-    total_stops = conn.execute("SELECT count(*) FROM city_stops").fetchone()[0]
-    with_coords = conn.execute("SELECT count(*) FROM city_stops WHERE lat IS NOT NULL").fetchone()[0]
 
     rows = conn.execute(
         "SELECT id, name FROM city_stops WHERE lat IS NULL ORDER BY id"

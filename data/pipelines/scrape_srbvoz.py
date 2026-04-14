@@ -10,7 +10,6 @@ import json
 import logging
 import re
 import time
-import unicodedata
 from datetime import date, timedelta
 from pathlib import Path
 

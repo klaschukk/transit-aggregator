@@ -109,11 +109,6 @@ def create_app(config_name: str | None = None) -> Flask:
             'asset_version': _ASSET_VERSION,
         }
 
-    # ── URL rewriting: strip /en/ and /ru/ prefix, serve same views ──
-    @app.url_value_preprocessor
-    def strip_lang_prefix(endpoint, values):
-        pass  # Language already detected in before_request
-
     # Register blueprints
     from .routes.main import main_bp
     from .routes.intercity import intercity_bp

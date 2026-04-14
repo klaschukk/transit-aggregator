@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from flask import Blueprint, render_template, request, make_response, jsonify, Response, current_app
+from flask import Blueprint, render_template, request, make_response, jsonify, current_app
 
-from app.db import query, query_one, cached_query, cached_query_one, db_ready
+from app.db import query, cached_query, cached_query_one, db_ready
 from app.extensions import limiter
 
 main_bp = Blueprint('main', __name__)

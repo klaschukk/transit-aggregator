@@ -4,7 +4,7 @@ import re
 
 from flask import Blueprint, render_template
 
-from app.db import query, query_one, cached_query, cached_query_one, db_ready
+from app.db import cached_query, cached_query_one, db_ready
 
 info_bp = Blueprint('info', __name__)
 
