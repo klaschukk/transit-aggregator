@@ -129,7 +129,7 @@
 {% block scripts %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
 <script>
-(function() {
+document.addEventListener('DOMContentLoaded', function() {
   /* ── Map ── */
   if (typeof L === 'undefined' || !document.getElementById('cityMap')) return;
   var cityCoords = {
@@ -240,6 +240,6 @@
       applyFilters();
     });
   });
-})();
+});
 </script>
 {% endblock %}

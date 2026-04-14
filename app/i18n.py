@@ -792,6 +792,444 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Stop location map',
         'ru': 'Карта местоположения остановки',
     },
+    'a11y.breadcrumb': {
+        'sr': 'Putanja',
+        'en': 'Breadcrumb',
+        'ru': 'Хлебные крошки',
+    },
+    'a11y.pagination': {
+        'sr': 'Paginacija',
+        'en': 'Pagination',
+        'ru': 'Пагинация',
+    },
+
+    # ── Default meta (base.html) ──
+    'meta.default_title': {
+        'sr': 'Prevozni — red vožnje u Srbiji',
+        'en': 'Prevozni — transport schedules in Serbia',
+        'ru': 'Prevozni — расписание транспорта в Сербии',
+    },
+    'meta.default_description': {
+        'sr': 'Red vožnje autobusa, vozova i gradskog prevoza u Srbiji. Pronađite polazak, uporedite cene i prevoznike. Besplatno, bez registracije.',
+        'en': 'Bus, train and city transport schedules in Serbia. Find departures, compare prices and carriers. Free, no registration.',
+        'ru': 'Расписание автобусов, поездов и городского транспорта в Сербии. Ищите отправления, сравнивайте цены и перевозчиков. Бесплатно, без регистрации.',
+    },
+    'meta.og_image_alt': {
+        'sr': 'Prevozni — red vožnje Srbija',
+        'en': 'Prevozni — Serbia transport schedules',
+        'ru': 'Prevozni — расписание транспорта Сербии',
+    },
+    'meta.city_not_found': {
+        'sr': 'Grad nije pronađen',
+        'en': 'City not found',
+        'ru': 'Город не найден',
+    },
+
+    # ── Error pages ──
+    'error.404_title': {
+        'sr': '404 — Stranica nije pronađena',
+        'en': '404 — Page not found',
+        'ru': '404 — Страница не найдена',
+    },
+
+    # ── route_index.html ──
+    'route_index.title': {
+        'sr': 'Sve autobuske i vozne rute u Srbiji',
+        'en': 'All bus and train routes in Serbia',
+        'ru': 'Все автобусные и железнодорожные маршруты в Сербии',
+    },
+    'route_index.meta': {
+        'sr': 'međugradskih autobuskih i voznih ruta u Srbiji. Red vožnje, cene karata i prevoznici — Beograd, Novi Sad, Niš i drugi gradovi.',
+        'en': 'intercity bus and train routes in Serbia. Schedules, ticket prices and carriers — Belgrade, Novi Sad, Niš and other cities.',
+        'ru': 'междугородних автобусных и железнодорожных маршрутов в Сербии. Расписание, цены билетов и перевозчики — Белград, Нови-Сад, Ниш и другие города.',
+    },
+    'route_index.h1': {
+        'sr': 'Međugradske rute',
+        'en': 'Intercity routes',
+        'ru': 'Междугородние маршруты',
+    },
+    'route_index.subtitle': {
+        'sr': 'ruta · autobus i voz',
+        'en': 'routes · bus and train',
+        'ru': 'маршрутов · автобус и поезд',
+    },
+    'route_index.filter_placeholder': {
+        'sr': 'Pretraži po gradu...',
+        'en': 'Filter by city...',
+        'ru': 'Поиск по городу...',
+    },
+    'route_index.results_suffix': {
+        'sr': 'rezultata',
+        'en': 'results',
+        'ru': 'результатов',
+    },
+    'route_index.show_more': {
+        'sr': 'Prikaži još',
+        'en': 'Show more',
+        'ru': 'Показать ещё',
+    },
+    'route_index.show_more_suffix': {
+        'sr': 'ruta',
+        'en': 'routes',
+        'ru': 'маршрутов',
+    },
+    'route_index.no_results': {
+        'sr': 'Nema rezultata za ovaj upit',
+        'en': 'No results for this query',
+        'ru': 'Нет результатов по запросу',
+    },
+    'route_index.no_routes': {
+        'sr': 'Nema dostupnih ruta',
+        'en': 'No routes available',
+        'ru': 'Нет доступных маршрутов',
+    },
+    'route_index.data_updating': {
+        'sr': 'Podaci se ažuriraju',
+        'en': 'Data is being updated',
+        'ru': 'Данные обновляются',
+    },
+    'route_index.from_price': {
+        'sr': 'od',
+        'en': 'from',
+        'ru': 'от',
+    },
+    'breadcrumb.all_routes': {
+        'sr': 'Sve rute',
+        'en': 'All routes',
+        'ru': 'Все маршруты',
+    },
+
+    # ── carriers_index.html ──
+    'carriers.title': {
+        'sr': 'Prevoznici u Srbiji',
+        'en': 'Carriers in Serbia',
+        'ru': 'Перевозчики в Сербии',
+    },
+    'carriers.meta': {
+        'sr': 'Lista autobuskih i železničkih prevoznika u Srbiji. Lasta, Niš-Ekspres, Srbija Voz i drugi.',
+        'en': 'List of bus and train carriers in Serbia. Lasta, Niš-Ekspres, Srbija Voz and others.',
+        'ru': 'Список автобусных и железнодорожных перевозчиков в Сербии. Lasta, Niš-Ekspres, Srbija Voz и другие.',
+    },
+    'carriers.h1': {
+        'sr': 'Prevoznici',
+        'en': 'Carriers',
+        'ru': 'Перевозчики',
+    },
+    'carriers.website': {
+        'sr': 'Sajt',
+        'en': 'Website',
+        'ru': 'Сайт',
+    },
+    'carriers.cities_label': {
+        'sr': 'Gradovi:',
+        'en': 'Cities:',
+        'ru': 'Города:',
+    },
+    'carriers.no_routes': {
+        'sr': 'Nema ruta u bazi za ovog prevoznika.',
+        'en': 'No routes in the database for this carrier.',
+        'ru': 'Нет маршрутов в базе для этого перевозчика.',
+    },
+    'carriers.next_page': {
+        'sr': 'Sledeća →',
+        'en': 'Next →',
+        'ru': 'Следующая →',
+    },
+    'carriers.count_suffix': {
+        'sr': 'prevoznika',
+        'en': 'carriers',
+        'ru': 'перевозчиков',
+    },
+
+    # ── stations_index.html ──
+    'stations.title': {
+        'sr': 'Autobuske i železničke stanice u Srbiji',
+        'en': 'Bus and railway stations in Serbia',
+        'ru': 'Автобусные и железнодорожные станции в Сербии',
+    },
+    'stations.meta': {
+        'sr': 'Lista autobuskih i železničkih stanica u Srbiji.',
+        'en': 'List of bus and railway stations in Serbia.',
+        'ru': 'Список автобусных и железнодорожных станций в Сербии.',
+    },
+    'stations.h1': {
+        'sr': 'Autobuske i železničke stanice',
+        'en': 'Bus and railway stations',
+        'ru': 'Автобусные и железнодорожные станции',
+    },
+    'stations.count_suffix': {
+        'sr': 'stanica',
+        'en': 'stations',
+        'ru': 'станций',
+    },
+
+    # ── city_index.html ──
+    'city_index.subtitle': {
+        'sr': 'Linije, stajališta i red vožnje',
+        'en': 'Lines, stops and schedules',
+        'ru': 'Линии, остановки и расписание',
+    },
+
+    # ── city_pair.html ──
+    'city_pair.title_suffix': {
+        'sr': 'autobus i voz',
+        'en': 'bus and train',
+        'ru': 'автобус и поезд',
+    },
+    'city_pair.meta_prefix': {
+        'sr': 'Kako doći od',
+        'en': 'How to travel from',
+        'ru': 'Как добраться из',
+    },
+    'city_pair.meta_mid': {
+        'sr': 'do',
+        'en': 'to',
+        'ru': 'до',
+    },
+    'city_pair.meta_suffix': {
+        'sr': 'Red vožnje, cene karata i prevoznici.',
+        'en': 'Schedule, ticket prices and carriers.',
+        'ru': 'Расписание, цены билетов и перевозчики.',
+    },
+    'city_pair.see_all_departures': {
+        'sr': 'Pogledaj sve polaske →',
+        'en': 'See all departures →',
+        'ru': 'Все отправления →',
+    },
+    'city_pair.carriers_heading': {
+        'sr': 'Prevoznici',
+        'en': 'Carriers',
+        'ru': 'Перевозчики',
+    },
+    'city_pair.carriers_hint': {
+        'sr': 'Proverite kod prevoznika za aktuelne linije.',
+        'en': 'Check with carriers for current lines.',
+        'ru': 'Уточняйте актуальные рейсы у перевозчиков.',
+    },
+    'city_pair.prices_heading': {
+        'sr': 'Cene',
+        'en': 'Prices',
+        'ru': 'Цены',
+    },
+    'city_pair.prices_hint': {
+        'sr': 'Cene variraju po prevoznicima. Kupite karte na blagajni.',
+        'en': 'Prices vary by carrier. Buy tickets at the ticket office.',
+        'ru': 'Цены у разных перевозчиков отличаются. Билеты продаются в кассе.',
+    },
+    'city_pair.tips_heading': {
+        'sr': 'Saveti',
+        'en': 'Tips',
+        'ru': 'Советы',
+    },
+    'city_pair.tip_buy_early': {
+        'sr': 'Kupite kartu unapred u sezoni i za vikende.',
+        'en': 'Buy tickets in advance during the season and weekends.',
+        'ru': 'Покупайте билеты заранее в сезон и на выходные.',
+    },
+    'city_pair.faq_heading': {
+        'sr': 'Često postavljana pitanja',
+        'en': 'Frequently asked questions',
+        'ru': 'Часто задаваемые вопросы',
+    },
+
+    # ── route_detail.html ──
+    'route_detail.title_suffix': {
+        'sr': 'red vožnje',
+        'en': 'schedule',
+        'ru': 'расписание',
+    },
+    'route_detail.meta_schedule': {
+        'sr': 'Red vožnje',
+        'en': 'Schedule',
+        'ru': 'Расписание',
+    },
+    'route_detail.meta_daily': {
+        'sr': 'polazaka dnevno',
+        'en': 'departures daily',
+        'ru': 'отправлений в день',
+    },
+    'route_detail.meta_carriers': {
+        'sr': 'prevoznici',
+        'en': 'carriers',
+        'ru': 'перевозчики',
+    },
+    'route_detail.meta_and_more': {
+        'sr': 'i dr',
+        'en': 'and more',
+        'ru': 'и др',
+    },
+    'route_detail.meta_from': {
+        'sr': 'Od',
+        'en': 'From',
+        'ru': 'От',
+    },
+
+    # ── search_results.html ──
+    'search_results.meta_from': {
+        'sr': 'Red vožnje od',
+        'en': 'Schedule from',
+        'ru': 'Расписание от',
+    },
+    'search_results.meta_to': {
+        'sr': 'do',
+        'en': 'to',
+        'ru': 'до',
+    },
+    'search_results.meta_desc': {
+        'sr': 'svi polasci, cene karata i prevoznici na jednom mestu.',
+        'en': 'all departures, ticket prices and carriers in one place.',
+        'ru': 'все отправления, цены билетов и перевозчики в одном месте.',
+    },
+    'search_results.meta_default': {
+        'sr': 'Pretražite red vožnje autobusa i vozova između gradova Srbije. Uporedite polaske, cene i prevoznike. Besplatno.',
+        'en': 'Search bus and train schedules between cities in Serbia. Compare departures, prices and carriers. Free.',
+        'ru': 'Ищите расписание автобусов и поездов между городами Сербии. Сравнивайте отправления, цены и перевозчиков. Бесплатно.',
+    },
+    'search_results.h1': {
+        'sr': 'Pronađite prevoz',
+        'en': 'Find transport',
+        'ru': 'Найдите транспорт',
+    },
+    'search_results.hero_sub': {
+        'sr': 'Autobus ili voz između gradova Srbije',
+        'en': 'Bus or train between cities in Serbia',
+        'ru': 'Автобус или поезд между городами Сербии',
+    },
+    'search_results.sort_label': {
+        'sr': 'Sortiraj:',
+        'en': 'Sort:',
+        'ru': 'Сортировка:',
+    },
+    'search_results.sort_time': {
+        'sr': 'Po vremenu',
+        'en': 'By time',
+        'ru': 'По времени',
+    },
+    'search_results.sort_price': {
+        'sr': 'Po ceni',
+        'en': 'By price',
+        'ru': 'По цене',
+    },
+
+    # ── city_transport.html ──
+    'city_transport.title_prefix': {
+        'sr': 'Gradski prevoz',
+        'en': 'City transport',
+        'ru': 'Городской транспорт',
+    },
+    'city_transport.title_suffix': {
+        'sr': 'linije i stajališta',
+        'en': 'lines and stops',
+        'ru': 'линии и остановки',
+    },
+    'city_transport.meta_prefix': {
+        'sr': 'Red vožnje gradskog prevoza u',
+        'en': 'City transport schedule in',
+        'ru': 'Расписание городского транспорта в',
+    },
+    'city_transport.meta_lines': {
+        'sr': 'linija, stajališta i polasci.',
+        'en': 'lines, stops and departures.',
+        'ru': 'линий, остановок и отправлений.',
+    },
+    'city_transport.stop_popup_more': {
+        'sr': 'Polasci →',
+        'en': 'Departures →',
+        'ru': 'Отправления →',
+    },
+
+    # ── line_detail.html ──
+    'line_detail.schedule_heading': {
+        'sr': 'Red vožnje',
+        'en': 'Schedule',
+        'ru': 'Расписание',
+    },
+    'line_detail.line_prefix': {
+        'sr': 'Linija',
+        'en': 'Line',
+        'ru': 'Линия',
+    },
+    'line_detail.meta_schedule': {
+        'sr': 'Red vožnje linije',
+        'en': 'Schedule for line',
+        'ru': 'Расписание линии',
+    },
+    'line_detail.meta_in': {
+        'sr': 'u',
+        'en': 'in',
+        'ru': 'в',
+    },
+    'line_detail.meta_stops': {
+        'sr': 'stajališta.',
+        'en': 'stops.',
+        'ru': 'остановок.',
+    },
+    'line_detail.meta_departures': {
+        'sr': 'Polasci od',
+        'en': 'Departures from',
+        'ru': 'Отправления с',
+    },
+    'line_detail.meta_to': {
+        'sr': 'do',
+        'en': 'to',
+        'ru': 'до',
+    },
+
+    # ── stop_detail.html ──
+    'stop_detail.stop_prefix': {
+        'sr': 'Stajalište',
+        'en': 'Stop',
+        'ru': 'Остановка',
+    },
+    'stop_detail.meta_schedule': {
+        'sr': 'red vožnje i polasci.',
+        'en': 'schedule and departures.',
+        'ru': 'расписание и отправления.',
+    },
+    'stop_detail.meta_lines_suffix': {
+        'sr': 'linija',
+        'en': 'lines',
+        'ru': 'линий',
+    },
+    'stop_detail.meta_and_more': {
+        'sr': 'i dr.',
+        'en': 'and more',
+        'ru': 'и др.',
+    },
+
+    # ── filter panel ──
+    'filter.heading': {
+        'sr': 'Filteri',
+        'en': 'Filters',
+        'ru': 'Фильтры',
+    },
+    'filter.close': {
+        'sr': 'Zatvori',
+        'en': 'Close',
+        'ru': 'Закрыть',
+    },
+    'filter.transport_type': {
+        'sr': 'Tip prevoza',
+        'en': 'Transport type',
+        'ru': 'Тип транспорта',
+    },
+    'filter.bus': {
+        'sr': 'Autobus',
+        'en': 'Bus',
+        'ru': 'Автобус',
+    },
+    'filter.carrier': {
+        'sr': 'Prevoznik',
+        'en': 'Carrier',
+        'ru': 'Перевозчик',
+    },
+
+    # ── Search form ──
+    'search_form.swap': {
+        'sr': 'Zameni',
+        'en': 'Swap',
+        'ru': 'Поменять',
+    },
 }
 
 SUPPORTED_LANGS = ('sr', 'en', 'ru')

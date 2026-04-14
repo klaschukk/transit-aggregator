@@ -9,7 +9,8 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"ItemList","name":"Linija {{ line.number }}: {{ line.name }}","description":"Red vožnje linije {{ line.number }} u {{ city_label }}u","numberOfItems":{{ stops|length if stops else 0 }},"itemListElement":[{% for s in stops[:20] %}{"@type":"ListItem","position":{{ loop.index }},"item":{"@type":"BusStop","name":"{{ s.name }}"{% if s.lat and s.lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ s.lat }},"longitude":{{ s.lon }}}{% endif %}}}{% if not loop.last %},{% endif %}{% endfor %}]}
 </script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""></noscript>
 {% endblock %}
 
 {% block content %}
@@ -138,9 +139,9 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
 <script>
-(function() {
+document.addEventListener('DOMContentLoaded', function() {
   /* ── Map ── */
   if (typeof L === 'undefined' || !document.getElementById('lineMap')) return;
   var map = L.map('lineMap', { zoomControl: false, attributionControl: false })
@@ -195,6 +196,6 @@
       });
     });
   });
-})();
+});
 </script>
 {% endblock %}
