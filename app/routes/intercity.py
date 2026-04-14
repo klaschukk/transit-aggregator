@@ -118,7 +118,14 @@ def city_pair(from_city: str, to_city: str):
     if trips:
         operators_list = sorted(set(t['operator'] for t in trips if t.get('operator')))
         prices = [t['price_rsd'] for t in trips if t.get('price_rsd')]
-        durations = [t['duration_min'] for t in trips if t.get('duration_min')]
+        # Clamp duration outliers: scraped trips occasionally have bogus duration_min
+        # (parser quirks on midnight-crossing or malformed arrival_time). Floor at
+        # distance / 100 km/h (generous upper bound of bus speed on SRB highways).
+        min_plausible = int(route['distance_km'] / 100 * 60) if route.get('distance_km') else 0
+        durations = [
+            t['duration_min'] for t in trips
+            if t.get('duration_min') and t['duration_min'] >= min_plausible
+        ]
         dep_times = [t['departure_time'] for t in trips if t.get('departure_time')]
 
         route_info['operators'] = operators_list
