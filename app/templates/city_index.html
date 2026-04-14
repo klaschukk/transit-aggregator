@@ -4,7 +4,7 @@
 
 {% block content %}
 
-{% from '_partials/_breadcrumb.html' import breadcrumb %}
+{% from '_partials/_breadcrumb.html' import breadcrumb with context %}
 {{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': _('city_index.breadcrumb')}]) }}
 
 <div class="page-title fade-in">

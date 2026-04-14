@@ -1,6 +1,6 @@
 {# Breadcrumb macro with BreadcrumbList JSON-LD #}
 {% macro breadcrumb(items) %}
-<nav class="breadcrumb" aria-label="Breadcrumb">
+<nav class="breadcrumb" aria-label="{{ _('a11y.breadcrumb') }}">
   {% for item in items %}
     {% if item.url %}
       <a href="{{ item.url }}" class="breadcrumb__link">{{ item.label }}</a>
