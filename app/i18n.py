@@ -992,12 +992,57 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'stations',
         'ru': 'станций',
     },
+    'stations.routes_count': {
+        'sr': 'ruta',
+        'en': 'routes',
+        'ru': 'маршрутов',
+    },
+    'stations.in_base_suffix': {
+        'sr': 'stanica u bazi',
+        'en': 'stations in database',
+        'ru': 'станций в базе',
+    },
+    'stations.type_train': {
+        'sr': 'Železnička stanica',
+        'en': 'Railway station',
+        'ru': 'Железнодорожная станция',
+    },
+    'stations.type_bus': {
+        'sr': 'Autobuska stanica',
+        'en': 'Bus station',
+        'ru': 'Автобусная станция',
+    },
+    'stations.type_generic': {
+        'sr': 'Stanica',
+        'en': 'Station',
+        'ru': 'Станция',
+    },
+    'stations.empty_loading': {
+        'sr': 'Podaci se učitavaju',
+        'en': 'Data is loading',
+        'ru': 'Данные загружаются',
+    },
+    'stations.breadcrumb': {
+        'sr': 'Stanice',
+        'en': 'Stations',
+        'ru': 'Станции',
+    },
 
     # ── city_index.html ──
     'city_index.subtitle': {
         'sr': 'Linije, stajališta i red vožnje',
         'en': 'Lines, stops and schedules',
         'ru': 'Линии, остановки и расписание',
+    },
+    'city_index.lines_suffix': {
+        'sr': 'linija',
+        'en': 'lines',
+        'ru': 'линий',
+    },
+    'city_index.breadcrumb': {
+        'sr': 'Gradski prevoz',
+        'en': 'City transport',
+        'ru': 'Городской транспорт',
     },
 
     # ── city_pair.html ──
@@ -1247,6 +1292,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Autobus',
         'en': 'Bus',
         'ru': 'Автобус',
+    },
+    'filter.train': {
+        'sr': 'Voz',
+        'en': 'Train',
+        'ru': 'Поезд',
     },
     'filter.carrier': {
         'sr': 'Prevoznik',
