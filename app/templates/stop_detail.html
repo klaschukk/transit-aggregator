@@ -2,13 +2,18 @@
 {% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš'} %}
 {% set city_label = city_names.get(city, city|title) %}
 
-{% block title %}Stajalište {{ stop.name|truncate(30, True, '…') }} — {{ city_label }} | Prevozni{% endblock %}
-{% block meta_description %}Stajalište {{ stop.name }}, {{ city_label }}: {% if stop_info and stop_info.line_count %}{{ stop_info.line_count }} linija, {% endif %}red vožnje{% if stop_info and stop_info.first_departure %} {{ stop_info.first_departure }}–{{ stop_info.last_departure }}{% endif %}. Besplatno.{% endblock %}
+{% block title %}{{ _('stop_detail.stop_prefix') }} {{ stop.name|truncate(30, True, '…') }} — {{ city_label }} | Prevozni{% endblock %}
+{% block meta_description %}{{ _('stop_detail.stop_prefix') }} {{ stop.name }}, {{ city_label }}: {% if stop_info and stop_info.line_count %}{{ stop_info.line_count }} {{ _('stop_detail.meta_lines_suffix') }}, {% endif %}{{ _('line_detail.schedule_heading') }}{% if stop_info and stop_info.first_departure %} {{ stop_info.first_departure }}–{{ stop_info.last_departure }}{% endif %}.{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BusStop","name":"{{ stop.name }}","containedInPlace":{"@type":"City","name":"{{ city_label }}"}{% if stop.lat and stop.lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stop.lat }},"longitude":{{ stop.lon }}}{% endif %}{% if stop_info and stop_info.first_departure %},"openingHours":"Mo-Fr {{ stop_info.first_departure }}-{{ stop_info.last_departure }}"{% endif %}{% if stop_info and stop_info.line_count %},"description":"{{ stop_info.line_count }} linija: {{ stop_info.line_types|join(', ') }}"{% endif %}}
 </script>
+{% if stop_info and stop_info.line_count %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Koje linije staju na stajalištu {{ stop.name }}?","acceptedAnswer":{"@type":"Answer","text":"Na stajalištu {{ stop.name }} u {{ city_label }}u staje {{ stop_info.line_count }} linija gradskog prevoza ({{ stop_info.line_types|join(', ') }})."}},{"@type":"Question","name":"Kada polaze autobusi sa stajališta {{ stop.name }}?","acceptedAnswer":{"@type":"Answer","text":"{% if stop_info.first_departure %}Prvi polazak sa stajališta {{ stop.name }} je u {{ stop_info.first_departure }}, a poslednji u {{ stop_info.last_departure }} radnim danom.{% else %}Tačan red vožnje proverite na samom stajalištu ili preko mobilne aplikacije gradskog prevoznika.{% endif %}"}},{"@type":"Question","name":"Gde se nalazi stajalište {{ stop.name }}?","acceptedAnswer":{"@type":"Answer","text":"Stajalište {{ stop.name }} se nalazi u gradu {{ city_label }}u{% if stop.lat and stop.lon %} na koordinatama {{ stop.lat }}, {{ stop.lon }}{% endif %}. Detaljna mapa i lista linija dostupni su besplatno na Prevozni.com."}}]}
+</script>
+{% endif %}
 {% if stop.lat and stop.lon %}
 <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" as="script" crossorigin="">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" media="print" onload="this.media='all'">

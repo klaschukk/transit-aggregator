@@ -4,12 +4,12 @@
 {% set type_labels = {'tram': _('city.tram'), 'trolleybus': _('city.trolleybus'), 'night': _('city.night'), 'e-bus': 'E-bus', 'bus': _('city.bus'), 'suburban': _('city.bus'), 'bg-voz': 'BG:Voz'} %}
 {% set type_order = ['tram', 'trolleybus', 'e-bus', 'bus', 'suburban', 'bg-voz', 'night'] %}
 
-{% block title %}Gradski prevoz {{ city_label }} — linije i stajališta | Prevozni{% endblock %}
-{% block meta_description %}Red vožnje gradskog prevoza u {{ city_label }}u. {{ lines|length }} linija, stajališta i polasci.{% endblock %}
+{% block title %}{{ _('city_transport.title_prefix') }} {{ city_label }} — {{ _('city_transport.title_suffix') }} | Prevozni{% endblock %}
+{% block meta_description %}{{ _('city_transport.meta_prefix') }} {{ city_label }}. {{ lines|length }} {{ _('city_transport.meta_lines') }}{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"CollectionPage","name":"Gradski prevoz {{ city_label }}","description":"{{ lines|length }} linija gradskog prevoza u {{ city_label }}u — autobus, tramvaj, trolejbus","about":{"@type":"City","name":"{{ city_label }}"}}
+{"@context":"https://schema.org","@type":"CollectionPage","name":"{{ _('city_transport.title_prefix') }} {{ city_label }}","description":"{{ lines|length }} {{ _('city_transport.meta_lines') }}","about":{"@type":"City","name":"{{ city_label }}"}}
 </script>
 <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" as="script" crossorigin="">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" media="print" onload="this.media='all'">
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function() {
           if (arrivals.length > 6) html += '<span class="stop-popup__badge" style="background:#94a3b8">+' + (arrivals.length - 6) + '</span>';
           html += '</div>';
         }
-        html += '<a class="stop-popup__more" href="{{ lang_prefix }}/gradski/{{ city }}/stajaliste/' + slug + '/">Polasci →</a>';
+        html += '<a class="stop-popup__more" href="{{ lang_prefix }}/gradski/{{ city }}/stajaliste/' + slug + '/">{{ _('city_transport.stop_popup_more') }}</a>';
         html += '</div>';
         marker.setPopupContent(html);
       })

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{{ route.from_city }} → {{ route.to_city }} — red vožnje | Prevozni{% endblock %}
-{% block meta_description %}Red vožnje {{ route.from_city }} → {{ route.to_city }}: {{ route.trip_count }} polazaka dnevno{% if price_min %}, od {{ price_min }} RSD{% endif %}. Besplatno, bez registracije.{% endblock %}
+{% block title %}{{ route.from_city }} → {{ route.to_city }} — {{ _('route_detail.title_suffix') }} | Prevozni{% endblock %}
+{% block meta_description %}{{ _('route_detail.meta_schedule') }} {{ route.from_city }} → {{ route.to_city }}: {{ route.trip_count }} {{ _('route_detail.meta_daily') }}{% if price_min %}, {{ _('route_detail.meta_from') }} {{ price_min }} RSD{% endif %}.{% endblock %}
 
 {% block head_extra %}
 {% if request.args.get('dan') or not trips %}
@@ -9,6 +9,11 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"ItemList","name":"Red vožnje {{ route.from_city }} — {{ route.to_city }}","itemListElement":[{% for trip in trips[:10] %}{"@type":"BusTrip","position":{{ loop.index }},"name":"{{ trip.operator }} {{ route.from_city }}–{{ route.to_city }}","departureTime":"{{ trip.departure_time }}","arrivalTime":"{{ trip.arrival_time }}","departureBusStop":{"@type":"BusStation","name":"{{ route.from_city }}"},"arrivalBusStop":{"@type":"BusStation","name":"{{ route.to_city }}"},"provider":{"@type":"Organization","name":"{{ trip.operator }}"}}{% if not loop.last %},{% endif %}{% endfor %}]}
 </script>
+{% if trips %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Koliko polazaka ima od {{ route.from_city }} do {{ route.to_city }}?","acceptedAnswer":{"@type":"Answer","text":"Dnevno ima {{ route.trip_count }} polazaka od {{ route.from_city }} do {{ route.to_city }}."}},{"@type":"Question","name":"Koliko košta karta {{ route.from_city }} — {{ route.to_city }}?","acceptedAnswer":{"@type":"Answer","text":"{% if price_min %}Cena karte počinje od {{ price_min }} RSD.{% else %}Cene variraju u zavisnosti od prevoznika; proverite aktuelne cene na stranici.{% endif %}"}},{"@type":"Question","name":"Koji prevoznici voze liniju {{ route.from_city }} — {{ route.to_city }}?","acceptedAnswer":{"@type":"Answer","text":"{% if operators_on_route %}Na ovoj liniji voze: {{ operators_on_route|join(', ') }}.{% else %}Proverite listu polazaka za aktuelne prevoznike.{% endif %}"}}]}
+</script>
+{% endif %}
 {% endblock %}
 
 {% block content %}

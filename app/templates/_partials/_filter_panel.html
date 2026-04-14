@@ -2,21 +2,21 @@
 {% macro filter_panel(operators=[], show_type=true) %}
 <aside class="filter-panel" id="filterPanel" aria-label="{{ _('a11y.filters') }}">
   <div class="filter-panel__header">
-    <div class="filter-panel__heading" id="filterPanelHeading">Filteri</div>
-    <button class="filter-panel__close" id="filterClose" type="button">Zatvori</button>
+    <div class="filter-panel__heading" id="filterPanelHeading">{{ _('filter.heading') }}</div>
+    <button class="filter-panel__close" id="filterClose" type="button">{{ _('filter.close') }}</button>
   </div>
 
   {% if show_type %}
   <div class="filter-group">
-    <span class="filter-group__label">Tip prevoza</span>
-    <label class="filter-check"><input type="checkbox" data-ftype="bus" checked> Autobus</label>
-    <label class="filter-check"><input type="checkbox" data-ftype="train" checked> Voz</label>
+    <span class="filter-group__label">{{ _('filter.transport_type') }}</span>
+    <label class="filter-check"><input type="checkbox" data-ftype="bus" checked> {{ _('filter.bus') }}</label>
+    <label class="filter-check"><input type="checkbox" data-ftype="train" checked> {{ _('filter.train') }}</label>
   </div>
   {% endif %}
 
   {% if operators|length > 1 %}
   <div class="filter-group">
-    <span class="filter-group__label">Prevoznik</span>
+    <span class="filter-group__label">{{ _('filter.carrier') }}</span>
     {% for op in operators %}
     <label class="filter-check"><input type="checkbox" data-operator="{{ op }}" checked> {{ op }}</label>
     {% endfor %}
