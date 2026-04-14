@@ -940,6 +940,36 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'carriers',
         'ru': 'перевозчиков',
     },
+    'carriers.in_base_suffix': {
+        'sr': 'prevoznika u bazi',
+        'en': 'carriers in database',
+        'ru': 'перевозчиков в базе',
+    },
+    'carriers.page_of': {
+        'sr': 'strana',
+        'en': 'page',
+        'ru': 'страница',
+    },
+    'carriers.routes_count': {
+        'sr': 'ruta',
+        'en': 'routes',
+        'ru': 'маршрутов',
+    },
+    'carriers.empty_loading': {
+        'sr': 'Podaci se učitavaju',
+        'en': 'Data is loading',
+        'ru': 'Данные загружаются',
+    },
+    'carriers.prev_page': {
+        'sr': '← Prethodna',
+        'en': '← Previous',
+        'ru': '← Предыдущая',
+    },
+    'carriers.page_info': {
+        'sr': 'Strana',
+        'en': 'Page',
+        'ru': 'Страница',
+    },
 
     # ── stations_index.html ──
     'stations.title': {
