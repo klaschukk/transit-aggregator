@@ -14,6 +14,7 @@ import re
 from pathlib import Path
 
 import duckdb
+import contextlib
 
 BASE_DIR = Path(__file__).parent.parent
 RAW_DIR = BASE_DIR / 'raw'
@@ -496,13 +497,11 @@ def _load_gsp_lines(conn: duckdb.DuckDBPyConnection,
                     continue
 
                 if db_stop_id:
-                    try:
+                    with contextlib.suppress(Exception):
                         conn.execute(
                             "INSERT OR IGNORE INTO city_line_stops VALUES (?, ?, ?)",
                             (line_db_id, db_stop_id, order)
                         )
-                    except Exception:
-                        pass
 
             line_db_id += 1
         except Exception as e:
@@ -710,10 +709,8 @@ def _load_gtfs(conn: duckdb.DuckDBPyConnection) -> None:
 
     # Step 4: Bulk load stop_times via DuckDB read_csv_auto
     # Force checkpoint before bulk load to prevent WAL issues
-    try:
+    with contextlib.suppress(Exception):
         conn.execute("CHECKPOINT")
-    except Exception:
-        pass
     conn.execute(f"""
         INSERT INTO gtfs_stop_times (trip_id, stop_id, arrival_time, departure_time, stop_sequence, city_stop_id)
         SELECT trip_id, stop_id::VARCHAR, arrival_time, departure_time, stop_sequence::INTEGER, NULL
@@ -930,7 +927,8 @@ def _cleanup(conn: duckdb.DuckDBPyConnection) -> None:
     balkan_slugs = set()
     if balkan_path.exists():
         import json as _json
-        balkan_slugs = set(r['slug'] for r in _json.load(open(balkan_path)))
+        with open(balkan_path) as _f:
+            balkan_slugs = {r['slug'] for r in _json.load(_f)}
     r1 = conn.execute("""
         DELETE FROM routes
         WHERE type = 'intercity'

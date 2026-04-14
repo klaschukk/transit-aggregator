@@ -1210,12 +1210,8 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 }
 .buy-ticket__btn svg { opacity: 0.7; }
 .buy-ticket__btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-.buy-ticket__btn--getbybus { background: #0891b2; }
-.buy-ticket__btn--getbybus:hover { background: #0e7490; }
 .buy-ticket__btn--bookaway { background: #059669; }
 .buy-ticket__btn--bookaway:hover { background: #047857; }
-.buy-ticket__btn--flixbus { background: #73d700; color: #1a1a1a; }
-.buy-ticket__btn--flixbus:hover { background: #65c100; }
 /* Trip-card hover polish */
 .trip-list .trip-card:hover {
   background: var(--color-bg-alt);
@@ -1277,9 +1273,6 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .info-card p { font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.6; margin: 0; }
 .info-card a { color: var(--color-primary); }
 .info-card ul { font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.8; padding-left: 16px; list-style: disc; margin: 0; }
-
-/* Search landing */
-.search-landing { max-width: 560px; margin-bottom: 32px; }
 
 /* ── 8. Responsive ── */
 @media (min-width: 640px) {
@@ -1539,35 +1532,6 @@ main { animation: fadeInUp .25s ease both; }
   margin-bottom: 8px;
 }
 .about-mission__text p:last-child { margin-bottom: 0; }
-
-.about-sources {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-.about-source {
-  padding: 20px;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-}
-.about-source__icon {
-  color: var(--color-primary);
-  margin-bottom: 12px;
-}
-.about-source__name {
-  font-size: var(--text-base);
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-.about-source__desc {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  line-height: 1.6;
-}
-@media (min-width: 640px) {
-  .about-sources { grid-template-columns: repeat(3, 1fr); }
-}
 
 .about-stats {
   display: grid;
@@ -2241,18 +2205,6 @@ main { animation: fadeInUp .25s ease both; }
 
 @media (min-width: 640px) {
   .station-group__cards { grid-template-columns: repeat(2, 1fr); }
-}
-
-/* ── 13. Dark mode prep ── */
-/* TODO: dark mode — override :root tokens here */
-@media (prefers-color-scheme: dark) {
-  /* :root {
-    --color-text: #e2e8f0;
-    --color-text-muted: #94a3b8;
-    --color-bg: #0f172a;
-    --color-bg-alt: #1e293b;
-    --color-border: #334155;
-  } */
 }
 
 /* ── UX Polish ── */

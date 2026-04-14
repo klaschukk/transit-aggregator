@@ -83,7 +83,7 @@ def get_station(session: requests.Session, city: str) -> dict | None:
         city_ascii = to_ascii(city).upper()
         for station in stations:
             sn = station['naziv'].upper()
-            if sn == city_upper or sn == city_ascii or to_ascii(sn) == city_ascii:
+            if sn in (city_upper, city_ascii) or to_ascii(sn) == city_ascii:
                 return station
         # Prefer main passenger station (skip freight/sorting yards)
         skip_keywords = ['TERETNA', 'RANŽIRNA', 'RANZIIRNA']

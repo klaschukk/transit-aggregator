@@ -41,7 +41,8 @@ def load_sr_ids():
     """Load Serbian city IDs from existing cache."""
     path = RAW_DIR / 'city_ids.json'
     if path.exists():
-        cache = json.load(open(path))
+        with open(path) as f:
+            cache = json.load(f)
         # Keep cities that have IDs
         return {name: (cid, SERBIA_COUNTRY) for name, cid in cache.items()
                 if name in ['Beograd', 'Novi Sad', 'Niš', 'Subotica', 'Užice', 'Novi Pazar',

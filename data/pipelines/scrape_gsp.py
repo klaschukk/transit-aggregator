@@ -233,7 +233,7 @@ def scrape_stops_from_lines(session: requests.Session, lines: list[dict]) -> lis
 
     # Load progress
     progress = load_stop_progress()
-    already_fetched = set(int(k) for k in progress['fetched'].keys())
+    already_fetched = set(int(k) for k in progress['fetched'])
     already_failed = set(progress['failed'])
 
     todo = sorted(all_stop_ids - already_fetched - already_failed)
