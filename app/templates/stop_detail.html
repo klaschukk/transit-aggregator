@@ -10,6 +10,7 @@
 {"@context":"https://schema.org","@type":"BusStop","name":"{{ stop.name }}","containedInPlace":{"@type":"City","name":"{{ city_label }}"}{% if stop.lat and stop.lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stop.lat }},"longitude":{{ stop.lon }}}{% endif %}{% if stop_info and stop_info.first_departure %},"openingHours":"Mo-Fr {{ stop_info.first_departure }}-{{ stop_info.last_departure }}"{% endif %}{% if stop_info and stop_info.line_count %},"description":"{{ stop_info.line_count }} linija: {{ stop_info.line_types|join(', ') }}"{% endif %}}
 </script>
 {% if stop.lat and stop.lon %}
+<link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" as="script" crossorigin="">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""></noscript>
 {% endif %}

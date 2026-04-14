@@ -11,6 +11,7 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"CollectionPage","name":"Gradski prevoz {{ city_label }}","description":"{{ lines|length }} linija gradskog prevoza u {{ city_label }}u — autobus, tramvaj, trolejbus","about":{"@type":"City","name":"{{ city_label }}"}}
 </script>
+<link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" as="script" crossorigin="">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""></noscript>
 {% endblock %}
@@ -33,7 +34,7 @@
 <!-- Map (only if stops have coordinates) -->
 {% if stops_with_coords %}
 <div class="city-map-wrap">
-  <div class="city-map" id="cityMap"></div>
+  <div class="city-map" id="cityMap" role="region" aria-label="{{ _('a11y.city_map') }}"></div>
 </div>
 <div class="schedule-disclaimer">
   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><circle cx="8" cy="8" r="7"/><path d="M8 5v3m0 3h.01"/></svg>

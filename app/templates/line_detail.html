@@ -3,12 +3,13 @@
 {% set city_label = city_names.get(city, city|title) %}
 
 {% block title %}Linija {{ line.number }}: {{ line.name|truncate(25, True, '…') }} — {{ city_label }} | Prevozni{% endblock %}
-{% block meta_description %}Red vožnje linije {{ line.number }} ({{ line_type_label }}) u {{ city_label }}u. {{ stops|length if stops else 0 }} stajališta.{% if first_dep and last_dep %} Polasci od {{ first_dep }} do {{ last_dep }}.{% endif %}{% endblock %}
+{% block meta_description %}Linija {{ line.number }} u {{ city_label }}u: {{ stops|length if stops else 0 }} stajališta{% if first_dep and last_dep %}, polasci {{ first_dep }}–{{ last_dep }}{% endif %}. Besplatno.{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"ItemList","name":"Linija {{ line.number }}: {{ line.name }}","description":"Red vožnje linije {{ line.number }} u {{ city_label }}u","numberOfItems":{{ stops|length if stops else 0 }},"itemListElement":[{% for s in stops[:20] %}{"@type":"ListItem","position":{{ loop.index }},"item":{"@type":"BusStop","name":"{{ s.name }}"{% if s.lat and s.lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ s.lat }},"longitude":{{ s.lon }}}{% endif %}}}{% if not loop.last %},{% endif %}{% endfor %}]}
 </script>
+<link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" as="script" crossorigin="">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""></noscript>
 {% endblock %}
@@ -52,7 +53,7 @@
 
 <!-- Map -->
 <div class="city-map-wrap">
-  <div class="city-map" id="lineMap"></div>
+  <div class="city-map" id="lineMap" role="region" aria-label="{{ _('a11y.line_map') }}"></div>
 </div>
 
 <!-- Direction -->
