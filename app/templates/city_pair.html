@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{{ from_city }} → {{ to_city }} — autobus i voz | Prevozni{% endblock %}
-{% block meta_description %}Kako doći od {{ from_city }} do {{ to_city }}? Red vožnje autobusa i vozova, cene karata i prevoznici. Besplatno, bez registracije.{% endblock %}
+{% block title %}{{ from_city }} → {{ to_city }} — {{ _('city_pair.title_suffix') }} | Prevozni{% endblock %}
+{% block meta_description %}{{ _('city_pair.meta_prefix') }} {{ from_city }} {{ _('city_pair.meta_mid') }} {{ to_city }}? {{ _('city_pair.meta_suffix') }}{% endblock %}
 
 {% block head_extra %}
 {% if route %}
@@ -48,7 +48,7 @@
 
 <button class="btn btn--outline filter-toggle" id="filterToggle">
   <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M3 3a1 1 0 011-1h12a1 1 0 01.82 1.573l-4.82 7v4.427a1 1 0 01-.553.894l-2 1A1 1 0 018 16v-5.427L3.18 3.573A1 1 0 013 3z"/></svg>
-  Filteri
+  {{ _('filter.heading') }}
 </button>
 
 <div class="results-layout">
@@ -64,7 +64,7 @@
 </div>
 
 {% elif route %}
-<a href="{{ lang_prefix }}/rute/{{ route.slug }}/" class="btn btn--primary">Pogledaj sve polaske →</a>
+<a href="{{ lang_prefix }}/rute/{{ route.slug }}/" class="btn btn--primary">{{ _('city_pair.see_all_departures') }}</a>
 {% endif %}
 
 <!-- Route summary (unique per route) -->
@@ -89,30 +89,30 @@
 <!-- Info cards -->
 <div class="cards-grid fade-in fade-in--d4">
   <div class="info-card">
-    <div class="info-card__heading">Prevoznici</div>
+    <div class="info-card__heading">{{ _('city_pair.carriers_heading') }}</div>
     {% if route_info and route_info.operators %}
     <p>Na liniji {{ from_city }} — {{ to_city }} voze {{ route_info.operators|length }} prevoznika:
        {{ route_info.operators|join(', ') }}.
        {% if route_info.cheapest_operator %}Najjeftinije karte nudi {{ route_info.cheapest_operator }}.{% endif %}</p>
     {% else %}
-    <p>Proverite kod prevoznika za aktuelne linije.</p>
+    <p>{{ _('city_pair.carriers_hint') }}</p>
     {% endif %}
   </div>
   <div class="info-card">
-    <div class="info-card__heading">Cene</div>
+    <div class="info-card__heading">{{ _('city_pair.prices_heading') }}</div>
     {% if route_info and route_info.price_min %}
     <p>Karte od {{ route_info.price_min }} RSD ({{ (route_info.price_min / config.EUR_RSD_RATE)|round|int }}€)
        do {{ route_info.price_max }} RSD ({{ (route_info.price_max / config.EUR_RSD_RATE)|round|int }}€).
        Kupite na blagajni autobuske stanice ili online.</p>
     {% else %}
-    <p>Cene variraju po prevoznicima. Kupite karte na blagajni.</p>
+    <p>{{ _('city_pair.prices_hint') }}</p>
     {% endif %}
   </div>
   <div class="info-card">
-    <div class="info-card__heading">Saveti</div>
+    <div class="info-card__heading">{{ _('city_pair.tips_heading') }}</div>
     <ul>
       {% if route_info and route_info.first_departure %}<li>Prvi polazak u {{ route_info.first_departure }}, poslednji u {{ route_info.last_departure }}.</li>{% endif %}
-      <li>Kupite kartu unapred u sezoni i za vikende.</li>
+      <li>{{ _('city_pair.tip_buy_early') }}</li>
       {% if route_info and route_info.duration_min %}<li>Putovanje traje {{ route_info.duration_min // 60 }}h {{ route_info.duration_min % 60 }}min{% if route_info.duration_max != route_info.duration_min %}–{{ route_info.duration_max // 60 }}h {{ route_info.duration_max % 60 }}min{% endif %}.</li>{% endif %}
     </ul>
   </div>
@@ -122,9 +122,26 @@
   {{ empty_state(icon='search', text='Direktna veza nije u bazi', sub=from_city ~ ' → ' ~ to_city) }}
 {% endif %}
 
+{% if related_pairs %}
+<section class="see-also">
+  <h2 class="see-also__title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+    Druge rute iz grada {{ from_city }}
+  </h2>
+  <div class="see-also__list">
+    {% for rp in related_pairs %}
+    <a href="{{ lang_prefix }}/voznja/{{ rp.from_city_slug }}-do-{{ rp.to_city_slug }}/" class="see-also__link">
+      {{ rp.from_city }} → {{ rp.to_city }}
+      <small>· {{ rp.trip_count }} polazaka{% if rp.distance_km %} · {{ rp.distance_km }} km{% endif %}</small>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
 <!-- FAQ (SEO rich snippets) -->
 <section class="faq-section">
-  <h2 class="section__title">Često postavljana pitanja</h2>
+  <h2 class="section__title">{{ _('city_pair.faq_heading') }}</h2>
   <div class="faq-list">
     <details class="faq-item">
       <summary class="faq-item__q">Koliko traje putovanje {{ from_city }} — {{ to_city }}?</summary>

@@ -142,7 +142,23 @@ def city_pair(from_city: str, to_city: str):
             cheapest_trip = next((t for t in trips if t.get('price_rsd') == cheapest_price), None)
             route_info['cheapest_operator'] = cheapest_trip['operator'] if cheapest_trip else None
 
+    # Related city pairs: other destinations from the same origin
+    related_pairs = []
+    if route:
+        related_pairs = cached_query("""
+            SELECT r.from_city, r.to_city, r.from_city_slug, r.to_city_slug,
+                   r.distance_km, COUNT(DISTINCT t.id) as trip_count
+            FROM routes r
+            LEFT JOIN trips t ON t.route_id = r.id
+            WHERE r.from_city = ? AND r.to_city != ? AND r.type = 'intercity'
+            GROUP BY r.from_city, r.to_city, r.from_city_slug, r.to_city_slug, r.distance_km
+            HAVING trip_count > 0
+            ORDER BY trip_count DESC
+            LIMIT 5
+        """, [route['from_city'], route['to_city']], ttl=3600)
+
     return render_template('city_pair.html',
                            route=route, trips=trips, route_info=route_info,
+                           related_pairs=related_pairs,
                            from_city=from_city.replace('-', ' ').title(),
                            to_city=to_city.replace('-', ' ').title())
