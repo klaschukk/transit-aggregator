@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Autobuske i železničke stanice u Srbiji — Prevozni{% endblock %}
-{% block meta_description %}Lista autobuskih i železničkih stanica u Srbiji. {{ stations|length }} stanica — Beograd, Novi Sad, Niš i drugi gradovi.{% endblock %}
+{% block title %}{{ _('stations.title') }} — Prevozni{% endblock %}
+{% block meta_description %}{{ _('stations.meta') }} {{ stations|length }} {{ _('stations.count_suffix') }} — Beograd, Novi Sad, Niš.{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
@@ -12,11 +12,11 @@
 
 {% from '_partials/_breadcrumb.html' import breadcrumb %}
 {% from '_partials/_empty_state.html' import empty_state %}
-{{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': 'Stanice'}]) }}
+{{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': _('stations.breadcrumb')}]) }}
 
 <div class="page-title fade-in">
-  <h1>Autobuske i železničke stanice</h1>
-  <p class="page-subtitle">{{ stations|length }} stanica u bazi</p>
+  <h1>{{ _('stations.h1') }}</h1>
+  <p class="page-subtitle">{{ stations|length }} {{ _('stations.in_base_suffix') }}</p>
 </div>
 
 {% if stations %}
@@ -34,7 +34,7 @@
       <h2 class="station-group__title">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
         {{ st.city }}
-        {% if st.route_count %}<span class="station-group__count">{{ st.route_count }} ruta</span>{% endif %}
+        {% if st.route_count %}<span class="station-group__count">{{ st.route_count }} {{ _('stations.routes_count') }}</span>{% endif %}
       </h2>
       <div class="station-group__cards">
   {% endif %}
@@ -53,7 +53,7 @@
     <div class="station-card__info">
       <div class="station-card__name">{{ st.name }}</div>
       <div class="station-card__meta">
-        {% if st.type == 'train' %}Železnička stanica{% elif st.type == 'bus' %}Autobuska stanica{% else %}Stanica{% endif %}
+        {% if st.type == 'train' %}{{ _('stations.type_train') }}{% elif st.type == 'bus' %}{{ _('stations.type_bus') }}{% else %}{{ _('stations.type_generic') }}{% endif %}
         {% if st.code %} · {{ st.code }}{% endif %}
       </div>
     </div>
@@ -66,7 +66,7 @@
 {% endif %}
 
 {% else %}
-  {{ empty_state(icon='stop', text='Podaci se učitavaju') }}
+  {{ empty_state(icon='stop', text=_('stations.empty_loading')) }}
 {% endif %}
 
 {% endblock %}

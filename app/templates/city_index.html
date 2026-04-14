@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% block title %}{{ _('city_index.title') }} — Prevozni{% endblock %}
-{% block meta_description %}{{ _('city_index.title') }} — linije, stajališta i red vožnje. Beograd, Novi Sad, Niš. Autobus, tramvaj, trolejbus na jednom mestu.{% endblock %}
+{% block meta_description %}{{ _('city_index.title') }} — {{ _('city_index.subtitle') }}. Beograd, Novi Sad, Niš.{% endblock %}
 
 {% block content %}
 
 {% from '_partials/_breadcrumb.html' import breadcrumb %}
-{{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': 'Gradski prevoz'}]) }}
+{{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': _('city_index.breadcrumb')}]) }}
 
 <div class="page-title fade-in">
   <h1>{{ _('city_index.title') }}</h1>
-  <p class="page-subtitle">Linije, stajališta i red vožnje</p>
+  <p class="page-subtitle">{{ _('city_index.subtitle') }}</p>
 </div>
 
 <div class="cards-grid fade-in fade-in--d1">
@@ -22,7 +22,7 @@
       </svg>
       {{ city.name }}
     </div>
-    <p>{{ city.desc }}{% if city.lines %} · {{ city.lines }} linija{% endif %}</p>
+    <p>{{ city.desc }}{% if city.lines %} · {{ city.lines }} {{ _('city_index.lines_suffix') }}{% endif %}</p>
   </a>
   {% endfor %}
 </div>

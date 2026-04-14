@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{% if from_city and to_city %}{{ from_city }} → {{ to_city }} — {{ _('search.results_for') }} — Prevozni{% else %}{{ _('search.title') }} — Prevozni{% endif %}{% endblock %}
-{% block meta_description %}{% if from_city and to_city %}Red vožnje od {{ from_city }} do {{ to_city }} — svi polasci, cene karata i prevoznici na jednom mestu.{% else %}Pretražite red vožnje autobusa i vozova između gradova Srbije. Uporedite polaske, cene i prevoznike. Besplatno.{% endif %}{% endblock %}
+{% block meta_description %}{% if from_city and to_city %}{{ _('search_results.meta_from') }} {{ from_city }} {{ _('search_results.meta_to') }} {{ to_city }} — {{ _('search_results.meta_desc') }}{% else %}{{ _('search_results.meta_default') }}{% endif %}{% endblock %}
 
 {% block head_extra %}
 {% if from_city and to_city %}
@@ -29,7 +29,7 @@
   {% if results %}
   <p class="page-subtitle">
     {{ results|length }} {{ _("routes.departures") }}
-    {%- if min_price %} · od {{ min_price }} RSD{% endif %}
+    {%- if min_price %} · {{ _('route_index.from_price') }} {{ min_price }} RSD{% endif %}
   </p>
   {% else %}
   <p class="page-subtitle">{{ _('search.no_results') }}</p>
@@ -43,13 +43,13 @@
   <div class="sort-bar__left">
     <button class="btn btn--outline filter-toggle" id="filterToggle">
       <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M3 3a1 1 0 011-1h12a1 1 0 01.82 1.573l-4.82 7v4.427a1 1 0 01-.553.894l-2 1A1 1 0 018 16v-5.427L3.18 3.573A1 1 0 013 3z"/></svg>
-      Filteri
+      {{ _('filter.heading') }}
     </button>
   </div>
   <div class="sort-bar__right">
-    <span class="sort-bar__label">Sortiraj:</span>
-    <button class="sort-btn sort-btn--active" data-sort="time">Po vremenu</button>
-    <button class="sort-btn" data-sort="price">Po ceni</button>
+    <span class="sort-bar__label">{{ _('search_results.sort_label') }}</span>
+    <button class="sort-btn sort-btn--active" data-sort="time">{{ _('search_results.sort_time') }}</button>
+    <button class="sort-btn" data-sort="price">{{ _('search_results.sort_price') }}</button>
   </div>
 </div>
 
@@ -117,8 +117,8 @@
 
 <section class="search-hero">
   <div class="search-hero__inner">
-    <h1 class="search-hero__title">Pronađite prevoz</h1>
-    <p class="search-hero__sub">Autobus ili voz između gradova Srbije</p>
+    <h1 class="search-hero__title">{{ _('search_results.h1') }}</h1>
+    <p class="search-hero__sub">{{ _('search_results.hero_sub') }}</p>
     <div class="search-hero__form">
       {{ search_form(t={'from': _('home.search_from'), 'to': _('home.search_to'), 'btn': _('home.search_btn')}, prefix=lang_prefix) }}
     </div>

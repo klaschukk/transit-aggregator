@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Prevoznici u Srbiji — Prevozni{% endblock %}
-{% block meta_description %}Lista autobuskih i železničkih prevoznika u Srbiji. Lasta, Niš-Ekspres, Srbija Voz i drugi. {{ operators|length }} prevoznika.{% endblock %}
+{% block title %}{{ _('carriers.title') }} — Prevozni{% endblock %}
+{% block meta_description %}{{ _('carriers.meta') }} {{ operators|length }} {{ _('carriers.count_suffix') }}.{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
@@ -12,11 +12,11 @@
 
 {% from '_partials/_breadcrumb.html' import breadcrumb %}
 {% from '_partials/_empty_state.html' import empty_state %}
-{{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': 'Prevoznici'}]) }}
+{{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': _('carriers.h1')}]) }}
 
 <div class="page-title fade-in">
-  <h1>Prevoznici</h1>
-  <p class="page-subtitle">{{ total_operators|default(operators|length) }} prevoznika u bazi{% if total_pages and total_pages > 1 %} · strana {{ page }} / {{ total_pages }}{% endif %}</p>
+  <h1>{{ _('carriers.h1') }}</h1>
+  <p class="page-subtitle">{{ total_operators|default(operators|length) }} {{ _('carriers.in_base_suffix') }}{% if total_pages and total_pages > 1 %} · {{ _('carriers.page_of') }} {{ page }} / {{ total_pages }}{% endif %}</p>
 </div>
 
 <!-- Anchor nav — only when everything fits on one page, otherwise labels are misleading -->
@@ -46,15 +46,15 @@
       <div class="carrier-section__info">
         <h2 class="carrier-section__name">{{ op.name }}</h2>
         <div class="carrier-section__meta">
-          {% if op.type == 'train' %}{{ _('carriers.train') }}{% else %}{{ _('carriers.bus') }}{% endif %} · {{ op.route_count|default(0) }} ruta
-          {% if op.website %} · <a href="{{ op.website }}" target="_blank" rel="noopener">Sajt</a>{% endif %}
+          {% if op.type == 'train' %}{{ _('carriers.train') }}{% else %}{{ _('carriers.bus') }}{% endif %} · {{ op.route_count|default(0) }} {{ _('carriers.routes_count') }}
+          {% if op.website %} · <a href="{{ op.website }}" target="_blank" rel="noopener">{{ _('carriers.website') }}</a>{% endif %}
         </div>
       </div>
     </div>
 
     {% if op.cities %}
     <div class="carrier-section__cities">
-      <span class="carrier-section__label">Gradovi:</span>
+      <span class="carrier-section__label">{{ _('carriers.cities_label') }}</span>
       {% for c in op.cities %}
       <span class="carrier-city-tag">{{ c.city }}</span>
       {% endfor %}
@@ -71,23 +71,23 @@
       {% endfor %}
     </div>
     {% elif op.route_count == 0 %}
-    <p class="carrier-section__empty">Nema ruta u bazi za ovog prevoznika.</p>
+    <p class="carrier-section__empty">{{ _('carriers.no_routes') }}</p>
     {% endif %}
   </section>
   {% endfor %}
 </div>
 {% else %}
-  {{ empty_state(icon='bus', text='Podaci se učitavaju') }}
+  {{ empty_state(icon='bus', text=_('carriers.empty_loading')) }}
 {% endif %}
 
 {% if total_pages and total_pages > 1 %}
-<nav class="pagination" aria-label="Paginacija">
+<nav class="pagination" aria-label="{{ _('a11y.pagination') }}">
   {% if page > 1 %}
-  <a class="pagination__link" rel="prev" href="{{ lang_prefix }}/prevoznici/{% if page > 2 %}?page={{ page - 1 }}{% endif %}">← Prethodna</a>
+  <a class="pagination__link" rel="prev" href="{{ lang_prefix }}/prevoznici/{% if page > 2 %}?page={{ page - 1 }}{% endif %}">{{ _('carriers.prev_page') }}</a>
   {% endif %}
-  <span class="pagination__info">Strana {{ page }} / {{ total_pages }}</span>
+  <span class="pagination__info">{{ _('carriers.page_info') }} {{ page }} / {{ total_pages }}</span>
   {% if page < total_pages %}
-  <a class="pagination__link" rel="next" href="{{ lang_prefix }}/prevoznici/?page={{ page + 1 }}">Sledeća →</a>
+  <a class="pagination__link" rel="next" href="{{ lang_prefix }}/prevoznici/?page={{ page + 1 }}">{{ _('carriers.next_page') }}</a>
   {% endif %}
 </nav>
 {% endif %}
