@@ -1325,6 +1325,275 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Swap',
         'ru': 'Поменять',
     },
+
+    # ── city_pair FAQ (interpolated) ──
+    'city_pair.faq.q_duration': {
+        'sr': 'Koliko traje putovanje {from_city} — {to_city}?',
+        'en': 'How long does the {from_city} — {to_city} trip take?',
+        'ru': 'Сколько длится поездка {from_city} — {to_city}?',
+    },
+    'city_pair.faq.q_price': {
+        'sr': 'Koja je cena karte {from_city} — {to_city}?',
+        'en': 'What is the ticket price for {from_city} — {to_city}?',
+        'ru': 'Сколько стоит билет {from_city} — {to_city}?',
+    },
+    'city_pair.faq.q_departures': {
+        'sr': 'Koliko polazaka dnevno ima {from_city} — {to_city}?',
+        'en': 'How many daily departures are there from {from_city} to {to_city}?',
+        'ru': 'Сколько ежедневных рейсов {from_city} — {to_city}?',
+    },
+    'city_pair.faq.q_operators': {
+        'sr': 'Koji prevoznici voze {from_city} — {to_city}?',
+        'en': 'Which carriers operate {from_city} — {to_city}?',
+        'ru': 'Какие перевозчики обслуживают {from_city} — {to_city}?',
+    },
+    'city_pair.faq.a_duration_range': {
+        'sr': 'Putovanje od {from_city} do {to_city} traje od {h_min}h {m_min}min do {h_max}h {m_max}min.',
+        'en': 'The trip from {from_city} to {to_city} takes from {h_min}h {m_min}min up to {h_max}h {m_max}min.',
+        'ru': 'Поездка из {from_city} в {to_city} занимает от {h_min}ч {m_min}мин до {h_max}ч {m_max}мин.',
+    },
+    'city_pair.faq.a_duration_distance_suffix': {
+        'sr': ' Rastojanje je {km} km.',
+        'en': ' The distance is {km} km.',
+        'ru': ' Расстояние — {km} км.',
+    },
+    'city_pair.faq.a_duration_distance_only': {
+        'sr': 'Rastojanje je oko {km} km. Tačno trajanje zavisi od prevoznika.',
+        'en': 'The distance is about {km} km. Exact duration depends on the carrier.',
+        'ru': 'Расстояние около {km} км. Точное время зависит от перевозчика.',
+    },
+    'city_pair.faq.a_duration_unknown': {
+        'sr': 'Trajanje zavisi od prevoznika i tipa prevoza.',
+        'en': 'Duration depends on the carrier and transport type.',
+        'ru': 'Время в пути зависит от перевозчика и вида транспорта.',
+    },
+    'city_pair.faq.a_price_range': {
+        'sr': 'Cene karata kreću se od {min} do {max} RSD ({eur_min}–{eur_max}€).',
+        'en': 'Ticket prices range from {min} to {max} RSD ({eur_min}–{eur_max}€).',
+        'ru': 'Цены билетов варьируются от {min} до {max} RSD ({eur_min}–{eur_max}€).',
+    },
+    'city_pair.faq.a_price_cheapest_suffix': {
+        'sr': ' Najjeftiniji prevoznik je {operator}.',
+        'en': ' The cheapest carrier is {operator}.',
+        'ru': ' Самый дешёвый перевозчик — {operator}.',
+    },
+    'city_pair.faq.a_price_from': {
+        'sr': 'Cene karata počinju od {min} RSD (oko {eur}€).',
+        'en': 'Ticket prices start from {min} RSD (about {eur}€).',
+        'ru': 'Цены билетов начинаются от {min} RSD (около {eur}€).',
+    },
+    'city_pair.faq.a_price_unknown': {
+        'sr': 'Cene variraju u zavisnosti od prevoznika.',
+        'en': 'Prices vary depending on the carrier.',
+        'ru': 'Цены зависят от перевозчика.',
+    },
+    'city_pair.faq.a_departures_full': {
+        'sr': 'Na ovoj ruti ima {count} polazaka dnevno. Prvi polazak je u {first}, poslednji u {last}.',
+        'en': 'This route has {count} daily departures. First at {first}, last at {last}.',
+        'ru': 'На этом маршруте {count} рейсов в день. Первый в {first}, последний в {last}.',
+    },
+    'city_pair.faq.a_departures_operators_suffix': {
+        'sr': ' Voze: {operators}.',
+        'en': ' Operated by: {operators}.',
+        'ru': ' Обслуживают: {operators}.',
+    },
+    'city_pair.faq.a_departures_count_only': {
+        'sr': 'Na ovoj ruti ima {count} polazaka dnevno.',
+        'en': 'This route has {count} daily departures.',
+        'ru': 'На этом маршруте {count} рейсов в день.',
+    },
+    'city_pair.faq.a_departures_unknown': {
+        'sr': 'Broj polazaka varira. Proverite aktuelni red vožnje.',
+        'en': 'The number of departures varies. Check the current schedule.',
+        'ru': 'Количество рейсов меняется. Проверьте актуальное расписание.',
+    },
+    'city_pair.faq.a_operators_list': {
+        'sr': 'Na liniji {from_city} — {to_city} voze {n} prevoznika: {operators}.',
+        'en': 'On the {from_city} — {to_city} route there are {n} carriers: {operators}.',
+        'ru': 'На маршруте {from_city} — {to_city} работают {n} перевозчиков: {operators}.',
+    },
+    'city_pair.faq.a_operators_cheapest_suffix': {
+        'sr': ' Najjeftiniji prevoznik je {operator} sa cenama od {min} RSD.',
+        'en': ' The cheapest carrier is {operator} with prices from {min} RSD.',
+        'ru': ' Самый дешёвый перевозчик — {operator}, цены от {min} RSD.',
+    },
+    # JSON-LD short variants
+    'city_pair.faq.ld_duration_range': {
+        'sr': 'Putovanje traje od {h_min}h {m_min}min do {h_max}h {m_max}min.',
+        'en': 'The trip takes from {h_min}h {m_min}min up to {h_max}h {m_max}min.',
+        'ru': 'Поездка занимает от {h_min}ч {m_min}мин до {h_max}ч {m_max}мин.',
+    },
+    'city_pair.faq.ld_price_range': {
+        'sr': 'Od {min} do {max} RSD ({eur_min}–{eur_max}€).',
+        'en': 'From {min} to {max} RSD ({eur_min}–{eur_max}€).',
+        'ru': 'От {min} до {max} RSD ({eur_min}–{eur_max}€).',
+    },
+    'city_pair.faq.ld_price_cheapest_suffix': {
+        'sr': ' Najjeftiniji: {operator}.',
+        'en': ' Cheapest: {operator}.',
+        'ru': ' Самый дешёвый: {operator}.',
+    },
+    'city_pair.faq.ld_price_from': {
+        'sr': 'Od {min} RSD ({eur}€).',
+        'en': 'From {min} RSD ({eur}€).',
+        'ru': 'От {min} RSD ({eur}€).',
+    },
+    'city_pair.faq.ld_price_unknown': {
+        'sr': 'Cene variraju.',
+        'en': 'Prices vary.',
+        'ru': 'Цены варьируются.',
+    },
+    'city_pair.faq.ld_departures_full': {
+        'sr': '{count} polazaka dnevno. Prvi u {first}, poslednji u {last}.',
+        'en': '{count} departures daily. First at {first}, last at {last}.',
+        'ru': '{count} рейсов в день. Первый в {first}, последний в {last}.',
+    },
+    'city_pair.faq.ld_departures_count_only': {
+        'sr': '{count} polazaka dnevno.',
+        'en': '{count} departures daily.',
+        'ru': '{count} рейсов в день.',
+    },
+    'city_pair.faq.ld_departures_unknown': {
+        'sr': 'Broj polazaka varira.',
+        'en': 'The number of departures varies.',
+        'ru': 'Количество рейсов меняется.',
+    },
+    'city_pair.faq.ld_operators_list': {
+        'sr': 'Voze {n} prevoznika: {operators}.',
+        'en': '{n} carriers operate: {operators}.',
+        'ru': '{n} перевозчиков: {operators}.',
+    },
+
+    # ── route_detail FAQ JSON-LD ──
+    'route_detail.faq.q_departures': {
+        'sr': 'Koliko polazaka ima od {from_city} do {to_city}?',
+        'en': 'How many departures are there from {from_city} to {to_city}?',
+        'ru': 'Сколько рейсов из {from_city} в {to_city}?',
+    },
+    'route_detail.faq.a_departures': {
+        'sr': 'Dnevno ima {count} polazaka od {from_city} do {to_city}.',
+        'en': 'There are {count} daily departures from {from_city} to {to_city}.',
+        'ru': 'Ежедневно выполняется {count} рейсов из {from_city} в {to_city}.',
+    },
+    'route_detail.faq.q_price': {
+        'sr': 'Koliko košta karta {from_city} — {to_city}?',
+        'en': 'How much is a {from_city} — {to_city} ticket?',
+        'ru': 'Сколько стоит билет {from_city} — {to_city}?',
+    },
+    'route_detail.faq.a_price_from': {
+        'sr': 'Cena karte počinje od {min} RSD.',
+        'en': 'Ticket price starts from {min} RSD.',
+        'ru': 'Цена билета начинается от {min} RSD.',
+    },
+    'route_detail.faq.a_price_unknown': {
+        'sr': 'Cene variraju u zavisnosti od prevoznika; proverite aktuelne cene na stranici.',
+        'en': 'Prices vary by carrier; check current prices on the page.',
+        'ru': 'Цены зависят от перевозчика; проверьте актуальные цены на странице.',
+    },
+    'route_detail.faq.q_operators': {
+        'sr': 'Koji prevoznici voze liniju {from_city} — {to_city}?',
+        'en': 'Which carriers operate the {from_city} — {to_city} route?',
+        'ru': 'Какие перевозчики обслуживают маршрут {from_city} — {to_city}?',
+    },
+    'route_detail.faq.a_operators_list': {
+        'sr': 'Na ovoj liniji voze: {operators}.',
+        'en': 'This route is operated by: {operators}.',
+        'ru': 'Этот маршрут обслуживают: {operators}.',
+    },
+    'route_detail.faq.a_operators_unknown': {
+        'sr': 'Proverite listu polazaka za aktuelne prevoznike.',
+        'en': 'Check the departures list for current carriers.',
+        'ru': 'Проверьте список рейсов для актуальных перевозчиков.',
+    },
+
+    # ── line_detail FAQ JSON-LD ──
+    'line_detail.faq.q_stops': {
+        'sr': 'Koliko stajališta ima linija {number}?',
+        'en': 'How many stops does line {number} have?',
+        'ru': 'Сколько остановок у линии {number}?',
+    },
+    'line_detail.faq.a_stops': {
+        'sr': 'Linija {number} ({name}) u {city}u ima {count} stajališta, od {first} do {last}.',
+        'en': 'Line {number} ({name}) in {city} has {count} stops, from {first} to {last}.',
+        'ru': 'Линия {number} ({name}) в городе {city} имеет {count} остановок, от {first} до {last}.',
+    },
+    'line_detail.faq.a_stops_no_endpoints': {
+        'sr': 'Linija {number} ({name}) u {city}u ima {count} stajališta.',
+        'en': 'Line {number} ({name}) in {city} has {count} stops.',
+        'ru': 'Линия {number} ({name}) в городе {city} имеет {count} остановок.',
+    },
+    'line_detail.faq.q_when': {
+        'sr': 'Kada saobraća linija {number}?',
+        'en': 'When does line {number} run?',
+        'ru': 'Когда работает линия {number}?',
+    },
+    'line_detail.faq.a_when_range': {
+        'sr': 'Linija {number} saobraća od {first} do {last} radnim danom prema GTFS redu vožnje.',
+        'en': 'Line {number} runs from {first} to {last} on weekdays according to the GTFS schedule.',
+        'ru': 'Линия {number} работает с {first} до {last} по будням согласно расписанию GTFS.',
+    },
+    'line_detail.faq.a_when_unknown': {
+        'sr': 'Tačan red vožnje linije {number} proverite na stajalištima ili kod gradskog prevoznika.',
+        'en': 'Check the exact schedule for line {number} at the stops or with the city carrier.',
+        'ru': 'Точное расписание линии {number} уточняйте на остановках или у городского перевозчика.',
+    },
+    'line_detail.faq.q_type': {
+        'sr': 'Koji je tip linije {number}?',
+        'en': 'What type is line {number}?',
+        'ru': 'Какой тип у линии {number}?',
+    },
+    'line_detail.faq.a_type': {
+        'sr': 'Linija {number} je {type} u sistemu gradskog prevoza grada {city}.',
+        'en': 'Line {number} is a {type} in the {city} city transport system.',
+        'ru': 'Линия {number} — это {type} в системе городского транспорта города {city}.',
+    },
+
+    # ── stop_detail FAQ JSON-LD ──
+    'stop_detail.faq.q_lines': {
+        'sr': 'Koje linije staju na stajalištu {stop}?',
+        'en': 'Which lines stop at {stop}?',
+        'ru': 'Какие линии останавливаются на остановке {stop}?',
+    },
+    'stop_detail.faq.a_lines': {
+        'sr': 'Na stajalištu {stop} u {city}u staje {count} linija gradskog prevoza ({types}).',
+        'en': 'At stop {stop} in {city}, {count} city transport lines stop ({types}).',
+        'ru': 'На остановке {stop} в городе {city} останавливается {count} линий городского транспорта ({types}).',
+    },
+    'stop_detail.faq.q_when': {
+        'sr': 'Kada polaze autobusi sa stajališta {stop}?',
+        'en': 'When do buses depart from {stop}?',
+        'ru': 'Когда отправляются автобусы с остановки {stop}?',
+    },
+    'stop_detail.faq.a_when_range': {
+        'sr': 'Prvi polazak sa stajališta {stop} je u {first}, a poslednji u {last} radnim danom.',
+        'en': 'The first departure from {stop} is at {first}, the last at {last} on weekdays.',
+        'ru': 'Первый рейс с остановки {stop} в {first}, последний в {last} по будням.',
+    },
+    'stop_detail.faq.a_when_unknown': {
+        'sr': 'Tačan red vožnje proverite na samom stajalištu ili preko mobilne aplikacije gradskog prevoznika.',
+        'en': 'Check the exact schedule at the stop itself or via the city carrier mobile app.',
+        'ru': 'Точное расписание уточняйте на самой остановке или в мобильном приложении городского перевозчика.',
+    },
+    'stop_detail.faq.q_where': {
+        'sr': 'Gde se nalazi stajalište {stop}?',
+        'en': 'Where is stop {stop} located?',
+        'ru': 'Где находится остановка {stop}?',
+    },
+    'stop_detail.faq.a_where': {
+        'sr': 'Stajalište {stop} se nalazi u gradu {city}.',
+        'en': 'Stop {stop} is located in the city of {city}.',
+        'ru': 'Остановка {stop} находится в городе {city}.',
+    },
+    'stop_detail.faq.a_where_coords_suffix': {
+        'sr': ' Koordinate: {lat}, {lon}.',
+        'en': ' Coordinates: {lat}, {lon}.',
+        'ru': ' Координаты: {lat}, {lon}.',
+    },
+    'stop_detail.faq.a_where_outro': {
+        'sr': ' Detaljna mapa i lista linija dostupni su besplatno na Prevozni.com.',
+        'en': ' A detailed map and list of lines are available for free on Prevozni.com.',
+        'ru': ' Подробная карта и список линий доступны бесплатно на Prevozni.com.',
+    },
 }
 
 SUPPORTED_LANGS = ('sr', 'en', 'ru')

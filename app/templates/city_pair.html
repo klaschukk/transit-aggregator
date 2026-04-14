@@ -144,28 +144,28 @@
   <h2 class="section__title">{{ _('city_pair.faq_heading') }}</h2>
   <div class="faq-list">
     <details class="faq-item">
-      <summary class="faq-item__q">Koliko traje putovanje {{ from_city }} — {{ to_city }}?</summary>
+      <summary class="faq-item__q">{{ _('city_pair.faq.q_duration').format(from_city=from_city, to_city=to_city) }}</summary>
       <div class="faq-item__a">
-        {% if route_info and route_info.duration_min %}Putovanje od {{ from_city }} do {{ to_city }} traje od {{ route_info.duration_min // 60 }}h {{ route_info.duration_min % 60 }}min do {{ route_info.duration_max // 60 }}h {{ route_info.duration_max % 60 }}min.{% if route and route.distance_km %} Rastojanje je {{ route.distance_km }} km.{% endif %}{% elif route and route.distance_km %}Rastojanje je oko {{ route.distance_km }} km. Tačno trajanje zavisi od prevoznika.{% else %}Trajanje zavisi od prevoznika i tipa prevoza.{% endif %}
+        {% if route_info and route_info.duration_min %}{{ _('city_pair.faq.a_duration_range').format(from_city=from_city, to_city=to_city, h_min=route_info.duration_min // 60, m_min=route_info.duration_min % 60, h_max=route_info.duration_max // 60, m_max=route_info.duration_max % 60) }}{% if route and route.distance_km %}{{ _('city_pair.faq.a_duration_distance_suffix').format(km=route.distance_km) }}{% endif %}{% elif route and route.distance_km %}{{ _('city_pair.faq.a_duration_distance_only').format(km=route.distance_km) }}{% else %}{{ _('city_pair.faq.a_duration_unknown') }}{% endif %}
       </div>
     </details>
     <details class="faq-item">
-      <summary class="faq-item__q">Koja je cena karte {{ from_city }} — {{ to_city }}?</summary>
+      <summary class="faq-item__q">{{ _('city_pair.faq.q_price').format(from_city=from_city, to_city=to_city) }}</summary>
       <div class="faq-item__a">
-        {% if route_info and route_info.price_min %}Cene karata kreću se od {{ route_info.price_min }} do {{ route_info.price_max }} RSD ({{ (route_info.price_min / config.EUR_RSD_RATE)|round|int }}–{{ (route_info.price_max / config.EUR_RSD_RATE)|round|int }}€).{% if route_info.cheapest_operator %} Najjeftiniji prevoznik je {{ route_info.cheapest_operator }}.{% endif %}{% elif route and route.min_price_rsd %}Cene karata počinju od {{ route.min_price_rsd }} RSD (oko {{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }}€).{% else %}Cene variraju u zavisnosti od prevoznika.{% endif %}
+        {% if route_info and route_info.price_min %}{{ _('city_pair.faq.a_price_range').format(min=route_info.price_min, max=route_info.price_max, eur_min=(route_info.price_min / config.EUR_RSD_RATE)|round|int, eur_max=(route_info.price_max / config.EUR_RSD_RATE)|round|int) }}{% if route_info.cheapest_operator %}{{ _('city_pair.faq.a_price_cheapest_suffix').format(operator=route_info.cheapest_operator) }}{% endif %}{% elif route and route.min_price_rsd %}{{ _('city_pair.faq.a_price_from').format(min=route.min_price_rsd, eur=(route.min_price_rsd / config.EUR_RSD_RATE)|round|int) }}{% else %}{{ _('city_pair.faq.a_price_unknown') }}{% endif %}
       </div>
     </details>
     <details class="faq-item">
-      <summary class="faq-item__q">Koliko polazaka dnevno ima {{ from_city }} — {{ to_city }}?</summary>
+      <summary class="faq-item__q">{{ _('city_pair.faq.q_departures').format(from_city=from_city, to_city=to_city) }}</summary>
       <div class="faq-item__a">
-        {% if route_info and route_info.first_departure %}Na ovoj ruti ima {{ route.trip_count|default(0) }} polazaka dnevno. Prvi polazak je u {{ route_info.first_departure }}, poslednji u {{ route_info.last_departure }}.{% if route_info.operators %} Voze: {{ route_info.operators|join(', ') }}.{% endif %}{% elif route and route.trip_count %}Na ovoj ruti ima {{ route.trip_count }} polazaka dnevno.{% else %}Broj polazaka varira. Proverite aktuelni red vožnje.{% endif %}
+        {% if route_info and route_info.first_departure %}{{ _('city_pair.faq.a_departures_full').format(count=route.trip_count|default(0), first=route_info.first_departure, last=route_info.last_departure) }}{% if route_info.operators %}{{ _('city_pair.faq.a_departures_operators_suffix').format(operators=route_info.operators|join(', ')) }}{% endif %}{% elif route and route.trip_count %}{{ _('city_pair.faq.a_departures_count_only').format(count=route.trip_count) }}{% else %}{{ _('city_pair.faq.a_departures_unknown') }}{% endif %}
       </div>
     </details>
     {% if route_info and route_info.operators %}
     <details class="faq-item">
-      <summary class="faq-item__q">Koji prevoznici voze {{ from_city }} — {{ to_city }}?</summary>
+      <summary class="faq-item__q">{{ _('city_pair.faq.q_operators').format(from_city=from_city, to_city=to_city) }}</summary>
       <div class="faq-item__a">
-        Na liniji {{ from_city }} — {{ to_city }} voze {{ route_info.operators|length }} prevoznika: {{ route_info.operators|join(', ') }}.{% if route_info.cheapest_operator %} Najjeftiniji prevoznik je {{ route_info.cheapest_operator }} sa cenama od {{ route_info.price_min }} RSD.{% endif %}
+        {{ _('city_pair.faq.a_operators_list').format(from_city=from_city, to_city=to_city, n=route_info.operators|length, operators=route_info.operators|join(', ')) }}{% if route_info.cheapest_operator %}{{ _('city_pair.faq.a_operators_cheapest_suffix').format(operator=route_info.cheapest_operator, min=route_info.price_min) }}{% endif %}
       </div>
     </details>
     {% endif %}
@@ -174,16 +174,16 @@
 
 {# FAQ JSON-LD with enriched answers #}
 {% if route %}
-{% set faq_duration %}{% if route_info and route_info.duration_min %}Putovanje traje od {{ route_info.duration_min // 60 }}h {{ route_info.duration_min % 60 }}min do {{ route_info.duration_max // 60 }}h {{ route_info.duration_max % 60 }}min.{% if route.distance_km %} Rastojanje je {{ route.distance_km }} km.{% endif %}{% elif route.distance_km %}Rastojanje je oko {{ route.distance_km }} km. Tačno trajanje zavisi od prevoznika.{% else %}Trajanje zavisi od prevoznika.{% endif %}{% endset %}
-{% set faq_price %}{% if route_info and route_info.price_min %}Od {{ route_info.price_min }} do {{ route_info.price_max }} RSD ({{ (route_info.price_min / config.EUR_RSD_RATE)|round|int }}–{{ (route_info.price_max / config.EUR_RSD_RATE)|round|int }}€).{% if route_info.cheapest_operator %} Najjeftiniji: {{ route_info.cheapest_operator }}.{% endif %}{% elif route.min_price_rsd %}Od {{ route.min_price_rsd }} RSD ({{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }}€).{% else %}Cene variraju.{% endif %}{% endset %}
-{% set faq_departures %}{% if route_info and route_info.first_departure %}{{ route.trip_count|default(0) }} polazaka dnevno. Prvi u {{ route_info.first_departure }}, poslednji u {{ route_info.last_departure }}.{% elif route.trip_count %}{{ route.trip_count }} polazaka dnevno.{% else %}Broj polazaka varira.{% endif %}{% endset %}
+{% set faq_duration %}{% if route_info and route_info.duration_min %}{{ _('city_pair.faq.ld_duration_range').format(h_min=route_info.duration_min // 60, m_min=route_info.duration_min % 60, h_max=route_info.duration_max // 60, m_max=route_info.duration_max % 60) }}{% if route.distance_km %}{{ _('city_pair.faq.a_duration_distance_suffix').format(km=route.distance_km) }}{% endif %}{% elif route.distance_km %}{{ _('city_pair.faq.a_duration_distance_only').format(km=route.distance_km) }}{% else %}{{ _('city_pair.faq.a_duration_unknown') }}{% endif %}{% endset %}
+{% set faq_price %}{% if route_info and route_info.price_min %}{{ _('city_pair.faq.ld_price_range').format(min=route_info.price_min, max=route_info.price_max, eur_min=(route_info.price_min / config.EUR_RSD_RATE)|round|int, eur_max=(route_info.price_max / config.EUR_RSD_RATE)|round|int) }}{% if route_info.cheapest_operator %}{{ _('city_pair.faq.ld_price_cheapest_suffix').format(operator=route_info.cheapest_operator) }}{% endif %}{% elif route.min_price_rsd %}{{ _('city_pair.faq.ld_price_from').format(min=route.min_price_rsd, eur=(route.min_price_rsd / config.EUR_RSD_RATE)|round|int) }}{% else %}{{ _('city_pair.faq.ld_price_unknown') }}{% endif %}{% endset %}
+{% set faq_departures %}{% if route_info and route_info.first_departure %}{{ _('city_pair.faq.ld_departures_full').format(count=route.trip_count|default(0), first=route_info.first_departure, last=route_info.last_departure) }}{% elif route.trip_count %}{{ _('city_pair.faq.ld_departures_count_only').format(count=route.trip_count) }}{% else %}{{ _('city_pair.faq.ld_departures_unknown') }}{% endif %}{% endset %}
 {% set faq_entities = [
-  {'@type':'Question','name':'Koliko traje putovanje ' ~ from_city ~ ' — ' ~ to_city ~ '?','acceptedAnswer':{'@type':'Answer','text':faq_duration|striptags|trim}},
-  {'@type':'Question','name':'Koja je cena karte ' ~ from_city ~ ' — ' ~ to_city ~ '?','acceptedAnswer':{'@type':'Answer','text':faq_price|striptags|trim}},
-  {'@type':'Question','name':'Koliko polazaka dnevno ima ' ~ from_city ~ ' — ' ~ to_city ~ '?','acceptedAnswer':{'@type':'Answer','text':faq_departures|striptags|trim}}
+  {'@type':'Question','name':_('city_pair.faq.q_duration').format(from_city=from_city, to_city=to_city),'acceptedAnswer':{'@type':'Answer','text':faq_duration|striptags|trim}},
+  {'@type':'Question','name':_('city_pair.faq.q_price').format(from_city=from_city, to_city=to_city),'acceptedAnswer':{'@type':'Answer','text':faq_price|striptags|trim}},
+  {'@type':'Question','name':_('city_pair.faq.q_departures').format(from_city=from_city, to_city=to_city),'acceptedAnswer':{'@type':'Answer','text':faq_departures|striptags|trim}}
 ] %}
 {% if route_info and route_info.operators %}
-  {% set _ = faq_entities.append({'@type':'Question','name':'Koji prevoznici voze ' ~ from_city ~ ' — ' ~ to_city ~ '?','acceptedAnswer':{'@type':'Answer','text':'Voze ' ~ route_info.operators|length ~ ' prevoznika: ' ~ route_info.operators|join(', ') ~ '.'}}) %}
+  {% set _ignored = faq_entities.append({'@type':'Question','name':_('city_pair.faq.q_operators').format(from_city=from_city, to_city=to_city),'acceptedAnswer':{'@type':'Answer','text':_('city_pair.faq.ld_operators_list').format(n=route_info.operators|length, operators=route_info.operators|join(', '))}}) %}
 {% endif %}
 {% set faq_ld = {'@context':'https://schema.org','@type':'FAQPage','mainEntity':faq_entities} %}
 <script type="application/ld+json">{{ faq_ld|tojson }}</script>
