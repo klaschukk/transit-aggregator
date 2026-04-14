@@ -1106,6 +1106,21 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Frequently asked questions',
         'ru': 'Часто задаваемые вопросы',
     },
+    'city_pair.other_routes_from': {
+        'sr': 'Druge rute iz grada',
+        'en': 'Other routes from',
+        'ru': 'Другие маршруты из',
+    },
+    'city_pair.departures_word': {
+        'sr': 'polazaka',
+        'en': 'departures',
+        'ru': 'отправлений',
+    },
+    'city_pair.no_direct': {
+        'sr': 'Direktna veza nije u bazi',
+        'en': 'No direct route in database',
+        'ru': 'Прямой маршрут отсутствует в базе',
+    },
 
     # ── route_detail.html ──
     'route_detail.title_suffix': {

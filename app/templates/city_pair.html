@@ -119,20 +119,20 @@
 </div>
 
 {% if not route %}
-  {{ empty_state(icon='search', text='Direktna veza nije u bazi', sub=from_city ~ ' → ' ~ to_city) }}
+  {{ empty_state(icon='search', text=_('city_pair.no_direct'), sub=from_city ~ ' → ' ~ to_city) }}
 {% endif %}
 
 {% if related_pairs %}
 <section class="see-also">
   <h2 class="see-also__title">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
-    Druge rute iz grada {{ from_city }}
+    {{ _('city_pair.other_routes_from') }} {{ from_city }}
   </h2>
   <div class="see-also__list">
     {% for rp in related_pairs %}
     <a href="{{ lang_prefix }}/voznja/{{ rp.from_city_slug }}-do-{{ rp.to_city_slug }}/" class="see-also__link">
       {{ rp.from_city }} → {{ rp.to_city }}
-      <small>· {{ rp.trip_count }} polazaka{% if rp.distance_km %} · {{ rp.distance_km }} km{% endif %}</small>
+      <small>· {{ rp.trip_count }} {{ _('city_pair.departures_word') }}{% if rp.distance_km %} · {{ rp.distance_km }} km{% endif %}</small>
     </a>
     {% endfor %}
   </div>
