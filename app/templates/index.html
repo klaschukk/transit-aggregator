@@ -19,7 +19,7 @@
     <h1 class="hero__title">{{ _('home.hero_title') }}</h1>
     <p class="hero__sub">{{ _('home.hero_subtitle') }}</p>
     <div class="hero__form">
-      {% from '_partials/_search_form.html' import search_form %}
+      {% from '_partials/_search_form.html' import search_form with context %}
       {{ search_form(t={'from': _('home.search_from'), 'to': _('home.search_to'), 'btn': _('home.search_btn')}, prefix=lang_prefix) }}
     </div>
   </div>

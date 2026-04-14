@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}404 — Stranica nije pronađena | Prevozni{% endblock %}
+{% block title %}{{ _('error.404_title') }} | Prevozni{% endblock %}
 
 {% block content %}
 
@@ -46,7 +46,7 @@
 
   <!-- Search on 404 -->
   <div class="error-page__search">
-    {% from '_partials/_search_form.html' import search_form %}
+    {% from "_partials/_search_form.html" import search_form with context %}
     {{ search_form(t={'from': _('home.search_from'), 'to': _('home.search_to'), 'btn': _('home.search_btn')}, prefix=lang_prefix) }}
   </div>
 

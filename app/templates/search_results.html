@@ -12,8 +12,8 @@
 
 {% from '_partials/_breadcrumb.html' import breadcrumb %}
 {% from '_partials/_trip_card.html' import trip_card %}
-{% from '_partials/_search_form.html' import search_form %}
-{% from '_partials/_filter_panel.html' import filter_panel %}
+{% from "_partials/_search_form.html" import search_form with context %}
+{% from '_partials/_filter_panel.html' import filter_panel with context %}
 {% from '_partials/_empty_state.html' import empty_state %}
 
 {% if from_city and to_city %}

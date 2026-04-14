@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ from_city }} → {{ to_city }} — autobus i voz | Prevozni{% endblock %}
-{% block meta_description %}Kako doći od {{ from_city }} do {{ to_city }}? Red vožnje, cene karata i prevoznici.{% endblock %}
+{% block meta_description %}Kako doći od {{ from_city }} do {{ to_city }}? Red vožnje autobusa i vozova, cene karata i prevoznici. Besplatno, bez registracije.{% endblock %}
 
 {% block head_extra %}
 {% if route %}
@@ -18,7 +18,7 @@
 {% from '_partials/_breadcrumb.html' import breadcrumb %}
 {% from '_partials/_trip_card.html' import trip_card %}
 {% from '_partials/_stats_strip.html' import stats_strip %}
-{% from '_partials/_filter_panel.html' import filter_panel %}
+{% from '_partials/_filter_panel.html' import filter_panel with context %}
 {% from '_partials/_empty_state.html' import empty_state %}
 
 {{ breadcrumb([
