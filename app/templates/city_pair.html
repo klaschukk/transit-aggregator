@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{{ from_city }} → {{ to_city }} — {{ _('city_pair.title_suffix') }} | Prevozni{% endblock %}
-{% block meta_description %}{{ _('city_pair.meta_prefix') }} {{ from_city }} {{ _('city_pair.meta_mid') }} {{ to_city }}? {{ _('city_pair.meta_suffix') }}{% endblock %}
+{% block title %}{{ from_city }} → {{ to_city }} {{ current_year }}: {{ _('city_pair.title_travel') }} | Prevozni{% endblock %}
+{% block meta_description %}{{ _('city_pair.meta_prefix') }} {{ from_city }} {{ _('city_pair.meta_mid') }} {{ to_city }} {{ current_year }}{% if route and route.trip_count %}: {{ route.trip_count }} {{ _('city_pair.departures_word') }}{% endif %}{% if route and route.min_price_rsd %}, {{ _('route_detail.meta_from')|lower }} {{ route.min_price_rsd }} RSD{% endif %}. {{ _('city_pair.meta_cta') }}{% endblock %}
 
 {% block head_extra %}
 {% if route %}

@@ -97,6 +97,7 @@ def create_app(config_name: str | None = None) -> Flask:
                 hreflang_urls[l] = f"{base_url}/{l}{clean_path}"
         hreflang_urls['x-default'] = base_url + clean_path
 
+        from datetime import datetime as _dt
         return {
             '_': _,
             'lang': lang,
@@ -107,6 +108,7 @@ def create_app(config_name: str | None = None) -> Flask:
             'canonical_url': canonical_url,
             'hreflang_urls': hreflang_urls,
             'asset_version': _ASSET_VERSION,
+            'current_year': _dt.utcnow().year,
         }
 
     # Register blueprints

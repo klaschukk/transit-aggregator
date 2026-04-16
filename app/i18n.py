@@ -1153,6 +1153,47 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'From',
         'ru': 'От',
     },
+    # CTR-optimized snippets: title/meta rewrites (2026+)
+    'route_detail.title_departures': {
+        'sr': 'polazaka dnevno',
+        'en': 'departures daily',
+        'ru': 'отправлений в день',
+    },
+    'route_detail.meta_compare_cta': {
+        'sr': 'Uporedi prevoznike i cene besplatno.',
+        'en': 'Compare carriers and prices for free.',
+        'ru': 'Сравните перевозчиков и цены бесплатно.',
+    },
+    'city_pair.title_travel': {
+        'sr': 'autobus, voz, cene',
+        'en': 'bus, train, prices',
+        'ru': 'автобус, поезд, цены',
+    },
+    'city_pair.meta_cta': {
+        'sr': 'Uporedi polaske, cene i vreme putovanja. Besplatno.',
+        'en': 'Compare departures, prices and travel time. Free.',
+        'ru': 'Сравните отправления, цены и время в пути. Бесплатно.',
+    },
+    'line_detail.title_line_city': {
+        'sr': 'stanice i red vožnje',
+        'en': 'stops and schedule',
+        'ru': 'остановки и расписание',
+    },
+    'line_detail.meta_eta': {
+        'sr': 'Karta linije, sve stanice i uživo dolasci.',
+        'en': 'Line map, all stops and live arrivals.',
+        'ru': 'Карта линии, все остановки и прибытия онлайн.',
+    },
+    'stop_detail.title_stop_city': {
+        'sr': 'linije i polasci',
+        'en': 'lines and departures',
+        'ru': 'линии и отправления',
+    },
+    'stop_detail.meta_eta': {
+        'sr': 'Sve linije, prvi i poslednji polazak, uživo ETA na karti.',
+        'en': 'All lines, first and last departure, live ETA on the map.',
+        'ru': 'Все линии, первый и последний рейс, онлайн-ETA на карте.',
+    },
 
     # ── search_results.html ──
     'search_results.meta_from': {
