@@ -152,10 +152,11 @@ def stop_detail(city: str, stop_slug: str):
             )
             if alt:
                 return redirect(url_for('city.stop_detail', city=city, stop_slug=norm), code=301)
-        # Legacy URLs from a prior DB state (cyrillic or triple-dash
-        # artefacts) won't come back — 410 Gone tells Google to drop them
-        # permanently. Clean ASCII misses stay 404 (may be typos).
-        if not stop_slug.isascii() or '---' in stop_slug:
+        # Legacy URLs from a prior DB state (cyrillic, triple-dash, or
+        # numeric-only scraper artefacts like "/stajaliste/1/") won't come
+        # back — 410 Gone tells Google to drop them permanently. Clean
+        # ASCII misses stay 404 (may be typos).
+        if not stop_slug.isascii() or '---' in stop_slug or stop_slug.isdigit():
             abort(410)
         abort(404)
 
