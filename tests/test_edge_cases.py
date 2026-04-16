@@ -8,9 +8,12 @@ import pytest
 # ── Cyrillic and unicode in URLs ──
 
 
-def test_cyrillic_slug_returns_404(client):
-    resp = client.get("/gradski/beograd/stajaliste/трг-републике/")
-    assert resp.status_code in (200, 404), f"Got {resp.status_code}"
+def test_cyrillic_slug_returns_410_or_redirect(client):
+    # Cyrillic stop slugs either 301-redirect to the Latin canonical (if the
+    # stop exists under a transliterated slug) or 410 Gone (legacy URL — tells
+    # Google to drop it permanently). 200 is allowed for the redirect target.
+    resp = client.get("/gradski/beograd/stajaliste/трг-републике/", follow_redirects=False)
+    assert resp.status_code in (200, 301, 410), f"Got {resp.status_code}"
 
 
 def test_unicode_route_slug(client):

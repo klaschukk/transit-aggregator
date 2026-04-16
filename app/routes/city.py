@@ -1,8 +1,9 @@
 from datetime import datetime
 
-from flask import Blueprint, render_template, abort, request, jsonify
+from flask import Blueprint, render_template, abort, request, jsonify, redirect, url_for
 from app.db import query, query_one, cached_query, cached_query_one, db_ready
 from app.extensions import limiter
+from app.slug import normalize_slug
 
 city_bp = Blueprint('city', __name__)
 
@@ -71,6 +72,14 @@ def line_detail(city: str, line_slug: str):
     """, [city, line_slug]) if db_ready() else None
 
     if not line:
+        norm = normalize_slug(line_slug)
+        if norm and norm != line_slug:
+            alt = query_one(
+                "SELECT slug FROM city_lines WHERE city = ? AND slug = ?",
+                [city, norm],
+            )
+            if alt:
+                return redirect(url_for('city.line_detail', city=city, line_slug=norm), code=301)
         abort(404)
 
     stops = query("""
@@ -132,6 +141,18 @@ def stop_detail(city: str, stop_slug: str):
     """, [city, stop_slug]) if db_ready() else None
 
     if not stop:
+        norm = normalize_slug(stop_slug)
+        if norm and norm != stop_slug:
+            alt = query_one(
+                "SELECT slug FROM city_stops WHERE city = ? AND slug = ?",
+                [city, norm],
+            )
+            if alt:
+                return redirect(url_for('city.stop_detail', city=city, stop_slug=norm), code=301)
+        # Non-ASCII slugs are legacy URLs from a prior DB state — 410 Gone
+        # tells Google to drop them permanently (faster than 404).
+        if not stop_slug.isascii():
+            abort(410)
         abort(404)
 
     # Lines serving this stop via city_line_stops

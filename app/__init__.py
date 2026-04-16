@@ -160,6 +160,11 @@ def create_app(config_name: str | None = None) -> Flask:
     def not_found(e):
         return render_template('404.html'), 404
 
+    @app.errorhandler(410)
+    def gone(e):
+        # Signal permanent removal so Google drops the URL faster than 404.
+        return render_template('404.html'), 410
+
     @app.errorhandler(500)
     def server_error(e):
         return render_template('500.html'), 500

@@ -246,7 +246,7 @@ def sitemap():
             HAVING COUNT(DISTINCT cls.line_id) >= 2
         """, ttl=3600)
         for s in stops:
-            pages.append(url(f'/gradski/{s["city"]}/stajaliste/{s["slug"]}/', 'weekly', '0.4'))
+            pages.append(url(f'/gradski/{s["city"]}/stajaliste/{s["slug"]}/', 'monthly', '0.2'))
 
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
