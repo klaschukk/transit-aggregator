@@ -30,9 +30,15 @@ def city_index():
     return render_template('city_index.html', cities=cities)
 
 
+_SUPPORTED_CITIES = ('beograd', 'novi-sad', 'nis', 'kragujevac')
+
+
 @city_bp.route('/gradski/<city>/')
 def city_hub(city: str):
-    if city not in ('beograd', 'novi-sad', 'nis', 'kragujevac'):
+    if city not in _SUPPORTED_CITIES:
+        norm = normalize_slug(city)
+        if norm in _SUPPORTED_CITIES and norm != city:
+            return redirect(url_for('city.city_hub', city=norm), code=301)
         abort(404)
 
     lines = cached_query("""
@@ -65,6 +71,16 @@ def city_hub(city: str):
 
 @city_bp.route('/gradski/<city>/linija/<line_slug>/')
 def line_detail(city: str, line_slug: str):
+    # Canonicalize both path segments before DB lookup: cyrillic/uppercase/
+    # diacritic variants redirect to the ASCII canonical form.
+    city_norm = city if city in _SUPPORTED_CITIES else normalize_slug(city)
+    line_norm = normalize_slug(line_slug)
+    if (city_norm, line_norm) != (city, line_slug) and city_norm in _SUPPORTED_CITIES and line_norm:
+        return redirect(
+            url_for('city.line_detail', city=city_norm, line_slug=line_norm),
+            code=301,
+        )
+
     line = query_one("""
         SELECT id, city, number, name, slug, color, code, type
         FROM city_lines
@@ -72,16 +88,8 @@ def line_detail(city: str, line_slug: str):
     """, [city, line_slug]) if db_ready() else None
 
     if not line:
-        norm = normalize_slug(line_slug)
-        if norm and norm != line_slug:
-            alt = query_one(
-                "SELECT slug FROM city_lines WHERE city = ? AND slug = ?",
-                [city, norm],
-            )
-            if alt:
-                return redirect(url_for('city.line_detail', city=city, line_slug=norm), code=301)
         # Non-ASCII legacy URLs → 410 Gone (Google drops permanently).
-        if not line_slug.isascii():
+        if not line_slug.isascii() or '---' in line_slug:
             abort(410)
         abort(404)
 
@@ -137,6 +145,14 @@ def line_detail(city: str, line_slug: str):
 
 @city_bp.route('/gradski/<city>/stajaliste/<stop_slug>/')
 def stop_detail(city: str, stop_slug: str):
+    city_norm = city if city in _SUPPORTED_CITIES else normalize_slug(city)
+    stop_norm = normalize_slug(stop_slug)
+    if (city_norm, stop_norm) != (city, stop_slug) and city_norm in _SUPPORTED_CITIES and stop_norm:
+        return redirect(
+            url_for('city.stop_detail', city=city_norm, stop_slug=stop_norm),
+            code=301,
+        )
+
     stop = query_one("""
         SELECT id, city, name, slug, lat, lon, code
         FROM city_stops
@@ -144,14 +160,6 @@ def stop_detail(city: str, stop_slug: str):
     """, [city, stop_slug]) if db_ready() else None
 
     if not stop:
-        norm = normalize_slug(stop_slug)
-        if norm and norm != stop_slug:
-            alt = query_one(
-                "SELECT slug FROM city_stops WHERE city = ? AND slug = ?",
-                [city, norm],
-            )
-            if alt:
-                return redirect(url_for('city.stop_detail', city=city, stop_slug=norm), code=301)
         # Legacy URLs from a prior DB state (cyrillic, triple-dash, or
         # numeric-only scraper artefacts like "/stajaliste/1/") won't come
         # back — 410 Gone tells Google to drop them permanently. Clean
