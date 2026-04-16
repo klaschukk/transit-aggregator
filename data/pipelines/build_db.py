@@ -132,8 +132,42 @@ def build() -> None:
         print("No scraped data found — loading sample data...")
         _load_sample_data(conn)
 
+    _verify_slug_invariant(conn)
+
     conn.close()
     print(f"Built {DB_PATH} successfully")
+
+
+def _verify_slug_invariant(conn: duckdb.DuckDBPyConnection) -> None:
+    """Fail the build if any slug in public URL tables is non-ASCII.
+
+    Non-ASCII slugs leak into sitemap.xml → Google indexes them → the URL
+    later 404s when the DB is rebuilt with a different transliteration,
+    costing crawl budget. Guard at the build boundary: each scraper may
+    drift independently, but the DB must never ship mojibake.
+    """
+    checks = [
+        ('city_stops', 'slug'),
+        ('city_lines', 'slug'),
+        ('routes', 'slug'),
+        ('routes', 'from_city_slug'),
+        ('routes', 'to_city_slug'),
+    ]
+    offenders: list[tuple[str, str, str]] = []
+    for table, col in checks:
+        rows = conn.execute(
+            f"SELECT {col} FROM {table} WHERE {col} !~ '^[a-z0-9-]+$' LIMIT 5"
+        ).fetchall()
+        for (slug,) in rows:
+            offenders.append((table, col, slug))
+    if offenders:
+        raise RuntimeError(
+            "non-ASCII slugs detected — refusing to ship a DB that would "
+            "produce broken sitemap URLs:\n  " + "\n  ".join(
+                f"{t}.{c} = {s!r}" for t, c, s in offenders
+            )
+        )
+    print("slug invariant: all URL slugs are ASCII ✓")
 
 
 def _create_schema(conn: duckdb.DuckDBPyConnection) -> None:
