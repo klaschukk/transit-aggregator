@@ -10,11 +10,15 @@ Usage: python -u data/pipelines/scrape_balkan.py
 """
 import json
 import re
+import sys
 import time
 from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from app.slug import normalize_slug  # noqa: E402
 
 RAW_DIR = Path(__file__).parent.parent / 'raw'
 
@@ -81,11 +85,12 @@ CITY_SLUG_MAP = {
 
 
 def to_slug(city: str) -> str:
-    return CITY_SLUG_MAP.get(city, city.lower().replace(' ', '-')
-                             .replace('š', 's').replace('č', 'c')
-                             .replace('ć', 'c').replace('ž', 'z')
-                             .replace('đ', 'dj').replace('ș', 's')
-                             .replace('ț', 't'))
+    """Manual map for known cities (for GetByBus URL compatibility), with
+    unified normalize_slug as the fallback — prevents drift that caused
+    ~171 stale URLs when different scrapers used different maps."""
+    if city in CITY_SLUG_MAP:
+        return CITY_SLUG_MAP[city]
+    return normalize_slug(city)
 
 
 def search_getbybus(from_city: str, to_city: str) -> dict | None:

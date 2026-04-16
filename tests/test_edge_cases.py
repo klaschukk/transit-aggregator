@@ -17,13 +17,17 @@ def test_cyrillic_slug_returns_410_or_redirect(client):
 
 
 def test_unicode_route_slug(client):
-    resp = client.get("/rute/београд-нови-сад/")
-    assert resp.status_code in (200, 404)
+    # Cyrillic route slug either 301-redirects to the Latin canonical form
+    # (when the route exists) or 410 Gone (legacy, non-ASCII).
+    resp = client.get("/rute/београд-нови-сад/", follow_redirects=False)
+    assert resp.status_code in (200, 301, 410)
 
 
 def test_emoji_in_url(client):
+    # Emoji is non-ASCII → 410 Gone. Flask may also reject with 400 if the
+    # URL fails validation upstream; 404 if the emoji normalizes to empty.
     resp = client.get("/rute/🚌/")
-    assert resp.status_code in (400, 404)
+    assert resp.status_code in (400, 404, 410)
 
 
 # ── Very long inputs ──
@@ -118,8 +122,11 @@ def test_double_slash(client):
 
 
 def test_url_with_spaces(client):
-    resp = client.get("/rute/beograd%20novi%20sad/")
-    assert resp.status_code in (200, 404)
+    # URL-encoded spaces decode to literal spaces, which normalize to dashes
+    # ("beograd novi sad" → "beograd-novi-sad"). If that slug exists we 301
+    # to the canonical form; otherwise 404.
+    resp = client.get("/rute/beograd%20novi%20sad/", follow_redirects=False)
+    assert resp.status_code in (200, 301, 404)
 
 
 def test_trailing_junk(client):

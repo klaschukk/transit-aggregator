@@ -80,6 +80,9 @@ def line_detail(city: str, line_slug: str):
             )
             if alt:
                 return redirect(url_for('city.line_detail', city=city, line_slug=norm), code=301)
+        # Non-ASCII legacy URLs → 410 Gone (Google drops permanently).
+        if not line_slug.isascii():
+            abort(410)
         abort(404)
 
     stops = query("""
@@ -149,9 +152,10 @@ def stop_detail(city: str, stop_slug: str):
             )
             if alt:
                 return redirect(url_for('city.stop_detail', city=city, stop_slug=norm), code=301)
-        # Non-ASCII slugs are legacy URLs from a prior DB state — 410 Gone
-        # tells Google to drop them permanently (faster than 404).
-        if not stop_slug.isascii():
+        # Legacy URLs from a prior DB state (cyrillic or triple-dash
+        # artefacts) won't come back — 410 Gone tells Google to drop them
+        # permanently. Clean ASCII misses stay 404 (may be typos).
+        if not stop_slug.isascii() or '---' in stop_slug:
             abort(410)
         abort(404)
 

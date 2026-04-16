@@ -11,10 +11,17 @@ Falls back to sample data if raw files are missing.
 """
 import json
 import re
+import sys
 from pathlib import Path
 
 import duckdb
 import contextlib
+
+# Share the one true slug function with the request-time code path
+# (app/slug.py). All pipelines must go through this — otherwise drift
+# between transliteration maps leaks non-ASCII slugs into the DB.
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from app.slug import normalize_slug  # noqa: E402
 
 BASE_DIR = Path(__file__).parent.parent
 RAW_DIR = BASE_DIR / 'raw'
@@ -63,23 +70,8 @@ def get_distance(from_city: str, to_city: str) -> int:
 
 
 def city_to_slug(city: str) -> str:
-    """Convert city name (Latin or Cyrillic) to URL slug."""
-    cyrillic = {
-        'а':'a','б':'b','в':'v','г':'g','д':'d','ђ':'d','е':'e','ж':'z',
-        'з':'z','и':'i','ј':'j','к':'k','л':'l','љ':'lj','м':'m','н':'n',
-        'њ':'nj','о':'o','п':'p','р':'r','с':'s','т':'t','ћ':'c','у':'u',
-        'ф':'f','х':'h','ц':'c','ч':'c','џ':'dz','ш':'s',
-        'А':'a','Б':'b','В':'v','Г':'g','Д':'d','Ђ':'d','Е':'e','Ж':'z',
-        'З':'z','И':'i','Ј':'j','К':'k','Л':'l','Љ':'lj','М':'m','Н':'n',
-        'Њ':'nj','О':'o','П':'p','Р':'r','С':'s','Т':'t','Ћ':'c','У':'u',
-        'Ф':'f','Х':'h','Ц':'c','Ч':'c','Џ':'dz','Ш':'s',
-        'š': 's', 'đ': 'd', 'ž': 'z', 'ć': 'c', 'č': 'c',
-        'Š': 's', 'Đ': 'd', 'Ž': 'z', 'Ć': 'c', 'Č': 'c',
-    }
-    result = ''
-    for ch in city.lower():
-        result += cyrillic.get(ch, ch)
-    return re.sub(r'[^a-z0-9]+', '-', result).strip('-')
+    """Backwards-compatible alias — single source of truth is app.slug."""
+    return normalize_slug(city)
 
 
 def type_color(line_type: str) -> str:

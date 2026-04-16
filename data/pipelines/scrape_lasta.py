@@ -14,11 +14,15 @@ Output: data/raw/lasta/routes.json  (nested format)
 import json
 import logging
 import re
+import sys
 import time
 from datetime import date, timedelta
 from pathlib import Path
 
 import requests
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from app.slug import normalize_slug  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s %(message)s')
 log = logging.getLogger(__name__)
@@ -161,12 +165,13 @@ def _build_pairs() -> list[tuple[str, str]]:
 
 
 def _city_to_slug(name: str) -> str:
-    """Convert city name to URL-safe slug."""
-    replacements = {'š': 's', 'đ': 'dj', 'ž': 'z', 'ć': 'c', 'č': 'c'}
-    result = name.lower()
-    for k, v in replacements.items():
-        result = result.replace(k, v)
-    return re.sub(r'[^a-z0-9]+', '-', result).strip('-')
+    """Unified slug — single source of truth is app.slug.normalize_slug.
+
+    The previous local implementation did not handle cyrillic at all —
+    if Lasta ever returned a cyrillic city name, a raw cyrillic slug
+    would land in the output JSON and later in city_stops.slug.
+    """
+    return normalize_slug(name)
 
 
 # ── Scraping ──────────────────────────────────────────────────────────────

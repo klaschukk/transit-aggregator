@@ -12,11 +12,15 @@ Usage:
 import argparse
 import logging
 import re
+import sys
 import zipfile
 from pathlib import Path
 
 import duckdb
 import requests
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from app.slug import normalize_slug  # noqa: E402
 
 GTFS_URL = (
     'https://data.gov.rs/s/resources/gradski-javni-prevoz-u-beogradu-gtfs/'
@@ -46,16 +50,13 @@ LINE_COLORS = {
 
 
 def slug(text: str) -> str:
-    cyrillic = {
-        'а':'a','б':'b','в':'v','г':'g','д':'d','ђ':'dj','е':'e','ж':'z',
-        'з':'z','и':'i','ј':'j','к':'k','л':'l','љ':'lj','м':'m','н':'n',
-        'њ':'nj','о':'o','п':'p','р':'r','с':'s','т':'t','ћ':'c','у':'u',
-        'ф':'f','х':'h','ц':'c','ч':'c','џ':'dz','ш':'s',
-    }
-    result = ''
-    for ch in text.lower():
-        result += cyrillic.get(ch, ch)
-    return re.sub(r'[^a-z0-9]+', '-', result).strip('-')
+    """Unified slug — single source of truth is app.slug.normalize_slug.
+
+    The previous local implementation mapped ђ → 'dj' while build_db.py
+    used ђ → 'd'. That drift caused ~171 legacy cyrillic URLs to drop
+    from the index as 404s after a GTFS re-import.
+    """
+    return normalize_slug(text)
 
 
 def download_gtfs(dest_zip: Path) -> None:

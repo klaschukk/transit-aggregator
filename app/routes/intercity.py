@@ -1,7 +1,8 @@
 from datetime import date, timedelta
 
-from flask import Blueprint, render_template, abort, request
+from flask import Blueprint, render_template, abort, request, redirect, url_for
 from app.db import query, query_one, cached_query, db_ready
+from app.slug import normalize_slug
 
 intercity_bp = Blueprint('intercity', __name__)
 
@@ -35,6 +36,17 @@ def route_detail(slug: str):
     """, [slug]) if db_ready() else None
 
     if not route:
+        norm = normalize_slug(slug)
+        if norm and norm != slug:
+            alt = query_one(
+                "SELECT slug FROM routes WHERE slug = ? AND type = 'intercity'",
+                [norm],
+            )
+            if alt:
+                return redirect(url_for('intercity.route_detail', slug=norm), code=301)
+        # Non-ASCII legacy URLs → 410 Gone (faster Google removal than 404).
+        if not slug.isascii():
+            abort(410)
         abort(404)
 
     trips = query("""
@@ -91,6 +103,15 @@ def route_detail(slug: str):
 
 @intercity_bp.route('/voznja/<from_city>-do-<to_city>/')
 def city_pair(from_city: str, to_city: str):
+    # Canonical redirect: uppercase or cyrillic URL → lowercase Latin.
+    from_norm = normalize_slug(from_city)
+    to_norm = normalize_slug(to_city)
+    if (from_norm, to_norm) != (from_city, to_city) and from_norm and to_norm:
+        return redirect(
+            url_for('intercity.city_pair', from_city=from_norm, to_city=to_norm),
+            code=301,
+        )
+
     route = query_one("""
         SELECT r.id, r.slug, r.from_city, r.to_city, r.distance_km, r.type,
                COUNT(DISTINCT t.id) as trip_count,

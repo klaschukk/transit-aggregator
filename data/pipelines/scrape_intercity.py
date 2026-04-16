@@ -17,11 +17,15 @@ Format: [{from_city, to_city, slug, distance_km, trips: [
 import json
 import logging
 import re
+import sys
 import time
 from datetime import date, timedelta
 from pathlib import Path
 
 import requests
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from app.slug import normalize_slug  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s %(message)s')
 log = logging.getLogger(__name__)
@@ -258,9 +262,8 @@ def _normalize(name: str) -> str:
 
 
 def _city_to_slug(name: str) -> str:
-    """Convert city name to URL slug."""
-    norm = _normalize(name)
-    return re.sub(r'[^a-z0-9]+', '-', norm).strip('-')
+    """Unified slug — single source of truth is app.slug.normalize_slug."""
+    return normalize_slug(name)
 
 
 def _get_distance(from_city: str, to_city: str) -> int:
