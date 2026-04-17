@@ -36,6 +36,14 @@ INTL = {
     'Timisoara': (6440, 174),
 }
 
+# Group cities by country_id so we can enumerate intra-country pairs
+# (Herceg Novi → Budva, Sarajevo → Mostar, Zagreb → Split, …) — without
+# these, pair-search pages for common domestic rides in neighbouring
+# countries show "no results" even when trips exist.
+_COUNTRY_GROUPS: dict[int, list[str]] = {}
+for _name, (_code, _country) in INTL.items():
+    _COUNTRY_GROUPS.setdefault(_country, []).append(_name)
+
 
 def load_sr_ids():
     """Load Serbian city IDs from existing cache."""
@@ -114,18 +122,33 @@ def main():
             pairs.append((sr_name, sr_code, sr_country, intl_name, intl_code, intl_country))
             pairs.append((intl_name, intl_code, intl_country, sr_name, sr_code, sr_country))
 
-    # Key international ↔ international
-    cross = [
-        ('Podgorica', 'Budva'), ('Budva', 'Kotor'), ('Herceg Novi', 'Kotor'),
-        ('Sarajevo', 'Mostar'), ('Sarajevo', 'Dubrovnik'), ('Zagreb', 'Split'),
-        ('Split', 'Dubrovnik'), ('Mostar', 'Dubrovnik'),
-    ]
+    # Intra-country combos (Montenegro ↔ Montenegro, BiH ↔ BiH, etc.)
+    # plus a curated cross-country list for popular tourist corridors.
+    cross: set[tuple[str, str]] = set()
+    for cities_in_country in _COUNTRY_GROUPS.values():
+        if len(cities_in_country) < 2:
+            continue
+        for a in cities_in_country:
+            for b in cities_in_country:
+                if a != b:
+                    cross.add((a, b))
+
+    # Cross-country popular corridors (tourists, Serbian diaspora)
+    cross.update({
+        ('Sarajevo', 'Dubrovnik'), ('Dubrovnik', 'Sarajevo'),
+        ('Sarajevo', 'Mostar'),    ('Mostar', 'Sarajevo'),
+        ('Mostar', 'Dubrovnik'),   ('Dubrovnik', 'Mostar'),
+        ('Split', 'Sarajevo'),     ('Sarajevo', 'Split'),
+        ('Podgorica', 'Sarajevo'), ('Sarajevo', 'Podgorica'),
+        ('Budva', 'Dubrovnik'),    ('Dubrovnik', 'Budva'),
+        ('Herceg Novi', 'Dubrovnik'), ('Dubrovnik', 'Herceg Novi'),
+    })
+
     for a, b in cross:
         if a in INTL and b in INTL:
             ac, acountry = INTL[a]
             bc, bcountry = INTL[b]
             pairs.append((a, ac, acountry, b, bc, bcountry))
-            pairs.append((b, bc, bcountry, a, ac, acountry))
 
     log.info(f'Pairs: {len(pairs)}, date: {dt}')
 
