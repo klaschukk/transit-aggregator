@@ -212,6 +212,9 @@ def sitemap():
         url('/rute/', 'weekly', '0.8'),
         url('/gradski/', 'weekly', '0.7'),
         url('/gradski/beograd/', 'weekly', '0.8'),
+        url('/gradski/novi-sad/', 'weekly', '0.7'),
+        url('/gradski/nis/', 'weekly', '0.7'),
+        url('/gradski/kragujevac/', 'weekly', '0.7'),
         url('/prevoznici/', 'monthly', '0.5'),
         url('/autobuske-stanice/', 'monthly', '0.5'),
         url('/destinacije/', 'weekly', '0.7'),
@@ -221,13 +224,24 @@ def sitemap():
     ]
 
     if db_ready():
-        # Intercity routes (all have trips — verified)
-        routes = cached_query("SELECT slug FROM routes WHERE type = 'intercity'", ttl=3600)
+        # Intercity routes — only those with real trips. Routes with 0 trips
+        # are noindex'd at render time, so including them here wastes crawl
+        # budget and signals "indexable" when the page says otherwise.
+        routes = cached_query("""
+            SELECT r.slug FROM routes r
+            WHERE r.type = 'intercity'
+              AND EXISTS (SELECT 1 FROM trips t WHERE t.route_id = r.id AND t.price_rsd > 0)
+        """, ttl=3600)
         for r in routes:
             pages.append(url(f'/rute/{r["slug"]}/', 'daily', '0.7'))
 
-        # SEO city-pair pages
-        routes2 = cached_query("SELECT from_city_slug, to_city_slug FROM routes WHERE type = 'intercity'", ttl=3600)
+        # SEO city-pair pages — same trips filter: city_pair is noindex when
+        # `not route or not trips`, so don't advertise empty pairs.
+        routes2 = cached_query("""
+            SELECT r.from_city_slug, r.to_city_slug FROM routes r
+            WHERE r.type = 'intercity'
+              AND EXISTS (SELECT 1 FROM trips t WHERE t.route_id = r.id AND t.price_rsd > 0)
+        """, ttl=3600)
         for r in routes2:
             pages.append(url(f'/voznja/{r["from_city_slug"]}-do-{r["to_city_slug"]}/', 'weekly', '0.6'))
 

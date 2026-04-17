@@ -208,8 +208,11 @@ def test_unknown_city(client):
 
 
 def test_city_case_sensitive(client):
-    resp = client.get("/gradski/BEOGRAD/")
-    assert resp.status_code == 404  # slugs are lowercase
+    # UPPERCASE city segment 301-redirects to the lowercase canonical form.
+    # Final lowercase URL is the indexable one; 301 is the signal to Google.
+    resp = client.get("/gradski/BEOGRAD/", follow_redirects=False)
+    assert resp.status_code == 301
+    assert resp.headers.get("Location", "").endswith("/gradski/beograd/")
 
 
 def test_city_pair_nonexistent(client):

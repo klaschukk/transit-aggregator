@@ -3,6 +3,11 @@
 {% block meta_description %}{{ _('carriers.meta') }} {{ operators|length }} {{ _('carriers.count_suffix') }}.{% endblock %}
 
 {% block head_extra %}
+{% if page and page > 1 %}
+{# Paginated pages share canonical with page 1 → noindex them to avoid
+   duplicate-canonical flags in GSC. Links still followed for discovery. #}
+<meta name="robots" content="noindex, follow">
+{% endif %}
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"ItemList","name":"Prevoznici u Srbiji","numberOfItems":{{ operators|length }},"itemListElement":[{% for op in operators %}{"@type":"ListItem","position":{{ loop.index }},"item":{"@type":"Organization","name":"{{ op.name }}"{% if op.website %},"url":"{{ op.website }}"{% endif %}}}{% if not loop.last %},{% endif %}{% endfor %}]}
 </script>
