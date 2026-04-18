@@ -124,17 +124,17 @@ def test_health_db_true(client):
 
 
 def test_sitemap_has_line_urls(client):
-    xml = client.get("/sitemap.xml").data.decode()
+    xml = client.get("/sitemap-lines.xml").data.decode()
     assert "/linija/" in xml
 
 
 def test_sitemap_has_stop_urls(client):
-    xml = client.get("/sitemap.xml").data.decode()
+    xml = client.get("/sitemap-stops.xml").data.decode()
     assert "/stajaliste/" in xml
 
 
 def test_sitemap_has_city_pair_urls(client):
-    xml = client.get("/sitemap.xml").data.decode()
+    xml = client.get("/sitemap-pairs.xml").data.decode()
     assert "/voznja/" in xml
 
 

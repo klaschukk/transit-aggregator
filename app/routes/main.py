@@ -171,19 +171,41 @@ def health():
     }), code
 
 
-@main_bp.route('/sitemap.xml')
-def sitemap():
-    """Generate sitemap with lastmod, proper priorities, filtered stops."""
-    from pathlib import Path
-    base = current_app.config['BASE_URL']
+# ── Sitemap helpers ───────────────────────────────────────────────────
+#
+# Sitemap is split into one index + five shards (core / routes / pairs /
+# lines / stops). Google reports indexation per-sitemap, so separate shards
+# let us see which content type is stuck in "Discovered not indexed"
+# instead of staring at one aggregate number. Each shard is also smaller
+# and refetched independently when its content changes — nightly data
+# refresh only bumps the lastmod on routes/pairs/stops, not core.
 
-    # DB lastmod: use file modification time
+
+def _sitemap_lastmod() -> str:
+    from pathlib import Path
     db_path = Path(current_app.config['DUCKDB_PATH'])
     if db_path.exists():
-        lastmod = datetime.fromtimestamp(db_path.stat().st_mtime).strftime('%Y-%m-%d')
-    else:
-        lastmod = datetime.now().strftime('%Y-%m-%d')
+        return datetime.fromtimestamp(db_path.stat().st_mtime).strftime('%Y-%m-%d')
+    return datetime.now().strftime('%Y-%m-%d')
 
+
+def _urlset(pages: list[str]) -> "Response":  # noqa: F821
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+        'xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
+        + '\n'.join(pages)
+        + '\n</urlset>'
+    )
+    resp = make_response(xml)
+    resp.headers['Content-Type'] = 'application/xml'
+    resp.headers['Cache-Control'] = 'public, max-age=3600'
+    return resp
+
+
+def _build_url_fn(base: str, lastmod: str):
+    """Return an `url(loc, freq, prio)` fn that emits one <url> per language
+    with full hreflang alternates. Shared by every sitemap shard."""
     from app.i18n import SUPPORTED_LANGS, DEFAULT_LANG
 
     def _loc_for(lang: str, loc: str) -> str:
@@ -192,21 +214,56 @@ def sitemap():
         return f'{base}/{lang}{loc}'
 
     def url(loc: str, freq: str, prio: str, mod: str = lastmod) -> str:
-        # Emit one <url> per language, each with hreflang alternates (sr/en/ru + x-default).
         alternates = ''.join(
             f'<xhtml:link rel="alternate" hreflang="{l}" href="{_loc_for(l, loc)}"/>'
             for l in SUPPORTED_LANGS
         )
-        alternates += f'<xhtml:link rel="alternate" hreflang="x-default" href="{_loc_for(DEFAULT_LANG, loc)}"/>'
+        alternates += (
+            f'<xhtml:link rel="alternate" hreflang="x-default" '
+            f'href="{_loc_for(DEFAULT_LANG, loc)}"/>'
+        )
         parts = []
         for l in SUPPORTED_LANGS:
             parts.append(
                 f'<url><loc>{_loc_for(l, loc)}</loc>'
-                f'<lastmod>{mod}</lastmod><changefreq>{freq}</changefreq><priority>{prio}</priority>'
-                f'{alternates}</url>'
+                f'<lastmod>{mod}</lastmod><changefreq>{freq}</changefreq>'
+                f'<priority>{prio}</priority>{alternates}</url>'
             )
         return ''.join(parts)
 
+    return url
+
+
+@main_bp.route('/sitemap.xml')
+def sitemap_index():
+    """Sitemap-index pointing at the five content-type shards.
+
+    Kept at the canonical /sitemap.xml location so existing GSC submissions
+    and the robots.txt `Sitemap:` line keep working; Google treats an index
+    here identically to a urlset.
+    """
+    base = current_app.config['BASE_URL']
+    lastmod = _sitemap_lastmod()
+    shards = ['core', 'routes', 'pairs', 'lines', 'stops']
+    xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    for shard in shards:
+        xml += (
+            f'<sitemap><loc>{base}/sitemap-{shard}.xml</loc>'
+            f'<lastmod>{lastmod}</lastmod></sitemap>\n'
+        )
+    xml += '</sitemapindex>'
+    resp = make_response(xml)
+    resp.headers['Content-Type'] = 'application/xml'
+    resp.headers['Cache-Control'] = 'public, max-age=3600'
+    return resp
+
+
+@main_bp.route('/sitemap-core.xml')
+def sitemap_core():
+    """Hub/landing pages — home, catalogs, city hubs, about/contact."""
+    base = current_app.config['BASE_URL']
+    url = _build_url_fn(base, _sitemap_lastmod())
     pages = [
         url('/', 'daily', '1.0'),
         url('/rute/', 'weekly', '0.8'),
@@ -222,11 +279,17 @@ def sitemap():
         url('/kontakt/', 'monthly', '0.3'),
         url('/privatnost/', 'monthly', '0.2'),
     ]
+    return _urlset(pages)
 
+
+@main_bp.route('/sitemap-routes.xml')
+def sitemap_routes():
+    """Intercity route-detail pages (/rute/<slug>/). Only routes with real
+    trips — tripless routes are noindex'd at render time."""
+    base = current_app.config['BASE_URL']
+    url = _build_url_fn(base, _sitemap_lastmod())
+    pages: list[str] = []
     if db_ready():
-        # Intercity routes — only those with real trips. Routes with 0 trips
-        # are noindex'd at render time, so including them here wastes crawl
-        # budget and signals "indexable" when the page says otherwise.
         routes = cached_query("""
             SELECT r.slug FROM routes r
             WHERE r.type = 'intercity'
@@ -234,23 +297,54 @@ def sitemap():
         """, ttl=3600)
         for r in routes:
             pages.append(url(f'/rute/{r["slug"]}/', 'daily', '0.7'))
+    return _urlset(pages)
 
-        # SEO city-pair pages — same trips filter: city_pair is noindex when
-        # `not route or not trips`, so don't advertise empty pairs.
-        routes2 = cached_query("""
+
+@main_bp.route('/sitemap-pairs.xml')
+def sitemap_pairs():
+    """SEO city-pair pages (/voznja/<from>-do-<to>/). Same trips filter."""
+    base = current_app.config['BASE_URL']
+    url = _build_url_fn(base, _sitemap_lastmod())
+    pages: list[str] = []
+    if db_ready():
+        pairs = cached_query("""
             SELECT r.from_city_slug, r.to_city_slug FROM routes r
             WHERE r.type = 'intercity'
               AND EXISTS (SELECT 1 FROM trips t WHERE t.route_id = r.id AND t.price_rsd > 0)
         """, ttl=3600)
-        for r in routes2:
-            pages.append(url(f'/voznja/{r["from_city_slug"]}-do-{r["to_city_slug"]}/', 'weekly', '0.6'))
+        for r in pairs:
+            pages.append(
+                url(f'/voznja/{r["from_city_slug"]}-do-{r["to_city_slug"]}/',
+                    'weekly', '0.6')
+            )
+    return _urlset(pages)
 
-        # City lines
+
+@main_bp.route('/sitemap-lines.xml')
+def sitemap_lines():
+    """City transit line-detail pages (/gradski/<city>/linija/<slug>/)."""
+    base = current_app.config['BASE_URL']
+    url = _build_url_fn(base, _sitemap_lastmod())
+    pages: list[str] = []
+    if db_ready():
         lines = cached_query("SELECT city, slug FROM city_lines", ttl=3600)
         for line in lines:
-            pages.append(url(f'/gradski/{line["city"]}/linija/{line["slug"]}/', 'weekly', '0.5'))
+            pages.append(
+                url(f'/gradski/{line["city"]}/linija/{line["slug"]}/',
+                    'weekly', '0.5')
+            )
+    return _urlset(pages)
 
-        # Stops: only those with 2+ lines AND coordinates (meaningful content)
+
+@main_bp.route('/sitemap-stops.xml')
+def sitemap_stops():
+    """City stop-detail pages (/gradski/<city>/stajaliste/<slug>/). Only
+    stops with 2+ lines AND coordinates — thin single-line stops stay out
+    of the index to save crawl budget."""
+    base = current_app.config['BASE_URL']
+    url = _build_url_fn(base, _sitemap_lastmod())
+    pages: list[str] = []
+    if db_ready():
         stops = cached_query("""
             SELECT DISTINCT cs.slug, cs.city
             FROM city_stops cs
@@ -260,22 +354,46 @@ def sitemap():
             HAVING COUNT(DISTINCT cls.line_id) >= 2
         """, ttl=3600)
         for s in stops:
-            pages.append(url(f'/gradski/{s["city"]}/stajaliste/{s["slug"]}/', 'monthly', '0.2'))
-
-    xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
-    xml += '\n'.join(pages)
-    xml += '\n</urlset>'
-    resp = make_response(xml)
-    resp.headers['Content-Type'] = 'application/xml'
-    resp.headers['Cache-Control'] = 'public, max-age=3600'
-    return resp
+            pages.append(
+                url(f'/gradski/{s["city"]}/stajaliste/{s["slug"]}/',
+                    'monthly', '0.2')
+            )
+    return _urlset(pages)
 
 
 @main_bp.route('/robots.txt')
 def robots():
     base = current_app.config['BASE_URL']
+    # Disallow AI-training crawlers. They don't send traffic back, so
+    # letting them index wastes server resources and exposes original
+    # content (scraped timetables, FAQ prose) to models that won't cite
+    # or link back. Search-engine bots (Google/Bing/Yandex) stay allowed.
+    ai_bots = (
+        'GPTBot',           # OpenAI
+        'ChatGPT-User',     # OpenAI on-demand browsing
+        'OAI-SearchBot',    # OpenAI SearchGPT
+        'ClaudeBot',        # Anthropic
+        'anthropic-ai',     # legacy Anthropic name
+        'Claude-Web',       # legacy Claude web crawler
+        'Google-Extended',  # Google Gemini/Bard training (NOT Googlebot)
+        'CCBot',            # Common Crawl (feeds most open LLMs)
+        'PerplexityBot',    # Perplexity
+        'Bytespider',       # ByteDance / TikTok
+        'Amazonbot',        # Alexa / Amazon AI
+        'cohere-ai',        # Cohere
+        'FacebookBot',      # Meta AI training
+        'Diffbot',          # crawl-for-resale aggregator
+    )
     lines = [
+        '# AI training crawlers — block (no traffic return, content reuse risk)',
+    ]
+    for bot in ai_bots:
+        lines.append(f'User-agent: {bot}')
+        lines.append('Disallow: /')
+        lines.append('')
+
+    lines += [
+        '# All other crawlers (Googlebot, Bingbot, YandexBot, …)',
         'User-agent: *',
         'Allow: /',
         '',

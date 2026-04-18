@@ -23,7 +23,8 @@ def test_privacy_page_ru(client):
 
 
 def test_privacy_in_sitemap(client):
-    resp = client.get("/sitemap.xml")
+    # /privatnost/ is a hub page → lives in the core shard after the split.
+    resp = client.get("/sitemap-core.xml")
     assert b"/privatnost/" in resp.data
 
 

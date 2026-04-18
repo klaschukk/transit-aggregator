@@ -105,15 +105,40 @@ def test_no_none_in_content(client, url):
 # ── Sitemap ──
 
 
-def test_sitemap_url_count(client):
+# /sitemap.xml is now a sitemap-index pointing at five content-type shards.
+# Tests load each shard explicitly instead of expecting one monolithic urlset.
+_SHARDS = [
+    "/sitemap-core.xml",
+    "/sitemap-routes.xml",
+    "/sitemap-pairs.xml",
+    "/sitemap-lines.xml",
+    "/sitemap-stops.xml",
+]
+
+
+def _all_sitemap_xml(client) -> str:
+    """Concatenated XML from every shard — used when a test just wants to
+    assert something about *the full sitemap surface* without caring which
+    shard holds the URL."""
+    return "\n".join(client.get(s).data.decode() for s in _SHARDS)
+
+
+def test_sitemap_index_references_all_shards(client):
     xml = client.get("/sitemap.xml").data.decode()
+    assert "<sitemapindex" in xml
+    for shard in _SHARDS:
+        assert shard in xml, f"sitemap-index is missing shard {shard}"
+
+
+def test_sitemap_url_count(client):
+    xml = _all_sitemap_xml(client)
     count = xml.count("<url>")
-    assert count >= 1000, f"Sitemap has only {count} URLs"
+    assert count >= 1000, f"Sitemap has only {count} URLs across shards"
 
 
 def test_sitemap_consistent_base_url(client):
     """All sitemap URLs should use the same base URL (whatever it is)."""
-    xml = client.get("/sitemap.xml").data.decode()
+    xml = _all_sitemap_xml(client)
     urls = re.findall(r"<loc>([^<]+)</loc>", xml)
     bases = set()
     for u in urls[:20]:
@@ -123,25 +148,26 @@ def test_sitemap_consistent_base_url(client):
 
 
 def test_sitemap_has_routes(client):
-    xml = client.get("/sitemap.xml").data.decode()
+    xml = client.get("/sitemap-routes.xml").data.decode()
     assert "/rute/" in xml
 
 
 def test_sitemap_has_lines(client):
-    xml = client.get("/sitemap.xml").data.decode()
+    xml = client.get("/sitemap-lines.xml").data.decode()
     assert "/linija/" in xml
 
 
 def test_sitemap_has_stops(client):
-    xml = client.get("/sitemap.xml").data.decode()
+    xml = client.get("/sitemap-stops.xml").data.decode()
     assert "/stajaliste/" in xml
 
 
 def test_sitemap_sample_urls_valid(client):
-    """Pick 5 URLs from sitemap and verify they return 200."""
-    xml = client.get("/sitemap.xml").data.decode()
+    """Pick 5 URLs from the combined sitemap shards and verify they 200."""
+    xml = _all_sitemap_xml(client)
     urls = re.findall(r"<loc>([^<]+)</loc>", xml)
-    # Pick evenly spaced samples
+    # Filter out the shard-index URLs themselves
+    urls = [u for u in urls if "/sitemap-" not in u]
     step = max(1, len(urls) // 5)
     for i in range(0, min(len(urls), step * 5), step):
         url = urls[i]

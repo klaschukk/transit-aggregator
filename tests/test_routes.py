@@ -150,12 +150,12 @@ def test_no_none_in_html(client, url):
 
 
 def test_sitemap_has_urls(client):
-    resp = client.get("/sitemap.xml")
+    # /sitemap.xml is now an index of shards; real <url> entries live in
+    # the shards. Pick the largest one (routes) and assert a floor.
+    resp = client.get("/sitemap-routes.xml")
     xml = resp.data.decode()
     url_count = xml.count("<url>")
-    assert url_count > 100, f"Sitemap has only {url_count} URLs"
-    # In production, sitemap should not contain localhost
-    # In test env, BASE_URL is localhost — skip this check
+    assert url_count > 100, f"sitemap-routes.xml has only {url_count} URLs"
 
 
 def test_robots_has_sitemap(client):
