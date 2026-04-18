@@ -1,24 +1,43 @@
 """
 Scrape international bus routes via busticket4.me API.
 
-Output: data/raw/international_routes.json
-Usage: python -u data/pipelines/scrape_international.py
+Reads the bt4 city catalog (built by discover_cities.py) and generates:
+  * Intra-country pairs  — all top-N hub combinations within each non-SR
+                           target country (Sarajevo↔Mostar, Split↔Zagreb, …)
+  * Inter-country pairs  — each country's intl hubs × each neighbor country's
+                           intl hubs (hub-spoke via geographic corridors).
+
+Serbia intra-country pairs are handled by scrape_intercity.py — this script
+covers every other pair touching a non-SR city.
+
+Output: data/raw/international_routes.json (flat; consumed by build_db)
+Usage:  python -u data/pipelines/scrape_international.py
+
+Budget: capped at MAX_PAIRS per run (default 2000) × 1 date, rate-limited to
+0.5s between calls, so a full run is ≲ 20 min.
 """
 import json
 import logging
+import random
+import sys
 import time
 from datetime import date, timedelta
 from pathlib import Path
 
 import requests
 
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from app.slug import normalize_slug  # noqa: E402 — import for future use / parity
+
 logging.basicConfig(level=logging.INFO, format='%(levelname)s %(message)s')
 log = logging.getLogger(__name__)
 
 BASE_URL = 'https://busticket4.me'
 RAW_DIR = Path(__file__).parent.parent / 'raw'
+CATALOG_PATH = RAW_DIR / 'bt4_cities_catalog.json'
 COMPANY_ID = 132
-SERBIA_COUNTRY = 208
+MAX_PAIRS = 2000
+EUR_TO_RSD = 117  # API returns EUR for intl routes; rough display-conversion
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/122.0',
@@ -26,39 +45,83 @@ HEADERS = {
     'Content-Type': 'application/json',
 }
 
-# city → (code, country_id) — verified from API
-INTL = {
-    'Podgorica': (1121, 42), 'Budva': (1139, 42), 'Herceg Novi': (1148, 42),
-    'Kotor': (1150, 42), 'Tivat': (2976, 42),
-    'Sarajevo': (1309, 31), 'Banja Luka': (1283, 31), 'Tuzla': (2089, 31), 'Mostar': (1276, 31),
-    'Zagreb': (1371, 86), 'Split': (1349, 86), 'Dubrovnik': (1346, 86), 'Rijeka': (1352, 86),
-    'Istanbul': (1582, 228), 'Ljubljana': (1730, 195), 'Ohrid': (1557, 128),
-    'Timisoara': (6440, 174),
+# Geographic neighbor graph (ISO2). Inter-country pairs are generated only
+# between neighbors — prevents combinatorial blow-up (6500+ pairs) while
+# still covering every realistic bus corridor. SR connects to all targets
+# (diaspora corridors + tourist ferries).
+NEIGHBORS: dict[str, set[str]] = {
+    'SR': {'ME', 'BA', 'HR', 'MK', 'HU', 'RO', 'BG', 'AL', 'SI', 'TR', 'GR'},
+    'ME': {'SR', 'BA', 'HR', 'AL'},
+    'BA': {'SR', 'HR', 'ME'},
+    'HR': {'SR', 'BA', 'ME', 'SI', 'HU'},
+    'MK': {'SR', 'BG', 'AL', 'GR'},
+    'AL': {'SR', 'ME', 'MK', 'GR'},
+    'SI': {'SR', 'HR', 'HU'},
+    'BG': {'SR', 'MK', 'RO', 'GR', 'TR'},
+    'RO': {'SR', 'HU', 'BG'},
+    'HU': {'SR', 'SI', 'HR', 'RO'},
+    'GR': {'SR', 'MK', 'AL', 'BG', 'TR'},
+    'TR': {'SR', 'BG', 'GR'},
 }
 
-# Group cities by country_id so we can enumerate intra-country pairs
-# (Herceg Novi → Budva, Sarajevo → Mostar, Zagreb → Split, …) — without
-# these, pair-search pages for common domestic rides in neighbouring
-# countries show "no results" even when trips exist.
-_COUNTRY_GROUPS: dict[int, list[str]] = {}
-for _name, (_code, _country) in INTL.items():
-    _COUNTRY_GROUPS.setdefault(_country, []).append(_name)
+
+# ── Catalog loading ───────────────────────────────────────────────────────
+
+def load_catalog() -> dict:
+    if not CATALOG_PATH.exists():
+        raise SystemExit(
+            f'{CATALOG_PATH} not found — run '
+            'python data/pipelines/discover_cities.py first'
+        )
+    with open(CATALOG_PATH, encoding='utf-8') as f:
+        return json.load(f)
 
 
-def load_sr_ids():
-    """Load Serbian city IDs from existing cache."""
-    path = RAW_DIR / 'city_ids.json'
-    if path.exists():
-        with open(path) as f:
-            cache = json.load(f)
-        # Keep cities that have IDs
-        return {name: (cid, SERBIA_COUNTRY) for name, cid in cache.items()
-                if name in ['Beograd', 'Novi Sad', 'Niš', 'Subotica', 'Užice', 'Novi Pazar',
-                            'Kragujevac', 'Čačak', 'Kraljevo', 'Kruševac']}
-    return {}
+def build_pairs(catalog: dict) -> list[tuple[str, str]]:
+    """Return ordered city-pair list.
+
+    Intra-country non-SR: every (hub_a, hub_b) with a != b per country.
+    Inter-country: every pair (a, b) where a∈intl_hubs[A], b∈intl_hubs[B],
+    and B is a geographic neighbor of A. Both directions produced.
+    """
+    hubs_intra = catalog['hubs_intra']
+    hubs_intl = catalog['hubs_intl']
+    cities = catalog['cities']
+
+    pairs: set[tuple[str, str]] = set()
+
+    # Intra-country (skip SR — covered by scrape_intercity)
+    for cc, hubs in hubs_intra.items():
+        if cc == 'SR':
+            continue
+        valid = [h for h in hubs if h in cities]
+        for a in valid:
+            for b in valid:
+                if a != b:
+                    pairs.add((a, b))
+
+    # Inter-country: NEIGHBORS × intl hubs
+    for a_cc, neighbors in NEIGHBORS.items():
+        a_hubs = [h for h in hubs_intl.get(a_cc, []) if h in cities]
+        for b_cc in neighbors:
+            b_hubs = [h for h in hubs_intl.get(b_cc, []) if h in cities]
+            for a in a_hubs:
+                for b in b_hubs:
+                    if a != b:
+                        pairs.add((a, b))
+
+    ordered = sorted(pairs)
+    if len(ordered) > MAX_PAIRS:
+        log.warning(f'Pair count {len(ordered)} > MAX_PAIRS {MAX_PAIRS}; sampling')
+        rng = random.Random(42)
+        ordered = sorted(rng.sample(ordered, MAX_PAIRS))
+    return ordered
 
 
-def search(session, from_name, from_code, from_country, to_name, to_code, to_country, dt):
+# ── Bus search API ────────────────────────────────────────────────────────
+
+def search(session, from_name, from_code, from_country,
+           to_name, to_code, to_country, dt):
     body = {
         'departure_place_id': from_code, 'arrival_place_id': to_code,
         'departure_place_name': from_name, 'arrival_place_name': to_name,
@@ -69,7 +132,10 @@ def search(session, from_name, from_code, from_country, to_name, to_code, to_cou
         'carrier_id': 0, 'carrier_parent_company_id': 0,
     }
     try:
-        r = session.post(f'{BASE_URL}/api/proxy/bus-search', json=body, headers=HEADERS, timeout=30)
+        r = session.post(
+            f'{BASE_URL}/api/proxy/bus-search',
+            json=body, headers=HEADERS, timeout=30,
+        )
         r.raise_for_status()
         data = r.json()
         return data.get('data', []) if isinstance(data, dict) else []
@@ -78,25 +144,27 @@ def search(session, from_name, from_code, from_country, to_name, to_code, to_cou
 
 
 def parse_trips(raw_trips, from_city, to_city):
-    """Parse API response into flat trip dicts."""
-    EUR_TO_RSD = 117  # approximate exchange rate
     result = []
     for t in raw_trips:
         sched = t.get('schedule', {})
         pricing = t.get('pricing', {})
         carrier = t.get('carrier', {})
+        booking = t.get('booking', {})
+        if booking.get('departure_cancelled'):
+            continue
 
-        dep_time = sched.get('departure_time', '')
-        arr_time = sched.get('arrival_time', '')
-        duration = sched.get('duration_minutes', 0)
+        # .get('k', default) returns None when the key exists but value is null,
+        # so coerce to '' explicitly — build_db.py has NOT NULL on arrival_time.
+        dep_time = sched.get('departure_time') or ''
+        arr_time = sched.get('arrival_time') or ''
+        duration = sched.get('duration_minutes') or 0
 
-        # Price: API returns EUR for international routes
+        # API returns EUR for intl; convert for display consistency
         price_eur = pricing.get('display_price', 0) or pricing.get('ticket_price', 0)
         price_rsd = int(float(price_eur) * EUR_TO_RSD) if price_eur else 0
-
         carrier_name = carrier.get('name', '')
 
-        if dep_time:
+        if dep_time and arr_time:
             result.append({
                 'from_city': from_city, 'to_city': to_city,
                 'departure_time': dep_time, 'arrival_time': arr_time,
@@ -106,66 +174,44 @@ def parse_trips(raw_trips, from_city, to_city):
     return result
 
 
-def main():
+# ── Main ──────────────────────────────────────────────────────────────────
+
+def main() -> None:
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     session = requests.Session()
     dt = date.today() + timedelta(days=1)
 
-    sr_cities = load_sr_ids()
-    log.info(f'Serbian cities: {len(sr_cities)}')
-    log.info(f'International cities: {len(INTL)}')
+    catalog = load_catalog()
+    cities = catalog['cities']
 
-    # Build pairs
-    pairs = []
-    for sr_name, (sr_code, sr_country) in sr_cities.items():
-        for intl_name, (intl_code, intl_country) in INTL.items():
-            pairs.append((sr_name, sr_code, sr_country, intl_name, intl_code, intl_country))
-            pairs.append((intl_name, intl_code, intl_country, sr_name, sr_code, sr_country))
-
-    # Intra-country combos (Montenegro ↔ Montenegro, BiH ↔ BiH, etc.)
-    # plus a curated cross-country list for popular tourist corridors.
-    cross: set[tuple[str, str]] = set()
-    for cities_in_country in _COUNTRY_GROUPS.values():
-        if len(cities_in_country) < 2:
-            continue
-        for a in cities_in_country:
-            for b in cities_in_country:
-                if a != b:
-                    cross.add((a, b))
-
-    # Cross-country popular corridors (tourists, Serbian diaspora)
-    cross.update({
-        ('Sarajevo', 'Dubrovnik'), ('Dubrovnik', 'Sarajevo'),
-        ('Sarajevo', 'Mostar'),    ('Mostar', 'Sarajevo'),
-        ('Mostar', 'Dubrovnik'),   ('Dubrovnik', 'Mostar'),
-        ('Split', 'Sarajevo'),     ('Sarajevo', 'Split'),
-        ('Podgorica', 'Sarajevo'), ('Sarajevo', 'Podgorica'),
-        ('Budva', 'Dubrovnik'),    ('Dubrovnik', 'Budva'),
-        ('Herceg Novi', 'Dubrovnik'), ('Dubrovnik', 'Herceg Novi'),
-    })
-
-    for a, b in cross:
-        if a in INTL and b in INTL:
-            ac, acountry = INTL[a]
-            bc, bcountry = INTL[b]
-            pairs.append((a, ac, acountry, b, bc, bcountry))
-
+    pairs = build_pairs(catalog)
+    log.info(
+        f'Catalog: {len(cities)} cities, '
+        f'{sum(len(v) for v in catalog["hubs_intra"].values())} intra hubs, '
+        f'{sum(len(v) for v in catalog["hubs_intl"].values())} intl hubs'
+    )
     log.info(f'Pairs: {len(pairs)}, date: {dt}')
 
-    all_trips = []
+    all_trips: list[dict] = []
     found = 0
+    total = len(pairs)
 
-    for i, (fn, fc, fco, tn, tc, tco) in enumerate(pairs):
+    for i, (fn, tn) in enumerate(pairs, 1):
+        fc = cities[fn]['code']
+        fco = cities[fn]['country_id']
+        tc = cities[tn]['code']
+        tco = cities[tn]['country_id']
+
         raw = search(session, fn, fc, fco, tn, tc, tco, dt)
         if raw:
             trips = parse_trips(raw, fn, tn)
             if trips:
                 all_trips.extend(trips)
                 found += 1
-                log.info(f'[{i+1}/{len(pairs)}] {fn} → {tn}: {len(trips)} departures')
+                log.info(f'[{i}/{total}] {fn} → {tn}: {len(trips)} departures')
 
-        if (i + 1) % 50 == 0:
-            log.info(f'  progress... {i+1}/{len(pairs)}, {found} routes')
+        if i % 100 == 0:
+            log.info(f'  progress... {i}/{total}, {found} routes, {len(all_trips)} trips')
 
         time.sleep(0.5)
 
@@ -173,7 +219,8 @@ def main():
     with open(out, 'w', encoding='utf-8') as f:
         json.dump(all_trips, f, ensure_ascii=False, indent=2)
 
-    log.info(f'\nDone: {found} routes, {len(all_trips)} trips → {out}')
+    log.info('')
+    log.info(f'Done: {found} routes, {len(all_trips)} trips → {out}')
 
 
 if __name__ == '__main__':

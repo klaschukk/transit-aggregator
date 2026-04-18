@@ -18,7 +18,10 @@ sleep 2
 
 cd "$PROJECT" || exit 1
 
-# Run scrapers — each is optional, failure is non-fatal
+# Run scrapers — each is optional, failure is non-fatal.
+# discover_cities refreshes the bt4 city catalog that scrape_intercity +
+# scrape_international both read from; must run first.
+$VENV -u data/pipelines/discover_cities.py  >> "$LOG" 2>&1 || echo "WARN: discover_cities failed ($?)" >> "$LOG"
 $VENV -u data/pipelines/scrape_gsp.py       >> "$LOG" 2>&1 || echo "WARN: scrape_gsp failed ($?)" >> "$LOG"
 $VENV -u data/pipelines/scrape_intercity.py  >> "$LOG" 2>&1 || echo "WARN: scrape_intercity failed ($?)" >> "$LOG"
 $VENV -u data/pipelines/scrape_srbvoz.py     >> "$LOG" 2>&1 || echo "WARN: scrape_srbvoz failed ($?)" >> "$LOG"
