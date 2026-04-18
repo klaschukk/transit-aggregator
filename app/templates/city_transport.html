@@ -11,6 +11,14 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"CollectionPage","name":"{{ _('city_transport.title_prefix') }} {{ city_label }}","description":"{{ lines|length }} {{ _('city_transport.meta_lines') }}","about":{"@type":"City","name":"{{ city_label }}"}}
 </script>
+{% set _stops_total = stops_with_coords if stops_with_coords else 0 %}
+{% set _faq_entities = [
+  {'@type':'Question','name':_('city_transport.faq_q1').format(city=city_label),'acceptedAnswer':{'@type':'Answer','text':(_('city_transport.intro_beograd_p2') if city == 'beograd' else _('city_transport.intro_novi_sad_p2') if city == 'novi-sad' else _('city_transport.intro_nis_p2') if city == 'nis' else _('city_transport.intro_kragujevac_p2')).format(prefix=lang_prefix)|striptags}},
+  {'@type':'Question','name':_('city_transport.faq_q2').format(city=city_label),'acceptedAnswer':{'@type':'Answer','text':_('city_transport.faq_a2').format(n=lines|length, stops=_stops_total)}},
+  {'@type':'Question','name':_('city_transport.faq_q3').format(city=city_label),'acceptedAnswer':{'@type':'Answer','text':_('city_transport.faq_a3')}},
+  {'@type':'Question','name':_('city_transport.faq_q4').format(city=city_label),'acceptedAnswer':{'@type':'Answer','text':_('city_transport.faq_a4').format(prefix=lang_prefix, city=city_label)|striptags}}
+] %}
+<script type="application/ld+json">{{ {'@context':'https://schema.org','@type':'FAQPage','mainEntity':_faq_entities}|tojson }}</script>
 <link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" as="script" crossorigin="">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""></noscript>
@@ -29,6 +37,29 @@
 <div class="page-title">
   <h1>{{ _('city.title') }} {{ city_label }}</h1>
   <p class="page-subtitle">{{ lines|length }} {{ _('city.lines_count') }}{% if stops_with_coords %} · {{ stops_with_coords }} {{ _('city.stops_on_map') }}{% endif %}</p>
+</div>
+
+<!-- SEO intro (per-city unique prose) -->
+<div class="seo-block fade-in">
+  <div class="seo-block__icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></svg>
+  </div>
+  <div class="seo-block__content">
+    <h2>{{ _('city_transport.intro_h').format(city=city_label) }}</h2>
+    {% if city == 'beograd' %}
+      <p>{{ _('city_transport.intro_beograd_p1').format(prefix=lang_prefix)|safe }}</p>
+      <p>{{ _('city_transport.intro_beograd_p2').format(prefix=lang_prefix)|safe }}</p>
+    {% elif city == 'novi-sad' %}
+      <p>{{ _('city_transport.intro_novi_sad_p1').format(prefix=lang_prefix)|safe }}</p>
+      <p>{{ _('city_transport.intro_novi_sad_p2').format(prefix=lang_prefix)|safe }}</p>
+    {% elif city == 'nis' %}
+      <p>{{ _('city_transport.intro_nis_p1').format(prefix=lang_prefix)|safe }}</p>
+      <p>{{ _('city_transport.intro_nis_p2').format(prefix=lang_prefix)|safe }}</p>
+    {% elif city == 'kragujevac' %}
+      <p>{{ _('city_transport.intro_kragujevac_p1').format(prefix=lang_prefix)|safe }}</p>
+      <p>{{ _('city_transport.intro_kragujevac_p2').format(prefix=lang_prefix)|safe }}</p>
+    {% endif %}
+  </div>
 </div>
 
 <!-- Map (only if stops have coordinates) -->
@@ -122,6 +153,50 @@
       <span class="see-also__card-title">{{ _('city.departures_from') }} {{ city_label }}</span>
       <span class="see-also__card-meta">{{ _('city.search_dest') }}</span>
     </a>
+  </div>
+</section>
+
+{% if popular_intercity %}
+<section class="see-also">
+  <h2 class="see-also__title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+    {{ _('city_transport.popular_routes_h').format(city=city_label) }}
+  </h2>
+  <div class="see-also__grid">
+    {% for r in popular_intercity %}
+    <a href="{{ lang_prefix }}/voznja/{{ r.from_city_slug }}-do-{{ r.to_city_slug }}/" class="see-also__card">
+      <span class="see-also__card-title">{{ r.from_city }} → {{ r.to_city }}</span>
+      <span class="see-also__card-meta">{{ r.trip_count }} {{ _('routes.departures') }}{% if r.distance_km %} · {{ r.distance_km }} km{% endif %}</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="faq-section">
+  <h2 class="section__title">{{ _('city_transport.faq_heading') }}</h2>
+  <div class="faq-list">
+    <details class="faq-item">
+      <summary class="faq-item__q">{{ _('city_transport.faq_q1').format(city=city_label) }}</summary>
+      <div class="faq-item__a">
+        {% if city == 'beograd' %}{{ _('city_transport.intro_beograd_p2').format(prefix=lang_prefix)|safe }}
+        {% elif city == 'novi-sad' %}{{ _('city_transport.intro_novi_sad_p2').format(prefix=lang_prefix)|safe }}
+        {% elif city == 'nis' %}{{ _('city_transport.intro_nis_p2').format(prefix=lang_prefix)|safe }}
+        {% elif city == 'kragujevac' %}{{ _('city_transport.intro_kragujevac_p2').format(prefix=lang_prefix)|safe }}{% endif %}
+      </div>
+    </details>
+    <details class="faq-item">
+      <summary class="faq-item__q">{{ _('city_transport.faq_q2').format(city=city_label) }}</summary>
+      <div class="faq-item__a">{{ _('city_transport.faq_a2').format(n=lines|length, stops=(stops_with_coords or 0)) }}</div>
+    </details>
+    <details class="faq-item">
+      <summary class="faq-item__q">{{ _('city_transport.faq_q3').format(city=city_label) }}</summary>
+      <div class="faq-item__a">{{ _('city_transport.faq_a3') }}</div>
+    </details>
+    <details class="faq-item">
+      <summary class="faq-item__q">{{ _('city_transport.faq_q4').format(city=city_label) }}</summary>
+      <div class="faq-item__a">{{ _('city_transport.faq_a4').format(prefix=lang_prefix, city=city_label)|safe }}</div>
+    </details>
   </div>
 </section>
 

@@ -6,6 +6,12 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebSite","name":"Prevozni","url":"{{ config.BASE_URL }}/","potentialAction":{"@type":"SearchAction","target":"{{ config.BASE_URL }}/pretraga/?od={od}&do={do}","query-input":"required name=od required name=do"}}
 </script>
+{% set _faq_entities = [
+  {'@type':'Question','name':_('home.faq_q1'),'acceptedAnswer':{'@type':'Answer','text':_('home.faq_a1')}},
+  {'@type':'Question','name':_('home.faq_q2'),'acceptedAnswer':{'@type':'Answer','text':_('home.faq_a2').format(prefix=lang_prefix)|striptags}},
+  {'@type':'Question','name':_('home.faq_q3'),'acceptedAnswer':{'@type':'Answer','text':_('home.faq_a3')}}
+] %}
+<script type="application/ld+json">{{ {'@context':'https://schema.org','@type':'FAQPage','mainEntity':_faq_entities}|tojson }}</script>
 {% endblock %}
 
 {% block main_class %}home-page{% endblock %}
@@ -140,6 +146,25 @@
       {% endif %}
     </div>
 
+  </div>
+</section>
+
+<!-- ═══════ FAQ ═══════ -->
+<section class="home-section container">
+  <h2 class="home-section__title">{{ _('home.faq_heading') }}</h2>
+  <div class="faq-list">
+    <details class="faq-item">
+      <summary class="faq-item__q">{{ _('home.faq_q1') }}</summary>
+      <div class="faq-item__a">{{ _('home.faq_a1') }}</div>
+    </details>
+    <details class="faq-item">
+      <summary class="faq-item__q">{{ _('home.faq_q2') }}</summary>
+      <div class="faq-item__a">{{ _('home.faq_a2').format(prefix=lang_prefix)|safe }}</div>
+    </details>
+    <details class="faq-item">
+      <summary class="faq-item__q">{{ _('home.faq_q3') }}</summary>
+      <div class="faq-item__a">{{ _('home.faq_a3') }}</div>
+    </details>
   </div>
 </section>
 

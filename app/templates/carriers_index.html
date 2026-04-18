@@ -11,6 +11,14 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"ItemList","name":"Prevoznici u Srbiji","numberOfItems":{{ operators|length }},"itemListElement":[{% for op in operators %}{"@type":"ListItem","position":{{ loop.index }},"item":{"@type":"Organization","name":"{{ op.name }}"{% if op.website %},"url":"{{ op.website }}"{% endif %}}}{% if not loop.last %},{% endif %}{% endfor %}]}
 </script>
+{% if not page or page == 1 %}
+{% set _faq_entities = [
+  {'@type':'Question','name':_('carriers.faq_q1'),'acceptedAnswer':{'@type':'Answer','text':_('carriers.faq_a1')}},
+  {'@type':'Question','name':_('carriers.faq_q2'),'acceptedAnswer':{'@type':'Answer','text':_('carriers.faq_a2').format(prefix=lang_prefix)|striptags}},
+  {'@type':'Question','name':_('carriers.faq_q3'),'acceptedAnswer':{'@type':'Answer','text':_('carriers.faq_a3')}}
+] %}
+<script type="application/ld+json">{{ {'@context':'https://schema.org','@type':'FAQPage','mainEntity':_faq_entities}|tojson }}</script>
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -23,6 +31,20 @@
   <h1>{{ _('carriers.h1') }}</h1>
   <p class="page-subtitle">{{ total_operators|default(operators|length) }} {{ _('carriers.in_base_suffix') }}{% if total_pages and total_pages > 1 %} · {{ _('carriers.page_of') }} {{ page }} / {{ total_pages }}{% endif %}</p>
 </div>
+
+{% if not page or page == 1 %}
+<!-- SEO intro (unique prose) — only on page 1 to avoid duplicate content -->
+<div class="seo-block fade-in">
+  <div class="seo-block__icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/></svg>
+  </div>
+  <div class="seo-block__content">
+    <h2>{{ _('carriers.intro_h') }}</h2>
+    <p>{{ _('carriers.intro_p1').format(prefix=lang_prefix)|safe }}</p>
+    <p>{{ _('carriers.intro_p2').format(prefix=lang_prefix)|safe }}</p>
+  </div>
+</div>
+{% endif %}
 
 <!-- Anchor nav — only when everything fits on one page, otherwise labels are misleading -->
 {% if operators and (not total_pages or total_pages <= 1) %}
@@ -83,6 +105,27 @@
 </div>
 {% else %}
   {{ empty_state(icon='bus', text=_('carriers.empty_loading')) }}
+{% endif %}
+
+{% if not page or page == 1 %}
+<!-- FAQ -->
+<section class="faq-section">
+  <h2 class="section__title">{{ _('carriers.faq_heading') }}</h2>
+  <div class="faq-list">
+    <details class="faq-item">
+      <summary class="faq-item__q">{{ _('carriers.faq_q1') }}</summary>
+      <div class="faq-item__a">{{ _('carriers.faq_a1') }}</div>
+    </details>
+    <details class="faq-item">
+      <summary class="faq-item__q">{{ _('carriers.faq_q2') }}</summary>
+      <div class="faq-item__a">{{ _('carriers.faq_a2').format(prefix=lang_prefix)|safe }}</div>
+    </details>
+    <details class="faq-item">
+      <summary class="faq-item__q">{{ _('carriers.faq_q3') }}</summary>
+      <div class="faq-item__a">{{ _('carriers.faq_a3') }}</div>
+    </details>
+  </div>
+</section>
 {% endif %}
 
 {% if total_pages and total_pages > 1 %}

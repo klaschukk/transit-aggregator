@@ -1635,6 +1635,762 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': ' A detailed map and list of lines are available for free on Prevozni.com.',
         'ru': ' Подробная карта и список линий доступны бесплатно на Prevozni.com.',
     },
+
+    # ── Hub SEO intros & FAQ: route_index (/rute/) ──
+    'route_index.intro_h': {
+        'sr': 'Međugradski autobusi i vozovi u Srbiji',
+        'en': 'Intercity buses and trains in Serbia',
+        'ru': 'Междугородние автобусы и поезда в Сербии',
+    },
+    'route_index.intro_p1': {
+        'sr': 'Prevozni.com objedinjuje red vožnje za <strong>autobuske i železničke rute</strong> širom Srbije i regiona. '
+              'Kataloške stranice pokrivaju preko 270 pravaca sa direktnim polascima između <a href="{prefix}/gradski/beograd/">Beograda</a>, '
+              '<a href="{prefix}/gradski/novi-sad/">Novog Sada</a>, <a href="{prefix}/gradski/nis/">Niša</a>, <a href="{prefix}/gradski/kragujevac/">Kragujevca</a> '
+              'i desetina manjih gradova, kao i međunarodne linije ka Crnoj Gori, Bosni i Hercegovini, Hrvatskoj, Severnoj Makedoniji, Sloveniji, Mađarskoj i Turskoj. '
+              'Za svaku rutu prikazujemo broj dnevnih polazaka, trajanje putovanja, minimalnu cenu karte i listu prevoznika koji saobraćaju na toj relaciji, '
+              'uključujući <a href="{prefix}/prevoznici/">Lastu, Niš-Ekspres, OZLEM, Srbija Voz</a> i druge operatere.',
+        'en': 'Prevozni.com aggregates timetables for <strong>intercity buses and trains</strong> across Serbia and the Balkans. '
+              'The catalog covers 270+ routes with direct departures between <a href="{prefix}/gradski/beograd/">Belgrade</a>, '
+              '<a href="{prefix}/gradski/novi-sad/">Novi Sad</a>, <a href="{prefix}/gradski/nis/">Niš</a>, <a href="{prefix}/gradski/kragujevac/">Kragujevac</a> '
+              'and dozens of smaller towns, plus international lines to Montenegro, Bosnia and Herzegovina, Croatia, North Macedonia, Slovenia, Hungary and Turkey. '
+              'For every route we show the number of daily departures, journey time, minimum ticket price and the list of operators running the line, '
+              'including <a href="{prefix}/prevoznici/">Lasta, Niš-Ekspres, OZLEM, Srbija Voz</a> and others.',
+        'ru': 'Prevozni.com объединяет расписание <strong>междугородних автобусов и поездов</strong> по Сербии и Балканам. '
+              'Каталог охватывает более 270 направлений с прямыми рейсами между <a href="{prefix}/gradski/beograd/">Белградом</a>, '
+              '<a href="{prefix}/gradski/novi-sad/">Нови-Садом</a>, <a href="{prefix}/gradski/nis/">Нишем</a>, <a href="{prefix}/gradski/kragujevac/">Крагуевацем</a> '
+              'и десятками небольших городов, а также международные рейсы в Черногорию, Боснию и Герцеговину, Хорватию, Северную Македонию, Словению, Венгрию и Турцию. '
+              'По каждому маршруту мы показываем количество ежедневных рейсов, длительность поездки, минимальную цену билета и список перевозчиков, '
+              'включая <a href="{prefix}/prevoznici/">Lasta, Niš-Ekspres, OZLEM, Srbija Voz</a> и других.',
+    },
+    'route_index.intro_p2': {
+        'sr': 'Pretraga u vrhu stranice filtrira rute u realnom vremenu prema imenu polaznog ili ciljnog grada. '
+              'Klikom na bilo koju rutu otvarate detaljnu stranicu sa spiskom polazaka po satu, cenama po prevozniku i filterima po delu dana '
+              '(jutro 06–12, popodne 12–18, veče 18–22, noć 22–06). Svaka ruta ima i SEO parnu stranicu tipa '
+              '<code>/voznja/grad1-do-grad2/</code> sa prosečnim trajanjem, rasponom cena i najjeftinijim prevoznikom — '
+              'korisno kad biramo najpovoljniji termin putovanja. Red vožnje se automatski osvežava svakih 24 sata iz zvaničnih izvora '
+              '(busticket4.me, polazak.rs, bgprevoz, gspns, srbijavoz). Karte se kupuju na blagajni autobuske stanice, u vozilu kod vozača ili online preko partnerskih sajtova.',
+        'en': 'The search bar at the top filters routes live by origin or destination city. '
+              'Clicking any route opens a detail page with hour-by-hour departures, prices per operator and time-of-day filters '
+              '(morning 06–12, afternoon 12–18, evening 18–22, night 22–06). Every route also has an SEO city-pair page at '
+              '<code>/voznja/city1-do-city2/</code> with average duration, price range and the cheapest operator — useful for picking the best-value departure. '
+              'Timetables refresh every 24 hours from official sources (busticket4.me, polazak.rs, bgprevoz, gspns, srbijavoz). '
+              'Tickets are sold at bus-station counters, on-board from the driver, or online through partner sites.',
+        'ru': 'Строка поиска сверху фильтрует маршруты в реальном времени по названию города отправления или прибытия. '
+              'При клике на маршрут открывается детальная страница с рейсами по часам, ценами по перевозчикам и фильтрами по времени суток '
+              '(утро 06–12, день 12–18, вечер 18–22, ночь 22–06). У каждого маршрута также есть SEO-страница пары городов по адресу '
+              '<code>/voznja/gorod1-do-gorod2/</code> со средней длительностью, диапазоном цен и самым дешёвым перевозчиком — полезно при выборе оптимального рейса. '
+              'Расписание обновляется каждые 24 часа из официальных источников (busticket4.me, polazak.rs, bgprevoz, gspns, srbijavoz). '
+              'Билеты продаются в кассах автовокзала, у водителя в автобусе или онлайн через партнёрские сайты.',
+    },
+    'route_index.faq_heading': {
+        'sr': 'Česta pitanja o autobuskim rutama',
+        'en': 'Frequently asked questions about bus routes',
+        'ru': 'Частые вопросы об автобусных маршрутах',
+    },
+    'route_index.faq_q1': {
+        'sr': 'Koliko međugradskih ruta pokriva Prevozni.com?',
+        'en': 'How many intercity routes does Prevozni.com cover?',
+        'ru': 'Сколько междугородних маршрутов охватывает Prevozni.com?',
+    },
+    'route_index.faq_a1': {
+        'sr': 'U bazi imamo {n} domaćih i međunarodnih linija sa preko 2800 polazaka dnevno. Katalog uključuje sve velike prevoznike u Srbiji (Lasta, Niš-Ekspres, Srbija Voz) '
+              'i regionalne operatere za linije ka Crnoj Gori, BiH, Hrvatskoj, Mađarskoj, Severnoj Makedoniji i Turskoj. Svakog dana se podaci ažuriraju iz zvaničnih izvora.',
+        'en': 'The database holds {n} domestic and international routes with 2,800+ daily departures. The catalog includes all major Serbian carriers (Lasta, Niš-Ekspres, Srbija Voz) '
+              'plus regional operators for lines to Montenegro, Bosnia, Croatia, Hungary, North Macedonia and Turkey. Data is refreshed daily from official sources.',
+        'ru': 'В базе {n} внутренних и международных маршрутов с более чем 2800 рейсами в сутки. Каталог включает всех крупных сербских перевозчиков (Lasta, Niš-Ekspres, Srbija Voz) '
+              'и региональных операторов на линиях в Черногорию, Боснию, Хорватию, Венгрию, Северную Македонию и Турцию. Данные обновляются ежедневно.',
+    },
+    'route_index.faq_q2': {
+        'sr': 'Kako da nađem najjeftiniju autobusku kartu?',
+        'en': 'How do I find the cheapest bus ticket?',
+        'ru': 'Как найти самый дешёвый автобусный билет?',
+    },
+    'route_index.faq_a2': {
+        'sr': 'Otvorite detaljnu stranicu rute i pogledajte kolonu cene — svaki polazak prikazuje cenu u RSD i EUR. '
+              'Na SEO parnoj stranici /voznja/grad1-do-grad2/ prikazan je raspon cena i najjeftiniji prevoznik. '
+              'Generalno, rani jutarnji (06–08) i noćni (22–06) polasci često imaju niže cene, a kupovina karte unapred može doneti dodatni popust kod nekih operatera.',
+        'en': 'Open the route detail page and check the price column — each departure shows the price in RSD and EUR. '
+              'The SEO city-pair page at /voznja/city1-do-city2/ displays the price range and the cheapest operator. '
+              'In general, early morning (06–08) and overnight (22–06) departures often have lower fares, and buying in advance can unlock additional discounts with some operators.',
+        'ru': 'Откройте детальную страницу маршрута и посмотрите колонку цены — у каждого рейса указана цена в RSD и EUR. '
+              'На SEO-странице пары /voznja/gorod1-do-gorod2/ показан диапазон цен и самый дешёвый перевозчик. '
+              'Обычно ранние утренние (06–08) и ночные (22–06) рейсы дешевле, а покупка билета заранее иногда даёт дополнительную скидку.',
+    },
+    'route_index.faq_q3': {
+        'sr': 'Mogu li da kupim kartu direktno preko Prevozni.com?',
+        'en': 'Can I buy a ticket directly through Prevozni.com?',
+        'ru': 'Можно ли купить билет прямо через Prevozni.com?',
+    },
+    'route_index.faq_a3': {
+        'sr': 'Prevozni.com je informativni servis — red vožnje je besplatan i bez registracije. '
+              'Na svakoj stranici rute nalazi se dugme „Kupi kartu" koje vodi na partnerski sistem (Bookaway) gde se kupovina obavlja online. '
+              'Karte se takođe kupuju na blagajni autobuske stanice ili kod vozača u autobusu.',
+        'en': 'Prevozni.com is an information service — timetables are free and require no registration. '
+              'Each route page has a "Buy ticket" button that opens our partner (Bookaway) for online booking. '
+              'Tickets are also sold at the bus station counter or on-board from the driver.',
+        'ru': 'Prevozni.com — информационный сервис: расписание бесплатно и без регистрации. '
+              'На каждой странице маршрута есть кнопка «Купить билет», которая ведёт к партнёру (Bookaway) для онлайн-покупки. '
+              'Билеты также продаются в кассе автовокзала или у водителя.',
+    },
+    'route_index.faq_q4': {
+        'sr': 'Koliko često se ažurira red vožnje?',
+        'en': 'How often are timetables updated?',
+        'ru': 'Как часто обновляется расписание?',
+    },
+    'route_index.faq_a4': {
+        'sr': 'Osnovni podaci (rute, prevoznici, cene) ažuriraju se svakodnevno u 3:00 ujutru iz zvaničnih izvora. '
+              'Za GTFS podatke o gradskom prevozu Beograda i Novog Sada, ažuriranje se vrši nedeljno. '
+              'Ukoliko primetite netačan podatak, možete nas kontaktirati preko <a href="{prefix}/kontakt/">kontakt stranice</a>.',
+        'en': 'Route-level data (routes, operators, prices) refresh nightly at 3:00 AM from official sources. '
+              'GTFS city-transit data for Belgrade and Novi Sad is updated weekly. '
+              'If you spot an error, please let us know via the <a href="{prefix}/kontakt/">contact page</a>.',
+        'ru': 'Основные данные (маршруты, перевозчики, цены) обновляются ночью в 3:00 из официальных источников. '
+              'GTFS-данные по городскому транспорту Белграда и Нови-Сада обновляются еженедельно. '
+              'Если заметили неточность, напишите нам через <a href="{prefix}/kontakt/">страницу контактов</a>.',
+    },
+    'route_index.popular_heading': {
+        'sr': 'Najpopularnije rute',
+        'en': 'Most popular routes',
+        'ru': 'Самые популярные маршруты',
+    },
+
+    # ── Hub SEO intros & FAQ: city_index (/gradski/) ──
+    'city_index.intro_h': {
+        'sr': 'Gradski prevoz u Srbiji: linije, stajališta, mape',
+        'en': 'City public transit in Serbia: lines, stops, maps',
+        'ru': 'Городской транспорт Сербии: линии, остановки, карты',
+    },
+    'city_index.intro_p1': {
+        'sr': 'Četiri najveća grada Srbije imaju razvijenu mrežu javnog gradskog prevoza. '
+              '<strong><a href="{prefix}/gradski/beograd/">Beograd</a></strong> operiše sa preko 500 linija autobusa, tramvaja i trolejbusa '
+              'u okviru GSP Beograd, sa potpunim GTFS rasporedom od preko 87.000 dnevnih polazaka. '
+              '<strong><a href="{prefix}/gradski/novi-sad/">Novi Sad</a></strong> ima 60+ linija JGSP Novi Sad sa rasporedom od 6.500 polazaka. '
+              '<strong><a href="{prefix}/gradski/nis/">Niš</a></strong> opslužuje JGP Niš-Ekspres sa 50+ linija, '
+              'a <strong><a href="{prefix}/gradski/kragujevac/">Kragujevac</a></strong> 23 linije lokalnog prevoznika. '
+              'Ukupno je u bazi 610 linija i preko 3700 stajališta sa GPS koordinatama — praktično sve stajalište u glavnim gradovima možete pronaći na interaktivnoj mapi.',
+        'en': 'Serbia\'s four largest cities run full-fledged public transit networks. '
+              '<strong><a href="{prefix}/gradski/beograd/">Belgrade</a></strong> operates 500+ bus, tram and trolleybus lines under GSP Beograd, '
+              'with a complete GTFS schedule of 87,000+ daily departures. '
+              '<strong><a href="{prefix}/gradski/novi-sad/">Novi Sad</a></strong> has 60+ JGSP Novi Sad lines with a 6,500-departure schedule. '
+              '<strong><a href="{prefix}/gradski/nis/">Niš</a></strong> is served by JGP Niš-Ekspres with 50+ lines, '
+              'and <strong><a href="{prefix}/gradski/kragujevac/">Kragujevac</a></strong> by 23 local carrier lines. '
+              'In total the database holds 610 lines and over 3,700 stops with GPS coordinates — you can find practically any stop in the main cities on the interactive map.',
+        'ru': 'Четыре крупнейших города Сербии имеют развитую сеть городского транспорта. '
+              '<strong><a href="{prefix}/gradski/beograd/">Белград</a></strong> — 500+ линий автобусов, трамваев и троллейбусов под управлением GSP Beograd, '
+              'с полным GTFS-расписанием на 87 000+ рейсов в сутки. '
+              '<strong><a href="{prefix}/gradski/novi-sad/">Нови-Сад</a></strong> — 60+ линий JGSP Novi Sad с расписанием на 6 500 рейсов. '
+              '<strong><a href="{prefix}/gradski/nis/">Ниш</a></strong> обслуживается JGP Niš-Ekspres с 50+ линиями, '
+              '<strong><a href="{prefix}/gradski/kragujevac/">Крагуевац</a></strong> — 23 линии местного перевозчика. '
+              'Всего в базе 610 линий и более 3700 остановок с GPS-координатами — практически любую остановку крупных городов можно найти на интерактивной карте.',
+    },
+    'city_index.intro_p2': {
+        'sr': 'Za svaku liniju prikazujemo trasu, spisak stajališta, tip prevoza (autobus / tramvaj / trolejbus / noćna linija) i, gde postoji GTFS feed, '
+              'tačan raspored polazaka za radni dan, subotu i nedelju. Klikom na stajalište otvarate stranicu sa spiskom linija koje tu staju, '
+              'procenom vremena dolaska narednog vozila (ETA) i najbližim stajalištima. '
+              'Karte za gradski prevoz u Srbiji kupuju se preko BusPlus kartice (Beograd), AP karte (Novi Sad) ili na kioscima i kod vozača. '
+              'Prevozni.com ne prodaje karte za gradski prevoz — naš cilj je da ponudi besplatan i brz pregled linija, stajališta i polazaka '
+              'u svim većim gradovima, korisno putnicima, turistima i studentima koji se tek upoznaju sa mrežom.',
+        'en': 'For every line we show the route path, stop list, transport type (bus / tram / trolleybus / night line) and, where a GTFS feed is available, '
+              'the exact departure schedule for weekdays, Saturdays and Sundays. Clicking a stop opens a page with the lines serving it, '
+              'an ETA estimate for the next arriving vehicle and nearby stops. '
+              'Tickets for city transit in Serbia are purchased with the BusPlus card (Belgrade), AP card (Novi Sad) or at kiosks and from the driver. '
+              'Prevozni.com does not sell city-transit tickets — our goal is to provide a free, fast overview of lines, stops and departures '
+              'in every major city, useful for commuters, tourists and students learning the network.',
+        'ru': 'Для каждой линии показываем трассу, список остановок, тип транспорта (автобус / трамвай / троллейбус / ночная линия) и, где есть GTFS, '
+              'точное расписание на будни, субботу и воскресенье. При клике на остановку открывается страница со списком линий, '
+              'прогнозом времени прибытия следующего транспорта (ETA) и ближайшими остановками. '
+              'Билеты на городской транспорт покупаются по карте BusPlus (Белград), AP (Нови-Сад), в киосках или у водителя. '
+              'Prevozni.com не продаёт билеты на городской транспорт — наша цель дать бесплатный и быстрый обзор линий, остановок и рейсов '
+              'во всех крупных городах, что полезно местным жителям, туристам и студентам.',
+    },
+    'city_index.faq_heading': {
+        'sr': 'Česta pitanja o gradskom prevozu',
+        'en': 'Frequently asked questions about city transit',
+        'ru': 'Частые вопросы о городском транспорте',
+    },
+    'city_index.faq_q1': {
+        'sr': 'Koji gradovi imaju kompletne podatke na Prevozni.com?',
+        'en': 'Which cities have complete data on Prevozni.com?',
+        'ru': 'В каких городах есть полные данные на Prevozni.com?',
+    },
+    'city_index.faq_a1': {
+        'sr': 'Trenutno pokrivamo Beograd (GSP, 514 linija, pun GTFS raspored), Novi Sad (JGSP, 61 linija, GTFS), '
+              'Niš (JGP Niš-Ekspres, 53 linije) i Kragujevac (23 linije). Za Beograd i Novi Sad imamo tačne vremena polazaka; '
+              'za Niš i Kragujevac prikazujemo trase i stajališta ali bez detaljnog GTFS rasporeda.',
+        'en': 'We currently cover Belgrade (GSP, 514 lines, full GTFS schedule), Novi Sad (JGSP, 61 lines, GTFS), '
+              'Niš (JGP Niš-Ekspres, 53 lines) and Kragujevac (23 lines). Belgrade and Novi Sad have precise departure times; '
+              'Niš and Kragujevac show routes and stops but without detailed GTFS schedules.',
+        'ru': 'Сейчас охвачены Белград (GSP, 514 линий, полный GTFS), Нови-Сад (JGSP, 61 линия, GTFS), '
+              'Ниш (JGP Niš-Ekspres, 53 линии) и Крагуевац (23 линии). У Белграда и Нови-Сада точное время рейсов; '
+              'у Ниша и Крагуеваца — только трассы и остановки без подробного GTFS-расписания.',
+    },
+    'city_index.faq_q2': {
+        'sr': 'Kako da nađem stajalište najbliže mojoj adresi?',
+        'en': 'How do I find the stop closest to my address?',
+        'ru': 'Как найти остановку, ближайшую к моему адресу?',
+    },
+    'city_index.faq_a2': {
+        'sr': 'Otvorite stranicu grada (npr. /gradski/beograd/) i koristite interaktivnu mapu. '
+              'Mapa prikazuje sva stajališta sa GPS koordinatama — zumirajte do željenog dela grada i kliknite na marker '
+              'da vidite koje linije tu staju. Na stranici svakog stajališta prikazujemo i obližnja stajališta u radijusu od 500 metara.',
+        'en': 'Open the city page (e.g. /gradski/beograd/) and use the interactive map. '
+              'The map shows every stop with GPS coordinates — zoom to your area and click a marker to see which lines stop there. '
+              'Each stop\'s detail page also lists nearby stops within ~500 metres.',
+        'ru': 'Откройте страницу города (например /gradski/beograd/) и воспользуйтесь интерактивной картой. '
+              'На карте отмечены все остановки с GPS — приблизьте нужный район и кликните по маркеру, чтобы увидеть линии. '
+              'На странице каждой остановки также есть список ближайших остановок в радиусе ~500 м.',
+    },
+    'city_index.faq_q3': {
+        'sr': 'Da li je raspored tačan u realnom vremenu?',
+        'en': 'Is the schedule real-time?',
+        'ru': 'Показывается ли расписание в реальном времени?',
+    },
+    'city_index.faq_a3': {
+        'sr': 'Prikazujemo planirani red vožnje iz GTFS feeda (ne GPS lokaciju vozila). ETA na stranici stajališta se računa iz rasporeda — '
+              'za stvarni GPS položaj vozila koristite zvanične aplikacije gradskih prevoznika (BusPlus, Moj Grad Beograd, Beograd+). '
+              'U praksi su polasci u Beogradu tačni unutar 5 minuta tokom radnog dana.',
+        'en': 'We show the scheduled timetable from GTFS feeds, not live vehicle GPS. The ETA on a stop page is computed from the schedule — '
+              'for real-time vehicle positions, use the official city-carrier apps (BusPlus, Moj Grad Beograd, Beograd+). '
+              'In practice Belgrade departures are accurate within ~5 minutes on weekdays.',
+        'ru': 'Показываем плановое расписание из GTFS (не GPS-позицию транспорта). ETA на странице остановки считается из расписания — '
+              'для реального положения транспорта используйте официальные приложения (BusPlus, Moj Grad Beograd, Beograd+). '
+              'На практике в Белграде рейсы по будням точны в пределах ~5 минут.',
+    },
+
+    # ── Hub SEO intros & FAQ: city_transport (/gradski/{city}/) ──
+    'city_transport.intro_h': {
+        'sr': 'O gradskom prevozu: {city}',
+        'en': 'About public transit in {city}',
+        'ru': 'О городском транспорте: {city}',
+    },
+    'city_transport.intro_beograd_p1': {
+        'sr': '<strong>GSP Beograd</strong> upravlja najvećom mrežom javnog prevoza u Srbiji: autobusi, tramvaji i trolejbusi čine više od 500 linija, '
+              'sa preko 87.000 dnevnih polazaka. Sistem pokriva 17 beogradskih opština, od Zemuna i Novog Beograda preko Vračara i Voždovca do Rakovice i Grocke. '
+              'Noćne linije (oznaka „N") saobraćaju sedam dana u nedelji, svakih 30–60 minuta, povezujući centar sa glavnim perifernim kvartovima. '
+              'Tramvajska mreža ima 12 dnevnih linija oko centra i Novog Beograda, trolejbuski sistem obuhvata 8 linija ka Zvezdari, Voždovcu i Paliluli. '
+              'Pored ovoga, BG:Voz — prigradski železnički sistem — povezuje Beograd sa Batajnicom, Ovčom i Resnikom.',
+        'en': '<strong>GSP Beograd</strong> operates the largest public-transit network in Serbia: buses, trams and trolleybuses form 500+ lines '
+              'with 87,000+ daily departures. The system covers all 17 Belgrade municipalities, from Zemun and Novi Beograd through Vračar and Voždovac to Rakovica and Grocka. '
+              'Night lines (prefix "N") run seven days a week every 30–60 minutes, linking the centre to major outer districts. '
+              'The tram network has 12 daytime lines around the centre and Novi Beograd; 8 trolleybus lines connect Zvezdara, Voždovac and Palilula. '
+              'BG:Voz suburban rail also links Belgrade with Batajnica, Ovča and Resnik.',
+        'ru': '<strong>GSP Beograd</strong> управляет крупнейшей сетью общественного транспорта Сербии: автобусы, трамваи и троллейбусы — это 500+ линий '
+              'и более 87 000 рейсов в сутки. Система охватывает все 17 белградских общин, от Земуна и Нового Белграда до Врачара, Вождовца, Раковицы и Гроцки. '
+              'Ночные линии (префикс «N») работают 7 дней в неделю каждые 30–60 минут, соединяя центр с основными окраинами. '
+              'Трамвайная сеть — 12 дневных линий в центре и Новом Белграде; 8 троллейбусных линий — Звездара, Вождовац и Палилула. '
+              'BG:Voz — пригородная железная дорога до Батайницы, Овчи и Ресника.',
+    },
+    'city_transport.intro_beograd_p2': {
+        'sr': 'Karte se kupuju preko <strong>BusPlus kartice</strong>, koja se puni na kioscima ili u GSP-ovim prodajnim mestima. '
+              'Cena jednokratne vožnje u zoni I iznosi oko 50 RSD, a dnevna karta košta 290 RSD. Studenti, penzioneri i đaci imaju popust uz potvrdu statusa. '
+              'BG:Voz koristi drugačiji tarifni sistem — karte se kupuju na stanicama Srbija Voza. '
+              'Za putovanja van Beograda koristi se mreža <a href="{prefix}/rute/">međugradskih autobusa i vozova</a>, sa polazcima sa Autobuske stanice BAS, '
+              'Centralnog železničkog stajališta Prokop i Lasta stanice.',
+        'en': 'Tickets are purchased with the <strong>BusPlus card</strong>, rechargeable at kiosks and GSP points. '
+              'A single ride in Zone I costs around 50 RSD, a day pass 290 RSD. Students, pensioners and pupils get discounts with proof of status. '
+              'BG:Voz uses a separate Srbija Voz ticket system. '
+              'For travel outside Belgrade, use the <a href="{prefix}/rute/">intercity bus and train network</a>, with departures from BAS Bus Station, '
+              'Prokop Central Station and the Lasta terminal.',
+        'ru': 'Билеты покупаются по карте <strong>BusPlus</strong>, которую пополняют в киосках и точках GSP. '
+              'Одна поездка в зоне I — около 50 RSD, проездной на день — 290 RSD. Студенты, пенсионеры и школьники — по скидке при наличии документа. '
+              'У BG:Voz отдельная тарифная система — билеты Srbija Voz. '
+              'Для поездок за пределами Белграда — сеть <a href="{prefix}/rute/">междугородних автобусов и поездов</a> с отправлением с автостанции BAS, '
+              'центрального ж/д вокзала Прокоп и терминала Lasta.',
+    },
+    'city_transport.intro_novi_sad_p1': {
+        'sr': '<strong>JGSP Novi Sad</strong> upravlja javnim gradskim prevozom u drugom najvećem gradu Srbije. '
+              'Mreža se sastoji od 60+ autobuskih linija koje povezuju centralno gradsko jezgro sa prigradskim naseljima (Petrovaradin, Sremska Kamenica, Futog, Veternik, Rumenka, Kać). '
+              'Gradski prevoz u Novom Sadu je prvenstveno autobuski — tramvaja i trolejbusa u gradu nema. '
+              'GTFS raspored za Novi Sad je dostupan u našoj bazi, tako da je moguće prikazati tačne polaske po satu za radni dan, subotu i nedelju.',
+        'en': '<strong>JGSP Novi Sad</strong> runs city transit in Serbia\'s second-largest city. '
+              'The network consists of 60+ bus lines connecting the city core with suburban settlements (Petrovaradin, Sremska Kamenica, Futog, Veternik, Rumenka, Kać). '
+              'Novi Sad has no trams or trolleybuses — transit is bus-only. '
+              'A GTFS schedule for Novi Sad is in our database, so exact departure times for weekdays, Saturdays and Sundays are available.',
+        'ru': '<strong>JGSP Novi Sad</strong> управляет городским транспортом второго по величине города Сербии. '
+              'Сеть — 60+ автобусных линий, соединяющих центр с пригородами (Петроварадин, Сремска-Каменица, Футог, Ветерник, Руменка, Кач). '
+              'В Нови-Саде нет трамваев и троллейбусов — только автобусы. '
+              'GTFS-расписание Нови-Сада есть в нашей базе, поэтому доступно точное время рейсов на будни, субботу и воскресенье.',
+    },
+    'city_transport.intro_novi_sad_p2': {
+        'sr': 'Karte se kupuju preko <strong>AP kartice JGSP Novi Sad</strong>, pametne kartice koja se puni u AP kioscima ili aplikaciji Moj JGSP. '
+              'Cena jednokratne vožnje iznosi oko 65 RSD, mesečna karta za đake košta od 1000 RSD. Pojedinačnu kartu moguće je kupiti i kod vozača po nešto višoj ceni. '
+              'Za <a href="{prefix}/rute/">međugradske linije</a> koristi se Autobuska stanica Novi Sad — povezuje Novi Sad sa Beogradom, Suboticom, Nišom, Zrenjaninom i desetinama drugih gradova.',
+        'en': 'Tickets use the <strong>JGSP Novi Sad AP card</strong>, a smart card rechargeable at AP kiosks or the Moj JGSP app. '
+              'A single ride costs around 65 RSD, a monthly student pass starts at 1,000 RSD. Single tickets can also be purchased from the driver at a slightly higher price. '
+              'For <a href="{prefix}/rute/">intercity routes</a> use Novi Sad Bus Station — connecting Novi Sad with Belgrade, Subotica, Niš, Zrenjanin and dozens of other cities.',
+        'ru': 'Билеты — по смарт-карте <strong>JGSP Novi Sad (AP)</strong>, которую пополняют в киосках AP или приложении Moj JGSP. '
+              'Одна поездка — около 65 RSD, ученический проездной — от 1000 RSD. Разовый билет можно купить и у водителя по чуть более высокой цене. '
+              '<a href="{prefix}/rute/">Междугородние рейсы</a> — с автовокзала Нови-Сада: Белград, Суботица, Ниш, Зренянин и десятки других городов.',
+    },
+    'city_transport.intro_nis_p1': {
+        'sr': '<strong>JGP Niš-Ekspres</strong> operiše gradskim prevozom u Nišu i okolini. '
+              'Mreža obuhvata oko 50 autobuskih linija koje pokrivaju Niš i prigradska naselja — od Medoševca i Bubnja na zapadu do Donjeg Međurova i Crvenog Krsta na istoku. '
+              'Ne postoji tramvajski ili trolejbuski sistem. GTFS raspored za Niš nije javno dostupan, zato prikazujemo trase i spiskove stajališta, '
+              'a za tačno vreme polazaka preporučujemo proveru u vozilu ili na kioscima Niš-Ekspresa.',
+        'en': '<strong>JGP Niš-Ekspres</strong> runs city transit in Niš and its surroundings. '
+              'The network comprises some 50 bus lines covering Niš and suburban settlements — from Medoševac and Bubanj in the west to Donje Međurovo and Crveni Krst in the east. '
+              'There are no trams or trolleybuses. A public GTFS schedule for Niš is not available, so we show routes and stop lists — '
+              'for exact departure times, check on-board or at Niš-Ekspres kiosks.',
+        'ru': '<strong>JGP Niš-Ekspres</strong> — городской перевозчик Ниша и окрестностей. '
+              'Сеть — около 50 автобусных линий по Нишу и пригородам: от Медошеваца и Бубни на западе до Донего-Мэдюрова и Црвеного-Крста на востоке. '
+              'Трамваев и троллейбусов нет. Публичного GTFS-расписания для Ниша нет, поэтому показываем трассы и списки остановок — '
+              'точное время уточняйте в автобусе или в киосках Niš-Ekspres.',
+    },
+    'city_transport.intro_nis_p2': {
+        'sr': 'Karte se kupuju u vozilu kod vozača (jednokratna vožnja oko 50 RSD) ili na mesečnim karticama Niš-Ekspresa za đake, studente i penzionere. '
+              'Niš je i važno čvorište za <a href="{prefix}/rute/">međugradske i međunarodne autobuske linije</a> ka Skoplju, Sofiji, Istanbulu i drugim evropskim gradovima — '
+              'polaze sa Autobuske stanice Niš. Železnica Srbije (Srbija Voz) takođe opslužuje Niš preko linija ka Beogradu, Preševu (granica sa Severnom Makedonijom) i Pirotu.',
+        'en': 'Tickets are bought on-board from the driver (single ride ~50 RSD) or via monthly Niš-Ekspres cards for pupils, students and pensioners. '
+              'Niš is also a hub for <a href="{prefix}/rute/">intercity and international bus lines</a> to Skopje, Sofia, Istanbul and other European cities — '
+              'departing from Niš Bus Station. Serbian Railways (Srbija Voz) also serves Niš via lines to Belgrade, Preševo (North Macedonia border) and Pirot.',
+        'ru': 'Билеты — у водителя (одна поездка ~50 RSD) или по месячным картам Niš-Ekspres для школьников, студентов и пенсионеров. '
+              'Ниш — важный узел <a href="{prefix}/rute/">междугородних и международных автобусных линий</a>: Скопье, София, Стамбул и др. — с автовокзала Ниша. '
+              'Железные дороги Сербии (Srbija Voz) — линии на Белград, Прешево (граница с С. Македонией) и Пирот.',
+    },
+    'city_transport.intro_kragujevac_p1': {
+        'sr': '<strong>Kragujevac</strong>, četvrti po veličini grad Srbije i istorijska prestonica (1818–1841), '
+              'ima kompaktnu autobusku mrežu od 23 linije koja pokriva centar i okolna naselja (Stanovo, Aerodrom, Pivara, Belošavac, Bubanj). '
+              'Za Kragujevac prikazujemo trase i spiskove stajališta dobijene iz OSM/Overpass podataka; '
+              'tačan GTFS raspored nije javno dostupan, pa za vreme polazaka preporučujemo proveru na stajalištima ili kod prevoznika.',
+        'en': '<strong>Kragujevac</strong>, Serbia\'s fourth-largest city and former capital (1818–1841), '
+              'has a compact 23-line bus network covering the centre and surrounding settlements (Stanovo, Aerodrom, Pivara, Belošavac, Bubanj). '
+              'For Kragujevac we show routes and stop lists built from OSM/Overpass data; '
+              'a public GTFS schedule is not available, so check departure times at the stops or with the carrier.',
+        'ru': '<strong>Крагуевац</strong> — четвёртый по величине город Сербии и бывшая столица (1818–1841) — '
+              'имеет компактную сеть из 23 автобусных линий: центр и пригороды (Станово, Аэродром, Пивара, Белошавац, Бубань). '
+              'Показываем трассы и списки остановок по данным OSM/Overpass; '
+              'публичного GTFS-расписания нет — время рейсов уточняйте на остановках или у перевозчика.',
+    },
+    'city_transport.intro_kragujevac_p2': {
+        'sr': 'Karte se kupuju u autobusu kod vozača, a za đake i studente postoje povlašćene mesečne karte. '
+              'Kragujevac je odlično povezan sa Beogradom (preko 20 polazaka dnevno) i Kraljevom; '
+              'pretraga <a href="{prefix}/rute/">svih međugradskih linija</a> vam pomaže da nađete najbolji polazak za svaki dan. '
+              'Autobuska stanica Kragujevac nalazi se u centru grada, blizu železničke stanice koja je takođe povezana sa Beogradom i Lapovom.',
+        'en': 'Tickets are bought on-board from the driver, with discounted monthly cards for pupils and students. '
+              'Kragujevac is well-connected with Belgrade (20+ daily departures) and Kraljevo; '
+              'search <a href="{prefix}/rute/">all intercity routes</a> to find the best departure for any day. '
+              'Kragujevac Bus Station is in the city centre, near the railway station linked to Belgrade and Lapovo.',
+        'ru': 'Билеты — у водителя, для учеников и студентов — скидочные месячные проездные. '
+              'Крагуевац хорошо связан с Белградом (20+ рейсов в день) и Кралево; '
+              'ищите <a href="{prefix}/rute/">все междугородние маршруты</a> для подбора оптимального рейса. '
+              'Автовокзал в центре города, рядом с ж/д станцией, которая связана с Белградом и Лапово.',
+    },
+    'city_transport.faq_heading': {
+        'sr': 'Često postavljana pitanja',
+        'en': 'Frequently asked questions',
+        'ru': 'Частые вопросы',
+    },
+    'city_transport.faq_q1': {
+        'sr': 'Kako da kupim kartu za gradski prevoz u {city}u?',
+        'en': 'How do I buy a transit ticket in {city}?',
+        'ru': 'Как купить билет на городской транспорт в {city}?',
+    },
+    'city_transport.faq_q2': {
+        'sr': 'Koliko linija opslužuje {city}?',
+        'en': 'How many lines serve {city}?',
+        'ru': 'Сколько линий обслуживает {city}?',
+    },
+    'city_transport.faq_a2': {
+        'sr': 'U mreži ima {n} aktivnih linija, sa ukupno {stops} stajališta mapiranih u našoj bazi. '
+              'Brojevi linija prikazuju se sa filterom po tipu (autobus, tramvaj, trolejbus, noćna) u vrhu stranice.',
+        'en': '{n} active lines serve the city, with {stops} stops mapped in our database. '
+              'Lines are filterable by type (bus, tram, trolleybus, night) at the top of the page.',
+        'ru': 'Сеть включает {n} активных линий и {stops} остановок в нашей базе. '
+              'Линии можно фильтровать по типу (автобус, трамвай, троллейбус, ночная) вверху страницы.',
+    },
+    'city_transport.faq_q3': {
+        'sr': 'Radi li gradski prevoz nedeljom i praznikom?',
+        'en': 'Does transit run on Sundays and holidays?',
+        'ru': 'Работает ли транспорт по воскресеньям и праздникам?',
+    },
+    'city_transport.faq_a3': {
+        'sr': 'Da, većina linija saobraća sedam dana u nedelji, sa smanjenom frekvencijom subotom i nedeljom. '
+              'Raspored vidite u rubrici „Subota" i „Nedelja" na stranici svake linije. Državnim praznicima obično se primenjuje nedeljni raspored.',
+        'en': 'Yes, most lines run seven days a week with reduced weekend frequency. '
+              'The schedule is split into Saturday and Sunday tabs on each line page. On public holidays the Sunday schedule typically applies.',
+        'ru': 'Да, большинство линий работают 7 дней в неделю с сокращённой частотой по выходным. '
+              'Расписание в табах «Субота» и «Недеља» на странице каждой линии. В госпраздники обычно действует воскресное расписание.',
+    },
+    'city_transport.faq_q4': {
+        'sr': 'Kako stižem iz {city}a u druge gradove Srbije?',
+        'en': 'How do I get from {city} to other cities in Serbia?',
+        'ru': 'Как добраться из {city} в другие города Сербии?',
+    },
+    'city_transport.faq_a4': {
+        'sr': 'Za međugradski prevoz koristite našu stranicu <a href="{prefix}/rute/">svih ruta</a> ili direktno tražite polazak preko '
+              '<a href="{prefix}/pretraga/?od={city}">polazaka iz {city}a</a>. Prikazujemo autobuske i železničke rute sa cenom, trajanjem i brojem polazaka.',
+        'en': 'For intercity travel use the <a href="{prefix}/rute/">all-routes page</a> or search directly via '
+              '<a href="{prefix}/pretraga/?od={city}">departures from {city}</a>. We show bus and train routes with price, duration and departure count.',
+        'ru': 'Для междугородних поездок используйте <a href="{prefix}/rute/">страницу всех маршрутов</a> или ищите напрямую через '
+              '<a href="{prefix}/pretraga/?od={city}">рейсы из {city}</a>. Показываем автобусные и ж/д маршруты с ценой, временем и количеством рейсов.',
+    },
+
+    # ── Hub SEO intros & FAQ: carriers_index (/prevoznici/) ──
+    'carriers.intro_h': {
+        'sr': 'Autobuski i železnički prevoznici u Srbiji',
+        'en': 'Bus and rail carriers in Serbia',
+        'ru': 'Автобусные и железнодорожные перевозчики Сербии',
+    },
+    'carriers.intro_p1': {
+        'sr': 'U Srbiji posluje više desetina autobuskih i železničkih prevoznika, od velikih nacionalnih operatera kao što su '
+              '<strong>Lasta</strong> (najveći operater u zemlji sa bazom u Beogradu), '
+              '<strong>Niš-Ekspres</strong> (lider na jugu Srbije), '
+              '<strong>Srbija Voz</strong> (državna železnica) do malih lokalnih firmi koje povezuju udaljena mesta sa najbližim gradskim čvorištima. '
+              'Međunarodni prevoznici poput <strong>OZLEM</strong>, <strong>GEA Tours</strong> i <strong>FUDEKS</strong> '
+              'opslužuju linije ka Turskoj, Bugarskoj, Severnoj Makedoniji, Austriji, Nemačkoj, Mađarskoj i Crnoj Gori. '
+              'Na Prevozni.com imamo preko 66 operatera sa 517 aktivnih linija — za svakog prikazujemo listu ruta, povezanih gradova i, kada je dostupno, zvanični sajt.',
+        'en': 'Serbia is served by dozens of bus and rail carriers — from large national operators such as '
+              '<strong>Lasta</strong> (the biggest carrier, based in Belgrade), '
+              '<strong>Niš-Ekspres</strong> (leading in southern Serbia), '
+              '<strong>Srbija Voz</strong> (state railway) — down to small local companies linking outlying towns to the nearest city hub. '
+              'International carriers like <strong>OZLEM</strong>, <strong>GEA Tours</strong> and <strong>FUDEKS</strong> '
+              'serve lines to Turkey, Bulgaria, North Macedonia, Austria, Germany, Hungary and Montenegro. '
+              'Prevozni.com lists 66+ operators with 517 active lines — for each one we show the route list, cities served and, when available, the official site.',
+        'ru': 'В Сербии работают десятки автобусных и ж/д перевозчиков — от крупных национальных операторов, таких как '
+              '<strong>Lasta</strong> (крупнейший перевозчик, база в Белграде), '
+              '<strong>Niš-Ekspres</strong> (лидер на юге Сербии), '
+              '<strong>Srbija Voz</strong> (гос. ж/д), до мелких местных компаний, соединяющих отдалённые города с ближайшими узлами. '
+              'Международные перевозчики <strong>OZLEM</strong>, <strong>GEA Tours</strong>, <strong>FUDEKS</strong> — '
+              'линии в Турцию, Болгарию, С. Македонию, Австрию, Германию, Венгрию и Черногорию. '
+              'На Prevozni.com — 66+ операторов и 517 активных линий; по каждому — список маршрутов, города обслуживания и, где доступно, официальный сайт.',
+    },
+    'carriers.intro_p2': {
+        'sr': 'Prevoznici su sortirani po broju linija koje opslužuju, tako da su na vrhu stranice najveći operateri. '
+              'Klikom na ime prevoznika dobijate listu svih njegovih ruta sa direktnim linkovima na stranice pojedinačnih linija '
+              '(npr. <a href="{prefix}/rute/">pregled svih ruta</a>). '
+              'Ukoliko ne znate pouzdano koji prevoznik vam odgovara, preporučujemo da krenete od odredišta: izaberite rutu (npr. '
+              '<a href="{prefix}/voznja/beograd-do-budva/">Beograd — Budva</a>) i pogledajte polaske sortirane po ceni i vremenu — '
+              'tu ćete videti koji operater nudi najbolju opciju za vaš termin. Za gradski prevoz svakog grada (GSP, JGSP, Niš-Ekspres) '
+              'posetite <a href="{prefix}/gradski/">stranicu gradskog prevoza</a>.',
+        'en': 'Carriers are sorted by number of routes served, so the biggest operators appear first. '
+              'Clicking a carrier name opens a list of its routes with direct links to individual line pages '
+              '(for example <a href="{prefix}/rute/">all routes</a>). '
+              'If you\'re not sure which carrier suits you, start from the destination: pick a route (e.g. '
+              '<a href="{prefix}/voznja/beograd-do-budva/">Belgrade — Budva</a>) and sort departures by price and time — '
+              'you\'ll see which operator offers the best option for your schedule. For city transit (GSP, JGSP, Niš-Ekspres) '
+              'visit the <a href="{prefix}/gradski/">city transit page</a>.',
+        'ru': 'Перевозчики отсортированы по числу маршрутов, так что крупнейшие — сверху. '
+              'При клике на имя перевозчика открывается список его маршрутов с прямыми ссылками на страницы линий '
+              '(например <a href="{prefix}/rute/">все маршруты</a>). '
+              'Если не уверены, какой перевозчик подходит, начните с направления: выберите маршрут (например '
+              '<a href="{prefix}/voznja/beograd-do-budva/">Белград — Будва</a>), отсортируйте рейсы по цене и времени — '
+              'увидите лучший вариант. Для городского транспорта (GSP, JGSP, Niš-Ekspres) — '
+              '<a href="{prefix}/gradski/">страница городского транспорта</a>.',
+    },
+    'carriers.faq_heading': {
+        'sr': 'Česta pitanja o prevoznicima',
+        'en': 'Frequently asked questions about carriers',
+        'ru': 'Частые вопросы о перевозчиках',
+    },
+    'carriers.faq_q1': {
+        'sr': 'Koji je najveći autobuski prevoznik u Srbiji?',
+        'en': 'Which is the largest bus carrier in Serbia?',
+        'ru': 'Кто крупнейший автобусный перевозчик Сербии?',
+    },
+    'carriers.faq_a1': {
+        'sr': 'Najveći operater je Lasta sa bazom u Beogradu — opslužuje preko 200 domaćih i međunarodnih linija. '
+              'Niš-Ekspres dominira na jugu zemlje, dok je Srbija Voz jedini železnički operater. '
+              'Kompletna lista prevoznika sa brojem linija i povezanim gradovima dostupna je na ovoj stranici.',
+        'en': 'The largest operator is Lasta, based in Belgrade — serving 200+ domestic and international routes. '
+              'Niš-Ekspres dominates the south, while Srbija Voz is the sole rail operator. '
+              'A complete list of carriers with route counts and cities served is on this page.',
+        'ru': 'Крупнейший оператор — Lasta (база в Белграде) — более 200 внутренних и международных маршрутов. '
+              'Niš-Ekspres лидирует на юге, а Srbija Voz — единственный ж/д оператор. '
+              'Полный список с числом маршрутов и городами — на этой странице.',
+    },
+    'carriers.faq_q2': {
+        'sr': 'Kako da uporedim cene između različitih prevoznika?',
+        'en': 'How do I compare prices between carriers?',
+        'ru': 'Как сравнить цены между перевозчиками?',
+    },
+    'carriers.faq_a2': {
+        'sr': 'Otvorite stranicu rute (npr. <a href="{prefix}/rute/">katalog ruta</a>) i pogledajte kolonu cene za svaki polazak — '
+              'pored cene je naveden i prevoznik, tako da je lako uporediti. SEO parne stranice /voznja/grad1-do-grad2/ dodatno prikazuju raspon cena i najjeftinijeg operatera.',
+        'en': 'Open a route page (e.g. the <a href="{prefix}/rute/">route catalog</a>) and check the price column — '
+              'each departure shows the operator alongside the price. SEO city-pair pages at /voznja/city1-do-city2/ additionally show the price range and the cheapest operator.',
+        'ru': 'Откройте страницу маршрута (например <a href="{prefix}/rute/">каталог маршрутов</a>) и смотрите столбец цены — '
+              'рядом с ценой указан перевозчик. SEO-страницы пар /voznja/gorod1-do-gorod2/ также показывают диапазон цен и самого дешёвого оператора.',
+    },
+    'carriers.faq_q3': {
+        'sr': 'Da li su podaci o prevoznicima zvanični?',
+        'en': 'Is the carrier data official?',
+        'ru': 'Официальные ли данные о перевозчиках?',
+    },
+    'carriers.faq_a3': {
+        'sr': 'Podaci se dobijaju automatski iz javnih izvora (busticket4.me, polazak.rs, srbijavoz.rs) i agregiraju nekoliko puta dnevno. '
+              'Nismo zvanični partner prevoznika — za rezervaciju mesta ili specifične uslove prevoza savetujemo posetu zvaničnog sajta operatera (link je na svakoj kartici).',
+        'en': 'Data is pulled automatically from public sources (busticket4.me, polazak.rs, srbijavoz.rs) and aggregated several times a day. '
+              'We are not an official carrier partner — for reservations or specific travel conditions please visit the carrier\'s official site (link on each card).',
+        'ru': 'Данные автоматически собираются из публичных источников (busticket4.me, polazak.rs, srbijavoz.rs) и агрегируются несколько раз в день. '
+              'Мы не являемся официальным партнёром перевозчиков — для бронирования или уточнения условий посетите официальный сайт оператора (ссылка на каждой карточке).',
+    },
+
+    # ── Hub SEO intros & FAQ: stations_index (/autobuske-stanice/) ──
+    'stations.intro_h': {
+        'sr': 'Autobuske i železničke stanice u Srbiji',
+        'en': 'Bus and train stations in Serbia',
+        'ru': 'Автобусные и железнодорожные станции Сербии',
+    },
+    'stations.intro_p1': {
+        'sr': 'Glavne čvorne stanice Srbije — autobuske i železničke — povezuju preko 100 gradova i 66 prevoznika u jedinstvenu mrežu. '
+              '<strong>Beogradska autobuska stanica (BAS)</strong> na Novom Beogradu je najveće čvorište u zemlji, sa preko 2000 dnevnih polazaka ka svim delovima Srbije i Evrope. '
+              '<strong>Centralna železnička stanica Beograd Centar (Prokop)</strong> je glavni železnički čvor od 2018. — polazak za Novi Sad, Subotice, Niš i međunarodne pravce. '
+              'Tu su i druga važna čvorišta: <strong>Autobuska stanica Novi Sad</strong>, <strong>Autobuska stanica Niš</strong>, '
+              '<strong>Autobuska stanica Subotica</strong> (granica sa Mađarskom), <strong>Prijepolje</strong> i <strong>Užice</strong> za linije ka Crnoj Gori i BiH.',
+        'en': 'Serbia\'s main hub stations — bus and rail — connect 100+ cities and 66 carriers into a single network. '
+              '<strong>Belgrade Bus Station (BAS)</strong> in Novi Beograd is the country\'s largest hub, with 2,000+ daily departures across Serbia and Europe. '
+              '<strong>Belgrade Centar (Prokop)</strong> is the country\'s main railway hub since 2018 — departures to Novi Sad, Subotica, Niš and international destinations. '
+              'Other key hubs: <strong>Novi Sad Bus Station</strong>, <strong>Niš Bus Station</strong>, '
+              '<strong>Subotica Bus Station</strong> (Hungarian border), and <strong>Prijepolje</strong> / <strong>Užice</strong> for lines to Montenegro and Bosnia.',
+        'ru': 'Главные узловые станции Сербии — автобусные и ж/д — связывают 100+ городов и 66 перевозчиков в единую сеть. '
+              '<strong>Белградский автовокзал (BAS)</strong> в Новом Белграде — крупнейший узел страны, 2000+ рейсов в сутки по всей Сербии и Европе. '
+              '<strong>Белград Центар (Прокоп)</strong> — главный ж/д узел с 2018 года: рейсы в Нови-Сад, Суботицу, Ниш и международные направления. '
+              'Другие важные узлы: <strong>автовокзал Нови-Сада</strong>, <strong>автовокзал Ниша</strong>, '
+              '<strong>автовокзал Суботицы</strong> (граница с Венгрией), <strong>Приеполе</strong> и <strong>Ужице</strong> — линии в Черногорию и БиГ.',
+    },
+    'stations.intro_p2': {
+        'sr': 'Za svaku stanicu prikazujemo grad, tip (autobuska / železnička) i broj ruta koje polaze sa nje. '
+              'Ukupno u bazi imamo desetke stanica grupisanih po gradovima — pogledajte <a href="{prefix}/rute/">katalog međugradskih ruta</a> '
+              'ili direktno otvorite stranicu nekog od ključnih gradova, npr. <a href="{prefix}/voznja/beograd-do-novi-sad/">Beograd — Novi Sad</a> '
+              'ili <a href="{prefix}/voznja/beograd-do-budva/">Beograd — Budva</a>. '
+              'Na stanicama se karte kupuju na blagajnama ili kod vozača u vozilu; u Beogradu i Novom Sadu su blagajne otvorene od 05:00 do 23:00, '
+              'sa radom tokom noći na glavnim međunarodnim polazcima. Stanice u manjim mestima često nemaju noćnu smenu — preporučujemo kupovinu karte unapred.',
+        'en': 'For every station we show the city, type (bus / rail) and the number of routes departing from it. '
+              'The database holds dozens of stations grouped by city — browse the <a href="{prefix}/rute/">intercity route catalog</a> '
+              'or jump to a key city pair directly, e.g. <a href="{prefix}/voznja/beograd-do-novi-sad/">Belgrade — Novi Sad</a> '
+              'or <a href="{prefix}/voznja/beograd-do-budva/">Belgrade — Budva</a>. '
+              'Tickets are sold at station counters or on-board from the driver; in Belgrade and Novi Sad counters are open 05:00–23:00, '
+              'with overnight service on major international departures. Smaller stations often lack a night shift — buy your ticket in advance.',
+        'ru': 'По каждой станции показываем город, тип (автобусная / ж/д) и количество маршрутов отправления. '
+              'В базе — десятки станций, сгруппированных по городам. Смотрите <a href="{prefix}/rute/">каталог междугородних маршрутов</a> '
+              'или переходите сразу к ключевой паре, например <a href="{prefix}/voznja/beograd-do-novi-sad/">Белград — Нови-Сад</a> '
+              'или <a href="{prefix}/voznja/beograd-do-budva/">Белград — Будва</a>. '
+              'Билеты продаются в кассах или у водителя; в Белграде и Нови-Саде кассы работают 05:00–23:00, '
+              'с ночными окнами на крупных международных рейсах. В малых городах ночной смены часто нет — покупайте билет заранее.',
+    },
+    'stations.faq_heading': {
+        'sr': 'Često postavljana pitanja o stanicama',
+        'en': 'Frequently asked questions about stations',
+        'ru': 'Частые вопросы о станциях',
+    },
+    'stations.faq_q1': {
+        'sr': 'Gde se nalazi glavna autobuska stanica u Beogradu?',
+        'en': 'Where is Belgrade\'s main bus station?',
+        'ru': 'Где находится главный автовокзал Белграда?',
+    },
+    'stations.faq_a1': {
+        'sr': 'Glavna BAS (Beogradska autobuska stanica) nalazi se u Novom Beogradu, Blok 42, odmah pored železničke stanice Beograd Centar (Prokop). '
+              'Od centra grada do nje se stiže linijama gradskog autobusa 78, 95 i E9 za oko 15 minuta. '
+              'Stara stanica BAS na Savamali zatvorena je 2019. godine.',
+        'en': 'The main BAS (Belgrade Bus Station) is in Novi Beograd, Block 42, next to Belgrade Centar railway station (Prokop). '
+              'From the city centre it\'s reachable by city buses 78, 95 or E9 in about 15 minutes. '
+              'The old BAS in Savamala closed in 2019.',
+        'ru': 'Главный BAS (Белградский автовокзал) — в Новом Белграде, Блок 42, рядом с ж/д вокзалом Београд Центар (Прокоп). '
+              'Из центра — городскими автобусами 78, 95 или E9 за ~15 минут. '
+              'Старый автовокзал BAS в Савамале закрыт в 2019 году.',
+    },
+    'stations.faq_q2': {
+        'sr': 'Mogu li da kupim kartu na stanici ili samo online?',
+        'en': 'Can I buy a ticket at the station or only online?',
+        'ru': 'Можно ли купить билет на станции или только онлайн?',
+    },
+    'stations.faq_a2': {
+        'sr': 'Karte se uvek mogu kupiti na blagajni autobuske ili železničke stanice, bez dodatnih taksi. '
+              'Online kupovina preko partnerskih sajtova ponekad nudi popust ili bržu rezervaciju mesta, naročito za popularne linije tokom letnje sezone ili praznika. '
+              'Za međugradske linije tokom leta preporučujemo kupovinu 2–3 dana unapred.',
+        'en': 'Tickets are always sold at bus and train station counters, with no booking fees. '
+              'Online purchase via partner sites sometimes offers a discount or faster seat reservation, especially for popular routes in summer and around holidays. '
+              'For intercity lines in summer we recommend buying 2–3 days in advance.',
+        'ru': 'Билеты всегда можно купить в кассах автовокзала или ж/д вокзала без дополнительных сборов. '
+              'Онлайн-покупка через партнёров иногда даёт скидку или быстрое бронирование места, особенно на популярных рейсах летом и в праздники. '
+              'Для междугородних рейсов летом советуем покупать билет за 2–3 дня.',
+    },
+    'stations.faq_q3': {
+        'sr': 'Koja je najbliža međunarodna stanica u Srbiji?',
+        'en': 'What is Serbia\'s closest international station?',
+        'ru': 'Какая ближайшая международная станция в Сербии?',
+    },
+    'stations.faq_a3': {
+        'sr': 'Zavisi od pravca putovanja: Subotica za Mađarsku, Dimitrovgrad za Bugarsku, Preševo za Severnu Makedoniju, '
+              'Priboj ili Užice za Bosnu i Hercegovinu, Prijepolje ili Novi Pazar za Crnu Goru. '
+              'Beogradski BAS takođe opslužuje najviše međunarodnih linija, uključujući direktne polaske ka Istanbulu, Beču, Minhenu, Frankfurtu i Zurich-u.',
+        'en': 'It depends on direction: Subotica for Hungary, Dimitrovgrad for Bulgaria, Preševo for North Macedonia, '
+              'Priboj or Užice for Bosnia, Prijepolje or Novi Pazar for Montenegro. '
+              'Belgrade BAS also handles the most international lines, including direct departures to Istanbul, Vienna, Munich, Frankfurt and Zurich.',
+        'ru': 'Зависит от направления: Суботица — в Венгрию, Димитровград — в Болгарию, Прешево — в С. Македонию, '
+              'Прибой или Ужице — в БиГ, Приеполе или Нови-Пазар — в Черногорию. '
+              'BAS Белграда также имеет больше всего международных рейсов, включая прямые на Стамбул, Вену, Мюнхен, Франкфурт и Цюрих.',
+    },
+
+    # ── Hub SEO intros & FAQ: destinations (/destinacije/) ──
+    'dest.intro_h': {
+        'sr': 'Popularne destinacije iz Srbije',
+        'en': 'Popular destinations from Serbia',
+        'ru': 'Популярные направления из Сербии',
+    },
+    'dest.intro_p1': {
+        'sr': 'Sa centralnim položajem na Balkanu, Srbija je odlična polazna tačka za putovanja autobusom ili vozom ka glavnim turističkim i poslovnim centrima regiona. '
+              'Letnji pravci ka <strong>Crnogorskom primorju</strong> (Budva, Herceg Novi, Kotor, Bar, Tivat, Ulcinj) imaju pojačane polaske tokom juna–septembra, '
+              'sa noćnim autobusima iz Beograda koji stižu ujutru na obalu. '
+              'Gradovi bivše Jugoslavije — <strong>Sarajevo, Mostar, Banja Luka, Zagreb, Split, Dubrovnik, Ljubljana, Skoplje, Bitola</strong> — '
+              'su dostupni direktnim autobuskim linijama, sa putovanjem od 4 do 10 sati. '
+              'Centralnoevropski pravci (<strong>Budimpešta, Beč, Minhen, Frankfurt, Prag</strong>) imaju dnevne i noćne autobuske rute sa Beogradske autobuske stanice, '
+              'a za Tursku (<strong>Istanbul</strong>) polazi direktan autobus iz Beograda i Niša.',
+        'en': 'With its central Balkan location, Serbia is a superb starting point for bus and rail travel to the region\'s main tourism and business hubs. '
+              'Summer routes to the <strong>Montenegrin coast</strong> (Budva, Herceg Novi, Kotor, Bar, Tivat, Ulcinj) run on increased frequency June–September, '
+              'with overnight buses from Belgrade arriving on the coast by morning. '
+              'Former-Yugoslavia cities — <strong>Sarajevo, Mostar, Banja Luka, Zagreb, Split, Dubrovnik, Ljubljana, Skopje, Bitola</strong> — '
+              'are reachable by direct bus lines, with journeys of 4–10 hours. '
+              'Central-European routes (<strong>Budapest, Vienna, Munich, Frankfurt, Prague</strong>) run day and night from Belgrade Bus Station, '
+              'and a direct bus to Turkey (<strong>Istanbul</strong>) departs from Belgrade and Niš.',
+        'ru': 'Благодаря центральному положению на Балканах Сербия — отличная отправная точка для автобусных и ж/д поездок по региону. '
+              'Летние рейсы на <strong>побережье Черногории</strong> (Будва, Херцег-Нови, Котор, Бар, Тиват, Улцинь) усилены июнь–сентябрь — '
+              'ночные автобусы из Белграда приходят на побережье утром. '
+              'Города бывшей Югославии — <strong>Сараево, Мостар, Баня-Лука, Загреб, Сплит, Дубровник, Любляна, Скопье, Битола</strong> — '
+              'доступны прямыми автобусами, поездка 4–10 часов. '
+              'Центральноевропейские направления (<strong>Будапешт, Вена, Мюнхен, Франкфурт, Прага</strong>) — дневные и ночные автобусы с BAS, '
+              'в Турцию (<strong>Стамбул</strong>) прямой автобус отправляется из Белграда и Ниша.',
+    },
+    'dest.intro_p2': {
+        'sr': 'Ispod je kratak pregled top 14 destinacija sa direktnim linkovima na stranice konkretnih ruta — '
+              'za svaku destinaciju navedene su glavne polazišne tačke iz Srbije (Beograd, Novi Sad, Niš, Subotica). '
+              'Za kompletan katalog međugradskih ruta posetite <a href="{prefix}/rute/">/rute/</a>, '
+              'a za pretragu po imenu grada iskoristite <a href="{prefix}/pretraga/">pretragu polazaka</a>. '
+              'Cene karata, broj dnevnih polazaka i prosečno trajanje putovanja prikazani su na stranici svake rute, sa mogućnošću online kupovine preko partnerskih sajtova. '
+              'Savet: za letnje pravce ka obali rezervišite kartu bar 7 dana unapred, a za međunarodne linije ka Turskoj i Nemačkoj čak 14 dana — '
+              'cene rastu kako se datum polaska približava, a kapacitet noćnih polazaka je ograničen.',
+        'en': 'Below is a quick overview of the top 14 destinations with direct links to the route pages — '
+              'each destination lists the main starting points from Serbia (Belgrade, Novi Sad, Niš, Subotica). '
+              'For the full intercity catalog visit <a href="{prefix}/rute/">/rute/</a>, '
+              'and for name-based search use <a href="{prefix}/pretraga/">the departures search</a>. '
+              'Ticket prices, daily-departure counts and average journey time are listed on each route page, with online booking available via partner sites. '
+              'Tip: for summer coastal routes book at least 7 days ahead, for international lines to Turkey and Germany as much as 14 days — '
+              'prices rise as departure nears and night-bus capacity is limited.',
+        'ru': 'Ниже — краткий обзор топ-14 направлений с прямыми ссылками на страницы маршрутов; '
+              'у каждого направления указаны основные отправные точки в Сербии (Белград, Нови-Сад, Ниш, Суботица). '
+              'Полный каталог — на <a href="{prefix}/rute/">/rute/</a>, '
+              'поиск по названию города — в <a href="{prefix}/pretraga/">поиске рейсов</a>. '
+              'Цены билетов, число рейсов в день и среднее время в пути — на странице каждого маршрута, с возможностью онлайн-покупки через партнёров. '
+              'Совет: на летнее побережье бронируйте минимум за 7 дней, на международные рейсы в Турцию и Германию — за 14; '
+              'цены растут по мере приближения даты, а ночные автобусы ограничены по вместимости.',
+    },
+    'dest.faq_heading': {
+        'sr': 'Često postavljana pitanja',
+        'en': 'Frequently asked questions',
+        'ru': 'Частые вопросы',
+    },
+    'dest.faq_q1': {
+        'sr': 'Koliko traje putovanje autobusom od Beograda do Budve?',
+        'en': 'How long is the bus ride from Belgrade to Budva?',
+        'ru': 'Сколько едет автобус из Белграда в Будву?',
+    },
+    'dest.faq_a1': {
+        'sr': 'Putovanje autobusom Beograd — Budva traje u proseku 11–12 sati, u zavisnosti od prevoznika i rute (preko Užica/Prijepolja ili Zlatibora). '
+              'Noćni polasci (u 20:00–22:00) stižu u Budvu oko 07:00–09:00 ujutru, što je najpovoljniji izbor za letnju sezonu. '
+              'Detalji na <a href="{prefix}/voznja/beograd-do-budva/">stranici Beograd — Budva</a>.',
+        'en': 'The Belgrade — Budva bus ride averages 11–12 hours, depending on operator and routing (via Užice/Prijepolje or Zlatibor). '
+              'Overnight departures (20:00–22:00) reach Budva around 07:00–09:00, the best option for summer. '
+              'Details on the <a href="{prefix}/voznja/beograd-do-budva/">Belgrade — Budva page</a>.',
+        'ru': 'Автобус Белград — Будва едет в среднем 11–12 часов в зависимости от перевозчика и маршрута (через Ужице/Приеполе или Златибор). '
+              'Ночные рейсы (20:00–22:00) приходят в Будву ~07:00–09:00 — лучший вариант летом. '
+              'Подробности на <a href="{prefix}/voznja/beograd-do-budva/">странице Белград — Будва</a>.',
+    },
+    'dest.faq_q2': {
+        'sr': 'Treba li mi viza ili pasoš za Crnu Goru, BiH, Severnu Makedoniju?',
+        'en': 'Do I need a visa or passport for Montenegro, Bosnia or North Macedonia?',
+        'ru': 'Нужна ли виза или паспорт для Черногории, БиГ или С. Македонии?',
+    },
+    'dest.faq_a2': {
+        'sr': 'Građani Srbije mogu da putuju sa ličnom kartom u Crnu Goru, Bosnu i Hercegovinu, Severnu Makedoniju i Albaniju — bez pasoša. '
+              'Za Hrvatsku (članica Šengena od 2023.) potreban je pasoš ili lična karta u zavisnosti od dokumenta. '
+              'Za zemlje EU van Šengena i Tursku preporučujemo pasoš sa važenjem od najmanje 6 meseci od datuma ulaska.',
+        'en': 'Serbian citizens can travel with a national ID to Montenegro, Bosnia and Herzegovina, North Macedonia and Albania — no passport required. '
+              'For Croatia (in Schengen since 2023) a passport or national ID is needed depending on the document. '
+              'For non-Schengen EU countries and Turkey, carry a passport valid at least 6 months from the entry date.',
+        'ru': 'Граждане Сербии могут ездить по внутреннему ID в Черногорию, Боснию и Герцеговину, С. Македонию и Албанию — без загранпаспорта. '
+              'Для Хорватии (в Шенгене с 2023) нужен паспорт или ID в зависимости от документа. '
+              'В страны ЕС вне Шенгена и Турцию — заграничный паспорт со сроком действия не менее 6 месяцев.',
+    },
+    'dest.faq_q3': {
+        'sr': 'Koja destinacija ima najjeftiniji autobuski polazak iz Beograda?',
+        'en': 'Which destination has the cheapest bus from Belgrade?',
+        'ru': 'В какое направление самый дешёвый автобус из Белграда?',
+    },
+    'dest.faq_a3': {
+        'sr': 'Za blize destinacije cene počinju od oko 10€: Novi Sad, Niš, Subotica, Kragujevac. '
+              'Za regionalne destinacije najpovoljnije su Sarajevo, Skoplje i Banja Luka (20–30€). '
+              'Letnji polasci na crnogorsko primorje mogu biti skuplji (30–45€) zbog veće tražnje — bukiranje unapred je ključno za niže cene.',
+        'en': 'Nearby destinations start around €10: Novi Sad, Niš, Subotica, Kragujevac. '
+              'In the region, the best-value are Sarajevo, Skopje and Banja Luka (€20–30). '
+              'Summer coastal runs to Montenegro can cost €30–45 due to high demand — early booking matters for lower fares.',
+        'ru': 'Ближние направления — от ~10€: Нови-Сад, Ниш, Суботица, Крагуевац. '
+              'Из региональных выгоднее всего Сараево, Скопье и Баня-Лука (20–30€). '
+              'Летние рейсы на побережье Черногории дороже (30–45€) из-за спроса — ранняя бронь снижает цену.',
+    },
+
+    # ── home FAQ (only) ──
+    'home.faq_heading': {
+        'sr': 'Često postavljana pitanja',
+        'en': 'Frequently asked questions',
+        'ru': 'Частые вопросы',
+    },
+    'home.faq_q1': {
+        'sr': 'Šta je Prevozni.com?',
+        'en': 'What is Prevozni.com?',
+        'ru': 'Что такое Prevozni.com?',
+    },
+    'home.faq_a1': {
+        'sr': 'Prevozni.com je besplatan agregator reda vožnje autobusa, vozova, tramvaja i trolejbusa u Srbiji. '
+              'Pokrivamo gradski prevoz u Beogradu, Novom Sadu, Nišu i Kragujevcu, kao i više od 270 međugradskih i međunarodnih ruta. '
+              'Nema registracije, nema reklama, podaci se ažuriraju svakodnevno iz zvaničnih izvora.',
+        'en': 'Prevozni.com is a free aggregator of bus, train, tram and trolleybus schedules in Serbia. '
+              'We cover city transit in Belgrade, Novi Sad, Niš and Kragujevac, plus 270+ intercity and international routes. '
+              'No signup, no ads, data refreshes daily from official sources.',
+        'ru': 'Prevozni.com — бесплатный агрегатор расписания автобусов, поездов, трамваев и троллейбусов Сербии. '
+              'Охватываем городской транспорт Белграда, Нови-Сада, Ниша и Крагуеваца, плюс 270+ междугородних и международных маршрутов. '
+              'Без регистрации, без рекламы, данные обновляются ежедневно из официальных источников.',
+    },
+    'home.faq_q2': {
+        'sr': 'Koje gradove i rute pokriva sajt?',
+        'en': 'Which cities and routes does the site cover?',
+        'ru': 'Какие города и маршруты покрывает сайт?',
+    },
+    'home.faq_a2': {
+        'sr': 'U bazi imamo 4 grada sa detaljnim gradskim prevozom (610 linija, 3700+ stajališta) i 517 međugradskih/međunarodnih ruta '
+              '(Crna Gora, BiH, Hrvatska, Mađarska, Severna Makedonija, Turska, Nemačka, Austrija i dr.). '
+              'Puni pregled je na <a href="{prefix}/gradski/">stranici gradskog prevoza</a> i <a href="{prefix}/rute/">katalogu ruta</a>.',
+        'en': 'The database holds 4 cities with detailed city transit (610 lines, 3,700+ stops) and 517 intercity/international routes '
+              '(Montenegro, Bosnia, Croatia, Hungary, North Macedonia, Turkey, Germany, Austria and more). '
+              'Full overview on the <a href="{prefix}/gradski/">city transit page</a> and <a href="{prefix}/rute/">route catalog</a>.',
+        'ru': 'В базе — 4 города с подробным городским транспортом (610 линий, 3700+ остановок) и 517 междугородних/международных маршрутов '
+              '(Черногория, БиГ, Хорватия, Венгрия, С. Македония, Турция, Германия, Австрия и др.). '
+              'Полный обзор на <a href="{prefix}/gradski/">странице городского транспорта</a> и <a href="{prefix}/rute/">каталоге маршрутов</a>.',
+    },
+    'home.faq_q3': {
+        'sr': 'Da li je sajt besplatan i bez reklama?',
+        'en': 'Is the site free and ad-free?',
+        'ru': 'Бесплатный ли сайт и без рекламы?',
+    },
+    'home.faq_a3': {
+        'sr': 'Da, Prevozni.com je potpuno besplatan i bez registracije. Ne prikazujemo invazivne reklame i ne prodajemo vaše podatke. '
+              'Posetu pratimo samo putem anonimne analitike (Umami), a projekat se izdržava povremenim affiliate provizijama kod kupovine karata preko naših partnera.',
+        'en': 'Yes, Prevozni.com is fully free and no-signup. We do not display intrusive ads and do not sell your data. '
+              'Visits are tracked only with anonymous analytics (Umami); the project is funded by occasional affiliate commissions when you buy tickets via our partners.',
+        'ru': 'Да, Prevozni.com полностью бесплатный и без регистрации. Мы не показываем навязчивую рекламу и не продаём ваши данные. '
+              'Посещения фиксируются только анонимной аналитикой (Umami); проект живёт за счёт редких партнёрских комиссий при покупке билетов через партнёров.',
+    },
+
+    # ── Popular / "See also" blocks ──
+    'city_transport.popular_routes_h': {
+        'sr': 'Popularne međugradske rute iz {city}a',
+        'en': 'Popular intercity routes from {city}',
+        'ru': 'Популярные междугородние маршруты из {city}',
+    },
+    'route_index.related_cities_h': {
+        'sr': 'Otkrijte gradski prevoz',
+        'en': 'Explore city transit',
+        'ru': 'Изучите городской транспорт',
+    },
 }
 
 SUPPORTED_LANGS = ('sr', 'en', 'ru')
