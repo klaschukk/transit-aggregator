@@ -19,7 +19,15 @@ def route_index():
         GROUP BY r.slug, r.from_city, r.to_city, r.distance_km
         ORDER BY r.from_city, r.to_city
     """) if db_ready() else []
-    return render_template('route_index.html', routes=routes)
+
+    # Popular routes block: top 8 by trip_count for SEO interlinking
+    popular_routes = sorted(
+        (r for r in routes if r.get('trip_count')),
+        key=lambda r: r['trip_count'], reverse=True
+    )[:8]
+
+    return render_template('route_index.html', routes=routes,
+                           popular_routes=popular_routes)
 
 
 @intercity_bp.route('/rute/<slug>/')
@@ -165,6 +173,7 @@ def city_pair(from_city: str, to_city: str):
 
     # Related city pairs: other destinations from the same origin
     related_pairs = []
+    onward_pairs = []
     if route:
         related_pairs = cached_query("""
             SELECT r.from_city, r.to_city, r.from_city_slug, r.to_city_slug,
@@ -178,8 +187,23 @@ def city_pair(from_city: str, to_city: str):
             LIMIT 5
         """, [route['from_city'], route['to_city']], ttl=3600)
 
+        # Onward: routes departing from the destination city — helps Google
+        # understand this page sits in a travel graph, not in isolation.
+        onward_pairs = cached_query("""
+            SELECT r.from_city, r.to_city, r.from_city_slug, r.to_city_slug,
+                   r.distance_km, COUNT(DISTINCT t.id) as trip_count
+            FROM routes r
+            LEFT JOIN trips t ON t.route_id = r.id
+            WHERE r.from_city = ? AND r.to_city != ? AND r.type = 'intercity'
+            GROUP BY r.from_city, r.to_city, r.from_city_slug, r.to_city_slug, r.distance_km
+            HAVING trip_count > 0
+            ORDER BY trip_count DESC
+            LIMIT 5
+        """, [route['to_city'], route['from_city']], ttl=3600)
+
     return render_template('city_pair.html',
                            route=route, trips=trips, route_info=route_info,
                            related_pairs=related_pairs,
+                           onward_pairs=onward_pairs,
                            from_city=from_city.replace('-', ' ').title(),
                            to_city=to_city.replace('-', ' ').title())

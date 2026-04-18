@@ -139,6 +139,23 @@
 </section>
 {% endif %}
 
+{% if onward_pairs %}
+<section class="see-also">
+  <h2 class="see-also__title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+    {{ _('city_pair.other_routes_from') }} {{ to_city }}
+  </h2>
+  <div class="see-also__list">
+    {% for rp in onward_pairs %}
+    <a href="{{ lang_prefix }}/voznja/{{ rp.from_city_slug }}-do-{{ rp.to_city_slug }}/" class="see-also__link">
+      {{ rp.from_city }} → {{ rp.to_city }}
+      <small>· {{ rp.trip_count }} {{ _('city_pair.departures_word') }}{% if rp.distance_km %} · {{ rp.distance_km }} km{% endif %}</small>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
 <!-- FAQ (SEO rich snippets) -->
 <section class="faq-section">
   <h2 class="section__title">{{ _('city_pair.faq_heading') }}</h2>

@@ -140,6 +140,42 @@
 </section>
 {% endif %}
 
+<!-- Related lines of the same type in this city — internal linking for SEO -->
+{% if related_lines %}
+<section class="see-also">
+  <h2 class="see-also__title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></svg>
+    {{ _('route.similar') }} {{ city_label }}
+  </h2>
+  <div class="see-also__list">
+    {% for rl in related_lines %}
+    <a href="{{ lang_prefix }}/gradski/{{ city }}/linija/{{ rl.slug }}/" class="see-also__link">
+      <span class="line-badge line-badge--sm"{% if rl.color %} style="background:{{ rl.color }}"{% endif %}>{{ rl.number }}</span>
+      {{ rl.name }}
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Back to city hub -->
+<section class="see-also">
+  <h2 class="see-also__title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>
+    {{ city_label }}
+  </h2>
+  <div class="see-also__grid">
+    <a href="{{ lang_prefix }}/gradski/{{ city }}/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('city.all') }} {{ _('city.lines_count') }} {{ city_label }}</span>
+      <span class="see-also__card-meta">{{ _('nav.city_transport') }}</span>
+    </a>
+    <a href="{{ lang_prefix }}/pretraga/?od={{ city_label }}" class="see-also__card">
+      <span class="see-also__card-title">{{ _('city.departures_from') }} {{ city_label }}</span>
+      <span class="see-also__card-meta">{{ _('city.search_dest') }}</span>
+    </a>
+  </div>
+</section>
+
 <!-- Unique SEO prose block (≥200 words) -->
 <div class="seo-block fade-in fade-in--d3">
   <div class="seo-block__icon">
@@ -196,7 +232,21 @@ document.addEventListener('DOMContentLoaded', function() {
   {% endfor %}
   {% endif %}
 
-  /* Draw route — skip segments where distance > 3km (data errors) */
+  /* Draw route. Priority: real OSM route-relation geometry (road-following),
+     fallback to straight-line segments between stops when geometry is
+     missing. Bad segments in fallback (>3km between consecutive stops) are
+     skipped so we don't draw long wrong lines. */
+  {% if geometry %}
+  var routeCoords = {{ geometry | safe }};
+  if (routeCoords && routeCoords.length > 1) {
+    /* Subtle white halo below + crisp coloured path on top */
+    L.polyline(routeCoords, { color: '#fff', weight: 7, opacity: 0.35 }).addTo(map);
+    L.polyline(routeCoords, { color: lineColor, weight: 4, opacity: 0.9 }).addTo(map);
+    map.fitBounds(routeCoords, { padding: [30, 30] });
+  } else if (coords.length > 1) {
+    map.fitBounds(coords, { padding: [30, 30] });
+  }
+  {% else %}
   function haversine(a, b) {
     var R = 6371, dLat = (b[0]-a[0])*Math.PI/180, dLon = (b[1]-a[1])*Math.PI/180;
     var x = Math.sin(dLat/2)*Math.sin(dLat/2) +
@@ -209,13 +259,14 @@ document.addEventListener('DOMContentLoaded', function() {
       if (haversine(coords[i-1], coords[i]) < 3) {
         seg.push(coords[i]);
       } else {
-        if (seg.length > 1) L.polyline(seg, { color: lineColor, weight: 3, opacity: 0.6 }).addTo(map);
+        if (seg.length > 1) L.polyline(seg, { color: lineColor, weight: 3, opacity: 0.6, dashArray: '6,6' }).addTo(map);
         seg = [coords[i]];
       }
     }
-    if (seg.length > 1) L.polyline(seg, { color: lineColor, weight: 3, opacity: 0.6 }).addTo(map);
+    if (seg.length > 1) L.polyline(seg, { color: lineColor, weight: 3, opacity: 0.6, dashArray: '6,6' }).addTo(map);
     map.fitBounds(coords, { padding: [30, 30] });
   }
+  {% endif %}
 
   /* ── Schedule tabs ── */
   document.querySelectorAll('.schedule-tab').forEach(function(tab) {

@@ -64,9 +64,28 @@ def city_hub(city: str):
         LIMIT 5
     """, [city]) if db_ready() else []
 
+    # Popular intercity routes departing from this city — for SEO interlinking.
+    # Match against from_city name (city_slug → Title case) since routes.from_city is display name.
+    city_display = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš', 'kragujevac': 'Kragujevac'}.get(city, city.title())
+    popular_intercity = cached_query("""
+        SELECT r.slug, r.from_city, r.to_city, r.distance_km,
+               COUNT(DISTINCT t.id) as trip_count,
+               MIN(t.price_rsd) as min_price_rsd,
+               r.from_city_slug, r.to_city_slug
+        FROM routes r
+        LEFT JOIN trips t ON t.route_id = r.id
+        WHERE r.type = 'intercity' AND r.from_city = ?
+        GROUP BY r.id, r.slug, r.from_city, r.to_city, r.distance_km, r.from_city_slug, r.to_city_slug
+        HAVING trip_count > 0
+        ORDER BY trip_count DESC
+        LIMIT 8
+    """, [city_display], ttl=3600) if db_ready() else []
+
     return render_template('city_transport.html', city=city, lines=lines,
                            stops_with_coords=stops_with_coords,
-                           top_stops=top_stops)
+                           top_stops=top_stops,
+                           popular_intercity=popular_intercity,
+                           city_label=city_display)
 
 
 @city_bp.route('/gradski/<city>/linija/<line_slug>/')
@@ -137,10 +156,35 @@ def line_detail(city: str, line_slug: str):
     }
     line_type_label = type_labels.get(line.get('type', ''), 'Autobus')
 
+    # Road-following polyline geometry (OSM route relation) — optional,
+    # falls back to straight-line-between-stops if missing. Populated by
+    # data/pipelines/scrape_route_geometries.py.
+    geometry = None
+    try:
+        geom_row = cached_query_one(
+            "SELECT coords_json FROM line_geometries WHERE line_id = ?",
+            [line['id']], ttl=86400,
+        )
+        if geom_row and geom_row.get('coords_json'):
+            geometry = geom_row['coords_json']
+    except Exception:
+        geometry = None
+
+    # Related lines of the same type in the same city (up to 6, excluding this line)
+    related_lines = cached_query("""
+        SELECT number, name, slug, color, type
+        FROM city_lines
+        WHERE city = ? AND type = ? AND id != ?
+        ORDER BY CAST(REGEXP_REPLACE(number, '[^0-9]', '', 'g') || '0' AS INTEGER)
+        LIMIT 6
+    """, [city, line.get('type', 'bus'), line['id']], ttl=3600) if db_ready() else []
+
     return render_template('line_detail.html', city=city, line=line, stops=stops,
                            schedule=schedule, has_gtfs=has_gtfs,
                            first_dep=first_dep, last_dep=last_dep,
-                           line_type_label=line_type_label)
+                           line_type_label=line_type_label,
+                           geometry=geometry,
+                           related_lines=related_lines)
 
 
 @city_bp.route('/gradski/<city>/stajaliste/<stop_slug>/')
