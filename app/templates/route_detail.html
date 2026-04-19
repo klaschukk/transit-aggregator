@@ -1,6 +1,12 @@
 {% extends "base.html" %}
-{% block title %}{{ route.from_city }} → {{ route.to_city }}: {{ route.trip_count }} {{ _('route_detail.title_departures') }} | Prevozni{% endblock %}
-{% block meta_description %}{{ route.trip_count }} {{ _('route_detail.meta_daily') }} {{ route.from_city }} → {{ route.to_city }}{% if price_min %}. {{ _('route_detail.meta_from') }} {{ price_min }} RSD{% endif %}. {{ _('route_detail.meta_compare_cta') }}{% endblock %}
+{# Title scaled to pair-name length to stay ≤60 chars even for long names
+   like "Kragujevac → Smederevska Palanka":
+     >30 chars (long)  → "{pair} | Prevozni"                 (43ch)
+     >22 chars (mid)   → "{pair} — {route_detail.title_short} | Prevozni"
+     else (short)      → "{pair}: {N} polazaka dnevno | Prevozni" #}
+{% set _pair_name = route.from_city ~ ' → ' ~ route.to_city %}
+{% block title %}{% if _pair_name|length > 28 %}{{ _pair_name }} | Prevozni{% elif _pair_name|length > 20 %}{{ _pair_name }} — {{ _('route_detail.title_short') }} | Prevozni{% else %}{{ _pair_name }}: {{ route.trip_count }} {{ _('route_detail.title_departures') }} | Prevozni{% endif %}{% endblock %}
+{% block meta_description %}{{ _('route_detail.meta_prefix') }} {{ _pair_name }}{% if route.distance_km %} ({{ route.distance_km }} km){% endif %}: {% if route.trip_count %}{{ route.trip_count }} {{ _('route_detail.meta_daily') }}{% if price_min %}, {{ _('route_detail.meta_from')|lower }} {{ price_min }} RSD{% endif %}. {% endif %}{{ _('route_detail.meta_body') }}{% endblock %}
 
 {% block head_extra %}
 {% if request.args.get('dan') or not trips %}
@@ -139,25 +145,30 @@
   {% endfor %}
 </div>
 
-<!-- Enriched SEO block -->
-<div class="seo-block fade-in fade-in--d3">
-  <div class="seo-block__icon">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-  </div>
-  <div class="seo-block__content">
-    <h2>{{ _('route.about') }} {{ route.from_city }} — {{ route.to_city }}</h2>
-    <p>Vožnja od {{ route.from_city }} do {{ route.to_city }} iznosi oko {{ route.distance_km|default(0) }} km.
-       {% if route.distance_km %}Prosečno trajanje putovanja autobusom je oko {{ (route.distance_km / 80)|round|int }} sata.{% endif %}
-       {% if operators_on_route %}Na ovoj ruti voze: {{ operators_on_route|join(', ') }}.{% endif %}
-       {% if price_min and price_max and price_min != price_max %}Cene karata se kreću od {{ price_min }} do {{ price_max }} RSD.
-       {% elif price_min %}Cena karte iznosi {{ price_min }} RSD.{% endif %}
-       {% if reverse_slug %}{{ _('route.see_reverse') }} <a href="{{ lang_prefix }}/rute/{{ reverse_slug }}/">{{ route.to_city }} → {{ route.from_city }}</a>.{% endif %}
-    </p>
-  </div>
-</div>
 {% else %}
   {{ empty_state(icon='search', text=_('search.no_results'), sub=_('buy.note')) }}
 {% endif %}
+
+<!-- Enriched SEO block — always rendered (including tripless routes) so the
+     page has enough unique content to avoid "thin content" signals, and so
+     the SEO sister pair (reverse_slug) always gets its internal link. -->
+<div class="seo-block fade-in fade-in--d3">
+  <div class="seo-block__icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+  </div>
+  <div class="seo-block__content">
+    <h2>{{ _('route.about') }} {{ route.from_city }} — {{ route.to_city }}</h2>
+    <p>{{ _('route.prose_distance').format(from_city=route.from_city, to_city=route.to_city, km=route.distance_km|default(0)) }}
+       {% if route.distance_km %}{{ _('route.prose_duration').format(hours=(route.distance_km / 80)|round|int) }}{% endif %}
+       {% if operators_on_route %}{{ _('route.prose_operators').format(ops=operators_on_route|join(', ')) }}{% endif %}
+       {% if price_min and price_max and price_min != price_max %}{{ _('route.prose_price_range').format(min=price_min, max=price_max) }}
+       {% elif price_min %}{{ _('route.prose_price_single').format(price=price_min) }}{% endif %}
+       {% if reverse_slug %}{{ _('route.see_reverse') }} <a href="{{ lang_prefix }}/rute/{{ reverse_slug }}/">{{ route.to_city }} → {{ route.from_city }}</a>.{% endif %}
+    </p>
+    <p>{{ _('route.prose_context').format(from_city=route.from_city, to_city=route.to_city) }}</p>
+    <p>{{ _('route.prose_buy').format(from_city=route.from_city, to_city=route.to_city) }}</p>
+  </div>
+</div>
 
 <!-- Similar routes -->
 {% if similar_routes %}

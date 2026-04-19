@@ -1293,14 +1293,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     # ── route_index.html ──
     'route_index.title': {
-        'sr': 'Sve autobuske i vozne rute u Srbiji',
-        'en': 'All bus and train routes in Serbia',
-        'ru': 'Все автобусные и железнодорожные маршруты в Сербии',
+        'sr': 'Sve međugradske rute u Srbiji',
+        'en': 'All intercity routes in Serbia',
+        'ru': 'Все междугородные маршруты в Сербии',
     },
     'route_index.meta': {
-        'sr': 'međugradskih autobuskih i voznih ruta u Srbiji. Red vožnje, cene karata i prevoznici — Beograd, Novi Sad, Niš i drugi gradovi.',
-        'en': 'intercity bus and train routes in Serbia. Schedules, ticket prices and carriers — Belgrade, Novi Sad, Niš and other cities.',
-        'ru': 'междугородних автобусных и железнодорожных маршрутов в Сербии. Расписание, цены билетов и перевозчики — Белград, Нови-Сад, Ниш и другие города.',
+        'sr': 'međugradskih autobuskih ruta u Srbiji. Red vožnje, cene i prevoznici — Beograd, Novi Sad, Niš i drugi gradovi.',
+        'en': 'intercity bus routes in Serbia. Schedules, prices and carriers — Belgrade, Novi Sad, Niš and other cities.',
+        'ru': 'междугородных автобусных маршрутов в Сербии. Расписание, цены и перевозчики — Белград, Нови-Сад, Ниш и другие города.',
     },
     'route_index.h1': {
         'sr': 'Međugradske rute',
@@ -1618,10 +1618,60 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'departures daily',
         'ru': 'отправлений в день',
     },
+    'route_detail.title_short': {
+        'sr': 'red vožnje i cene',
+        'en': 'schedule and prices',
+        'ru': 'расписание и цены',
+    },
     'route_detail.meta_compare_cta': {
         'sr': 'Uporedi prevoznike i cene besplatno.',
         'en': 'Compare carriers and prices for free.',
         'ru': 'Сравните перевозчиков и цены бесплатно.',
+    },
+    'route_detail.meta_prefix': {
+        'sr': 'Autobuska ruta',
+        'en': 'Bus route',
+        'ru': 'Автобусный маршрут',
+    },
+    'route_detail.meta_body': {
+        'sr': 'Red vožnje, cene karata, prevoznici i trajanje putovanja. Uporedite polaske i kupite kartu online preko partnera. Besplatno, bez registracije.',
+        'en': 'Schedule, ticket prices, carriers and trip duration. Compare departures and buy a ticket online via partners. Free, no registration required.',
+        'ru': 'Расписание, цены билетов, перевозчики и время в пути. Сравните отправления и купите билет онлайн через партнёров. Бесплатно, без регистрации.',
+    },
+    'route.prose_distance': {
+        'sr': 'Vožnja od {from_city} do {to_city} iznosi oko {km} km.',
+        'en': 'The trip from {from_city} to {to_city} is about {km} km.',
+        'ru': 'Поездка из {from_city} в {to_city} занимает около {km} км.',
+    },
+    'route.prose_duration': {
+        'sr': 'Prosečno trajanje putovanja autobusom je oko {hours} sata.',
+        'en': 'Average bus trip duration is around {hours} hours.',
+        'ru': 'Средняя длительность поездки на автобусе — около {hours} часов.',
+    },
+    'route.prose_operators': {
+        'sr': 'Na ovoj ruti voze prevoznici: {ops}.',
+        'en': 'Carriers on this route: {ops}.',
+        'ru': 'На этом маршруте работают перевозчики: {ops}.',
+    },
+    'route.prose_price_range': {
+        'sr': 'Cene karata se kreću od {min} do {max} RSD, u zavisnosti od prevoznika i dana.',
+        'en': 'Ticket prices range from {min} to {max} RSD, depending on carrier and day.',
+        'ru': 'Цены билетов колеблются от {min} до {max} RSD в зависимости от перевозчика и дня.',
+    },
+    'route.prose_price_single': {
+        'sr': 'Cena karte iznosi oko {price} RSD.',
+        'en': 'Ticket price is around {price} RSD.',
+        'ru': 'Цена билета — около {price} RSD.',
+    },
+    'route.prose_context': {
+        'sr': 'Autobuske linije između {from_city} i {to_city} povezuju putnike tokom cele godine. Na ovoj stranici prikazujemo kompletan red vožnje za svaki dan u nedelji, sa mogućnošću filtriranja po vremenu polaska, trajanju putovanja ili ceni. Podaci se ažuriraju svake noći iz više izvora (busticket4.me, polazak.rs, srbijavoz.rs), a prikazane cene su orjentacione — konačnu cenu i raspoloživost mesta potvrđuje partner kod kog kupujete kartu.',
+        'en': 'Bus lines between {from_city} and {to_city} run year-round. This page shows the full schedule for each day of the week, with filters for departure time, trip duration and price. Data is refreshed nightly from multiple sources (busticket4.me, polazak.rs, srbijavoz.rs), and displayed prices are indicative — the final fare and seat availability is confirmed by the partner where you buy the ticket.',
+        'ru': 'Автобусные рейсы между {from_city} и {to_city} работают круглый год. На этой странице показано полное расписание по дням недели, с фильтрами по времени отправления, длительности поездки и цене. Данные обновляются каждую ночь из нескольких источников (busticket4.me, polazak.rs, srbijavoz.rs), а показанные цены ориентировочные — финальную цену и наличие мест подтверждает партнёр, у которого вы покупаете билет.',
+    },
+    'route.prose_buy': {
+        'sr': 'Kartu za rutu {from_city} — {to_city} možete kupiti direktno kod prevoznika na autobuskoj stanici ili online preko partnera (Bookaway, BusTicket4.me). Online kupovina obično nudi nekoliko različitih polazaka po istoj ceni, pa vredi uporediti vremena. Za grupe preko 5 putnika ili studentske popuste kontaktirajte prevoznika direktno — Prevozni ne prodaje karte i nije posrednik u kupovini.',
+        'en': 'You can buy a ticket for {from_city} — {to_city} directly from the carrier at the bus station or online via partners (Bookaway, BusTicket4.me). Online purchase usually offers several departures at the same price, so it is worth comparing times. For groups of 5+ or student discounts contact the carrier directly — Prevozni does not sell tickets and is not a purchase intermediary.',
+        'ru': 'Билет на маршрут {from_city} — {to_city} можно купить напрямую у перевозчика на автовокзале или онлайн через партнёров (Bookaway, BusTicket4.me). Онлайн-покупка обычно предлагает несколько отправлений по одной цене — стоит сравнить время. Для групп от 5 человек или студенческих скидок обращайтесь напрямую к перевозчику — Prevozni не продаёт билеты и не является посредником.',
     },
     'city_pair.title_travel': {
         'sr': 'autobus, voz, cene',
