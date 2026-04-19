@@ -378,6 +378,26 @@ def sitemap_stops():
     return _urlset(pages)
 
 
+@main_bp.route('/offline.html')
+def offline_page():
+    """Cached by the service worker as the offline fallback shell."""
+    return render_template('offline.html')
+
+
+@main_bp.route('/sw.js')
+def service_worker():
+    """Service worker — must be served from the site root so its scope
+    covers the whole app. Flask's /static/ would scope it to /static/."""
+    from pathlib import Path
+    sw_path = Path(current_app.root_path) / 'static' / 'js' / 'sw.js'
+    body = sw_path.read_text(encoding='utf-8')
+    resp = make_response(body)
+    resp.headers['Content-Type'] = 'application/javascript'
+    resp.headers['Cache-Control'] = 'public, max-age=3600'
+    resp.headers['Service-Worker-Allowed'] = '/'
+    return resp
+
+
 @main_bp.route('/robots.txt')
 def robots():
     base = current_app.config['BASE_URL']

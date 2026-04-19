@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex, follow">
 {% endif %}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"ItemList","name":"Red vožnje {{ route.from_city }} — {{ route.to_city }}","itemListElement":[{% for trip in trips[:10] %}{"@type":"BusTrip","position":{{ loop.index }},"name":"{{ trip.operator }} {{ route.from_city }}–{{ route.to_city }}","departureTime":"{{ trip.departure_time }}","arrivalTime":"{{ trip.arrival_time }}","departureBusStop":{"@type":"BusStation","name":"{{ route.from_city }}"},"arrivalBusStop":{"@type":"BusStation","name":"{{ route.to_city }}"},"provider":{"@type":"Organization","name":"{{ trip.operator }}"}}{% if not loop.last %},{% endif %}{% endfor %}]}
+{"@context":"https://schema.org","@type":"ItemList","name":"Red vožnje {{ route.from_city }} — {{ route.to_city }}","itemListElement":[{% for trip in trips[:10] %}{"@type":"BusTrip","position":{{ loop.index }},"name":"{{ trip.operator }} {{ route.from_city }}–{{ route.to_city }}","departureTime":"{{ trip.departure_time }}","arrivalTime":"{{ trip.arrival_time }}","departureBusStop":{"@type":"BusStation","name":"{{ route.from_city }}"},"arrivalBusStop":{"@type":"BusStation","name":"{{ route.to_city }}"},"provider":{"@type":"Organization","name":"{{ trip.operator }}"}{% if trip.price_rsd %},"offers":{"@type":"Offer","price":"{{ trip.price_rsd }}","priceCurrency":"RSD","availability":"https://schema.org/InStock","url":"{{ canonical_url }}"}{% endif %}}{% if not loop.last %},{% endif %}{% endfor %}]}
 </script>
 {% if trips %}
 <script type="application/ld+json">

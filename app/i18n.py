@@ -679,6 +679,33 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': '{name} is a bus carrier in Serbia and the region. On Prevozni.com you can find schedules and prices for {routes} intercity routes run by this carrier, with {trips} daily departures in total. The network covers {cities} cities.',
         'ru': '{name} — автобусный перевозчик в Сербии и регионе. На Prevozni.com можно найти расписание и цены на {routes} междугородних маршрутов этого перевозчика, всего {trips} ежедневных отправлений. Сеть охватывает {cities} городов.',
     },
+    # ── Offline fallback (PWA) ──
+    'offline.title': {
+        'sr': 'Nema interneta',
+        'en': 'You are offline',
+        'ru': 'Нет интернета',
+    },
+    'offline.meta': {
+        'sr': 'Trenutno ste van mreže. Prevozni će se ponovo povezati čim se vrati internet.',
+        'en': 'You are currently offline. Prevozni will reconnect as soon as the internet is back.',
+        'ru': 'Вы сейчас офлайн. Prevozni подключится снова как только появится интернет.',
+    },
+    'offline.h1': {
+        'sr': 'Nema interneta',
+        'en': 'You are offline',
+        'ru': 'Нет интернета',
+    },
+    'offline.sub': {
+        'sr': 'Proverite konekciju i pokušajte ponovo.',
+        'en': 'Check your connection and try again.',
+        'ru': 'Проверьте подключение и попробуйте снова.',
+    },
+    'offline.back_home': {
+        'sr': 'Nazad na početnu',
+        'en': 'Back to home',
+        'ru': 'На главную',
+    },
+
     # ── Guides / blog ──
     'guides.index_title': {
         'sr': 'Vodiči za putovanja autobusom — Prevozni',

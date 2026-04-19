@@ -94,6 +94,17 @@
 </script>
 
 <script>
+/* Register service worker — offline fallback + static-asset cache.
+   Only registers on https (localhost counts); skips if browser doesn't
+   support it. Errors are swallowed — SW is strictly a nice-to-have. */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function(){});
+  });
+}
+</script>
+
+<script>
 /* Mobile nav toggle */
 (function() {
   var btn = document.getElementById('navToggle');
@@ -101,11 +112,26 @@
   if (btn && nav) {
     var hamburger = '<path d="M3 12h18M3 6h18M3 18h18"/>';
     var xIcon = '<path d="M18 6L6 18M6 6l12 12"/>';
+    /* On mobile the nav slides in from the side but stays in the DOM.
+       Use `inert` when closed so keyboard users don't tab through hidden
+       links and screen readers skip them. Applies only below the desktop
+       breakpoint where is-open actually gates visibility. */
+    function syncInert() {
+      var isMobile = window.matchMedia('(max-width: 767px)').matches;
+      if (isMobile && !nav.classList.contains('is-open')) {
+        nav.setAttribute('inert', '');
+      } else {
+        nav.removeAttribute('inert');
+      }
+    }
+    syncInert();
+    window.addEventListener('resize', syncInert);
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
       var open = nav.classList.toggle('is-open');
       btn.setAttribute('aria-expanded', open);
       btn.querySelector('svg').innerHTML = open ? xIcon : hamburger;
+      syncInert();
     });
     /* Close on link click */
     nav.querySelectorAll('.site-nav__link').forEach(function(a) {
@@ -113,6 +139,7 @@
         nav.classList.remove('is-open');
         btn.setAttribute('aria-expanded', 'false');
         btn.querySelector('svg').innerHTML = hamburger;
+        syncInert();
       });
     });
   }

@@ -8,6 +8,11 @@
 {"@context":"https://schema.org","@type":"TravelAction","fromLocation":{"@type":"City","name":"{{ from_city }}"},"toLocation":{"@type":"City","name":"{{ to_city }}"}}
 </script>
 {% endif %}
+{% if route and trips %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ItemList","name":"{{ from_city }} → {{ to_city }}","itemListElement":[{% for trip in trips[:10] %}{"@type":"BusTrip","position":{{ loop.index }},"name":"{{ trip.operator }} {{ from_city }}–{{ to_city }}","departureTime":"{{ trip.departure_time }}","arrivalTime":"{{ trip.arrival_time }}","departureBusStop":{"@type":"BusStation","name":"{{ from_city }}"},"arrivalBusStop":{"@type":"BusStation","name":"{{ to_city }}"},"provider":{"@type":"Organization","name":"{{ trip.operator }}"}{% if trip.price_rsd %},"offers":{"@type":"Offer","price":"{{ trip.price_rsd }}","priceCurrency":"RSD","availability":"https://schema.org/InStock","url":"{{ canonical_url }}"}{% endif %}}{% if not loop.last %},{% endif %}{% endfor %}]}
+</script>
+{% endif %}
 {% if not route or not trips %}
 <meta name="robots" content="noindex, follow">
 {% endif %}
