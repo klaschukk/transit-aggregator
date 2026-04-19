@@ -1,8 +1,20 @@
-{# Trip card macro — reused in route_detail, city_pair, search_results #}
-{% macro trip_card(trip) %}
+{# Trip card macro — reused in route_detail, city_pair, search_results.
+
+   Args:
+     trip    — trip dict (departure_time, arrival_time, duration_min,
+               price_rsd, operator, type)
+     ba_url  — optional Bookaway affiliate URL for this origin→dest pair.
+               When present, renders a per-card "Kupi" button so the CTA
+               sits next to the visible price instead of one shared button
+               at the bottom of the page (higher CTR → affiliate revenue).
+     buy_label — label for the buy button (i18n'd by caller, e.g. _('buy.cta'))
+#}
+{% macro trip_card(trip, ba_url=None, buy_label='') %}
 <div class="trip-card"
      data-type="{{ trip.type|default('bus') }}"
      data-operator="{{ trip.operator|default('') }}"
+     data-price="{{ trip.price_rsd|default(0) }}"
+     data-duration="{{ trip.duration_min|default(0) }}"
      data-hour="{{ trip.departure_time[:2] if trip.departure_time else '' }}">
   <div class="trip-card__time trip-card__time--depart">
     {{ trip.departure_time[:5] if trip.departure_time else '—' }}
@@ -19,7 +31,7 @@
     </div>
     {% if trip.duration_min %}
     <span class="trip-card__duration">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="11" height="11"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v4l2.5 1.5"/></svg>
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="11" height="11" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v4l2.5 1.5"/></svg>
       {{ trip.duration_min // 60 }}h {{ trip.duration_min % 60 }}min
     </span>
     {% endif %}
@@ -27,9 +39,22 @@
   <div class="trip-card__time trip-card__time--arrive">
     {{ trip.arrival_time[:5] if trip.arrival_time else '' }}
   </div>
-  {% if trip.price_rsd %}
+  {% if trip.price_rsd or ba_url %}
   <div class="trip-card__meta">
-    <span class="trip-card__price">{{ trip.price_rsd }} <small>RSD</small></span>
+    {% if trip.price_rsd %}
+    <span class="trip-card__price js-price" data-rsd="{{ trip.price_rsd }}">
+      <span class="js-price-value">{{ trip.price_rsd }}</span> <small class="js-price-ccy">RSD</small>
+    </span>
+    {% endif %}
+    {% if ba_url %}
+    <a class="trip-card__buy" href="{{ ba_url }}" target="_blank"
+       rel="noopener nofollow sponsored"
+       data-op="{{ trip.operator|default('') }}"
+       data-time="{{ trip.departure_time[:5] if trip.departure_time else '' }}">
+      {{ buy_label or 'Kupi' }}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+    </a>
+    {% endif %}
   </div>
   {% endif %}
 </div>

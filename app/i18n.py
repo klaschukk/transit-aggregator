@@ -638,6 +638,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Purchase is made on partner websites. Prevozni does not sell tickets.',
         'ru': 'Покупка на сайтах партнёров. Prevozni не продаёт билеты.',
     },
+    'buy.cta': {
+        'sr': 'Kupi',
+        'en': 'Buy',
+        'ru': 'Купить',
+    },
 
     # ── Day labels ──
     'day.today': {'sr': 'Danas', 'en': 'Today', 'ru': 'Сегодня'},

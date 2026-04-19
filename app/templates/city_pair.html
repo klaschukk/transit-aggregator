@@ -21,6 +21,13 @@
 {% from '_partials/_filter_panel.html' import filter_panel with context %}
 {% from '_partials/_empty_state.html' import empty_state %}
 
+{# Bookaway per-trip affiliate link (renders inside each trip_card below). #}
+{% set _from_slug = from_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
+{% set _to_slug = to_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
+{% set _cm = {'beograd':'serbia','novi-sad':'serbia','nis':'serbia','subotica':'serbia','kragujevac':'serbia','uzice':'serbia','valjevo':'serbia','sabac':'serbia','cacak':'serbia','kraljevo':'serbia','krusevac':'serbia','leskovac':'serbia','vranje':'serbia','pirot':'serbia','sombor':'serbia','zrenjanin':'serbia','pancevo':'serbia','smederevo':'serbia','novi-pazar':'serbia','podgorica':'montenegro','budva':'montenegro','herceg-novi':'montenegro','bar':'montenegro','kotor':'montenegro','tivat':'montenegro','niksic':'montenegro','ulcinj':'montenegro','sarajevo':'bosnia-and-herzegovina','banja-luka':'bosnia-and-herzegovina','tuzla':'bosnia-and-herzegovina','mostar':'bosnia-and-herzegovina','trebinje':'bosnia-and-herzegovina','zagreb':'croatia','split':'croatia','dubrovnik':'croatia','rijeka':'croatia','skopje':'north-macedonia','ohrid':'north-macedonia','budapest':'hungary','sofia':'bulgaria','thessaloniki':'greece','vienna':'austria','ljubljana':'slovenia','timisoara':'romania','bucharest':'romania','istanbul':'turkey','tirana':'albania'} %}
+{% set _ba_country = _cm.get(_to_slug, _cm.get(_from_slug, 'serbia')) %}
+{% set _ba_url = 'https://www.bookaway.com/routes/' ~ _ba_country ~ '/' ~ _from_slug ~ '-to-' ~ _to_slug ~ '?offer_id=34&aff_id=4033&utm_source=prevozni&utm_medium=city-pair' %}
+
 {{ breadcrumb([
   {'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')},
   {'url': lang_prefix ~ '/rute/', 'label': _('route.all_routes')},
@@ -57,7 +64,7 @@
   <div class="results-main">
     <div class="trip-list fade-in fade-in--d2" id="tripList">
       {% for trip in trips %}
-        {{ trip_card(trip) }}
+        {{ trip_card(trip, ba_url=_ba_url, buy_label=_('buy.cta')) }}
       {% endfor %}
     </div>
   </div>
