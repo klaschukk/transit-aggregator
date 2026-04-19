@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ _('about.title') }} — Prevozni{% endblock %}
+{% block title %}{{ _('about.title') }} — {{ _('about.title_suffix') }} | Prevozni{% endblock %}
 {% block meta_description %}{{ _('about.mission') }}{% endblock %}
 
 {% block head_extra %}
@@ -53,8 +53,35 @@
 
 <section class="section">
   <div class="seo-block">
-    <h2>{{ _('about.disclaimer_title') }}</h2>
-    <p>{{ _('about.disclaimer') }}</p>
+    <div class="seo-block__icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" aria-hidden="true"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></svg>
+    </div>
+    <div class="seo-block__content">
+      <h2>{{ _('about.what_h') }}</h2>
+      <p>{{ _('about.what_p1')|safe }}</p>
+      <p>{{ _('about.what_p2')|safe }}</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="seo-block">
+    <div class="seo-block__icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+    </div>
+    <div class="seo-block__content">
+      <h2>{{ _('about.sources_h') }}</h2>
+      <p>{{ _('about.sources_p') }}</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="seo-block">
+    <div class="seo-block__content">
+      <h2>{{ _('about.disclaimer_title') }}</h2>
+      <p>{{ _('about.disclaimer') }}</p>
+    </div>
   </div>
 </section>
 

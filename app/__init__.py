@@ -157,6 +157,50 @@ def create_app(config_name: str | None = None) -> Flask:
             response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         return response
 
+    # Security headers.
+    #   HSTS — forces browsers to use HTTPS for 2 years, includes subdomains,
+    #     preload-eligible. Tells aggregators/scanners we're an HTTPS-only site.
+    #   CSP — restrictive but practical: self + the external services we
+    #     actually embed (Leaflet from unpkg, OSM tiles, Umami analytics,
+    #     AdSense once enabled, Bookaway buy links). 'unsafe-inline' is
+    #     required because Jinja templates still ship inline JSON-LD +
+    #     inline <script> blocks (nav toggle, currency switcher, etc.) —
+    #     converting those to hashed scripts is a separate refactor.
+    #   Referrer-Policy + X-Content-Type-Options are belt-and-suspenders.
+    @app.after_request
+    def add_security_headers(response):
+        response.headers.setdefault(
+            'Strict-Transport-Security',
+            'max-age=63072000; includeSubDomains; preload',
+        )
+        response.headers.setdefault('X-Content-Type-Options', 'nosniff')
+        response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
+        response.headers.setdefault(
+            'Permissions-Policy',
+            'geolocation=(), microphone=(), camera=(), payment=()',
+        )
+        if 'text/html' in (response.content_type or ''):
+            response.headers.setdefault('Content-Security-Policy', (
+                "default-src 'self'; "
+                "script-src 'self' 'unsafe-inline' "
+                "https://unpkg.com "
+                "https://analytics.farmako.ro "
+                "https://www.googletagmanager.com "
+                "https://pagead2.googlesyndication.com "
+                "https://www.bookaway.com; "
+                "style-src 'self' 'unsafe-inline' https://unpkg.com; "
+                "img-src 'self' data: https: blob:; "
+                "font-src 'self' data:; "
+                "connect-src 'self' https://analytics.farmako.ro "
+                "https://tile.openstreetmap.org; "
+                "frame-src 'self' https://www.bookaway.com "
+                "https://pagead2.googlesyndication.com "
+                "https://googleads.g.doubleclick.net; "
+                "base-uri 'self'; form-action 'self'; "
+                "object-src 'none';"
+            ))
+        return response
+
     # Error handlers
     @app.errorhandler(404)
     def not_found(e):

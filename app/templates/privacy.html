@@ -15,15 +15,38 @@
 <section class="prose">
   <h2>{{ _('privacy.cookies_h') }}</h2>
   <p>{{ _('privacy.cookies_body') }}</p>
+  <p>{{ _('privacy.cookies_body2') }}</p>
 
   <h2>{{ _('privacy.analytics_h') }}</h2>
   <p>{{ _('privacy.analytics_body') }}</p>
+  <p>{{ _('privacy.analytics_body2') }}</p>
+
+  <h2>{{ _('privacy.third_party_h') }}</h2>
+  <p>{{ _('privacy.third_party_body') }}</p>
 
   <h2>{{ _('privacy.contact_h') }}</h2>
   <p>{{ _('privacy.contact_body') }}</p>
 
   <h2>{{ _('privacy.rights_h') }}</h2>
   <p>{{ _('privacy.rights_body') }}</p>
+  <p>{{ _('privacy.rights_body2') }}</p>
+
+  <h2>{{ _('privacy.changes_h') }}</h2>
+  <p>{{ _('privacy.changes_body') }}</p>
+</section>
+
+<section class="see-also">
+  <h2 class="see-also__title">{{ _('see_also.title') }}</h2>
+  <div class="see-also__grid">
+    <a href="{{ lang_prefix }}/o-nama/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('about.title') }}</span>
+      <span class="see-also__card-meta">{{ _('see_also.about_desc') }}</span>
+    </a>
+    <a href="{{ lang_prefix }}/kontakt/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('contact.title') }}</span>
+      <span class="see-also__card-meta">{{ _('contact.subtitle') }}</span>
+    </a>
+  </div>
 </section>
 
 {% endblock %}

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ route.from_city }} → {{ route.to_city }}: {{ route.trip_count }} {{ _('route_detail.title_departures') }} · {{ current_year }} | Prevozni{% endblock %}
+{% block title %}{{ route.from_city }} → {{ route.to_city }}: {{ route.trip_count }} {{ _('route_detail.title_departures') }} | Prevozni{% endblock %}
 {% block meta_description %}{{ route.trip_count }} {{ _('route_detail.meta_daily') }} {{ route.from_city }} → {{ route.to_city }}{% if price_min %}. {{ _('route_detail.meta_from') }} {{ price_min }} RSD{% endif %}. {{ _('route_detail.meta_compare_cta') }}{% endblock %}
 
 {% block head_extra %}

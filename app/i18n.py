@@ -139,9 +139,101 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     # ── Homepage ──
     'home.title': {
-        'sr': 'Prevozni — red vožnje autobusa, vozova i gradskog prevoza',
-        'en': 'Prevozni — bus, train and city transport schedules in Serbia',
-        'ru': 'Prevozni — расписание автобусов, поездов и городского транспорта в Сербии',
+        'sr': 'Prevozni — red vožnje autobusa i vozova u Srbiji',
+        'en': 'Prevozni — bus and train schedules in Serbia',
+        'ru': 'Prevozni — расписание автобусов и поездов в Сербии',
+    },
+    'home.meta': {
+        'sr': 'Pronađite autobus ili voz između gradova Srbije i Balkana. Red vožnje, cene, prevoznici. Besplatno i bez registracije, u 3 jezika.',
+        'en': 'Find a bus or train between cities in Serbia and the Balkans. Schedules, prices, carriers. Free, no registration, in 3 languages.',
+        'ru': 'Найдите автобус или поезд между городами Сербии и Балкан. Расписание, цены, перевозчики. Бесплатно, без регистрации, на 3 языках.',
+    },
+    'about.title_suffix': {
+        'sr': 'Prevozni Srbija, misija i kontakt',
+        'en': 'Prevozni Serbia, mission and contact',
+        'ru': 'Prevozni Сербия, миссия и контакт',
+    },
+    'contact.meta': {
+        'sr': 'Imate pitanje, sugestiju ili ste primetili grešku na Prevozni? Pišite nam na info@prevozni.com ili popunite kontakt formu. Odgovaramo u roku od 48 sati.',
+        'en': 'Got a question, suggestion or spotted a bug on Prevozni? Email info@prevozni.com or use the contact form. We reply within 48 hours.',
+        'ru': 'Есть вопрос, предложение или заметили ошибку на Prevozni? Напишите на info@prevozni.com или заполните контактную форму. Отвечаем в течение 48 часов.',
+    },
+    'about.what_h': {
+        'sr': 'Šta je Prevozni',
+        'en': 'What is Prevozni',
+        'ru': 'Что такое Prevozni',
+    },
+    'about.what_p1': {
+        'sr': 'Prevozni je <strong>besplatni agregator</strong> podataka o javnom prevozu u Srbiji i regionu — međugradske autobuske rute, vozovi Srbija Voza, gradski prevoz u Beogradu, Novom Sadu, Nišu i Kragujevcu, i izabrani polasci za Crnu Goru, Bosnu, Hrvatsku i druge balkanske zemlje. Naš cilj: pokazati kada i odakle možete da putujete, po kojoj ceni i sa kojim prevoznikom — bez reklama koje sakrivaju podatke, bez obaveze registracije, na srpskom, engleskom i ruskom.',
+        'en': 'Prevozni is a <strong>free aggregator</strong> of public transit data for Serbia and the region — intercity bus routes, Srbija Voz trains, city transport in Belgrade, Novi Sad, Niš and Kragujevac, and selected departures to Montenegro, Bosnia, Croatia and other Balkan countries. Our goal: show when and from where you can travel, at what price and with which carrier — with no ad walls hiding data, no account required, in Serbian, English and Russian.',
+        'ru': 'Prevozni — это <strong>бесплатный агрегатор</strong> данных об общественном транспорте Сербии и региона: междугородние автобусные маршруты, поезда Srbija Voz, городской транспорт в Белграде, Нови-Саде, Нише и Крагуеваце, а также отдельные рейсы в Черногорию, Боснию, Хорватию и другие страны Балкан. Наша цель — показать когда и откуда можно уехать, по какой цене и с каким перевозчиком — без рекламных стен, без регистрации, на сербском, английском и русском.',
+    },
+    'about.what_p2': {
+        'sr': 'Mi ne prodajemo karte i ne naplaćujemo pretragu. Kupovina se obavlja direktno na sajtovima prevoznika ili preko partnera kao što je Bookaway. Kada kliknete na dugme "Kupi" pored polaska, bićete prebačeni na sajt partnera — on prodaje kartu, a Prevozni može da dobije malu proviziju koja pokriva troškove održavanja sajta. Pregled raspored, poređenje prevoznika i cena ostaju besplatni.',
+        'en': 'We don\'t sell tickets and we don\'t charge for search. Purchase happens directly on the carrier\'s site or via a partner like Bookaway. When you click "Buy" next to a departure you are taken to the partner\'s site — they sell the ticket, and Prevozni may receive a small commission that covers the cost of running this site. Browsing schedules, comparing carriers and prices stays free.',
+        'ru': 'Мы не продаём билеты и не берём деньги за поиск. Покупка происходит напрямую на сайте перевозчика или через партнёра типа Bookaway. При клике на кнопку "Купить" рядом с рейсом вы попадаете на сайт партнёра — он продаёт билет, а Prevozni может получить небольшую комиссию, которая покрывает расходы на работу сайта. Просмотр расписаний, сравнение перевозчиков и цен остаются бесплатными.',
+    },
+    'about.sources_h': {
+        'sr': 'Odakle dolaze podaci',
+        'en': 'Where the data comes from',
+        'ru': 'Откуда берутся данные',
+    },
+    'contact.intro_h': {
+        'sr': 'Kako da nam pišete',
+        'en': 'How to reach us',
+        'ru': 'Как с нами связаться',
+    },
+    'contact.intro_p1': {
+        'sr': 'Najbrži način: <strong>info@prevozni.com</strong>. Možete i da koristite formu ispod — poruka stiže u isti inbox + automatski u naš Telegram kanal za operativne stvari, pa je odgovor obično u roku od 24 sata (radnim danima) ili do 48 sati (vikendom i praznicima).',
+        'en': 'Fastest channel: <strong>info@prevozni.com</strong>. You can also use the form below — it lands in the same inbox plus our ops Telegram channel, so typical response time is within 24 hours on weekdays, up to 48 hours on weekends and holidays.',
+        'ru': 'Самый быстрый канал: <strong>info@prevozni.com</strong>. Также можно использовать форму ниже — сообщение попадает в тот же ящик плюс в наш оперативный Telegram-канал, поэтому обычно отвечаем в течение 24 часов по будням и до 48 часов по выходным и праздникам.',
+    },
+    'privacy.cookies_body2': {
+        'sr': 'Koristimo isključivo kolačiće prve strane (eng. first-party cookies) za čuvanje vaših preferenci (jezik sajta, valuta za cene, sačuvane rute). Ne postavljamo marketinške kolačiće trećih strana, ne pratimo vas na drugim sajtovima, ne gradimo vaš profil za prodaju oglasnih agencija.',
+        'en': 'We only use first-party cookies to remember your preferences (site language, currency display, saved routes). We do not set third-party marketing cookies, do not track you across other sites, and do not build profiles for sale to ad networks.',
+        'ru': 'Мы используем только first-party cookies для сохранения ваших настроек (язык сайта, валюта цен, сохранённые маршруты). Мы не ставим маркетинговые cookies третьих сторон, не отслеживаем вас на других сайтах и не строим профили для продажи рекламным сетям.',
+    },
+    'privacy.analytics_body2': {
+        'sr': 'Za razumevanje kako ljudi koriste Prevozni koristimo Umami — privacy-first analitiku koja ne koristi kolačiće i ne prikuplja lične identifikatore. Umami beleži agregatne statistike (broj poseta po stranici, dolazni izvori, tip uređaja) ali ne povezuje događaje sa individualnim korisnikom. Svi podaci ostaju na našem serveru; ne šalju se Google Analytics-u ili drugim trećim stranama.',
+        'en': 'To understand how people use Prevozni we use Umami — privacy-first analytics that does not use cookies and does not collect personal identifiers. Umami records aggregate statistics (visits per page, referrers, device type) but does not tie events to individual users. All data stays on our server; it is not sent to Google Analytics or any third party.',
+        'ru': 'Чтобы понимать как люди пользуются Prevozni мы используем Umami — privacy-first аналитику, которая не использует cookies и не собирает персональные идентификаторы. Umami записывает агрегированную статистику (визиты по страницам, источники переходов, тип устройства), но не связывает события с конкретным пользователем. Все данные остаются на нашем сервере, они не отправляются в Google Analytics или другие третьи стороны.',
+    },
+    'privacy.third_party_h': {
+        'sr': 'Linkovi trećih strana',
+        'en': 'Third-party links',
+        'ru': 'Ссылки третьих сторон',
+    },
+    'privacy.third_party_body': {
+        'sr': 'Prevozni sadrži linkove ka sajtovima prevoznika i partnera (Bookaway, BusTicket4.me i drugi). Kada kliknete na takav link, napuštate naš sajt i ulazite u politiku privatnosti tog partnera. Nismo odgovorni za njihove prakse — pročitajte njihovu politiku pre nego što unesete lične podatke ili kupite kartu. Mi možemo da dobijemo proviziju od partnera ako kupite preko linka sa našeg sajta; to nikad ne utiče na cenu koju vi plaćate.',
+        'en': 'Prevozni contains links to carriers and partners (Bookaway, BusTicket4.me and others). When you click such a link you leave our site and enter that partner\'s privacy policy. We are not responsible for their practices — read their policy before entering personal data or buying a ticket. We may receive a commission from partners if you buy via a link on our site; this never affects the price you pay.',
+        'ru': 'Prevozni содержит ссылки на сайты перевозчиков и партнёров (Bookaway, BusTicket4.me и другие). При клике на такую ссылку вы покидаете наш сайт и попадаете под политику конфиденциальности этого партнёра. Мы не отвечаем за их практики — прочитайте их политику перед вводом личных данных или покупкой билета. Мы можем получать комиссию от партнёров при покупке через нашу ссылку; это никак не влияет на цену которую вы платите.',
+    },
+    'privacy.rights_body2': {
+        'sr': 'Ako želite da zatražite izvoz, izmenu ili brisanje podataka (na primer vaše kontakt poruke), pošaljite zahtev na info@prevozni.com. Obradićemo ga u roku od 30 dana u skladu sa GDPR-om i srpskim Zakonom o zaštiti podataka o ličnosti. Nije potrebno da navodite razlog.',
+        'en': 'If you want to request export, correction or deletion of your data (for example a contact form message you sent), email info@prevozni.com. We will process the request within 30 days in line with GDPR and the Serbian Personal Data Protection Act. You do not need to state a reason.',
+        'ru': 'Если вы хотите запросить экспорт, исправление или удаление данных (например вашего сообщения из контактной формы), напишите на info@prevozni.com. Мы обработаем запрос в течение 30 дней в соответствии с GDPR и сербским законом о защите персональных данных. Причину указывать не обязательно.',
+    },
+    'privacy.changes_h': {
+        'sr': 'Izmene ove politike',
+        'en': 'Changes to this policy',
+        'ru': 'Изменения этой политики',
+    },
+    'privacy.changes_body': {
+        'sr': 'Ako nešto bitno promenimo (na primer dodamo novi analitički alat ili pustimo reklame), objavićemo novu verziju ove stranice i ažurirati datum ispod. Za suštinske izmene obavestićemo i preko banera na početnoj strani minimalno 14 dana unapred. Trenutna verzija: april 2026.',
+        'en': 'If we change something material (for example add a new analytics tool or enable ads), we publish a new version of this page and update the date below. For substantive changes we also announce a homepage banner at least 14 days in advance. Current version: April 2026.',
+        'ru': 'Если мы изменяем что-то существенное (например добавляем новый аналитический инструмент или включаем рекламу), мы публикуем новую версию этой страницы и обновляем дату ниже. Для существенных изменений также вывешиваем баннер на главной странице минимум за 14 дней. Текущая версия: апрель 2026.',
+    },
+
+    'contact.intro_p2': {
+        'sr': 'Šta nam najviše pomaže: <strong>tačan URL stranice</strong> gde ste naišli na grešku, <strong>screenshot</strong> (ako je vizuelni bug) i <strong>naziv pretraživača i uređaja</strong>. Za predloge novih gradova ili ruta — napišite kuda biste voleli da putujete, ubrzavamo obogaćivanje podataka na osnovu stvarne potražnje.',
+        'en': 'What helps us most: the <strong>exact URL</strong> where you hit the problem, a <strong>screenshot</strong> (for visual bugs), and the <strong>browser + device</strong> you are on. For feature requests or new cities/routes — tell us where you\'d like to travel; we prioritise data enrichment based on actual demand.',
+        'ru': 'Что помогает больше всего: <strong>точный URL</strong> страницы где вы столкнулись с проблемой, <strong>скриншот</strong> (для визуальных багов) и <strong>браузер + устройство</strong>. Для предложений по новым городам или маршрутам — напишите куда вам хотелось бы поехать, мы приоритизируем обогащение данных по реальному спросу.',
+    },
+
+    'about.sources_p': {
+        'sr': 'Mrežno svake noći (u 02:00) skeniramo i objedinjujemo podatke iz više izvora: busticket4.me (glavna baza međugradskih autobusa), srbijavoz.rs (zvanični red vožnje vozova), polazak.rs (Lasta i povezani prevoznici), bgprevoz.rs (GSP Beograd), gspns.co.rs (JGSP Novi Sad), Overpass (OpenStreetMap — koordinate stajališta) i zvanični GTFS feed sa data.gov.rs. Ako podatak nedostaje ili zastari, uvek proverite i na sajtu prevoznika.',
+        'en': 'Every night (at 02:00 local time) we scan and merge data from several sources: busticket4.me (primary intercity bus database), srbijavoz.rs (official train schedule), polazak.rs (Lasta and related carriers), bgprevoz.rs (GSP Belgrade), gspns.co.rs (JGSP Novi Sad), Overpass (OpenStreetMap — stop coordinates) and the official GTFS feed from data.gov.rs. If a datum is missing or outdated, always cross-check the carrier\'s own site.',
+        'ru': 'Каждую ночь (в 02:00 местного времени) мы сканируем и объединяем данные из нескольких источников: busticket4.me (основная база междугородних автобусов), srbijavoz.rs (официальное расписание поездов), polazak.rs (Lasta и связанные перевозчики), bgprevoz.rs (GSP Белград), gspns.co.rs (JGSP Нови-Сад), Overpass (OpenStreetMap — координаты остановок) и официальный GTFS фид с data.gov.rs. Если данных не хватает или они устарели — сверяйтесь на сайте самого перевозчика.',
     },
     'home.hero_title': {
         'sr': 'Red vožnje u Srbiji',
@@ -1629,6 +1721,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'linija, stajališta i polasci.',
         'en': 'lines, stops and departures.',
         'ru': 'линий, остановок и отправлений.',
+    },
+    'city_transport.meta_extra': {
+        'sr': 'Interaktivna mapa stajališta, red vožnje po danima, dolasci uživo. Besplatno.',
+        'en': 'Interactive stops map, schedule by day, live arrivals. Free, no registration.',
+        'ru': 'Интерактивная карта остановок, расписание по дням, прибытия в реальном времени. Бесплатно.',
     },
     'city_transport.stop_popup_more': {
         'sr': 'Polasci →',

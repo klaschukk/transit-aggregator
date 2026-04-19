@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ _('contact.title') }} — Prevozni{% endblock %}
-{% block meta_description %}{{ _('contact.subtitle') }} info@prevozni.com{% endblock %}
+{% block meta_description %}{{ _('contact.meta') }}{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
@@ -16,6 +16,17 @@
 <div class="page-title">
   <h1>{{ _('contact.title') }}</h1>
   <p class="page-subtitle">{{ _('contact.subtitle') }}</p>
+</div>
+
+<div class="seo-block fade-in">
+  <div class="seo-block__icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+  </div>
+  <div class="seo-block__content">
+    <h2>{{ _('contact.intro_h') }}</h2>
+    <p>{{ _('contact.intro_p1')|safe }}</p>
+    <p>{{ _('contact.intro_p2')|safe }}</p>
+  </div>
 </div>
 
 {% if sent %}

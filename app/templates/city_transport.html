@@ -4,8 +4,8 @@
 {% set type_labels = {'tram': _('city.tram'), 'trolleybus': _('city.trolleybus'), 'night': _('city.night'), 'e-bus': 'E-bus', 'bus': _('city.bus'), 'suburban': _('city.bus'), 'bg-voz': 'BG:Voz'} %}
 {% set type_order = ['tram', 'trolleybus', 'e-bus', 'bus', 'suburban', 'bg-voz', 'night'] %}
 
-{% block title %}{{ _('city_transport.title_prefix') }} {{ city_label }} — {{ _('city_transport.title_suffix') }} | Prevozni{% endblock %}
-{% block meta_description %}{{ _('city_transport.meta_prefix') }} {{ city_label }}. {{ lines|length }} {{ _('city_transport.meta_lines') }}{% endblock %}
+{% block title %}{{ _('city_transport.title_prefix') }} {{ city_label }} | Prevozni{% endblock %}
+{% block meta_description %}{{ _('city_transport.meta_prefix') }} {{ city_label }}. {{ lines|length }} {{ _('city_transport.meta_lines') }} {{ _('city_transport.meta_extra') }}{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
