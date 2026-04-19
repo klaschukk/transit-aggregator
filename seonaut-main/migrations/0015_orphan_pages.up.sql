@@ -1,1 +1,0 @@
-INSERT INTO issue_types (id, type, priority) VALUES(30, "ERROR_ORPHAN", 3);

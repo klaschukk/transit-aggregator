@@ -1,1 +1,0 @@
-ALTER TABLE `projects` ADD COLUMN `allow_subdomains` tinyint NOT NULL DEFAULT '0';

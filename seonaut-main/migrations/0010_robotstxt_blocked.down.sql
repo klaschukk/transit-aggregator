@@ -1,1 +1,0 @@
-ALTER TABLE `pagereports` DROP COLUMN `robotstxt_blocked`;

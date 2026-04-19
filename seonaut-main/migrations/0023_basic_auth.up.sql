@@ -1,1 +1,0 @@
-ALTER TABLE `projects` ADD COLUMN `basic_auth` tinyint NOT NULL DEFAULT '0';

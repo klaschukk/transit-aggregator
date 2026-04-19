@@ -1,1 +1,0 @@
-ALTER TABLE `projects` ADD COLUMN `follow_nofollow` tinyint NOT NULL DEFAULT '0';

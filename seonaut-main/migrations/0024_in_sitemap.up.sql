@@ -1,1 +1,0 @@
-ALTER TABLE `pagereports` ADD COLUMN `in_sitemap` tinyint NOT NULL DEFAULT '0';

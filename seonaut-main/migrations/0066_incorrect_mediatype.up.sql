@@ -1,1 +1,0 @@
-INSERT INTO issue_types (id, type, priority) VALUES(74, "ERROR_INCORRECT_MEDIA_TYPE", 3);

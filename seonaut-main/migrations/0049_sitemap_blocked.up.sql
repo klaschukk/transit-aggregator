@@ -1,1 +1,0 @@
-ALTER TABLE `crawls` ADD COLUMN `sitemap_blocked` tinyint NOT NULL DEFAULT 0;

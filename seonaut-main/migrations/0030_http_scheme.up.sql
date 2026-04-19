@@ -1,1 +1,0 @@
-INSERT INTO issue_types (id, type, priority) VALUES(36, "HTTP_SCHEME", 1);

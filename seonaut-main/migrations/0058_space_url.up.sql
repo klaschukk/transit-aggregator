@@ -1,1 +1,0 @@
-INSERT INTO issue_types (id, type, priority) VALUES(67, "ERROR_SPACE_URL", 2);

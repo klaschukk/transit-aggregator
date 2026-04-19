@@ -1,1 +1,0 @@
-ALTER TABLE `users` ADD COLUMN `deleting` tinyint NOT NULL DEFAULT '0';

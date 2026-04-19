@@ -1,1 +1,0 @@
-INSERT INTO issue_types (id, type, priority) VALUES(72, "ERROR_NOSNIPPET", 3);

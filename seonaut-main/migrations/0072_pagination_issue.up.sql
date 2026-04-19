@@ -1,1 +1,0 @@
-INSERT INTO issue_types (id, type, priority) VALUES(78, "ERROR_PAGINATION_LINKS", 2);

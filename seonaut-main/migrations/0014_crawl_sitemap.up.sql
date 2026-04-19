@@ -1,1 +1,0 @@
-ALTER TABLE `projects` ADD COLUMN `crawl_sitemap` tinyint NOT NULL DEFAULT '0';

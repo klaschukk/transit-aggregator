@@ -1,1 +1,0 @@
-INSERT INTO issue_types (id, type, priority) VALUES(73, "ERROR_IMG_SIZE_ATTR", 3);

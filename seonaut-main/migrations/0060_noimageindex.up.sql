@@ -1,1 +1,0 @@
-INSERT INTO issue_types (id, type, priority) VALUES(69, "ERROR_NOIMAGEINDEX", 3);

@@ -1,1 +1,0 @@
-INSERT INTO issue_types (id, type, priority) VALUES(70, "ERROR_PICTURE_MISSONG_IMG", 2);

@@ -1,1 +1,0 @@
-INSERT INTO issue_types (id, type, priority) VALUES(38, "ERROR_CANONICALIZED_NON_INDEXABLE", 3);

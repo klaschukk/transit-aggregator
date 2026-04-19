@@ -1,1 +1,0 @@
-ALTER TABLE `projects` ADD COLUMN `include_noindex` tinyint NOT NULL DEFAULT '0';
