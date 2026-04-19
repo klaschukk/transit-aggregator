@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}{{ operator.name }} — {{ _('operator.title_suffix') }} {{ current_year }} | Prevozni{% endblock %}
+{% block meta_description %}{{ operator.name }}: {{ total_routes }} {{ _('operator.meta_routes') }}, {{ total_trips }} {{ _('operator.meta_trips') }}. {{ _('operator.meta_cta') }}{% endblock %}
+
+{% block head_extra %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"{{ operator.name }}","url":"{{ canonical_url }}"{% if operator.website %},"sameAs":["{{ operator.website }}"]{% endif %},"areaServed":[{"@type":"Country","name":"Serbia"},{"@type":"Country","name":"Montenegro"}]}
+</script>
+{% if routes %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ItemList","name":"{{ operator.name }} — {{ _('operator.routes_heading') }}","numberOfItems":{{ routes|length }},"itemListElement":[{% for r in routes[:20] %}{"@type":"ListItem","position":{{ loop.index }},"item":{"@type":"BusTrip","name":"{{ r.from_city }} → {{ r.to_city }}","provider":{"@type":"Organization","name":"{{ operator.name }}"}}}{% if not loop.last %},{% endif %}{% endfor %}]}
+</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+{% from '_partials/_breadcrumb.html' import breadcrumb with context %}
+{% from '_partials/_empty_state.html' import empty_state %}
+
+{{ breadcrumb([
+  {'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')},
+  {'url': lang_prefix ~ '/prevoznici/', 'label': _('carriers.h1')},
+  {'label': operator.name}
+]) }}
+
+<div class="page-title fade-in">
+  <h1>{{ operator.name }}</h1>
+  <p class="page-subtitle">
+    {% if operator.type == 'train' %}{{ _('carriers.train') }}{% else %}{{ _('carriers.bus') }}{% endif %}
+    · {{ total_routes }} {{ _('carriers.routes_count') }}
+    · {{ cities|length }} {{ _('operator.cities_count') }}
+    {%- if operator.website %} · <a href="{{ operator.website }}" target="_blank" rel="noopener nofollow">{{ _('carriers.website') }}</a>{% endif %}
+  </p>
+</div>
+
+<!-- SEO prose intro — unique per operator via stats -->
+<div class="seo-block fade-in">
+  <div class="seo-block__icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" aria-hidden="true"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></svg>
+  </div>
+  <div class="seo-block__content">
+    <h2>{{ _('operator.about_h').format(name=operator.name) }}</h2>
+    <p>{{ _('operator.about_p').format(name=operator.name, routes=total_routes, trips=total_trips, cities=cities|length) }}</p>
+    {% if cities %}
+    <p>{{ _('operator.cities_p').format(name=operator.name, cities=cities[:8]|join(', ')) }}</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Routes list -->
+{% if routes %}
+<section class="section">
+  <h2 class="section__title">{{ _('operator.routes_heading') }}</h2>
+  <div class="route-grid">
+    {% for r in routes %}
+    <a href="{{ lang_prefix }}/rute/{{ r.slug }}/" class="route-card fade-in fade-in--d{{ loop.index0 % 5 }}">
+      <div class="route-card__cities">
+        <span class="route-card__from">{{ r.from_city }}</span>
+        <svg class="route-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+        <span class="route-card__to">{{ r.to_city }}</span>
+      </div>
+      <div class="route-card__meta">
+        {% if r.distance_km %}{{ r.distance_km }} km · {% endif %}
+        {{ r.trip_count }} {{ _('routes.departures') }}
+        {% if r.min_price_rsd %} ·
+          <span class="ccy-rsd">{{ _('route.from_price') }} {{ r.min_price_rsd }} RSD</span><span class="ccy-eur">{{ _('route.from_price') }} {{ (r.min_price_rsd / (config.EUR_RSD_RATE or 117))|round|int }} €</span>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% else %}
+  {{ empty_state(icon='bus', text=_('operator.no_routes')) }}
+{% endif %}
+
+<!-- Internal linking: back to catalog + popular operators -->
+<section class="see-also">
+  <h2 class="see-also__title">{{ _('see_also.title') }}</h2>
+  <div class="see-also__list">
+    <a href="{{ lang_prefix }}/prevoznici/" class="see-also__link">{{ _('carriers.h1') }}</a>
+    <a href="{{ lang_prefix }}/rute/" class="see-also__link">{{ _('see_also.all_routes') }}</a>
+    <a href="{{ lang_prefix }}/destinacije/" class="see-also__link">{{ _('nav.destinations') }}</a>
+  </div>
+</section>
+
+{% endblock %}

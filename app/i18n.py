@@ -633,6 +633,58 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Длительность',
     },
 
+    # ── Operator detail page ──
+    'operator.title_suffix': {
+        'sr': 'rute i red vožnje',
+        'en': 'routes and schedules',
+        'ru': 'маршруты и расписание',
+    },
+    'operator.meta_routes': {
+        'sr': 'međugradskih ruta',
+        'en': 'intercity routes',
+        'ru': 'междугородних маршрутов',
+    },
+    'operator.meta_trips': {
+        'sr': 'polazaka',
+        'en': 'departures',
+        'ru': 'отправлений',
+    },
+    'operator.meta_cta': {
+        'sr': 'Uporedite cene, vidite raspored. Besplatno.',
+        'en': 'Compare prices, see schedules. Free.',
+        'ru': 'Сравните цены, посмотрите расписание. Бесплатно.',
+    },
+    'operator.cities_count': {
+        'sr': 'gradova u mreži',
+        'en': 'cities served',
+        'ru': 'городов в сети',
+    },
+    'operator.routes_heading': {
+        'sr': 'Sve rute prevoznika',
+        'en': 'All operator routes',
+        'ru': 'Все маршруты перевозчика',
+    },
+    'operator.no_routes': {
+        'sr': 'Trenutno nema dostupnih ruta za ovog prevoznika.',
+        'en': 'No routes available for this carrier at the moment.',
+        'ru': 'В настоящее время нет доступных маршрутов для этого перевозчика.',
+    },
+    'operator.about_h': {
+        'sr': 'O prevozniku {name}',
+        'en': 'About carrier {name}',
+        'ru': 'О перевозчике {name}',
+    },
+    'operator.about_p': {
+        'sr': '{name} je autobuski prevoznik u Srbiji i regionu. Na Prevozni.com možete pronaći raspored i cene za {routes} međugradskih ruta ovog prevoznika sa ukupno {trips} dnevnih polazaka. Mreža pokriva {cities} gradova.',
+        'en': '{name} is a bus carrier in Serbia and the region. On Prevozni.com you can find schedules and prices for {routes} intercity routes run by this carrier, with {trips} daily departures in total. The network covers {cities} cities.',
+        'ru': '{name} — автобусный перевозчик в Сербии и регионе. На Prevozni.com можно найти расписание и цены на {routes} междугородних маршрутов этого перевозчика, всего {trips} ежедневных отправлений. Сеть охватывает {cities} городов.',
+    },
+    'operator.cities_p': {
+        'sr': 'Najčešće tačke u mreži prevoznika {name}: {cities}. Kliknite na rutu da vidite konkretne polaske, cene i karte za kupovinu.',
+        'en': 'Most frequent endpoints in {name}\'s network: {cities}. Click a route to see departures, prices and ticket purchase links.',
+        'ru': 'Наиболее частые точки в сети {name}: {cities}. Нажмите на маршрут чтобы увидеть конкретные отправления, цены и ссылки на покупку.',
+    },
+
     # ── Buy ticket ──
     'buy.title': {
         'sr': 'Kupite kartu online',

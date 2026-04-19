@@ -284,8 +284,9 @@ def sitemap_core():
 
 @main_bp.route('/sitemap-routes.xml')
 def sitemap_routes():
-    """Intercity route-detail pages (/rute/<slug>/). Only routes with real
-    trips — tripless routes are noindex'd at render time."""
+    """Intercity route-detail pages (/rute/<slug>/) + operator-detail pages
+    (/prevoznici/<slug>/). Both are hub-like catalog entries; same shard
+    keeps their freshness signal aligned with the routes table."""
     base = current_app.config['BASE_URL']
     url = _build_url_fn(base, _sitemap_lastmod())
     pages: list[str] = []
@@ -297,6 +298,14 @@ def sitemap_routes():
         """, ttl=3600)
         for r in routes:
             pages.append(url(f'/rute/{r["slug"]}/', 'daily', '0.7'))
+
+        operators = cached_query("""
+            SELECT DISTINCT o.slug FROM operators o
+            JOIN trips t ON t.operator_id = o.id
+            WHERE o.slug IS NOT NULL
+        """, ttl=3600)
+        for op in operators:
+            pages.append(url(f'/prevoznici/{op["slug"]}/', 'weekly', '0.5'))
     return _urlset(pages)
 
 

@@ -71,7 +71,9 @@
         </svg>
       </div>
       <div class="carrier-section__info">
-        <h2 class="carrier-section__name">{{ op.name }}</h2>
+        <h2 class="carrier-section__name">
+          <a href="{{ lang_prefix }}/prevoznici/{{ op.slug }}/">{{ op.name }}</a>
+        </h2>
         <div class="carrier-section__meta">
           {% if op.type == 'train' %}{{ _('carriers.train') }}{% else %}{{ _('carriers.bus') }}{% endif %} · {{ op.route_count|default(0) }} {{ _('carriers.routes_count') }}
           {% if op.website %} · <a href="{{ op.website }}" target="_blank" rel="noopener">{{ _('carriers.website') }}</a>{% endif %}

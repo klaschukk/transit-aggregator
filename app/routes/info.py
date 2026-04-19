@@ -2,9 +2,10 @@ import html
 import logging
 import re
 
-from flask import Blueprint, render_template
+from flask import Blueprint, abort, redirect, render_template, url_for
 
 from app.db import cached_query, cached_query_one, db_ready
+from app.slug import normalize_slug
 
 info_bp = Blueprint('info', __name__)
 
@@ -186,6 +187,58 @@ def carriers():
         total_operators=total,
         page=page,
         total_pages=total_pages,
+    )
+
+
+@info_bp.route('/prevoznici/<slug>/')
+def operator_detail(slug: str):
+    """Single-operator page: all their intercity routes + stats.
+
+    One per operator × 3 languages = 66 × 3 ≈ 200 new indexable URLs,
+    each with unique content (the route list + cities covered is
+    different for every carrier). Great for long-tail queries like
+    "Lasta raspored" or "Niš-Ekspres rute".
+    """
+    op = cached_query_one(
+        "SELECT id, name, slug, website, type FROM operators WHERE slug = ?",
+        [slug], ttl=3600,
+    ) if db_ready() else None
+
+    if not op:
+        # Canonical redirect for cyrillic / uppercase slugs.
+        norm = normalize_slug(slug)
+        if norm and norm != slug:
+            alt = cached_query_one(
+                "SELECT slug FROM operators WHERE slug = ?", [norm], ttl=3600,
+            )
+            if alt:
+                return redirect(
+                    url_for('info.operator_detail', slug=norm), code=301,
+                )
+        if not slug.isascii():
+            abort(410)
+        abort(404)
+
+    routes = cached_query("""
+        SELECT r.slug, r.from_city, r.to_city, r.distance_km,
+               COUNT(DISTINCT t.id) AS trip_count,
+               MIN(t.price_rsd) AS min_price_rsd
+        FROM routes r
+        JOIN trips t ON t.route_id = r.id
+        WHERE t.operator_id = ? AND r.type = 'intercity' AND t.price_rsd > 0
+        GROUP BY r.slug, r.from_city, r.to_city, r.distance_km
+        ORDER BY trip_count DESC, r.from_city, r.to_city
+    """, [op['id']], ttl=3600)
+
+    cities = sorted({c for r in routes for c in (r['from_city'], r['to_city'])})
+
+    return render_template(
+        'operator_detail.html',
+        operator=op,
+        routes=routes,
+        cities=cities,
+        total_routes=len(routes),
+        total_trips=sum(r['trip_count'] for r in routes),
     )
 
 
