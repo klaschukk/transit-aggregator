@@ -40,7 +40,15 @@
 ]) }}
 
 <div class="page-title fade-in">
-  <h1>{{ from_city }} → {{ to_city }}</h1>
+  <h1>
+    {{ from_city }} → {{ to_city }}
+    <button type="button" class="js-fav-btn fav-btn" aria-label="{{ _('fav.save_aria') }}"
+            data-path="/voznja/{{ _from_slug }}-do-{{ _to_slug }}/"
+            data-key="{{ _from_slug }}-do-{{ _to_slug }}"
+            data-from="{{ from_city }}" data-to="{{ to_city }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+    </button>
+  </h1>
   <p class="page-subtitle">
     {% if route %}{{ route.trip_count|default(0) }} polazaka dnevno{% if route.distance_km %} · {{ route.distance_km }} km{% endif %}{% endif %}
     {% if route and route.min_price_rsd %} · od

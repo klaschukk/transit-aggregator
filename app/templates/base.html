@@ -94,6 +94,40 @@
 </script>
 
 <script>
+/* Saved routes (localStorage) — star toggle on route_detail + city_pair
+   page titles. Write a small record so /omiljeno/ can render it. */
+(function(){
+  var KEY = 'prevozni.saved';
+  function read(){ try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch(e){ return []; } }
+  function write(arr){ try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch(e){} }
+  document.querySelectorAll('.js-fav-btn').forEach(function(btn){
+    var key = btn.dataset.key;
+    var saved = read().some(function(x){ return x.key === key; });
+    btn.classList.toggle('fav-btn--on', saved);
+    btn.setAttribute('aria-pressed', saved ? 'true' : 'false');
+    btn.addEventListener('click', function(){
+      var arr = read();
+      var idx = arr.findIndex(function(x){ return x.key === key; });
+      if (idx >= 0) {
+        arr.splice(idx, 1);
+      } else {
+        arr.push({
+          key: key,
+          path: btn.dataset.path,
+          from: btn.dataset.from,
+          to: btn.dataset.to,
+        });
+      }
+      write(arr);
+      var on = idx < 0;
+      btn.classList.toggle('fav-btn--on', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  });
+})();
+</script>
+
+<script>
 /* Register service worker — offline fallback + static-asset cache.
    Only registers on https (localhost counts); skips if browser doesn't
    support it. Errors are swallowed — SW is strictly a nice-to-have. */

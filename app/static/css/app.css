@@ -1971,6 +1971,25 @@ main { animation: fadeInUp .25s ease both; }
   color: var(--color-primary-dark);
 }
 
+/* ── Favourite (star) button in H1 ── */
+.fav-btn {
+  background: none; border: 0; cursor: pointer;
+  vertical-align: middle; margin-left: 10px;
+  color: var(--color-text-muted);
+  padding: 6px; border-radius: var(--radius-md);
+  transition: color .15s, background .15s, transform .15s;
+}
+.fav-btn:hover { color: var(--color-accent); background: var(--color-bg-alt); transform: scale(1.05); }
+.fav-btn--on { color: var(--color-accent); }
+.fav-btn--on svg { fill: currentColor; }
+.fav-remove {
+  background: none; border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs); color: var(--color-text-muted);
+  padding: 4px 10px; cursor: pointer;
+}
+.fav-remove:hover { color: var(--color-text); border-color: var(--color-text-muted); }
+
 /* ── Currency toggle (RSD ↔ EUR) ──
    Every rendered price ships both spans; CSS picks one based on the
    <html class="ccy-eur"> flag set from cookie in a pre-body inline

@@ -378,6 +378,14 @@ def sitemap_stops():
     return _urlset(pages)
 
 
+@main_bp.route('/omiljeno/')
+def favourites():
+    """Client-side favourites list — content is rendered from localStorage
+    by JS. Server just returns an empty shell so the URL is shareable and
+    has proper meta tags."""
+    return render_template('favourites.html')
+
+
 @main_bp.route('/offline.html')
 def offline_page():
     """Cached by the service worker as the offline fallback shell."""

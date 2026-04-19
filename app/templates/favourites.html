@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('fav.title') }} | Prevozni{% endblock %}
+{% block meta_description %}{{ _('fav.meta') }}{% endblock %}
+{% block head_extra %}
+<meta name="robots" content="noindex">
+{% endblock %}
+
+{% block content %}
+
+{% from '_partials/_breadcrumb.html' import breadcrumb with context %}
+{% from '_partials/_empty_state.html' import empty_state %}
+
+{{ breadcrumb([
+  {'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')},
+  {'label': _('fav.h1')}
+]) }}
+
+<div class="page-title fade-in">
+  <h1>{{ _('fav.h1') }}</h1>
+  <p class="page-subtitle" id="favCount"></p>
+</div>
+
+<div id="favList" class="route-grid"></div>
+
+<div id="favEmpty" hidden>
+  {{ empty_state(icon='star', text=_('fav.empty'), sub=_('fav.empty_sub')) }}
+  <p style="text-align: center; margin-top: 24px;">
+    <a class="btn btn--primary" href="{{ lang_prefix }}/rute/">{{ _('fav.browse_routes') }}</a>
+  </p>
+</div>
+
+<script>
+(function(){
+  var KEY = 'prevozni.saved';
+  var list = document.getElementById('favList');
+  var empty = document.getElementById('favEmpty');
+  var count = document.getElementById('favCount');
+  var lp = {{ lang_prefix|tojson }};
+
+  function read(){ try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch(e){ return []; } }
+  function write(arr){ try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch(e){} }
+
+  var saved = read();
+  if (!saved.length) {
+    empty.hidden = false;
+    count.textContent = {{ _('fav.zero')|tojson }};
+    return;
+  }
+  count.textContent = saved.length + ' ' + {{ _('fav.count_suffix')|tojson }};
+  saved.forEach(function(item){
+    var card = document.createElement('a');
+    card.className = 'route-card fade-in';
+    card.href = lp + item.path;
+    card.innerHTML =
+      '<div class="route-card__cities">' +
+        '<span class="route-card__from">' + item.from + '</span>' +
+        '<svg class="route-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>' +
+        '<span class="route-card__to">' + item.to + '</span>' +
+      '</div>' +
+      '<div class="route-card__meta">' +
+        '<button type="button" class="fav-remove" data-key="' + item.key + '">' + {{ _('fav.remove')|tojson }} + '</button>' +
+      '</div>';
+    list.appendChild(card);
+  });
+  list.addEventListener('click', function(e){
+    var btn = e.target.closest('.fav-remove');
+    if (!btn) return;
+    e.preventDefault();
+    var key = btn.dataset.key;
+    write(read().filter(function(x){ return x.key !== key; }));
+    location.reload();
+  });
+})();
+</script>
+{% endblock %}

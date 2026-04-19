@@ -679,6 +679,54 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': '{name} is a bus carrier in Serbia and the region. On Prevozni.com you can find schedules and prices for {routes} intercity routes run by this carrier, with {trips} daily departures in total. The network covers {cities} cities.',
         'ru': '{name} — автобусный перевозчик в Сербии и регионе. На Prevozni.com можно найти расписание и цены на {routes} междугородних маршрутов этого перевозчика, всего {trips} ежедневных отправлений. Сеть охватывает {cities} городов.',
     },
+    # ── Favourites (localStorage) ──
+    'fav.title': {
+        'sr': 'Sačuvane rute',
+        'en': 'Saved routes',
+        'ru': 'Сохранённые маршруты',
+    },
+    'fav.meta': {
+        'sr': 'Vaše sačuvane autobuske rute na Prevozni. Rute su sačuvane lokalno u vašem pregledaču.',
+        'en': 'Your saved bus routes on Prevozni. Routes are stored locally in your browser.',
+        'ru': 'Ваши сохранённые автобусные маршруты на Prevozni. Маршруты хранятся локально в браузере.',
+    },
+    'fav.h1': {'sr': 'Sačuvane rute', 'en': 'Saved routes', 'ru': 'Сохранённые маршруты'},
+    'fav.save_aria': {
+        'sr': 'Sačuvaj rutu',
+        'en': 'Save route',
+        'ru': 'Сохранить маршрут',
+    },
+    'fav.remove': {
+        'sr': 'Ukloni',
+        'en': 'Remove',
+        'ru': 'Убрать',
+    },
+    'fav.zero': {
+        'sr': 'Još nemate sačuvanih ruta',
+        'en': 'No saved routes yet',
+        'ru': 'Сохранённых маршрутов пока нет',
+    },
+    'fav.count_suffix': {
+        'sr': 'ruta sačuvano',
+        'en': 'routes saved',
+        'ru': 'маршрутов сохранено',
+    },
+    'fav.empty': {
+        'sr': 'Nemate sačuvanih ruta',
+        'en': 'You have no saved routes',
+        'ru': 'У вас нет сохранённых маршрутов',
+    },
+    'fav.empty_sub': {
+        'sr': 'Kliknite zvezdicu pored naziva rute da biste je sačuvali.',
+        'en': 'Click the star next to a route name to save it.',
+        'ru': 'Нажмите звёздочку рядом с названием маршрута чтобы сохранить его.',
+    },
+    'fav.browse_routes': {
+        'sr': 'Pregledaj sve rute',
+        'en': 'Browse all routes',
+        'ru': 'Посмотреть все маршруты',
+    },
+
     # ── Offline fallback (PWA) ──
     'offline.title': {
         'sr': 'Nema interneta',
