@@ -679,6 +679,172 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': '{name} is a bus carrier in Serbia and the region. On Prevozni.com you can find schedules and prices for {routes} intercity routes run by this carrier, with {trips} daily departures in total. The network covers {cities} cities.',
         'ru': '{name} — автобусный перевозчик в Сербии и регионе. На Prevozni.com можно найти расписание и цены на {routes} междугородних маршрутов этого перевозчика, всего {trips} ежедневных отправлений. Сеть охватывает {cities} городов.',
     },
+    # ── Guides / blog ──
+    'guides.index_title': {
+        'sr': 'Vodiči za putovanja autobusom — Prevozni',
+        'en': 'Bus travel guides — Prevozni',
+        'ru': 'Гиды по автобусным поездкам — Prevozni',
+    },
+    'guides.index_meta': {
+        'sr': 'Praktični vodiči za putovanja autobusom i vozom po Srbiji i Balkanu: cene, redovi vožnje, poređenja, saveti.',
+        'en': 'Practical guides for bus and train travel across Serbia and the Balkans: prices, schedules, comparisons, tips.',
+        'ru': 'Практические гиды по автобусным и железнодорожным поездкам по Сербии и Балканам: цены, расписания, сравнения, советы.',
+    },
+    'guides.index_h1': {
+        'sr': 'Vodiči za putnike',
+        'en': 'Traveller guides',
+        'ru': 'Гиды для путешественников',
+    },
+    'guides.index_subtitle': {
+        'sr': 'Sve što treba da znate pre putovanja',
+        'en': 'Everything you need to know before you travel',
+        'ru': 'Всё что нужно знать перед поездкой',
+    },
+    'guides.intro_h': {
+        'sr': 'Kako koristiti ove vodiče',
+        'en': 'How to use these guides',
+        'ru': 'Как пользоваться этими гидами',
+    },
+    'guides.intro_p': {
+        'sr': 'Naši vodiči odgovaraju na konkretna pitanja putnika: kako doći do određenog grada, kada su najjeftinije karte, kako izabrati između autobusa i voza. Sav sadržaj se ažurira kada se promene redovi vožnje ili cene kod prevoznika.',
+        'en': 'Our guides answer specific traveller questions: how to reach a specific city, when tickets are cheapest, how to choose between bus and train. All content is refreshed when carrier schedules or prices change.',
+        'ru': 'Наши гиды отвечают на конкретные вопросы путешественников: как добраться до определённого города, когда билеты дешевле, как выбрать между автобусом и поездом. Весь контент обновляется при изменениях расписания или цен у перевозчиков.',
+    },
+    'guides.cat_travel': {'sr': 'Putovanja', 'en': 'Travel', 'ru': 'Путешествия'},
+    'guides.cat_tips': {'sr': 'Saveti', 'en': 'Tips', 'ru': 'Советы'},
+
+    # Guide 1 — Belgrade → Budva
+    'guides.beograd_budva.title': {
+        'sr': 'Kako doći iz Beograda u Budvu: autobus, voz, cene 2026',
+        'en': 'How to get from Belgrade to Budva: bus, train, prices 2026',
+        'ru': 'Как добраться из Белграда в Будву: автобус, поезд, цены 2026',
+    },
+    'guides.beograd_budva.meta': {
+        'sr': 'Pun vodič za put Beograd → Budva 2026: autobus (najbrže, 10–12h), cene od 30€, preporučeni prevoznici i saveti.',
+        'en': 'Full guide for Belgrade → Budva trip in 2026: bus (fastest, 10–12h), prices from €30, recommended carriers and tips.',
+        'ru': 'Полный гид по поездке Белград → Будва в 2026: автобус (быстрее всего, 10–12ч), цены от 30€, рекомендуемые перевозчики и советы.',
+    },
+    'guides.beograd_budva.p1': {
+        'sr': 'Beograd i Budva razdvaja oko <strong>600 km</strong> — put kroz Užice, Zlatibor, Nikšić i Podgoricu. Direktnog voza nema; najpraktičniji način je <strong>autobus preko noći</strong> (10–12 sati). Letnja sezona: i dnevne linije i veći broj prevoznika. Zimi: uglavnom noćne linije.',
+        'en': 'Belgrade and Budva are separated by about <strong>600 km</strong> — the route runs through Užice, Zlatibor, Nikšić and Podgorica. There is no direct train; the most practical way is an <strong>overnight bus</strong> (10–12 hours). In summer: more daytime lines and more carriers. In winter: mostly overnight lines.',
+        'ru': 'Белград и Будву разделяет около <strong>600 км</strong> — путь через Ужице, Златибор, Никшич и Подгорицу. Прямого поезда нет; самый практичный вариант — <strong>ночной автобус</strong> (10–12 часов). Летом: больше дневных рейсов и перевозчиков. Зимой: в основном ночные рейсы.',
+    },
+    'guides.beograd_budva.h2_options': {
+        'sr': 'Opcije prevoza',
+        'en': 'Travel options',
+        'ru': 'Варианты транспорта',
+    },
+    'guides.beograd_budva.p2': {
+        'sr': 'Na ovoj relaciji prevoz organizuju <strong>Lasta</strong>, <strong>Kavim-Jedinstvo</strong>, <strong>OZLEM</strong> i još nekoliko regionalnih prevoznika. Prosečna vožnja traje <strong>10 sati 30 minuta</strong> sa jednom pauzom. Većina autobusa su savremeni, sa WC-om, WiFi-jem i klimom.',
+        'en': 'The route is operated by <strong>Lasta</strong>, <strong>Kavim-Jedinstvo</strong>, <strong>OZLEM</strong> and several regional carriers. Average trip is <strong>10 hours 30 minutes</strong> with one break. Most buses are modern, with toilet, WiFi and A/C.',
+        'ru': 'Маршрут обслуживают <strong>Lasta</strong>, <strong>Kavim-Jedinstvo</strong>, <strong>OZLEM</strong> и несколько региональных перевозчиков. Средняя поездка — <strong>10 часов 30 минут</strong> с одной остановкой. Большинство автобусов современные, с туалетом, WiFi и кондиционером.',
+    },
+    'guides.beograd_budva.h2_price': {
+        'sr': 'Cene karata',
+        'en': 'Ticket prices',
+        'ru': 'Цены билетов',
+    },
+    'guides.beograd_budva.p3': {
+        'sr': 'Karte koštaju <strong>30–45€</strong> (3500–5200 RSD) zavisno od prevoznika i sezone. U julu-avgustu cene idu gore. Za najjeftinije karte: kupujte unapred i izbegavajte vikende. Povratna karta je često 5–10% jeftinija od dve u jednom smeru.',
+        'en': 'Tickets cost <strong>€30–45</strong> (3500–5200 RSD) depending on carrier and season. Prices rise in July–August. For cheapest fares: book in advance and avoid weekends. Return tickets are often 5–10% cheaper than two one-ways.',
+        'ru': 'Билеты стоят <strong>30–45€</strong> (3500–5200 RSD) в зависимости от перевозчика и сезона. Летом цены растут. Для самых дешёвых билетов: покупайте заранее и избегайте выходных. Обратный билет часто на 5–10% дешевле двух в одну сторону.',
+    },
+    'guides.beograd_budva.h2_when': {
+        'sr': 'Kada putovati',
+        'en': 'When to travel',
+        'ru': 'Когда ехать',
+    },
+    'guides.beograd_budva.p4': {
+        'sr': 'Glavna sezona je <strong>jun-septembar</strong> — tada je najveći izbor polazaka i najviše turista. Van sezone (novembar-mart) put je jeftiniji i mirniji, ali je broj polazaka manji (obično samo noćni). Srećom, Budva radi cele godine — čak i zimi tu ima života.',
+        'en': 'Peak season is <strong>June–September</strong> — most departures and most tourists. Off-season (November–March) is cheaper and quieter, but fewer departures (usually overnight only). Luckily Budva is open year-round — even in winter it has a pulse.',
+        'ru': 'Пик — <strong>июнь-сентябрь</strong> — больше всего рейсов и туристов. Несезон (ноябрь-март) — дешевле и тише, но меньше рейсов (обычно только ночные). К счастью, Будва живёт круглый год — даже зимой там есть жизнь.',
+    },
+    'guides.beograd_budva.cta': {
+        'sr': 'Proveri polazke Beograd → Budva',
+        'en': 'Check Belgrade → Budva departures',
+        'ru': 'Посмотреть рейсы Белград → Будва',
+    },
+
+    # Guide 2 — cheap tickets
+    'guides.cheap_tickets.title': {
+        'sr': 'Najjeftinije autobus karte u Srbiji: 7 saveta 2026',
+        'en': 'Cheapest bus tickets in Serbia: 7 tips for 2026',
+        'ru': 'Самые дешёвые билеты на автобус в Сербии: 7 советов 2026',
+    },
+    'guides.cheap_tickets.meta': {
+        'sr': 'Kako kupiti najjeftinije karte za autobus u Srbiji: kada bukirati, gde tražiti, koji prevoznici daju popuste.',
+        'en': 'How to buy the cheapest bus tickets in Serbia: when to book, where to look, which carriers offer discounts.',
+        'ru': 'Как купить самые дешёвые билеты на автобус в Сербии: когда бронировать, где искать, какие перевозчики дают скидки.',
+    },
+    'guides.cheap_tickets.p1': {
+        'sr': 'Cene autobuskih karata u Srbiji variraju i do 40% zavisno od dana, prevoznika i načina kupovine. Evo kako ih spustiti na minimum.',
+        'en': 'Bus ticket prices in Serbia vary by up to 40% depending on the day, carrier and purchase method. Here is how to push them to the minimum.',
+        'ru': 'Цены автобусных билетов в Сербии различаются до 40% в зависимости от дня, перевозчика и способа покупки. Вот как опустить их до минимума.',
+    },
+    'guides.cheap_tickets.h2_when': {'sr': 'Kada kupiti', 'en': 'When to buy', 'ru': 'Когда покупать'},
+    'guides.cheap_tickets.p2': {
+        'sr': 'Autobuske karte u Srbiji nemaju tako izražen dynamic pricing kao avio, ali i dalje: <strong>utorak-četvrtak</strong> su najjeftiniji dani, vikendi i praznici 10–25% skuplji. Vožnje rano ujutru i kasno noću su obično jeftinije od popodnevnih.',
+        'en': 'Serbian bus tickets don\'t have dynamic pricing like airlines, but still: <strong>Tuesday-Thursday</strong> are cheapest days, weekends and holidays 10–25% more expensive. Early morning and late-night runs are usually cheaper than afternoon ones.',
+        'ru': 'Автобусные билеты в Сербии не имеют такого динамичного ценообразования как авиа, но всё же: <strong>вторник-четверг</strong> — самые дешёвые дни, выходные и праздники на 10–25% дороже. Утренние и ночные рейсы обычно дешевле дневных.',
+    },
+    'guides.cheap_tickets.h2_where': {'sr': 'Gde tražiti', 'en': 'Where to look', 'ru': 'Где искать'},
+    'guides.cheap_tickets.p3': {
+        'sr': 'Većina prevoznika prodaje online preko partnera <strong>Bookaway</strong> ili <strong>BusTicket4.me</strong>. Direktno na šalteru autobuske stanice ponekad je i jeftinije — posebno kod manjih lokalnih prevoznika (Niš-Ekspres, Severtrans, Autoprevoz).',
+        'en': 'Most carriers sell online via partners <strong>Bookaway</strong> or <strong>BusTicket4.me</strong>. Buying directly at the bus-station counter is sometimes cheaper — especially with smaller local carriers (Niš-Ekspres, Severtrans, Autoprevoz).',
+        'ru': 'Большинство перевозчиков продают онлайн через партнёров <strong>Bookaway</strong> или <strong>BusTicket4.me</strong>. Прямо на кассе автовокзала иногда дешевле — особенно у небольших местных перевозчиков (Niš-Ekspres, Severtrans, Autoprevoz).',
+    },
+    'guides.cheap_tickets.h2_tips': {'sr': 'Praktični saveti', 'en': 'Practical tips', 'ru': 'Практические советы'},
+    'guides.cheap_tickets.p4': {
+        'sr': 'Povratna karta obično je 5–10% jeftinija od dve odvojene. Studentske i penzionerske popuste daju Lasta, Kavim i Niš-Ekspres (do 30%). Za više ljudi: proveriti grupne cene kod prevoznika — česta ušteda 15–20%. Ne bukirati u petak popodne i nedelju uveče — to je cenovni pik nedelje.',
+        'en': 'Return tickets are usually 5–10% cheaper than two one-ways. Student and senior discounts: Lasta, Kavim and Niš-Ekspres (up to 30%). For groups: check group rates with the carrier — typical savings 15–20%. Avoid booking Friday afternoon and Sunday evening — weekly price peak.',
+        'ru': 'Обратные билеты обычно на 5–10% дешевле двух в одну сторону. Студенческие и пенсионерские скидки: Lasta, Kavim и Niš-Ekspres (до 30%). Для групп: проверьте групповые тарифы у перевозчика — обычно экономия 15–20%. Не бронируйте в пятницу днём и воскресенье вечером — пик цен недели.',
+    },
+    'guides.cheap_tickets.cta': {
+        'sr': 'Vidi sve rute i cene',
+        'en': 'See all routes and prices',
+        'ru': 'Посмотреть все маршруты и цены',
+    },
+
+    # Guide 3 — bus vs train
+    'guides.bus_vs_train.title': {
+        'sr': 'Autobus ili voz u Srbiji: šta je bolje?',
+        'en': 'Bus or train in Serbia: which is better?',
+        'ru': 'Автобус или поезд в Сербии: что лучше?',
+    },
+    'guides.bus_vs_train.meta': {
+        'sr': 'Poređenje autobusa i voza u Srbiji: brzina, cena, komfor, pokrivenost. Kada izabrati šta.',
+        'en': 'Bus vs. train comparison for Serbia: speed, price, comfort, coverage. When to pick which.',
+        'ru': 'Сравнение автобуса и поезда в Сербии: скорость, цена, комфорт, покрытие. Когда что выбрать.',
+    },
+    'guides.bus_vs_train.p1': {
+        'sr': 'U Srbiji autobus pokriva skoro sve relacije (275+ međugradskih), dok voz radi na oko 15 glavnih pravaca. Ipak, na nekim rutama voz je ozbiljan takmičar — jeftiniji i komforniji.',
+        'en': 'In Serbia, the bus covers nearly every route (275+ intercity), while the train runs on about 15 main corridors. Still, on certain routes the train is a serious contender — cheaper and more comfortable.',
+        'ru': 'В Сербии автобус покрывает почти все направления (275+ междугородних), поезд работает на ~15 основных коридорах. Тем не менее на некоторых маршрутах поезд — серьёзный конкурент: дешевле и комфортнее.',
+    },
+    'guides.bus_vs_train.h2_bus': {'sr': 'Kada autobus', 'en': 'When bus wins', 'ru': 'Когда автобус выигрывает'},
+    'guides.bus_vs_train.p2': {
+        'sr': 'Autobus je bolji izbor za <strong>manje gradove</strong> (Čačak, Kraljevo, Užice, Valjevo, Leskovac), <strong>putovanja u region</strong> (Crna Gora, Bosna, Hrvatska), i <strong>noćne polaske</strong> kada možete da spavate u sedištu. Prevoznika je mnogo, frekvencija velika.',
+        'en': 'The bus is better for <strong>smaller cities</strong> (Čačak, Kraljevo, Užice, Valjevo, Leskovac), <strong>regional travel</strong> (Montenegro, Bosnia, Croatia), and <strong>overnight runs</strong> where you can sleep in the seat. Lots of carriers, high frequency.',
+        'ru': 'Автобус лучше для <strong>небольших городов</strong> (Чачак, Кралево, Ужице, Валево, Лесковац), <strong>региональных поездок</strong> (Черногория, Босния, Хорватия) и <strong>ночных рейсов</strong> где можно поспать в кресле. Много перевозчиков, высокая частота.',
+    },
+    'guides.bus_vs_train.h2_train': {'sr': 'Kada voz', 'en': 'When train wins', 'ru': 'Когда поезд выигрывает'},
+    'guides.bus_vs_train.p3': {
+        'sr': 'Voz je bolji na pravcu <strong>Beograd — Novi Sad</strong> (brza Soko linija, 37 min) i na relacijama <strong>Beograd — Subotica</strong>, <strong>Beograd — Niš</strong>. Komfor je veći (možete da ustanete i prošetate), cene često niže nego autobus, i nema zastoja u saobraćaju.',
+        'en': 'The train wins on <strong>Belgrade — Novi Sad</strong> (the fast Soko line, 37 min) and on <strong>Belgrade — Subotica</strong>, <strong>Belgrade — Niš</strong>. More comfort (you can stand and walk), often cheaper than the bus, no traffic jams.',
+        'ru': 'Поезд выигрывает на направлении <strong>Белград — Нови-Сад</strong> (скорая линия Soko, 37 мин) и на <strong>Белград — Суботица</strong>, <strong>Белград — Ниш</strong>. Больше комфорта (можно встать и пройтись), часто дешевле автобуса, нет пробок.',
+    },
+    'guides.bus_vs_train.h2_verdict': {'sr': 'Verdikt', 'en': 'Verdict', 'ru': 'Вывод'},
+    'guides.bus_vs_train.p4': {
+        'sr': 'Za <strong>Novi Sad</strong>, <strong>Subotica</strong>, <strong>Niš</strong>: pokušajte voz (posebno Soko). Za sve ostalo: autobus. Kad god ima oba — uporedite cenu i vreme na ovom sajtu pre kupovine.',
+        'en': 'For <strong>Novi Sad</strong>, <strong>Subotica</strong>, <strong>Niš</strong>: try the train (especially Soko). For everything else: bus. Whenever both are available — compare price and time on this site before buying.',
+        'ru': 'Для <strong>Нови-Сад</strong>, <strong>Суботица</strong>, <strong>Ниш</strong>: попробуйте поезд (особенно Soko). Для всего остального: автобус. Когда оба варианта есть — сравните цену и время на этом сайте перед покупкой.',
+    },
+    'guides.bus_vs_train.cta': {
+        'sr': 'Uporedi polaske',
+        'en': 'Compare departures',
+        'ru': 'Сравнить рейсы',
+    },
+
     # ── Country hub page ──
     'country.title_prefix': {
         'sr': 'Autobus Srbija',

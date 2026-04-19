@@ -117,6 +117,61 @@ def destinations():
 # Country slug → (display name, list of member cities as they appear in
 # routes.from_city / routes.to_city, SEO intro key). The "cities" list is
 # what we filter the routes table on, so names must match exactly.
+_GUIDES: dict[str, dict] = {
+    'kako-doci-beograd-budva': {
+        'title_key': 'guides.beograd_budva.title',
+        'meta_key': 'guides.beograd_budva.meta',
+        'date': '2026-04-15',
+        'category_key': 'guides.cat_travel',
+    },
+    'najjeftinije-autobus-karte-srbija': {
+        'title_key': 'guides.cheap_tickets.title',
+        'meta_key': 'guides.cheap_tickets.meta',
+        'date': '2026-04-10',
+        'category_key': 'guides.cat_tips',
+    },
+    'autobus-ili-voz-srbija': {
+        'title_key': 'guides.bus_vs_train.title',
+        'meta_key': 'guides.bus_vs_train.meta',
+        'date': '2026-04-05',
+        'category_key': 'guides.cat_tips',
+    },
+}
+
+
+@info_bp.route('/vodici/')
+def guides_index():
+    """Index of all SEO guides — evergreen long-form content."""
+    guides = [
+        {
+            'slug': slug,
+            'title_key': info['title_key'],
+            'meta_key': info['meta_key'],
+            'date': info['date'],
+            'category_key': info['category_key'],
+        }
+        for slug, info in _GUIDES.items()
+    ]
+    guides.sort(key=lambda g: g['date'], reverse=True)
+    return render_template('guides_index.html', guides=guides)
+
+
+@info_bp.route('/vodici/<slug>/')
+def guide_detail(slug: str):
+    """Render a single guide. Body lives in templates/guides/<slug>.html."""
+    info = _GUIDES.get(slug)
+    if not info:
+        norm = normalize_slug(slug)
+        if norm in _GUIDES and norm != slug:
+            return redirect(url_for('info.guide_detail', slug=norm), code=301)
+        abort(404)
+    return render_template(
+        f'guides/{slug}.html',
+        guide_slug=slug,
+        guide_info=info,
+    )
+
+
 _COUNTRY_HUBS: dict[str, dict] = {
     'crna-gora': {
         'name': 'Crna Gora',

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _(guide_info.title_key) }} | Prevozni{% endblock %}
+{% block meta_description %}{{ _(guide_info.meta_key) }}{% endblock %}
+
+{% block head_extra %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article","headline":"{{ _(guide_info.title_key) }}","datePublished":"{{ guide_info.date }}","dateModified":"{{ guide_info.date }}","author":{"@type":"Organization","name":"Prevozni"},"publisher":{"@type":"Organization","name":"Prevozni","url":"{{ config.BASE_URL }}/"}}
+</script>
+{% endblock %}
+
+{% block content %}
+
+{% from '_partials/_breadcrumb.html' import breadcrumb with context %}
+
+{{ breadcrumb([
+  {'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')},
+  {'url': lang_prefix ~ '/vodici/', 'label': _('guides.index_h1')},
+  {'label': _(guide_info.title_key)}
+]) }}
+
+<article class="guide-article fade-in">
+  <header class="page-title">
+    <h1>{{ _(guide_info.title_key) }}</h1>
+    <p class="page-subtitle">{{ _(guide_info.category_key) }} · {{ guide_info.date }}</p>
+  </header>
+
+  <div class="seo-block">
+    <div class="seo-block__content guide-body">
+      {% block guide_body %}{% endblock %}
+    </div>
+  </div>
+</article>
+
+<section class="see-also">
+  <h2 class="see-also__title">{{ _('see_also.title') }}</h2>
+  <div class="see-also__list">
+    <a href="{{ lang_prefix }}/vodici/" class="see-also__link">{{ _('guides.index_h1') }}</a>
+    <a href="{{ lang_prefix }}/rute/" class="see-also__link">{{ _('see_also.all_routes') }}</a>
+    <a href="{{ lang_prefix }}/destinacije/" class="see-also__link">{{ _('nav.destinations') }}</a>
+  </div>
+</section>
+
+{% endblock %}

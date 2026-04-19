@@ -1,0 +1,16 @@
+{% extends "guides/_guide_base.html" %}
+
+{% block guide_body %}
+<p>{{ _('guides.bus_vs_train.p1')|safe }}</p>
+<h2>{{ _('guides.bus_vs_train.h2_bus') }}</h2>
+<p>{{ _('guides.bus_vs_train.p2')|safe }}</p>
+<h2>{{ _('guides.bus_vs_train.h2_train') }}</h2>
+<p>{{ _('guides.bus_vs_train.p3')|safe }}</p>
+<h2>{{ _('guides.bus_vs_train.h2_verdict') }}</h2>
+<p>{{ _('guides.bus_vs_train.p4')|safe }}</p>
+<p>
+  <a class="btn btn--primary" href="{{ lang_prefix }}/pretraga/">
+    {{ _('guides.bus_vs_train.cta') }}
+  </a>
+</p>
+{% endblock %}

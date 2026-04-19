@@ -1,0 +1,16 @@
+{% extends "guides/_guide_base.html" %}
+
+{% block guide_body %}
+<p>{{ _('guides.cheap_tickets.p1')|safe }}</p>
+<h2>{{ _('guides.cheap_tickets.h2_when') }}</h2>
+<p>{{ _('guides.cheap_tickets.p2')|safe }}</p>
+<h2>{{ _('guides.cheap_tickets.h2_where') }}</h2>
+<p>{{ _('guides.cheap_tickets.p3')|safe }}</p>
+<h2>{{ _('guides.cheap_tickets.h2_tips') }}</h2>
+<p>{{ _('guides.cheap_tickets.p4')|safe }}</p>
+<p>
+  <a class="btn btn--primary" href="{{ lang_prefix }}/rute/">
+    {{ _('guides.cheap_tickets.cta') }}
+  </a>
+</p>
+{% endblock %}

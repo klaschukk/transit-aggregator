@@ -1,0 +1,16 @@
+{% extends "guides/_guide_base.html" %}
+
+{% block guide_body %}
+<p>{{ _('guides.beograd_budva.p1')|safe }}</p>
+<h2>{{ _('guides.beograd_budva.h2_options') }}</h2>
+<p>{{ _('guides.beograd_budva.p2')|safe }}</p>
+<h2>{{ _('guides.beograd_budva.h2_price') }}</h2>
+<p>{{ _('guides.beograd_budva.p3')|safe }}</p>
+<h2>{{ _('guides.beograd_budva.h2_when') }}</h2>
+<p>{{ _('guides.beograd_budva.p4')|safe }}</p>
+<p>
+  <a class="btn btn--primary" href="{{ lang_prefix }}/voznja/beograd-do-budva/">
+    {{ _('guides.beograd_budva.cta') }}
+  </a>
+</p>
+{% endblock %}

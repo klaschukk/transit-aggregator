@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('guides.index_title') }} | Prevozni{% endblock %}
+{% block meta_description %}{{ _('guides.index_meta') }}{% endblock %}
+
+{% block content %}
+
+{% from '_partials/_breadcrumb.html' import breadcrumb with context %}
+
+{{ breadcrumb([
+  {'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')},
+  {'label': _('guides.index_h1')}
+]) }}
+
+<div class="page-title fade-in">
+  <h1>{{ _('guides.index_h1') }}</h1>
+  <p class="page-subtitle">{{ _('guides.index_subtitle') }}</p>
+</div>
+
+<div class="seo-block fade-in">
+  <div class="seo-block__icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 016.5 17H20V4H6.5A2.5 2.5 0 004 6.5v13z"/><path d="M4 19.5V17"/></svg>
+  </div>
+  <div class="seo-block__content">
+    <h2>{{ _('guides.intro_h') }}</h2>
+    <p>{{ _('guides.intro_p') }}</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="route-grid">
+    {% for g in guides %}
+    <a href="{{ lang_prefix }}/vodici/{{ g.slug }}/" class="route-card fade-in fade-in--d{{ loop.index0 % 5 }}">
+      <div class="route-card__cities">
+        <span class="route-card__from">{{ _(g.title_key) }}</span>
+      </div>
+      <div class="route-card__meta">
+        {{ _(g.category_key) }} · {{ g.date }}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="see-also">
+  <h2 class="see-also__title">{{ _('see_also.title') }}</h2>
+  <div class="see-also__list">
+    <a href="{{ lang_prefix }}/rute/" class="see-also__link">{{ _('see_also.all_routes') }}</a>
+    <a href="{{ lang_prefix }}/destinacije/" class="see-also__link">{{ _('nav.destinations') }}</a>
+    <a href="{{ lang_prefix }}/prevoznici/" class="see-also__link">{{ _('carriers.h1') }}</a>
+  </div>
+</section>
+
+{% endblock %}
