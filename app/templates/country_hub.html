@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('country.title_prefix') }} {{ country_name }} — {{ _('country.title_suffix') }} {{ current_year }} | Prevozni{% endblock %}
+{% block meta_description %}{{ _('country.meta_prefix') }} {{ country_name }}: {{ total_routes }} {{ _('country.meta_routes') }}, {{ total_trips }} {{ _('country.meta_trips') }}, {{ cities|length }} {{ _('country.meta_cities') }}. {{ _('country.meta_cta') }}{% endblock %}
+
+{% block head_extra %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Place","name":"{{ country_name }}","url":"{{ canonical_url }}"}
+</script>
+{% if routes %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ItemList","name":"{{ _('country.routes_heading') }} {{ country_name }}","numberOfItems":{{ routes|length }},"itemListElement":[{% for r in routes[:20] %}{"@type":"ListItem","position":{{ loop.index }},"item":{"@type":"BusTrip","name":"{{ r.from_city }} → {{ r.to_city }}"}}{% if not loop.last %},{% endif %}{% endfor %}]}
+</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+{% from '_partials/_breadcrumb.html' import breadcrumb with context %}
+{% from '_partials/_empty_state.html' import empty_state %}
+
+{{ breadcrumb([
+  {'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')},
+  {'url': lang_prefix ~ '/destinacije/', 'label': _('nav.destinations')},
+  {'label': country_name}
+]) }}
+
+<div class="page-title fade-in">
+  <h1>{{ _('country.h1') }} {{ country_name }}</h1>
+  <p class="page-subtitle">
+    {{ total_routes }} {{ _('country.stat_routes') }} ·
+    {{ cities|length }} {{ _('country.stat_cities') }} ·
+    {{ total_trips }} {{ _('country.stat_trips') }}
+  </p>
+</div>
+
+<!-- SEO intro (unique per country via stats) -->
+<div class="seo-block fade-in">
+  <div class="seo-block__icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+  </div>
+  <div class="seo-block__content">
+    <h2>{{ _('country.about_h').format(country=country_name) }}</h2>
+    <p>{{ _('country.about_p').format(country=country_name, routes=total_routes, trips=total_trips, cities=cities|length, from_sr=from_serbia_count, intra=intra_count) }}</p>
+    {% if cities %}
+    <p>{{ _('country.cities_p').format(country=country_name, cities=cities|join(', ')) }}</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Routes list -->
+{% if routes %}
+<section class="section">
+  <h2 class="section__title">{{ _('country.routes_heading') }} {{ country_name }}</h2>
+  <div class="route-grid">
+    {% for r in routes %}
+    <a href="{{ lang_prefix }}/voznja/{{ r.from_city_slug }}-do-{{ r.to_city_slug }}/" class="route-card fade-in fade-in--d{{ loop.index0 % 5 }}">
+      <div class="route-card__cities">
+        <span class="route-card__from">{{ r.from_city }}</span>
+        <svg class="route-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+        <span class="route-card__to">{{ r.to_city }}</span>
+      </div>
+      <div class="route-card__meta">
+        {% if r.distance_km %}{{ r.distance_km }} km · {% endif %}
+        {{ r.trip_count }} {{ _('routes.departures') }}
+        {% if r.min_price_rsd %} ·
+          <span class="ccy-rsd">{{ _('route.from_price') }} {{ r.min_price_rsd }} RSD</span><span class="ccy-eur">{{ _('route.from_price') }} {{ (r.min_price_rsd / (config.EUR_RSD_RATE or 117))|round|int }} €</span>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% else %}
+  {{ empty_state(icon='bus', text=_('country.no_routes')) }}
+{% endif %}
+
+<!-- Other countries + internal links -->
+<section class="see-also">
+  <h2 class="see-also__title">{{ _('see_also.title') }}</h2>
+  <div class="see-also__list">
+    {% for slug, name in [('crna-gora','Crna Gora'), ('bosna','Bosna i Hercegovina'), ('hrvatska','Hrvatska'), ('makedonija','Severna Makedonija')] if slug != country_slug %}
+    <a href="{{ lang_prefix }}/destinacije/{{ slug }}/" class="see-also__link">{{ name }}</a>
+    {% endfor %}
+    <a href="{{ lang_prefix }}/rute/" class="see-also__link">{{ _('see_also.all_routes') }}</a>
+    <a href="{{ lang_prefix }}/destinacije/" class="see-also__link">{{ _('nav.destinations') }}</a>
+  </div>
+</section>
+
+{% endblock %}

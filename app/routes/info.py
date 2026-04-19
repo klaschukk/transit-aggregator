@@ -114,6 +114,88 @@ def destinations():
     return render_template('destinations.html')
 
 
+# Country slug → (display name, list of member cities as they appear in
+# routes.from_city / routes.to_city, SEO intro key). The "cities" list is
+# what we filter the routes table on, so names must match exactly.
+_COUNTRY_HUBS: dict[str, dict] = {
+    'crna-gora': {
+        'name': 'Crna Gora',
+        'cities': ('Podgorica', 'Budva', 'Herceg Novi', 'Kotor', 'Tivat',
+                   'Bar', 'Nikšić', 'Ulcinj', 'Cetinje', 'Bijelo Polje'),
+    },
+    'bosna': {
+        'name': 'Bosna i Hercegovina',
+        'cities': ('Sarajevo', 'Banja Luka', 'Tuzla', 'Mostar', 'Trebinje'),
+    },
+    'hrvatska': {
+        'name': 'Hrvatska',
+        'cities': ('Zagreb', 'Split', 'Dubrovnik', 'Rijeka', 'Osijek', 'Vukovar'),
+    },
+    'makedonija': {
+        'name': 'Severna Makedonija',
+        'cities': ('Skopje', 'Ohrid', 'Bitola', 'Kumanovo'),
+    },
+}
+
+
+@info_bp.route('/destinacije/<country>/')
+def country_hub(country: str):
+    """Country-level catalog of intercity routes touching a target country.
+
+    Traffic driver: "autobus Srbija Crna Gora", "bus Serbia Bosnia" etc.
+    are real search intents that currently hit thin /rute/ entries or
+    nothing at all. A single page listing every Serbia↔country route
+    with trip counts + cheapest price is the right landing target.
+    """
+    info = _COUNTRY_HUBS.get(country)
+    if not info:
+        norm = normalize_slug(country)
+        if norm in _COUNTRY_HUBS and norm != country:
+            return redirect(url_for('info.country_hub', country=norm), code=301)
+        abort(404)
+
+    cities_placeholders = ', '.join(['?'] * len(info['cities']))
+    routes = cached_query(f"""
+        SELECT r.slug, r.from_city, r.to_city, r.distance_km,
+               r.from_city_slug, r.to_city_slug,
+               COUNT(DISTINCT t.id) AS trip_count,
+               MIN(t.price_rsd) AS min_price_rsd
+        FROM routes r
+        JOIN trips t ON t.route_id = r.id
+        WHERE r.type = 'intercity' AND t.price_rsd > 0
+          AND (r.from_city IN ({cities_placeholders})
+               OR r.to_city IN ({cities_placeholders}))
+        GROUP BY r.slug, r.from_city, r.to_city, r.distance_km,
+                 r.from_city_slug, r.to_city_slug
+        HAVING trip_count > 0
+        ORDER BY trip_count DESC, r.from_city, r.to_city
+        LIMIT 200
+    """, list(info['cities']) * 2, ttl=3600) if db_ready() else []
+
+    # Aggregate stats for the SEO intro
+    cities_in_country = sorted({
+        c for r in routes
+        for c in (r['from_city'], r['to_city'])
+        if c in info['cities']
+    })
+    from_serbia = [r for r in routes if r['from_city'] not in info['cities']]
+    intra = [r for r in routes
+             if r['from_city'] in info['cities']
+             and r['to_city'] in info['cities']]
+
+    return render_template(
+        'country_hub.html',
+        country_slug=country,
+        country_name=info['name'],
+        routes=routes,
+        cities=cities_in_country,
+        total_routes=len(routes),
+        total_trips=sum(r['trip_count'] for r in routes),
+        from_serbia_count=len(from_serbia),
+        intra_count=len(intra),
+    )
+
+
 @info_bp.route('/prevoznici/')
 def carriers():
     """Carriers/operators page — cached, batch queries, paginated."""

@@ -679,6 +679,64 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': '{name} is a bus carrier in Serbia and the region. On Prevozni.com you can find schedules and prices for {routes} intercity routes run by this carrier, with {trips} daily departures in total. The network covers {cities} cities.',
         'ru': '{name} — автобусный перевозчик в Сербии и регионе. На Prevozni.com можно найти расписание и цены на {routes} междугородних маршрутов этого перевозчика, всего {trips} ежедневных отправлений. Сеть охватывает {cities} городов.',
     },
+    # ── Country hub page ──
+    'country.title_prefix': {
+        'sr': 'Autobus Srbija',
+        'en': 'Bus Serbia',
+        'ru': 'Автобус Сербия',
+    },
+    'country.title_suffix': {
+        'sr': 'raspored i cene',
+        'en': 'schedule and prices',
+        'ru': 'расписание и цены',
+    },
+    'country.meta_prefix': {
+        'sr': 'Red vožnje autobusa iz Srbije za',
+        'en': 'Bus schedule from Serbia to',
+        'ru': 'Расписание автобусов из Сербии в',
+    },
+    'country.meta_routes': {'sr': 'ruta', 'en': 'routes', 'ru': 'маршрутов'},
+    'country.meta_trips': {'sr': 'polazaka', 'en': 'departures', 'ru': 'отправлений'},
+    'country.meta_cities': {'sr': 'gradova', 'en': 'cities', 'ru': 'городов'},
+    'country.meta_cta': {
+        'sr': 'Uporedite cene i kupite kartu. Besplatno.',
+        'en': 'Compare prices, buy tickets. Free.',
+        'ru': 'Сравните цены, купите билет. Бесплатно.',
+    },
+    'country.h1': {
+        'sr': 'Autobuske rute —',
+        'en': 'Bus routes —',
+        'ru': 'Автобусные маршруты —',
+    },
+    'country.stat_routes': {'sr': 'ruta', 'en': 'routes', 'ru': 'маршрутов'},
+    'country.stat_cities': {'sr': 'gradova', 'en': 'cities', 'ru': 'городов'},
+    'country.stat_trips': {'sr': 'dnevnih polazaka', 'en': 'daily departures', 'ru': 'ежедневных отправлений'},
+    'country.routes_heading': {
+        'sr': 'Sve rute za',
+        'en': 'All routes to',
+        'ru': 'Все маршруты в',
+    },
+    'country.no_routes': {
+        'sr': 'Trenutno nema dostupnih ruta za ovu zemlju.',
+        'en': 'No routes available for this country at the moment.',
+        'ru': 'В настоящее время нет доступных маршрутов в эту страну.',
+    },
+    'country.about_h': {
+        'sr': 'Putovanja autobusom u {country}',
+        'en': 'Bus travel to {country}',
+        'ru': 'Автобусные поездки в {country}',
+    },
+    'country.about_p': {
+        'sr': 'Na Prevozni.com pronaći ćete {routes} aktivnih autobuskih ruta koje povezuju Srbiju sa državom {country}, sa ukupno {trips} polazaka dnevno. Od toga {from_sr} rute polaze iz srpskih gradova, a {intra} rute su unutar same zemlje. Pokriveno je {cities} gradova.',
+        'en': 'On Prevozni.com you will find {routes} active bus routes connecting Serbia with {country}, with {trips} daily departures in total. {from_sr} routes depart from Serbian cities, and {intra} routes are within the country itself. {cities} cities are covered.',
+        'ru': 'На Prevozni.com вы найдёте {routes} активных автобусных маршрутов, соединяющих Сербию со страной {country}, всего {trips} ежедневных отправлений. Из них {from_sr} маршрутов отправляются из сербских городов, а {intra} маршрутов — внутри самой страны. Охвачено {cities} городов.',
+    },
+    'country.cities_p': {
+        'sr': 'Gradovi u {country} koji su pokriveni: {cities}. Kliknite na rutu da vidite konkretne polaske, cene karata i kupovinu kod partnera.',
+        'en': 'Cities in {country} covered: {cities}. Click a route to see departures, ticket prices and partner purchase links.',
+        'ru': 'Города в {country}, охваченные сервисом: {cities}. Нажмите на маршрут чтобы увидеть отправления, цены билетов и покупку у партнёра.',
+    },
+
     'operator.cities_p': {
         'sr': 'Najčešće tačke u mreži prevoznika {name}: {cities}. Kliknite na rutu da vidite konkretne polaske, cene i karte za kupovinu.',
         'en': 'Most frequent endpoints in {name}\'s network: {cities}. Click a route to see departures, prices and ticket purchase links.',
