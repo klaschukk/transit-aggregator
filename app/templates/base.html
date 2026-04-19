@@ -51,6 +51,12 @@
 {% if config.ADSENSE_ID %}
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config.ADSENSE_ID }}" crossorigin="anonymous"></script>
 {% endif %}
+<script>
+/* Currency preference — read cookie BEFORE render to avoid FOUC of RSD↔EUR.
+   Server never sees cookie for caching reasons (sitemap + pages cache cleanly),
+   all currency rendering is client-side via body class. */
+(function(){try{var m=document.cookie.match(/(?:^|; )ccy=(\w+)/);if(m&&m[1]==='eur')document.documentElement.classList.add('ccy-eur');}catch(e){}})();
+</script>
 </head>
 <body>
 
@@ -65,6 +71,27 @@
 {% include '_partials/_footer.html' %}
 
 {% block scripts %}{% endblock %}
+
+<script>
+/* Currency switcher — toggles <html class="ccy-eur"> and persists in cookie.
+   CSS shows/hides .ccy-rsd vs .ccy-eur spans rendered by every trip card. */
+(function(){
+  function setCcy(c){
+    document.documentElement.classList.toggle('ccy-eur', c === 'eur');
+    try { document.cookie = 'ccy=' + c + '; path=/; max-age=31536000; samesite=lax'; } catch(e){}
+    document.querySelectorAll('.js-ccy-btn').forEach(function(b){
+      var active = b.dataset.ccy === c;
+      b.classList.toggle('lang-pill__item--active', active);
+      b.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+  }
+  var initial = document.documentElement.classList.contains('ccy-eur') ? 'eur' : 'rsd';
+  setCcy(initial);
+  document.querySelectorAll('.js-ccy-btn').forEach(function(b){
+    b.addEventListener('click', function(){ setCcy(b.dataset.ccy); });
+  });
+})();
+</script>
 
 <script>
 /* Mobile nav toggle */

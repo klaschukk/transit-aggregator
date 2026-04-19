@@ -762,6 +762,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Language selector',
         'ru': 'Выбор языка',
     },
+    'a11y.currency_switcher': {
+        'sr': 'Izbor valute',
+        'en': 'Currency selector',
+        'ru': 'Выбор валюты',
+    },
     'a11y.search_form': {
         'sr': 'Pretraga polazaka',
         'en': 'Journey search',

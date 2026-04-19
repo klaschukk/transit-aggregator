@@ -42,8 +42,10 @@
   {% if trip.price_rsd or ba_url %}
   <div class="trip-card__meta">
     {% if trip.price_rsd %}
-    <span class="trip-card__price js-price" data-rsd="{{ trip.price_rsd }}">
-      <span class="js-price-value">{{ trip.price_rsd }}</span> <small class="js-price-ccy">RSD</small>
+    {% set _price_eur = ((trip.price_rsd / (config.EUR_RSD_RATE or 117))|round(1))|string %}
+    <span class="trip-card__price">
+      <span class="ccy-rsd">{{ trip.price_rsd }} <small>RSD</small></span>
+      <span class="ccy-eur">{{ (trip.price_rsd / (config.EUR_RSD_RATE or 117))|round|int }} <small>€</small></span>
     </span>
     {% endif %}
     {% if ba_url %}

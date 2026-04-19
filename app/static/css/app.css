@@ -1971,6 +1971,14 @@ main { animation: fadeInUp .25s ease both; }
   color: var(--color-primary-dark);
 }
 
+/* ── Currency toggle (RSD ↔ EUR) ──
+   Every rendered price ships both spans; CSS picks one based on the
+   <html class="ccy-eur"> flag set from cookie in a pre-body inline
+   script (no FOUC). JS in base.html flips the class on button click. */
+.ccy-eur { display: none; }
+html.ccy-eur .ccy-rsd { display: none; }
+html.ccy-eur .ccy-eur { display: inline; }
+
 /* ── 11. Accessibility utilities ── */
 .sr-only {
   position: absolute;
