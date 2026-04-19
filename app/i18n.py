@@ -627,6 +627,12 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'carriers.website': {'sr': 'Sajt', 'en': 'Website', 'ru': 'Сайт'},
     'stations.train': {'sr': 'Železničke stanice', 'en': 'Train stations', 'ru': 'Ж/д станции'},
 
+    'search_results.sort_duration': {
+        'sr': 'Trajanje',
+        'en': 'Duration',
+        'ru': 'Длительность',
+    },
+
     # ── Buy ticket ──
     'buy.title': {
         'sr': 'Kupite kartu online',

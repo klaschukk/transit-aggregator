@@ -61,6 +61,7 @@
     <span class="sort-bar__label">{{ _('search_results.sort_label') }}</span>
     <button class="sort-btn sort-btn--active" data-sort="time">{{ _('search_results.sort_time') }}</button>
     <button class="sort-btn" data-sort="price">{{ _('search_results.sort_price') }}</button>
+    <button class="sort-btn" data-sort="duration">{{ _('search_results.sort_duration') }}</button>
   </div>
 </div>
 
@@ -223,11 +224,19 @@
 
       items.sort(function(a, b) {
         if (sortBy === 'price') {
-          var pa = a.querySelector('.trip-card__price');
-          var pb = b.querySelector('.trip-card__price');
-          var va = pa ? parseInt(pa.textContent.replace(/\D/g, '')) : 999999;
-          var vb = pb ? parseInt(pb.textContent.replace(/\D/g, '')) : 999999;
+          var va = parseInt(a.dataset.price) || 999999;
+          var vb = parseInt(b.dataset.price) || 999999;
+          /* Treat 0 (price unknown) as last */
+          if (va === 0) va = 999999;
+          if (vb === 0) vb = 999999;
           return va - vb;
+        }
+        if (sortBy === 'duration') {
+          var da = parseInt(a.dataset.duration) || 999999;
+          var db = parseInt(b.dataset.duration) || 999999;
+          if (da === 0) da = 999999;
+          if (db === 0) db = 999999;
+          return da - db;
         }
         /* default: by departure time text (HH:MM) */
         var ta = (a.querySelector('.trip-card__time--depart') || {}).textContent || '99:99';
