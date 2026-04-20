@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, request, make_response, jsonify, current_app
 
 from app.db import query, cached_query, cached_query_one, db_ready
-from app.extensions import limiter
+from app.extensions import limiter, csrf
 
 main_bp = Blueprint('main', __name__)
 
@@ -122,6 +122,42 @@ def search():
                            to_city=to_city, datum=date,
                            min_price=min_price,
                            popular_routes=popular_routes)
+
+
+@main_bp.route('/api/ba-click', methods=['POST'])
+@limiter.limit("60 per minute")
+@csrf.exempt
+def api_ba_click():
+    """Log a Bookaway affiliate click for per-route CTR + later revenue
+    attribution. Client POSTs a small JSON payload and opens the Bookaway
+    URL itself — we never redirect here so there's no open-redirect surface."""
+    from app.analytics_db import insert_ba_click
+    from app.extensions import _client_ip
+
+    data = request.get_json(silent=True) or {}
+
+    route_slug = str(data.get('route_slug', ''))[:200]
+    surface = str(data.get('surface', ''))[:40]
+    operator = str(data.get('operator', ''))[:100]
+    trip_time = str(data.get('trip_time', ''))[:10]
+
+    # Surface allowlist — prevents cardinality bloat from bogus values.
+    if surface and surface not in (
+        'search', 'route_detail', 'city_pair', 'route_detail_global',
+        'city_pair_global', 'search_global',
+    ):
+        surface = 'other'
+
+    insert_ba_click(
+        route_slug=route_slug,
+        surface=surface,
+        operator=operator,
+        trip_time=trip_time,
+        ip=_client_ip(),
+        user_agent=request.headers.get('User-Agent', '')[:300],
+        referrer=request.headers.get('Referer', '')[:500],
+    )
+    return '', 204
 
 
 @main_bp.route('/api/cities')
@@ -443,6 +479,7 @@ def robots():
         'Allow: /',
         '',
         'Disallow: /api/',
+        'Disallow: /admin/',
         'Disallow: /health',
         'Disallow: /pretraga/?*',
         '',
