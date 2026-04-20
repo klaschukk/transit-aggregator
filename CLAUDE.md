@@ -125,8 +125,14 @@ Production environment requires these env vars:
 - `SECRET_KEY` — **обязателен** (при отсутствии app бросает RuntimeError на старте).
   Сгенерировать: `python -c "import secrets; print(secrets.token_hex(32))"`.
   Хранить в systemd unit (`Environment=`) или `.env` (не коммитить).
-- `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` — уведомления контакт-формы.
+- `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` — уведомления контакт-формы
+  + weekly SEO digest (переиспользуется).
 - `DUCKDB_PATH` — путь к `transit.duckdb` (по умолчанию `data/dbs/transit.duckdb`).
+- `GSC_CREDENTIALS_PATH` — service account JSON для Search Console API
+  (по умолчанию `/home/klaschuk/.gsc-credentials.json`, mode 0600). Нужен
+  только для `scripts/weekly_seo.sh` (cron). Setup: `docs/06_tech/gsc-setup.md`.
+- `GSC_SITE_URL` — GSC property identifier
+  (по умолчанию `sc-domain:prevozni.com`).
 
 ## Инфраструктура
 

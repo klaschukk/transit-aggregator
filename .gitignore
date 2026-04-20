@@ -12,6 +12,11 @@ data/raw/
 data/gtfs/*.txt
 data/gtfs/*.html
 
+# Google Search Console snapshots (regenerated weekly)
+data/gsc/
+.gsc-credentials.json
+*.gsc-credentials.json
+
 # Scraper progress/cache files
 *_progress.json
 city_ids.json
