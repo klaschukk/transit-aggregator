@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}Revenue dashboard — Prevozni admin{% endblock %}
+{% block meta_description %}Internal admin dashboard (noindex).{% endblock %}
+
+{% block head_extra %}
+<meta name="robots" content="noindex, nofollow, noarchive">
+<style>
+/* Dashboard-only styles — kept inline to avoid polluting the public app.css. */
+.adm{max-width:1100px;margin:0 auto;padding:24px 16px;}
+.adm h1{font-size:24px;margin:0 0 20px;}
+.adm h2{font-size:15px;margin:28px 0 10px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.adm .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px;}
+.adm .kpi{background:#f1f5f9;padding:14px 16px;border-radius:10px;}
+.adm .kpi__v{font-size:26px;font-weight:700;color:#0d9488;}
+.adm .kpi__l{font-size:12px;color:#64748b;margin-top:4px;}
+.adm table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:24px;}
+.adm th,.adm td{padding:8px 10px;text-align:left;border-bottom:1px solid #e2e8f0;}
+.adm th{background:#f8fafc;font-weight:600;color:#475569;font-size:11px;text-transform:uppercase;letter-spacing:.05em;}
+.adm tbody tr:hover{background:#fafbfc;}
+.adm .chart{background:#f8fafc;padding:12px;border-radius:10px;display:flex;gap:2px;align-items:flex-end;height:120px;}
+.adm .chart__bar{flex:1;background:#0d9488;border-radius:2px 2px 0 0;min-height:2px;position:relative;}
+.adm .chart__bar:hover{background:#0f766e;}
+.adm .chart__bar span{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);font-size:10px;white-space:nowrap;padding:2px 4px;background:#334155;color:white;border-radius:3px;opacity:0;pointer-events:none;}
+.adm .chart__bar:hover span{opacity:1;}
+.adm .chart__labels{display:flex;gap:2px;margin-top:4px;font-size:10px;color:#64748b;}
+.adm .chart__labels span{flex:1;text-align:center;}
+.adm .surface{display:inline-block;padding:2px 8px;font-size:11px;border-radius:10px;background:#e0f2fe;color:#075985;}
+.adm .empty{padding:20px;color:#94a3b8;font-style:italic;}
+.adm .tabs{display:flex;gap:4px;margin-bottom:8px;}
+.adm .tabs button{padding:6px 14px;border:1px solid #cbd5e1;background:#fff;font-size:13px;cursor:pointer;border-radius:6px;}
+.adm .tabs button.on{background:#0d9488;color:#fff;border-color:#0d9488;}
+.adm .tabs-panel{display:none;}
+.adm .tabs-panel.on{display:block;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="adm">
+  <h1>Bookaway affiliate — revenue dashboard</h1>
+
+  <div class="kpis">
+    <div class="kpi">
+      <div class="kpi__v">{{ totals_7 }}</div>
+      <div class="kpi__l">Clicks · last 7 days</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__v">{{ totals_30 }}</div>
+      <div class="kpi__l">Clicks · last 30 days</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__v">{{ daily|length }}</div>
+      <div class="kpi__l">Active days</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__v">{{ top_routes_30|length }}</div>
+      <div class="kpi__l">Routes with clicks (30d)</div>
+    </div>
+  </div>
+
+  <h2>Daily clicks (last 30 days)</h2>
+  {% if daily %}
+  <div class="chart" aria-label="Daily bookaway clicks">
+    {% for d in daily %}
+    <div class="chart__bar" style="height:{{ d.pct }}%"><span>{{ d.day }} · {{ d.clicks }}</span></div>
+    {% endfor %}
+  </div>
+  <div class="chart__labels">
+    {% for d in daily %}
+    <span>{% if loop.first or loop.last or loop.index % 5 == 0 %}{{ d.day.strftime('%d.%m') }}{% endif %}</span>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">No clicks logged yet.</div>
+  {% endif %}
+
+  <h2>Top routes by clicks</h2>
+  <div class="tabs">
+    <button class="on" data-tab="top7">Last 7 days</button>
+    <button data-tab="top30">Last 30 days</button>
+  </div>
+
+  <div class="tabs-panel on" data-panel="top7">
+    {% if top_routes_7 %}
+    <table>
+      <thead><tr><th>#</th><th>Route slug</th><th>Surface</th><th>Clicks</th></tr></thead>
+      <tbody>
+        {% for r in top_routes_7 %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td><a href="/rute/{{ r.route_slug }}/" target="_blank" rel="noopener">{{ r.route_slug }}</a></td>
+          <td><span class="surface">{{ r.surface or 'unknown' }}</span></td>
+          <td><strong>{{ r.clicks }}</strong></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty">No clicks in the last 7 days.</div>
+    {% endif %}
+  </div>
+
+  <div class="tabs-panel" data-panel="top30">
+    {% if top_routes_30 %}
+    <table>
+      <thead><tr><th>#</th><th>Route slug</th><th>Surface</th><th>Clicks</th></tr></thead>
+      <tbody>
+        {% for r in top_routes_30 %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td><a href="/rute/{{ r.route_slug }}/" target="_blank" rel="noopener">{{ r.route_slug }}</a></td>
+          <td><span class="surface">{{ r.surface or 'unknown' }}</span></td>
+          <td><strong>{{ r.clicks }}</strong></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty">No clicks in the last 30 days.</div>
+    {% endif %}
+  </div>
+
+  <h2>Clicks by surface (last 30 days)</h2>
+  {% if by_surface_30 %}
+  <table>
+    <thead><tr><th>Surface</th><th>Clicks</th><th>Share</th></tr></thead>
+    <tbody>
+      {% set _total = by_surface_30|sum(attribute='clicks') or 1 %}
+      {% for r in by_surface_30 %}
+      <tr>
+        <td><span class="surface">{{ r.surface }}</span></td>
+        <td>{{ r.clicks }}</td>
+        <td>{{ (r.clicks * 100 // _total) }}%</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">No clicks yet.</div>
+  {% endif %}
+
+  <p style="font-size:12px;color:#94a3b8;margin-top:32px;">
+    Data is sourced from <code>data/dbs/analytics.duckdb</code> (<code>ba_clicks</code> table).
+    For organic page-view counts (to compute CTR) pair with the Umami dashboard
+    at <a href="https://analytics.farmako.ro/" target="_blank" rel="noopener">analytics.farmako.ro</a>.
+  </p>
+</div>
+
+<script>
+(function(){
+  document.querySelectorAll('.adm .tabs button').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.adm .tabs button').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      document.querySelectorAll('.adm .tabs-panel').forEach(function(p){
+        p.classList.toggle('on', p.dataset.panel === b.dataset.tab);
+      });
+    });
+  });
+})();
+</script>
+{% endblock %}
