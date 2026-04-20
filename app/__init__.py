@@ -98,6 +98,23 @@ def create_app(config_name: str | None = None) -> Flask:
         hreflang_urls['x-default'] = base_url + clean_path
 
         from datetime import datetime as _dt
+        from app.affiliates import resolve_offers as _resolve_offers, ab_partner_order as _ab_order
+
+        def affiliate_offers(from_slug, to_slug, from_city='', to_city='', utm_medium='trip-card'):
+            """Template helper — resolves the ranked offer list for a pair.
+
+            Applies the per-request A/B variant (cookie `ab_partner`, else
+            deterministic from client IP) so the first offer is the one
+            the user's variant wants promoted.
+            """
+            ab = _ab_order(
+                request.cookies if request else None,
+                seed=(request.remote_addr or '') if request else '',
+            )
+            return _resolve_offers(
+                from_slug, to_slug, from_city, to_city, utm_medium, ab_choice=ab,
+            )
+
         return {
             '_': _,
             'lang': lang,
@@ -109,6 +126,7 @@ def create_app(config_name: str | None = None) -> Flask:
             'hreflang_urls': hreflang_urls,
             'asset_version': _ASSET_VERSION,
             'current_year': _dt.utcnow().year,
+            'affiliate_offers': affiliate_offers,
         }
 
     # Register blueprints
@@ -116,13 +134,16 @@ def create_app(config_name: str | None = None) -> Flask:
     from .routes.intercity import intercity_bp
     from .routes.city import city_bp
     from .routes.info import info_bp
+    from .routes.admin import admin_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(intercity_bp)
     app.register_blueprint(city_bp)
     app.register_blueprint(info_bp)
+    app.register_blueprint(admin_bp)
 
-    # Register same blueprints under /en/ and /ru/ prefixes
+    # Register same blueprints under /en/ and /ru/ prefixes.
+    # admin_bp stays unprefixed — dashboards don't need localisation.
     for lang in SUPPORTED_LANGS:
         if lang == DEFAULT_LANG:
             continue
@@ -131,13 +152,18 @@ def create_app(config_name: str | None = None) -> Flask:
         app.register_blueprint(city_bp, url_prefix=f'/{lang}', name=f'city_{lang}')
         app.register_blueprint(info_bp, url_prefix=f'/{lang}', name=f'info_{lang}')
 
+    # Analytics schema init — idempotent, first request wins.
+    from . import analytics_db
+    with app.app_context():
+        analytics_db.init_schema()
+
     # Gzip compression
     from flask_compress import Compress
     Compress(app)
 
     # CSRF protection (flask-wtf). Runtime config WTF_CSRF_ENABLED can turn it off in tests.
-    from flask_wtf.csrf import CSRFProtect
-    CSRFProtect(app)
+    from .extensions import csrf
+    csrf.init_app(app)
 
     # Rate limiting
     from .extensions import limiter

@@ -77,46 +77,30 @@
   {% endfor %}
 </div>
 
-<!-- Buy ticket — always visible -->
+<!-- Buy ticket — always visible. Offers come from app.affiliates; the
+     first is the primary CTA (priority: availability → commission → UX),
+     the rest render in the partners block below the trip list. -->
 {% set _from_slug = route.from_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj')|replace('ș','s')|replace('ț','t') %}
 {% set _to_slug = route.to_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj')|replace('ș','s')|replace('ț','t') %}
-{% set _country_map = {
-  'beograd':'serbia','novi-sad':'serbia','nis':'serbia','subotica':'serbia','kragujevac':'serbia',
-  'uzice':'serbia','valjevo':'serbia','sabac':'serbia','cacak':'serbia','kraljevo':'serbia',
-  'krusevac':'serbia','leskovac':'serbia','vranje':'serbia','pirot':'serbia','sombor':'serbia',
-  'zrenjanin':'serbia','pancevo':'serbia','smederevo':'serbia','novi-pazar':'serbia',
-  'podgorica':'montenegro','budva':'montenegro','herceg-novi':'montenegro','bar':'montenegro',
-  'kotor':'montenegro','tivat':'montenegro','niksic':'montenegro','ulcinj':'montenegro',
-  'sarajevo':'bosnia-and-herzegovina','banja-luka':'bosnia-and-herzegovina','tuzla':'bosnia-and-herzegovina',
-  'mostar':'bosnia-and-herzegovina','trebinje':'bosnia-and-herzegovina',
-  'zagreb':'croatia','split':'croatia','dubrovnik':'croatia','rijeka':'croatia',
-  'skopje':'north-macedonia','ohrid':'north-macedonia',
-  'budapest':'hungary','szeged':'hungary',
-  'bucharest':'romania','timisoara':'romania',
-  'sofia':'bulgaria','plovdiv':'bulgaria',
-  'tirana':'albania','thessaloniki':'greece','athens':'greece',
-  'vienna':'austria','ljubljana':'slovenia','maribor':'slovenia',
-  'munich':'germany','frankfurt':'germany','berlin':'germany','stuttgart':'germany',
-  'istanbul':'turkey','bar':'montenegro','niksic':'montenegro','ulcinj':'montenegro',
-  'banja-luka':'bosnia-and-herzegovina','trebinje':'bosnia-and-herzegovina','brcko':'bosnia-and-herzegovina',
-  'rijeka':'croatia','osijek':'croatia','vukovar':'croatia',
-  'bitola':'north-macedonia','kumanovo':'north-macedonia',
-  'pecs':'hungary','cluj-napoca':'romania','bucharest':'romania',
-  'plovdiv':'bulgaria','durres':'albania',
-  'athens':'greece',
-} %}
-{% set _ba_country = _country_map.get(_to_slug, _country_map.get(_from_slug, 'serbia')) %}
-{% set _ba_url = 'https://www.bookaway.com/routes/' ~ _ba_country ~ '/' ~ _from_slug ~ '-to-' ~ _to_slug ~ '?offer_id=34&aff_id=4033&utm_source=prevozni&utm_medium=route-detail' %}
+{% set _offers = affiliate_offers(_from_slug, _to_slug, route.from_city, route.to_city, 'route-detail') %}
+{% set _offers_trip = affiliate_offers(_from_slug, _to_slug, route.from_city, route.to_city, 'trip-card') %}
+{% set _primary = _offers[0] if _offers else None %}
 <div class="buy-ticket fade-in">
   <div class="buy-ticket__header">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20" aria-hidden="true"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2 2 2 0 010 4 2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 00-2-2 2 2 0 010-4 2 2 0 002-2V7a2 2 0 00-2-2H5z"/></svg>
     <span>{{ _('buy.title') }}</span>
   </div>
   <div class="buy-ticket__links">
-    <a href="{{ _ba_url }}" target="_blank" rel="noopener nofollow sponsored" class="buy-ticket__btn buy-ticket__btn--bookaway">
-      Bookaway
+    {% if _primary %}
+    <a href="{{ _primary.url }}" target="_blank" rel="noopener nofollow sponsored"
+       class="buy-ticket__btn buy-ticket__btn--{{ _primary.partner_key }}"
+       style="background: {{ _primary.brand_color }};"
+       data-partner="{{ _primary.partner_key }}"
+       data-route-slug="{{ route.slug }}" data-surface="route_detail_global">
+      {{ _primary.partner_name }}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg>
     </a>
+    {% endif %}
   </div>
   <p class="buy-ticket__note">{{ _('buy.note') }}</p>
 </div>
@@ -141,12 +125,35 @@
 
 <div class="trip-list fade-in fade-in--d2" id="tripList">
   {% for trip in trips %}
-    {{ trip_card(trip, ba_url=_ba_url, buy_label=_('buy.cta')) }}
+    {{ trip_card(trip, offers=_offers_trip, buy_label=_('buy.cta'),
+                 route_slug=route.slug, surface='route_detail') }}
   {% endfor %}
 </div>
 
 {% else %}
   {{ empty_state(icon='search', text=_('search.no_results'), sub=_('buy.note')) }}
+{% endif %}
+
+{% if _offers|length > 1 %}
+<!-- Multi-partner block — secondary CTAs for users who prefer a different
+     booking site UX. Different partners get different CTRs, so exposing
+     the full set also functions as a CTR split test. -->
+<div class="partners-block fade-in fade-in--d3">
+  <h3 class="partners-block__heading">{{ _('buy.partners_heading') }}</h3>
+  <div class="partners-block__grid">
+    {% for offer in _offers %}
+    <a href="{{ offer.url }}" target="_blank" rel="noopener nofollow sponsored"
+       class="partners-block__btn"
+       style="background: {{ offer.brand_color }};"
+       data-partner="{{ offer.partner_key }}"
+       data-route-slug="{{ route.slug }}" data-surface="route_detail_partners">
+      {{ _('buy.via_partner') }} {{ offer.partner_name }}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg>
+    </a>
+    {% endfor %}
+  </div>
+  <p class="partners-block__note">{{ _('buy.partners_note') }}</p>
+</div>
 {% endif %}
 
 <!-- Enriched SEO block — always rendered (including tripless routes) so the

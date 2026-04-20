@@ -1224,6 +1224,39 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .buy-ticket__btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 .buy-ticket__btn--bookaway { background: #059669; }
 .buy-ticket__btn--bookaway:hover { background: #047857; }
+.buy-ticket__btn--flixbus { background: #73d700; }
+.buy-ticket__btn--flixbus:hover { filter: brightness(0.92); }
+.buy-ticket__btn--omio { background: #e91e63; }
+.buy-ticket__btn--omio:hover { filter: brightness(0.92); }
+
+/* Multi-partner block (route_detail bottom) */
+.partners-block {
+  background: var(--color-bg-alt); border-radius: 12px;
+  padding: 18px 20px; margin: 24px 0;
+}
+.partners-block__heading {
+  font-size: 1rem; font-weight: 600; margin: 0 0 12px;
+  color: var(--color-text);
+}
+.partners-block__grid {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;
+}
+.partners-block__btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 18px; border-radius: 8px;
+  font-size: 0.85rem; font-weight: 600;
+  color: #fff; text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+}
+.partners-block__btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  filter: brightness(0.95);
+}
+.partners-block__btn svg { opacity: 0.7; }
+.partners-block__note {
+  font-size: 0.78rem; color: var(--color-text-muted); margin: 0;
+}
 /* Trip-card hover polish */
 .trip-list .trip-card:hover {
   background: var(--color-bg-alt);

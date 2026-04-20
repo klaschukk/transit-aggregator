@@ -208,6 +208,16 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Prevozni contains links to carriers and partners (Bookaway, BusTicket4.me and others). When you click such a link you leave our site and enter that partner\'s privacy policy. We are not responsible for their practices — read their policy before entering personal data or buying a ticket. We may receive a commission from partners if you buy via a link on our site; this never affects the price you pay.',
         'ru': 'Prevozni содержит ссылки на сайты перевозчиков и партнёров (Bookaway, BusTicket4.me и другие). При клике на такую ссылку вы покидаете наш сайт и попадаете под политику конфиденциальности этого партнёра. Мы не отвечаем за их практики — прочитайте их политику перед вводом личных данных или покупкой билета. Мы можем получать комиссию от партнёров при покупке через нашу ссылку; это никак не влияет на цену которую вы платите.',
     },
+    'privacy.affiliate_h': {
+        'sr': 'Praćenje klikova na "Kupi" (Bookaway)',
+        'en': 'Tracking of "Buy" (Bookaway) clicks',
+        'ru': 'Отслеживание кликов по кнопке «Купить» (Bookaway)',
+    },
+    'privacy.affiliate_body': {
+        'sr': 'Kad kliknete na dugme "Kupi" koje vodi na Bookaway, beležimo minimalni zapis o kliku na sopstvenom serveru: identifikator rute (npr. beograd-budva), tip stranice sa koje ste kliknuli (katalog, detalj rute, pretraga), prevoznika, vreme polaska, anonimizovani hash vaše IP adrese (sha256 sa sol-tajnom koja se redovno menja) i osnovne tehničke podatke pretraživača. Ne beležimo sirovu IP adresu, ime, email niti bilo šta što može direktno da vas identifikuje. Ove zapise čuvamo maksimalno 90 dana u interne svrhe — da znamo koji delovi sajta ljudima stvarno pomažu da nađu kartu i da pravilno pripišemo proviziju od Bookaway-a. Isti zapisi se šalju i u našu analitiku (Umami) kao anonimni event "ba_click". Ako želite da vaši klikovi ne budu zabeleženi, uključite ad-blocker ili privatni mod u pretraživaču — naš sajt nastavlja da radi bez ovih zapisa.',
+        'en': 'When you click a "Buy" button that goes to Bookaway, we keep a minimal click record on our own server: the route identifier (e.g. beograd-budva), the page type the click came from (catalog, route detail, search), the carrier, departure time, a salted sha256 hash of your IP (salt rotates regularly) and basic browser technical data. We do not store raw IPs, names, emails or anything directly identifying you. These records are kept for at most 90 days and used internally to understand which parts of the site actually help people find a ticket and to correctly attribute Bookaway commissions. The same events are mirrored to our analytics (Umami) as an anonymous "ba_click" event. If you prefer your clicks not to be recorded, use an ad-blocker or private browsing — the site works without these records.',
+        'ru': 'Когда вы нажимаете кнопку «Купить», ведущую на Bookaway, мы сохраняем на нашем сервере минимальную запись: идентификатор маршрута (например beograd-budva), тип страницы с которой был клик (каталог, детали маршрута, поиск), перевозчика, время рейса, анонимизированный sha256-хэш вашего IP с регулярно меняющейся солью и базовые технические данные браузера. Мы не храним сырой IP, имя, email или что-либо прямо вас идентифицирующее. Эти записи хранятся не более 90 дней и используются внутренне — чтобы понимать какие части сайта реально помогают людям найти билет и корректно атрибутировать комиссии Bookaway. Эти же события отправляются в нашу аналитику (Umami) как анонимный event «ba_click». Если вы не хотите чтобы клики записывались — включите ad-blocker или приватный режим, сайт работает и без этих записей.',
+    },
     'privacy.rights_body2': {
         'sr': 'Ako želite da zatražite izvoz, izmenu ili brisanje podataka (na primer vaše kontakt poruke), pošaljite zahtev na info@prevozni.com. Obradićemo ga u roku od 30 dana u skladu sa GDPR-om i srpskim Zakonom o zaštiti podataka o ličnosti. Nije potrebno da navodite razlog.',
         'en': 'If you want to request export, correction or deletion of your data (for example a contact form message you sent), email info@prevozni.com. We will process the request within 30 days in line with GDPR and the Serbian Personal Data Protection Act. You do not need to state a reason.',
@@ -1091,6 +1101,21 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Kupi',
         'en': 'Buy',
         'ru': 'Купить',
+    },
+    'buy.via_partner': {
+        'sr': 'Kupi preko',
+        'en': 'Buy via',
+        'ru': 'Купить через',
+    },
+    'buy.partners_heading': {
+        'sr': 'Kupi kartu kod naših partnera',
+        'en': 'Buy your ticket from our partners',
+        'ru': 'Купить билет у наших партнёров',
+    },
+    'buy.partners_note': {
+        'sr': 'Cene su iste — mi dobijemo malu proviziju ako kupite preko ovih linkova.',
+        'en': 'Prices are the same — we receive a small commission if you book via these links.',
+        'ru': 'Цены одинаковые — мы получаем небольшую комиссию при бронировании по этим ссылкам.',
     },
 
     # ── Day labels ──

@@ -1,4 +1,9 @@
 {% extends "base.html" %}
+{# Template-scope vars — must live outside blocks so schema.org in
+   head_extra and the trip list in content both see the same offers. #}
+{% set _from_slug = from_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
+{% set _to_slug = to_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
+{% set _offers_trip = affiliate_offers(_from_slug, _to_slug, from_city, to_city, 'city-pair') %}
 {% block title %}{{ from_city }} → {{ to_city }} {{ current_year }}: {{ _('city_pair.title_travel') }} | Prevozni{% endblock %}
 {% block meta_description %}{{ _('city_pair.meta_prefix') }} {{ from_city }} {{ _('city_pair.meta_mid') }} {{ to_city }} {{ current_year }}{% if route and route.trip_count %}: {{ route.trip_count }} {{ _('city_pair.departures_word') }}{% endif %}{% if route and route.min_price_rsd %}, {{ _('route_detail.meta_from')|lower }} {{ route.min_price_rsd }} RSD{% endif %}. {{ _('city_pair.meta_cta') }}{% endblock %}
 
@@ -10,7 +15,7 @@
 {% endif %}
 {% if route and trips %}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"ItemList","name":"{{ from_city }} → {{ to_city }}","itemListElement":[{% for trip in trips[:10] %}{"@type":"BusTrip","position":{{ loop.index }},"name":"{{ trip.operator }} {{ from_city }}–{{ to_city }}","departureTime":"{{ trip.departure_time }}","arrivalTime":"{{ trip.arrival_time }}","departureBusStop":{"@type":"BusStation","name":"{{ from_city }}"},"arrivalBusStop":{"@type":"BusStation","name":"{{ to_city }}"},"provider":{"@type":"Organization","name":"{{ trip.operator }}"}{% if trip.price_rsd %},"offers":{"@type":"Offer","price":"{{ trip.price_rsd }}","priceCurrency":"RSD","availability":"https://schema.org/InStock","url":"{{ canonical_url }}"}{% endif %}}{% if not loop.last %},{% endif %}{% endfor %}]}
+{"@context":"https://schema.org","@type":"ItemList","name":"{{ from_city }} → {{ to_city }}","itemListElement":[{% for trip in trips[:10] %}{"@type":"BusTrip","position":{{ loop.index }},"name":"{{ trip.operator }} {{ from_city }}–{{ to_city }}","departureTime":"{{ trip.departure_time }}","arrivalTime":"{{ trip.arrival_time }}","departureBusStop":{"@type":"BusStation","name":"{{ from_city }}"},"arrivalBusStop":{"@type":"BusStation","name":"{{ to_city }}"},"provider":{"@type":"Organization","name":"{{ trip.operator }}"}{% if trip.price_rsd or _offers_trip %},"offers":[{% if trip.price_rsd %}{"@type":"Offer","price":"{{ trip.price_rsd }}","priceCurrency":"RSD","availability":"https://schema.org/InStock","url":"{{ canonical_url }}","seller":{"@type":"Organization","name":"{{ trip.operator }}"}}{% if _offers_trip %},{% endif %}{% endif %}{% for o in _offers_trip %}{"@type":"Offer","availability":"https://schema.org/InStock","url":"{{ o.url }}","seller":{"@type":"Organization","name":"{{ o.partner_name }}"}}{% if not loop.last %},{% endif %}{% endfor %}]{% endif %}}{% if not loop.last %},{% endif %}{% endfor %}]}
 </script>
 {% endif %}
 {% if not route or not trips %}
@@ -25,13 +30,6 @@
 {% from '_partials/_stats_strip.html' import stats_strip %}
 {% from '_partials/_filter_panel.html' import filter_panel with context %}
 {% from '_partials/_empty_state.html' import empty_state %}
-
-{# Bookaway per-trip affiliate link (renders inside each trip_card below). #}
-{% set _from_slug = from_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
-{% set _to_slug = to_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
-{% set _cm = {'beograd':'serbia','novi-sad':'serbia','nis':'serbia','subotica':'serbia','kragujevac':'serbia','uzice':'serbia','valjevo':'serbia','sabac':'serbia','cacak':'serbia','kraljevo':'serbia','krusevac':'serbia','leskovac':'serbia','vranje':'serbia','pirot':'serbia','sombor':'serbia','zrenjanin':'serbia','pancevo':'serbia','smederevo':'serbia','novi-pazar':'serbia','podgorica':'montenegro','budva':'montenegro','herceg-novi':'montenegro','bar':'montenegro','kotor':'montenegro','tivat':'montenegro','niksic':'montenegro','ulcinj':'montenegro','sarajevo':'bosnia-and-herzegovina','banja-luka':'bosnia-and-herzegovina','tuzla':'bosnia-and-herzegovina','mostar':'bosnia-and-herzegovina','trebinje':'bosnia-and-herzegovina','zagreb':'croatia','split':'croatia','dubrovnik':'croatia','rijeka':'croatia','skopje':'north-macedonia','ohrid':'north-macedonia','budapest':'hungary','sofia':'bulgaria','thessaloniki':'greece','vienna':'austria','ljubljana':'slovenia','timisoara':'romania','bucharest':'romania','istanbul':'turkey','tirana':'albania'} %}
-{% set _ba_country = _cm.get(_to_slug, _cm.get(_from_slug, 'serbia')) %}
-{% set _ba_url = 'https://www.bookaway.com/routes/' ~ _ba_country ~ '/' ~ _from_slug ~ '-to-' ~ _to_slug ~ '?offer_id=34&aff_id=4033&utm_source=prevozni&utm_medium=city-pair' %}
 
 {{ breadcrumb([
   {'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')},
@@ -79,7 +77,9 @@
   <div class="results-main">
     <div class="trip-list fade-in fade-in--d2" id="tripList">
       {% for trip in trips %}
-        {{ trip_card(trip, ba_url=_ba_url, buy_label=_('buy.cta')) }}
+        {{ trip_card(trip, offers=_offers_trip, buy_label=_('buy.cta'),
+                     route_slug=(route.slug if route and route.slug else _from_slug ~ '-do-' ~ _to_slug),
+                     surface='city_pair') }}
       {% endfor %}
     </div>
   </div>

@@ -16,14 +16,13 @@
 {% from '_partials/_filter_panel.html' import filter_panel with context %}
 {% from '_partials/_empty_state.html' import empty_state %}
 
-{# Bookaway country/slug resolution — shared by per-card buy buttons and
-   the fallback "no results" block below. Hardcoded country map kept in
-   one place instead of scattered `.replace()` chains. #}
+{# Affiliate offers resolved by app.affiliates — the country/UX/commission
+   ordering lives in partners.py; this template just consumes the list. #}
 {% set _from_slug = from_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') if from_city else '' %}
 {% set _to_slug = to_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') if to_city else '' %}
-{% set _cm = {'beograd':'serbia','novi-sad':'serbia','nis':'serbia','subotica':'serbia','kragujevac':'serbia','podgorica':'montenegro','budva':'montenegro','herceg-novi':'montenegro','bar':'montenegro','kotor':'montenegro','tivat':'montenegro','niksic':'montenegro','ulcinj':'montenegro','sarajevo':'bosnia-and-herzegovina','tuzla':'bosnia-and-herzegovina','mostar':'bosnia-and-herzegovina','banja-luka':'bosnia-and-herzegovina','trebinje':'bosnia-and-herzegovina','zagreb':'croatia','split':'croatia','dubrovnik':'croatia','rijeka':'croatia','skopje':'north-macedonia','ohrid':'north-macedonia','budapest':'hungary','sofia':'bulgaria','thessaloniki':'greece','vienna':'austria','ljubljana':'slovenia','timisoara':'romania','bucharest':'romania','istanbul':'turkey','tirana':'albania'} %}
-{% set _ba_country = _cm.get(_to_slug, _cm.get(_from_slug, 'serbia')) %}
-{% set _ba_url = 'https://www.bookaway.com/routes/' ~ _ba_country ~ '/' ~ _from_slug ~ '-to-' ~ _to_slug ~ '?offer_id=34&aff_id=4033&utm_source=prevozni&utm_medium=trip-card' if (_from_slug and _to_slug) else '' %}
+{% set _campaign = (_from_slug ~ '-do-' ~ _to_slug) if (_from_slug and _to_slug) else '' %}
+{% set _offers_trip = affiliate_offers(_from_slug, _to_slug, from_city, to_city, 'trip-card') if (_from_slug and _to_slug) else [] %}
+{% set _offers_block = affiliate_offers(_from_slug, _to_slug, from_city, to_city, 'search-empty') if (_from_slug and _to_slug) else [] %}
 
 {% if from_city and to_city %}
 <!-- ═══ Results view ═══ -->
@@ -76,7 +75,8 @@
   <div class="results-main">
     <div class="trip-list" id="tripList">
       {% for trip in results %}
-        {{ trip_card(trip, ba_url=_ba_url, buy_label=_('buy.cta')) }}
+        {{ trip_card(trip, offers=_offers_trip, buy_label=_('buy.cta'),
+                     route_slug=_campaign, surface='search') }}
       {% endfor %}
     </div>
   </div>
@@ -94,15 +94,25 @@
   <div class="empty-state__sub">{{ from_city }} → {{ to_city }}</div>
 </div>
 
-<!-- Buy ticket externally — fallback when no trips in DB for this pair. -->
-{% if _ba_url %}
+<!-- Buy ticket externally — fallback when no trips in DB for this pair.
+     Shows every applicable partner so at least one link monetises the
+     dead-end search (users who bounce here from Google are the highest-
+     intent traffic we get). -->
+{% if _offers_block %}
 <div class="buy-ticket">
   <div class="buy-ticket__header">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20" aria-hidden="true"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2 2 2 0 010 4 2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 00-2-2 2 2 0 010-4 2 2 0 002-2V7a2 2 0 00-2-2H5z"/></svg>
     <span>{{ _('buy.title') }}</span>
   </div>
   <div class="buy-ticket__links">
-    <a href="{{ _ba_url }}" target="_blank" rel="noopener nofollow sponsored" class="buy-ticket__btn buy-ticket__btn--bookaway">Bookaway <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg></a>
+    {% for offer in _offers_block %}
+    <a href="{{ offer.url }}" target="_blank" rel="noopener nofollow sponsored"
+       class="buy-ticket__btn buy-ticket__btn--{{ offer.partner_key }}"
+       style="background: {{ offer.brand_color }};"
+       data-partner="{{ offer.partner_key }}"
+       data-route-slug="{{ _campaign }}" data-surface="search_global">{{ offer.partner_name }}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg></a>
+    {% endfor %}
   </div>
   <p class="buy-ticket__note">{{ _('buy.note') }}</p>
 </div>
