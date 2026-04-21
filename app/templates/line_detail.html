@@ -12,9 +12,8 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"{{ _('line_detail.faq.q_stops').format(number=line.number) }}","acceptedAnswer":{"@type":"Answer","text":"{% if stops %}{{ _('line_detail.faq.a_stops').format(number=line.number, name=line.name, city=city_label, count=stops|length, first=stops[0].name, last=stops[-1].name) }}{% else %}{{ _('line_detail.faq.a_stops_no_endpoints').format(number=line.number, name=line.name, city=city_label, count=0) }}{% endif %}"}},{"@type":"Question","name":"{{ _('line_detail.faq.q_when').format(number=line.number) }}","acceptedAnswer":{"@type":"Answer","text":"{% if first_dep and last_dep %}{{ _('line_detail.faq.a_when_range').format(number=line.number, first=first_dep, last=last_dep) }}{% else %}{{ _('line_detail.faq.a_when_unknown').format(number=line.number) }}{% endif %}"}},{"@type":"Question","name":"{{ _('line_detail.faq.q_type').format(number=line.number) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('line_detail.faq.a_type').format(number=line.number, type=line_type_label|lower, city=city_label) }}"}}]}
 </script>
-<link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" as="script" crossorigin="">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""></noscript>
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
 {% endblock %}
 
 {% block content %}
@@ -206,11 +205,40 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+/* Leaflet lazy-loader — fetch CSS+JS only when map enters viewport (IO),
+   fallback eager for older browsers. Saves 42KB + 150-250ms main-thread. */
+(function() {
+  var mapEl = document.getElementById('lineMap');
+  if (!mapEl) return;
+  var LEAFLET_CSS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+  var LEAFLET_JS  = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  var loaded = false;
+
+  function loadLeaflet() {
+    if (loaded) return;
+    loaded = true;
+    var css = document.createElement('link');
+    css.rel = 'stylesheet'; css.href = LEAFLET_CSS; css.crossOrigin = '';
+    document.head.appendChild(css);
+    var js = document.createElement('script');
+    js.src = LEAFLET_JS; js.crossOrigin = '';
+    js.onload = initMap;
+    document.head.appendChild(js);
+  }
+
+  if (!('IntersectionObserver' in window)) { loadLeaflet(); return; }
+  var io = new IntersectionObserver(function(entries) {
+    if (entries.some(function(e){ return e.isIntersecting; })) {
+      io.disconnect();
+      loadLeaflet();
+    }
+  }, { rootMargin: '200px' });
+  io.observe(mapEl);
+
+  function initMap() {
   /* ── Map ── */
-  if (typeof L === 'undefined' || !document.getElementById('lineMap')) return;
+  if (typeof L === 'undefined') return;
   var map = L.map('lineMap', { zoomControl: false, attributionControl: false })
     .setView([44.8176, 20.4569], 13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
@@ -268,16 +296,23 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   {% endif %}
 
-  /* ── Schedule tabs ── */
+  }
+})();
+</script>
+
+<script>
+/* Schedule tabs — not tied to map, run immediately. */
+(function() {
   document.querySelectorAll('.schedule-tab').forEach(function(tab) {
     tab.addEventListener('click', function() {
-      document.querySelector('.schedule-tab--active').classList.remove('schedule-tab--active');
+      var cur = document.querySelector('.schedule-tab--active');
+      if (cur) cur.classList.remove('schedule-tab--active');
       tab.classList.add('schedule-tab--active');
       document.querySelectorAll('.schedule-grid').forEach(function(g) {
         g.classList.toggle('schedule-grid--active', g.dataset.schedule === tab.dataset.day);
       });
     });
   });
-});
+})();
 </script>
 {% endblock %}

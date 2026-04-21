@@ -15,9 +15,8 @@
 </script>
 {% endif %}
 {% if stop.lat and stop.lon %}
-<link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" as="script" crossorigin="">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""></noscript>
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
 {% endif %}
 {% endblock %}
 
@@ -151,17 +150,38 @@
 
 {% block scripts %}
 {% if stop.lat and stop.lon %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  if (typeof L === 'undefined' || !document.getElementById('stopMap')) return;
+/* Leaflet async-loader — stop map is the LCP candidate (hero position), so we
+   fetch Leaflet immediately during HTML parse (no IntersectionObserver gate)
+   but still append via JS so the request doesn't render-block. The CSS ships
+   with media=print then swaps to all on load to avoid blocking first paint. */
+(function() {
+  var mapEl = document.getElementById('stopMap');
+  if (!mapEl) return;
   var lat = {{ stop.lat }}, lon = {{ stop.lon }};
-  var map = L.map('stopMap', { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false }).setView([lat, lon], 16);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-  L.circleMarker([lat, lon], {
-    radius: 12, color: '#0d9488', fillColor: '#fff', fillOpacity: 1, weight: 3
-  }).addTo(map);
-});
+
+  var css = document.createElement('link');
+  css.rel = 'stylesheet';
+  css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+  css.crossOrigin = '';
+  css.media = 'print';
+  css.onload = function(){ this.media = 'all'; };
+  document.head.appendChild(css);
+
+  var js = document.createElement('script');
+  js.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  js.crossOrigin = '';
+  js.async = true;
+  js.onload = function() {
+    if (typeof L === 'undefined') return;
+    var map = L.map('stopMap', { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false }).setView([lat, lon], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+    L.circleMarker([lat, lon], {
+      radius: 12, color: '#0d9488', fillColor: '#fff', fillOpacity: 1, weight: 3
+    }).addTo(map);
+  };
+  document.head.appendChild(js);
+})();
 </script>
 {% endif %}
 <script>

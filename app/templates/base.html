@@ -8,8 +8,6 @@
 <meta name="theme-color" content="#0d9488">
 <meta name="robots" content="index, follow, max-image-preview:large">
 {% if config.YANDEX_VERIFICATION %}<meta name="yandex-verification" content="{{ config.YANDEX_VERIFICATION }}">{% endif %}
-<link rel="preconnect" href="https://unpkg.com" crossorigin>
-<link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
 <link rel="dns-prefetch" href="https://www.bookaway.com">
 <title>{% block title %}{{ _('meta.default_title') }}{% endblock %}</title>
 <meta name="description" content="{% block meta_description %}{{ _('meta.default_description') }}{% endblock %}">
@@ -41,7 +39,6 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png">
 <link rel="manifest" href="/static/site.webmanifest">
 {% block head_extra %}{% endblock %}
-<link rel="preload" href="{{ url_for('static', filename='css/app.css') }}?v={{ asset_version }}" as="style">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v={{ asset_version }}">
 <script defer src="https://analytics.farmako.ro/umami" data-website-id="b8703518-4b58-4069-9a90-a4fb28cf3649"></script>
 {% if config.GA_TRACKING_ID %}
@@ -59,6 +56,7 @@
 </script>
 </head>
 <body>
+<svg aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden"><symbol id="ic-arrow-r" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-7-7l7 7-7 7"/></symbol></svg>
 
 <a href="#main-content" class="skip-link">{{ _('a11y.skip_to_content') }}</a>
 
@@ -307,7 +305,12 @@ if ('serviceWorker' in navigator) {
   }
 
   /* ── City autocomplete ── */
-  document.querySelectorAll('.js-city-input').forEach(function(input) {
+  /* Early-return on pages without search form (most of the site). The selector
+     query is cheap; the real cost is the per-input listener wiring + i18n
+     string interpolation below that runs on every template render. */
+  var _cityInputs = document.querySelectorAll('.js-city-input');
+  if (!_cityInputs.length) return;
+  _cityInputs.forEach(function(input) {
     var dropdown = input.parentElement.querySelector('.autocomplete');
     if (!dropdown) return;
     var timer = null;

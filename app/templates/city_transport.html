@@ -19,9 +19,8 @@
   {'@type':'Question','name':_('city_transport.faq_q4').format(city=city_label),'acceptedAnswer':{'@type':'Answer','text':_('city_transport.faq_a4').format(prefix=lang_prefix, city=city_label)|striptags}}
 ] %}
 <script type="application/ld+json">{{ {'@context':'https://schema.org','@type':'FAQPage','mainEntity':_faq_entities}|tojson }}</script>
-<link rel="preload" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" as="script" crossorigin="">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""></noscript>
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
 {% endblock %}
 
 {% block content %}
@@ -203,11 +202,42 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+/* Leaflet lazy-loader — fetch CSS+JS only when map container enters viewport.
+   Saves ~42KB gzipped + 150-250ms main-thread on mobile first load when user
+   hasn't scrolled to the map yet. Falls back to eager load on IE/older browsers. */
+(function() {
+  var mapEl = document.getElementById('cityMap');
+  if (!mapEl) return;
+  var wrap = mapEl.closest('.city-map-wrap') || mapEl;
+  var LEAFLET_CSS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+  var LEAFLET_JS  = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  var loaded = false;
+
+  function loadLeaflet() {
+    if (loaded) return;
+    loaded = true;
+    var css = document.createElement('link');
+    css.rel = 'stylesheet'; css.href = LEAFLET_CSS; css.crossOrigin = '';
+    document.head.appendChild(css);
+    var js = document.createElement('script');
+    js.src = LEAFLET_JS; js.crossOrigin = '';
+    js.onload = initMap;
+    document.head.appendChild(js);
+  }
+
+  if (!('IntersectionObserver' in window)) { loadLeaflet(); return; }
+  var io = new IntersectionObserver(function(entries) {
+    if (entries.some(function(e){ return e.isIntersecting; })) {
+      io.disconnect();
+      loadLeaflet();
+    }
+  }, { rootMargin: '200px' });
+  io.observe(wrap);
+
+  function initMap() {
   /* ── Map ── */
-  if (typeof L === 'undefined' || !document.getElementById('cityMap')) return;
+  if (typeof L === 'undefined') return;
   var cityCoords = {
     'beograd': [44.8176, 20.4569],
     'novi-sad': [45.2671, 19.8335],
@@ -287,8 +317,13 @@ document.addEventListener('DOMContentLoaded', function() {
     moveTimer = setTimeout(loadStops, 300);
   });
   loadStops();
+  }
+})();
+</script>
 
-  /* ── Search filter ── */
+<script>
+/* Line search + type filter — runs regardless of map load. */
+(function() {
   var input = document.getElementById('lineSearch');
   var activeType = 'all';
 
@@ -307,15 +342,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (input) input.addEventListener('input', applyFilters);
 
-  /* ── Type filter tabs ── */
   document.querySelectorAll('#typeFilter .filter-chip').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      document.querySelector('#typeFilter .filter-chip--active').classList.remove('filter-chip--active');
+      var cur = document.querySelector('#typeFilter .filter-chip--active');
+      if (cur) cur.classList.remove('filter-chip--active');
       btn.classList.add('filter-chip--active');
       activeType = btn.dataset.type;
       applyFilters();
     });
   });
-});
+})();
 </script>
 {% endblock %}
