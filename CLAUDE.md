@@ -133,6 +133,10 @@ Production environment requires these env vars:
   только для `scripts/weekly_seo.sh` (cron). Setup: `docs/06_tech/gsc-setup.md`.
 - `GSC_SITE_URL` — GSC property identifier
   (по умолчанию `sc-domain:prevozni.com`).
+- `SMTP_HOST`, `SMTP_PORT` (587), `SMTP_USER`, `SMTP_PASS`,
+  `MAIL_FROM` — outbound email (newsletter confirm/welcome/unsubscribe).
+  Без `SMTP_HOST` mailer пишет в `logs/mail_dev.log` — double-opt-in
+  работает локально и в тестах без реального mailbox.
 
 ## Инфраструктура
 

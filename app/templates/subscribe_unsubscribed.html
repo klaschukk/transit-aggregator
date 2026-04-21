@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}
+  {% if ok %}Odjava uspešna{% else %}Link nije važeći{% endif %} | Prevozni
+{% endblock %}
+{% block meta_robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<div class="page-title">
+  {% if ok %}
+    <h1>Odjavili ste se ✓</h1>
+    <p class="page-subtitle">
+      Više nećete dobijati email od nas. Ako ste se odjavili greškom,
+      možete se prijaviti ponovo na početnoj strani.
+    </p>
+  {% else %}
+    <h1>Link nije važeći</h1>
+    <p class="page-subtitle">
+      Ovaj link je već iskorišćen ili nije ispravan.
+    </p>
+  {% endif %}
+
+  <p style="margin-top:24px">
+    <a href="{{ lang_prefix }}/" class="btn btn--primary">Nazad na početnu</a>
+  </p>
+</div>
+{% endblock %}

@@ -142,12 +142,14 @@ def create_app(config_name: str | None = None) -> Flask:
     from .routes.city import city_bp
     from .routes.info import info_bp
     from .routes.admin import admin_bp
+    from .routes.subscribe import subscribe_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(intercity_bp)
     app.register_blueprint(city_bp)
     app.register_blueprint(info_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(subscribe_bp)
 
     # Register same blueprints under /en/ and /ru/ prefixes.
     # admin_bp stays unprefixed — dashboards don't need localisation.

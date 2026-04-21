@@ -74,6 +74,25 @@ CREATE TABLE IF NOT EXISTS reviews (
 CREATE INDEX IF NOT EXISTS reviews_route_idx ON reviews(route_slug, status);
 CREATE INDEX IF NOT EXISTS reviews_email_idx ON reviews(email_hash);
 CREATE INDEX IF NOT EXISTS reviews_status_idx ON reviews(status, ts);
+
+CREATE SEQUENCE IF NOT EXISTS subscribers_id_seq;
+CREATE TABLE IF NOT EXISTS subscribers (
+    id                BIGINT PRIMARY KEY DEFAULT nextval('subscribers_id_seq'),
+    email             VARCHAR NOT NULL,
+    email_lower       VARCHAR NOT NULL,
+    lang              VARCHAR,
+    source            VARCHAR,
+    referrer          VARCHAR,
+    ip_hash           VARCHAR,
+    ts                TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    confirm_token     VARCHAR,
+    confirmed_at      TIMESTAMP,
+    unsubscribe_token VARCHAR,
+    unsubscribed_at   TIMESTAMP
+);
+CREATE UNIQUE INDEX IF NOT EXISTS subscribers_email_uq ON subscribers(email_lower);
+CREATE INDEX IF NOT EXISTS subscribers_confirm_idx ON subscribers(confirm_token);
+CREATE INDEX IF NOT EXISTS subscribers_unsub_idx ON subscribers(unsubscribe_token);
 """
 
 
@@ -262,6 +281,178 @@ def set_review_status(review_id: int, status: str, note: str = '') -> bool:
         logger.error("set_review_status failed: %s", exc)
         _local.conn = None
         return False
+
+
+# ── subscribers helpers ─────────────────────────────────────────────────
+
+
+_CONFIRM_TTL_DAYS = 7
+
+
+def _new_token() -> str:
+    import uuid
+    return uuid.uuid4().hex
+
+
+def subscriber_by_email(email: str) -> dict | None:
+    if not email:
+        return None
+    rows = query(
+        "SELECT id, email, lang, source, confirm_token, confirmed_at, "
+        "       unsubscribe_token, unsubscribed_at, ts "
+        "FROM subscribers WHERE email_lower = ?",
+        [email.strip().lower()],
+    )
+    return rows[0] if rows else None
+
+
+def insert_or_refresh_subscriber(
+    *,
+    email: str,
+    lang: str,
+    source: str,
+    referrer: str,
+    ip: str,
+) -> dict | None:
+    """Create a pending subscriber, or re-issue a confirm token for an
+    existing pending/unsubscribed record. Returns the stored row including
+    the fresh tokens. Idempotent for already-confirmed rows (returns
+    existing with action='already_confirmed')."""
+    email = (email or '').strip()
+    if not email:
+        return None
+    email_lower = email.lower()
+    existing = subscriber_by_email(email_lower)
+
+    try:
+        conn = _get_conn()
+        if existing is None:
+            confirm_t = _new_token()
+            unsub_t = _new_token()
+            conn.execute(
+                "INSERT INTO subscribers (email, email_lower, lang, source, "
+                "referrer, ip_hash, confirm_token, unsubscribe_token) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                [
+                    email[:200], email_lower[:200],
+                    (lang or 'sr')[:5],
+                    (source or 'unknown')[:40],
+                    (referrer or '')[:500],
+                    hash_ip(ip),
+                    confirm_t, unsub_t,
+                ],
+            )
+            row = subscriber_by_email(email_lower) or {}
+            row['_action'] = 'created'
+            return row
+
+        if existing.get('confirmed_at') and not existing.get('unsubscribed_at'):
+            existing['_action'] = 'already_confirmed'
+            return existing
+
+        # Pending or previously unsubscribed — rotate tokens + clear the
+        # unsubscribed state so the user opts back in fresh.
+        confirm_t = _new_token()
+        unsub_t = _new_token()
+        conn.execute(
+            "UPDATE subscribers SET confirm_token = ?, unsubscribe_token = ?, "
+            "ts = CURRENT_TIMESTAMP, lang = ?, source = ?, referrer = ?, "
+            "ip_hash = ?, unsubscribed_at = NULL "
+            "WHERE id = ?",
+            [
+                confirm_t, unsub_t,
+                (lang or 'sr')[:5],
+                (source or 'unknown')[:40],
+                (referrer or '')[:500],
+                hash_ip(ip),
+                existing['id'],
+            ],
+        )
+        fresh = subscriber_by_email(email_lower) or {}
+        fresh['_action'] = 'resent'
+        return fresh
+    except duckdb.Error as exc:
+        logger.error("insert_or_refresh_subscriber failed: %s", exc)
+        _local.conn = None
+        return None
+
+
+def confirm_subscriber(token: str) -> tuple[str, dict | None]:
+    """Exchange a confirm_token for a confirmed row.
+
+    Returns (status, row) where status is:
+    'ok'       — freshly confirmed; row has email/lang/unsubscribe_token
+                 so the caller can send the welcome letter.
+    'already'  — row was already confirmed before (row returned too).
+    'expired'  — token older than _CONFIRM_TTL_DAYS (row returned).
+    'invalid'  — token not found; row is None.
+    """
+    if not token:
+        return 'invalid', None
+    try:
+        conn = _get_conn()
+        rows = conn.execute(
+            "SELECT id, email, lang, unsubscribe_token, confirmed_at, ts "
+            "FROM subscribers WHERE confirm_token = ?",
+            [token],
+        ).fetchall()
+        if not rows:
+            return 'invalid', None
+        sub_id, email, lang, unsub_token, confirmed_at, created_at = rows[0]
+        row = {
+            'id': sub_id, 'email': email, 'lang': lang,
+            'unsubscribe_token': unsub_token,
+        }
+        if confirmed_at is not None:
+            return 'already', row
+        from datetime import datetime, timedelta
+        if created_at is not None:
+            age = datetime.utcnow() - created_at
+            if age > timedelta(days=_CONFIRM_TTL_DAYS):
+                return 'expired', row
+        conn.execute(
+            "UPDATE subscribers SET confirmed_at = CURRENT_TIMESTAMP, "
+            "confirm_token = NULL WHERE id = ?",
+            [sub_id],
+        )
+        return 'ok', row
+    except duckdb.Error as exc:
+        logger.error("confirm_subscriber failed: %s", exc)
+        _local.conn = None
+        return 'invalid', None
+
+
+def unsubscribe_subscriber(token: str) -> bool:
+    if not token:
+        return False
+    try:
+        conn = _get_conn()
+        res = conn.execute(
+            "UPDATE subscribers SET unsubscribed_at = CURRENT_TIMESTAMP "
+            "WHERE unsubscribe_token = ? AND unsubscribed_at IS NULL "
+            "RETURNING id",
+            [token],
+        ).fetchone()
+        return res is not None
+    except duckdb.Error as exc:
+        logger.error("unsubscribe_subscriber failed: %s", exc)
+        return False
+
+
+def subscriber_stats() -> dict:
+    rows = query(
+        "SELECT "
+        "  COUNT(*) AS total, "
+        "  COUNT(*) FILTER (WHERE confirmed_at IS NOT NULL "
+        "                   AND unsubscribed_at IS NULL) AS confirmed, "
+        "  COUNT(*) FILTER (WHERE confirmed_at IS NULL "
+        "                   AND unsubscribed_at IS NULL) AS pending, "
+        "  COUNT(*) FILTER (WHERE unsubscribed_at IS NOT NULL) AS unsubscribed "
+        "FROM subscribers"
+    )
+    if not rows:
+        return {'total': 0, 'confirmed': 0, 'pending': 0, 'unsubscribed': 0}
+    return {k: int(v or 0) for k, v in rows[0].items()}
 
 
 def request_review_deletion(review_id: int, email: str) -> bool:

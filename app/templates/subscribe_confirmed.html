@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}
+  {% if result == 'ok' %}Pretplata potvrđena
+  {% elif result == 'already' %}Već ste pretplaćeni
+  {% elif result == 'expired' %}Link je istekao
+  {% else %}Prevozni{% endif %} | Prevozni
+{% endblock %}
+{% block meta_robots %}noindex, nofollow{% endblock %}
+
+{% block content %}
+<div class="page-title">
+  {% if result == 'ok' %}
+    <h1>Pretplata potvrđena ✓</h1>
+    <p class="page-subtitle">
+      Poslali smo vam dobrodošlicu na email. Jednom nedeljno ćete
+      dobijati najjeftinije karte i nove rute.
+    </p>
+  {% elif result == 'already' %}
+    <h1>Već ste pretplaćeni</h1>
+    <p class="page-subtitle">
+      Ovaj email je već potvrđen ranije — ne morate ništa da radite.
+    </p>
+  {% elif result == 'expired' %}
+    <h1>Link je istekao</h1>
+    <p class="page-subtitle">
+      Potvrdni link traje 7 dana. Prijavite se ponovo sa iste adrese
+      da dobijete svež link.
+    </p>
+  {% else %}
+    <h1>Nešto nije u redu</h1>
+    <p class="page-subtitle">Pokušajte da se prijavite ponovo.</p>
+  {% endif %}
+
+  <p style="margin-top:24px">
+    <a href="{{ lang_prefix }}/" class="btn btn--primary">Nazad na početnu</a>
+  </p>
+</div>
+{% endblock %}
