@@ -118,6 +118,7 @@ def _welcome_email_body(unsub_url: str, lang: str) -> tuple[str, str, str]:
 
 
 @subscribe_bp.route('/api/subscribe', methods=['POST'])
+@csrf.exempt
 @limiter.limit("5 per hour")
 def api_subscribe():
     """Accept an email, create or refresh a pending row, send confirm letter.
