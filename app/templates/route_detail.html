@@ -6,7 +6,7 @@
      else (short)      → "{pair}: {N} polazaka dnevno | Prevozni" #}
 {% set _pair_name = route.from_city ~ ' → ' ~ route.to_city %}
 {% block title %}{% if _pair_name|length > 28 %}{{ _pair_name }} | Prevozni{% elif _pair_name|length > 20 %}{{ _pair_name }} — {{ _('route_detail.title_short') }} | Prevozni{% else %}{{ _pair_name }}: {{ route.trip_count }} {{ _('route_detail.title_departures') }} | Prevozni{% endif %}{% endblock %}
-{% block meta_description %}{{ _('route_detail.meta_prefix') }} {{ _pair_name }}{% if route.distance_km %} ({{ route.distance_km }} km){% endif %}: {% if route.trip_count %}{{ route.trip_count }} {{ _('route_detail.meta_daily') }}{% if price_min %}, {{ _('route_detail.meta_from')|lower }} {{ price_min }} RSD{% endif %}. {% endif %}{{ _('route_detail.meta_body') }}{% endblock %}
+{% block meta_description %}{{ _('route_detail.meta_prefix') }} {{ _pair_name }}{% if route.distance_km %} ({{ route.distance_km }} km){% endif %}: {% if route.trip_count %}{{ route.trip_count }} {{ _('route_detail.meta_daily') }}{% if price_min %}, {{ _('route_detail.meta_from')|lower }} {{ price_min }} RSD{% endif %}. {% endif %}{% if reviews_agg and reviews_agg.n and reviews_agg.n >= 5 %}{{ reviews_agg.avg }}★ ({{ reviews_agg.n }}). {% endif %}{{ _('route_detail.meta_body') }}{% endblock %}
 
 {% block head_extra %}
 {% if request.args.get('dan') or not trips %}
@@ -19,6 +19,35 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"{{ _('route_detail.faq.q_departures').format(from_city=route.from_city, to_city=route.to_city) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('route_detail.faq.a_departures').format(count=route.trip_count, from_city=route.from_city, to_city=route.to_city) }}"}},{"@type":"Question","name":"{{ _('route_detail.faq.q_price').format(from_city=route.from_city, to_city=route.to_city) }}","acceptedAnswer":{"@type":"Answer","text":"{% if price_min %}{{ _('route_detail.faq.a_price_from').format(min=price_min) }}{% else %}{{ _('route_detail.faq.a_price_unknown') }}{% endif %}"}},{"@type":"Question","name":"{{ _('route_detail.faq.q_operators').format(from_city=route.from_city, to_city=route.to_city) }}","acceptedAnswer":{"@type":"Answer","text":"{% if operators_on_route %}{{ _('route_detail.faq.a_operators_list').format(operators=operators_on_route|join(', ')) }}{% else %}{{ _('route_detail.faq.a_operators_unknown') }}{% endif %}"}}]}
 </script>
+{% endif %}
+{# AggregateRating + Review markup — Google's documented path to ★ rich results.
+   Emitted as a Product (travel offering) so the stars attach unambiguously. #}
+{% if reviews_agg and reviews_agg.n %}
+{% set _review_entities = [] %}
+{% for r in reviews[:10] %}
+  {% set _ignored = _review_entities.append({
+    '@type':'Review',
+    'reviewRating': {'@type':'Rating','ratingValue': r.rating, 'bestRating': 5, 'worstRating': 1},
+    'author': {'@type':'Person','name': r.author_name},
+    'reviewBody': r.comment,
+    'datePublished': (r.ts.isoformat() if r.ts else ''),
+    'inLanguage': r.lang or 'sr',
+  }) %}
+{% endfor %}
+{% set _product_ld = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  'name': route.from_city ~ ' → ' ~ route.to_city,
+  'description': _('route_detail.meta_prefix') ~ ' ' ~ route.from_city ~ ' → ' ~ route.to_city,
+  'aggregateRating': {
+    '@type': 'AggregateRating',
+    'ratingValue': reviews_agg.avg,
+    'reviewCount': reviews_agg.n,
+    'bestRating': 5, 'worstRating': 1,
+  },
+  'review': _review_entities,
+} %}
+<script type="application/ld+json">{{ _product_ld|tojson }}</script>
 {% endif %}
 {% endblock %}
 
@@ -176,6 +205,10 @@
     <p>{{ _('route.prose_buy').format(from_city=route.from_city, to_city=route.to_city) }}</p>
   </div>
 </div>
+
+<!-- Reviews (UGC) — below the prose block, above similar routes -->
+{% from '_partials/_reviews.html' import reviews_section with context %}
+{{ reviews_section(route.slug, reviews, reviews_agg) }}
 
 <!-- Similar routes -->
 {% if similar_routes %}

@@ -213,6 +213,16 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Tracking of "Buy" (Bookaway) clicks',
         'ru': 'Отслеживание кликов по кнопке «Купить» (Bookaway)',
     },
+    'privacy.reviews_h': {
+        'sr': 'Korisničke recenzije',
+        'en': 'User reviews',
+        'ru': 'Пользовательские отзывы',
+    },
+    'privacy.reviews_body': {
+        'sr': 'Ako ostavite recenziju rute (dugme „Ostavite vašu recenziju" na stranici rute), čuvamo vašu ocenu, tekst komentara i ime koje ste uneli — oni se javno prikazuju nakon moderacije. Email adresu ne čuvamo u otvorenom obliku: sa nje računamo sha256 hash sa solju radi provere autorstva (za brisanje recenzije) i identifikacije „proverenih" autora koji su ranije objavili 3+ odobrene recenzije. Pored toga čuvamo jezik (sr/en/ru), anonimizovani hash IP adrese, i vreme slanja — isključivo za zaštitu od spama i auditing. U svakom trenutku možete da zatražite brisanje svoje recenzije dugmetom „Zatraži brisanje" ispod svake recenzije; potvrđujete uneti istu email adresu kojom ste prvobitno poslali, a naš moderator soft-briše zapis u roku od 7 dana u skladu sa GDPR-om.',
+        'en': 'If you leave a route review (via the "Leave your review" form), we store your rating, comment text, and the name you entered — these are shown publicly after moderation. Your email address is never stored in cleartext: we compute a salted sha256 hash of it for authorship checks (so you can request deletion later) and to identify "trusted" authors who have previously posted 3+ approved reviews. We also keep the submission language (sr/en/ru), a salted IP hash, and the timestamp — only for spam protection and audit. You can request deletion any time via the "Request deletion" button under each review; you prove ownership by re-entering the same email, and our moderator soft-deletes the record within 7 days per GDPR.',
+        'ru': 'Если вы оставите отзыв о маршруте (через форму «Оставить отзыв»), мы храним оценку, текст комментария и указанное имя — они публикуются после модерации. Email в открытом виде не храним: вычисляем sha256-хэш с солью, чтобы позже проверить авторство (при запросе удаления) и опознать «проверенных» авторов, у которых уже опубликовано 3+ одобренных отзыва. Также храним язык отправки (sr/en/ru), хэш IP и время отправки — только для защиты от спама и аудита. В любой момент можно запросить удаление кнопкой «Запросить удаление» под каждым отзывом; вы подтверждаете владение, указав тот же email, а модератор мягко удалит запись в течение 7 дней согласно GDPR.',
+    },
     'privacy.affiliate_body': {
         'sr': 'Kad kliknete na dugme "Kupi" koje vodi na Bookaway, beležimo minimalni zapis o kliku na sopstvenom serveru: identifikator rute (npr. beograd-budva), tip stranice sa koje ste kliknuli (katalog, detalj rute, pretraga), prevoznika, vreme polaska, anonimizovani hash vaše IP adrese (sha256 sa sol-tajnom koja se redovno menja) i osnovne tehničke podatke pretraživača. Ne beležimo sirovu IP adresu, ime, email niti bilo šta što može direktno da vas identifikuje. Ove zapise čuvamo maksimalno 90 dana u interne svrhe — da znamo koji delovi sajta ljudima stvarno pomažu da nađu kartu i da pravilno pripišemo proviziju od Bookaway-a. Isti zapisi se šalju i u našu analitiku (Umami) kao anonimni event "ba_click". Ako želite da vaši klikovi ne budu zabeleženi, uključite ad-blocker ili privatni mod u pretraživaču — naš sajt nastavlja da radi bez ovih zapisa.',
         'en': 'When you click a "Buy" button that goes to Bookaway, we keep a minimal click record on our own server: the route identifier (e.g. beograd-budva), the page type the click came from (catalog, route detail, search), the carrier, departure time, a salted sha256 hash of your IP (salt rotates regularly) and basic browser technical data. We do not store raw IPs, names, emails or anything directly identifying you. These records are kept for at most 90 days and used internally to understand which parts of the site actually help people find a ticket and to correctly attribute Bookaway commissions. The same events are mirrored to our analytics (Umami) as an anonymous "ba_click" event. If you prefer your clicks not to be recorded, use an ad-blocker or private browsing — the site works without these records.',
@@ -2929,6 +2939,132 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Otkrijte gradski prevoz',
         'en': 'Explore city transit',
         'ru': 'Изучите городской транспорт',
+    },
+
+    # ── Reviews / UGC ──
+    'review.heading': {
+        'sr': 'Iskustva putnika', 'en': 'Traveller reviews', 'ru': 'Отзывы пассажиров',
+    },
+    'review.summary_empty': {
+        'sr': 'Budite prvi koji ostavlja recenziju za ovu rutu.',
+        'en': 'Be the first to review this route.',
+        'ru': 'Будьте первым, кто оставит отзыв о маршруте.',
+    },
+    'review.summary_few': {
+        'sr': '{n} ocena, prosek {avg} ★ · podelite i vaše iskustvo',
+        'en': '{n} ratings, average {avg} ★ · share your experience too',
+        'ru': '{n} оценок, средняя {avg} ★ · поделитесь своим опытом',
+    },
+    'review.summary': {
+        'sr': '{n} ocena · prosek {avg} ★',
+        'en': '{n} ratings · average {avg} ★',
+        'ru': '{n} оценок · средняя {avg} ★',
+    },
+    'review.form_heading': {
+        'sr': 'Ostavite vašu recenziju', 'en': 'Leave your review', 'ru': 'Оставить отзыв',
+    },
+    'review.rating_label': {
+        'sr': 'Ocena (1–5)', 'en': 'Rating (1–5)', 'ru': 'Оценка (1–5)',
+    },
+    'review.comment_label': {
+        'sr': 'Komentar (50–500 znakova)',
+        'en': 'Comment (50–500 characters)',
+        'ru': 'Комментарий (50–500 символов)',
+    },
+    'review.comment_ph': {
+        'sr': 'Kako je bila vožnja? Komfor, tačnost, cena, osoblje, prtljag, WiFi, stajališta…',
+        'en': 'How was the ride? Comfort, timekeeping, price, staff, luggage, WiFi, stops…',
+        'ru': 'Как прошла поездка? Комфорт, пунктуальность, цена, персонал, багаж, WiFi, остановки…',
+    },
+    'review.name_label': {'sr': 'Ime (2–40 slova)', 'en': 'Name (2–40 letters)', 'ru': 'Имя (2–40 букв)'},
+    'review.email_label': {
+        'sr': 'Email (opciono, za obaveštenje)',
+        'en': 'Email (optional, for approval notice)',
+        'ru': 'Email (необязательно, для уведомления)',
+    },
+    'review.submit': {'sr': 'Pošalji recenziju', 'en': 'Submit review', 'ru': 'Отправить отзыв'},
+    'review.consent': {
+        'sr': 'Slanjem dozvoljavate objavu vaše ocene i komentara nakon moderacije. Email ne objavljujemo.',
+        'en': 'By submitting you allow us to publish the rating and comment after moderation. Email is never published.',
+        'ru': 'Отправляя отзыв, вы разрешаете опубликовать оценку и комментарий после модерации. Email не публикуем.',
+    },
+    'review.ok.pending': {
+        'sr': 'Hvala! Pregledaćemo recenziju u roku od 24–48 h.',
+        'en': 'Thanks! We will review your comment within 24–48 hours.',
+        'ru': 'Спасибо! Мы проверим отзыв в течение 24–48 часов.',
+    },
+    'review.ok.auto': {
+        'sr': 'Hvala! Recenzija je objavljena.',
+        'en': 'Thanks! Your review is live.',
+        'ru': 'Спасибо! Отзыв опубликован.',
+    },
+    'review.err.generic': {
+        'sr': 'Došlo je do greške. Pokušajte ponovo.',
+        'en': 'Something went wrong. Please try again.',
+        'ru': 'Что-то пошло не так. Попробуйте снова.',
+    },
+    'review.err.rate_limit': {
+        'sr': 'Previše pokušaja u kratkom vremenu. Pokušajte ponovo za sat vremena.',
+        'en': 'Too many attempts. Please retry in about an hour.',
+        'ru': 'Слишком много попыток. Повторите примерно через час.',
+    },
+    'review.err.rating': {
+        'sr': 'Odaberite ocenu od 1 do 5 zvezdica.',
+        'en': 'Pick a rating from 1 to 5 stars.',
+        'ru': 'Выберите оценку от 1 до 5 звёзд.',
+    },
+    'review.err.comment_length': {
+        'sr': 'Komentar treba da ima 50–500 znakova.',
+        'en': 'Comment must be 50–500 characters.',
+        'ru': 'Комментарий должен быть 50–500 символов.',
+    },
+    'review.err.name_length': {
+        'sr': 'Ime treba da ima 2–40 slova.',
+        'en': 'Name must be 2–40 letters.',
+        'ru': 'Имя должно быть 2–40 букв.',
+    },
+    'review.err.email_invalid': {
+        'sr': 'Email adresa nije validna.',
+        'en': 'Email address is not valid.',
+        'ru': 'Email адрес недействителен.',
+    },
+    'review.err.no_urls': {
+        'sr': 'Linkovi na spoljne sajtove nisu dozvoljeni u komentarima.',
+        'en': 'Links to external sites are not allowed in comments.',
+        'ru': 'Ссылки на внешние сайты в комментариях не разрешены.',
+    },
+    'review.err.profanity': {
+        'sr': 'Komentar sadrži neprihvatljiv sadržaj.',
+        'en': 'Comment contains unacceptable content.',
+        'ru': 'Комментарий содержит неприемлемое содержание.',
+    },
+    'review.err.spam': {
+        'sr': 'Slanje je odbijeno.',
+        'en': 'Submission rejected.',
+        'ru': 'Отправка отклонена.',
+    },
+    'review.err.too_fast': {
+        'sr': 'Pokušaj je prebrz — pročitajte formu pažljivo.',
+        'en': 'That was too fast — please read the form and try again.',
+        'ru': 'Слишком быстро — перечитайте форму и попробуйте ещё раз.',
+    },
+    'review.delete.link': {
+        'sr': 'Zatraži brisanje',
+        'en': 'Request deletion',
+        'ru': 'Запросить удаление',
+    },
+    'review.delete.prompt': {
+        'sr': 'Unesite email adresu kojom ste ostavili recenziju:',
+        'en': 'Enter the email you submitted the review with:',
+        'ru': 'Введите email, с которым вы оставили отзыв:',
+    },
+    'review.delete.sent': {
+        'sr': 'Zahtev za brisanje je primljen. Obradićemo ga u roku od 7 dana u skladu sa GDPR-om.',
+        'en': 'Deletion request received. We will process it within 7 days per GDPR.',
+        'ru': 'Запрос на удаление принят. Обработаем в течение 7 дней согласно GDPR.',
+    },
+    'review.lang_note': {
+        'sr': 'Recenzija na srpskom', 'en': 'Review in English', 'ru': 'Отзыв на русском',
     },
 }
 

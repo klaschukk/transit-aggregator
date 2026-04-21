@@ -5,7 +5,7 @@
 {% set _to_slug = to_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
 {% set _offers_trip = affiliate_offers(_from_slug, _to_slug, from_city, to_city, 'city-pair') %}
 {% block title %}{{ from_city }} → {{ to_city }} {{ current_year }}: {{ _('city_pair.title_travel') }} | Prevozni{% endblock %}
-{% block meta_description %}{{ _('city_pair.meta_prefix') }} {{ from_city }} {{ _('city_pair.meta_mid') }} {{ to_city }} {{ current_year }}{% if route and route.trip_count %}: {{ route.trip_count }} {{ _('city_pair.departures_word') }}{% endif %}{% if route and route.min_price_rsd %}, {{ _('route_detail.meta_from')|lower }} {{ route.min_price_rsd }} RSD{% endif %}. {{ _('city_pair.meta_cta') }}{% endblock %}
+{% block meta_description %}{{ _('city_pair.meta_prefix') }} {{ from_city }} {{ _('city_pair.meta_mid') }} {{ to_city }} {{ current_year }}{% if route and route.trip_count %}: {{ route.trip_count }} {{ _('city_pair.departures_word') }}{% endif %}{% if route and route.min_price_rsd %}, {{ _('route_detail.meta_from')|lower }} {{ route.min_price_rsd }} RSD{% endif %}.{% if reviews_agg and reviews_agg.n and reviews_agg.n >= 5 %} {{ reviews_agg.avg }}★ ({{ reviews_agg.n }}).{% endif %} {{ _('city_pair.meta_cta') }}{% endblock %}
 
 {% block head_extra %}
 {% if route %}
@@ -20,6 +20,31 @@
 {% endif %}
 {% if not route or not trips %}
 <meta name="robots" content="noindex, follow">
+{% endif %}
+{% if reviews_agg and reviews_agg.n %}
+{% set _review_entities = [] %}
+{% for r in reviews[:10] %}
+  {% set _ignored = _review_entities.append({
+    '@type':'Review',
+    'reviewRating': {'@type':'Rating','ratingValue': r.rating, 'bestRating': 5, 'worstRating': 1},
+    'author': {'@type':'Person','name': r.author_name},
+    'reviewBody': r.comment,
+    'datePublished': (r.ts.isoformat() if r.ts else ''),
+    'inLanguage': r.lang or 'sr',
+  }) %}
+{% endfor %}
+{% set _product_ld = {
+  '@context':'https://schema.org', '@type':'Product',
+  'name': from_city ~ ' → ' ~ to_city,
+  'description': _('city_pair.meta_prefix') ~ ' ' ~ from_city ~ ' → ' ~ to_city,
+  'aggregateRating': {
+    '@type':'AggregateRating',
+    'ratingValue': reviews_agg.avg, 'reviewCount': reviews_agg.n,
+    'bestRating': 5, 'worstRating': 1,
+  },
+  'review': _review_entities,
+} %}
+<script type="application/ld+json">{{ _product_ld|tojson }}</script>
 {% endif %}
 {% endblock %}
 
@@ -142,6 +167,11 @@
 
 {% if not route %}
   {{ empty_state(icon='search', text=_('city_pair.no_direct'), sub=from_city ~ ' → ' ~ to_city) }}
+{% endif %}
+
+{% if route %}
+{% from '_partials/_reviews.html' import reviews_section with context %}
+{{ reviews_section(review_route_slug, reviews, reviews_agg) }}
 {% endif %}
 
 {% if related_pairs %}

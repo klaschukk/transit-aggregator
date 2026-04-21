@@ -1,0 +1,104 @@
+{# Reviews section — rendered on route_detail + city_pair below the trip list.
+
+   Args:
+     route_slug — the key used by POST /api/review/<slug> and the SEO
+                   AggregateRating schema. Pass the canonical rute/ slug
+                   for city_pair too so ratings aggregate across both pages.
+     reviews    — list of dicts (id, rating, comment, author_name, lang, ts)
+                   already filtered to status='approved'.
+     aggregate  — {n, avg} dict from analytics_db.aggregate_rating().
+#}
+{% macro reviews_section(route_slug, reviews, aggregate) %}
+<section class="reviews" id="reviews" aria-labelledby="reviewsHeading">
+  <h2 class="reviews__title" id="reviewsHeading">{{ _('review.heading') }}</h2>
+
+  {% if aggregate and aggregate.n %}
+  <p class="reviews__summary">
+    {% if aggregate.n < 3 %}
+      {{ _('review.summary_few').format(n=aggregate.n, avg=aggregate.avg) }}
+    {% else %}
+      {{ _('review.summary').format(n=aggregate.n, avg=aggregate.avg) }}
+    {% endif %}
+  </p>
+  {% else %}
+  <p class="reviews__summary reviews__summary--empty">{{ _('review.summary_empty') }}</p>
+  {% endif %}
+
+  {% if reviews %}
+  <ol class="reviews__list">
+    {% for r in reviews %}
+    <li class="review-card" data-review-id="{{ r.id }}">
+      <div class="review-card__hdr">
+        <span class="review-card__stars" aria-label="{{ r.rating }} / 5">
+          {% for _ in range(r.rating) %}★{% endfor %}{% for _ in range(5 - r.rating) %}☆{% endfor %}
+        </span>
+        <span class="review-card__author">{{ r.author_name }}</span>
+        <span class="review-card__sep">·</span>
+        <time class="review-card__date" datetime="{{ r.ts.isoformat() if r.ts else '' }}">
+          {{ r.ts.strftime('%Y-%m') if r.ts else '' }}
+        </time>
+        {% if r.lang and r.lang != lang %}
+        <span class="review-card__lang" title="{{ _('review.lang_note') }}">{{ r.lang|upper }}</span>
+        {% endif %}
+      </div>
+      <p class="review-card__body">{{ r.comment }}</p>
+      <button type="button" class="review-card__del js-review-del-btn"
+              data-review-id="{{ r.id }}">{{ _('review.delete.link') }}</button>
+    </li>
+    {% endfor %}
+  </ol>
+  {% endif %}
+
+  <details class="review-form-wrap">
+    <summary class="review-form-wrap__toggle">{{ _('review.form_heading') }}</summary>
+
+    <form class="review-form" method="post"
+          action="{{ lang_prefix }}/api/review/{{ route_slug }}"
+          data-action-template="{{ lang_prefix }}/api/review/__SLUG__"
+          aria-describedby="reviewFormStatus">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="loaded_at" value="{{ _review_loaded_at }}">
+      {# Honeypot — real users never fill this; CSS hides it from sight. #}
+      <label class="hp" aria-hidden="true">
+        Website (leave empty)
+        <input type="text" name="website" tabindex="-1" autocomplete="off">
+      </label>
+
+      <div class="review-form__row">
+        <label class="review-form__label">{{ _('review.rating_label') }}</label>
+        <div class="rating-widget" role="radiogroup" aria-label="{{ _('review.rating_label') }}">
+          <input type="hidden" name="rating" id="ratingValue" value="0">
+          {% for i in range(1, 6) %}
+          <button type="button" class="rating-widget__star" role="radio"
+                  aria-checked="false" data-v="{{ i }}" aria-label="{{ i }}">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2l3 7h7l-6 5 2 8-6-4-6 4 2-8-6-5h7z"/></svg>
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <label class="review-form__row">
+        <span class="review-form__label">{{ _('review.comment_label') }}</span>
+        <textarea name="comment" rows="4" maxlength="500" minlength="50"
+                  required placeholder="{{ _('review.comment_ph') }}"></textarea>
+      </label>
+
+      <div class="review-form__fields">
+        <label class="review-form__row">
+          <span class="review-form__label">{{ _('review.name_label') }}</span>
+          <input type="text" name="name" minlength="2" maxlength="40" required autocomplete="name">
+        </label>
+        <label class="review-form__row">
+          <span class="review-form__label">{{ _('review.email_label') }}</span>
+          <input type="email" name="email" maxlength="100" autocomplete="email">
+        </label>
+      </div>
+
+      <p class="review-form__consent">{{ _('review.consent') }}</p>
+
+      <button type="submit" class="btn btn--accent">{{ _('review.submit') }}</button>
+      <div class="review-form__status" id="reviewFormStatus" role="status" aria-live="polite" hidden></div>
+    </form>
+  </details>
+</section>
+{% endmacro %}

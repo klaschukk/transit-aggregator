@@ -54,6 +54,26 @@ CREATE TABLE IF NOT EXISTS ba_clicks (
 );
 CREATE INDEX IF NOT EXISTS ba_clicks_ts_idx ON ba_clicks(ts);
 CREATE INDEX IF NOT EXISTS ba_clicks_slug_idx ON ba_clicks(route_slug);
+
+CREATE SEQUENCE IF NOT EXISTS reviews_id_seq;
+CREATE TABLE IF NOT EXISTS reviews (
+    id             BIGINT PRIMARY KEY DEFAULT nextval('reviews_id_seq'),
+    route_slug     VARCHAR NOT NULL,
+    rating         INTEGER NOT NULL,
+    comment        VARCHAR NOT NULL,
+    author_name    VARCHAR NOT NULL,
+    email_hash     VARCHAR,
+    lang           VARCHAR,
+    ts             TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status         VARCHAR DEFAULT 'pending',
+    moderated_at   TIMESTAMP,
+    moderator_note VARCHAR,
+    deletion_requested BOOLEAN DEFAULT FALSE,
+    ip_hash        VARCHAR
+);
+CREATE INDEX IF NOT EXISTS reviews_route_idx ON reviews(route_slug, status);
+CREATE INDEX IF NOT EXISTS reviews_email_idx ON reviews(email_hash);
+CREATE INDEX IF NOT EXISTS reviews_status_idx ON reviews(status, ts);
 """
 
 
@@ -119,3 +139,146 @@ def query(sql: str, params: list | None = None) -> list[dict]:
         logger.error("analytics_db query failed: %s | %s", exc, sql)
         _local.conn = None
         return []
+
+
+# ── reviews helpers ─────────────────────────────────────────────────────
+
+
+def hash_email(email: str) -> str:
+    """sha256 over a stable lowercased email, salted the same way as IPs.
+    Keeps plaintext out of the DB entirely while supporting GDPR match-by-email
+    (user re-enters their address at deletion time)."""
+    salt = current_app.config.get('IP_HASH_SALT', '') or 'dev-only-rotate-me'
+    normalized = (email or '').strip().lower()
+    return hashlib.sha256((salt + '|email|' + normalized).encode('utf-8')).hexdigest()
+
+
+def insert_review(
+    *,
+    route_slug: str,
+    rating: int,
+    comment: str,
+    author_name: str,
+    email: str,
+    lang: str,
+    ip: str,
+    status: str = 'pending',
+) -> int | None:
+    try:
+        conn = _get_conn()
+        res = conn.execute(
+            "INSERT INTO reviews (route_slug, rating, comment, author_name, "
+            "email_hash, lang, status, ip_hash) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id",
+            [
+                (route_slug or '')[:200],
+                max(1, min(5, int(rating))),
+                (comment or '').strip()[:500],
+                (author_name or '').strip()[:40],
+                hash_email(email) if email else None,
+                (lang or 'sr')[:5],
+                status if status in ('pending', 'approved') else 'pending',
+                hash_ip(ip),
+            ],
+        )
+        row = res.fetchone()
+        return int(row[0]) if row else None
+    except duckdb.Error as exc:
+        logger.error("insert_review failed: %s", exc)
+        _local.conn = None
+        return None
+
+
+def is_trusted_author(email: str) -> bool:
+    """True after the author already has 3+ approved reviews. Callers should
+    still run anti-spam checks — this only decides default status."""
+    if not email:
+        return False
+    try:
+        conn = _get_conn()
+        row = conn.execute(
+            "SELECT COUNT(*) FROM reviews WHERE email_hash = ? AND status = 'approved'",
+            [hash_email(email)],
+        ).fetchone()
+        return bool(row and row[0] >= 3)
+    except duckdb.Error as exc:
+        logger.error("is_trusted_author failed: %s", exc)
+        return False
+
+
+def approved_reviews(route_slug: str, limit: int = 50) -> list[dict]:
+    return query(
+        "SELECT id, rating, comment, author_name, lang, ts "
+        "FROM reviews WHERE route_slug = ? AND status = 'approved' "
+        "ORDER BY ts DESC LIMIT ?",
+        [route_slug, limit],
+    )
+
+
+def aggregate_rating(route_slug: str) -> dict:
+    rows = query(
+        "SELECT COUNT(*) AS n, AVG(rating) AS avg_rating "
+        "FROM reviews WHERE route_slug = ? AND status = 'approved'",
+        [route_slug],
+    )
+    if not rows or not rows[0]['n']:
+        return {'n': 0, 'avg': None}
+    return {'n': int(rows[0]['n']), 'avg': round(float(rows[0]['avg_rating']), 1)}
+
+
+def pending_reviews(limit: int = 100) -> list[dict]:
+    return query(
+        "SELECT id, route_slug, rating, comment, author_name, lang, ts, "
+        "       deletion_requested, email_hash "
+        "FROM reviews WHERE status = 'pending' OR deletion_requested = TRUE "
+        "ORDER BY deletion_requested DESC, ts ASC LIMIT ?",
+        [limit],
+    )
+
+
+def set_review_status(review_id: int, status: str, note: str = '') -> bool:
+    if status not in ('approved', 'rejected', 'deleted'):
+        return False
+    try:
+        conn = _get_conn()
+        if status == 'deleted':
+            # Soft delete: wipe PII so the row stays for audit but can't
+            # identify the author anymore.
+            conn.execute(
+                "UPDATE reviews SET status='deleted', moderated_at=CURRENT_TIMESTAMP, "
+                "moderator_note=?, author_name='[deleted]', comment='[deleted]', "
+                "email_hash=NULL, deletion_requested=FALSE "
+                "WHERE id = ?",
+                [note[:200], review_id],
+            )
+        else:
+            conn.execute(
+                "UPDATE reviews SET status=?, moderated_at=CURRENT_TIMESTAMP, "
+                "moderator_note=? WHERE id = ?",
+                [status, note[:200], review_id],
+            )
+        return True
+    except duckdb.Error as exc:
+        logger.error("set_review_status failed: %s", exc)
+        _local.conn = None
+        return False
+
+
+def request_review_deletion(review_id: int, email: str) -> bool:
+    """Mark a review for admin-confirmed deletion, if the email hash matches.
+    Prevents Alice-deleting-Bob's-review by requiring the requester prove
+    ownership via the email they originally submitted with."""
+    if not email:
+        return False
+    try:
+        conn = _get_conn()
+        res = conn.execute(
+            "UPDATE reviews SET deletion_requested = TRUE "
+            "WHERE id = ? AND email_hash = ? AND status != 'deleted' "
+            "RETURNING id",
+            [review_id, hash_email(email)],
+        ).fetchone()
+        return res is not None
+    except duckdb.Error as exc:
+        logger.error("request_review_deletion failed: %s", exc)
+        return False

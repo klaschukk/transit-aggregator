@@ -115,6 +115,12 @@ def create_app(config_name: str | None = None) -> Flask:
                 from_slug, to_slug, from_city, to_city, utm_medium, ab_choice=ab,
             )
 
+        # Review-form anti-spam timestamp — embedded as hidden field so the
+        # submit handler can check the user read the form for >3s before
+        # sending. Computed once per request.
+        import time as _time
+        review_loaded_at = f'{_time.time():.3f}'
+
         return {
             '_': _,
             'lang': lang,
@@ -127,6 +133,7 @@ def create_app(config_name: str | None = None) -> Flask:
             'asset_version': _ASSET_VERSION,
             'current_year': _dt.utcnow().year,
             'affiliate_offers': affiliate_offers,
+            '_review_loaded_at': review_loaded_at,
         }
 
     # Register blueprints

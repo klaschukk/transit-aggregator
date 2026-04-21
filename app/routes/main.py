@@ -1,3 +1,5 @@
+import re
+import time
 from datetime import datetime
 
 from flask import Blueprint, render_template, request, make_response, jsonify, current_app
@@ -6,6 +8,70 @@ from app.db import query, cached_query, cached_query_one, db_ready
 from app.extensions import limiter, csrf
 
 main_bp = Blueprint('main', __name__)
+
+
+# Minimal profanity list (sr / en / ru). Intentionally short — false-positive
+# rate on a free-text review form is worse than letting the occasional slur
+# through to the moderation queue.
+_PROFANITY = (
+    'kurac', 'jebi', 'jeba', 'pizda', 'picka', 'govno',
+    'fuck', 'shit', 'bitch', 'asshole',
+    'хуй', 'пизд', 'бляд', 'сука',
+)
+
+# Allow prevozni.com links in comments; strip all other URLs.
+_URL_RE = re.compile(r'\bhttps?://\S+', re.IGNORECASE)
+_EMAIL_RE = re.compile(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+_SLUG_RE = re.compile(r'^[a-z0-9][a-z0-9\-]{1,199}$')
+
+
+def _validate_review(form: dict) -> tuple[str | None, dict]:
+    """Return (error_key, cleaned_fields). error_key is None on success."""
+    # Honeypot — any content means bot.
+    if (form.get('website') or '').strip():
+        return 'review.error.spam', {}
+
+    # Minimum fill time (defeats the dumbest submit-on-load bots).
+    try:
+        loaded_at = float(form.get('loaded_at') or '0')
+    except ValueError:
+        loaded_at = 0.0
+    if loaded_at and time.time() - loaded_at < 3.0:
+        return 'review.error.too_fast', {}
+
+    try:
+        rating = int(form.get('rating') or '0')
+    except (ValueError, TypeError):
+        rating = 0
+    if not 1 <= rating <= 5:
+        return 'review.error.rating', {}
+
+    comment = (form.get('comment') or '').strip()
+    if not 50 <= len(comment) <= 500:
+        return 'review.error.comment_length', {}
+
+    # Strip non-prevozni URLs; if stripping is needed, reject so the
+    # author knows their link was dropped rather than silently mangling.
+    for m in _URL_RE.finditer(comment):
+        host = m.group(0).split('/', 3)[2].lower() if '/' in m.group(0)[8:] else ''
+        if 'prevozni.com' not in host:
+            return 'review.error.no_urls', {}
+
+    lower = comment.lower()
+    if any(w in lower for w in _PROFANITY):
+        return 'review.error.profanity', {}
+
+    name = (form.get('name') or '').strip()
+    if not 2 <= len(name) <= 40:
+        return 'review.error.name_length', {}
+
+    email = (form.get('email') or '').strip()[:100]
+    if email and not _EMAIL_RE.match(email):
+        return 'review.error.email_invalid', {}
+
+    return None, {
+        'rating': rating, 'comment': comment, 'name': name, 'email': email,
+    }
 
 
 @main_bp.route('/')
@@ -122,6 +188,101 @@ def search():
                            to_city=to_city, datum=date,
                            min_price=min_price,
                            popular_routes=popular_routes)
+
+
+@main_bp.route('/api/review/<route_slug>', methods=['POST'])
+@limiter.limit("3 per hour")
+def api_review_submit(route_slug):
+    """Submit a user review for a route. CSRF-protected (form POST, not JSON).
+    Goes to moderation queue by default; trusted authors auto-approve."""
+    from app import analytics_db
+    from app.extensions import _client_ip
+    from app.notifier import notify_admin
+    from flask import g
+
+    if not _SLUG_RE.match(route_slug or ''):
+        return jsonify(error='bad_route'), 400
+
+    error_key, cleaned = _validate_review(request.form.to_dict())
+    if error_key:
+        return jsonify(error=error_key), 400
+
+    status = 'approved' if analytics_db.is_trusted_author(cleaned['email']) else 'pending'
+
+    review_id = analytics_db.insert_review(
+        route_slug=route_slug,
+        rating=cleaned['rating'],
+        comment=cleaned['comment'],
+        author_name=cleaned['name'],
+        email=cleaned['email'],
+        lang=getattr(g, 'lang', 'sr'),
+        ip=_client_ip(),
+        status=status,
+    )
+    if review_id is None:
+        return jsonify(error='db_error'), 500
+
+    if status == 'pending':
+        notify_admin(
+            subject='Nova recenzija čeka moderaciju',
+            body=(
+                f'Route: {route_slug}\nRating: {cleaned["rating"]}★\n'
+                f'Author: {cleaned["name"]}\n\n'
+                f'{cleaned["comment"]}\n\n'
+                f'Approve: /admin/reviews/{review_id}/approve'
+            ),
+        )
+
+    return jsonify(
+        ok=True, status=status, review_id=review_id,
+        message='review.ok.auto' if status == 'approved' else 'review.ok.pending',
+    ), 202
+
+
+@main_bp.route('/api/reviews/<route_slug>', methods=['GET'])
+def api_reviews_list(route_slug):
+    """Public JSON feed of approved reviews for a route, 5-min cached."""
+    from app import analytics_db
+
+    if not _SLUG_RE.match(route_slug or ''):
+        return jsonify(error='bad_route'), 400
+
+    items = []
+    for r in analytics_db.approved_reviews(route_slug):
+        items.append({
+            'id': r['id'], 'rating': r['rating'],
+            'comment': r['comment'], 'author_name': r['author_name'],
+            'lang': r['lang'], 'ts': r['ts'].isoformat() if r.get('ts') else None,
+        })
+    agg = analytics_db.aggregate_rating(route_slug)
+    resp = jsonify(aggregate=agg, reviews=items)
+    resp.headers['Cache-Control'] = 'public, max-age=300'
+    return resp
+
+
+@main_bp.route('/api/review/<int:review_id>/delete-request', methods=['POST'])
+@limiter.limit("5 per hour")
+@csrf.exempt
+def api_review_delete_request(review_id):
+    """Mark a review for admin-confirmed deletion. Requester proves ownership
+    by re-entering the email they submitted with. We return `ok: true` on
+    mismatch too — an attacker can't enumerate review ownership."""
+    from app import analytics_db
+    from app.notifier import notify_admin
+
+    data = request.get_json(silent=True) or request.form.to_dict() or {}
+    email = (data.get('email') or '').strip()
+    if not _EMAIL_RE.match(email):
+        return jsonify(ok=False), 400
+
+    ok = analytics_db.request_review_deletion(review_id, email)
+    if ok:
+        notify_admin(
+            subject='GDPR: zahtev za brisanje recenzije',
+            body=f'Review id {review_id} marked deletion_requested=True.\n'
+                 f'Confirm in /admin/reviews (Delete button).',
+        )
+    return jsonify(ok=True), 200
 
 
 @main_bp.route('/api/ba-click', methods=['POST'])

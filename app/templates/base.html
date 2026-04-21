@@ -251,6 +251,108 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
+/* ── Reviews: star widget + AJAX submit + GDPR delete request ──────────
+   One delegated script powers every review form on the site. Early-exit
+   when no reviews section is present so other pages pay zero cost. */
+(function(){
+  var widgets = document.querySelectorAll('.rating-widget');
+  var forms   = document.querySelectorAll('form.review-form');
+  var delBtns = document.querySelectorAll('.js-review-del-btn');
+  if (!widgets.length && !forms.length && !delBtns.length) return;
+
+  /* ── Star widget: click or keyboard navigation to set rating ── */
+  widgets.forEach(function(w){
+    var stars = w.querySelectorAll('.rating-widget__star');
+    var hidden = w.querySelector('input[name="rating"]');
+    function paint(v){
+      stars.forEach(function(s, i){
+        var on = (i + 1) <= v;
+        s.classList.toggle('rating-widget__star--on', on);
+        s.setAttribute('aria-checked', on && (i + 1) === v ? 'true' : 'false');
+      });
+      if (hidden) hidden.value = v;
+    }
+    stars.forEach(function(s){
+      s.addEventListener('click', function(){ paint(parseInt(s.dataset.v, 10) || 0); });
+      s.addEventListener('keydown', function(ev){
+        if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') {
+          ev.preventDefault();
+          var cur = parseInt(hidden.value, 10) || 0;
+          paint(Math.max(1, Math.min(5, cur + (ev.key === 'ArrowRight' ? 1 : -1))));
+          stars[Math.max(0, (parseInt(hidden.value, 10) || 1) - 1)].focus();
+        }
+      });
+    });
+  });
+
+  /* ── Form submit via fetch so we can show inline status without reloading ── */
+  forms.forEach(function(form){
+    form.addEventListener('submit', function(ev){
+      ev.preventDefault();
+      var status = form.querySelector('.review-form__status');
+      var data = new FormData(form);
+      if (status) { status.hidden = false; status.textContent = '…'; }
+      fetch(form.action, {
+        method: 'POST', body: data, credentials: 'same-origin',
+        headers: {'Accept': 'application/json'},
+      }).then(function(r){
+        return r.json().then(function(j){ return {ok: r.ok, status: r.status, body: j}; });
+      }).then(function(resp){
+        if (resp.ok) {
+          var key = resp.body && resp.body.message ? resp.body.message : 'review.ok.pending';
+          status.textContent = (key === 'review.ok.auto'
+            ? {{ _('review.ok.auto')|tojson }}
+            : {{ _('review.ok.pending')|tojson }});
+          status.className = 'review-form__status review-form__status--ok';
+          form.reset();
+          form.querySelectorAll('.rating-widget__star--on').forEach(function(s){
+            s.classList.remove('rating-widget__star--on');
+            s.setAttribute('aria-checked', 'false');
+          });
+        } else if (resp.status === 429) {
+          status.textContent = {{ _('review.err.rate_limit')|tojson }};
+          status.className = 'review-form__status review-form__status--err';
+        } else {
+          var err = resp.body && resp.body.error ? resp.body.error.replace('.', '_err_') : '';
+          var map = {
+            'review_err_rating':         {{ _('review.err.rating')|tojson }},
+            'review_err_comment_length': {{ _('review.err.comment_length')|tojson }},
+            'review_err_name_length':    {{ _('review.err.name_length')|tojson }},
+            'review_err_email_invalid':  {{ _('review.err.email_invalid')|tojson }},
+            'review_err_no_urls':        {{ _('review.err.no_urls')|tojson }},
+            'review_err_profanity':      {{ _('review.err.profanity')|tojson }},
+            'review_err_spam':           {{ _('review.err.spam')|tojson }},
+            'review_err_too_fast':       {{ _('review.err.too_fast')|tojson }},
+          };
+          status.textContent = map[err] || {{ _('review.err.generic')|tojson }};
+          status.className = 'review-form__status review-form__status--err';
+        }
+      }).catch(function(){
+        status.textContent = {{ _('review.err.generic')|tojson }};
+        status.className = 'review-form__status review-form__status--err';
+      });
+    });
+  });
+
+  /* ── GDPR: per-review delete request. Prompt for email, hash-match
+       server-side, mark for admin review. ── */
+  document.addEventListener('click', function(ev){
+    var btn = ev.target.closest('.js-review-del-btn');
+    if (!btn) return;
+    var id = btn.dataset.reviewId;
+    var email = window.prompt({{ _('review.delete.prompt')|tojson }});
+    if (!email) return;
+    fetch('/api/review/' + id + '/delete-request', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email: email}), credentials: 'same-origin',
+    }).then(function(){
+      window.alert({{ _('review.delete.sent')|tojson }});
+    }).catch(function(){});
+  });
+})();
+</script>
+
+<script>
 /* Mobile nav toggle */
 (function() {
   var btn = document.getElementById('navToggle');

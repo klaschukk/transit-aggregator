@@ -101,12 +101,17 @@ def route_detail(slug: str):
         LIMIT 4
     """, [route['from_city'], slug], ttl=3600)
 
+    from app import analytics_db
+    reviews_list = analytics_db.approved_reviews(slug)
+    reviews_agg = analytics_db.aggregate_rating(slug)
+
     return render_template('route_detail.html', route=route, trips=trips,
                            days=days, selected_day=selected_day,
                            similar_routes=similar_routes,
                            operators_on_route=operators_on_route,
                            price_min=price_min, price_max=price_max,
-                           reverse_slug=reverse_slug)
+                           reverse_slug=reverse_slug,
+                           reviews=reviews_list, reviews_agg=reviews_agg)
 
 
 @intercity_bp.route('/voznja/<from_city>-do-<to_city>/')
@@ -201,9 +206,18 @@ def city_pair(from_city: str, to_city: str):
             LIMIT 5
         """, [route['to_city'], route['from_city']], ttl=3600)
 
+    # Reviews aggregate across both /voznja/ and /rute/ via the canonical
+    # route slug — UGC is the property of the pair, not the URL.
+    from app import analytics_db
+    canonical_slug = route['slug'] if route and route.get('slug') else f'{from_city}-do-{to_city}'
+    reviews_list = analytics_db.approved_reviews(canonical_slug)
+    reviews_agg = analytics_db.aggregate_rating(canonical_slug)
+
     return render_template('city_pair.html',
                            route=route, trips=trips, route_info=route_info,
                            related_pairs=related_pairs,
                            onward_pairs=onward_pairs,
                            from_city=from_city.replace('-', ' ').title(),
-                           to_city=to_city.replace('-', ' ').title())
+                           to_city=to_city.replace('-', ' ').title(),
+                           reviews=reviews_list, reviews_agg=reviews_agg,
+                           review_route_slug=canonical_slug)
