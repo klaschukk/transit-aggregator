@@ -7,9 +7,13 @@ deployments.
 import hmac
 from functools import wraps
 
-from flask import Blueprint, render_template, current_app, Response, request
+from flask import (
+    Blueprint, render_template, current_app, Response, request, redirect,
+    url_for, flash,
+)
 
 from app import analytics_db
+from app.extensions import csrf
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -111,3 +115,69 @@ def _total_clicks_since(days: int) -> int:
         f"SELECT COUNT(*) AS c FROM ba_clicks WHERE ts >= CURRENT_TIMESTAMP - INTERVAL '{days} days'"
     )
     return rows[0]['c'] if rows else 0
+
+
+# ── Reviews moderation ────────────────────────────────────────────────
+
+
+@admin_bp.route('/reviews')
+@_basic_auth_required
+def reviews():
+    """Moderation queue: pending reviews + deletion requests.
+
+    Approved/rejected history is not shown by default to keep the queue
+    visually tight — add `?all=1` to see the full log.
+    """
+    show_all = request.args.get('all') == '1'
+    if show_all:
+        items = analytics_db.query(
+            "SELECT id, route_slug, rating, comment, author_name, status, "
+            "       lang, ts, deletion_requested, email_hash, moderator_note "
+            "FROM reviews ORDER BY ts DESC LIMIT 200"
+        )
+    else:
+        items = analytics_db.pending_reviews(limit=200)
+
+    stats = analytics_db.query(
+        "SELECT status, COUNT(*) AS c FROM reviews GROUP BY status"
+    )
+    counts = {row['status']: row['c'] for row in stats}
+
+    return render_template(
+        'admin/reviews.html',
+        items=items, counts=counts, show_all=show_all,
+    )
+
+
+@admin_bp.route('/reviews/<int:review_id>/<action>', methods=['POST'])
+@_basic_auth_required
+@csrf.exempt
+def review_action(review_id: int, action: str):
+    """Approve / reject / delete a review. All three are POST-only so a
+    stray GET crawl can't mutate state."""
+    if action not in ('approve', 'reject', 'delete'):
+        return Response('bad action', status=400)
+
+    note = (request.form.get('note') or '')[:200]
+    status_map = {'approve': 'approved', 'reject': 'rejected', 'delete': 'deleted'}
+    new_status = status_map[action]
+
+    ok = analytics_db.set_review_status(review_id, new_status, note)
+    if not ok:
+        return Response('update failed', status=500)
+
+    # "Approved" notifications are best-effort — we don't retain plaintext
+    # emails, so this is a no-op in the current infra. Kept as a stub so
+    # the callsite exists when Mailgun lands.
+    if new_status == 'approved':
+        from app.notifier import notify_author
+        # We no longer have the plaintext email at moderation time, so we
+        # log a stub record. Admin UI can show "approved" manually.
+        notify_author(
+            email='',
+            subject='Your review is live on Prevozni.com',
+            body=f'Review id {review_id} was approved. '
+                 f'Once SMTP is configured this will become a real email.',
+        )
+
+    return redirect(url_for('admin.reviews'))

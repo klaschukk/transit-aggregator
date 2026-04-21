@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Reviews moderation — Prevozni admin{% endblock %}
+{% block meta_description %}Internal admin page (noindex).{% endblock %}
+
+{% block head_extra %}
+<meta name="robots" content="noindex, nofollow, noarchive">
+<style>
+.adm{max-width:1100px;margin:0 auto;padding:24px 16px;}
+.adm h1{font-size:24px;margin:0 0 10px;}
+.adm .sub{color:#64748b;margin-bottom:20px;font-size:13px;}
+.adm .kpis{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+.adm .kpi{padding:10px 14px;border-radius:8px;background:#f1f5f9;font-size:13px;}
+.adm .kpi strong{color:#0d9488;font-size:18px;margin-right:6px;}
+.adm .tabs{margin-bottom:16px;}
+.adm .tabs a{display:inline-block;padding:6px 12px;border:1px solid #cbd5e1;border-radius:6px;margin-right:6px;font-size:13px;text-decoration:none;color:#334155;}
+.adm .tabs a.on{background:#0d9488;color:#fff;border-color:#0d9488;}
+.adm .card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin-bottom:12px;}
+.adm .card--deletion{border-color:#ef4444;background:#fef2f2;}
+.adm .card--approved{border-color:#10b981;}
+.adm .card--rejected{border-color:#94a3b8;opacity:.7;}
+.adm .hdr{display:flex;gap:12px;align-items:center;font-size:13px;color:#475569;flex-wrap:wrap;}
+.adm .stars{color:#f59e0b;letter-spacing:2px;}
+.adm .slug a{color:#0d9488;text-decoration:none;}
+.adm .comment{margin:10px 0;padding:10px 12px;background:#f8fafc;border-radius:6px;font-size:14px;line-height:1.5;white-space:pre-wrap;}
+.adm .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.03em;}
+.adm .badge--pending{background:#fef3c7;color:#92400e;}
+.adm .badge--approved{background:#d1fae5;color:#065f46;}
+.adm .badge--rejected{background:#e2e8f0;color:#475569;}
+.adm .badge--deleted{background:#fee2e2;color:#991b1b;}
+.adm .badge--gdpr{background:#ef4444;color:#fff;}
+.adm .actions{display:flex;gap:8px;margin-top:10px;}
+.adm .actions button{padding:6px 12px;font-size:13px;border:0;border-radius:6px;cursor:pointer;font-weight:500;}
+.adm .btn-approve{background:#10b981;color:#fff;}
+.adm .btn-reject{background:#f1f5f9;color:#334155;}
+.adm .btn-delete{background:#ef4444;color:#fff;}
+.adm .actions button:hover{filter:brightness(1.1);}
+.adm .empty{padding:40px;text-align:center;color:#94a3b8;}
+.adm .note{font-size:12px;color:#64748b;font-style:italic;margin-top:6px;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="adm">
+  <h1>Reviews moderation</h1>
+  <p class="sub">User-generated reviews awaiting approval. Approve to publish
+    on <code>route_detail</code>; reject for spam; delete soft-wipes PII.</p>
+
+  <div class="kpis">
+    <div class="kpi"><strong>{{ counts.get('pending', 0) }}</strong>pending</div>
+    <div class="kpi"><strong>{{ counts.get('approved', 0) }}</strong>approved</div>
+    <div class="kpi"><strong>{{ counts.get('rejected', 0) }}</strong>rejected</div>
+    <div class="kpi"><strong>{{ counts.get('deleted', 0) }}</strong>deleted</div>
+  </div>
+
+  <div class="tabs">
+    <a href="/admin/reviews" class="{% if not show_all %}on{% endif %}">Queue</a>
+    <a href="/admin/reviews?all=1" class="{% if show_all %}on{% endif %}">All (last 200)</a>
+  </div>
+
+  {% if items %}
+    {% for r in items %}
+    <div class="card card--{{ r.status|default('pending') }}{% if r.deletion_requested %} card--deletion{% endif %}">
+      <div class="hdr">
+        <span class="stars">{% for _ in range(r.rating) %}★{% endfor %}{% for _ in range(5 - r.rating) %}☆{% endfor %}</span>
+        <span>{{ r.author_name }}</span>
+        <span>·</span>
+        <span class="slug">
+          <a href="/rute/{{ r.route_slug }}/" target="_blank" rel="noopener">{{ r.route_slug }}</a>
+        </span>
+        <span>·</span>
+        <span>{{ r.ts.strftime('%Y-%m-%d %H:%M') if r.ts else '' }}</span>
+        <span>·</span>
+        <span>lang={{ r.lang or '?' }}</span>
+        {% if r.status %}<span class="badge badge--{{ r.status }}">{{ r.status }}</span>{% endif %}
+        {% if r.deletion_requested %}<span class="badge badge--gdpr">GDPR deletion requested</span>{% endif %}
+      </div>
+      <div class="comment">{{ r.comment }}</div>
+      {% if r.moderator_note %}
+      <div class="note">Note: {{ r.moderator_note }}</div>
+      {% endif %}
+
+      <div class="actions">
+        {% if r.status == 'pending' and not r.deletion_requested %}
+        <form method="post" action="/admin/reviews/{{ r.id }}/approve" style="display:inline;">
+          <button class="btn-approve" type="submit">Approve</button>
+        </form>
+        <form method="post" action="/admin/reviews/{{ r.id }}/reject" style="display:inline;">
+          <button class="btn-reject" type="submit">Reject</button>
+        </form>
+        {% endif %}
+        {% if r.deletion_requested or r.status == 'approved' %}
+        <form method="post" action="/admin/reviews/{{ r.id }}/delete" style="display:inline;"
+              onsubmit="return confirm('Soft-delete review {{ r.id }} (PII will be wiped)?');">
+          <button class="btn-delete" type="submit">
+            {% if r.deletion_requested %}Confirm GDPR delete{% else %}Delete{% endif %}
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty">
+      {% if show_all %}No reviews yet.{% else %}Queue is empty — no pending items.{% endif %}
+    </div>
+  {% endif %}
+
+  <p style="font-size:12px;color:#94a3b8;margin-top:24px;">
+    Rejected reviews stay in <code>reviews</code> for audit; deleted ones are
+    soft-deleted (PII wiped). Trusted authors (3+ approved via same email)
+    auto-approve on submit.
+  </p>
+</div>
+{% endblock %}
