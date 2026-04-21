@@ -152,6 +152,35 @@ def test_trusted_author_auto_approves_after_three(rv_app):
         assert analytics_db.is_trusted_author('somebody-else@example.com') is False
 
 
+def test_trusted_author_respects_feature_flag(rv_client, rv_app):
+    """Trusted email only auto-approves when REVIEWS_AUTO_APPROVE_TRUSTED=true.
+    Default (off) runs 100% manual for first month as specced."""
+    from app import analytics_db
+    email = 'flag-test@example.com'
+    # Pre-seed 3 approved reviews so this email qualifies as trusted.
+    with rv_app.app_context():
+        for _ in range(3):
+            analytics_db.insert_review(
+                route_slug='beograd-split', rating=5,
+                comment='Solidno putovanje, par stvari moglo bolje ali nije loše, preporučljivo.',
+                author_name='Flag', email=email, lang='sr', ip='9.9.9.9',
+                status='approved',
+            )
+
+    # Flag off → always pending, even for trusted.
+    rv_app.config['REVIEWS_AUTO_APPROVE_TRUSTED'] = False
+    r = rv_client.post('/api/review/beograd-split', data=_ok_payload(email=email, comment='Još jedna recenzija iste osobe, trebalo bi i dalje biti pending jer je flag off.'))
+    assert r.status_code == 202 and r.get_json()['status'] == 'pending'
+
+    # Flag on → trusted gets auto-approved.
+    rv_app.config['REVIEWS_AUTO_APPROVE_TRUSTED'] = True
+    r = rv_client.post('/api/review/beograd-split', data=_ok_payload(email=email, comment='Treća recenzija nakon uključivanja flaga, trebalo bi biti approved odmah.'))
+    assert r.status_code == 202 and r.get_json()['status'] == 'approved'
+
+    # Cleanup so subsequent tests run at default-off.
+    rv_app.config['REVIEWS_AUTO_APPROVE_TRUSTED'] = False
+
+
 # ── GET /api/reviews/<slug> ──
 
 

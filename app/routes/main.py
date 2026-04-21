@@ -207,7 +207,13 @@ def api_review_submit(route_slug):
     if error_key:
         return jsonify(error=error_key), 400
 
-    status = 'approved' if analytics_db.is_trusted_author(cleaned['email']) else 'pending'
+    # Trusted auto-approve is opt-in — see config REVIEWS_AUTO_APPROVE_TRUSTED.
+    # Default 'false' matches the 100%-manual spec for the first month.
+    auto_approve = (
+        current_app.config.get('REVIEWS_AUTO_APPROVE_TRUSTED')
+        and analytics_db.is_trusted_author(cleaned['email'])
+    )
+    status = 'approved' if auto_approve else 'pending'
 
     review_id = analytics_db.insert_review(
         route_slug=route_slug,

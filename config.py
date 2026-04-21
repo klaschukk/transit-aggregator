@@ -27,6 +27,13 @@ class Config:
     ADMIN_USER = os.environ.get('ADMIN_USER', '')
     ADMIN_PASS = os.environ.get('ADMIN_PASS', '')
 
+    # Reviews: gate trusted-author auto-approve behind an opt-in flag so the
+    # first month of production runs 100% manual moderation (spec: quality >
+    # velocity). Flip to 'true' after the review volume warrants it.
+    REVIEWS_AUTO_APPROVE_TRUSTED = os.environ.get(
+        'REVIEWS_AUTO_APPROVE_TRUSTED', 'false'
+    ).lower() == 'true'
+
 
 class ProductionConfig(Config):
     DEBUG = False
