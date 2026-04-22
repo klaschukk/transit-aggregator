@@ -46,18 +46,20 @@
       <div class="contact-form__group">
         <label class="contact-form__label" for="contactName">{{ _('contact.name') }}</label>
         <input class="contact-form__input" id="contactName" name="ime" type="text"
-               placeholder="{{ _('contact.name_ph') }}" maxlength="100" required>
+               placeholder="{{ _('contact.name_ph') }}" maxlength="100" required
+               autocomplete="name" inputmode="text" enterkeyhint="next">
       </div>
       <div class="contact-form__group">
         <label class="contact-form__label" for="contactEmail">{{ _('contact.email') }}</label>
         <input class="contact-form__input" id="contactEmail" name="email" type="email"
-               placeholder="you@email.com" maxlength="100" required>
+               placeholder="you@email.com" maxlength="100" required
+               autocomplete="email" inputmode="email" enterkeyhint="next">
       </div>
       <div class="contact-form__group">
         <label class="contact-form__label" for="contactMessage">{{ _('contact.message') }}</label>
         <textarea class="contact-form__input contact-form__textarea" id="contactMessage"
                   name="poruka" placeholder="{{ _('contact.message_ph') }}" rows="5"
-                  maxlength="500" required></textarea>
+                  maxlength="500" required enterkeyhint="send"></textarea>
       </div>
     </div>
     <button type="submit" class="btn btn--primary contact-form__submit">

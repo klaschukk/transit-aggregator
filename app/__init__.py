@@ -183,13 +183,16 @@ def create_app(config_name: str | None = None) -> Flask:
     def ratelimit_handler(e):
         return jsonify(error="rate_limit_exceeded", message=str(e.description)), 429
 
-    # Cache headers
+    # Cache headers. HTML uses `no-cache` (revalidate each hit) instead of
+    # `no-store` — the latter blocks bfcache in all evergreen browsers and
+    # Lighthouse flags it as a mobile UX regression. no-cache still forces
+    # a round-trip for freshness but lets Back/Forward restore instantly.
     @app.after_request
     def add_cache_headers(response):
         if request.path.startswith('/static/'):
             response.headers['Cache-Control'] = 'public, max-age=86400'
         elif 'text/html' in (response.content_type or ''):
-            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+            response.headers['Cache-Control'] = 'no-cache, must-revalidate'
         return response
 
     # Security headers.

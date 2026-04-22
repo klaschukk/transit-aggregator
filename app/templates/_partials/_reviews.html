@@ -80,17 +80,20 @@
       <label class="review-form__row">
         <span class="review-form__label">{{ _('review.comment_label') }}</span>
         <textarea name="comment" rows="4" maxlength="500" minlength="50"
-                  required placeholder="{{ _('review.comment_ph') }}"></textarea>
+                  required enterkeyhint="send"
+                  placeholder="{{ _('review.comment_ph') }}"></textarea>
       </label>
 
       <div class="review-form__fields">
         <label class="review-form__row">
           <span class="review-form__label">{{ _('review.name_label') }}</span>
-          <input type="text" name="name" minlength="2" maxlength="40" required autocomplete="name">
+          <input type="text" name="name" minlength="2" maxlength="40" required
+                 autocomplete="name" inputmode="text" enterkeyhint="next">
         </label>
         <label class="review-form__row">
           <span class="review-form__label">{{ _('review.email_label') }}</span>
-          <input type="email" name="email" maxlength="100" autocomplete="email">
+          <input type="email" name="email" maxlength="100"
+                 autocomplete="email" inputmode="email" enterkeyhint="send">
         </label>
       </div>
 

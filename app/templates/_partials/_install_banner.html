@@ -1,0 +1,33 @@
+{# PWA install banner — starts hidden. install-promo.js decides when to
+   flip data-visible, and whether to show the generic Android prompt
+   or the iOS "Add to Home Screen" modal. #}
+<aside class="install-banner" id="installBanner" role="region"
+       aria-label="{{ _('pwa.install_title') }}" data-visible="false">
+  <div class="install-banner__icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="36" height="36">
+      <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/>
+    </svg>
+  </div>
+  <div class="install-banner__body">
+    <div class="install-banner__title">{{ _('pwa.install_title') }}</div>
+    <div class="install-banner__sub">{{ _('pwa.install_sub') }}</div>
+  </div>
+  <div class="install-banner__actions">
+    <button type="button" class="install-banner__btn install-banner__btn--ghost"
+            id="installDismiss">{{ _('pwa.dismiss') }}</button>
+    <button type="button" class="install-banner__btn" id="installAccept">
+      {{ _('pwa.install_cta') }}
+    </button>
+  </div>
+</aside>
+
+<div class="install-modal" id="installModal" role="dialog" aria-modal="true"
+     aria-labelledby="installModalTitle" hidden>
+  <div class="install-modal__sheet">
+    <h2 class="install-modal__title" id="installModalTitle">{{ _('pwa.install_ios_title') }}</h2>
+    <p class="install-modal__body">{{ _('pwa.install_ios_hint') }}</p>
+    <button type="button" class="install-modal__close" id="installModalClose">
+      {{ _('pwa.install_ios_close') }}
+    </button>
+  </div>
+</div>

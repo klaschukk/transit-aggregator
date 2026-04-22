@@ -68,7 +68,11 @@
 
 {% include '_partials/_footer.html' %}
 
+{% include '_partials/_install_banner.html' %}
+
 {% block scripts %}{% endblock %}
+
+<script defer src="{{ url_for('static', filename='js/install-promo.js') }}?v={{ asset_version }}"></script>
 
 <script>
 /* Currency switcher — toggles <html class="ccy-eur"> and persists in cookie.

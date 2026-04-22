@@ -9,6 +9,7 @@
         <label class="journey-form__label" for="fromCity">OD</label>
         <input class="journey-form__input js-city-input" id="fromCity" name="od" type="text"
                value="{{ from_city }}" placeholder="{{ _t.get('from', 'Odakle?') }}" autocomplete="off"
+               inputmode="text" enterkeyhint="next"
                role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="fromDropdown">
         <div class="autocomplete" id="fromDropdown" role="listbox"></div>
       </div>
@@ -24,6 +25,7 @@
         <label class="journey-form__label" for="toCity">DO</label>
         <input class="journey-form__input js-city-input" id="toCity" name="do" type="text"
                value="{{ to_city }}" placeholder="{{ _t.get('to', 'Kuda?') }}" autocomplete="off"
+               inputmode="text" enterkeyhint="search"
                role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="toDropdown">
         <div class="autocomplete" id="toDropdown" role="listbox"></div>
       </div>

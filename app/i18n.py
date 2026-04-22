@@ -2940,6 +2940,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Explore city transit',
         'ru': 'Изучите городской транспорт',
     },
+    'stop_prose.heading': {
+        'sr': 'O stajalištu {stop_name}',
+        'en': 'About the {stop_name} stop',
+        'ru': 'Об остановке {stop_name}',
+    },
 
     # ── Reviews / UGC ──
     'review.heading': {
@@ -3065,6 +3070,155 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
     'review.lang_note': {
         'sr': 'Recenzija na srpskom', 'en': 'Review in English', 'ru': 'Отзыв на русском',
+    },
+
+    # ── Newsletter / email subscribe ──
+    'newsletter.title': {
+        'sr': 'Newsletter',
+        'en': 'Newsletter',
+        'ru': 'Рассылка',
+    },
+    'newsletter.subtitle': {
+        'sr': 'Najjeftinije karte i nove rute — jednom nedeljno. Bez spama.',
+        'en': 'Cheapest tickets and new routes, weekly. No spam.',
+        'ru': 'Самые дешёвые билеты и новые маршруты — раз в неделю. Без спама.',
+    },
+    'newsletter.placeholder': {
+        'sr': 'vaš@email.rs',
+        'en': 'your@email.com',
+        'ru': 'ваш@email.ru',
+    },
+    'newsletter.button': {
+        'sr': 'Pretplati se',
+        'en': 'Subscribe',
+        'ru': 'Подписаться',
+    },
+    'newsletter.consent': {
+        'sr': 'Saglasan/a sam sa obradom email adrese prema <a href="{prefix}/privatnost/">Politici privatnosti</a>.',
+        'en': 'I agree to email processing per the <a href="{prefix}/privatnost/">Privacy policy</a>.',
+        'ru': 'Согласен/на с обработкой email согласно <a href="{prefix}/privatnost/">Политике конфиденциальности</a>.',
+    },
+    'newsletter.success_pending': {
+        'sr': 'Proverite email — poslali smo Vam link za potvrdu.',
+        'en': 'Check your inbox — we sent a confirmation link.',
+        'ru': 'Проверьте почту — отправили письмо с подтверждением.',
+    },
+    'newsletter.success_already': {
+        'sr': 'Već ste pretplaćeni — hvala!',
+        'en': "You're already subscribed — thanks!",
+        'ru': 'Вы уже подписаны — спасибо!',
+    },
+    'newsletter.error_email': {
+        'sr': 'Email adresa nije ispravna.',
+        'en': 'Email address is invalid.',
+        'ru': 'Некорректный email.',
+    },
+    'newsletter.error_consent': {
+        'sr': 'Potvrdite saglasnost da biste se pretplatili.',
+        'en': 'Tick the consent box to subscribe.',
+        'ru': 'Отметьте согласие, чтобы подписаться.',
+    },
+    'newsletter.error_generic': {
+        'sr': 'Greška pri slanju. Pokušajte ponovo.',
+        'en': 'Something went wrong. Try again.',
+        'ru': 'Ошибка отправки. Попробуйте ещё раз.',
+    },
+    'newsletter.error_ratelimit': {
+        'sr': 'Previše pokušaja. Pokušajte za sat vremena.',
+        'en': 'Too many attempts. Try again in an hour.',
+        'ru': 'Слишком много попыток. Попробуйте через час.',
+    },
+
+    # ── Price-alert (route-scoped newsletter) ──
+    'price_alert.title': {
+        'sr': 'Obaveštenje o ceni',
+        'en': 'Price alert',
+        'ru': 'Уведомление о цене',
+    },
+    'price_alert.subtitle': {
+        'sr': 'Javljamo kada cena za {pair} padne ili stigne akcija.',
+        'en': "We'll email when {pair} drops in price or goes on sale.",
+        'ru': 'Сообщим, когда цена {pair} упадёт или появится акция.',
+    },
+    'price_alert.button': {
+        'sr': 'Prati cenu',
+        'en': 'Track price',
+        'ru': 'Следить за ценой',
+    },
+    'price_alert.sub_hint': {
+        'sr': 'Jedan email kad najniža cena padne za 10% ili više.',
+        'en': 'One email whenever the cheapest ticket drops 10% or more.',
+        'ru': 'Одно письмо, когда минимальная цена падает на 10% и больше.',
+    },
+    'price_alert.ok_check_inbox': {
+        'sr': 'Proverite email — poslali smo link za potvrdu.',
+        'en': 'Check your inbox — we sent a confirmation link.',
+        'ru': 'Проверьте почту — мы отправили ссылку для подтверждения.',
+    },
+    'price_alert.ok_already': {
+        'sr': 'Već ste pretplaćeni — obaveštavaćemo Vas čim cena padne.',
+        'en': "You're already subscribed — we'll email you on the next drop.",
+        'ru': 'Вы уже подписаны — напишем, как только цена упадёт.',
+    },
+    'price_alert.err': {
+        'sr': 'Nešto je pošlo po zlu. Pokušajte ponovo.',
+        'en': 'Something went wrong. Please try again.',
+        'ru': 'Что-то пошло не так. Попробуйте ещё раз.',
+    },
+    'subscribe.email_placeholder': {
+        'sr': 'Vaš email',
+        'en': 'Your email',
+        'ru': 'Ваш email',
+    },
+    'subscribe.consent_prefix': {
+        'sr': 'Slažem se sa',
+        'en': 'I agree to the',
+        'ru': 'Я согласен с',
+    },
+    'subscribe.consent_link': {
+        'sr': 'politikom privatnosti',
+        'en': 'privacy policy',
+        'ru': 'политикой конфиденциальности',
+    },
+
+    # ── PWA install promo ──
+    'pwa.install_title': {
+        'sr': 'Instalirajte Prevozni',
+        'en': 'Install Prevozni',
+        'ru': 'Установить Prevozni',
+    },
+    'pwa.install_sub': {
+        'sr': 'Brže otvaranje, manje reklama, offline pretraga.',
+        'en': 'Faster launches, less clutter, offline search.',
+        'ru': 'Быстрый запуск, меньше шума, поиск офлайн.',
+    },
+    'pwa.install_cta': {
+        'sr': 'Instaliraj',
+        'en': 'Install',
+        'ru': 'Установить',
+    },
+    'pwa.dismiss': {
+        'sr': 'Ne sada',
+        'en': 'Not now',
+        'ru': 'Не сейчас',
+    },
+    'pwa.install_ios_title': {
+        'sr': 'Dodajte na početni ekran',
+        'en': 'Add to Home Screen',
+        'ru': 'На главный экран',
+    },
+    'pwa.install_ios_hint': {
+        'sr': 'Otvorite stranicu u Safariju, tapnite dugme Podeli, pa '
+              '"Na početni ekran" da instalirate Prevozni kao aplikaciju.',
+        'en': 'Open this page in Safari, tap the Share button, then '
+              'choose "Add to Home Screen" to install Prevozni as an app.',
+        'ru': 'Откройте страницу в Safari, нажмите кнопку «Поделиться» и '
+              'выберите «На экран „Домой"», чтобы установить Prevozni.',
+    },
+    'pwa.install_ios_close': {
+        'sr': 'Zatvori',
+        'en': 'Close',
+        'ru': 'Закрыть',
     },
 }
 

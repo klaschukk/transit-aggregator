@@ -1,3 +1,4 @@
+import threading
 from datetime import datetime
 
 from flask import Blueprint, render_template, abort, request, jsonify, redirect, url_for
@@ -284,9 +285,49 @@ def stop_detail(city: str, stop_slug: str):
     else:
         stop_info['has_gtfs'] = False
 
+    # E-E-A-T prose: rules-based 150–300-word unique block per stop, cached
+    # in-process for 24 h since inputs (lines/nearby/gtfs) only change when
+    # the transit DB rebuilds overnight.
+    from app.content.stop_prose import build_prose
+    from flask import g
+    lang = getattr(g, 'lang', 'sr')
+    lang_prefix = getattr(g, 'lang_prefix', '')
+    prose = _stop_prose_cached(
+        stop_slug=stop['slug'], lang=lang, lang_prefix=lang_prefix,
+        stop=stop, lines=lines_at_stop, nearby=nearby_stops,
+        gtfs=stop_info if stop_info.get('has_gtfs') else None,
+    )
+
     return render_template('stop_detail.html', city=city, stop=stop,
                            departures=departures, lines_at_stop=lines_at_stop,
-                           nearby_stops=nearby_stops, stop_info=stop_info)
+                           nearby_stops=nearby_stops, stop_info=stop_info,
+                           prose=prose)
+
+
+# ── Stop prose cache (in-process, 24 h TTL) ─────────────────────────────
+# Keyed by (slug, lang). Single worker hits ~2K unique stops × 3 langs = 6K
+# entries max. Cheap to recompute but caching saves ~1 ms per request.
+
+_STOP_PROSE_CACHE: dict[tuple[str, str], dict] = {}
+_STOP_PROSE_CACHE_LOCK = threading.Lock()
+_STOP_PROSE_CACHE_TTL = 24 * 3600
+_STOP_PROSE_CACHE_STAMPS: dict[tuple[str, str], float] = {}
+
+
+def _stop_prose_cached(*, stop_slug, lang, lang_prefix, stop, lines, nearby, gtfs):
+    import time as _time
+    from app.content.stop_prose import build_prose
+    key = (stop_slug, lang)
+    now = _time.time()
+    with _STOP_PROSE_CACHE_LOCK:
+        stamp = _STOP_PROSE_CACHE_STAMPS.get(key, 0)
+        if key in _STOP_PROSE_CACHE and now - stamp < _STOP_PROSE_CACHE_TTL:
+            return _STOP_PROSE_CACHE[key]
+    prose = build_prose(stop, lines, nearby, gtfs, lang=lang, lang_prefix=lang_prefix)
+    with _STOP_PROSE_CACHE_LOCK:
+        _STOP_PROSE_CACHE[key] = prose
+        _STOP_PROSE_CACHE_STAMPS[key] = now
+    return prose
 
 
 @city_bp.route('/api/stop-arrivals')

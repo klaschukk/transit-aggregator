@@ -128,20 +128,18 @@
 </section>
 {% endif %}
 
-<!-- SEO content block (unique per stop) -->
-{% if stop_info and stop_info.line_count %}
-<div class="seo-block fade-in fade-in--d3">
+<!-- E-E-A-T prose (unique 150–300 words per stop, rules-based from live data) -->
+{% if prose and prose.intro %}
+<div class="seo-block stop-prose fade-in fade-in--d3">
   <div class="seo-block__icon">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
   </div>
   <div class="seo-block__content">
-    <h2>O stajalištu {{ stop.name }}</h2>
-    <p>Stajalište {{ stop.name }} se nalazi u {{ city_label }}u. Kroz ovo stajalište prolazi {{ stop_info.line_count }} linija gradskog prevoza
-      ({{ stop_info.line_types|join(', ') }}).
-      {% if stop_info.has_gtfs and stop_info.first_departure %}Prevoz saobraća od {{ stop_info.first_departure }} do {{ stop_info.last_departure }} radnim danom.{% endif %}
-      {% if stop_info.busiest_lines %}Najfrekventnije linije su
-        {% for bl in stop_info.busiest_lines %}{{ bl.number }} ({{ bl.name }}){% if not loop.last %}, {% endif %}{% endfor %}.{% endif %}
-    </p>
+    <h2>{{ _('stop_prose.heading').format(stop_name=stop.name) }}</h2>
+    <p>{{ prose.intro }}</p>
+    <p>{{ prose.service }}</p>
+    <p>{{ prose.location }}</p>
+    <p>{{ prose.tip|safe }}</p>
   </div>
 </div>
 {% endif %}
