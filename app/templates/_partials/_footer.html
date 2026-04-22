@@ -4,6 +4,8 @@
       <div class="site-footer__col site-footer__col--brand">
         <div class="site-footer__brand">Prevozni</div>
         <p class="site-footer__desc">{{ _('footer.desc') }}</p>
+        {% from '_partials/_newsletter_form.html' import newsletter_form with context %}
+        {{ newsletter_form(source='footer', variant='footer') }}
       </div>
       <div class="site-footer__col">
         <div class="site-footer__heading">{{ _('footer.navigation') }}</div>

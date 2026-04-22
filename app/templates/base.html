@@ -477,5 +477,71 @@ if ('serviceWorker' in navigator) {
   });
 })();
 </script>
+
+<script>
+/* Newsletter / price-alert forms — fetch POST to /api/subscribe and swap
+   the form into an inline status message in place. Handles every variant
+   (footer / home hero / route price-alert) via the .js-newsletter-form
+   selector set by the partial macro. Runs with early-return on pages
+   without any form so it adds ~0.1ms on others. */
+(function(){
+  var forms = document.querySelectorAll('.js-newsletter-form');
+  if (!forms.length) return;
+
+  var STRINGS = {
+    pending:      {{ _('newsletter.success_pending')|tojson }},
+    already:      {{ _('newsletter.success_already')|tojson }},
+    err_email:    {{ _('newsletter.error_email')|tojson }},
+    err_consent:  {{ _('newsletter.error_consent')|tojson }},
+    err_generic:  {{ _('newsletter.error_generic')|tojson }},
+    err_rate:     {{ _('newsletter.error_ratelimit')|tojson }},
+  };
+
+  function showStatus(form, msg, ok) {
+    var slot = form.querySelector('.newsletter-form__status');
+    if (!slot) return;
+    slot.hidden = false;
+    slot.textContent = msg;
+    slot.classList.toggle('newsletter-form__status--ok', !!ok);
+    slot.classList.toggle('newsletter-form__status--err', !ok);
+  }
+
+  forms.forEach(function(form){
+    form.addEventListener('submit', function(ev){
+      ev.preventDefault();
+      var btn = form.querySelector('button[type="submit"]');
+      if (btn) btn.disabled = true;
+      var data = new FormData(form);
+      fetch('/api/subscribe', {
+        method: 'POST', body: data, credentials: 'same-origin',
+        headers: { 'Accept': 'application/json' },
+      }).then(function(r){
+        return r.json().then(function(j){ return {status: r.status, body: j}; });
+      }).then(function(res){
+        if (res.status === 202) {
+          showStatus(form, STRINGS.pending, true);
+          /* Track intent in Umami for attribution — bookending with ba_click. */
+          try { if (window.umami) umami.track('newsletter_signup',
+               {source: form.dataset.source || ''}); } catch(e){}
+        } else if (res.status === 200 && res.body && res.body.status === 'already_subscribed') {
+          showStatus(form, STRINGS.already, true);
+        } else if (res.status === 400 && res.body && res.body.error === 'subscribe.error.consent_required') {
+          showStatus(form, STRINGS.err_consent, false);
+        } else if (res.status === 400 && res.body && res.body.error === 'subscribe.error.email_invalid') {
+          showStatus(form, STRINGS.err_email, false);
+        } else if (res.status === 429) {
+          showStatus(form, STRINGS.err_rate, false);
+        } else {
+          showStatus(form, STRINGS.err_generic, false);
+        }
+      }).catch(function(){
+        showStatus(form, STRINGS.err_generic, false);
+      }).finally(function(){
+        if (btn) btn.disabled = false;
+      });
+    });
+  });
+})();
+</script>
 </body>
 </html>

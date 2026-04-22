@@ -31,6 +31,12 @@
   </div>
 </section>
 
+<!-- ═══════ NEWSLETTER ═══════ -->
+<section class="home-newsletter container fade-in">
+  {% from '_partials/_newsletter_form.html' import newsletter_form with context %}
+  {{ newsletter_form(source='home', variant='hero') }}
+</section>
+
 <!-- ═══════ STATS ═══════ -->
 <section class="home-stats container fade-in">
   <div class="home-stats__item">
