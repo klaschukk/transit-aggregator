@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Subscribers — Prevozni admin{% endblock %}
+{% block meta_description %}Internal admin dashboard (noindex).{% endblock %}
+
+{% block head_extra %}
+<meta name="robots" content="noindex, nofollow, noarchive">
+<style>
+.adm{max-width:1100px;margin:0 auto;padding:24px 16px;font-size:14px;}
+.adm h1{font-size:24px;margin:0 0 20px;}
+.adm h2{font-size:13px;margin:22px 0 10px;color:#475569;text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
+.adm .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:24px;}
+.adm .kpi{background:#f1f5f9;padding:12px 14px;border-radius:10px;}
+.adm .kpi__v{font-size:22px;font-weight:700;color:#0d9488;}
+.adm .kpi__l{font-size:11px;color:#64748b;margin-top:3px;}
+.adm table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:18px;}
+.adm th,.adm td{padding:7px 10px;text-align:left;border-bottom:1px solid #e2e8f0;vertical-align:top;}
+.adm th{background:#f8fafc;font-weight:600;color:#475569;font-size:11px;text-transform:uppercase;letter-spacing:.04em;}
+.adm .badge{display:inline-block;padding:1px 8px;font-size:10px;border-radius:10px;background:#e0f2fe;color:#075985;text-transform:uppercase;letter-spacing:.04em;}
+.adm .badge--ok{background:#dcfce7;color:#166534;}
+.adm .badge--pending{background:#fef9c3;color:#854d0e;}
+.adm .badge--off{background:#fee2e2;color:#991b1b;}
+.adm .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.adm .filters a{padding:5px 10px;background:#fff;border:1px solid #cbd5e1;border-radius:6px;text-decoration:none;color:#334155;font-size:12px;}
+.adm .filters a.on{background:#0d9488;color:#fff;border-color:#0d9488;}
+.adm .empty{color:#94a3b8;font-style:italic;padding:20px;}
+.adm code{font-family:ui-monospace,monospace;font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="adm">
+  <h1>Newsletter &middot; price-alert subscribers</h1>
+
+  <div class="kpis">
+    <div class="kpi"><div class="kpi__v">{{ stats.total }}</div><div class="kpi__l">Total</div></div>
+    <div class="kpi"><div class="kpi__v">{{ stats.confirmed }}</div><div class="kpi__l">Confirmed</div></div>
+    <div class="kpi"><div class="kpi__v">{{ stats.pending }}</div><div class="kpi__l">Pending confirm</div></div>
+    <div class="kpi"><div class="kpi__v">{{ stats.unsubscribed }}</div><div class="kpi__l">Unsubscribed</div></div>
+  </div>
+
+  <h2>Filter by source</h2>
+  <div class="filters">
+    <a href="{{ url_for('admin.subscribers') }}" class="{% if not filter_source and not filter_route %}on{% endif %}">All</a>
+    {% for s in by_source %}
+    <a href="{{ url_for('admin.subscribers', source=s.source) }}"
+       class="{% if filter_source == s.source %}on{% endif %}">
+      {{ s.source }} ({{ s.confirmed }}/{{ s.total }})
+    </a>
+    {% endfor %}
+  </div>
+
+  {% if top_routes %}
+  <h2>Top routes with confirmed price-alert subscribers</h2>
+  <div class="filters">
+    {% for r in top_routes %}
+    <a href="{{ url_for('admin.subscribers', source='price_alert', route=r.route_slug) }}"
+       class="{% if filter_route == r.route_slug %}on{% endif %}">
+      {{ r.route_slug }} ({{ r.total }})
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <h2>Latest 200 {% if filter_source %}· {{ filter_source }}{% endif %}{% if filter_route %} · {{ filter_route }}{% endif %}</h2>
+  {% if items %}
+  <table>
+    <thead>
+      <tr><th>Signed up</th><th>Email</th><th>Lang</th><th>Source</th><th>Route</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      {% for it in items %}
+      <tr>
+        <td><code>{{ it.ts.strftime('%Y-%m-%d %H:%M') if it.ts else '—' }}</code></td>
+        <td>{{ it.email[:3] }}…{{ it.email[-8:] if it.email|length > 8 else it.email }}</td>
+        <td>{{ it.lang or '—' }}</td>
+        <td><span class="badge">{{ it.source or 'unknown' }}</span></td>
+        <td>{% if it.route_slug %}<code>{{ it.route_slug }}</code>{% else %}—{% endif %}</td>
+        <td>
+          {% if it.unsubscribed_at %}<span class="badge badge--off">unsub</span>
+          {% elif it.confirmed_at %}<span class="badge badge--ok">confirmed</span>
+          {% else %}<span class="badge badge--pending">pending</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No rows match these filters.</p>
+  {% endif %}
+</div>
+{% endblock %}

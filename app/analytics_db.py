@@ -93,6 +93,41 @@ CREATE TABLE IF NOT EXISTS subscribers (
 CREATE UNIQUE INDEX IF NOT EXISTS subscribers_email_uq ON subscribers(email_lower);
 CREATE INDEX IF NOT EXISTS subscribers_confirm_idx ON subscribers(confirm_token);
 CREATE INDEX IF NOT EXISTS subscribers_unsub_idx ON subscribers(unsubscribe_token);
+
+-- Price-alert backbone. route_slug links a subscriber row to a specific
+-- /rute/{slug}/ page; NULL keeps generic-newsletter rows backwards-compatible.
+ALTER TABLE subscribers ADD COLUMN IF NOT EXISTS route_slug VARCHAR;
+CREATE INDEX IF NOT EXISTS subscribers_route_idx ON subscribers(route_slug);
+
+-- One row per route per day. UNIQUE(route_slug, date) makes the nightly
+-- snapshot script idempotent — re-running never duplicates history.
+CREATE TABLE IF NOT EXISTS price_snapshots (
+    route_slug  VARCHAR NOT NULL,
+    date        DATE    NOT NULL,
+    min_price   INTEGER,
+    max_price   INTEGER,
+    avg_price   DOUBLE,
+    trip_count  INTEGER,
+    snapshot_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (route_slug, date)
+);
+CREATE INDEX IF NOT EXISTS price_snapshots_route_idx ON price_snapshots(route_slug, date);
+
+-- Dedup ledger for alert dispatch. Join with subscribers.id + cooldown
+-- window to guarantee at most one email per (subscriber, route) per week.
+CREATE SEQUENCE IF NOT EXISTS price_alerts_sent_id_seq;
+CREATE TABLE IF NOT EXISTS price_alerts_sent (
+    id             BIGINT PRIMARY KEY DEFAULT nextval('price_alerts_sent_id_seq'),
+    subscriber_id  BIGINT NOT NULL,
+    route_slug     VARCHAR NOT NULL,
+    old_price      INTEGER,
+    new_price      INTEGER,
+    drop_pct       INTEGER,
+    sent_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    delivered_ok   BOOLEAN
+);
+CREATE INDEX IF NOT EXISTS price_alerts_sent_sub_idx ON price_alerts_sent(subscriber_id, route_slug, sent_at);
+CREATE INDEX IF NOT EXISTS price_alerts_sent_route_idx ON price_alerts_sent(route_slug, sent_at);
 """
 
 
@@ -298,7 +333,7 @@ def subscriber_by_email(email: str) -> dict | None:
     if not email:
         return None
     rows = query(
-        "SELECT id, email, lang, source, confirm_token, confirmed_at, "
+        "SELECT id, email, lang, source, route_slug, confirm_token, confirmed_at, "
         "       unsubscribe_token, unsubscribed_at, ts "
         "FROM subscribers WHERE email_lower = ?",
         [email.strip().lower()],
@@ -313,16 +348,24 @@ def insert_or_refresh_subscriber(
     source: str,
     referrer: str,
     ip: str,
+    route_slug: str | None = None,
 ) -> dict | None:
     """Create a pending subscriber, or re-issue a confirm token for an
     existing pending/unsubscribed record. Returns the stored row including
     the fresh tokens. Idempotent for already-confirmed rows (returns
-    existing with action='already_confirmed')."""
+    existing with action='already_confirmed').
+
+    `route_slug` binds a price-alert signup to one /rute/{slug}/ page. Pass
+    None for generic newsletter signups. An existing confirmed subscriber
+    re-subscribing with a different route_slug has their row updated so
+    they can track a new route without re-confirming.
+    """
     email = (email or '').strip()
     if not email:
         return None
     email_lower = email.lower()
     existing = subscriber_by_email(email_lower)
+    route_slug = (route_slug or None) and route_slug[:200]
 
     try:
         conn = _get_conn()
@@ -331,8 +374,8 @@ def insert_or_refresh_subscriber(
             unsub_t = _new_token()
             conn.execute(
                 "INSERT INTO subscribers (email, email_lower, lang, source, "
-                "referrer, ip_hash, confirm_token, unsubscribe_token) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                "referrer, ip_hash, confirm_token, unsubscribe_token, route_slug) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [
                     email[:200], email_lower[:200],
                     (lang or 'sr')[:5],
@@ -340,6 +383,7 @@ def insert_or_refresh_subscriber(
                     (referrer or '')[:500],
                     hash_ip(ip),
                     confirm_t, unsub_t,
+                    route_slug,
                 ],
             )
             row = subscriber_by_email(email_lower) or {}
@@ -347,6 +391,17 @@ def insert_or_refresh_subscriber(
             return row
 
         if existing.get('confirmed_at') and not existing.get('unsubscribed_at'):
+            # Already confirmed. If they're signing up for a different
+            # route, update the binding silently — don't make them re-confirm
+            # to track a new route.
+            if route_slug and existing.get('route_slug') != route_slug:
+                conn.execute(
+                    "UPDATE subscribers SET route_slug = ? WHERE id = ?",
+                    [route_slug, existing['id']],
+                )
+                existing['_action'] = 'route_updated'
+                existing['route_slug'] = route_slug
+                return existing
             existing['_action'] = 'already_confirmed'
             return existing
 
@@ -357,7 +412,7 @@ def insert_or_refresh_subscriber(
         conn.execute(
             "UPDATE subscribers SET confirm_token = ?, unsubscribe_token = ?, "
             "ts = CURRENT_TIMESTAMP, lang = ?, source = ?, referrer = ?, "
-            "ip_hash = ?, unsubscribed_at = NULL "
+            "ip_hash = ?, unsubscribed_at = NULL, route_slug = ? "
             "WHERE id = ?",
             [
                 confirm_t, unsub_t,
@@ -365,6 +420,7 @@ def insert_or_refresh_subscriber(
                 (source or 'unknown')[:40],
                 (referrer or '')[:500],
                 hash_ip(ip),
+                route_slug,
                 existing['id'],
             ],
         )
@@ -453,6 +509,121 @@ def subscriber_stats() -> dict:
     if not rows:
         return {'total': 0, 'confirmed': 0, 'pending': 0, 'unsubscribed': 0}
     return {k: int(v or 0) for k, v in rows[0].items()}
+
+
+# ── price alerts helpers ────────────────────────────────────────────────
+
+
+def insert_or_refresh_price_snapshot(
+    route_slug: str,
+    *,
+    snapshot_date,
+    min_price: int | None,
+    max_price: int | None,
+    avg_price: float | None,
+    trip_count: int,
+) -> bool:
+    """Upsert one row per (route_slug, snapshot_date). Idempotent — rerunning
+    the nightly snapshot on the same day simply refreshes the numbers.
+
+    DuckDB's ON CONFLICT DO UPDATE had trouble mixing `excluded.*` + a
+    literal CURRENT_TIMESTAMP in the same SET, so we do delete-then-insert
+    atomically inside a transaction instead. Same net effect, same PK
+    guarantee."""
+    conn = None
+    try:
+        conn = _get_conn()
+        conn.execute("BEGIN TRANSACTION")
+        conn.execute(
+            "DELETE FROM price_snapshots WHERE route_slug = ? AND date = ?",
+            [route_slug, snapshot_date],
+        )
+        conn.execute(
+            "INSERT INTO price_snapshots "
+            "(route_slug, date, min_price, max_price, avg_price, trip_count) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            [route_slug, snapshot_date, min_price, max_price, avg_price, trip_count],
+        )
+        conn.execute("COMMIT")
+        return True
+    except duckdb.Error as exc:
+        if conn is not None:
+            try:
+                conn.execute("ROLLBACK")
+            except duckdb.Error:
+                pass
+        logger.error("insert_or_refresh_price_snapshot failed: %s", exc)
+        _local.conn = None
+        return False
+
+
+def price_snapshots_for_route(route_slug: str, days: int = 7) -> list[dict]:
+    """Last `days` snapshots for one route, newest first.
+
+    DuckDB doesn't accept parameter binding inside INTERVAL literals, so
+    the day count is interpolated directly. Safe because `days` is coerced
+    to int before use.
+    """
+    days_i = max(0, int(days))
+    return query(
+        "SELECT date, min_price, max_price, avg_price, trip_count "
+        "FROM price_snapshots "
+        f"WHERE route_slug = ? AND date >= CURRENT_DATE - INTERVAL '{days_i}' DAY "
+        "ORDER BY date DESC",
+        [route_slug],
+    )
+
+
+def subscribers_for_route_alerts(route_slug: str) -> list[dict]:
+    """Every confirmed, non-unsubscribed subscriber watching this route.
+    Generic-newsletter rows (route_slug IS NULL) are excluded."""
+    return query(
+        "SELECT id, email, lang, unsubscribe_token "
+        "FROM subscribers "
+        "WHERE route_slug = ? "
+        "  AND confirmed_at IS NOT NULL "
+        "  AND unsubscribed_at IS NULL",
+        [route_slug],
+    )
+
+
+def price_alert_recently_sent(
+    subscriber_id: int, route_slug: str, within_days: int = 7,
+) -> bool:
+    """True iff we already sent this (subscriber, route) an alert in the
+    cooldown window. Guards against spamming the same user every night when
+    a route sits cheap for a week."""
+    days_i = max(0, int(within_days))
+    rows = query(
+        "SELECT 1 FROM price_alerts_sent "
+        "WHERE subscriber_id = ? AND route_slug = ? "
+        f"  AND sent_at >= CURRENT_TIMESTAMP - INTERVAL '{days_i}' DAY "
+        "LIMIT 1",
+        [subscriber_id, route_slug],
+    )
+    return bool(rows)
+
+
+def record_price_alert_sent(
+    *,
+    subscriber_id: int,
+    route_slug: str,
+    old_price: int,
+    new_price: int,
+    drop_pct: int,
+    delivered_ok: bool,
+) -> None:
+    try:
+        conn = _get_conn()
+        conn.execute(
+            "INSERT INTO price_alerts_sent "
+            "(subscriber_id, route_slug, old_price, new_price, drop_pct, delivered_ok) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            [subscriber_id, route_slug, old_price, new_price, drop_pct, delivered_ok],
+        )
+    except duckdb.Error as exc:
+        logger.error("record_price_alert_sent failed: %s", exc)
+        _local.conn = None
 
 
 def request_review_deletion(review_id: int, email: str) -> bool:

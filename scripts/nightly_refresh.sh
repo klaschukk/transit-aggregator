@@ -46,6 +46,11 @@ fi
 # Post-build: add Novi Sad OSM stops + line links
 $VENV -u scripts/enrich_post_build.py >> "$LOG" 2>&1 || true
 
+# Price-alert snapshot + scan. Non-fatal — an email-send outage must not
+# block the nightly refresh. Snapshot must run before scan.
+$VENV -u scripts/price_snapshot.py   >> "$LOG" 2>&1 || echo "WARN: price_snapshot failed ($?)" >> "$LOG"
+$VENV -u scripts/price_alert_scan.py >> "$LOG" 2>&1 || echo "WARN: price_alert_scan failed ($?)" >> "$LOG"
+
 # Enrich stop coordinates (non-blocking, limit to 50 per night)
 $VENV -u data/pipelines/enrich_stops_coords.py enrich --limit 50 >> "$LOG" 2>&1 || true
 

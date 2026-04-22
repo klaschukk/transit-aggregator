@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Price alerts — Prevozni admin{% endblock %}
+{% block meta_description %}Internal admin dashboard (noindex).{% endblock %}
+
+{% block head_extra %}
+<meta name="robots" content="noindex, nofollow, noarchive">
+<style>
+.adm{max-width:1100px;margin:0 auto;padding:24px 16px;font-size:14px;}
+.adm h1{font-size:24px;margin:0 0 20px;}
+.adm h2{font-size:13px;margin:22px 0 10px;color:#475569;text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
+.adm .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:24px;}
+.adm .kpi{background:#f1f5f9;padding:12px 14px;border-radius:10px;}
+.adm .kpi__v{font-size:22px;font-weight:700;color:#0d9488;}
+.adm .kpi__l{font-size:11px;color:#64748b;margin-top:3px;}
+.adm table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:18px;}
+.adm th,.adm td{padding:7px 10px;text-align:left;border-bottom:1px solid #e2e8f0;}
+.adm th{background:#f8fafc;font-weight:600;color:#475569;font-size:11px;text-transform:uppercase;letter-spacing:.04em;}
+.adm .badge{display:inline-block;padding:1px 8px;font-size:10px;border-radius:10px;background:#e0f2fe;color:#075985;text-transform:uppercase;letter-spacing:.04em;}
+.adm .badge--ok{background:#dcfce7;color:#166534;}
+.adm .badge--off{background:#fee2e2;color:#991b1b;}
+.adm code{font-family:ui-monospace,monospace;font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;}
+.adm .empty{color:#94a3b8;font-style:italic;padding:20px;}
+.adm .chart{background:#f8fafc;padding:10px;border-radius:10px;display:flex;gap:2px;align-items:flex-end;height:80px;margin-bottom:18px;}
+.adm .chart__bar{flex:1;background:#0d9488;border-radius:2px 2px 0 0;min-height:2px;}
+.adm .drop{color:#065f46;font-weight:600;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="adm">
+  <h1>Price-drop alert history</h1>
+
+  <div class="kpis">
+    <div class="kpi"><div class="kpi__v">{{ totals.total or 0 }}</div><div class="kpi__l">Total sent</div></div>
+    <div class="kpi"><div class="kpi__v">{{ totals.delivered or 0 }}</div><div class="kpi__l">Delivered OK</div></div>
+    <div class="kpi"><div class="kpi__v">{{ totals.failed or 0 }}</div><div class="kpi__l">Failed</div></div>
+    <div class="kpi"><div class="kpi__v">{{ totals.recipients or 0 }}</div><div class="kpi__l">Unique subscribers</div></div>
+    <div class="kpi"><div class="kpi__v">{{ totals.routes or 0 }}</div><div class="kpi__l">Unique routes</div></div>
+  </div>
+
+  {% if by_day %}
+  <h2>Alerts per day · last 30 days</h2>
+  {% set _max_c = by_day|map(attribute='c')|max %}
+  <div class="chart">
+    {% for d in by_day|reverse %}
+    <div class="chart__bar" title="{{ d.day }} — {{ d.c }}"
+         style="height: {{ (d.c * 100 / (_max_c or 1))|round|int }}%"></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <h2>Latest 200 alerts</h2>
+  {% if items %}
+  <table>
+    <thead>
+      <tr><th>Sent</th><th>Route</th><th>Old</th><th>New</th><th>Drop</th><th>Lang</th><th>Recipient</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      {% for it in items %}
+      <tr>
+        <td><code>{{ it.sent_at.strftime('%Y-%m-%d %H:%M') if it.sent_at else '—' }}</code></td>
+        <td><a href="/rute/{{ it.route_slug }}/" target="_blank"><code>{{ it.route_slug }}</code></a></td>
+        <td>{{ it.old_price }} RSD</td>
+        <td class="drop">{{ it.new_price }} RSD</td>
+        <td class="drop">−{{ it.drop_pct }}%</td>
+        <td>{{ it.lang or '—' }}</td>
+        <td>{% if it.email %}{{ it.email[:3] }}…{{ it.email[-8:] if it.email|length > 8 else it.email }}{% else %}(deleted){% endif %}</td>
+        <td>
+          {% if it.delivered_ok %}<span class="badge badge--ok">OK</span>
+          {% else %}<span class="badge badge--off">FAIL</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No alerts have been sent yet. Run <code>python scripts/price_alert_scan.py --dry-run</code> to debug.</p>
+  {% endif %}
+</div>
+{% endblock %}

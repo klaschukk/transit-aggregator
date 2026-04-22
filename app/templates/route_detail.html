@@ -163,6 +163,16 @@
   {{ empty_state(icon='search', text=_('search.no_results'), sub=_('buy.note')) }}
 {% endif %}
 
+<!-- Price alert — inline newsletter variant scoped to this pair. Sits
+     between the trip list and the partner grid where intent is highest:
+     the user has already seen today's prices. -->
+<section class="route-price-alert fade-in fade-in--d2">
+  {% from '_partials/_newsletter_form.html' import newsletter_form with context %}
+  {{ newsletter_form(source='price_alert', variant='price_alert',
+                     pair_label=route.from_city ~ ' → ' ~ route.to_city,
+                     route_slug=route.slug) }}
+</section>
+
 {% if _offers|length > 1 %}
 <!-- Multi-partner block — secondary CTAs for users who prefer a different
      booking site UX. Different partners get different CTRs, so exposing

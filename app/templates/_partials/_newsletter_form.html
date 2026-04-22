@@ -1,0 +1,61 @@
+{#
+  Newsletter sign-up widget — three layouts:
+
+    newsletter_form(source='footer')          → compact inline (footer)
+    newsletter_form(source='home', variant='hero')
+                                               → centered card (home below hero)
+    newsletter_form(source='price_alert',
+                    variant='price_alert',
+                    pair_label='Beograd → Budva',
+                    route_slug='beograd-budva')
+                                               → scoped price-alert (route_detail)
+                                                 route_slug is required for the
+                                                 price-alert source — subscribe.py
+                                                 rejects a price_alert POST without it.
+
+  All variants POST to /api/subscribe (double-opt-in). The server replies
+  JSON {ok, status|error, message}; the JS handler swaps form → status text
+  in-place. Selectors used by base.html's centralised JS: .js-newsletter-form.
+
+  Consent checkbox is mandatory (subscribe.py enforces it). Privacy policy
+  link is interpolated with `prefix` so it stays within the current locale.
+#}
+{% macro newsletter_form(source='footer', variant='default', pair_label=None, route_slug=None) %}
+<form class="newsletter-form newsletter-form--{{ variant }} js-newsletter-form"
+      method="post" action="/api/subscribe" data-source="{{ source }}"
+      novalidate>
+  {% if route_slug %}<input type="hidden" name="route_slug" value="{{ route_slug }}">{% endif %}
+  {% if variant != 'footer' %}
+  <div class="newsletter-form__head">
+    <h3 class="newsletter-form__title">
+      {% if variant == 'price_alert' %}{{ _('price_alert.title') }}{% else %}{{ _('newsletter.title') }}{% endif %}
+    </h3>
+    <p class="newsletter-form__sub">
+      {% if variant == 'price_alert' and pair_label %}
+        {{ _('price_alert.subtitle').format(pair=pair_label) }}
+      {% else %}
+        {{ _('newsletter.subtitle') }}
+      {% endif %}
+    </p>
+  </div>
+  {% endif %}
+  <input type="hidden" name="source" value="{{ source }}">
+  <div class="newsletter-form__row">
+    <label class="newsletter-form__label" for="nl-email-{{ source }}">
+      <span class="visually-hidden">Email</span>
+      <input type="email" id="nl-email-{{ source }}" name="email"
+             class="newsletter-form__input"
+             placeholder="{{ _('newsletter.placeholder') }}"
+             autocomplete="email" required maxlength="100">
+    </label>
+    <button type="submit" class="btn btn--primary newsletter-form__submit">
+      {% if variant == 'price_alert' %}{{ _('price_alert.button') }}{% else %}{{ _('newsletter.button') }}{% endif %}
+    </button>
+  </div>
+  <label class="newsletter-form__consent">
+    <input type="checkbox" name="consent" value="1" required>
+    <span>{{ _('newsletter.consent').format(prefix=lang_prefix)|safe }}</span>
+  </label>
+  <div class="newsletter-form__status" role="status" aria-live="polite" hidden></div>
+</form>
+{% endmacro %}

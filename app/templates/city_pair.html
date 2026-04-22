@@ -55,6 +55,7 @@
 {% from '_partials/_stats_strip.html' import stats_strip %}
 {% from '_partials/_filter_panel.html' import filter_panel with context %}
 {% from '_partials/_empty_state.html' import empty_state %}
+{% from '_partials/_newsletter_form.html' import newsletter_form with context %}
 
 {{ breadcrumb([
   {'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')},
@@ -95,6 +96,13 @@
   <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M3 3a1 1 0 011-1h12a1 1 0 01.82 1.573l-4.82 7v4.427a1 1 0 01-.553.894l-2 1A1 1 0 018 16v-5.427L3.18 3.573A1 1 0 013 3z"/></svg>
   {{ _('filter.heading') }}
 </button>
+
+{% set _alert_slug = (route.slug if route and route.slug else _from_slug ~ '-do-' ~ _to_slug) %}
+<section class="route-price-alert fade-in">
+  {{ newsletter_form(source='price_alert', variant='price_alert',
+                     pair_label=from_city ~ ' → ' ~ to_city,
+                     route_slug=_alert_slug) }}
+</section>
 
 <div class="results-layout">
   {% set operators = trips|map(attribute='operator')|unique|list %}

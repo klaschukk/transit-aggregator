@@ -20,6 +20,8 @@ subscribe_bp = Blueprint('subscribe', __name__)
 _EMAIL_RE = re.compile(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
 _EMAIL_MAX = 100
 _SOURCE_MAX = 40
+_ROUTE_SLUG_MAX = 200
+_ROUTE_SLUG_RE = re.compile(r'^[a-z0-9-]+$')  # match app.slug.normalize_slug output
 _ALLOWED_SOURCES = {
     'home', 'footer', 'route_detail', 'city_pair',
     'price_alert', 'guide', 'other',
@@ -132,12 +134,19 @@ def api_subscribe():
     data = request.form.to_dict() or request.get_json(silent=True) or {}
     email = (data.get('email') or '').strip()[:_EMAIL_MAX + 1]
     source = (data.get('source') or 'unknown').strip()[:_SOURCE_MAX]
+    route_slug = (data.get('route_slug') or '').strip()[:_ROUTE_SLUG_MAX]
     consent = (data.get('consent') or '').strip().lower() in (
         '1', 'on', 'true', 'yes',
     )
 
     if source not in _ALLOWED_SOURCES:
         source = 'other'
+    # Only accept route_slug for the price-alert source — ignore it everywhere
+    # else so a generic footer signup can't accidentally bind to a route.
+    if route_slug and (source != 'price_alert' or not _ROUTE_SLUG_RE.match(route_slug)):
+        route_slug = ''
+    if source == 'price_alert' and not route_slug:
+        return jsonify(ok=False, error='subscribe.error.route_required'), 400
     if not email or len(email) > _EMAIL_MAX or not _EMAIL_RE.match(email):
         return jsonify(ok=False, error='subscribe.error.email_invalid'), 400
     if not consent:
@@ -151,6 +160,7 @@ def api_subscribe():
         source=source,
         referrer=(request.referrer or '')[:500],
         ip=_client_ip(),
+        route_slug=route_slug or None,
     )
     if row is None:
         return jsonify(ok=False, error='subscribe.error.db'), 500

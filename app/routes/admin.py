@@ -120,6 +120,100 @@ def _total_clicks_since(days: int) -> int:
 # ── Reviews moderation ────────────────────────────────────────────────
 
 
+@admin_bp.route('/subscribers')
+@_basic_auth_required
+def subscribers():
+    """Newsletter + price-alert subscribers, filterable by source/route.
+
+    `?source=price_alert&route=<slug>` narrows to a single route; without
+    filters the latest 200 rows across all signups are shown. Emails are
+    truncated in the listing — full addresses are visible only by clicking
+    into a row (future improvement; for now we show first/last 3 chars).
+    """
+    source = (request.args.get('source') or '').strip()[:40]
+    route = (request.args.get('route') or '').strip()[:200]
+
+    where = []
+    params: list = []
+    if source:
+        where.append('source = ?')
+        params.append(source)
+    if route:
+        where.append('route_slug = ?')
+        params.append(route)
+    clause = ('WHERE ' + ' AND '.join(where)) if where else ''
+
+    items = analytics_db.query(
+        f"SELECT id, email, lang, source, route_slug, ts, "
+        f"       confirmed_at, unsubscribed_at "
+        f"FROM subscribers {clause} "
+        f"ORDER BY ts DESC LIMIT 200",
+        params,
+    )
+    stats = analytics_db.subscriber_stats()
+    # By-source breakdown for the filter chip row.
+    by_source = analytics_db.query(
+        "SELECT COALESCE(NULLIF(source, ''), 'unknown') AS source, "
+        "       COUNT(*) AS total, "
+        "       COUNT(*) FILTER (WHERE confirmed_at IS NOT NULL "
+        "                        AND unsubscribed_at IS NULL) AS confirmed "
+        "FROM subscribers GROUP BY source ORDER BY total DESC"
+    )
+    # Top-10 routes by confirmed-subscriber count (price_alert only).
+    top_routes = analytics_db.query(
+        "SELECT route_slug, COUNT(*) AS total "
+        "FROM subscribers "
+        "WHERE source = 'price_alert' AND route_slug IS NOT NULL "
+        "  AND confirmed_at IS NOT NULL AND unsubscribed_at IS NULL "
+        "GROUP BY route_slug ORDER BY total DESC LIMIT 10"
+    )
+    return render_template(
+        'admin/subscribers.html',
+        items=items, stats=stats, by_source=by_source, top_routes=top_routes,
+        filter_source=source, filter_route=route,
+    )
+
+
+@admin_bp.route('/price-alerts')
+@_basic_auth_required
+def price_alerts():
+    """History of sent price-drop emails — one row per delivery.
+
+    Success rate here is "delivered_ok from the SMTP layer", not
+    open/click — for that we'd need a webhook integration (Mailgun,
+    Postmark). Until then this is the best on-box signal we have.
+    """
+    items = analytics_db.query(
+        "SELECT pa.id, pa.route_slug, pa.old_price, pa.new_price, pa.drop_pct, "
+        "       pa.sent_at, pa.delivered_ok, "
+        "       s.email, s.lang "
+        "FROM price_alerts_sent pa "
+        "LEFT JOIN subscribers s ON s.id = pa.subscriber_id "
+        "ORDER BY pa.sent_at DESC LIMIT 200"
+    )
+    totals = analytics_db.query(
+        "SELECT "
+        "  COUNT(*) AS total, "
+        "  COUNT(*) FILTER (WHERE delivered_ok = TRUE) AS delivered, "
+        "  COUNT(*) FILTER (WHERE delivered_ok = FALSE) AS failed, "
+        "  COUNT(DISTINCT subscriber_id) AS recipients, "
+        "  COUNT(DISTINCT route_slug) AS routes "
+        "FROM price_alerts_sent"
+    )
+    by_day = analytics_db.query(
+        "SELECT CAST(sent_at AS DATE) AS day, COUNT(*) AS c "
+        "FROM price_alerts_sent "
+        "WHERE sent_at >= CURRENT_TIMESTAMP - INTERVAL '30 days' "
+        "GROUP BY day ORDER BY day DESC"
+    )
+    return render_template(
+        'admin/price_alerts.html',
+        items=items,
+        totals=(totals[0] if totals else {}),
+        by_day=by_day,
+    )
+
+
 @admin_bp.route('/reviews')
 @_basic_auth_required
 def reviews():
