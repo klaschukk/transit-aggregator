@@ -655,3 +655,23 @@ def robots():
     resp = make_response('\n'.join(lines) + '\n')
     resp.headers['Content-Type'] = 'text/plain'
     return resp
+
+
+@main_bp.route('/ads.txt')
+def ads_txt():
+    """AdSense / IAB ads.txt — populated once AdSense approves; served as
+    empty (single informational comment) so crawlers don't see 404 during
+    the application review window. Replace the body once Google issues a
+    publisher ID.
+
+    Ref: https://iabtechlab.com/ads-txt/
+    """
+    ads_id = current_app.config.get('ADSENSE_ID', '').strip()
+    if ads_id:
+        # pub-1234567890 → google.com, pub-1234567890, DIRECT, f08c47fec0942fa0
+        body = f'google.com, {ads_id}, DIRECT, f08c47fec0942fa0\n'
+    else:
+        body = '# ads.txt — AdSense pending. Will be populated once Google issues publisher ID.\n'
+    resp = make_response(body)
+    resp.headers['Content-Type'] = 'text/plain'
+    return resp
