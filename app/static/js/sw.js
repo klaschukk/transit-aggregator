@@ -7,7 +7,7 @@
    Bumped version invalidates ALL caches: change the CACHE number on
    every deploy to force cold refresh. */
 
-const CACHE = 'prevozni-v2';
+const CACHE = 'prevozni-v3';
 const OFFLINE_URL = '/offline.html';
 const STATIC_SHELL = [
   OFFLINE_URL,
