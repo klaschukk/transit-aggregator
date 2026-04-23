@@ -130,13 +130,15 @@
 </script>
 
 <script>
-/* Register service worker — offline fallback + static-asset cache.
-   Only registers on https (localhost counts); skips if browser doesn't
-   support it. Errors are swallowed — SW is strictly a nice-to-have. */
+/* Service worker temporarily disabled — kill-switch /sw.js unregisters
+   previously-installed workers on visit. Existing SW registrations get
+   cleared; no new ones are created. When the cleanup is complete for
+   our user base (Umami: dropped "sw-killed" events), restore the real
+   SW registration from git history (commit 42582d1) and bump CACHE. */
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function(){});
-  });
+  navigator.serviceWorker.getRegistrations().then(function(rs) {
+    rs.forEach(function(r) { r.unregister(); });
+  }).catch(function(){});
 }
 </script>
 
