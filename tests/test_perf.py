@@ -67,3 +67,79 @@ def test_no_eager_leaflet_on_map_pages(client):
         assert '<script src="https://unpkg.com/leaflet' not in html, (
             f"{url} regressed to eager Leaflet <script> tag; use lazy loader"
         )
+
+
+# ── Mobile regression gates ────────────────────────────────────────────────
+# Lock in the mobile-pass fixes from docs/06_tech/perf-baseline-mobile.md.
+# Each test protects a common regression that the byte-size budget would not
+# catch but that would still break real mobile UX.
+
+MOBILE_16PX_SELECTORS = (
+    ".journey-form__date",
+    ".search-bar__input",
+    ".review-form textarea",
+    ".review-form input[type=\"text\"]",
+    ".review-form input[type=\"email\"]",
+)
+
+
+def test_mobile_inputs_avoid_ios_zoom(client):
+    """iOS auto-zooms any focused input with computed font-size < 16px. We
+    remap sub-16px inputs to --text-base inside the <640px breakpoint.
+    This test asserts the rule survives future edits; if a new input is
+    legitimately below 16px, add it to the mobile block explicitly."""
+    css = client.get("/static/css/app.css").data.decode()
+    anchor = css.find("@media (max-width: 639px)")
+    assert anchor != -1, "mobile breakpoint block went missing"
+    block = css[anchor:anchor + 5000]
+    for selector in MOBILE_16PX_SELECTORS:
+        assert selector in block, (
+            f"{selector} must be remapped to 16px inside <640px block "
+            "to prevent iOS zoom-on-focus"
+        )
+
+
+def test_form_inputs_have_mobile_keyboard_hints(client):
+    """Email inputs must surface the email keyboard + autocomplete. Search
+    inputs must surface enterkeyhint. A <input type="text"> regression
+    would force the user to hunt for @ on their virtual keyboard."""
+    html = client.get("/").data.decode()
+    assert 'inputmode="email"' in html, "newsletter email input lost inputmode"
+    assert 'autocomplete="email"' in html
+    assert ('enterkeyhint="search"' in html) or ('enterkeyhint="next"' in html)
+
+
+def test_map_containers_reserve_height(client):
+    """CLS guard: Leaflet containers must not collapse to 0 before JS runs.
+    If someone swaps the explicit height/aspect-ratio for a content-driven
+    layout, the hero pops in and blows CLS."""
+    css = client.get("/static/css/app.css").data.decode()
+    assert "aspect-ratio" in css, (
+        "map wrap lost its CLS-reserving aspect-ratio rule"
+    )
+    hero_anchor = css.find(".stop-hero__map")
+    assert hero_anchor != -1
+    hero_decl = css[hero_anchor:hero_anchor + 400]
+    assert "height:" in hero_decl and "180px" in hero_decl, (
+        "stop-hero__map must keep its explicit 180px height (LCP candidate)"
+    )
+
+
+def test_ios_safe_area_insets_in_layout(client):
+    """iPhone X+ notch / home indicator need env(safe-area-inset-*) on
+    pinned chrome (header, footer, cookie + install banners). Regression
+    here leaves content under the notch or behind the home bar."""
+    css = client.get("/static/css/app.css").data.decode()
+    assert "safe-area-inset-top" in css
+    assert "safe-area-inset-bottom" in css
+    assert "safe-area-inset-left" in css
+    assert "safe-area-inset-right" in css
+
+
+def test_autocomplete_js_has_early_return(client):
+    """The city-autocomplete block ships from base.html on every page even
+    when no search form exists. The early-return keeps per-page TBT ~0ms
+    on ~4000 non-form pages."""
+    html = client.get("/o-nama/").data.decode()
+    assert ".js-city-input" in html
+    assert "_cityInputs.length" in html  # guarded NodeList length check
