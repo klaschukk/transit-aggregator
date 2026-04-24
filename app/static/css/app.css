@@ -975,13 +975,21 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 
 /* City map */
 .city-map-wrap {
-  height: 40vh;
+  /* Aspect ratio reserves vertical space before Leaflet finishes loading
+     so CLS stays at 0. We still cap with min/max so very tall/short
+     viewports don't produce awkward strips. */
+  aspect-ratio: 16 / 10;
   min-height: 250px;
   max-height: 420px;
   border-radius: var(--radius-lg);
   overflow: hidden;
   margin-bottom: 24px;
   border: 1px solid var(--color-border);
+  /* Leaflet handles pinch/drag internally; telling the browser this
+     element won't double-tap-zoom keeps surrounding page scroll snappy
+     on iOS and prevents a subtle touch delay when the user starts the
+     gesture just inside the map bounds. */
+  touch-action: pan-x pan-y pinch-zoom;
 }
 .city-map { height: 100%; }
 
@@ -1390,7 +1398,7 @@ input:focus-visible,
   box-shadow: 0 0 0 2px rgba(13, 148, 136, .2);
 }
 
-/* ── Mobile touch targets (< 640px) ���─ */
+/* ── Mobile touch targets (< 640px) ── */
 @media (max-width: 639px) {
   /* Prevent horizontal scroll */
   body { overflow-x: hidden; }
@@ -1419,6 +1427,31 @@ input:focus-visible,
     mask-image: linear-gradient(to right, #000 85%, transparent);
     padding-right: 24px;
   }
+
+  /* iOS auto-zooms any focused input with computed font-size < 16px. Bump
+     the inputs that were sized below the 16px threshold to kill the
+     viewport jump without changing desktop typography. */
+  .journey-form__date,
+  .search-bar__input,
+  .review-form textarea,
+  .review-form input[type="text"],
+  .review-form input[type="email"] { font-size: var(--text-base); }
+
+  /* Buy CTA on trip list — 32px was below both Apple HIG (44) and Material
+     (48). Bump min-height + padding; horizontal flow is unchanged. */
+  .trip-card__buy { min-height: 44px; padding: 10px 16px; }
+
+  /* Header pills were ornamental on desktop (28px). On mobile the same
+     primitive can appear bare on /politika-kolacica/ and body-level uses,
+     so ensure a thumbable target. The in-sheet override below still wins. */
+  .lang-pill__item { min-height: 36px; }
+
+  /* Mobile sheet pill needs more thumb room between items (was gap:0). */
+  .site-nav.is-open .lang-pill { gap: 4px; }
+
+  /* Star save button — ensure 44×44 on narrow screens even when the
+     surrounding header is tight. */
+  .fav-btn { min-height: 44px; min-width: 44px; }
 }
 
 /* ── Extra-narrow fixes (< 480px) ── */
@@ -1473,8 +1506,15 @@ main { animation: fadeInUp .25s ease both; }
   margin-bottom: 24px;
 }
 .stop-hero__map {
+  /* Explicit height keeps the hero LCP candidate from shifting once Leaflet
+     paints its tiles. 180px fits under the fold on 375×667 (iPhone SE) so
+     the stop name + line list are visible before the user scrolls. */
   height: 180px;
   position: relative;
+  /* Stop-detail map is display-only (dragging:false in JS init) so we
+     opt out of all panning/zooming gestures — the surrounding page
+     scroll always wins on touch. */
+  touch-action: pan-y;
 }
 .stop-hero__map::after {
   content: '';
