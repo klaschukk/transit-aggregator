@@ -3220,6 +3220,304 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Close',
         'ru': 'Закрыть',
     },
+
+    # ── Footer legal links + disclosure ──
+    'footer.tos': {
+        'sr': 'Uslovi korišćenja',
+        'en': 'Terms of Service',
+        'ru': 'Условия использования',
+    },
+    'footer.cookies': {
+        'sr': 'Politika kolačića',
+        'en': 'Cookie Policy',
+        'ru': 'Политика cookies',
+    },
+    'footer.partners': {
+        'sr': 'Partnerske provizije: Bookaway, FlixBus, Omio. Klikom na "Kupi" možete napustiti naš sajt.',
+        'en': 'Partner commissions: Bookaway, FlixBus, Omio. Clicking "Buy" may take you off-site.',
+        'ru': 'Партнёрские комиссии: Bookaway, FlixBus, Omio. Нажатие «Купить» может увести с сайта.',
+    },
+
+    # ── Cookie consent banner ──
+    'cookies.banner.aria': {
+        'sr': 'Obaveštenje o kolačićima',
+        'en': 'Cookie notice',
+        'ru': 'Уведомление о cookies',
+    },
+    'cookies.banner.text': {
+        'sr': 'Koristimo kolačiće za osnovne funkcije (jezik, valuta, sačuvane rute) i anonimnu analitiku bez praćenja. Možete prihvatiti sve ili samo neophodne.',
+        'en': 'We use cookies for essential features (language, currency, saved routes) and anonymous analytics without tracking. You can accept all or essentials only.',
+        'ru': 'Мы используем cookies для базовых функций (язык, валюта, сохранённые маршруты) и анонимной аналитики без отслеживания. Можно принять всё или только необходимые.',
+    },
+    'cookies.banner.accept_all': {
+        'sr': 'Prihvatam',
+        'en': 'Accept all',
+        'ru': 'Принять всё',
+    },
+    'cookies.banner.essential': {
+        'sr': 'Samo neophodni',
+        'en': 'Essentials only',
+        'ru': 'Только необходимые',
+    },
+    'cookies.banner.more': {
+        'sr': 'Više',
+        'en': 'More',
+        'ru': 'Подробнее',
+    },
+
+    # ── Cookie Policy page ──
+    'cookies.page.title': {
+        'sr': 'Politika kolačića',
+        'en': 'Cookie Policy',
+        'ru': 'Политика cookies',
+    },
+    'cookies.page.meta': {
+        'sr': 'Koje kolačiće Prevozni koristi, zašto, koliko se čuvaju i kako da ih onemogućite ili povučete saglasnost.',
+        'en': 'Which cookies Prevozni uses, why, how long they are stored, and how to disable them or withdraw consent.',
+        'ru': 'Какие cookies использует Prevozni, зачем, сколько хранятся и как их отключить или отозвать согласие.',
+    },
+    'cookies.page.intro': {
+        'sr': 'Ova stranica objašnjava koje kolačiće i tehnologije lokalnog skladištenja Prevozni koristi, u koju svrhu, koliko dugo se čuvaju i kako da kontrolišete ili povučete svoju saglasnost.',
+        'en': 'This page explains which cookies and local-storage technologies Prevozni uses, their purpose, how long they are kept, and how you can control or withdraw your consent.',
+        'ru': 'На этой странице описано, какие cookies и технологии локального хранения использует Prevozni, для чего, сколько они хранятся и как вы можете управлять своим согласием или отозвать его.',
+    },
+    'cookies.page.what_h': {
+        'sr': 'Šta su kolačići',
+        'en': 'What are cookies',
+        'ru': 'Что такое cookies',
+    },
+    'cookies.page.what_body': {
+        'sr': 'Kolačići (cookies) su mali tekstualni zapisi koje veb sajt postavlja u vaš pretraživač. Oni pomažu sajtu da upamti vaše preferencije između poseta — na primer izabrani jezik ili valutu — ili da razlikuje dve posete iste stranice. Local storage radi slično ali ostaje u pretraživaču dok ga ne obrišete. Prevozni koristi samo <strong>first-party</strong> kolačiće (postavljeni sa prevozni.com) i nikada ne postavlja reklamne ili praćeće kolačiće trećih strana.',
+        'en': 'Cookies are small text records a website places in your browser. They help the site remember your preferences between visits — for example the selected language or currency — or distinguish between visits to the same page. Local storage works similarly but persists in the browser until you clear it. Prevozni uses only <strong>first-party</strong> cookies (set from prevozni.com) and never sets third-party advertising or tracking cookies.',
+        'ru': 'Cookies — это небольшие текстовые записи, которые сайт сохраняет в вашем браузере. Они помогают сайту запоминать ваши настройки между посещениями — например выбранный язык или валюту — или различать посещения одной страницы. Local storage работает похожим образом, но остаётся в браузере, пока вы его не очистите. Prevozni использует только <strong>first-party</strong> cookies (установленные с prevozni.com) и никогда не ставит рекламные или трекинговые cookies третьих сторон.',
+    },
+    'cookies.page.used_h': {
+        'sr': 'Koje kolačiće koristimo',
+        'en': 'Which cookies we use',
+        'ru': 'Какие cookies мы используем',
+    },
+    'cookies.page.used_intro': {
+        'sr': 'Ovo je potpuna lista kolačića i local-storage zapisa koje Prevozni može postaviti u vašem pretraživaču:',
+        'en': 'This is the complete list of cookies and local-storage items Prevozni may place in your browser:',
+        'ru': 'Это полный список cookies и записей local storage, которые Prevozni может поставить в вашем браузере:',
+    },
+    'cookies.page.th_name': {
+        'sr': 'Ime',
+        'en': 'Name',
+        'ru': 'Имя',
+    },
+    'cookies.page.th_purpose': {
+        'sr': 'Svrha',
+        'en': 'Purpose',
+        'ru': 'Назначение',
+    },
+    'cookies.page.th_duration': {
+        'sr': 'Trajanje',
+        'en': 'Duration',
+        'ru': 'Срок',
+    },
+    'cookies.page.th_type': {
+        'sr': 'Tip',
+        'en': 'Type',
+        'ru': 'Тип',
+    },
+    'cookies.page.type_essential': {
+        'sr': 'neophodan',
+        'en': 'essential',
+        'ru': 'необходимый',
+    },
+    'cookies.page.type_analytics': {
+        'sr': 'analitika',
+        'en': 'analytics',
+        'ru': 'аналитика',
+    },
+    'cookies.page.dur_year': {
+        'sr': '1 godina',
+        'en': '1 year',
+        'ru': '1 год',
+    },
+    'cookies.page.dur_session': {
+        'sr': 'sesija',
+        'en': 'session',
+        'ru': 'сессия',
+    },
+    'cookies.page.dur_until_cleared': {
+        'sr': 'dok ne obrišete',
+        'en': 'until cleared',
+        'ru': 'до очистки',
+    },
+    'cookies.page.purpose_consent': {
+        'sr': 'Pamti vaš odabir u baneru saglasnosti (sve / samo neophodni).',
+        'en': 'Remembers your choice in the consent banner (all / essentials only).',
+        'ru': 'Запоминает ваш выбор в баннере согласия (всё / только необходимые).',
+    },
+    'cookies.page.purpose_ccy': {
+        'sr': 'Pamti izabrani prikaz valute (RSD ili EUR).',
+        'en': 'Remembers the selected currency display (RSD or EUR).',
+        'ru': 'Запоминает выбранную валюту отображения (RSD или EUR).',
+    },
+    'cookies.page.purpose_ab': {
+        'sr': 'Dodeljuje stabilan A/B redosled partnerskih ponuda (Bookaway / FlixBus / Omio) po posetiocu.',
+        'en': 'Assigns a stable A/B ordering of partner offers (Bookaway / FlixBus / Omio) per visitor.',
+        'ru': 'Назначает стабильный A/B порядок партнёрских предложений (Bookaway / FlixBus / Omio) для посетителя.',
+    },
+    'cookies.page.purpose_saved': {
+        'sr': 'Čuva vaše označene rute (lokalno u pretraživaču, ne šalje se na server).',
+        'en': 'Stores your saved routes (locally in the browser, never sent to the server).',
+        'ru': 'Хранит ваши сохранённые маршруты (локально в браузере, не отправляется на сервер).',
+    },
+    'cookies.page.purpose_session': {
+        'sr': 'CSRF zaštita forme — traje samo tokom sesije.',
+        'en': 'CSRF form protection — lasts only for the session.',
+        'ru': 'CSRF-защита формы — только на время сессии.',
+    },
+    'cookies.page.third_party_h': {
+        'sr': 'Treće strane',
+        'en': 'Third parties',
+        'ru': 'Третьи стороны',
+    },
+    'cookies.page.third_party_body': {
+        'sr': '<strong>Umami</strong> (analytics.farmako.ro) prikuplja anonimnu agregatnu statistiku poseta <strong>bez kolačića</strong> i bez ličnih identifikatora. Ako prihvatite sve kolačiće, učitavamo Umami skriptu; ako izaberete samo neophodne, skripta se ne učitava. <strong>Bookaway, FlixBus i Omio</strong> su partnerski sajtovi — kada kliknete "Kupi", napuštate naš sajt i ulazite pod njihovu politiku kolačića.',
+        'en': '<strong>Umami</strong> (analytics.farmako.ro) collects anonymous aggregate visit statistics <strong>without cookies</strong> and without personal identifiers. If you accept all cookies, we load the Umami script; if you choose essentials only, the script is not loaded. <strong>Bookaway, FlixBus and Omio</strong> are partner sites — when you click "Buy" you leave our site and fall under their cookie policy.',
+        'ru': '<strong>Umami</strong> (analytics.farmako.ro) собирает анонимную агрегированную статистику посещений <strong>без cookies</strong> и без персональных идентификаторов. Если вы принимаете все cookies, мы загружаем скрипт Umami; если выбираете только необходимые — скрипт не загружается. <strong>Bookaway, FlixBus и Omio</strong> — партнёрские сайты, при нажатии «Купить» вы покидаете наш сайт и попадаете под их политику cookies.',
+    },
+    'cookies.page.disable_h': {
+        'sr': 'Kako da onemogućite kolačiće',
+        'en': 'How to disable cookies',
+        'ru': 'Как отключить cookies',
+    },
+    'cookies.page.disable_body': {
+        'sr': 'Svaki pretraživač vam omogućava da blokirate ili obrišete kolačiće: pogledajte podešavanja Chrome / Firefox / Safari / Edge, obično pod "Privatnost i bezbednost". Ako blokirate neophodne kolačiće, neke funkcije (pamćenje valute, sačuvane rute) neće raditi, ali sajt ostaje upotrebljiv.',
+        'en': 'Every browser lets you block or delete cookies: check Chrome / Firefox / Safari / Edge settings, typically under "Privacy and security". If you block essential cookies, some features (currency memory, saved routes) will not work, but the site remains usable.',
+        'ru': 'Любой браузер позволяет блокировать или удалять cookies: откройте настройки Chrome / Firefox / Safari / Edge, обычно в разделе «Конфиденциальность и безопасность». Если блокировать необходимые cookies, некоторые функции (запоминание валюты, сохранённые маршруты) не будут работать, но сайт остаётся функциональным.',
+    },
+    'cookies.page.revoke_h': {
+        'sr': 'Povlačenje saglasnosti',
+        'en': 'Withdrawing consent',
+        'ru': 'Отзыв согласия',
+    },
+    'cookies.page.revoke_body': {
+        'sr': 'Da povučete svoju prethodnu saglasnost (ponovo vam se pojavi baner i možete da izaberete drugu opciju), kliknite dugme ispod — brišemo kolačić saglasnosti i osvežavamo stranicu.',
+        'en': 'To withdraw your previous consent (so the banner appears again and you can pick a different option), click the button below — we clear the consent cookie and reload the page.',
+        'ru': 'Чтобы отозвать ранее данное согласие (баннер появится снова, и вы сможете выбрать другой вариант), нажмите кнопку ниже — мы удаляем cookie согласия и перезагружаем страницу.',
+    },
+    'cookies.page.revoke_btn': {
+        'sr': 'Resetuj moju saglasnost',
+        'en': 'Reset my consent',
+        'ru': 'Сбросить согласие',
+    },
+    'cookies.page.changes_h': {
+        'sr': 'Izmene ove politike',
+        'en': 'Changes to this policy',
+        'ru': 'Изменения этой политики',
+    },
+    'cookies.page.changes_body': {
+        'sr': 'Ako dodamo novi alat ili promenimo način korišćenja kolačića, ažuriraćemo ovu stranicu i datum ispod. Trenutna verzija: april 2026.',
+        'en': 'If we add a new tool or change how we use cookies, we will update this page and the date below. Current version: April 2026.',
+        'ru': 'Если мы добавим новый инструмент или изменим порядок использования cookies, мы обновим эту страницу и дату ниже. Текущая версия: апрель 2026.',
+    },
+
+    # ── Terms of Service page ──
+    'tos.title': {
+        'sr': 'Uslovi korišćenja',
+        'en': 'Terms of Service',
+        'ru': 'Условия использования',
+    },
+    'tos.meta': {
+        'sr': 'Uslovi korišćenja sajta Prevozni — ko smo, šta nudimo, odricanje od odgovornosti za tačnost podataka, partnerski linkovi i korisnički sadržaj.',
+        'en': 'Terms of Service for Prevozni — who we are, what we provide, disclaimer on data accuracy, affiliate links and user content.',
+        'ru': 'Условия использования сайта Prevozni — кто мы, что предоставляем, отказ от ответственности за точность данных, партнёрские ссылки и пользовательский контент.',
+    },
+    'tos.intro': {
+        'sr': 'Ovi uslovi regulišu korišćenje sajta prevozni.com. Nastavkom korišćenja prihvatate ih u celini. Ako se ne slažete, molimo ne koristite sajt.',
+        'en': 'These terms govern the use of prevozni.com. By continuing to use the site you accept them in full. If you disagree, please do not use the site.',
+        'ru': 'Эти условия регулируют использование сайта prevozni.com. Продолжая использовать сайт, вы принимаете их полностью. Если не согласны, пожалуйста, не пользуйтесь сайтом.',
+    },
+    'tos.updated': {
+        'sr': 'Poslednja izmena: april 2026.',
+        'en': 'Last updated: April 2026.',
+        'ru': 'Последнее обновление: апрель 2026.',
+    },
+    'tos.s1_h': {
+        'sr': '1. Ko smo',
+        'en': '1. Who we are',
+        'ru': '1. Кто мы',
+    },
+    'tos.s1_body': {
+        'sr': 'Prevozni je nezavisan projekat koji agregira javno dostupne podatke o javnom prevozu u Srbiji i regionu. Nismo prevoznik, agencija za prodaju karata ni zvanični predstavnik bilo kojeg prevoznika. Za kontakt koristite <strong>info@prevozni.com</strong> ili formu na <a href="/kontakt/">/kontakt/</a>.',
+        'en': 'Prevozni is an independent project that aggregates publicly available public-transit data for Serbia and the region. We are not a carrier, a ticket agency, or an official representative of any carrier. For contact use <strong>info@prevozni.com</strong> or the form at <a href="/kontakt/">/kontakt/</a>.',
+        'ru': 'Prevozni — независимый проект, агрегирующий общедоступные данные об общественном транспорте Сербии и региона. Мы не перевозчик, не билетное агентство и не официальный представитель какого-либо перевозчика. Для связи — <strong>info@prevozni.com</strong> или форма на <a href="/kontakt/">/kontakt/</a>.',
+    },
+    'tos.s2_h': {
+        'sr': '2. Usluge',
+        'en': '2. Services',
+        'ru': '2. Услуги',
+    },
+    'tos.s2_body': {
+        'sr': 'Sajt pruža besplatan pregled reda vožnje, cena i prevoznika za međugradske autobuse, vozove i gradski prevoz. Ne prodajemo karte; kupovinu obavlja sam prevoznik ili partnerska platforma na koju vas vodi dugme "Kupi". Ne garantujemo dostupnost polaska koji se prikazuje — proverite direktno kod prevoznika pre putovanja.',
+        'en': 'The site provides free schedule, price and carrier information for intercity buses, trains and urban transport. We do not sell tickets; purchase is handled by the carrier itself or by a partner platform reached via the "Buy" button. We do not guarantee the availability of any displayed departure — please verify directly with the carrier before travelling.',
+        'ru': 'Сайт предоставляет бесплатную информацию о расписании, ценах и перевозчиках для междугородних автобусов, поездов и городского транспорта. Мы не продаём билеты; покупка осуществляется самим перевозчиком или партнёрской платформой по кнопке «Купить». Мы не гарантируем наличие отображаемого рейса — проверяйте непосредственно у перевозчика перед поездкой.',
+    },
+    'tos.s3_h': {
+        'sr': '3. Tačnost podataka',
+        'en': '3. Data accuracy',
+        'ru': '3. Точность данных',
+    },
+    'tos.s3_body': {
+        'sr': 'Podaci dolaze iz više javnih izvora (vidi <a href="/o-nama/">/o-nama/</a>) i osvežavaju se automatski. Trudimo se da budu tačni, ali ih pružamo "takve kakvi jesu" — bez garancije o ažurnosti, potpunosti ili pogodnosti za određenu namenu. Prevoznici mogu u svakom trenutku promeniti red vožnje, cene ili ukinuti liniju; uvek proverite zvanični sajt prevoznika ili stanice pre puta.',
+        'en': 'Data comes from several public sources (see <a href="/o-nama/">/o-nama/</a>) and is refreshed automatically. We aim for accuracy but provide it "as is" — without warranty of timeliness, completeness or fitness for a particular purpose. Carriers can change schedules, prices or cancel lines at any time; always check the carrier\'s or station\'s official site before travelling.',
+        'ru': 'Данные поступают из нескольких публичных источников (см. <a href="/o-nama/">/o-nama/</a>) и обновляются автоматически. Мы стремимся к точности, но предоставляем данные «как есть», без гарантий актуальности, полноты или пригодности для конкретной цели. Перевозчики могут в любой момент изменить расписание, цены или отменить рейс; всегда сверяйтесь с официальным сайтом перевозчика или станции перед поездкой.',
+    },
+    'tos.s4_h': {
+        'sr': '4. Partnerski linkovi (affiliate disclosure)',
+        'en': '4. Affiliate links (disclosure)',
+        'ru': '4. Партнёрские ссылки (disclosure)',
+    },
+    'tos.s4_body': {
+        'sr': 'Neki linkovi za kupovinu karte (dugme "Kupi" pored polaska) vode na partnerske platforme <strong>Bookaway</strong>, <strong>FlixBus</strong> ili <strong>Omio</strong>. Ako kupite kartu preko takvog linka, Prevozni može da dobije malu proviziju koja pokriva troškove održavanja sajta. <strong>Cena koju vi plaćate se ne menja.</strong> Partnerski linkovi su jasno obeleženi kao "Kupi" a u naš sistem se beleži samo anonimni agregirani zapis klika (bez ličnih podataka) — detalji u <a href="/privatnost/">Politici privatnosti</a>.',
+        'en': 'Some ticket-purchase links (the "Buy" button next to a departure) go to partner platforms <strong>Bookaway</strong>, <strong>FlixBus</strong> or <strong>Omio</strong>. If you buy a ticket via such a link, Prevozni may receive a small commission that helps cover hosting and maintenance. <strong>The price you pay is not affected.</strong> Affiliate links are clearly labelled "Buy" and only an anonymous aggregate click record (no personal data) is stored on our side — details in the <a href="/privatnost/">Privacy Policy</a>.',
+        'ru': 'Некоторые ссылки покупки билета (кнопка «Купить» рядом с рейсом) ведут на партнёрские платформы <strong>Bookaway</strong>, <strong>FlixBus</strong> или <strong>Omio</strong>. Если вы покупаете билет по такой ссылке, Prevozni может получить небольшую комиссию, которая покрывает расходы на хостинг и поддержку. <strong>Цена для вас не меняется.</strong> Партнёрские ссылки явно помечены как «Купить», а у нас сохраняется только анонимная агрегированная запись клика (без персональных данных) — подробности в <a href="/privatnost/">Политике конфиденциальности</a>.',
+    },
+    'tos.s5_h': {
+        'sr': '5. Korisnički sadržaj (recenzije)',
+        'en': '5. User content (reviews)',
+        'ru': '5. Пользовательский контент (отзывы)',
+    },
+    'tos.s5_body': {
+        'sr': 'Korisnici mogu da ostave recenziju rute. Zadržavate autorska prava nad tekstom koji ste napisali; slanjem nam dajete <strong>ne-isključivu, besplatnu, globalnu licencu</strong> da recenziju javno prikazujemo, indeksiramo i prevodimo kada je to potrebno. Zabranjujemo: spam, linkove, lične podatke trećih lica, uvrede i govor mržnje. Zadržavamo pravo da moderiramo, uredimo ili obrišemo recenziju bez prethodnog obaveštenja. Možete zatražiti brisanje svoje recenzije dugmetom "Zatraži brisanje" ispod nje, u skladu sa <a href="/privatnost/">Politikom privatnosti</a>.',
+        'en': 'Users may leave route reviews. You retain copyright over the text you wrote; by submitting you grant us a <strong>non-exclusive, royalty-free, worldwide licence</strong> to display, index and translate the review where relevant. We forbid: spam, links, third-party personal data, insults and hate speech. We reserve the right to moderate, edit or delete any review without prior notice. You can request deletion of your review via the "Request deletion" button beneath it, as described in the <a href="/privatnost/">Privacy Policy</a>.',
+        'ru': 'Пользователи могут оставлять отзывы о маршрутах. Авторские права на текст остаются за вами; при отправке вы предоставляете нам <strong>неисключительную, безвозмездную, всемирную лицензию</strong> на публичное отображение, индексацию и перевод отзыва при необходимости. Запрещены: спам, ссылки, персональные данные третьих лиц, оскорбления и язык ненависти. Мы оставляем за собой право модерировать, редактировать или удалять любой отзыв без предварительного уведомления. Удаление своего отзыва можно запросить кнопкой «Запросить удаление» под ним, как описано в <a href="/privatnost/">Политике конфиденциальности</a>.',
+    },
+    'tos.s6_h': {
+        'sr': '6. Ograničenje odgovornosti',
+        'en': '6. Limitation of liability',
+        'ru': '6. Ограничение ответственности',
+    },
+    'tos.s6_body': {
+        'sr': 'U meri dozvoljenoj zakonom, Prevozni i njegovi autori nisu odgovorni za bilo kakvu direktnu, indirektnu, slučajnu ili posledičnu štetu koja proizlazi iz korišćenja ili nemogućnosti korišćenja sajta, uključujući ali ne ograničavajući se na propuštena putovanja, nekorektne informacije o polascima, cenama ili stanicama, i prekide u radu. Korišćenjem sajta prihvatate da je putovanje vaša lična odluka i odgovornost.',
+        'en': 'To the extent permitted by law, Prevozni and its authors are not liable for any direct, indirect, incidental or consequential damages arising from use or inability to use the site, including but not limited to missed trips, incorrect departure / price / station information, and service interruptions. By using the site you agree that travel decisions remain your personal responsibility.',
+        'ru': 'В той мере, в какой это допускается законом, Prevozni и его авторы не несут ответственности за прямые, косвенные, случайные или последующие убытки, возникающие в связи с использованием или невозможностью использования сайта, включая (но не ограничиваясь): пропущенные поездки, неверную информацию о рейсах / ценах / станциях и перебои в работе. Используя сайт, вы соглашаетесь, что решение о поездке остаётся вашей личной ответственностью.',
+    },
+    'tos.s7_h': {
+        'sr': '7. Merodavno pravo',
+        'en': '7. Governing law',
+        'ru': '7. Применимое право',
+    },
+    'tos.s7_body': {
+        'sr': 'Ovi uslovi se tumače u skladu sa pravom Republike Srbije. Za sve sporove koji proizlaze iz korišćenja sajta nadležan je sud u Beogradu, Srbija, osim ako imperativne norme zaštite potrošača u vašoj državi prebivališta ne propisuju drugačije.',
+        'en': 'These terms are interpreted under the law of the Republic of Serbia. Any disputes arising from use of the site fall under the jurisdiction of the court in Belgrade, Serbia, unless mandatory consumer-protection rules in your country of residence require otherwise.',
+        'ru': 'Эти условия толкуются в соответствии с правом Республики Сербия. Все споры, возникающие в связи с использованием сайта, подсудны суду в Белграде, Сербия, если иное не предусмотрено императивными нормами защиты прав потребителей страны вашего проживания.',
+    },
+    'tos.s8_h': {
+        'sr': '8. Izmene uslova',
+        'en': '8. Changes to these terms',
+        'ru': '8. Изменения условий',
+    },
+    'tos.s8_body': {
+        'sr': 'Možemo povremeno da ažuriramo ove uslove. Svaka nova verzija se objavljuje na ovoj stranici sa datumom izmene. Ako izmena bitno utiče na vaša prava, objavljujemo baner na početnoj strani najmanje 14 dana unapred. Nastavkom korišćenja sajta nakon objave prihvatate izmenjene uslove.',
+        'en': 'We may update these terms from time to time. Each new version is published on this page with a change date. If a change materially affects your rights, we publish a homepage banner at least 14 days in advance. Continued use of the site after publication constitutes acceptance of the updated terms.',
+        'ru': 'Мы можем периодически обновлять эти условия. Каждая новая версия публикуется на этой странице с датой изменения. Если изменение существенно затрагивает ваши права, мы вывешиваем баннер на главной странице минимум за 14 дней. Продолжение использования сайта после публикации означает принятие обновлённых условий.',
+    },
 }
 
 SUPPORTED_LANGS = ('sr', 'en', 'ru')

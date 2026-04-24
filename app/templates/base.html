@@ -40,7 +40,25 @@
 <link rel="manifest" href="/static/site.webmanifest">
 {% block head_extra %}{% endblock %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v={{ asset_version }}">
-<script defer src="https://analytics.farmako.ro/umami" data-website-id="b8703518-4b58-4069-9a90-a4fb28cf3649"></script>
+<script>
+/* Umami loader — GDPR-gated. Only loads analytics when the user
+   explicitly consented to "all" cookies. `essential` (or no cookie at all
+   while the banner is visible) skips loading. The main cookie-consent
+   script below also appends Umami on-demand when the user later clicks
+   "Accept all", so tracking resumes without a page reload. */
+(function(){
+  try {
+    var m = document.cookie.match(/(?:^|; )cookie_consent=([^;]+)/);
+    if (m && m[1] === 'all') {
+      var s = document.createElement('script');
+      s.defer = true;
+      s.src = 'https://analytics.farmako.ro/umami';
+      s.setAttribute('data-website-id', 'b8703518-4b58-4069-9a90-a4fb28cf3649');
+      document.head.appendChild(s);
+    }
+  } catch(e){}
+})();
+</script>
 {% if config.GA_TRACKING_ID %}
 <script async src="https://www.googletagmanager.com/gtag/js?id={{ config.GA_TRACKING_ID }}"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ config.GA_TRACKING_ID }}');</script>
@@ -68,11 +86,62 @@
 
 {% include '_partials/_footer.html' %}
 
+{% include '_partials/_cookie_banner.html' %}
+
 {% include '_partials/_install_banner.html' %}
 
 {% block scripts %}{% endblock %}
 
 <script defer src="{{ url_for('static', filename='js/install-promo.js') }}?v={{ asset_version }}"></script>
+
+<script>
+/* ── Cookie consent banner ───────────────────────────────────────────────
+   Shows the banner until the user picks "all" or "essential". Choice
+   persists in `cookie_consent` (1 year). On "all" we dynamically append
+   the Umami script so analytics resume without a reload. The /politika-
+   kolacica/ page exposes a `.js-consent-reset` button that clears the
+   cookie so the banner returns on next navigation. */
+(function(){
+  var KEY = 'cookie_consent';
+  function readConsent(){
+    var m = document.cookie.match(/(?:^|; )cookie_consent=([^;]+)/);
+    return m ? m[1] : '';
+  }
+  function writeConsent(v){
+    var oneYear = 60 * 60 * 24 * 365;
+    document.cookie = KEY + '=' + v + '; path=/; max-age=' + oneYear + '; samesite=lax';
+  }
+  function loadUmami(){
+    if (document.querySelector('script[data-umami-loaded]')) return;
+    var s = document.createElement('script');
+    s.defer = true;
+    s.src = 'https://analytics.farmako.ro/umami';
+    s.setAttribute('data-website-id', 'b8703518-4b58-4069-9a90-a4fb28cf3649');
+    s.setAttribute('data-umami-loaded', '1');
+    document.head.appendChild(s);
+  }
+  var banner = document.getElementById('cookieBanner');
+  if (banner && !readConsent()) {
+    banner.setAttribute('data-visible', 'true');
+    banner.addEventListener('click', function(ev){
+      var btn = ev.target.closest('button[data-consent]');
+      if (!btn) return;
+      var choice = btn.getAttribute('data-consent');
+      writeConsent(choice);
+      banner.setAttribute('data-visible', 'false');
+      if (choice === 'all') loadUmami();
+    });
+  }
+  /* Reset button on /politika-kolacica/ */
+  document.addEventListener('click', function(ev){
+    var btn = ev.target.closest('.js-consent-reset');
+    if (!btn) return;
+    ev.preventDefault();
+    document.cookie = KEY + '=; path=/; max-age=0; samesite=lax';
+    location.reload();
+  });
+})();
+</script>
 
 <script>
 /* Currency switcher — toggles <html class="ccy-eur"> and persists in cookie.

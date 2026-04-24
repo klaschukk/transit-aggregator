@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ _('tos.title') }} — Prevozni{% endblock %}
+{% block meta_description %}{{ _('tos.meta') }}{% endblock %}
+
+{% block content %}
+
+{% from '_partials/_breadcrumb.html' import breadcrumb with context %}
+{{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': _('tos.title')}]) }}
+
+<div class="page-title">
+  <h1>{{ _('tos.title') }}</h1>
+  <p class="page-subtitle">{{ _('tos.intro') }}</p>
+</div>
+
+<section class="prose">
+  <p><em>{{ _('tos.updated') }}</em></p>
+
+  <h2>{{ _('tos.s1_h') }}</h2>
+  <p>{{ _('tos.s1_body')|safe }}</p>
+
+  <h2>{{ _('tos.s2_h') }}</h2>
+  <p>{{ _('tos.s2_body') }}</p>
+
+  <h2>{{ _('tos.s3_h') }}</h2>
+  <p>{{ _('tos.s3_body')|safe }}</p>
+
+  <h2>{{ _('tos.s4_h') }}</h2>
+  <p>{{ _('tos.s4_body')|safe }}</p>
+
+  <h2>{{ _('tos.s5_h') }}</h2>
+  <p>{{ _('tos.s5_body')|safe }}</p>
+
+  <h2>{{ _('tos.s6_h') }}</h2>
+  <p>{{ _('tos.s6_body') }}</p>
+
+  <h2>{{ _('tos.s7_h') }}</h2>
+  <p>{{ _('tos.s7_body') }}</p>
+
+  <h2>{{ _('tos.s8_h') }}</h2>
+  <p>{{ _('tos.s8_body') }}</p>
+</section>
+
+<section class="see-also">
+  <h2 class="see-also__title">{{ _('see_also.title') }}</h2>
+  <div class="see-also__grid">
+    <a href="{{ lang_prefix }}/privatnost/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('privacy.title') }}</span>
+      <span class="see-also__card-meta">{{ _('privacy.intro') }}</span>
+    </a>
+    <a href="{{ lang_prefix }}/politika-kolacica/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('cookies.page.title') }}</span>
+      <span class="see-also__card-meta">{{ _('cookies.page.meta') }}</span>
+    </a>
+  </div>
+</section>
+
+{% endblock %}

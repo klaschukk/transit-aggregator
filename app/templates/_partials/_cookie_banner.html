@@ -1,0 +1,18 @@
+{# Cookie consent banner — rendered on every page. JS in base.html hides it
+   when `cookie_consent` cookie is already set. Slides up from the bottom
+   above content, never modal. #}
+<aside class="cookie-banner" id="cookieBanner" role="region"
+       aria-label="{{ _('cookies.banner.aria') }}" data-visible="false">
+  <div class="cookie-banner__body">
+    <p class="cookie-banner__text">{{ _('cookies.banner.text') }}</p>
+  </div>
+  <div class="cookie-banner__actions">
+    <a href="{{ lang_prefix }}/politika-kolacica/" class="cookie-banner__link">
+      {{ _('cookies.banner.more') }}
+    </a>
+    <button type="button" class="cookie-banner__btn cookie-banner__btn--ghost"
+            data-consent="essential">{{ _('cookies.banner.essential') }}</button>
+    <button type="button" class="cookie-banner__btn"
+            data-consent="all">{{ _('cookies.banner.accept_all') }}</button>
+  </div>
+</aside>

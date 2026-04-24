@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}{{ _('cookies.page.title') }} — Prevozni{% endblock %}
+{% block meta_description %}{{ _('cookies.page.meta') }}{% endblock %}
+
+{% block content %}
+
+{% from '_partials/_breadcrumb.html' import breadcrumb with context %}
+{{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': _('cookies.page.title')}]) }}
+
+<div class="page-title">
+  <h1>{{ _('cookies.page.title') }}</h1>
+  <p class="page-subtitle">{{ _('cookies.page.intro') }}</p>
+</div>
+
+<section class="prose">
+  <h2>{{ _('cookies.page.what_h') }}</h2>
+  <p>{{ _('cookies.page.what_body')|safe }}</p>
+
+  <h2>{{ _('cookies.page.used_h') }}</h2>
+  <p>{{ _('cookies.page.used_intro') }}</p>
+
+  <table class="cookie-table">
+    <thead>
+      <tr>
+        <th>{{ _('cookies.page.th_name') }}</th>
+        <th>{{ _('cookies.page.th_purpose') }}</th>
+        <th>{{ _('cookies.page.th_duration') }}</th>
+        <th>{{ _('cookies.page.th_type') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>cookie_consent</code></td>
+        <td>{{ _('cookies.page.purpose_consent') }}</td>
+        <td>{{ _('cookies.page.dur_year') }}</td>
+        <td class="cookie-table__type">{{ _('cookies.page.type_essential') }}</td>
+      </tr>
+      <tr>
+        <td><code>ccy</code></td>
+        <td>{{ _('cookies.page.purpose_ccy') }}</td>
+        <td>{{ _('cookies.page.dur_year') }}</td>
+        <td class="cookie-table__type">{{ _('cookies.page.type_essential') }}</td>
+      </tr>
+      <tr>
+        <td><code>ab_partner</code></td>
+        <td>{{ _('cookies.page.purpose_ab') }}</td>
+        <td>{{ _('cookies.page.dur_year') }}</td>
+        <td class="cookie-table__type">{{ _('cookies.page.type_essential') }}</td>
+      </tr>
+      <tr>
+        <td><code>session</code></td>
+        <td>{{ _('cookies.page.purpose_session') }}</td>
+        <td>{{ _('cookies.page.dur_session') }}</td>
+        <td class="cookie-table__type">{{ _('cookies.page.type_essential') }}</td>
+      </tr>
+      <tr>
+        <td><code>localStorage: prevozni.saved</code></td>
+        <td>{{ _('cookies.page.purpose_saved') }}</td>
+        <td>{{ _('cookies.page.dur_until_cleared') }}</td>
+        <td class="cookie-table__type">{{ _('cookies.page.type_essential') }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>{{ _('cookies.page.third_party_h') }}</h2>
+  <p>{{ _('cookies.page.third_party_body')|safe }}</p>
+
+  <h2>{{ _('cookies.page.disable_h') }}</h2>
+  <p>{{ _('cookies.page.disable_body') }}</p>
+
+  <h2>{{ _('cookies.page.revoke_h') }}</h2>
+  <p>{{ _('cookies.page.revoke_body') }}</p>
+  <p>
+    <button type="button" class="cookie-banner__btn js-consent-reset">
+      {{ _('cookies.page.revoke_btn') }}
+    </button>
+  </p>
+
+  <h2>{{ _('cookies.page.changes_h') }}</h2>
+  <p>{{ _('cookies.page.changes_body') }}</p>
+</section>
+
+<section class="see-also">
+  <h2 class="see-also__title">{{ _('see_also.title') }}</h2>
+  <div class="see-also__grid">
+    <a href="{{ lang_prefix }}/privatnost/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('privacy.title') }}</span>
+      <span class="see-also__card-meta">{{ _('privacy.intro') }}</span>
+    </a>
+    <a href="{{ lang_prefix }}/uslovi/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('tos.title') }}</span>
+      <span class="see-also__card-meta">{{ _('tos.meta') }}</span>
+    </a>
+  </div>
+</section>
+
+{% endblock %}

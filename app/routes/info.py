@@ -108,6 +108,16 @@ def privacy():
     return render_template('privacy.html')
 
 
+@info_bp.route('/uslovi/')
+def terms():
+    return render_template('terms.html')
+
+
+@info_bp.route('/politika-kolacica/')
+def cookie_policy():
+    return render_template('cookie_policy.html')
+
+
 @info_bp.route('/destinacije/')
 def destinations():
     """Top travel destinations page — SEO content magnet."""

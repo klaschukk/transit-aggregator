@@ -489,6 +489,8 @@ def sitemap_core():
         url('/o-nama/', 'monthly', '0.3'),
         url('/kontakt/', 'monthly', '0.3'),
         url('/privatnost/', 'monthly', '0.2'),
+        url('/uslovi/', 'monthly', '0.2'),
+        url('/politika-kolacica/', 'monthly', '0.2'),
     ]
     return _urlset(pages)
 
