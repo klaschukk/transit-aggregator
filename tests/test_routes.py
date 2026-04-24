@@ -202,9 +202,8 @@ def test_stop_detail_has_lines(client):
 
 def test_health_has_db_field(client):
     data = json.loads(client.get("/health").data)
-    assert "db" in data
-    assert data["db"] is True
-    assert data["status"] == "ok"
+    assert data["checks"]["transit_db"]["ok"] is True
+    assert data["status"] in ("ok", "degraded")
 
 
 # ── f) JSON-LD validation ───────────────────────────────────────────

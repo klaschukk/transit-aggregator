@@ -13,6 +13,8 @@ from pathlib import Path
 import duckdb
 from flask import current_app
 
+from . import observability
+
 logger = logging.getLogger(__name__)
 
 _local = threading.local()
@@ -140,6 +142,8 @@ def init_schema() -> None:
         logger.info("analytics_db schema ready at %s", _path())
     except duckdb.Error as exc:
         logger.error("analytics_db init failed: %s", exc)
+        observability.capture_exception(exc, subsystem='analytics_db',
+                                        op='init_schema')
 
 
 def hash_ip(ip: str) -> str:
@@ -179,6 +183,10 @@ def insert_ba_click(
         )
     except duckdb.Error as exc:
         logger.error("insert_ba_click failed: %s", exc)
+        observability.capture_exception(
+            exc, subsystem='analytics_db', op='insert_ba_click',
+            route_slug=route_slug, surface=surface,
+        )
         _local.conn = None  # reset stale connection
 
 

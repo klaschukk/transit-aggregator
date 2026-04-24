@@ -8,6 +8,8 @@ from typing import Any
 import duckdb
 from flask import current_app
 
+from . import observability
+
 logger = logging.getLogger(__name__)
 
 # Thread-local persistent connections (one per gunicorn worker thread)
@@ -56,10 +58,13 @@ def query(sql: str, params: list[Any] | None = None) -> list[dict]:
         except duckdb.Error as exc2:
             logger.error("DuckDB query failed after reconnect: %s | sql=%s params=%s",
                          exc2, sql, p)
+            observability.capture_exception(exc2, subsystem='duckdb',
+                                            phase='post_reconnect')
             return []
     except duckdb.Error as exc:
         logger.error("DuckDB query error: %s | sql=%s params=%s", exc, sql, p)
         _local.conn = None
+        observability.capture_exception(exc, subsystem='duckdb', phase='query')
         return []
 
 

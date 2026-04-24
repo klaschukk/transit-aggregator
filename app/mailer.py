@@ -19,6 +19,8 @@ from pathlib import Path
 
 from flask import current_app
 
+from . import observability
+
 logger = logging.getLogger(__name__)
 
 _DEV_LOG_FILENAME = 'mail_dev.log'
@@ -84,6 +86,9 @@ def _send_smtp(*, to: str, subject: str, text: str,
         return True
     except (smtplib.SMTPException, OSError) as exc:
         logger.error("SMTP send failed to %s: %s", to, exc)
+        observability.capture_exception(
+            exc, subsystem='smtp', host=host, port=port,
+        )
         # Still write to dev log so the flow stays observable when SMTP
         # is temporarily broken — the user can replay from the log if needed.
         _append_dev_log(to, subject, text, html)

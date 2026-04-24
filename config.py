@@ -43,6 +43,15 @@ class Config:
     SMTP_PASS = os.environ.get('SMTP_PASS', '')
     MAIL_FROM = os.environ.get('MAIL_FROM', 'no-reply@prevozni.com')
 
+    # Sentry error tracking. Empty DSN → sentry_sdk.init() is skipped entirely
+    # so dev/tests never phone home. Traces sample rate applies to performance
+    # spans; keep low — 5K events/mo free tier burns fast at 100% sampling.
+    SENTRY_DSN = os.environ.get('SENTRY_DSN', '')
+    SENTRY_ENV = os.environ.get('SENTRY_ENV', '')  # falls back to FLASK_ENV
+    SENTRY_TRACES_SAMPLE_RATE = float(
+        os.environ.get('SENTRY_TRACES_SAMPLE_RATE', '0.1') or '0.1'
+    )
+
 
 class ProductionConfig(Config):
     DEBUG = False

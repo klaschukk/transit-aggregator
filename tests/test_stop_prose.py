@@ -226,6 +226,82 @@ def test_no_placeholder_leaks_across_10_samples(app_ctx):
             assert 'None' not in text, f'{slug}:{para} has None: {text}'
 
 
+def test_suburban_type_does_not_crash(app_ctx):
+    """Regression: Novi Sad has 36 lines with type='suburban' which crashed
+    prose rendering (KeyError) until we added the label. Test guards against
+    any similar type addition regressing silently."""
+    stop = _make_stop(slug='ns-suburban', city='novi-sad', lat=45.26, lon=19.84)
+    lines = [{'number': 'P1', 'type': 'suburban', 'name': 'A - B',
+              'slug': 'p1', 'color': '#999'}]
+    out = build_prose(stop, lines, [], None, lang='sr')
+    assert out['service'], 'suburban type must render'
+    assert 'prigradskih' in out['service'] or 'P1' in out['service']
+
+
+def test_unknown_type_falls_back_gracefully(app_ctx):
+    """A scraper adding a new line.type (e.g. 'metro' someday) must not
+    crash prose — it falls back to 'bus' semantics."""
+    stop = _make_stop(slug='future-type')
+    lines = [{'number': 'M1', 'type': 'metro-line-2042', 'name': 'A - B',
+              'slug': 'm1', 'color': '#333'}]
+    out = build_prose(stop, lines, [], None, lang='en')
+    assert out['intro'] and out['service']
+    assert '{' not in out['intro']
+
+
+def test_all_db_types_render(app_ctx):
+    """All six types actually present in city_lines render without placeholder
+    leaks, in all three languages."""
+    for t in ('bus', 'tram', 'trolleybus', 'night', 'suburban', 'e-bus', 'bg-voz'):
+        for lang in ('sr', 'en', 'ru'):
+            stop = _make_stop(slug=f'{t}-{lang}')
+            lines = [{'number': '1', 'type': t, 'name': 'A - B',
+                      'slug': 'l1', 'color': '#0d9488'}]
+            out = build_prose(stop, lines, [], None, lang=lang)
+            assert out['service'], f'{t}/{lang} empty'
+            assert '{' not in out['service'], f'{t}/{lang} leaked: {out["service"]}'
+
+
+def test_cyrillic_stop_names_roundtrip(app_ctx):
+    """Many Belgrade stops have Cyrillic names (e.g. 'Младеновац АС'). The
+    generator must pass them through intact without encoding errors."""
+    stop = _make_stop(slug='cyrillic-stop', name='Младеновац АС')
+    out = build_prose(stop, _make_lines(5), [], None, lang='sr')
+    assert 'Младеновац АС' in out['intro']
+    assert '{' not in out['intro']
+
+
+def test_all_four_paragraphs_always_populated(app_ctx):
+    """Across 20 randomly shaped inputs, every returned prose has all 4
+    paragraph keys with non-empty content (unless zero-line, which returns {})."""
+    import random
+    rng = random.Random(123)
+    for i in range(20):
+        n_lines = rng.randint(1, 40)
+        has_coords = rng.random() < 0.9
+        stop = _make_stop(
+            slug=f'rand-{i}',
+            lat=44.80 + rng.uniform(-0.05, 0.05) if has_coords else None,
+            lon=20.45 + rng.uniform(-0.05, 0.05) if has_coords else None,
+            city=rng.choice(['beograd', 'novi-sad', 'nis', 'kragujevac']),
+        )
+        lines = _make_lines(n_lines, types=('bus', 'tram', 'night', 'suburban'))
+        out = build_prose(stop, lines, [], None, lang='sr')
+        for key in ('intro', 'service', 'location', 'tip'):
+            assert key in out and out[key], f'rand-{i} {key} empty'
+            assert '{' not in out[key]
+
+
+def test_lang_prefix_threads_through_to_tip(app_ctx):
+    """/ru and /en pages must have correctly prefixed catalog links so users
+    stay in their language on click-through. Regression: earlier build hardcoded /rute/."""
+    stop = _make_stop()
+    ru = build_prose(stop, _make_lines(3), [], None, lang='ru', lang_prefix='/ru')
+    en = build_prose(stop, _make_lines(3), [], None, lang='en', lang_prefix='/en')
+    assert '/ru/rute/' in ru['tip'], f'RU tip missing /ru prefix: {ru["tip"]}'
+    assert '/en/rute/' in en['tip'], f'EN tip missing /en prefix: {en["tip"]}'
+
+
 def test_word_count_in_spec_range(app_ctx):
     """Spec: 150-300 words (when the stop has rich data: GTFS + nearby + multiple lines).
     Loose lower bound here — templates aim for >100, real stops with GTFS top 150."""

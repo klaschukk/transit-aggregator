@@ -111,23 +111,26 @@ _INTRO_POI_SUFFIX: dict[str, list[str]] = {
 
 
 _SERVICE: dict[str, list[str]] = {
+    # All four variants put {type_breakdown} after an em-dash or semicolon so
+    # the breakdown fragment ("od toga autobusa 5, …") flows as a subordinate
+    # clause without a capitalization mismatch.
     'sr': [
-        'Linije koje staju na ovom stajalištu su {line_numbers}. {type_breakdown}.',
+        'Linije koje staju na ovom stajalištu su {line_numbers} — {type_breakdown}.',
         'Sa stajališta polaze linije {line_numbers} — {type_breakdown}.',
         'Ovo stajalište opslužuju linije {line_numbers}; {type_breakdown}.',
-        'Kroz stajalište prolaze linije: {line_numbers}. {type_breakdown}.',
+        'Kroz stajalište prolaze linije {line_numbers}; {type_breakdown}.',
     ],
     'en': [
-        'Lines calling at this stop: {line_numbers}. {type_breakdown}.',
+        'Lines calling at this stop: {line_numbers} — {type_breakdown}.',
         'From this stop you can take lines {line_numbers} — {type_breakdown}.',
         'This stop is served by lines {line_numbers}; {type_breakdown}.',
-        'Lines running through the stop: {line_numbers}. {type_breakdown}.',
+        'Lines running through the stop: {line_numbers}; {type_breakdown}.',
     ],
     'ru': [
-        'Здесь останавливаются линии {line_numbers}. {type_breakdown}.',
+        'Здесь останавливаются линии {line_numbers} — {type_breakdown}.',
         'С этой остановки отправляются линии {line_numbers} — {type_breakdown}.',
         'Остановку обслуживают линии {line_numbers}; {type_breakdown}.',
-        'Через остановку проходят линии: {line_numbers}. {type_breakdown}.',
+        'Через остановку проходят линии: {line_numbers}; {type_breakdown}.',
     ],
 }
 
@@ -347,11 +350,14 @@ _DISTRICT_LABELS: dict[str, dict[str, str]] = {
 
 _VEHICLE_KIND: dict[str, dict[str, str]] = {
     'sr': {'bus': 'autobusko', 'tram': 'tramvajsko', 'trolleybus': 'trolejbusko',
-           'night': 'noćno', 'e-bus': 'e-bus', 'bg-voz': 'železničko', 'mixed': 'gradsko'},
+           'night': 'noćno', 'e-bus': 'e-bus', 'bg-voz': 'železničko',
+           'suburban': 'prigradsko', 'mixed': 'gradsko'},
     'en': {'bus': 'bus', 'tram': 'tram', 'trolleybus': 'trolleybus',
-           'night': 'night', 'e-bus': 'e-bus', 'bg-voz': 'rail', 'mixed': 'mixed'},
+           'night': 'night', 'e-bus': 'e-bus', 'bg-voz': 'rail',
+           'suburban': 'suburban', 'mixed': 'mixed'},
     'ru': {'bus': 'автобусная', 'tram': 'трамвайная', 'trolleybus': 'троллейбусная',
-           'night': 'ночная', 'e-bus': 'e-bus', 'bg-voz': 'железнодорожная', 'mixed': 'смешанная'},
+           'night': 'ночная', 'e-bus': 'e-bus', 'bg-voz': 'железнодорожная',
+           'suburban': 'пригородная', 'mixed': 'смешанная'},
 }
 
 _SIZE_CATEGORY: dict[str, list[str]] = {
@@ -395,18 +401,24 @@ def _type_breakdown(lines: list[dict], lang: str) -> str:
     """Human sentence fragment: 'autobusa 15, tramvaja 2, trolejbusa 3'."""
     counts: dict[str, int] = {}
     for line in lines:
-        counts[line.get('type') or 'bus'] = counts.get(line.get('type') or 'bus', 0) + 1
-    order = ['bus', 'tram', 'trolleybus', 'night', 'e-bus', 'bg-voz']
+        t = line.get('type') or 'bus'
+        counts[t] = counts.get(t, 0) + 1
+    # Order covers all current DB types; unknown types fall through and are
+    # silently dropped from the breakdown rather than crashing prose render.
+    order = ['bus', 'tram', 'trolleybus', 'night', 'suburban', 'e-bus', 'bg-voz']
     labels = {
         'sr': {'bus': 'autobusa', 'tram': 'tramvaja', 'trolleybus': 'trolejbusa',
-               'night': 'noćnih', 'e-bus': 'e-bus linija', 'bg-voz': 'BG Voz linija'},
+               'night': 'noćnih', 'suburban': 'prigradskih',
+               'e-bus': 'e-bus linija', 'bg-voz': 'BG Voz linija'},
         # English plural handled per-count below to avoid "1 trams".
         'en': {'bus': ('bus', 'buses'), 'tram': ('tram', 'trams'),
                'trolleybus': ('trolleybus', 'trolleybuses'),
                'night': ('night line', 'night lines'),
+               'suburban': ('suburban line', 'suburban lines'),
                'e-bus': ('e-bus', 'e-buses'), 'bg-voz': ('BG Voz', 'BG Voz')},
         'ru': {'bus': 'автобусных', 'tram': 'трамвайных', 'trolleybus': 'троллейбусных',
-               'night': 'ночных', 'e-bus': 'e-bus', 'bg-voz': 'BG Voz'},
+               'night': 'ночных', 'suburban': 'пригородных',
+               'e-bus': 'e-bus', 'bg-voz': 'BG Voz'},
     }[lang]
     parts: list[str] = []
     for t in order:
@@ -470,8 +482,11 @@ def _compute_slots(
     size_category = _SIZE_CATEGORY[lang][size_bucket]
     size_category_ru = _SIZE_CATEGORY['ru'][size_bucket]
 
-    vkind = _VEHICLE_KIND[lang][primary_type]
-    vkind_ru = _VEHICLE_KIND['ru'][primary_type]
+    # Fall back to 'bus' (the overwhelming majority) for any future type not
+    # yet in the label maps — future-proofs prose rendering against new scraper
+    # types entering the DB without a code change.
+    vkind = _VEHICLE_KIND[lang].get(primary_type, _VEHICLE_KIND[lang]['bus'])
+    vkind_ru = _VEHICLE_KIND['ru'].get(primary_type, _VEHICLE_KIND['ru']['bus'])
 
     city_label = _CITY_LABELS[lang].get(city, city.title())
     city_loc = _CITY_LABELS_LOC[lang].get(city, city_label)

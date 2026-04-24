@@ -8,9 +8,32 @@ set -o pipefail
 PROJECT=/home/klaschuk/transit
 VENV=$PROJECT/venv/bin/python3
 LOG=$PROJECT/logs/nightly_$(date +%Y%m%d).log
+STARTED_TS=$(date +%s)
 
 mkdir -p "$PROJECT/logs"
 echo "=== START $(date) ===" >> "$LOG"
+
+# Write a machine-readable marker for /health. Used by the Flask /health
+# endpoint to surface "nightly last ran 8h ago, status=ok".
+write_marker() {
+  local status="$1"
+  local http="${2:-}"
+  local now_iso
+  now_iso=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+  local now_ts
+  now_ts=$(date +%s)
+  local duration=$((now_ts - STARTED_TS))
+  cat > "$PROJECT/logs/last_refresh.json" <<EOF
+{"status":"$status","finished_at":"$now_iso","finished_ts":$now_ts,"duration_s":$duration,"health_http":"$http"}
+EOF
+}
+
+# Ping Sentry. No-op when SENTRY_DSN is unset; otherwise captures a message
+# tagged with job=nightly so alerts can route on that tag.
+sentry_ping() {
+  "$VENV" "$PROJECT/scripts/sentry_notify.py" "$1" "${2:-error}" job=nightly \
+    >> "$LOG" 2>&1 || true
+}
 
 # Stop service to release DB lock
 sudo systemctl stop transit
@@ -39,6 +62,8 @@ if [ $BUILD_STATUS -ne 0 ]; then
   echo "FATAL: build_db failed (exit $BUILD_STATUS)" >> "$LOG"
   sudo systemctl start transit
   echo "FAIL $(date)" > "$PROJECT/logs/last_refresh.txt"
+  write_marker "fail"
+  sentry_ping "nightly_refresh: build_db failed exit=$BUILD_STATUS" fatal
   echo "=== FAILED $(date) ===" >> "$LOG"
   exit 1
 fi
@@ -68,10 +93,18 @@ if [ "$STATUS" != "200" ]; then
   sleep 3
   STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 http://127.0.0.1:5000/health)
   echo "Retry health check: $STATUS" >> "$LOG"
+  if [ "$STATUS" != "200" ]; then
+    sentry_ping "nightly_refresh: /health still not 200 after restart (got $STATUS)" error
+  fi
 fi
 
 echo "=== DONE $(date) ===" >> "$LOG"
 echo "$STATUS $(date)" > "$PROJECT/logs/last_refresh.txt"
+if [ "$STATUS" = "200" ]; then
+  write_marker "ok" "$STATUS"
+else
+  write_marker "degraded" "$STATUS"
+fi
 
 # Cleanup logs older than 14 days
 find "$PROJECT/logs" -name "nightly_*.log" -mtime +14 -delete 2>/dev/null || true

@@ -76,7 +76,12 @@ class Bookaway(Partner):
     """Primary partner. Strongest Balkans coverage, highest commission band."""
     key = 'bookaway'
     name = 'Bookaway'
-    brand_color = '#059669'
+    # Bookaway brand is emerald-600 (#059669); at 13.6 px normal white its
+    # ratio on white text is 3.76:1 (WCAG AA fail). Stepping down one tone
+    # to emerald-700 (#047857) clears 4.65:1 and is virtually indistinguishable
+    # to the eye — and matches the old :hover, so there's no flicker. The
+    # primary revenue CTA must pass AA first; brand exactness second.
+    brand_color = '#047857'
     commission_band = (5.0, 10.0)
     ux_rank = 1
 

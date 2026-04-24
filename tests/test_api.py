@@ -135,7 +135,15 @@ def test_stop_arrivals_nonexistent(client):
 
 
 def test_health_status(client):
-    data = json.loads(client.get("/health").data)
-    assert data["status"] == "ok"
-    assert data["db"] is True
-    assert "service" in data
+    # /health returns HTTP 200 for both "ok" and "degraded" — only "down"
+    # (HTTP 503) pages. Tests tolerate "degraded" because the dev box often
+    # has the live gunicorn holding analytics.duckdb's write lock.
+    resp = client.get("/health")
+    assert resp.status_code == 200
+    data = json.loads(resp.data)
+    assert data["status"] in ("ok", "degraded")
+    assert data["service"] == "prevozni"
+    assert data["checks"]["transit_db"]["ok"] is True
+    assert data["checks"]["logs_writable"] is True
+    assert "version" in data
+    assert "uptime_seconds" in data

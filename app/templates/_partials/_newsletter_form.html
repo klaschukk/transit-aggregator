@@ -26,10 +26,14 @@
       novalidate>
   {% if route_slug %}<input type="hidden" name="route_slug" value="{{ route_slug }}">{% endif %}
   {% if variant != 'footer' %}
+  {# Heading is h2: on home the newsletter is the first section after the
+     hero h1, so h3 would skip a level (axe heading-order fail). On
+     route_detail / city_pair the price-alert block sits between other h2
+     section titles, where h2 is the correct rank anyway. #}
   <div class="newsletter-form__head">
-    <h3 class="newsletter-form__title">
+    <h2 class="newsletter-form__title">
       {% if variant == 'price_alert' %}{{ _('price_alert.title') }}{% else %}{{ _('newsletter.title') }}{% endif %}
-    </h3>
+    </h2>
     <p class="newsletter-form__sub">
       {% if variant == 'price_alert' and pair_label %}
         {{ _('price_alert.subtitle').format(pair=pair_label) }}
@@ -46,7 +50,8 @@
       <input type="email" id="nl-email-{{ source }}" name="email"
              class="newsletter-form__input"
              placeholder="{{ _('newsletter.placeholder') }}"
-             autocomplete="email" required maxlength="100">
+             autocomplete="email" inputmode="email" enterkeyhint="send"
+             required maxlength="100">
     </label>
     <button type="submit" class="btn btn--primary newsletter-form__submit">
       {% if variant == 'price_alert' %}{{ _('price_alert.button') }}{% else %}{{ _('newsletter.button') }}{% endif %}

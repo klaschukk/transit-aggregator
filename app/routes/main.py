@@ -348,29 +348,135 @@ def api_cities():
 
 @main_bp.route('/health')
 def health():
-    import os
-    import tempfile
-    db_ok = db_ready()
+    """Structured health probe for cron + ops dashboards.
 
-    logs_ok = False
-    logs_dir = os.path.join(current_app.root_path, '..', 'logs')
+    Contract: always returns JSON (never raises); HTTP 200 only when every
+    critical check is green, 503 otherwise. Never leaks tracebacks or paths
+    outside the project root — exposed to the public internet behind
+    Cloudflare but not gated.
+
+    Checks are deliberately cheap (<50ms total): filesystem stat, a COUNT(*)
+    against a cached connection, and a last-refresh marker file. Heavier
+    probes belong in /admin/* dashboards, not on a cron-polled endpoint.
+    """
+    import json
+    import os
+    import shutil
+    import tempfile
+    from pathlib import Path
+
+    from app import APP_START_TIME, _ASSET_VERSION
+
+    checks: dict = {}
+    critical_ok = True  # transit_db + logs — sets overall http code
+    degraded = False    # analytics_db, nightly — surfaces but doesn't 503
+
+    # ── transit_db: file present, age, route count ──────────────────────
+    db_path_str = current_app.config['DUCKDB_PATH']
+    db_path = Path(db_path_str)
+    transit = {'ok': False, 'age_hours': None, 'routes': None}
+    if db_path.exists():
+        try:
+            age_s = time.time() - db_path.stat().st_mtime
+            transit['age_hours'] = round(age_s / 3600, 1)
+        except OSError:
+            pass
+        try:
+            row = cached_query_one(
+                "SELECT COUNT(*) AS c FROM routes", ttl=60
+            )
+            transit['routes'] = int(row['c']) if row else None
+            transit['ok'] = bool(transit['routes'])
+        except Exception:  # noqa: BLE001 — /health must never raise
+            transit['ok'] = False
+    if not transit['ok']:
+        critical_ok = False
+    # Stale data warning — nightly refresh didn't run or failed silently.
+    if transit['age_hours'] is not None and transit['age_hours'] > 36:
+        degraded = True
+    checks['transit_db'] = transit
+
+    # ── analytics_db: writable (ba_clicks insert path) ──────────────────
+    analytics = {'ok': False}
     try:
-        os.makedirs(logs_dir, exist_ok=True)
+        from app import analytics_db
+        rows = analytics_db.query("SELECT COUNT(*) AS c FROM ba_clicks")
+        if rows:
+            analytics['ok'] = True
+            analytics['clicks_total'] = int(rows[0]['c'])
+    except Exception:  # noqa: BLE001
+        analytics['ok'] = False
+    if not analytics['ok']:
+        degraded = True
+    checks['analytics_db'] = analytics
+
+    # ── logs dir writable (gunicorn access/error) ───────────────────────
+    logs_dir = Path(current_app.root_path).parent / 'logs'
+    logs_ok = False
+    try:
+        logs_dir.mkdir(parents=True, exist_ok=True)
         with tempfile.NamedTemporaryFile(
-            dir=logs_dir, prefix='.healthcheck-', delete=True
+            dir=str(logs_dir), prefix='.healthcheck-', delete=True
         ) as f:
             f.write(b'ok')
         logs_ok = True
     except OSError:
         logs_ok = False
+    if not logs_ok:
+        critical_ok = False
+    checks['logs_writable'] = logs_ok
 
-    status = 'ok' if (db_ok and logs_ok) else 'degraded'
-    code = 200 if status == 'ok' else 503
+    # ── disk free % on the partition hosting the project ────────────────
+    try:
+        usage = shutil.disk_usage(str(logs_dir.parent))
+        free_pct = round(usage.free * 100.0 / usage.total, 1)
+        checks['disk_free_pct'] = free_pct
+        # <10% free means the nightly snapshot will OOM the partition soon.
+        if free_pct < 10:
+            degraded = True
+    except OSError:
+        checks['disk_free_pct'] = None
+
+    # ── nightly refresh status (written by scripts/nightly_refresh.sh) ──
+    nightly = {'last_run': None, 'status': None, 'age_hours': None}
+    marker = logs_dir / 'last_refresh.json'
+    try:
+        if marker.exists():
+            payload = json.loads(marker.read_text(encoding='utf-8'))
+            nightly['last_run'] = payload.get('finished_at')
+            nightly['status'] = payload.get('status')
+            finished_ts = payload.get('finished_ts')
+            if finished_ts:
+                nightly['age_hours'] = round(
+                    (time.time() - float(finished_ts)) / 3600, 1
+                )
+    except (OSError, ValueError, TypeError):
+        pass
+    if nightly['status'] == 'fail':
+        degraded = True
+    # Haven't heard from nightly in >30h — probably cron is broken.
+    if nightly['age_hours'] is not None and nightly['age_hours'] > 30:
+        degraded = True
+    checks['nightly'] = nightly
+
+    # ── derived ─────────────────────────────────────────────────────────
+    uptime = int(time.time() - APP_START_TIME)
+    if not critical_ok:
+        status = 'down'
+        code = 503
+    elif degraded:
+        status = 'degraded'
+        code = 200  # degraded shouldn't page — only hard failures do
+    else:
+        status = 'ok'
+        code = 200
+
     return jsonify({
         'status': status,
         'service': 'prevozni',
-        'db': db_ok,
-        'logs_writable': logs_ok,
+        'version': _ASSET_VERSION,
+        'uptime_seconds': uptime,
+        'checks': checks,
     }), code
 
 

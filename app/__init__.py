@@ -1,10 +1,17 @@
 import os
 import subprocess
+import time
 from pathlib import Path
 
 from flask import Flask, render_template, request, g
 from config import config_map
 from .i18n import get_text, SUPPORTED_LANGS, DEFAULT_LANG
+from . import observability
+
+
+# Worker/process boot timestamp — exposed via /health as uptime_seconds so we
+# can tell at a glance whether gunicorn just restarted (crashloop symptom).
+APP_START_TIME = time.time()
 
 
 def _compute_asset_version(root: Path) -> str:
@@ -45,6 +52,16 @@ def create_app(config_name: str | None = None) -> Flask:
         raise RuntimeError(
             "SECRET_KEY environment variable must be set in production"
         )
+
+    # Sentry — no-op when SENTRY_DSN is empty (dev/tests). Must run before
+    # blueprint registration so Flask error handlers below are already wired
+    # with the integration's hooks.
+    observability.init_sentry(
+        dsn=app.config.get('SENTRY_DSN', ''),
+        environment=app.config.get('SENTRY_ENV') or config_name,
+        release=_ASSET_VERSION,
+        traces_sample_rate=app.config.get('SENTRY_TRACES_SAMPLE_RATE', 0.1),
+    )
 
     # ── i18n: detect language from URL prefix ──
     @app.before_request

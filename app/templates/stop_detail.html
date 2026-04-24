@@ -7,7 +7,7 @@
 
 {% block head_extra %}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BusStop","name":"{{ stop.name }}","containedInPlace":{"@type":"City","name":"{{ city_label }}"}{% if stop.lat and stop.lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stop.lat }},"longitude":{{ stop.lon }}}{% endif %}{% if stop_info and stop_info.first_departure %},"openingHours":"Mo-Fr {{ stop_info.first_departure }}-{{ stop_info.last_departure }}"{% endif %}{% if stop_info and stop_info.line_count %},"description":"{{ stop_info.line_count }} linija: {{ stop_info.line_types|join(', ') }}"{% endif %}}
+{"@context":"https://schema.org","@type":"BusStop","name":"{{ stop.name }}","publicAccess":true,"url":"{{ request.url_root.rstrip('/') }}{{ lang_prefix }}/gradski/{{ city }}/stajaliste/{{ stop.slug }}/","containedInPlace":{"@type":"City","name":"{{ city_label }}","address":{"@type":"PostalAddress","addressCountry":"RS","addressLocality":"{{ city_label }}"}}{% if stop.lat and stop.lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stop.lat }},"longitude":{{ stop.lon }}}{% endif %}{% if stop_info and stop_info.first_departure %},"openingHours":"Mo-Fr {{ stop_info.first_departure }}-{{ stop_info.last_departure }}"{% endif %}{% if stop_info and stop_info.line_count %},"description":"{{ stop_info.line_count }} linija: {{ stop_info.line_types|join(', ') }}"{% endif %}}
 </script>
 {% if stop_info and stop_info.line_count %}
 <script type="application/ld+json">

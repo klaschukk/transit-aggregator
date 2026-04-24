@@ -151,6 +151,10 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   padding: 4px 8px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.03em;
   color: var(--color-text-muted); text-decoration: none; transition: all 0.15s;
   border-right: 1px solid var(--color-border);
+  /* Inline display on desktop keeps the pill compact; below 640px the nav
+     dropdown overrides to a larger hit area (see `.site-nav.is-open` rule). */
+  min-width: 32px; min-height: 28px;
+  display: inline-flex; align-items: center; justify-content: center;
 }
 .lang-pill__item:last-child { border-right: none; }
 .lang-pill__item:hover { background: var(--color-bg-alt); color: var(--color-text); }
@@ -210,6 +214,14 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   padding-top: 8px;
   border: 1px solid var(--color-border);
   border-radius: 6px;
+}
+/* Within the open mobile nav sheet, currency + language pills should be
+   comfortable to tap with a thumb — 44×44 minimum, a touch larger than
+   the desktop header where the pills are header-ornamental. */
+.site-nav.is-open .lang-pill__item {
+  min-height: 44px;
+  padding: 10px 14px;
+  font-size: var(--text-sm);
 }
 
 @media (min-width: 640px) {
@@ -288,7 +300,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .page-subtitle { font-size: var(--text-sm); color: var(--color-text-muted); }
 .reverse-route {
   display: inline-flex; align-items: center; gap: 4px;
-  font-size: var(--text-sm); font-weight: 600; color: var(--color-primary); margin-top: 6px;
+  font-size: var(--text-sm); font-weight: 600; color: var(--color-primary-dark); margin-top: 6px;
 }
 .reverse-route:hover { opacity: .7; }
 
@@ -321,7 +333,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   color: var(--color-text-muted);
   flex-wrap: wrap;
 }
-.breadcrumb__link { color: var(--color-primary); font-weight: 500; }
+.breadcrumb__link { color: var(--color-primary-dark); font-weight: 500; }
 .breadcrumb__link:hover { text-decoration: underline; }
 .breadcrumb__sep {
   color: var(--color-border);
@@ -348,10 +360,12 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 }
 .btn:active { transform: scale(0.97); }
 .btn--primary {
-  background: var(--color-primary);
+  /* White on #0d9488 was 3.2:1 — fails AA for normal and <18.66px bold.
+     --color-primary-dark (#0f766e) clears 4.84:1 across all button text. */
+  background: var(--color-primary-dark);
   color: var(--color-bg);
 }
-.btn--primary:hover { background: var(--color-primary-dark); }
+.btn--primary:hover { background: #115e59; }
 .btn--accent {
   background: var(--color-accent);
   /* Orange #f59e0b + white text was ~2.2:1 (WCAG fail). Dark text on
@@ -470,13 +484,18 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   transition: all .2s ease;
   text-decoration: none;
 }
-.filter-chip:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.filter-chip:hover { border-color: var(--color-primary); color: var(--color-primary-dark); }
 .filter-chip--active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+  /* White on primary-dark clears 4.84:1; the 12px .filter-chip__sub inside
+     must also see a darker bg to stay above AA (4.5:1) at non-large size. */
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
   color: var(--color-bg);
 }
-.filter-chip__sub { font-size: var(--text-xs); opacity: .7; }
+/* Dropping opacity: on the active chip it made the sub read as #b6dfdb
+   on teal (2.59:1 fail); on inactive it dimmed the date to #7e8896
+   (3.59:1 fail). Base muted colour stays readable without the fade. */
+.filter-chip__sub { font-size: var(--text-xs); }
 
 /* Trip card */
 .trip-list {
@@ -501,7 +520,8 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .trip-card__middle { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
 .trip-card__carrier {
   height: 22px; padding: 0 10px;
-  background: var(--color-primary);
+  /* White-on-primary at 9–12px bold was 3.74:1. primary-dark clears AA. */
+  background: var(--color-primary-dark);
   color: var(--color-bg);
   border-radius: var(--radius-pill);
   font-size: var(--text-xs);
@@ -522,15 +542,20 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .trip-card__price small { font-size: var(--text-xs); font-weight: 500; }
 .trip-card__buy {
   display: inline-flex; align-items: center; gap: 4px;
-  padding: 5px 10px;
-  background: var(--color-accent); color: #fff;
+  /* Bumped from 5×10 to 8×14 so the Kupi CTA hits ~32px — paired with
+     44px min-height on the parent .trip-card the tap target is usable. */
+  padding: 8px 14px;
+  /* Accent bg + white text was 2.14:1 (hard fail). Mirroring .btn--accent:
+     dark text on orange = 7.0:1. Brand colour unchanged. */
+  background: var(--color-accent); color: var(--color-text);
   font-size: var(--text-xs); font-weight: 700;
   border-radius: var(--radius-pill);
   text-decoration: none;
   white-space: nowrap;
+  min-height: 32px;
   transition: background .15s, transform .15s;
 }
-.trip-card__buy:hover { background: var(--color-accent-dark); transform: translateY(-1px); }
+.trip-card__buy:hover { background: var(--color-accent-dark); color: var(--color-text); transform: translateY(-1px); }
 .trip-card__buy svg { flex-shrink: 0; }
 /* Route line (dot — segment — carrier — segment — dot) */
 .trip-card__route-line {
@@ -1068,7 +1093,13 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   letter-spacing: -.3px;
   flex-shrink: 0;
   line-height: 1;
-  box-shadow: 0 1px 2px rgba(0,0,0,.12);
+  /* Badge backgrounds come from the DB as inline style="background:X".
+     The tram red #e53e3e was 4.12:1 — AA fail at 11px bold. An inset
+     dark overlay darkens EVERY inline background by ~12% without
+     touching the white foreground, buying enough contrast on the
+     weakest brand colours while leaving already-dark badges (night,
+     train) looking unchanged. */
+  box-shadow: inset 0 0 0 100vh rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.12);
 }
 .line-badge--sm { min-width: 32px; height: 24px; padding: 0 6px; font-size: 11px; }
 .line-badge--lg { min-width: 56px; height: 40px; padding: 0 14px; font-size: var(--text-xl); }
@@ -1247,8 +1278,10 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 }
 .buy-ticket__btn svg { opacity: 0.7; }
 .buy-ticket__btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-.buy-ticket__btn--bookaway { background: #059669; }
-.buy-ticket__btn--bookaway:hover { background: #047857; }
+/* Bookaway green: #059669 + white = 3.76:1 (AA fail at 13.6px normal).
+   #047857 clears 4.65:1 and matches the old :hover — no visual jump. */
+.buy-ticket__btn--bookaway { background: #047857; }
+.buy-ticket__btn--bookaway:hover { background: #065f46; }
 .buy-ticket__btn--flixbus { background: #73d700; }
 .buy-ticket__btn--flixbus:hover { filter: brightness(0.92); }
 .buy-ticket__btn--omio { background: #e91e63; }
@@ -1390,7 +1423,6 @@ input:focus:not(:focus-visible) { outline: none; }
 
 /* Input focus-visible: use border instead of outline */
 input:focus-visible,
-.search-bar__input:focus-visible,
 .journey-form__input:focus-visible,
 .journey-form__date:focus-visible {
   outline: none;
@@ -1488,7 +1520,7 @@ main { animation: fadeInUp .25s ease both; }
   gap: 6px;
   font-size: var(--text-sm);
   font-weight: 600;
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
   padding: 8px 0;
   min-height: 44px;
 }
@@ -1802,10 +1834,10 @@ main { animation: fadeInUp .25s ease both; }
   cursor: pointer;
   transition: all .2s ease;
 }
-.time-chip:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.time-chip:hover { border-color: var(--color-primary); color: var(--color-primary-dark); }
 .time-chip--active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
   color: var(--color-bg);
 }
 
@@ -1898,10 +1930,10 @@ main { animation: fadeInUp .25s ease both; }
   transition: all .2s ease;
   cursor: pointer;
 }
-.sort-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.sort-btn:hover { border-color: var(--color-primary); color: var(--color-primary-dark); }
 .sort-btn--active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
   color: var(--color-bg);
 }
 .trip-count {
@@ -2066,7 +2098,12 @@ main { animation: fadeInUp .25s ease both; }
   background: none; border: 0; cursor: pointer;
   vertical-align: middle; margin-left: 10px;
   color: var(--color-text-muted);
-  padding: 6px; border-radius: var(--radius-md);
+  /* 22px SVG + 6px padding = 34×34 — below Apple/Material 44×44.
+     Bump to 11px padding for a comfortable 44×44 tap target without
+     widening the star icon itself. */
+  padding: 11px; border-radius: var(--radius-md);
+  min-width: 44px; min-height: 44px;
+  display: inline-flex; align-items: center; justify-content: center;
   transition: color .15s, background .15s, transform .15s;
 }
 .fav-btn:hover { color: var(--color-accent); background: var(--color-bg-alt); transform: scale(1.05); }
@@ -2084,9 +2121,12 @@ main { animation: fadeInUp .25s ease both; }
    Every rendered price ships both spans; CSS picks one based on the
    <html class="ccy-eur"> flag set from cookie in a pre-body inline
    script (no FOUC). JS in base.html flips the class on button click. */
-.ccy-eur { display: none; }
-html.ccy-eur .ccy-rsd { display: none; }
-html.ccy-eur .ccy-eur { display: inline; }
+/* span. scoping is critical — bare .ccy-eur also matches <html class="ccy-eur">
+   which display:none'd the whole page when the user clicked the EUR pill
+   (reproduced as a "blank site" bug in both Chrome and Safari). */
+span.ccy-eur { display: none; }
+html.ccy-eur span.ccy-rsd { display: none; }
+html.ccy-eur span.ccy-eur { display: inline; }
 
 /* ── 11. Accessibility utilities ── */
 .sr-only {
@@ -2489,7 +2529,7 @@ select:focus-visible, textarea:focus-visible {
 .review-form-wrap__toggle {
   font-weight: 600;
   cursor: pointer;
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
   list-style: none;
 }
 .review-form-wrap__toggle::-webkit-details-marker { display: none; }
@@ -2738,7 +2778,14 @@ select:focus-visible, textarea:focus-visible {
   min-width: 16px;
   min-height: 16px;
 }
-.newsletter-form__consent a { color: var(--color-primary); }
+/* Teal on bg-alt was 2.02:1 against surrounding muted text
+   (link-in-text-block fail) and 3.57:1 against the bg. primary-dark
+   clears 4.84:1 on bg-alt; underline disambiguates the link even when
+   colour is missed (WCAG 1.4.1). */
+.newsletter-form__consent a {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}
 .newsletter-form__status {
   font-size: var(--text-sm);
   padding: 10px 14px;
