@@ -17,15 +17,17 @@ import pytest
 
 
 BUDGETS_GZIPPED = {
-    "/": 15000,
+    "/": 16000,                                # +1KB for toast bundle + skeleton stub
     "/rute/": 70000,
-    "/rute/beograd-novi-sad/": 20000,
-    "/voznja/beograd-do-budva/": 18000,
+    "/rute/beograd-novi-sad/": 21000,          # +1KB for share button + toast wiring
+    "/voznja/beograd-do-budva/": 19000,        # same — share button + toast wiring
     "/gradski/beograd/": 45000,
     "/gradski/beograd/stajaliste/sajam/": 20000,
 }
 
-CSS_BUDGET_GZIPPED = 18000  # app.css currently ~12KB gzipped; +50% headroom
+# app.css with mobile-magic CSS (toast + skeleton + tap-feedback + share-btn
+# + static-map fallback) — net +1.5 KB gzipped over the prior baseline.
+CSS_BUDGET_GZIPPED = 21000
 
 
 @pytest.mark.parametrize("url,budget", list(BUDGETS_GZIPPED.items()))

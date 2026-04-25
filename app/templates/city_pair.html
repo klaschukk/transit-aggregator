@@ -51,7 +51,7 @@
 {% block content %}
 
 {% from '_partials/_breadcrumb.html' import breadcrumb with context %}
-{% from '_partials/_trip_card.html' import trip_card %}
+{% from '_partials/_trip_card.html' import trip_card with context %}
 {% from '_partials/_stats_strip.html' import stats_strip %}
 {% from '_partials/_filter_panel.html' import filter_panel with context %}
 {% from '_partials/_empty_state.html' import empty_state %}
@@ -71,6 +71,14 @@
             data-key="{{ _from_slug }}-do-{{ _to_slug }}"
             data-from="{{ from_city }}" data-to="{{ to_city }}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+    </button>
+    <button type="button" class="share-btn" data-share-current
+            data-share-title="{{ from_city }} → {{ to_city }} | Prevozni"
+            aria-label="{{ _('a11y.share') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true">
+        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+        <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/>
+      </svg>
     </button>
   </h1>
   <p class="page-subtitle">
@@ -128,7 +136,7 @@
   <div class="seo-block__icon">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
   </div>
-  <div class="seo-block__content">
+  <div class="seo-block__content" data-collapse="1">
     <h2>{{ from_city }} — {{ to_city }}: prevoz</h2>
     <p>
       {% if route.distance_km %}Rastojanje između {{ from_city }} i {{ to_city }} iznosi {{ route.distance_km }} km. {% endif %}
@@ -138,6 +146,12 @@
       {% if route_info.first_departure and route_info.last_departure %}Prvi polazak je u {{ route_info.first_departure }}, a poslednji u {{ route_info.last_departure }}.{% endif %}
     </p>
   </div>
+  <button type="button" class="seo-block__more" data-collapse-toggle
+          data-more-label="{{ _('common.read_more') }}"
+          data-less-label="{{ _('common.read_less') }}"
+          aria-expanded="false">
+    {{ _('common.read_more') }}
+  </button>
 </div>
 {% endif %}
 
@@ -181,6 +195,12 @@
 {% from '_partials/_reviews.html' import reviews_section with context %}
 {{ reviews_section(review_route_slug, reviews, reviews_agg) }}
 {% endif %}
+
+{# Mid-page ad — between reviews and related-pairs grid. Same pattern
+   as route_detail (single slot, post-content, pre-discovery), so
+   ad-density across these two sister page types is identical. #}
+{% from '_partials/_ad_slot.html' import ad_slot with context %}
+{{ ad_slot('city_pair_bottom', format='leaderboard') }}
 
 {% if related_pairs %}
 <section class="see-also">

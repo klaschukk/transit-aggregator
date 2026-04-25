@@ -54,7 +54,7 @@
 {% block content %}
 
 {% from '_partials/_breadcrumb.html' import breadcrumb with context %}
-{% from '_partials/_trip_card.html' import trip_card %}
+{% from '_partials/_trip_card.html' import trip_card with context %}
 {% from '_partials/_stats_strip.html' import stats_strip %}
 {% from '_partials/_empty_state.html' import empty_state %}
 
@@ -79,6 +79,14 @@
             data-key="rute-{{ route.slug }}"
             data-from="{{ route.from_city }}" data-to="{{ route.to_city }}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+    </button>
+    <button type="button" class="share-btn" data-share-current
+            data-share-title="{{ route.from_city }} → {{ route.to_city }} | Prevozni"
+            aria-label="{{ _('a11y.share') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true">
+        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+        <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/>
+      </svg>
     </button>
   </h1>
   <p class="page-subtitle">{{ _('route.schedule') }}</p>
@@ -202,7 +210,11 @@
   <div class="seo-block__icon">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
   </div>
-  <div class="seo-block__content">
+  {# Mobile prose collapse: mobile.js flips data-collapse to "0" when
+     the user taps the .seo-block__more button below. data-collapse="1"
+     is the initial state on every viewport, but app.mobile.css applies
+     the height clip only at ≤767px — desktop reads the full prose. #}
+  <div class="seo-block__content" data-collapse="1">
     <h2>{{ _('route.about') }} {{ route.from_city }} — {{ route.to_city }}</h2>
     <p>{{ _('route.prose_distance').format(from_city=route.from_city, to_city=route.to_city, km=route.distance_km|default(0)) }}
        {% if route.distance_km %}{{ _('route.prose_duration').format(hours=(route.distance_km / 80)|round|int) }}{% endif %}
@@ -214,11 +226,46 @@
     <p>{{ _('route.prose_context').format(from_city=route.from_city, to_city=route.to_city) }}</p>
     <p>{{ _('route.prose_buy').format(from_city=route.from_city, to_city=route.to_city) }}</p>
   </div>
+  <button type="button" class="seo-block__more" data-collapse-toggle
+          data-more-label="{{ _('common.read_more') }}"
+          data-less-label="{{ _('common.read_less') }}"
+          aria-expanded="false">
+    {{ _('common.read_more') }}
+  </button>
 </div>
 
+{# Bottom-of-content ad — single slot AFTER the prose block, BEFORE
+   reviews. Avoids competing with Bookaway/partner CTAs above and stays
+   out of the long-form prose body (Google penalty risk). Reviews come
+   right after so readers reaching this scroll depth are still engaged. #}
+{% from '_partials/_ad_slot.html' import ad_slot with context %}
+{{ ad_slot('route_bottom', format='leaderboard') }}
+
 <!-- Reviews (UGC) — below the prose block, above similar routes -->
+{# A/B Exp 5: review_cta_v1 — placement of the "leave a review" CTA.
+   - 'after-trips' (control): standard inline section, current behaviour.
+   - 'sidebar': inline section + extra prompt floating on desktop right rail
+     above the reviews list.
+   - 'sticky-bottom': inline section + a fixed-bottom mobile bar that
+     scrolls into view once reviews come in sight.
+   Variant value is exposed both as a body data-attr (for CSS) and as a
+   `data-ab-variant` on the form so the conversion JS can include the
+   correct variant when posting /api/ab-convert. #}
+{% set _review_cta_variant = ab_variant('review_cta_v1') %}
+<div data-ab-review-cta="{{ _review_cta_variant }}">
 {% from '_partials/_reviews.html' import reviews_section with context %}
 {{ reviews_section(route.slug, reviews, reviews_agg) }}
+</div>
+{% if _review_cta_variant == 'sticky-bottom' %}
+<div class="ab-review-sticky">
+  <a href="#review-form" class="ab-review-sticky__btn"
+     data-ab-experiment="review_cta_v1"
+     data-ab-variant="{{ _review_cta_variant }}"
+     data-ab-event="cta_click">
+    {{ _('reviews.cta_short') }}
+  </a>
+</div>
+{% endif %}
 
 <!-- Similar routes -->
 {% if similar_routes %}

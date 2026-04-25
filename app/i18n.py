@@ -1261,6 +1261,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Swap origin and destination',
         'ru': 'Поменять местами пункты',
     },
+    'a11y.share': {
+        'sr': 'Podeli',
+        'en': 'Share',
+        'ru': 'Поделиться',
+    },
     'a11y.trip_date': {
         'sr': 'Datum putovanja',
         'en': 'Trip date',

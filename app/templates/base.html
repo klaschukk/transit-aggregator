@@ -40,6 +40,12 @@
 <link rel="manifest" href="/static/site.webmanifest">
 {% block head_extra %}{% endblock %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v={{ asset_version }}">
+{# Mobile design system overlay — only fetched when the viewport actually
+   matches. Browsers still download the resource for `media` mismatches in
+   most cases (low priority), but they don't apply or block render. The
+   net cost on desktop is one ~5KB gzipped GET that doesn't affect FCP. #}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/app.mobile.css') }}?v={{ asset_version }}" media="(max-width: 767px)">
+{% if config.ADSENSE_ID %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ads.css') }}?v={{ asset_version }}">{% endif %}
 <script>
 /* Umami loader — GDPR-gated. Only loads analytics when the user
    explicitly consented to "all" cookies. `essential` (or no cookie at all
@@ -64,16 +70,86 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ config.GA_TRACKING_ID }}');</script>
 {% endif %}
 {% if config.ADSENSE_ID %}
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config.ADSENSE_ID }}" crossorigin="anonymous"></script>
+{# AdSense bootstrap — consent-aware. Three cases:
+
+     cookie_consent=all       → personalized ads, full tracking
+     cookie_consent=essential → non-personalized ads (NPA=1)
+     no consent yet           → script not loaded, house ad fallback
+                                rendered server-side via _ad_slot.html
+
+   `requestNonPersonalizedAds` must be set BEFORE the loader script so
+   the very first impression respects the choice. The cookie consent
+   handler in this same file dynamically reloads the page when the user
+   moves from essential→all so the NPA flag flips to 0 cleanly. #}
+<script>
+(function(){
+  try {
+    var m = document.cookie.match(/(?:^|; )cookie_consent=([^;]+)/);
+    var consent = m ? m[1] : '';
+    if (consent !== 'all' && consent !== 'essential') return;
+    window.adsbygoogle = window.adsbygoogle || [];
+    if (consent === 'essential') {
+      window.adsbygoogle.requestNonPersonalizedAds = 1;
+    }
+    var s = document.createElement('script');
+    s.async = true;
+    s.crossOrigin = 'anonymous';
+    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config.ADSENSE_ID }}';
+    s.setAttribute('data-adsbygoogle', '1');
+    document.head.appendChild(s);
+  } catch(e){}
+})();
+</script>
+{# Adblock detector — sets a cookie if `adsbygoogle` is still undefined
+   5s after page load. House ads check the cookie on the next request
+   and skip the slot script entirely so adblock users see the house
+   creative instead of an empty <ins>. #}
+<script>
+window.addEventListener('load', function(){
+  setTimeout(function(){
+    try {
+      var blocked = !window.adsbygoogle
+        || (Array.isArray(window.adsbygoogle) && window.adsbygoogle.loaded === undefined
+            && document.querySelector('script[data-adsbygoogle]') === null);
+      if (blocked) {
+        document.cookie = 'ads_blocked=1; path=/; max-age=86400; samesite=lax';
+      }
+    } catch(e){}
+  }, 5000);
+});
+</script>
 {% endif %}
+{# A/B Exp 4: currency_default_v1 — for non-Serbo-Croatian visitors only.
+   When the variant is 'eur' AND the user has not picked a currency yet,
+   we default to EUR by setting the html class. The user can still switch
+   via the toggle, which writes a `ccy` cookie that wins on subsequent
+   loads. Calling `ab_variant` here also fires an exposure for any visitor
+   that lands on the page — exactly what the experiment measures.
+   The variant is also stamped on <body data-ab-ccy=...> so the buy-click
+   handler in base.html attributes the conversion to the variant we
+   *rendered with*, not whatever the user has toggled to since. #}
+{% set _ccy_variant = ab_variant('currency_default_v1') %}
 <script>
 /* Currency preference — read cookie BEFORE render to avoid FOUC of RSD↔EUR.
-   Server never sees cookie for caching reasons (sitemap + pages cache cleanly),
-   all currency rendering is client-side via body class. */
-(function(){try{var m=document.cookie.match(/(?:^|; )ccy=(\w+)/);if(m&&m[1]==='eur')document.documentElement.classList.add('ccy-eur');}catch(e){}})();
+   Order:
+     1. Explicit user pick: cookie `ccy=eur` → EUR.
+     2. A/B variant assignment (server-rendered): if variant=='eur' AND no
+        cookie, default to EUR.
+   Server never sees the cookie for caching reasons; rendering is purely
+   client-side via the html class. */
+(function(){
+  try {
+    var picked = document.cookie.match(/(?:^|; )ccy=(\w+)/);
+    if (picked) {
+      if (picked[1] === 'eur') document.documentElement.classList.add('ccy-eur');
+    } else if ({{ ('true' if _ccy_variant == 'eur' else 'false') }}) {
+      document.documentElement.classList.add('ccy-eur');
+    }
+  } catch(e) {}
+})();
 </script>
 </head>
-<body>
+<body data-ab-ccy="{{ _ccy_variant }}">
 <svg aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden"><symbol id="ic-arrow-r" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-7-7l7 7-7 7"/></symbol></svg>
 
 <a href="#main-content" class="skip-link">{{ _('a11y.skip_to_content') }}</a>
@@ -89,6 +165,8 @@
 {% include '_partials/_cookie_banner.html' %}
 
 {% include '_partials/_install_banner.html' %}
+
+{% include '_partials/_mobile_anchor_ad.html' %}
 
 {% block scripts %}{% endblock %}
 
@@ -159,7 +237,18 @@
   var initial = document.documentElement.classList.contains('ccy-eur') ? 'eur' : 'rsd';
   setCcy(initial);
   document.querySelectorAll('.js-ccy-btn').forEach(function(b){
-    b.addEventListener('click', function(){ setCcy(b.dataset.ccy); });
+    b.addEventListener('click', function(){
+      setCcy(b.dataset.ccy);
+      // User-confirmed feedback — the prices switch instantly, but a
+      // toast confirms the choice "stuck" so the user doesn't keep
+      // tapping. Skipped if toast.js hasn't loaded yet (early click).
+      if (window.toast) {
+        window.toast.show(
+          b.dataset.ccy === 'eur' ? 'Switched to EUR' : 'Switched to RSD',
+          { type: 'info', duration: 2000 }
+        );
+      }
+    });
   });
 })();
 </script>
@@ -193,6 +282,14 @@
       var on = idx < 0;
       btn.classList.toggle('fav-btn--on', on);
       btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      // Visual confirmation — added/removed message, plus a tiny
+      // haptic on Android Chrome (no-op elsewhere). The toast doubles
+      // as an action-undo affordance pattern that's easy to add later.
+      if (window.toast) {
+        window.toast.show(on ? 'Added to saved' : 'Removed from saved',
+          { type: on ? 'success' : 'info', duration: 2200 });
+      }
+      if (window.prevozniHaptic) window.prevozniHaptic(8);
     });
   });
 })();
@@ -253,6 +350,27 @@ if ('serviceWorker' in navigator) {
     return out;
   }
 
+  function logAbConvert(experiment, event, variant, value){
+    /* Same delivery semantics as logBaClick — beacon first, fetch keepalive
+       fallback. Server endpoint /api/ab-convert is a 204 fire-and-forget
+       that records one row in ab_events. */
+    try {
+      var body = JSON.stringify({
+        experiment: experiment, event: event,
+        variant: variant || undefined, value: value || 1,
+      });
+      if (navigator.sendBeacon) {
+        var blob = new Blob([body], {type: 'application/json'});
+        navigator.sendBeacon('/api/ab-convert', blob);
+      } else {
+        fetch('/api/ab-convert', {
+          method: 'POST', headers: {'Content-Type':'application/json'},
+          body: body, keepalive: true,
+        }).catch(function(){});
+      }
+    } catch(e){}
+  }
+
   /* ── Bookaway CTAs (per-trip + whole-route) ── */
   document.addEventListener('click', function(ev){
     var el = ev.target.closest('.trip-card__buy, .buy-ticket__btn--bookaway');
@@ -266,9 +384,49 @@ if ('serviceWorker' in navigator) {
     };
     u('ba_click', payload);
     logBaClick(payload);
+    /* A/B Exp 1 + Exp 2: a buy-button click is a conversion for the CTA-copy
+       and CTA-color experiments. We pass the variant the server rendered
+       (read from data-attrs) so the conversion always lines up with the
+       exposure even if config changed mid-flight. */
+    if (el.dataset.abCta) {
+      logAbConvert('cta_copy_v1', 'buy_click', el.dataset.abCta);
+    }
+    if (el.dataset.abColor) {
+      logAbConvert('cta_color_v1', 'buy_click', el.dataset.abColor);
+    }
+    /* A/B Exp 4: tourist currency-default. We attribute the conversion
+       to the variant the page was *rendered with* — read from
+       body[data-ab-ccy], stamped server-side. Reading the live ccy-eur
+       class would mis-attribute users who toggled currency after load. */
+    var ccyVariant = document.body.dataset.abCcy;
+    if (ccyVariant) {
+      logAbConvert('currency_default_v1', 'buy_click', ccyVariant);
+    }
     /* Don't preventDefault — the <a target="_blank"> navigates naturally
        while sendBeacon / fetch(keepalive) deliver the log. */
   });
+
+  /* ── Generic A/B conversion handler — any element with data-ab-experiment
+     fires logAbConvert on click. Used for review CTA + future surfaces. */
+  document.addEventListener('click', function(ev){
+    var el = ev.target.closest('[data-ab-experiment]');
+    if (!el) return;
+    var exp = el.dataset.abExperiment;
+    var variant = el.dataset.abVariant || '';
+    var event = el.dataset.abEvent || 'click';
+    if (exp && event) logAbConvert(exp, event, variant);
+  });
+
+  /* ── Hero search form submit — A/B Exp 3 conversion on home page. ── */
+  document.addEventListener('submit', function(ev){
+    var form = ev.target.closest('form.search-form, form[data-search-form]');
+    if (!form) return;
+    var heroSub = document.querySelector('[data-ab-hero-sub]');
+    if (heroSub) {
+      logAbConvert('hero_sub_v1', 'search_submit',
+                   heroSub.dataset.abHeroSub);
+    }
+  }, true);
 
   /* ── Currency toggle ── */
   document.querySelectorAll('.js-ccy-btn').forEach(function(btn){
@@ -512,11 +670,19 @@ if ('serviceWorker' in navigator) {
       clearTimeout(timer);
       var q = input.value.trim();
       if (q.length < 1) { dropdown.classList.remove('is-open'); return; }
+      // Show 3-row shimmer while the autocomplete request is in flight.
+      // Cleared by show(); .catch() also resets so a network failure
+      // doesn't leave the user staring at a permanent placeholder.
+      dropdown.innerHTML =
+        '<div class="autocomplete__item"><span class="skeleton-row" style="width:60%"></span></div>' +
+        '<div class="autocomplete__item"><span class="skeleton-row" style="width:40%"></span></div>' +
+        '<div class="autocomplete__item"><span class="skeleton-row" style="width:75%"></span></div>';
+      dropdown.classList.add('is-open');
       timer = setTimeout(function() {
         fetch('/api/cities?q=' + encodeURIComponent(q))
           .then(function(r) { return r.json(); })
           .then(show)
-          .catch(function() {});
+          .catch(function() { dropdown.classList.remove('is-open'); });
       }, 150);
     });
 
@@ -614,5 +780,13 @@ if ('serviceWorker' in navigator) {
   });
 })();
 </script>
+{# Toast notifications — minimal API, no deps. Loaded BEFORE mobile.js
+   so mobile.js's share / haptic helpers can call window.toast.show
+   without a load-order race. #}
+<script src="{{ url_for('static', filename='js/toast.js') }}?v={{ asset_version }}" defer></script>
+{# Mobile UX behaviours — the script self-bails on desktop via matchMedia,
+   so loading it everywhere is cheap. `defer` makes sure it runs after
+   parsing without blocking the LCP path. #}
+<script src="{{ url_for('static', filename='js/mobile.js') }}?v={{ asset_version }}" defer></script>
 </body>
 </html>
