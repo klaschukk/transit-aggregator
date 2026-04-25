@@ -32,9 +32,15 @@ def send_mail(
     subject: str,
     text: str,
     html: str | None = None,
+    list_unsubscribe: str | None = None,
 ) -> bool:
     """Deliver or log. Returns True on success (including DEV-log success),
-    False only when both SMTP and the fallback file write failed."""
+    False only when both SMTP and the fallback file write failed.
+
+    list_unsubscribe: when set, attaches the RFC 8058 / RFC 2369 headers
+    Gmail and Yahoo use to render their one-click unsubscribe button.
+    Pass the per-recipient unsubscribe URL — the wrapping in
+    `<https://...>` and the List-Unsubscribe-Post line are added here."""
     to = (to or '').strip()
     if not to:
         logger.warning("send_mail called with empty recipient")
@@ -42,13 +48,15 @@ def send_mail(
 
     host = current_app.config.get('SMTP_HOST', '')
     if not host:
-        return _append_dev_log(to, subject, text, html)
+        return _append_dev_log(to, subject, text, html, list_unsubscribe)
 
-    return _send_smtp(to=to, subject=subject, text=text, html=html)
+    return _send_smtp(to=to, subject=subject, text=text, html=html,
+                      list_unsubscribe=list_unsubscribe)
 
 
 def _send_smtp(*, to: str, subject: str, text: str,
-               html: str | None) -> bool:
+               html: str | None,
+               list_unsubscribe: str | None = None) -> bool:
     cfg = current_app.config
     host = cfg.get('SMTP_HOST', '')
     port = int(cfg.get('SMTP_PORT', 587))
@@ -62,6 +70,12 @@ def _send_smtp(*, to: str, subject: str, text: str,
     msg['Subject'] = subject
     msg['From'] = sender
     msg['To'] = to
+    if list_unsubscribe:
+        # Gmail's one-click POST + the legacy mailto/URL list. Both are
+        # required: the POST header alone produces the dashboard button,
+        # but Outlook 2019 and older Apple Mail still need the URL form.
+        msg['List-Unsubscribe'] = f'<{list_unsubscribe}>'
+        msg['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click'
     msg.set_content(text)
     if html:
         msg.add_alternative(html, subtype='html')
@@ -96,7 +110,8 @@ def _send_smtp(*, to: str, subject: str, text: str,
 
 
 def _append_dev_log(to: str, subject: str, text: str,
-                    html: str | None) -> bool:
+                    html: str | None,
+                    list_unsubscribe: str | None = None) -> bool:
     try:
         root = Path(current_app.root_path).parent
         log_dir = root / 'logs'
@@ -106,9 +121,12 @@ def _append_dev_log(to: str, subject: str, text: str,
             f.write(
                 f"\n{'=' * 60}\n"
                 f"{datetime.utcnow().isoformat()}Z  to={to}\n"
-                f"subject: {subject}\n\n"
-                f"{text}\n"
+                f"subject: {subject}\n"
             )
+            if list_unsubscribe:
+                f.write(f"List-Unsubscribe: <{list_unsubscribe}>\n")
+                f.write("List-Unsubscribe-Post: List-Unsubscribe=One-Click\n")
+            f.write(f"\n{text}\n")
             if html:
                 f.write(f"\n-- HTML --\n{html}\n")
         return True

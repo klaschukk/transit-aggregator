@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}{{ campaign.slug }} — Compose · Prevozni Admin{% endblock %}
+{% block content %}
+<style>
+  .nl-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--color-border); margin: 16px 0 0; }
+  .nl-tab { padding: 10px 16px; cursor: pointer; border: none; background: none; font-weight: 600; color: var(--color-text-muted); border-bottom: 2px solid transparent; }
+  .nl-tab.is-active { color: var(--color-primary-dark); border-bottom-color: var(--color-primary); }
+  .nl-pane { display: none; padding: 16px 0; }
+  .nl-pane.is-active { display: block; }
+  .nl-field { display: block; margin: 12px 0; }
+  .nl-field label { display: block; font-size: 12px; color: var(--color-text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .04em; font-weight: 700; }
+  .nl-field input[type="text"], .nl-field textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--color-border);
+    border-radius: 6px; font-size: 14px; font-family: var(--font); box-sizing: border-box;
+  }
+  .nl-field textarea { min-height: 280px; font-family: ui-monospace, "Menlo", monospace; line-height: 1.5; }
+  .nl-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 24px; }
+  .nl-validate { background: var(--color-bg-alt); padding: 12px 16px; border-radius: 8px; margin-top: 16px; font-size: 13px; }
+  .nl-score { font-size: 28px; font-weight: 800; color: var(--color-primary-dark); }
+  .nl-reason { padding: 4px 0; }
+  .nl-reason--fail { color: #991b1b; }
+  .nl-reason--warn { color: #b45309; }
+  .nl-reason--info { color: var(--color-text-muted); }
+  .nl-preview { width: 100%; height: 600px; border: 1px solid var(--color-border); border-radius: 8px; }
+  .nl-aud { background: var(--color-bg-alt); padding: 12px 16px; border-radius: 8px; margin: 12px 0; }
+  .nl-aud textarea { width: 100%; min-height: 120px; font-family: ui-monospace, "Menlo", monospace; font-size: 13px; padding: 8px; border: 1px solid var(--color-border); border-radius: 4px; box-sizing: border-box; }
+</style>
+
+<p><a href="{{ url_for('admin.newsletter_index') }}">← All campaigns</a></p>
+<h1>{{ campaign.slug }}</h1>
+<p class="page-subtitle">
+  Status: <strong>{{ campaign.status }}</strong> · Kind: {{ campaign.template_kind or '—' }} ·
+  Audience estimate: <strong>{{ audience_count }}</strong> subscriber(s)
+</p>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}<div class="schedule-disclaimer">{% for m in messages %}{{ m }}<br>{% endfor %}</div>{% endif %}
+{% endwith %}
+
+<form method="post" action="{{ url_for('admin.newsletter_compose', campaign_id=campaign.id) }}" id="composeForm">
+  <input type="hidden" name="op" id="op" value="save">
+
+  <div class="nl-tabs" role="tablist">
+    {% for code, label in [('sr','Srpski'),('en','English'),('ru','Русский')] %}
+      <button type="button" class="nl-tab{% if loop.first %} is-active{% endif %}"
+              data-tab="{{ code }}">{{ label }}</button>
+    {% endfor %}
+  </div>
+
+  {% for code in ['sr','en','ru'] %}
+  <div class="nl-pane{% if loop.first %} is-active{% endif %}" data-pane="{{ code }}" lang="{{ code }}">
+    <div class="nl-field">
+      <label for="subject_{{ code }}">Subject ({{ code }})</label>
+      <input type="text" id="subject_{{ code }}" name="subject_{{ code }}"
+             value="{{ campaign['subject_' ~ code] or '' }}" maxlength="200">
+    </div>
+    <div class="nl-field">
+      <label for="preheader_{{ code }}">Preheader ({{ code }})</label>
+      <input type="text" id="preheader_{{ code }}" name="preheader_{{ code }}"
+             value="{{ campaign['preheader_' ~ code] or '' }}" maxlength="200">
+    </div>
+    <div class="nl-field">
+      <label for="body_md_{{ code }}">Body (markdown — placeholders <code>{{ '{{unsub_url}}' }}</code> available)</label>
+      <textarea id="body_md_{{ code }}" name="body_md_{{ code }}">{{ campaign['body_md_' ~ code] or '' }}</textarea>
+    </div>
+    <p>
+      <a target="_blank" rel="noopener"
+         href="{{ url_for('admin.newsletter_preview', campaign_id=campaign.id, lang=code) }}">
+         Open HTML preview ({{ code }}) →
+      </a>
+    </p>
+  </div>
+  {% endfor %}
+
+  <h2>Audience filter (JSON)</h2>
+  <div class="nl-aud">
+    <p style="margin:0 0 8px;color:var(--color-text-muted);font-size:13px">
+      Keys: <code>lang</code>, <code>source</code>, <code>route_slug</code>,
+      <code>min_days_old</code>, <code>max_days_old</code>,
+      <code>exclude_unsubscribed</code>, <code>exclude_suppressed</code>.
+    </p>
+    <textarea id="audience_filter_json" name="audience_filter_json">{{ audience_filter_json }}</textarea>
+  </div>
+
+  <div class="nl-actions">
+    <button type="button" class="btn btn--outline" id="btnValidate">Validate</button>
+    <button type="submit" class="btn btn--primary" data-op="save">Save draft</button>
+    <button type="submit" class="btn btn--accent" data-op="test">Send test to ADMIN_EMAIL</button>
+    <button type="submit" class="btn btn--primary" data-op="send_now"
+            onclick="return confirm('Send to live audience now? This is irreversible.')">
+      Send now
+    </button>
+  </div>
+
+  <div id="validateBox" class="nl-validate" hidden>
+    <div class="nl-score" id="validateScore">—</div>
+    <div id="validateReasons"></div>
+  </div>
+</form>
+
+<script>
+(function(){
+  // Tab switcher
+  var tabs = document.querySelectorAll('.nl-tab');
+  var panes = document.querySelectorAll('.nl-pane');
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){
+      tabs.forEach(function(x){ x.classList.remove('is-active'); });
+      t.classList.add('is-active');
+      var code = t.dataset.tab;
+      panes.forEach(function(p){ p.classList.toggle('is-active', p.dataset.pane === code); });
+    });
+  });
+
+  // Submit-op switcher
+  document.querySelectorAll('button[type="submit"][data-op]').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.getElementById('op').value = b.dataset.op;
+    });
+  });
+
+  // Validate button — POST op=validate, render JSON.
+  document.getElementById('btnValidate').addEventListener('click', function(){
+    var box = document.getElementById('validateBox');
+    var scoreEl = document.getElementById('validateScore');
+    var reasonsEl = document.getElementById('validateReasons');
+    box.hidden = false;
+    scoreEl.textContent = '…';
+    reasonsEl.innerHTML = '';
+    var fd = new FormData(document.getElementById('composeForm'));
+    fd.set('op', 'validate');
+    fetch(window.location.href, { method: 'POST', body: fd })
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        // Worst-of-three score (a campaign sent in 3 langs is bound by its
+        // weakest language — the one most likely to land in spam).
+        var worst = 100;
+        var per = j.per_language || {};
+        Object.keys(per).forEach(function(l){ if (per[l].score < worst) worst = per[l].score; });
+        scoreEl.textContent = worst + '/100';
+        scoreEl.style.color = worst >= j.passing_score ? '#0f766e' : '#991b1b';
+        var html = '<p>Audience: <strong>' + j.audience_count + '</strong> subscriber(s).</p>';
+        Object.keys(per).forEach(function(l){
+          html += '<p><strong>' + l.toUpperCase() + '</strong> — score ' + per[l].score + '/100</p><ul style="margin:0 0 8px 24px">';
+          (per[l].reasons || []).forEach(function(r){
+            html += '<li class="nl-reason nl-reason--' + r.severity + '">' + r.severity + ': ' + r.message + (r.detail ? ' — <em>' + r.detail + '</em>' : '') + '</li>';
+          });
+          html += '</ul>';
+        });
+        reasonsEl.innerHTML = html;
+      })
+      .catch(function(e){
+        scoreEl.textContent = 'error';
+        reasonsEl.textContent = String(e);
+      });
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Newsletter — Admin · Prevozni{% endblock %}
+{% block content %}
+<style>
+  .nl-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .nl-table th, .nl-table td { padding: 8px 10px; border-bottom: 1px solid var(--color-border); text-align: left; vertical-align: top; }
+  .nl-table th { background: var(--color-bg-alt); font-weight: 700; }
+  .nl-status { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 12px; font-weight: 700; }
+  .nl-status--draft { background: #e2e8f0; color: #475569; }
+  .nl-status--sending { background: #fef3c7; color: #92400e; }
+  .nl-status--sent { background: #ccfbf1; color: #0f766e; }
+  .nl-status--cancelled, .nl-status--failed { background: #fee2e2; color: #991b1b; }
+  .nl-stats { font-variant-numeric: tabular-nums; color: var(--color-text-muted); font-size: 12px; }
+</style>
+
+<h1>Newsletter — Campaigns</h1>
+<p class="page-subtitle">Compose, preview, validate and dispatch campaigns. Drafts are seeded on app boot.</p>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}<div class="schedule-disclaimer">{% for m in messages %}{{ m }}{% endfor %}</div>{% endif %}
+{% endwith %}
+
+<table class="nl-table">
+  <thead>
+    <tr><th>Slug</th><th>Kind</th><th>Status</th><th>Subjects</th><th>Stats</th><th></th></tr>
+  </thead>
+  <tbody>
+  {% for c in campaigns %}
+    <tr>
+      <td><strong>{{ c.slug }}</strong><br><small style="color:var(--color-text-muted)">{{ c.created_at }}</small></td>
+      <td>{{ c.template_kind or '—' }}</td>
+      <td><span class="nl-status nl-status--{{ c.status }}">{{ c.status }}</span></td>
+      <td>
+        {% if c.subject_sr %}<div lang="sr">SR: {{ c.subject_sr|truncate(60) }}</div>{% endif %}
+        {% if c.subject_en %}<div lang="en">EN: {{ c.subject_en|truncate(60) }}</div>{% endif %}
+        {% if c.subject_ru %}<div lang="ru">RU: {{ c.subject_ru|truncate(60) }}</div>{% endif %}
+      </td>
+      <td class="nl-stats">
+        recip {{ c.live_stats.recipients }}<br>
+        deliv {{ c.live_stats.delivered }}<br>
+        open {{ c.live_stats.opened }} ·
+        click {{ c.live_stats.clicked }}<br>
+        bounce {{ c.live_stats.bounced }} ·
+        unsub {{ c.live_stats.unsubscribed }}
+      </td>
+      <td><a class="btn btn--outline" href="{{ url_for('admin.newsletter_compose', campaign_id=c.id) }}">Open</a></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="6">No campaigns yet — drafts are seeded on next app boot.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+{% if suppressions %}
+<h2 style="margin-top:32px">Recent suppressions ({{ suppressions|length }})</h2>
+<p class="page-subtitle">Hard bounces + complaints. Never re-sent until manually removed.</p>
+<table class="nl-table">
+  <thead><tr><th>Email</th><th>Reason</th><th>Added</th><th>Note</th></tr></thead>
+  <tbody>
+    {% for s in suppressions %}
+    <tr>
+      <td>{{ s.email_lower }}</td>
+      <td>{{ s.reason }}</td>
+      <td>{{ s.added_at }}</td>
+      <td><small>{{ s.note or '' }}</small></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

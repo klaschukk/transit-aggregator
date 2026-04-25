@@ -130,6 +130,73 @@ CREATE TABLE IF NOT EXISTS price_alerts_sent (
 );
 CREATE INDEX IF NOT EXISTS price_alerts_sent_sub_idx ON price_alerts_sent(subscriber_id, route_slug, sent_at);
 CREATE INDEX IF NOT EXISTS price_alerts_sent_route_idx ON price_alerts_sent(route_slug, sent_at);
+
+-- Newsletter campaigns. One row per campaign (across all 3 languages —
+-- we localise body/subject in-row rather than 3×row to keep the audience
+-- match logic single-statement). status transitions: draft → sending →
+-- sent (or → cancelled on operator abort). audience_filter is JSON so
+-- new filter primitives (lang, source, route_slug, days_since_signup,
+-- min_engagement) can land without a schema bump.
+CREATE SEQUENCE IF NOT EXISTS campaigns_id_seq;
+CREATE TABLE IF NOT EXISTS campaigns (
+    id                BIGINT PRIMARY KEY DEFAULT nextval('campaigns_id_seq'),
+    slug              VARCHAR NOT NULL,
+    subject_sr        VARCHAR,
+    subject_en        VARCHAR,
+    subject_ru        VARCHAR,
+    preheader_sr      VARCHAR,
+    preheader_en      VARCHAR,
+    preheader_ru      VARCHAR,
+    body_md_sr        VARCHAR,
+    body_md_en        VARCHAR,
+    body_md_ru        VARCHAR,
+    audience_filter   VARCHAR,          -- JSON
+    status            VARCHAR NOT NULL DEFAULT 'draft',
+    template_kind     VARCHAR,          -- welcome / weekly / seasonal / oneoff
+    created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    scheduled_at      TIMESTAMP,
+    sent_at           TIMESTAMP,
+    recipients_count  INTEGER DEFAULT 0,
+    delivered_count   INTEGER DEFAULT 0,
+    opened_count      INTEGER DEFAULT 0,
+    clicked_count     INTEGER DEFAULT 0,
+    bounced_count     INTEGER DEFAULT 0,
+    unsub_count       INTEGER DEFAULT 0
+);
+CREATE UNIQUE INDEX IF NOT EXISTS campaigns_slug_uq ON campaigns(slug);
+CREATE INDEX IF NOT EXISTS campaigns_status_idx ON campaigns(status, scheduled_at);
+
+-- One row per (campaign, subscriber) attempt. Resume support reads the
+-- last sent_at for a campaign and continues from there. delivered/opened/
+-- clicked are populated by the Mailgun webhook (or stay NULL when SMTP
+-- only — we still track sent_at so re-runs don't duplicate).
+CREATE SEQUENCE IF NOT EXISTS campaign_sends_id_seq;
+CREATE TABLE IF NOT EXISTS campaign_sends (
+    id              BIGINT PRIMARY KEY DEFAULT nextval('campaign_sends_id_seq'),
+    campaign_id     BIGINT NOT NULL,
+    subscriber_id   BIGINT NOT NULL,
+    sent_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    delivered_at    TIMESTAMP,
+    opened_at       TIMESTAMP,
+    clicked_at      TIMESTAMP,
+    bounced_at      TIMESTAMP,
+    unsubscribed_at TIMESTAMP,
+    error           VARCHAR
+);
+CREATE UNIQUE INDEX IF NOT EXISTS campaign_sends_uq
+    ON campaign_sends(campaign_id, subscriber_id);
+CREATE INDEX IF NOT EXISTS campaign_sends_campaign_idx
+    ON campaign_sends(campaign_id, sent_at);
+
+-- Hard-bounce + complaint suppression. Once an address is here we never
+-- send to it again — protects sender reputation and bills (Mailgun
+-- charges per attempted send, not per delivered).
+CREATE TABLE IF NOT EXISTS email_suppressions (
+    email_lower  VARCHAR PRIMARY KEY,
+    reason       VARCHAR,           -- 'bounce' / 'complaint' / 'manual'
+    added_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    note         VARCHAR
+);
 """
 
 

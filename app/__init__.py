@@ -1,7 +1,10 @@
+import logging
 import os
 import subprocess
 import time
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 from flask import Flask, render_template, request, g
 from config import config_map
@@ -182,6 +185,16 @@ def create_app(config_name: str | None = None) -> Flask:
     from . import analytics_db
     with app.app_context():
         analytics_db.init_schema()
+        # Seed the three baked-in newsletter drafts (welcome / weekly /
+        # seasonal). Idempotent — refreshes existing rows, doesn't
+        # duplicate. Skipped under testing so tests can build their
+        # own fixture state without 3 drafts pre-populating the table.
+        if os.environ.get('FLASK_ENV') != 'testing':
+            try:
+                from .newsletter import seed_drafts
+                seed_drafts.seed()
+            except Exception as exc:  # nosec — boot must not crash on drafts
+                logger.warning('newsletter draft seed skipped: %s', exc)
 
     # Gzip compression
     from flask_compress import Compress

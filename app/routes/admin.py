@@ -275,3 +275,323 @@ def review_action(review_id: int, action: str):
         )
 
     return redirect(url_for('admin.reviews'))
+
+
+# ── Newsletter compose + dispatch + Mailgun webhook ────────────────────
+
+import json as _json
+import hmac as _hmac
+import hashlib as _hashlib
+
+from app.newsletter import campaigns as _cmp
+from app.newsletter import audience as _aud
+from app.newsletter import validator as _val
+from app.newsletter import dispatch as _disp
+from app.newsletter import render as _render
+from app import mailer as _mailer
+
+
+@admin_bp.route('/newsletter')
+@_basic_auth_required
+def newsletter_index():
+    """List all campaigns with quick stats — entry point for the admin."""
+    rows = _cmp.list_campaigns(limit=100)
+    # Live stats per campaign — drives the open/click rate display.
+    for row in rows:
+        row['live_stats'] = _cmp.stats(int(row['id']))
+    suppressions = _cmp.list_suppressions(limit=20)
+    return render_template(
+        'admin/newsletter/index.html',
+        campaigns=rows, suppressions=suppressions,
+    )
+
+
+@admin_bp.route('/newsletter/<int:campaign_id>', methods=['GET', 'POST'])
+@_basic_auth_required
+@csrf.exempt
+def newsletter_compose(campaign_id: int):
+    """Compose / preview / validate / test-send / schedule.
+
+    POST verbs (form field `op`):
+      save        — persist edits, status stays 'draft'
+      validate    — return JSON {score, reasons, details, audience_count}
+      test        — send to ADMIN_EMAIL only, no DB writes
+      send_now    — full dispatch; redirects to index when done
+    """
+    campaign = _cmp.get_campaign(campaign_id)
+    if not campaign:
+        return Response('not found', status=404)
+
+    if request.method == 'POST':
+        op = request.form.get('op', '')
+
+        # Read shared edit fields up-front for save / validate paths.
+        subjects = {l: (request.form.get(f'subject_{l}') or '').strip()
+                    for l in ('sr', 'en', 'ru')}
+        preheaders = {l: (request.form.get(f'preheader_{l}') or '').strip()
+                      for l in ('sr', 'en', 'ru')}
+        bodies = {l: request.form.get(f'body_md_{l}') or ''
+                  for l in ('sr', 'en', 'ru')}
+        try:
+            audience_filter = _json.loads(
+                request.form.get('audience_filter_json') or '{}'
+            )
+        except (ValueError, TypeError):
+            audience_filter = {}
+
+        if op == 'validate':
+            # Per-language validation; fail = worst across all 3 languages.
+            results = {}
+            for l in ('sr', 'en', 'ru'):
+                if not bodies[l].strip():
+                    continue
+                score, reasons, details = _val.validate(
+                    subjects[l], preheaders[l], bodies[l],
+                )
+                results[l] = {
+                    'score': score,
+                    'reasons': [
+                        {'severity': r.severity, 'message': r.message,
+                         'detail': r.detail} for r in reasons
+                    ],
+                    'details': details,
+                }
+            audience_count = _aud.estimate_count(audience_filter)
+            return {
+                'per_language': results,
+                'audience_count': audience_count,
+                'passing_score': _val.PASSING_SCORE,
+            }
+
+        if op == 'save':
+            _cmp.upsert_campaign(
+                slug=campaign['slug'],
+                template_kind=campaign.get('template_kind') or 'oneoff',
+                subjects=subjects,
+                preheaders=preheaders,
+                bodies=bodies,
+                audience_filter=audience_filter,
+                status='draft',
+            )
+            flash('Saved.')
+            return redirect(url_for('admin.newsletter_compose',
+                                    campaign_id=campaign_id))
+
+        if op == 'test':
+            # Save first so the test send reflects the operator's latest edits.
+            _cmp.upsert_campaign(
+                slug=campaign['slug'],
+                template_kind=campaign.get('template_kind') or 'oneoff',
+                subjects=subjects, preheaders=preheaders, bodies=bodies,
+                audience_filter=audience_filter, status='draft',
+            )
+            admin_email = (current_app.config.get('ADMIN_EMAIL') or '').strip()
+            if not admin_email:
+                flash('ADMIN_EMAIL not configured — set env var to receive tests.')
+                return redirect(url_for('admin.newsletter_compose',
+                                        campaign_id=campaign_id))
+            base = current_app.config.get('BASE_URL') or 'https://prevozni.com'
+            res = _disp.send_campaign(
+                campaign_id,
+                send_fn=_mailer.send_mail,
+                unsub_base_url=base,
+                test_email=admin_email,
+                dry_run=False,
+            )
+            flash(f'Test sent to {admin_email}: {res}')
+            return redirect(url_for('admin.newsletter_compose',
+                                    campaign_id=campaign_id))
+
+        if op == 'send_now':
+            # Save first, then dispatch — the validator should have run
+            # client-side; the server still re-checks before the loop kicks.
+            _cmp.upsert_campaign(
+                slug=campaign['slug'],
+                template_kind=campaign.get('template_kind') or 'oneoff',
+                subjects=subjects, preheaders=preheaders, bodies=bodies,
+                audience_filter=audience_filter, status='draft',
+            )
+            base = current_app.config.get('BASE_URL') or 'https://prevozni.com'
+            res = _disp.send_campaign(
+                campaign_id,
+                send_fn=_mailer.send_mail,
+                unsub_base_url=base,
+                min_delay_s=0.6,
+            )
+            flash(f'Send result: {res}')
+            return redirect(url_for('admin.newsletter_index'))
+
+        return Response('bad op', status=400)
+
+    # GET — render the compose page.
+    audience = _cmp.parse_audience(campaign)
+    audience_count = _aud.estimate_count(audience)
+    return render_template(
+        'admin/newsletter/compose.html',
+        campaign=campaign,
+        audience_filter_json=_json.dumps(audience, ensure_ascii=False, indent=2),
+        audience_count=audience_count,
+        passing_score=_val.PASSING_SCORE,
+    )
+
+
+@admin_bp.route('/newsletter/<int:campaign_id>/preview/<lang>')
+@_basic_auth_required
+def newsletter_preview(campaign_id: int, lang: str):
+    """Render the brand-framed HTML preview the operator sees in the
+    compose iframe. Lives behind admin auth so search engines can't
+    accidentally index it (the X-Robots-Tag also covers this)."""
+    if lang not in ('sr', 'en', 'ru'):
+        return Response('bad lang', status=400)
+    campaign = _cmp.get_campaign(campaign_id)
+    if not campaign:
+        return Response('not found', status=404)
+
+    subject = campaign.get(f'subject_{lang}') or ''
+    preheader = campaign.get(f'preheader_{lang}') or ''
+    body_md = campaign.get(f'body_md_{lang}') or ''
+    base = current_app.config.get('BASE_URL') or 'https://prevozni.com'
+    _, html, _ = _render.render_email(
+        subject=subject, preheader=preheader, body_md=body_md, lang=lang,
+        unsub_url=f"{base}/api/unsubscribe/PREVIEW",
+        source='preview', confirmed_date='',
+    )
+    return Response(html, mimetype='text/html; charset=utf-8')
+
+
+# ── Mailgun webhook (signature-verified) ─────────────────────────────
+
+@admin_bp.route('/api/mailgun-webhook', methods=['POST'])
+@csrf.exempt
+def mailgun_webhook():
+    """Mailgun → us. Verifies HMAC signature, updates campaign_sends.
+
+    Lives under /admin so `_no_index` adds X-Robots-Tag (no SEO leak)
+    and the basic-auth decorator is *not* applied here — the signing
+    key is the auth. The route is csrf-exempt and idempotent: a replayed
+    event sets the same column to the same timestamp.
+    """
+    body = request.get_data() or b''
+    signing_key = (current_app.config.get('MAILGUN_WEBHOOK_SIGNING_KEY')
+                   or current_app.config.get('MAILGUN_API_KEY') or '')
+
+    # Mailgun event payload format: signature{token, timestamp, signature},
+    # event-data{event, recipient, message{headers{message-id}}, ...}
+    try:
+        payload = _json.loads(body or b'{}')
+    except (ValueError, TypeError):
+        return Response('invalid json', status=400)
+
+    if signing_key:
+        sig = (payload.get('signature') or {})
+        token = str(sig.get('token') or '')
+        ts = str(sig.get('timestamp') or '')
+        provided = str(sig.get('signature') or '')
+        expected = _hmac.new(
+            signing_key.encode('utf-8'),
+            (ts + token).encode('utf-8'),
+            _hashlib.sha256,
+        ).hexdigest()
+        if not _hmac.compare_digest(expected, provided):
+            return Response('bad signature', status=403)
+    elif current_app.config.get('FLASK_ENV') == 'production':
+        # Refuse to accept unsigned events in prod — reputation risk.
+        return Response('signing key not configured', status=503)
+
+    event_data = payload.get('event-data') or {}
+    event = event_data.get('event') or ''
+    recipient = (event_data.get('recipient') or '').lower().strip()
+    if not recipient or event not in (
+        'delivered', 'opened', 'clicked', 'failed',
+        'complained', 'unsubscribed',
+    ):
+        return Response('ignored', status=200)
+
+    # Mailgun event → DB column.
+    column = {
+        'delivered': 'delivered_at',
+        'opened': 'opened_at',
+        'clicked': 'clicked_at',
+        'failed': 'bounced_at',
+        'complained': 'bounced_at',
+        'unsubscribed': 'unsubscribed_at',
+    }[event]
+
+    # Resolve recipient email → subscriber id; ignore if not found.
+    rows = analytics_db.query(
+        "SELECT id FROM subscribers WHERE email_lower = ?", [recipient],
+    )
+    if not rows:
+        return Response('subscriber not found', status=200)
+    subscriber_id = int(rows[0]['id'])
+
+    # Find the most recent send for this subscriber to attach the event.
+    latest = analytics_db.query(
+        "SELECT campaign_id FROM campaign_sends WHERE subscriber_id = ? "
+        "ORDER BY sent_at DESC LIMIT 1",
+        [subscriber_id],
+    )
+    if not latest:
+        return Response('no matching send', status=200)
+    campaign_id = int(latest[0]['campaign_id'])
+
+    conn = analytics_db._get_conn()
+    conn.execute(
+        f"UPDATE campaign_sends SET {column} = CURRENT_TIMESTAMP "
+        "WHERE campaign_id = ? AND subscriber_id = ?",
+        [campaign_id, subscriber_id],
+    )
+
+    # Auto-suppress on hard bounce or complaint — protect sender rep.
+    if event in ('failed', 'complained'):
+        _cmp.suppress_email(recipient,
+                            'bounce' if event == 'failed' else 'complaint',
+                            note=f'mailgun:{event}')
+
+    return Response('ok', status=200)
+
+
+# ── GDPR data export ─────────────────────────────────────────────────
+
+@admin_bp.route('/api/subscriber-data', methods=['GET'])
+@csrf.exempt
+def subscriber_data_export():
+    """Self-service data export keyed by the subscriber's unsubscribe
+    token (which they have on every email they've ever received from us).
+
+    Returns the personal data we hold about that subscriber as JSON —
+    GDPR Article 15 access request, satisfied without a manual ticket.
+    Output excludes other users' data (campaign_sends rows are filtered
+    to this subscriber)."""
+    token = request.args.get('token', '').strip()
+    if not token:
+        return Response('token required', status=400)
+    rows = analytics_db.query(
+        "SELECT id, email, lang, source, ts, confirmed_at, unsubscribed_at, "
+        "       route_slug FROM subscribers WHERE unsubscribe_token = ?",
+        [token],
+    )
+    if not rows:
+        return Response('not found', status=404)
+    sub = rows[0]
+    sends = analytics_db.query(
+        "SELECT campaign_id, sent_at, delivered_at, opened_at, clicked_at, "
+        "       bounced_at, unsubscribed_at "
+        "FROM campaign_sends WHERE subscriber_id = ?",
+        [int(sub['id'])],
+    )
+    return {
+        'subscriber': {
+            'email': sub['email'],
+            'lang': sub.get('lang'),
+            'source': sub.get('source'),
+            'subscribed_at': str(sub.get('ts') or ''),
+            'confirmed_at': str(sub.get('confirmed_at') or ''),
+            'unsubscribed_at': str(sub.get('unsubscribed_at') or ''),
+            'route_slug': sub.get('route_slug'),
+        },
+        'campaign_sends': [
+            {k: str(v) if v is not None else None for k, v in row.items()}
+            for row in sends
+        ],
+    }
