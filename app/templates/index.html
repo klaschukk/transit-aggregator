@@ -23,10 +23,23 @@
   <div class="hero__bg"></div>
   <div class="hero__inner container">
     <h1 class="hero__title">{{ _('home.hero_title') }}</h1>
-    <p class="hero__sub">{{ _('home.hero_subtitle') }}</p>
+    {# A/B Exp 3: hero subtitle copy. Variant key picks one of three i18n
+       slots — copy itself stays localised. ab_variant() also fires the
+       exposure event for any home-page visitor. #}
+    {% set _hero_variant = ab_variant('hero_sub_v1') %}
+    <p class="hero__sub" data-ab-hero-sub="{{ _hero_variant }}">
+      {{ _('home.hero_sub_' ~ _hero_variant) }}
+    </p>
     <div class="hero__form">
       {% from '_partials/_search_form.html' import search_form with context %}
       {{ search_form(t={'from': _('home.search_from'), 'to': _('home.search_to'), 'btn': _('home.search_btn')}, prefix=lang_prefix) }}
+    </div>
+    {# Mobile-only value-prop strip (hidden ≥768px via app.mobile.css scoping). #}
+    <div class="hero__valueprop" aria-label="{{ _('home.valueprop_aria') }}">
+      <span><b>{{ stats.routes }}+</b> {{ _('common.routes') }}</span>
+      <span><b>70+</b> {{ _('common.carriers') }}</span>
+      <span><b>3</b> {{ _('common.languages') }}</span>
+      <span><b>{{ _('home.valueprop_free') }}</b></span>
     </div>
   </div>
 </section>
@@ -36,6 +49,15 @@
   {% from '_partials/_newsletter_form.html' import newsletter_form with context %}
   {{ newsletter_form(source='home', variant='hero') }}
 </section>
+
+{# Top-of-fold ad — leaderboard/728×90 desktop, responsive mobile.
+   Sits between newsletter (low-engagement, easy to scroll past) and
+   stats (anchor content). Highest-RPM home placement per AdSense
+   travel-niche benchmarks. #}
+<div class="container">
+  {% from '_partials/_ad_slot.html' import ad_slot with context %}
+  {{ ad_slot('home_top', format='leaderboard') }}
+</div>
 
 <!-- ═══════ STATS ═══════ -->
 <section class="home-stats container fade-in">
@@ -154,6 +176,13 @@
 
   </div>
 </section>
+
+{# Mid-page ad — between FAQ section and benefits, where engaged
+   readers reach the second viewport. Large-rectangle for desktop;
+   responsive collapses to mobile-friendly height. #}
+<div class="container">
+  {{ ad_slot('home_mid', format='large-rectangle') }}
+</div>
 
 <!-- ═══════ FAQ ═══════ -->
 <section class="home-section container">

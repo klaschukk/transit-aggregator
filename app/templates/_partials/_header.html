@@ -44,3 +44,8 @@
     </button>
   </div>
 </header>
+{# Backdrop for the off-canvas drawer (mobile only). Rendered always so
+   mobile.js can toggle it without injecting DOM. `data-nav-backdrop`
+   is a separate signal from bottom-sheet backdrops — mobile.js wires
+   tap-to-close on it specifically for the nav drawer. #}
+<div class="m-nav-backdrop" data-nav-backdrop hidden></div>

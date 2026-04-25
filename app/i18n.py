@@ -213,6 +213,16 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Tracking of "Buy" (Bookaway) clicks',
         'ru': 'Отслеживание кликов по кнопке «Купить» (Bookaway)',
     },
+    'privacy.adsense_h': {
+        'sr': 'Google AdSense (reklame)',
+        'en': 'Google AdSense (advertising)',
+        'ru': 'Google AdSense (реклама)',
+    },
+    'privacy.adsense_body': {
+        'sr': 'Na nekim stranicama prikazujemo reklame preko Google AdSense. Ako ste prihvatili sve kolačiće, AdSense može da koristi kolačiće trećih strana za personalizaciju reklama na osnovu vaše istorije pregleda na drugim sajtovima. Ako ste izabrali samo osnovne kolačiće, AdSense radi u režimu neperonalizovanih reklama (requestNonPersonalizedAds) — reklame se biraju na osnovu sadržaja stranice, a ne vašeg profila. AdSense automatski dobija minimalne podatke o pregledu (IP, user-agent) prema njihovoj <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener nofollow">politici reklamiranja</a>. Možete da isključite personalizaciju u <a href="https://adssettings.google.com/" target="_blank" rel="noopener nofollow">Google Ads Settings</a> u bilo kom trenutku.',
+        'en': 'On some pages we display ads through Google AdSense. If you accepted all cookies, AdSense may use third-party cookies to personalise ads based on your browsing history across other sites. If you accepted only essential cookies, AdSense runs in non-personalised mode (requestNonPersonalizedAds) — ads are picked based on page content, not your profile. AdSense automatically receives minimal request data (IP, user-agent) per their <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener nofollow">advertising policy</a>. You can opt out of personalisation in <a href="https://adssettings.google.com/" target="_blank" rel="noopener nofollow">Google Ads Settings</a> at any time.',
+        'ru': 'На некоторых страницах мы показываем рекламу через Google AdSense. Если вы приняли все cookies, AdSense может использовать сторонние cookies для персонализации рекламы на основе истории просмотров на других сайтах. Если вы выбрали только основные cookies, AdSense работает в режиме неперсонализированной рекламы (requestNonPersonalizedAds) — реклама подбирается по содержанию страницы, а не по вашему профилю. AdSense автоматически получает минимальные данные запроса (IP, user-agent) согласно их <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener nofollow">политике рекламы</a>. Отключить персонализацию можно в любой момент в <a href="https://adssettings.google.com/" target="_blank" rel="noopener nofollow">Google Ads Settings</a>.',
+    },
     'privacy.reviews_h': {
         'sr': 'Korisničke recenzije',
         'en': 'User reviews',
@@ -346,6 +356,41 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Prikaži još',
         'en': 'Show more',
         'ru': 'Показать ещё',
+    },
+    'common.read_more': {
+        'sr': 'Pročitaj više',
+        'en': 'Read more',
+        'ru': 'Читать дальше',
+    },
+    'common.read_less': {
+        'sr': 'Sakri',
+        'en': 'Read less',
+        'ru': 'Свернуть',
+    },
+    'common.carriers': {
+        'sr': 'prevoznika',
+        'en': 'carriers',
+        'ru': 'перевозчиков',
+    },
+    'common.languages': {
+        'sr': 'jezika',
+        'en': 'languages',
+        'ru': 'языка',
+    },
+    'home.valueprop_aria': {
+        'sr': 'Ključne brojke',
+        'en': 'Key numbers',
+        'ru': 'Ключевые цифры',
+    },
+    'home.valueprop_free': {
+        'sr': 'Besplatno',
+        'en': 'Free',
+        'ru': 'Бесплатно',
+    },
+    'ads.label': {
+        'sr': 'Reklama',
+        'en': 'Advertisement',
+        'ru': 'Реклама',
     },
     'common.now': {
         'sr': 'sada',

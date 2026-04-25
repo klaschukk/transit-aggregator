@@ -1,200 +1,200 @@
-domain,url,category,DA_estimate,language,contact_method,status,contacted_at,last_status_change,notes
-serbia.travel,https://www.serbia.travel/en,serbian_tourism,75,en,form,todo,,,official National Tourism Organisation; homepage useful-links potential
-tob.rs,https://www.tob.rs/en,serbian_tourism,65,en,form,todo,,,Tourism Organization of Belgrade; pitch as citizen-useful tool
-tob.rs,https://www.tob.rs/sr,serbian_tourism,65,sr,form,todo,,,TOB Serbian version; local audience fit
-novisad.travel,https://novisad.travel/en,serbian_tourism,55,en,form,todo,,,Novi Sad official tourism EN; transport info page likely
-visitnovisad.rs,https://www.visitnovisad.rs/en,serbian_tourism,50,en,form,todo,,,Visit Novi Sad EN portal; useful-links request angle
-gtokg.org.rs,https://www.gtokg.org.rs/kontakt,serbian_tourism,40,sr,form,todo,,,Tourism Org Kragujevac contact page; direct city fit
-gtokg.org.rs,https://www.gtokg.org.rs/en,serbian_tourism,40,en,form,todo,,,GTO Kragujevac EN version
-nistourism.org.rs,https://www.nistourism.org.rs,serbian_tourism,40,sr,form,todo,,,Nis Tourism Organization; transit aggregator = natural partner
-visitbelgrade.rs,https://visitbelgrade.rs,serbian_tourism,45,sr,form,todo,,,Visit Belgrade tourism portal; getting-around section
-visitsubotica.rs,https://visitsubotica.rs,serbian_tourism,35,sr,form,todo,,,Visit Subotica; north-Serbia bus hub city
-subotica.com,https://subotica.com,serbian_tourism,30,sr,form,todo,,,Subotica city info site; bus station references
-vojvodina.travel,https://vojvodina.travel,serbian_tourism,40,sr,form,todo,,,Vojvodina regional tourism; Novi Sad + surrounding
-nptara.rs,https://nptara.rs,serbian_tourism,35,sr,form,todo,,,Tara National Park; visitors need bus info
-npkopaonik.rs,https://www.npkopaonik.rs,serbian_tourism,35,sr,form,todo,,,Kopaonik NP official; getting-there section fits
-en.unesco.org,https://en.unesco.org/countries/serbia,serbian_tourism,90,en,form,todo,,,UNESCO Serbia country page; heritage-site transport angle weak but high DA
-studenica.rs,https://www.studenica.rs,serbian_tourism,40,sr,form,todo,,,Studenica Monastery UNESCO site; pilgrims need bus routes
-beogradskatvrdjava.co.rs,https://www.beogradskatvrdjava.co.rs,serbian_tourism,35,sr,form,todo,,,Belgrade Fortress official; city-transport cross-link
-serbia-visit.com,https://www.serbia-visit.com,serbian_tourism,25,en,email,todo,,,Serbia-visit guide; link exchange candidate
-worldtravelguide.net,https://www.worldtravelguide.net/guides/europe/serbia,serbian_tourism,70,en,form,todo,,,Columbus WorldTravelGuide Serbia; getting-around reference
-lasta.rs,https://www.lasta.rs,serbian_operator,50,sr,email,todo,,,Largest Serbian intercity operator; partner/useful-links pitch
-nis-ekspres.rs,https://www.nis-ekspres.rs,serbian_operator,40,sr,email,todo,,,Nis-Ekspres operator; timetable aggregator = natural link
-nis-ekspres.rs,https://www.nis-ekspres.rs/kontakt,serbian_operator,40,sr,email,todo,,,Nis-Ekspres contact page; direct outreach
-severtrans.rs,https://www.severtrans.rs,serbian_operator,35,sr,email,todo,,,Severtrans operator; Vojvodina region coverage
-severtrans.rs,https://www.severtrans.rs/kontakt,serbian_operator,35,sr,email,todo,,,Severtrans contact page
-autoprevoz.rs,https://www.autoprevoz.rs,serbian_operator,30,sr,email,todo,,,Autoprevoz; partner-pages exist for agencies
-autoprevoz.rs,https://www.autoprevoz.rs/kontakt,serbian_operator,30,sr,email,todo,,,Autoprevoz contact
-fudeks.rs,https://www.fudeks.rs,serbian_operator,30,sr,email,todo,,,Fudeks Belgrade operator; aggregator listing value
-fudeks.rs,https://www.fudeks.rs/kontakt,serbian_operator,30,sr,email,todo,,,Fudeks contact
-busplus.rs,https://www.busplus.rs,serbian_operator,35,sr,form,todo,,,BusPlus (Belgrade city ticketing); cross-link natural
-bgprevoz.rs,https://www.bgprevoz.rs,serbian_operator,40,sr,form,todo,,,GSP Belgrade data source; partner relationship
-bgprevoz.rs,https://www.bgprevoz.rs/index.php/kontakt,serbian_operator,40,sr,form,todo,,,GSP Belgrade contact
-gsp.rs,https://www.gsp.rs,serbian_operator,40,sr,form,todo,,,GSP Belgrade corporate site
-bgsaobracaj.rs,https://www.bgsaobracaj.rs,serbian_operator,35,sr,form,todo,,,Belgrade traffic/transit info portal
-bgsaobracaj.rs,https://www.bgsaobracaj.rs/kontakt,serbian_operator,35,sr,form,todo,,,BG Saobracaj contact
-srbvoz.rs,https://www.srbvoz.rs,serbian_operator,55,sr,form,todo,,,Srbija Voz national railway; timetable referral
-srbvoz.rs,https://www.srbvoz.rs/en,serbian_operator,55,en,form,todo,,,Srbija Voz EN site
-srbvoz.rs,https://www.srbvoz.rs/contact,serbian_operator,55,en,form,todo,,,Srbija Voz contact
-polazak.rs,https://polazak.rs,serbian_operator,45,sr,form,todo,,,Polazak.rs booking platform; data source
-polazak.rs,https://polazak.rs/en,serbian_operator,45,en,form,todo,,,Polazak EN version
-data.gov.rs,https://data.gov.rs,serbian_gov,75,sr,email,todo,,,Serbia open data portal; GTFS datasets; cite-source
-data.gov.rs,https://data.gov.rs/en,serbian_gov,75,en,email,todo,,,data.gov.rs EN
-srbija.gov.rs,https://www.srbija.gov.rs/en,serbian_gov,82,en,form,todo,,,Government of Serbia EN portal
-srbija.gov.rs,https://www.srbija.gov.rs,serbian_gov,82,sr,form,todo,,,Government of Serbia SR
-mgsi.gov.rs,https://mgsi.gov.rs,serbian_gov,70,sr,email,todo,,,Ministry of Construction Transport & Infrastructure; direct relevance
-mgsi.gov.rs,https://mgsi.gov.rs/en,serbian_gov,70,en,email,todo,,,MGSI EN version
-ekologija.gov.rs,https://www.ekologija.gov.rs,serbian_gov,65,sr,form,todo,,,Ministry of Environment; public-transport-for-eco angle
-beograd.rs,https://www.beograd.rs,serbian_gov,72,sr,form,todo,,,City of Belgrade portal
-beograd.rs,https://www.beograd.rs/lat,serbian_gov,72,sr,form,todo,,,Belgrade Latin site
-novisad.rs,https://www.novisad.rs,serbian_gov,65,sr,form,todo,,,City of Novi Sad portal
-ni.rs,https://www.ni.rs,serbian_gov,60,sr,form,todo,,,City of Nis official portal
-kragujevac.rs,https://www.kragujevac.rs,serbian_gov,55,sr,form,todo,,,City of Kragujevac portal
-putevi-srbije.rs,https://www.putevi-srbije.rs,serbian_gov,60,sr,form,todo,,,Serbian Roads agency; useful-links page exists
-rts.rs,https://www.rts.rs,serbian_gov,80,sr,form,todo,,,Public broadcaster RTS; news tip / press release
-rtv.rs,https://www.rtv.rs,serbian_gov,72,sr,form,todo,,,Vojvodina public broadcaster
-balkaninsight.com,https://www.balkaninsight.com/category/serbia/,balkan_blog,70,en,email,todo,,,BIRN Balkan Insight Serbia category; op-ed pitch
-inyourpocket.com,https://www.inyourpocket.com/belgrade,balkan_blog,65,en,email,todo,,,In Your Pocket Belgrade; transport-chapter link
-inyourpocket.com,https://www.inyourpocket.com/novi-sad,balkan_blog,65,en,email,todo,,,IYP Novi Sad guide
-inyourpocket.com,https://www.inyourpocket.com/nis,balkan_blog,65,en,email,todo,,,IYP Nis guide
-inyourpocket.com,https://www.inyourpocket.com/serbia,balkan_blog,65,en,email,todo,,,IYP Serbia hub
-lonelyplanet.com,https://www.lonelyplanet.com/serbia,balkan_blog,88,en,form,todo,,,Lonely Planet Serbia destination; user-forum link
-chasingthedonkey.com,https://chasingthedonkey.com,balkan_blog,55,en,email,todo,,,Chasing the Donkey Balkans blog; active 2024-2025
-chasingthedonkey.com,https://chasingthedonkey.com/things-to-do-in-belgrade-serbia,balkan_blog,55,en,email,todo,,,Belgrade post specifically; comment/link angle
-wander-lush.org,https://wander-lush.org,balkan_blog,50,en,email,todo,,,Wander-Lush Balkans specialist Emily Lush
-seat61.com,https://www.seat61.com/Serbia.htm,balkan_blog,75,en,email,todo,,,Seat61 Serbia rail page; natural bus counterpart
-nomadicmatt.com,https://www.nomadicmatt.com,balkan_blog,80,en,email,todo,,,Nomadic Matt travel blog; resource-page pitch
-serbianmonitor.com,https://serbianmonitor.com,balkan_blog,35,en,email,todo,,,Serbian Monitor news/travel blog
-myserbia.rs,https://myserbia.rs,balkan_blog,30,en,email,todo,,,MySerbia travel blog; link-exchange friendly
-serbianprivatetours.com,https://www.serbianprivatetours.com,balkan_blog,25,en,email,todo,,,Serbian Private Tours blog/site
-serbianprivatetours.com,https://www.serbianprivatetours.com/contact,balkan_blog,25,en,email,todo,,,Direct contact page
-en.wikipedia.org,https://en.wikipedia.org/wiki/Transport_in_Serbia,wikipedia_edit,95,en,form,todo,,,Add External Links citation for schedules
-en.wikipedia.org,https://en.wikipedia.org/wiki/Rail_transport_in_Serbia,wikipedia_edit,95,en,form,todo,,,Rail transport article; ref link
-en.wikipedia.org,https://en.wikipedia.org/wiki/Transport_in_Belgrade,wikipedia_edit,95,en,form,todo,,,Transport in Belgrade; external links section
-en.wikipedia.org,https://en.wikipedia.org/wiki/GSP_Belgrade,wikipedia_edit,95,en,form,todo,,,GSP Belgrade; ref for route data
-en.wikipedia.org,https://en.wikipedia.org/wiki/JGSP_Novi_Sad,wikipedia_edit,95,en,form,todo,,,JGSP Novi Sad; ref candidate
-en.wikipedia.org,https://en.wikipedia.org/wiki/Belgrade_Bus_Station,wikipedia_edit,95,en,form,todo,,,BAS article; external-links
-en.wikipedia.org,https://en.wikipedia.org/wiki/Lasta_Beograd,wikipedia_edit,95,en,form,todo,,,Lasta Beograd article
-en.wikipedia.org,https://en.wikipedia.org/wiki/Ni%C5%A1-Ekspres,wikipedia_edit,95,en,form,todo,,,Nis-Ekspres article
-en.wikipedia.org,https://en.wikipedia.org/wiki/Serbian_Railways,wikipedia_edit,95,en,form,todo,,,Serbian Railways article
-en.wikipedia.org,https://en.wikipedia.org/wiki/Beovoz,wikipedia_edit,95,en,form,todo,,,Beovoz suburban rail article
-en.wikipedia.org,https://en.wikipedia.org/wiki/BG_Voz,wikipedia_edit,95,en,form,todo,,,BG Voz article
-en.wikipedia.org,https://en.wikipedia.org/wiki/Belgrade_tram_system,wikipedia_edit,95,en,form,todo,,,Belgrade trams article
-en.wikipedia.org,https://en.wikipedia.org/wiki/Tourism_in_Serbia,wikipedia_edit,95,en,form,todo,,,Tourism in Serbia; getting-around subsection
-sr.wikipedia.org,https://sr.wikipedia.org/wiki/ГСП_Београд,wikipedia_edit,80,sr,form,todo,,,GSP Beograd SR-wiki
-sr.wikipedia.org,https://sr.wikipedia.org/wiki/ЈГСП_Нови_Сад,wikipedia_edit,80,sr,form,todo,,,JGSP Novi Sad SR-wiki
-sr.wikipedia.org,https://sr.wikipedia.org/wiki/Саобраћај_у_Србији,wikipedia_edit,80,sr,form,todo,,,Saobracaj u Srbiji SR-wiki article
-en.wikivoyage.org,https://en.wikivoyage.org/wiki/Serbia,wikipedia_edit,85,en,form,todo,,,Wikivoyage Serbia; Get-around section edit
-en.wikivoyage.org,https://en.wikivoyage.org/wiki/Belgrade,wikipedia_edit,85,en,form,todo,,,Wikivoyage Belgrade
-en.wikivoyage.org,https://en.wikivoyage.org/wiki/Novi_Sad,wikipedia_edit,85,en,form,todo,,,Wikivoyage Novi Sad
-en.wikivoyage.org,https://en.wikivoyage.org/wiki/Ni%C5%A1,wikipedia_edit,85,en,form,todo,,,Wikivoyage Nis
-en.wikivoyage.org,https://en.wikivoyage.org/wiki/Kragujevac,wikipedia_edit,85,en,form,todo,,,Wikivoyage Kragujevac
-en.wikivoyage.org,https://en.wikivoyage.org/wiki/Subotica,wikipedia_edit,85,en,form,todo,,,Wikivoyage Subotica
-wikitravel.org,https://wikitravel.org/en/Serbia,wikipedia_edit,65,en,form,todo,,,Wikitravel Serbia; Get-around section
-reddit.com,https://www.reddit.com/r/serbia,expat_serbia,90,en,reddit,todo,,,r/serbia main subreddit; share-useful-tool angle
-reddit.com,https://www.reddit.com/r/Serbia/wiki,expat_serbia,90,en,reddit,todo,,,r/Serbia wiki; add useful-sites entry
-reddit.com,https://www.reddit.com/r/belgrade,expat_serbia,75,en,reddit,todo,,,r/belgrade subreddit
-reddit.com,https://www.reddit.com/r/Belgrade/wiki,expat_serbia,75,en,reddit,todo,,,r/Belgrade wiki resources
-reddit.com,https://www.reddit.com/r/novisad,expat_serbia,55,en,reddit,todo,,,r/novisad community
-reddit.com,https://www.reddit.com/r/AskBalkans,expat_serbia,78,en,reddit,todo,,,AskBalkans Q&A; answer-bus-questions strategy
-reddit.com,https://www.reddit.com/r/Balkans,expat_serbia,70,en,reddit,todo,,,r/Balkans community
-reddit.com,https://www.reddit.com/r/europetravel,expat_serbia,80,en,reddit,todo,,,r/europetravel; answer Serbia threads
-reddit.com,https://www.reddit.com/r/solotravel,expat_serbia,82,en,reddit,todo,,,r/solotravel; Serbia itinerary threads
-reddit.com,https://www.reddit.com/r/travel,expat_serbia,88,en,reddit,todo,,,r/travel main; high-traffic mention
-reddit.com,https://www.reddit.com/r/yugoslavia,expat_serbia,50,en,reddit,todo,,,r/yugoslavia nostalgia+geo
-internations.org,https://www.internations.org/belgrade-expats,expat_serbia,70,en,form,todo,,,InterNations Belgrade community; useful-links section
-expat.com,https://www.expat.com/en/destination/europe/serbia,expat_serbia,70,en,form,todo,,,Expat.com Serbia destination hub
-expat.com,https://www.expat.com/en/forum/europe/serbia,expat_serbia,70,en,form,todo,,,Expat.com Serbia forum; post answers
-travel.stackexchange.com,https://travel.stackexchange.com/questions/tagged/serbia,expat_serbia,80,en,form,todo,,,Travel StackExchange Serbia tag; answer bus-route Qs
-vc.ru,https://vc.ru/tag/Сербия,russian_diaspora,78,ru,form,todo,,,vc.ru Serbia tag; guest post angle about relocating/living
-habr.com,https://habr.com/ru/hubs/travel/,russian_diaspora,82,ru,form,todo,,,Habr travel hub; dev-relocation audience
-pikabu.ru,https://pikabu.ru/tag/Сербия,russian_diaspora,72,ru,form,todo,,,Pikabu Serbia tag; casual travel/relocation posts
-russerbia.ru,https://russerbia.ru,russian_diaspora,25,ru,form,todo,,,Russian-Serbian community portal; useful-links candidate
-serbia4rus.ru,https://serbia4rus.ru,russian_diaspora,20,ru,email,todo,,,Niche relocation site; direct owner pitch
-zivot-u-srbiji.com,https://zivot-u-srbiji.com,russian_diaspora,22,ru,form,todo,,,Life-in-Serbia blog RU; transport section natural fit
-ballkan.ru,https://ballkan.ru,russian_diaspora,22,ru,email,todo,,,RU Balkans travel magazine; guest post
-balkanpost.ru,https://balkanpost.ru,russian_diaspora,20,ru,email,todo,,,RU Balkans news; press-release angle
-awaytravel.ru,https://awaytravel.ru,russian_diaspora,25,ru,email,todo,,,RU travel blog; Serbia itineraries
-tonkosti.ru,https://tonkosti.ru/Сербия,russian_diaspora,62,ru,form,todo,,,Tonkosti — big RU travel portal Serbia section
-tutu.ru,https://www.tutu.ru,russian_diaspora,78,ru,form,todo,,,RU travel aggregator; partner listing
-travelask.ru,https://travelask.ru/serbia,russian_diaspora,55,ru,form,todo,,,TravelAsk Serbia; Q&A answer-threads
-lonelyplanet.com,https://www.lonelyplanet.com/thorntree/forums/europe-western-europe/serbia,travel_forum,88,en,form,todo,,,Lonely Planet Thorntree Serbia sub-forum
-tripadvisor.com,https://www.tripadvisor.com/ShowForum-g294472-i3707-Serbia.html,travel_forum,90,en,form,todo,,,TripAdvisor Serbia forum; answer bus-route questions
-ricksteves.com,https://community.ricksteves.com/travel-forum/eastern-europe,travel_forum,75,en,form,todo,,,Rick Steves Eastern Europe forum
-flyertalk.com,https://www.flyertalk.com/forum/,travel_forum,75,en,form,todo,,,FlyerTalk; occasional Serbia threads
-bootsnall.com,https://www.bootsnall.com/forum/,travel_forum,55,en,form,todo,,,BootsnAll indie travel forum
-nomadicmatt.com,https://www.nomadicmatt.com/travel-blogs/serbia/,travel_blog_global,80,en,email,todo,,,Nomadic Matt Serbia category page
-theculturetrip.com,https://theculturetrip.com/europe/serbia,travel_blog_global,75,en,email,todo,,,Culture Trip Serbia; listicle-style posts link out
-matadornetwork.com,https://matadornetwork.com/tag/serbia/,travel_blog_global,70,en,email,todo,,,Matador Network Serbia tag; broken-link candidate
-againstthecompass.com,https://againstthecompass.com,travel_blog_global,55,en,email,todo,,,Off-beat destinations blog; Serbia guide extant
-adventurouskate.com,https://www.adventurouskate.com,travel_blog_global,70,en,email,todo,,,Adventurous Kate — Balkans posts 2023-2024
-thetraveldudes.com,https://traveldudes.com,travel_blog_global,55,en,email,todo,,,Travel Dudes — multi-author; accepts guest input
-bemusedbackpacker.com,https://www.bemusedbackpacker.com,travel_blog_global,45,en,email,todo,,,Budget-travel blog Michael Huxley; Balkans coverage
-journeyera.com,https://www.journey-era.com,travel_blog_global,45,en,email,todo,,,Journey Era; photography-first travel blog
-inwanderlust.com,https://inwanderlust.com,travel_blog_global,40,en,email,todo,,,Small-ish blog; higher reply rate than big ones
-emilyluxton.co.uk,https://emilyluxton.co.uk,travel_blog_global,50,en,email,todo,,,Emily Luxton travel writer; Serbia posts
-pointsguy.com,https://thepointsguy.com,travel_blog_global,85,en,form,todo,,,The Points Guy; occasional Serbia articles
-matadornetwork.com,https://matadornetwork.com/tag/serbia/,broken_link_candidates,70,en,email,todo,,,Scan this URL with backlinks_broken.py — broken outbound hrefs
-nomadicmatt.com,https://www.nomadicmatt.com/travel-guides/serbia-travel-tips/,broken_link_candidates,80,en,email,todo,,,Scan with backlinks_broken.py — Serbia travel-tips outbound links
-theculturetrip.com,https://theculturetrip.com/europe/serbia/articles,broken_link_candidates,75,en,email,todo,,,Scan with backlinks_broken.py — Serbia articles list
-en.wikivoyage.org,https://en.wikivoyage.org/wiki/Serbia,broken_link_candidates,85,en,form,todo,,,Scan with backlinks_broken.py — user-added external links often stale
-lonelyplanet.com,https://www.lonelyplanet.com/serbia/belgrade,broken_link_candidates,88,en,form,todo,,,Scan with backlinks_broken.py — transport subsection
-seat61.com,https://www.seat61.com/Serbia.htm,broken_link_candidates,75,en,email,todo,,,Scan with backlinks_broken.py — Mark Smith curates manually
-facebook.com,https://www.facebook.com/groups/lifeinserbia,facebook_groups,70,en,facebook,todo,,,Life in Serbia expat group ~10k members
-facebook.com,https://www.facebook.com/groups/expatsinbelgrade,facebook_groups,65,en,facebook,todo,,,Expats in Belgrade FB group
-facebook.com,https://www.facebook.com/groups/digitalnomadsinserbia,facebook_groups,55,en,facebook,todo,,,Digital nomads in Serbia FB group
-facebook.com,https://www.facebook.com/groups/russkievserbii,facebook_groups,60,ru,facebook,todo,,,Русские в Сербии FB group
-facebook.com,https://www.facebook.com/groups/zivimousrbiji,facebook_groups,55,ru,facebook,todo,,,Живём в Сербии FB group
-t.me,https://t.me/zivot_u_srbiji,facebook_groups,50,ru,telegram,todo,,,Жизнь в Сербии Telegram channel — DM admin
-t.me,https://t.me/serbiarelocation,facebook_groups,45,ru,telegram,todo,,,Serbia Relocation TG channel
-t.me,https://t.me/belgradeexpats,facebook_groups,40,en,telegram,todo,,,Belgrade Expats TG channel
-youtube.com,https://www.youtube.com/@InYourPocketCityGuides,youtube_travel,65,en,form,todo,,,In Your Pocket YouTube — description-box links
-youtube.com,https://www.youtube.com/@wolterstravel,youtube_travel,55,en,form,todo,,,Wolters World travel channel; did Serbia video
-youtube.com,https://www.youtube.com/@TravelwithDorian,youtube_travel,45,en,form,todo,,,Travel with Dorian; Balkan road trips
-nomadicmatt.com,https://www.nomadicmatt.com/?s=serbia,travel_blog_global,80,en,email,todo,,,search page shows Serbia posts; pitch transit data for Balkans guide update
-adventurouskate.com,https://adventurouskate.com/category/destinations/europe/serbia/,travel_blog_global,72,en,email,todo,,,active Serbia category; pitch local transport resource for itinerary posts
-againstthecompass.com,https://againstthecompass.com/en/serbia/,travel_blog_global,55,en,email,todo,,,dedicated Serbia hub; suggest linking Prevozni as Serbian transit resource
-thebrokebackpacker.com,https://www.thebrokebackpacker.com/backpacking-serbia-travel-guide/,travel_blog_global,70,en,email,todo,,,existing Serbia guide; pitch as budget bus schedule add-on
-journeyera.com,https://www.journeyera.com/,travel_blog_global,45,en,email,todo,,,adventure blog by Jackson Groves; pitch Balkan bus collab
-inwanderlust.com,https://www.inwanderlust.com/serbia/,travel_blog_global,35,en,email,todo,,,has dedicated Serbia page; direct link ask
-earthtrekkers.com,https://www.earthtrekkers.com/,travel_blog_global,65,en,email,todo,,,family travel blog; has Balkans itineraries
-expertvagabond.com,https://expertvagabond.com/?s=serbia,travel_blog_global,60,en,email,todo,,,Matthew Karsten Balkans content; resource link pitch
-goatsontheroad.com,https://www.goatsontheroad.com/?s=serbia,travel_blog_global,60,en,email,todo,,,Nick and Dariece have Serbia content
-twomonkeystravelgroup.com,https://www.twomonkeystravelgroup.com/?s=serbia,travel_blog_global,55,en,email,todo,,,couple travel blog with Balkans coverage
-theblondeabroad.com,https://www.theblondeabroad.com/,travel_blog_global,60,en,email,todo,,,Kiersten has Balkan guides; pitch bus-schedule addition
-alongdustyroads.com,https://www.alongdustyroads.com/,travel_blog_global,45,en,email,todo,,,slow-travel Balkans specialists
-worldnomads.com,https://www.worldnomads.com/explore/eastern-europe/serbia,travel_blog_global,78,en,form,todo,,,WorldNomads Serbia guide; submit as verified local source
-roughguides.com,https://www.roughguides.com/destinations/europe/serbia/,travel_blog_global,78,en,form,todo,,,Rough Guides Serbia hub; pitch editorial mention
-fodors.com,https://www.fodors.com/world/europe/serbia,travel_blog_global,80,en,form,todo,,,Fodor's Serbia destination page; pitch editorial link
-timeout.com,https://www.timeout.com/belgrade,travel_blog_global,85,en,form,todo,,,TimeOut Belgrade; offer as transit companion
-reddit.com,https://www.reddit.com/r/IWantOut/,travel_forum,88,en,reddit,todo,,,relocation sub; Serbia-bound Russians/Ukrainians ask transport
-reddit.com,https://www.reddit.com/r/expats/,travel_forum,88,en,reddit,todo,,,expats sub; settling-in questions mention buses
-reddit.com,https://www.reddit.com/r/InterRail/,travel_forum,75,en,reddit,todo,,,interrail sub; Serbia train coverage with Prevozni data
-reddit.com,https://www.reddit.com/r/beograd/,travel_forum,70,sr,reddit,todo,,,Serbian-language Beograd sub; local bus questions
-reddit.com,https://www.reddit.com/r/digitalnomad/,travel_forum,90,en,reddit,todo,,,nomads ask about Belgrade often; transit resource
-tourister.ru,https://www.tourister.ru/world/europe/serbia,russian_diaspora,70,ru,form,todo,,,major RU travel community; publish review and embed Prevozni link
-drive2.ru,https://www.drive2.ru/,russian_diaspora,70,ru,form,todo,,,auto community; travelogue with public-transport fallback
-pora-valit.com,https://www.pora-valit.com/,russian_diaspora,45,ru,form,todo,,,RU emigration community; Serbia migration threads
-visasam.ru,https://visasam.ru/,russian_diaspora,55,ru,form,todo,,,RU visa/relocation site; suggest Serbia transport link
-meduza.io,https://meduza.io/,russian_diaspora,85,ru,email,todo,,,"RU independent media; relocation coverage, pitch as source"
-rbth.com,https://www.rbth.com/travel,russian_diaspora,70,ru,email,todo,,,Russia Beyond travel; Serbia feature pitch
-dzen.ru,https://dzen.ru/a/search?query=Сербия,russian_diaspora,80,ru,form,todo,,,Dzen Сербия search; publish relocation/transport stories
-perito-burrito.com,https://perito-burrito.com/,russian_diaspora,55,ru,email,todo,,,urbanism magazine; pitch Belgrade/Novi Sad transit data story
-forum.awd.ru,https://forum.awd.ru/viewforum.php?f=218,russian_diaspora,55,ru,form,todo,,,Eastern Europe travel forum; answer Serbia threads
-t.me,https://t.me/s/serbia_chat,russian_diaspora,55,ru,telegram,todo,,,public chat; share Prevozni when users ask schedules
-t.me,https://t.me/s/life_serbia,russian_diaspora,50,ru,telegram,todo,,,public TG channel; admin DM to cross-post transit tips
-t.me,https://t.me/s/serbia_live,russian_diaspora,55,ru,telegram,todo,,,ВНЖ/гражданство channel; admin partnership pitch
-t.me,https://t.me/s/serbianow,russian_diaspora,55,ru,telegram,todo,,,Сербия Сейчас news channel; pitch cross-post
-t.me,https://t.me/s/ruserbia,russian_diaspora,55,ru,telegram,todo,,,О Сербии по-русски; admin collab for transit updates
-youtube.com,https://www.youtube.com/@DrewBinsky,youtube_travel,85,en,form,todo,,,top travel YouTuber; pitch description-box link
-youtube.com,https://www.youtube.com/@GabrielTraveler,youtube_travel,70,en,email,todo,,,filmed Serbia; ask description link
-youtube.com,https://www.youtube.com/@BaldAndBankrupt,youtube_travel,85,en,email,todo,,,covers former-Yugoslavia extensively; pitch description mention
-youtube.com,https://www.youtube.com/@HeyNadine,youtube_travel,70,en,email,todo,,,travel YouTuber with Balkans content
-youtube.com,https://www.youtube.com/@KaraandNate,youtube_travel,85,en,form,todo,,,big travel couple; Serbia videos
-youtube.com,https://www.youtube.com/@Vagabrothers,youtube_travel,78,en,email,todo,,,travel brothers; covered Belgrade
-facebook.com,https://www.facebook.com/groups/ExpatsInSerbia/,facebook_groups,55,en,facebook,todo,,,major Serbia expat group; post transit tool
-facebook.com,https://www.facebook.com/groups/DigitalNomadsBelgrade/,facebook_groups,50,en,facebook,todo,,,Belgrade nomads; transit tool post fits
-facebook.com,https://www.facebook.com/groups/InternationalsInSerbia/,facebook_groups,45,en,facebook,todo,,,internationals group; transit tool pitch
-nomadlist.com,https://nomadlist.com/belgrade,broken_link_candidates,72,en,form,todo,,,Nomad List Belgrade; submit transit link in city resources
-nomadlist.com,https://nomadlist.com/novi-sad,broken_link_candidates,65,en,form,todo,,,Nomad List Novi Sad; submit transit link
-hitchwiki.org,https://hitchwiki.org/en/Serbia,broken_link_candidates,50,en,form,todo,,,Hitchhiking wiki Serbia; add public-transport fallback
+domain,url,category,DA_estimate,language,contact_method,contact_email,template,site_title,their_topic,our_hook,enriched_at,status,contacted_at,last_status_change,last_event,last_event_at,follow_up_count,opted_out,backlink_url,backlink_detected_at,notes
+serbia.travel,https://www.serbia.travel/en,serbian_tourism,75,en,form,,,,,,,todo,,,,,,,,,official National Tourism Organisation; homepage useful-links potential
+tob.rs,https://www.tob.rs/en,serbian_tourism,65,en,form,,,,,,,todo,,,,,,,,,Tourism Organization of Belgrade; pitch as citizen-useful tool
+tob.rs,https://www.tob.rs/sr,serbian_tourism,65,sr,form,,,,,,,todo,,,,,,,,,TOB Serbian version; local audience fit
+novisad.travel,https://novisad.travel/en,serbian_tourism,55,en,form,,,,,,,todo,,,,,,,,,Novi Sad official tourism EN; transport info page likely
+visitnovisad.rs,https://www.visitnovisad.rs/en,serbian_tourism,50,en,form,,,,,,,todo,,,,,,,,,Visit Novi Sad EN portal; useful-links request angle
+gtokg.org.rs,https://www.gtokg.org.rs/kontakt,serbian_tourism,40,sr,form,,,,,,,todo,,,,,,,,,Tourism Org Kragujevac contact page; direct city fit
+gtokg.org.rs,https://www.gtokg.org.rs/en,serbian_tourism,40,en,form,,,,,,,todo,,,,,,,,,GTO Kragujevac EN version
+nistourism.org.rs,https://www.nistourism.org.rs,serbian_tourism,40,sr,form,,,,,,,todo,,,,,,,,,Nis Tourism Organization; transit aggregator = natural partner
+visitbelgrade.rs,https://visitbelgrade.rs,serbian_tourism,45,sr,form,,,,,,,todo,,,,,,,,,Visit Belgrade tourism portal; getting-around section
+visitsubotica.rs,https://visitsubotica.rs,serbian_tourism,35,sr,form,,,,,,,todo,,,,,,,,,Visit Subotica; north-Serbia bus hub city
+subotica.com,https://subotica.com,serbian_tourism,30,sr,form,,,,,,,todo,,,,,,,,,Subotica city info site; bus station references
+vojvodina.travel,https://vojvodina.travel,serbian_tourism,40,sr,form,,,,,,,todo,,,,,,,,,Vojvodina regional tourism; Novi Sad + surrounding
+nptara.rs,https://nptara.rs,serbian_tourism,35,sr,form,,,,,,,todo,,,,,,,,,Tara National Park; visitors need bus info
+npkopaonik.rs,https://www.npkopaonik.rs,serbian_tourism,35,sr,form,,,,,,,todo,,,,,,,,,Kopaonik NP official; getting-there section fits
+en.unesco.org,https://en.unesco.org/countries/serbia,serbian_tourism,90,en,form,,,,,,,todo,,,,,,,,,UNESCO Serbia country page; heritage-site transport angle weak but high DA
+studenica.rs,https://www.studenica.rs,serbian_tourism,40,sr,form,,,,,,,todo,,,,,,,,,Studenica Monastery UNESCO site; pilgrims need bus routes
+beogradskatvrdjava.co.rs,https://www.beogradskatvrdjava.co.rs,serbian_tourism,35,sr,form,,,,,,,todo,,,,,,,,,Belgrade Fortress official; city-transport cross-link
+serbia-visit.com,https://www.serbia-visit.com,serbian_tourism,25,en,email,,,,,,,todo,,,,,,,,,Serbia-visit guide; link exchange candidate
+worldtravelguide.net,https://www.worldtravelguide.net/guides/europe/serbia,serbian_tourism,70,en,form,,,,,,,todo,,,,,,,,,Columbus WorldTravelGuide Serbia; getting-around reference
+lasta.rs,https://www.lasta.rs,serbian_operator,50,sr,email,,,,,,,todo,,,,,,,,,Largest Serbian intercity operator; partner/useful-links pitch
+nis-ekspres.rs,https://www.nis-ekspres.rs,serbian_operator,40,sr,email,,,,,,,todo,,,,,,,,,Nis-Ekspres operator; timetable aggregator = natural link
+nis-ekspres.rs,https://www.nis-ekspres.rs/kontakt,serbian_operator,40,sr,email,,,,,,,todo,,,,,,,,,Nis-Ekspres contact page; direct outreach
+severtrans.rs,https://www.severtrans.rs,serbian_operator,35,sr,email,,,,,,,todo,,,,,,,,,Severtrans operator; Vojvodina region coverage
+severtrans.rs,https://www.severtrans.rs/kontakt,serbian_operator,35,sr,email,,,,,,,todo,,,,,,,,,Severtrans contact page
+autoprevoz.rs,https://www.autoprevoz.rs,serbian_operator,30,sr,email,,,,,,,todo,,,,,,,,,Autoprevoz; partner-pages exist for agencies
+autoprevoz.rs,https://www.autoprevoz.rs/kontakt,serbian_operator,30,sr,email,,,,,,,todo,,,,,,,,,Autoprevoz contact
+fudeks.rs,https://www.fudeks.rs,serbian_operator,30,sr,email,,,,,,,todo,,,,,,,,,Fudeks Belgrade operator; aggregator listing value
+fudeks.rs,https://www.fudeks.rs/kontakt,serbian_operator,30,sr,email,,,,,,,todo,,,,,,,,,Fudeks contact
+busplus.rs,https://www.busplus.rs,serbian_operator,35,sr,form,,,,,,,todo,,,,,,,,,BusPlus (Belgrade city ticketing); cross-link natural
+bgprevoz.rs,https://www.bgprevoz.rs,serbian_operator,40,sr,form,,,,,,,todo,,,,,,,,,GSP Belgrade data source; partner relationship
+bgprevoz.rs,https://www.bgprevoz.rs/index.php/kontakt,serbian_operator,40,sr,form,,,,,,,todo,,,,,,,,,GSP Belgrade contact
+gsp.rs,https://www.gsp.rs,serbian_operator,40,sr,form,,,,,,,todo,,,,,,,,,GSP Belgrade corporate site
+bgsaobracaj.rs,https://www.bgsaobracaj.rs,serbian_operator,35,sr,form,,,,,,,todo,,,,,,,,,Belgrade traffic/transit info portal
+bgsaobracaj.rs,https://www.bgsaobracaj.rs/kontakt,serbian_operator,35,sr,form,,,,,,,todo,,,,,,,,,BG Saobracaj contact
+srbvoz.rs,https://www.srbvoz.rs,serbian_operator,55,sr,form,,,,,,,todo,,,,,,,,,Srbija Voz national railway; timetable referral
+srbvoz.rs,https://www.srbvoz.rs/en,serbian_operator,55,en,form,,,,,,,todo,,,,,,,,,Srbija Voz EN site
+srbvoz.rs,https://www.srbvoz.rs/contact,serbian_operator,55,en,form,,,,,,,todo,,,,,,,,,Srbija Voz contact
+polazak.rs,https://polazak.rs,serbian_operator,45,sr,form,,,,,,,todo,,,,,,,,,Polazak.rs booking platform; data source
+polazak.rs,https://polazak.rs/en,serbian_operator,45,en,form,,,,,,,todo,,,,,,,,,Polazak EN version
+data.gov.rs,https://data.gov.rs,serbian_gov,75,sr,email,,,,,,,todo,,,,,,,,,Serbia open data portal; GTFS datasets; cite-source
+data.gov.rs,https://data.gov.rs/en,serbian_gov,75,en,email,,,,,,,todo,,,,,,,,,data.gov.rs EN
+srbija.gov.rs,https://www.srbija.gov.rs/en,serbian_gov,82,en,form,,,,,,,todo,,,,,,,,,Government of Serbia EN portal
+srbija.gov.rs,https://www.srbija.gov.rs,serbian_gov,82,sr,form,,,,,,,todo,,,,,,,,,Government of Serbia SR
+mgsi.gov.rs,https://mgsi.gov.rs,serbian_gov,70,sr,email,,,,,,,todo,,,,,,,,,Ministry of Construction Transport & Infrastructure; direct relevance
+mgsi.gov.rs,https://mgsi.gov.rs/en,serbian_gov,70,en,email,,,,,,,todo,,,,,,,,,MGSI EN version
+ekologija.gov.rs,https://www.ekologija.gov.rs,serbian_gov,65,sr,form,,,,,,,todo,,,,,,,,,Ministry of Environment; public-transport-for-eco angle
+beograd.rs,https://www.beograd.rs,serbian_gov,72,sr,form,,,,,,,todo,,,,,,,,,City of Belgrade portal
+beograd.rs,https://www.beograd.rs/lat,serbian_gov,72,sr,form,,,,,,,todo,,,,,,,,,Belgrade Latin site
+novisad.rs,https://www.novisad.rs,serbian_gov,65,sr,form,,,,,,,todo,,,,,,,,,City of Novi Sad portal
+ni.rs,https://www.ni.rs,serbian_gov,60,sr,form,,,,,,,todo,,,,,,,,,City of Nis official portal
+kragujevac.rs,https://www.kragujevac.rs,serbian_gov,55,sr,form,,,,,,,todo,,,,,,,,,City of Kragujevac portal
+putevi-srbije.rs,https://www.putevi-srbije.rs,serbian_gov,60,sr,form,,,,,,,todo,,,,,,,,,Serbian Roads agency; useful-links page exists
+rts.rs,https://www.rts.rs,serbian_gov,80,sr,form,,,,,,,todo,,,,,,,,,Public broadcaster RTS; news tip / press release
+rtv.rs,https://www.rtv.rs,serbian_gov,72,sr,form,,,,,,,todo,,,,,,,,,Vojvodina public broadcaster
+balkaninsight.com,https://www.balkaninsight.com/category/serbia/,balkan_blog,70,en,email,,,,,,,todo,,,,,,,,,BIRN Balkan Insight Serbia category; op-ed pitch
+inyourpocket.com,https://www.inyourpocket.com/belgrade,balkan_blog,65,en,email,,,,,,,todo,,,,,,,,,In Your Pocket Belgrade; transport-chapter link
+inyourpocket.com,https://www.inyourpocket.com/novi-sad,balkan_blog,65,en,email,,,,,,,todo,,,,,,,,,IYP Novi Sad guide
+inyourpocket.com,https://www.inyourpocket.com/nis,balkan_blog,65,en,email,,,,,,,todo,,,,,,,,,IYP Nis guide
+inyourpocket.com,https://www.inyourpocket.com/serbia,balkan_blog,65,en,email,,,,,,,todo,,,,,,,,,IYP Serbia hub
+lonelyplanet.com,https://www.lonelyplanet.com/serbia,balkan_blog,88,en,form,,,,,,,todo,,,,,,,,,Lonely Planet Serbia destination; user-forum link
+chasingthedonkey.com,https://chasingthedonkey.com,balkan_blog,55,en,email,,,,,,,todo,,,,,,,,,Chasing the Donkey Balkans blog; active 2024-2025
+chasingthedonkey.com,https://chasingthedonkey.com/things-to-do-in-belgrade-serbia,balkan_blog,55,en,email,,,,,,,todo,,,,,,,,,Belgrade post specifically; comment/link angle
+wander-lush.org,https://wander-lush.org,balkan_blog,50,en,email,,,,,,,todo,,,,,,,,,Wander-Lush Balkans specialist Emily Lush
+seat61.com,https://www.seat61.com/Serbia.htm,balkan_blog,75,en,email,,,,,,,todo,,,,,,,,,Seat61 Serbia rail page; natural bus counterpart
+nomadicmatt.com,https://www.nomadicmatt.com,balkan_blog,80,en,email,,,,,,,todo,,,,,,,,,Nomadic Matt travel blog; resource-page pitch
+serbianmonitor.com,https://serbianmonitor.com,balkan_blog,35,en,email,,,,,,,todo,,,,,,,,,Serbian Monitor news/travel blog
+myserbia.rs,https://myserbia.rs,balkan_blog,30,en,email,,,,,,,todo,,,,,,,,,MySerbia travel blog; link-exchange friendly
+serbianprivatetours.com,https://www.serbianprivatetours.com,balkan_blog,25,en,email,,,,,,,todo,,,,,,,,,Serbian Private Tours blog/site
+serbianprivatetours.com,https://www.serbianprivatetours.com/contact,balkan_blog,25,en,email,,,,,,,todo,,,,,,,,,Direct contact page
+en.wikipedia.org,https://en.wikipedia.org/wiki/Transport_in_Serbia,wikipedia_edit,95,en,form,,,,,,,todo,,,,,,,,,Add External Links citation for schedules
+en.wikipedia.org,https://en.wikipedia.org/wiki/Rail_transport_in_Serbia,wikipedia_edit,95,en,form,,,,,,,todo,,,,,,,,,Rail transport article; ref link
+en.wikipedia.org,https://en.wikipedia.org/wiki/Transport_in_Belgrade,wikipedia_edit,95,en,form,,,,,,,todo,,,,,,,,,Transport in Belgrade; external links section
+en.wikipedia.org,https://en.wikipedia.org/wiki/GSP_Belgrade,wikipedia_edit,95,en,form,,,,,,,todo,,,,,,,,,GSP Belgrade; ref for route data
+en.wikipedia.org,https://en.wikipedia.org/wiki/JGSP_Novi_Sad,wikipedia_edit,95,en,form,,,,,,,todo,,,,,,,,,JGSP Novi Sad; ref candidate
+en.wikipedia.org,https://en.wikipedia.org/wiki/Belgrade_Bus_Station,wikipedia_edit,95,en,form,,,,,,,todo,,,,,,,,,BAS article; external-links
+en.wikipedia.org,https://en.wikipedia.org/wiki/Lasta_Beograd,wikipedia_edit,95,en,form,,,,,,,todo,,,,,,,,,Lasta Beograd article
+en.wikipedia.org,https://en.wikipedia.org/wiki/Ni%C5%A1-Ekspres,wikipedia_edit,95,en,form,,,,,,,todo,,,,,,,,,Nis-Ekspres article
+en.wikipedia.org,https://en.wikipedia.org/wiki/Serbian_Railways,wikipedia_edit,95,en,form,,,,,,,todo,,,,,,,,,Serbian Railways article
+en.wikipedia.org,https://en.wikipedia.org/wiki/Beovoz,wikipedia_edit,95,en,form,,,,,,,todo,,,,,,,,,Beovoz suburban rail article
+en.wikipedia.org,https://en.wikipedia.org/wiki/BG_Voz,wikipedia_edit,95,en,form,,,,,,,todo,,,,,,,,,BG Voz article
+en.wikipedia.org,https://en.wikipedia.org/wiki/Belgrade_tram_system,wikipedia_edit,95,en,form,,,,,,,todo,,,,,,,,,Belgrade trams article
+en.wikipedia.org,https://en.wikipedia.org/wiki/Tourism_in_Serbia,wikipedia_edit,95,en,form,,,,,,,todo,,,,,,,,,Tourism in Serbia; getting-around subsection
+sr.wikipedia.org,https://sr.wikipedia.org/wiki/ГСП_Београд,wikipedia_edit,80,sr,form,,,,,,,todo,,,,,,,,,GSP Beograd SR-wiki
+sr.wikipedia.org,https://sr.wikipedia.org/wiki/ЈГСП_Нови_Сад,wikipedia_edit,80,sr,form,,,,,,,todo,,,,,,,,,JGSP Novi Sad SR-wiki
+sr.wikipedia.org,https://sr.wikipedia.org/wiki/Саобраћај_у_Србији,wikipedia_edit,80,sr,form,,,,,,,todo,,,,,,,,,Saobracaj u Srbiji SR-wiki article
+en.wikivoyage.org,https://en.wikivoyage.org/wiki/Serbia,wikipedia_edit,85,en,form,,,,,,,todo,,,,,,,,,Wikivoyage Serbia; Get-around section edit
+en.wikivoyage.org,https://en.wikivoyage.org/wiki/Belgrade,wikipedia_edit,85,en,form,,,,,,,todo,,,,,,,,,Wikivoyage Belgrade
+en.wikivoyage.org,https://en.wikivoyage.org/wiki/Novi_Sad,wikipedia_edit,85,en,form,,,,,,,todo,,,,,,,,,Wikivoyage Novi Sad
+en.wikivoyage.org,https://en.wikivoyage.org/wiki/Ni%C5%A1,wikipedia_edit,85,en,form,,,,,,,todo,,,,,,,,,Wikivoyage Nis
+en.wikivoyage.org,https://en.wikivoyage.org/wiki/Kragujevac,wikipedia_edit,85,en,form,,,,,,,todo,,,,,,,,,Wikivoyage Kragujevac
+en.wikivoyage.org,https://en.wikivoyage.org/wiki/Subotica,wikipedia_edit,85,en,form,,,,,,,todo,,,,,,,,,Wikivoyage Subotica
+wikitravel.org,https://wikitravel.org/en/Serbia,wikipedia_edit,65,en,form,,,,,,,todo,,,,,,,,,Wikitravel Serbia; Get-around section
+reddit.com,https://www.reddit.com/r/serbia,expat_serbia,90,en,reddit,,,,,,,todo,,,,,,,,,r/serbia main subreddit; share-useful-tool angle
+reddit.com,https://www.reddit.com/r/Serbia/wiki,expat_serbia,90,en,reddit,,,,,,,todo,,,,,,,,,r/Serbia wiki; add useful-sites entry
+reddit.com,https://www.reddit.com/r/belgrade,expat_serbia,75,en,reddit,,,,,,,todo,,,,,,,,,r/belgrade subreddit
+reddit.com,https://www.reddit.com/r/Belgrade/wiki,expat_serbia,75,en,reddit,,,,,,,todo,,,,,,,,,r/Belgrade wiki resources
+reddit.com,https://www.reddit.com/r/novisad,expat_serbia,55,en,reddit,,,,,,,todo,,,,,,,,,r/novisad community
+reddit.com,https://www.reddit.com/r/AskBalkans,expat_serbia,78,en,reddit,,,,,,,todo,,,,,,,,,AskBalkans Q&A; answer-bus-questions strategy
+reddit.com,https://www.reddit.com/r/Balkans,expat_serbia,70,en,reddit,,,,,,,todo,,,,,,,,,r/Balkans community
+reddit.com,https://www.reddit.com/r/europetravel,expat_serbia,80,en,reddit,,,,,,,todo,,,,,,,,,r/europetravel; answer Serbia threads
+reddit.com,https://www.reddit.com/r/solotravel,expat_serbia,82,en,reddit,,,,,,,todo,,,,,,,,,r/solotravel; Serbia itinerary threads
+reddit.com,https://www.reddit.com/r/travel,expat_serbia,88,en,reddit,,,,,,,todo,,,,,,,,,r/travel main; high-traffic mention
+reddit.com,https://www.reddit.com/r/yugoslavia,expat_serbia,50,en,reddit,,,,,,,todo,,,,,,,,,r/yugoslavia nostalgia+geo
+internations.org,https://www.internations.org/belgrade-expats,expat_serbia,70,en,form,,,,,,,todo,,,,,,,,,InterNations Belgrade community; useful-links section
+expat.com,https://www.expat.com/en/destination/europe/serbia,expat_serbia,70,en,form,,,,,,,todo,,,,,,,,,Expat.com Serbia destination hub
+expat.com,https://www.expat.com/en/forum/europe/serbia,expat_serbia,70,en,form,,,,,,,todo,,,,,,,,,Expat.com Serbia forum; post answers
+travel.stackexchange.com,https://travel.stackexchange.com/questions/tagged/serbia,expat_serbia,80,en,form,,,,,,,todo,,,,,,,,,Travel StackExchange Serbia tag; answer bus-route Qs
+vc.ru,https://vc.ru/tag/Сербия,russian_diaspora,78,ru,form,,,,,,,todo,,,,,,,,,vc.ru Serbia tag; guest post angle about relocating/living
+habr.com,https://habr.com/ru/hubs/travel/,russian_diaspora,82,ru,form,,,,,,,todo,,,,,,,,,Habr travel hub; dev-relocation audience
+pikabu.ru,https://pikabu.ru/tag/Сербия,russian_diaspora,72,ru,form,,,,,,,todo,,,,,,,,,Pikabu Serbia tag; casual travel/relocation posts
+russerbia.ru,https://russerbia.ru,russian_diaspora,25,ru,form,,,,,,,todo,,,,,,,,,Russian-Serbian community portal; useful-links candidate
+serbia4rus.ru,https://serbia4rus.ru,russian_diaspora,20,ru,email,,,,,,,todo,,,,,,,,,Niche relocation site; direct owner pitch
+zivot-u-srbiji.com,https://zivot-u-srbiji.com,russian_diaspora,22,ru,form,,,,,,,todo,,,,,,,,,Life-in-Serbia blog RU; transport section natural fit
+ballkan.ru,https://ballkan.ru,russian_diaspora,22,ru,email,,,,,,,todo,,,,,,,,,RU Balkans travel magazine; guest post
+balkanpost.ru,https://balkanpost.ru,russian_diaspora,20,ru,email,,,,,,,todo,,,,,,,,,RU Balkans news; press-release angle
+awaytravel.ru,https://awaytravel.ru,russian_diaspora,25,ru,email,,,,,,,todo,,,,,,,,,RU travel blog; Serbia itineraries
+tonkosti.ru,https://tonkosti.ru/Сербия,russian_diaspora,62,ru,form,,,,,,,todo,,,,,,,,,Tonkosti — big RU travel portal Serbia section
+tutu.ru,https://www.tutu.ru,russian_diaspora,78,ru,form,,,,,,,todo,,,,,,,,,RU travel aggregator; partner listing
+travelask.ru,https://travelask.ru/serbia,russian_diaspora,55,ru,form,,,,,,,todo,,,,,,,,,TravelAsk Serbia; Q&A answer-threads
+lonelyplanet.com,https://www.lonelyplanet.com/thorntree/forums/europe-western-europe/serbia,travel_forum,88,en,form,,,,,,,todo,,,,,,,,,Lonely Planet Thorntree Serbia sub-forum
+tripadvisor.com,https://www.tripadvisor.com/ShowForum-g294472-i3707-Serbia.html,travel_forum,90,en,form,,,,,,,todo,,,,,,,,,TripAdvisor Serbia forum; answer bus-route questions
+ricksteves.com,https://community.ricksteves.com/travel-forum/eastern-europe,travel_forum,75,en,form,,,,,,,todo,,,,,,,,,Rick Steves Eastern Europe forum
+flyertalk.com,https://www.flyertalk.com/forum/,travel_forum,75,en,form,,,,,,,todo,,,,,,,,,FlyerTalk; occasional Serbia threads
+bootsnall.com,https://www.bootsnall.com/forum/,travel_forum,55,en,form,,,,,,,todo,,,,,,,,,BootsnAll indie travel forum
+nomadicmatt.com,https://www.nomadicmatt.com/travel-blogs/serbia/,travel_blog_global,80,en,email,,,,,,,todo,,,,,,,,,Nomadic Matt Serbia category page
+theculturetrip.com,https://theculturetrip.com/europe/serbia,travel_blog_global,75,en,email,,,,,,,todo,,,,,,,,,Culture Trip Serbia; listicle-style posts link out
+matadornetwork.com,https://matadornetwork.com/tag/serbia/,travel_blog_global,70,en,email,,,,,,,todo,,,,,,,,,Matador Network Serbia tag; broken-link candidate
+againstthecompass.com,https://againstthecompass.com,travel_blog_global,55,en,email,,,,,,,todo,,,,,,,,,Off-beat destinations blog; Serbia guide extant
+adventurouskate.com,https://www.adventurouskate.com,travel_blog_global,70,en,email,,,,,,,todo,,,,,,,,,Adventurous Kate — Balkans posts 2023-2024
+thetraveldudes.com,https://traveldudes.com,travel_blog_global,55,en,email,,,,,,,todo,,,,,,,,,Travel Dudes — multi-author; accepts guest input
+bemusedbackpacker.com,https://www.bemusedbackpacker.com,travel_blog_global,45,en,email,,,,,,,todo,,,,,,,,,Budget-travel blog Michael Huxley; Balkans coverage
+journeyera.com,https://www.journey-era.com,travel_blog_global,45,en,email,,,,,,,todo,,,,,,,,,Journey Era; photography-first travel blog
+inwanderlust.com,https://inwanderlust.com,travel_blog_global,40,en,email,,,,,,,todo,,,,,,,,,Small-ish blog; higher reply rate than big ones
+emilyluxton.co.uk,https://emilyluxton.co.uk,travel_blog_global,50,en,email,,,,,,,todo,,,,,,,,,Emily Luxton travel writer; Serbia posts
+pointsguy.com,https://thepointsguy.com,travel_blog_global,85,en,form,,,,,,,todo,,,,,,,,,The Points Guy; occasional Serbia articles
+matadornetwork.com,https://matadornetwork.com/tag/serbia/,broken_link_candidates,70,en,email,,,,,,,todo,,,,,,,,,Scan this URL with backlinks_broken.py — broken outbound hrefs
+nomadicmatt.com,https://www.nomadicmatt.com/travel-guides/serbia-travel-tips/,broken_link_candidates,80,en,email,,,,,,,todo,,,,,,,,,Scan with backlinks_broken.py — Serbia travel-tips outbound links
+theculturetrip.com,https://theculturetrip.com/europe/serbia/articles,broken_link_candidates,75,en,email,,,,,,,todo,,,,,,,,,Scan with backlinks_broken.py — Serbia articles list
+en.wikivoyage.org,https://en.wikivoyage.org/wiki/Serbia,broken_link_candidates,85,en,form,,,,,,,todo,,,,,,,,,Scan with backlinks_broken.py — user-added external links often stale
+lonelyplanet.com,https://www.lonelyplanet.com/serbia/belgrade,broken_link_candidates,88,en,form,,,,,,,todo,,,,,,,,,Scan with backlinks_broken.py — transport subsection
+seat61.com,https://www.seat61.com/Serbia.htm,broken_link_candidates,75,en,email,,,,,,,todo,,,,,,,,,Scan with backlinks_broken.py — Mark Smith curates manually
+facebook.com,https://www.facebook.com/groups/lifeinserbia,facebook_groups,70,en,facebook,,,,,,,todo,,,,,,,,,Life in Serbia expat group ~10k members
+facebook.com,https://www.facebook.com/groups/expatsinbelgrade,facebook_groups,65,en,facebook,,,,,,,todo,,,,,,,,,Expats in Belgrade FB group
+facebook.com,https://www.facebook.com/groups/digitalnomadsinserbia,facebook_groups,55,en,facebook,,,,,,,todo,,,,,,,,,Digital nomads in Serbia FB group
+facebook.com,https://www.facebook.com/groups/russkievserbii,facebook_groups,60,ru,facebook,,,,,,,todo,,,,,,,,,Русские в Сербии FB group
+facebook.com,https://www.facebook.com/groups/zivimousrbiji,facebook_groups,55,ru,facebook,,,,,,,todo,,,,,,,,,Живём в Сербии FB group
+t.me,https://t.me/zivot_u_srbiji,facebook_groups,50,ru,telegram,,,,,,,todo,,,,,,,,,Жизнь в Сербии Telegram channel — DM admin
+t.me,https://t.me/serbiarelocation,facebook_groups,45,ru,telegram,,,,,,,todo,,,,,,,,,Serbia Relocation TG channel
+t.me,https://t.me/belgradeexpats,facebook_groups,40,en,telegram,,,,,,,todo,,,,,,,,,Belgrade Expats TG channel
+youtube.com,https://www.youtube.com/@InYourPocketCityGuides,youtube_travel,65,en,form,,,,,,,todo,,,,,,,,,In Your Pocket YouTube — description-box links
+youtube.com,https://www.youtube.com/@wolterstravel,youtube_travel,55,en,form,,,,,,,todo,,,,,,,,,Wolters World travel channel; did Serbia video
+youtube.com,https://www.youtube.com/@TravelwithDorian,youtube_travel,45,en,form,,,,,,,todo,,,,,,,,,Travel with Dorian; Balkan road trips
+nomadicmatt.com,https://www.nomadicmatt.com/?s=serbia,travel_blog_global,80,en,email,,,,,,,todo,,,,,,,,,search page shows Serbia posts; pitch transit data for Balkans guide update
+adventurouskate.com,https://adventurouskate.com/category/destinations/europe/serbia/,travel_blog_global,72,en,email,,,,,,,todo,,,,,,,,,active Serbia category; pitch local transport resource for itinerary posts
+againstthecompass.com,https://againstthecompass.com/en/serbia/,travel_blog_global,55,en,email,,,,,,,todo,,,,,,,,,dedicated Serbia hub; suggest linking Prevozni as Serbian transit resource
+thebrokebackpacker.com,https://www.thebrokebackpacker.com/backpacking-serbia-travel-guide/,travel_blog_global,70,en,email,,,,,,,todo,,,,,,,,,existing Serbia guide; pitch as budget bus schedule add-on
+journeyera.com,https://www.journeyera.com/,travel_blog_global,45,en,email,,,,,,,todo,,,,,,,,,adventure blog by Jackson Groves; pitch Balkan bus collab
+inwanderlust.com,https://www.inwanderlust.com/serbia/,travel_blog_global,35,en,email,,,,,,,todo,,,,,,,,,has dedicated Serbia page; direct link ask
+earthtrekkers.com,https://www.earthtrekkers.com/,travel_blog_global,65,en,email,,,,,,,todo,,,,,,,,,family travel blog; has Balkans itineraries
+expertvagabond.com,https://expertvagabond.com/?s=serbia,travel_blog_global,60,en,email,,,,,,,todo,,,,,,,,,Matthew Karsten Balkans content; resource link pitch
+goatsontheroad.com,https://www.goatsontheroad.com/?s=serbia,travel_blog_global,60,en,email,,,,,,,todo,,,,,,,,,Nick and Dariece have Serbia content
+twomonkeystravelgroup.com,https://www.twomonkeystravelgroup.com/?s=serbia,travel_blog_global,55,en,email,,,,,,,todo,,,,,,,,,couple travel blog with Balkans coverage
+theblondeabroad.com,https://www.theblondeabroad.com/,travel_blog_global,60,en,email,,,,,,,todo,,,,,,,,,Kiersten has Balkan guides; pitch bus-schedule addition
+alongdustyroads.com,https://www.alongdustyroads.com/,travel_blog_global,45,en,email,,,,,,,todo,,,,,,,,,slow-travel Balkans specialists
+worldnomads.com,https://www.worldnomads.com/explore/eastern-europe/serbia,travel_blog_global,78,en,form,,,,,,,todo,,,,,,,,,WorldNomads Serbia guide; submit as verified local source
+roughguides.com,https://www.roughguides.com/destinations/europe/serbia/,travel_blog_global,78,en,form,,,,,,,todo,,,,,,,,,Rough Guides Serbia hub; pitch editorial mention
+fodors.com,https://www.fodors.com/world/europe/serbia,travel_blog_global,80,en,form,,,,,,,todo,,,,,,,,,Fodor's Serbia destination page; pitch editorial link
+timeout.com,https://www.timeout.com/belgrade,travel_blog_global,85,en,form,,,,,,,todo,,,,,,,,,TimeOut Belgrade; offer as transit companion
+reddit.com,https://www.reddit.com/r/IWantOut/,travel_forum,88,en,reddit,,,,,,,todo,,,,,,,,,relocation sub; Serbia-bound Russians/Ukrainians ask transport
+reddit.com,https://www.reddit.com/r/expats/,travel_forum,88,en,reddit,,,,,,,todo,,,,,,,,,expats sub; settling-in questions mention buses
+reddit.com,https://www.reddit.com/r/InterRail/,travel_forum,75,en,reddit,,,,,,,todo,,,,,,,,,interrail sub; Serbia train coverage with Prevozni data
+reddit.com,https://www.reddit.com/r/beograd/,travel_forum,70,sr,reddit,,,,,,,todo,,,,,,,,,Serbian-language Beograd sub; local bus questions
+reddit.com,https://www.reddit.com/r/digitalnomad/,travel_forum,90,en,reddit,,,,,,,todo,,,,,,,,,nomads ask about Belgrade often; transit resource
+tourister.ru,https://www.tourister.ru/world/europe/serbia,russian_diaspora,70,ru,form,,,,,,,todo,,,,,,,,,major RU travel community; publish review and embed Prevozni link
+drive2.ru,https://www.drive2.ru/,russian_diaspora,70,ru,form,,,,,,,todo,,,,,,,,,auto community; travelogue with public-transport fallback
+pora-valit.com,https://www.pora-valit.com/,russian_diaspora,45,ru,form,,,,,,,todo,,,,,,,,,RU emigration community; Serbia migration threads
+visasam.ru,https://visasam.ru/,russian_diaspora,55,ru,form,,,,,,,todo,,,,,,,,,RU visa/relocation site; suggest Serbia transport link
+meduza.io,https://meduza.io/,russian_diaspora,85,ru,email,,,,,,,todo,,,,,,,,,"RU independent media; relocation coverage, pitch as source"
+rbth.com,https://www.rbth.com/travel,russian_diaspora,70,ru,email,,,,,,,todo,,,,,,,,,Russia Beyond travel; Serbia feature pitch
+dzen.ru,https://dzen.ru/a/search?query=Сербия,russian_diaspora,80,ru,form,,,,,,,todo,,,,,,,,,Dzen Сербия search; publish relocation/transport stories
+perito-burrito.com,https://perito-burrito.com/,russian_diaspora,55,ru,email,,,,,,,todo,,,,,,,,,urbanism magazine; pitch Belgrade/Novi Sad transit data story
+forum.awd.ru,https://forum.awd.ru/viewforum.php?f=218,russian_diaspora,55,ru,form,,,,,,,todo,,,,,,,,,Eastern Europe travel forum; answer Serbia threads
+t.me,https://t.me/s/serbia_chat,russian_diaspora,55,ru,telegram,,,,,,,todo,,,,,,,,,public chat; share Prevozni when users ask schedules
+t.me,https://t.me/s/life_serbia,russian_diaspora,50,ru,telegram,,,,,,,todo,,,,,,,,,public TG channel; admin DM to cross-post transit tips
+t.me,https://t.me/s/serbia_live,russian_diaspora,55,ru,telegram,,,,,,,todo,,,,,,,,,ВНЖ/гражданство channel; admin partnership pitch
+t.me,https://t.me/s/serbianow,russian_diaspora,55,ru,telegram,,,,,,,todo,,,,,,,,,Сербия Сейчас news channel; pitch cross-post
+t.me,https://t.me/s/ruserbia,russian_diaspora,55,ru,telegram,,,,,,,todo,,,,,,,,,О Сербии по-русски; admin collab for transit updates
+youtube.com,https://www.youtube.com/@DrewBinsky,youtube_travel,85,en,form,,,,,,,todo,,,,,,,,,top travel YouTuber; pitch description-box link
+youtube.com,https://www.youtube.com/@GabrielTraveler,youtube_travel,70,en,email,,,,,,,todo,,,,,,,,,filmed Serbia; ask description link
+youtube.com,https://www.youtube.com/@BaldAndBankrupt,youtube_travel,85,en,email,,,,,,,todo,,,,,,,,,covers former-Yugoslavia extensively; pitch description mention
+youtube.com,https://www.youtube.com/@HeyNadine,youtube_travel,70,en,email,,,,,,,todo,,,,,,,,,travel YouTuber with Balkans content
+youtube.com,https://www.youtube.com/@KaraandNate,youtube_travel,85,en,form,,,,,,,todo,,,,,,,,,big travel couple; Serbia videos
+youtube.com,https://www.youtube.com/@Vagabrothers,youtube_travel,78,en,email,,,,,,,todo,,,,,,,,,travel brothers; covered Belgrade
+facebook.com,https://www.facebook.com/groups/ExpatsInSerbia/,facebook_groups,55,en,facebook,,,,,,,todo,,,,,,,,,major Serbia expat group; post transit tool
+facebook.com,https://www.facebook.com/groups/DigitalNomadsBelgrade/,facebook_groups,50,en,facebook,,,,,,,todo,,,,,,,,,Belgrade nomads; transit tool post fits
+facebook.com,https://www.facebook.com/groups/InternationalsInSerbia/,facebook_groups,45,en,facebook,,,,,,,todo,,,,,,,,,internationals group; transit tool pitch
+nomadlist.com,https://nomadlist.com/belgrade,broken_link_candidates,72,en,form,,,,,,,todo,,,,,,,,,Nomad List Belgrade; submit transit link in city resources
+nomadlist.com,https://nomadlist.com/novi-sad,broken_link_candidates,65,en,form,,,,,,,todo,,,,,,,,,Nomad List Novi Sad; submit transit link
+hitchwiki.org,https://hitchwiki.org/en/Serbia,broken_link_candidates,50,en,form,,,,,,,todo,,,,,,,,,Hitchhiking wiki Serbia; add public-transport fallback

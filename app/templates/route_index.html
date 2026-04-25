@@ -91,6 +91,12 @@
   <button class="btn btn--outline" id="showMoreBtn" type="button">{{ _('route_index.show_more') }} {{ routes|length - 50 }} {{ _('route_index.show_more_suffix') }}</button>
 </div>
 {% endif %}
+
+{# Below-grid ad — single slot after the catalog (the route-grid is a
+   CSS grid; injecting in-grid would break alignment). Catches users
+   who scroll the catalog to the bottom and re-engage from there. #}
+{% from '_partials/_ad_slot.html' import ad_slot with context %}
+{{ ad_slot('catalog_in_feed', format='leaderboard') }}
 <div id="routesEmpty" hidden>
   {{ empty_state(icon='search', text=_('route_index.no_results')) }}
 </div>

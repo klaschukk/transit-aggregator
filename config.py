@@ -15,6 +15,24 @@ class Config:
     DEBUG = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
     GA_TRACKING_ID = os.environ.get('GA_TRACKING_ID', '')
     ADSENSE_ID = os.environ.get('ADSENSE_ID', '')
+    # Publisher ID for /ads.txt (`pub-XXXXXXXXX`). Same numeric body as
+    # ADSENSE_ID — kept separate so /ads.txt is independent of whether
+    # the site is currently rendering ads (a paused campaign still
+    # needs a valid ads.txt for re-approval).
+    ADSENSE_PUB_ID = os.environ.get('ADSENSE_PUB_ID', ADSENSE_ID)
+    # Per-slot ad-unit IDs. Set ADSENSE_SLOT_<KEY> env vars from the
+    # AdSense console; missing keys render the house ad instead.
+    # Keys must match the strings passed to ad_slot() in templates.
+    ADSENSE_SLOTS = {
+        'home_top':           os.environ.get('ADSENSE_SLOT_HOME_TOP', ''),
+        'home_mid':           os.environ.get('ADSENSE_SLOT_HOME_MID', ''),
+        'route_bottom':       os.environ.get('ADSENSE_SLOT_ROUTE_BOTTOM', ''),
+        'city_pair_bottom':   os.environ.get('ADSENSE_SLOT_CITY_PAIR_BOTTOM', ''),
+        'city_transport_mid': os.environ.get('ADSENSE_SLOT_CITY_TRANSPORT_MID', ''),
+        'catalog_in_feed':    os.environ.get('ADSENSE_SLOT_CATALOG_IN_FEED', ''),
+        'guide_sidebar':      os.environ.get('ADSENSE_SLOT_GUIDE_SIDEBAR', ''),
+        'mobile_anchor':      os.environ.get('ADSENSE_SLOT_MOBILE_ANCHOR', ''),
+    }
     CONTACT_EMAIL = os.environ.get('CONTACT_EMAIL', '')
     TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
     TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '')
@@ -42,6 +60,28 @@ class Config:
     SMTP_USER = os.environ.get('SMTP_USER', '')
     SMTP_PASS = os.environ.get('SMTP_PASS', '')
     MAIL_FROM = os.environ.get('MAIL_FROM', 'no-reply@prevozni.com')
+
+    # Mailgun (optional, for cold outreach only — transactional mail
+    # stays on SMTP so a Mailgun outage can't break newsletter signup).
+    # With MAILGUN_API_KEY + MAILGUN_DOMAIN set, scripts/backlinks_send.py
+    # posts to Mailgun's v3 API and we get open/click/bounce webhooks
+    # at /api/mailgun-webhook. MAILGUN_WEBHOOK_SIGNING_KEY is the HMAC
+    # key used to verify those callbacks (distinct from the API key in
+    # newer Mailgun setups); falls back to MAILGUN_API_KEY when unset.
+    MAILGUN_API_KEY = os.environ.get('MAILGUN_API_KEY', '')
+    MAILGUN_DOMAIN = os.environ.get('MAILGUN_DOMAIN', '')
+    MAILGUN_WEBHOOK_SIGNING_KEY = os.environ.get(
+        'MAILGUN_WEBHOOK_SIGNING_KEY', '',
+    )
+
+    # CAN-SPAM compliant physical mailing address — appears in the
+    # CAN-SPAM footer of every cold-outreach email. US recipients
+    # require a real postal address; set this in systemd before the
+    # first non-dry-run send. Read straight from env at module load
+    # so app.outreach.sender stays import-clean.
+    MAIL_PHYSICAL_ADDRESS = os.environ.get(
+        'MAIL_PHYSICAL_ADDRESS', 'Prevozni · Belgrade, Serbia',
+    )
 
     # Sentry error tracking. Empty DSN → sentry_sdk.init() is skipped entirely
     # so dev/tests never phone home. Traces sample rate applies to performance

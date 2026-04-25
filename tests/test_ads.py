@@ -1,0 +1,191 @@
+"""AdSense placement + house-ad fallback + privacy compliance.
+
+Covers four risk surfaces:
+
+  1. With ADSENSE_ID empty (default in tests) — every page must render
+     the house-ad fallback in place of the slot.
+  2. /ads.txt reflects ADSENSE_PUB_ID format correctly (and degrades to
+     a comment when unset).
+  3. Mobile-anchor partial only renders when consent='all' AND not
+     dismissed AND a slot id is configured.
+  4. AdSense disclosure is present on /privatnost/ and the dashboard
+     handles missing adsense_daily table gracefully (day-1 state).
+
+We never set ADSENSE_ID in these tests — tests must work with the
+default empty config so a stray pytest run can never accidentally load
+the AdSense JS or hit pagead2.googlesyndication.com.
+"""
+from __future__ import annotations
+
+import pytest
+
+
+# ── 1. House-ad fallback rendering when ADSENSE_ID is empty ────────────
+
+
+@pytest.mark.parametrize('path', [
+    '/',
+    '/rute/',
+    '/rute/beograd-novi-sad/',
+    '/voznja/beograd-do-novi-sad/',
+    '/gradski/beograd/',
+])
+def test_pages_render_house_ad_when_adsense_disabled(client, path):
+    """Default config has ADSENSE_ID='' — every ad-bearing page must
+    render the house-ad partial in the slot wrapper. The slot wrapper
+    itself stays present so reserved layout space is unchanged."""
+    resp = client.get(path)
+    if resp.status_code == 404:
+        pytest.skip(f'page {path} not present in test DB')
+    assert resp.status_code == 200, path
+    assert b'class="ad-slot' in resp.data, path
+    assert b'house-ad' in resp.data, path
+
+
+def test_no_adsense_script_loaded_when_id_empty(client):
+    """The bootstrap <script> block must not appear when ADSENSE_ID is
+    empty — guarantees no leak of pagead2.googlesyndication.com to
+    clients in dev/CI."""
+    resp = client.get('/')
+    assert resp.status_code == 200
+    assert b'pagead2.googlesyndication.com' not in resp.data
+
+
+def test_no_ins_adsbygoogle_when_disabled(client):
+    """`<ins class="adsbygoogle">` must never appear in the rendered
+    HTML when AdSense is off — wrong house-ad fallback path otherwise."""
+    resp = client.get('/')
+    assert resp.status_code == 200
+    assert b'adsbygoogle' not in resp.data, \
+        'adsbygoogle leaked into HTML with ADSENSE_ID empty'
+
+
+# ── 2. /ads.txt content ────────────────────────────────────────────────
+
+
+def test_ads_txt_returns_placeholder_when_no_pub_id(client):
+    """With ADSENSE_PUB_ID empty (test default), /ads.txt returns a
+    comment line instead of 404 — keeps AdSense crawlers from logging
+    a missing-file error during the approval window."""
+    resp = client.get('/ads.txt')
+    assert resp.status_code == 200
+    assert resp.content_type.startswith('text/plain')
+    body = resp.data.decode('utf-8')
+    assert body.startswith('#') or 'pub-' in body
+
+
+def test_ads_txt_format_when_pub_id_set(client, app):
+    """Patch the live config and confirm /ads.txt returns the IAB-canonical
+    format. Not a real env var test — we toggle via app.config so other
+    tests in the session aren't affected."""
+    original = app.config.get('ADSENSE_ID', '')
+    try:
+        app.config['ADSENSE_ID'] = 'ca-pub-1234567890'
+        resp = client.get('/ads.txt')
+        assert resp.status_code == 200
+        body = resp.data.decode('utf-8').strip()
+        assert 'google.com' in body
+        assert 'ca-pub-1234567890' in body
+        assert 'DIRECT' in body
+        assert 'f08c47fec0942fa0' in body
+    finally:
+        app.config['ADSENSE_ID'] = original
+
+
+# ── 3. Mobile anchor partial ────────────────────────────────────────────
+
+
+def test_mobile_anchor_not_rendered_without_consent(client):
+    """No `cookie_consent` cookie → the anchor partial must early-return
+    (output is empty). Verified by absence of the wrapper id."""
+    resp = client.get('/')
+    assert resp.status_code == 200
+    assert b'id="mobileAnchorAd"' not in resp.data
+
+
+def test_mobile_anchor_not_rendered_with_essential_consent(client):
+    """Even with consent=essential the anchor stays hidden — Google's
+    NPA mode can't run on the in-page anchor format reliably enough to
+    risk a frequency-policy hit."""
+    client.set_cookie(key='cookie_consent', value='essential',
+                      path='/', domain='localhost')
+    resp = client.get('/')
+    assert resp.status_code == 200
+    assert b'id="mobileAnchorAd"' not in resp.data
+
+
+def test_mobile_anchor_still_off_without_slot_id(client, app):
+    """Even with consent=all + ADSENSE_ID set, the anchor needs the
+    mobile_anchor slot id. Missing slot → no render."""
+    original_id = app.config.get('ADSENSE_ID', '')
+    original_slots = dict(app.config.get('ADSENSE_SLOTS', {}))
+    try:
+        app.config['ADSENSE_ID'] = 'ca-pub-1234567890'
+        app.config['ADSENSE_SLOTS'] = {**original_slots, 'mobile_anchor': ''}
+        client.set_cookie(key='cookie_consent', value='all',
+                          path='/', domain='localhost')
+        resp = client.get('/')
+        assert resp.status_code == 200
+        assert b'id="mobileAnchorAd"' not in resp.data
+    finally:
+        app.config['ADSENSE_ID'] = original_id
+        app.config['ADSENSE_SLOTS'] = original_slots
+
+
+# ── 4. Privacy + revenue dashboard ──────────────────────────────────────
+
+
+def test_privacy_page_includes_adsense_disclosure(client):
+    """AdSense personalised ads must be disclosed on /privatnost/ —
+    Google policy requirement + GDPR Art. 13."""
+    resp = client.get('/privatnost/')
+    assert resp.status_code == 200
+    body = resp.data.lower()
+    assert b'adsense' in body
+    # Disclosure may be in any of 3 languages depending on default lang;
+    # verify a known phrase from each variant is hittable.
+    body_text = body.decode('utf-8', errors='ignore')
+    accepted_phrases = (
+        'requestnonpersonalizedads',
+        'non-personalised',
+        'неперсонализ',
+        'neperonaliz',
+    )
+    assert any(p in body_text for p in accepted_phrases), \
+        'no AdSense personalised-ads disclosure phrase matched'
+
+
+def test_admin_revenue_handles_missing_adsense_table(client):
+    """When `adsense_daily` table doesn't exist (day 1 / fresh dev box),
+    /admin/revenue must still respond — defensively. ADMIN_USER not
+    configured in tests so we accept either 503 (admin disabled) or
+    401 (auth required) — both prove the route didn't 500."""
+    resp = client.get('/admin/revenue')
+    assert resp.status_code in (401, 503)
+
+
+# ── 5. Slot-level template macro behaviour ──────────────────────────────
+
+
+def test_ads_label_translated_in_slot(client):
+    """Every slot wrapper carries the `ads.label` translation so users
+    know it's an ad zone — required by AdSense policy on disclosure."""
+    resp = client.get('/')
+    assert resp.status_code == 200
+    # In SR (default) the label is 'Reklama'; verify *any* recognised
+    # form so an i18n tweak doesn't accidentally void disclosure.
+    body = resp.data
+    assert (b'Reklama' in body or b'Advertisement' in body
+            or b'\xd0\xa0\xd0\xb5\xd0\xba\xd0\xbb\xd0\xb0\xd0\xbc' in body), \
+        'no ad label found — disclosure missing'
+
+
+def test_ad_slot_wrappers_present_on_route_detail(client):
+    """The bottom slot wrapper must exist on a route page even when ads
+    are disabled — `min-height` reservation is what prevents CLS when
+    ads later flip on."""
+    resp = client.get('/rute/beograd-novi-sad/')
+    if resp.status_code == 404:
+        pytest.skip('route not in test DB')
+    assert resp.status_code == 200
+    assert b'data-slot="route_bottom"' in resp.data

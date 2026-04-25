@@ -1,0 +1,40 @@
+{# Floating Action Button macro.
+
+   Three intent flavours, picked by the caller:
+     intent="search"    — opens the global search bottom-sheet
+                          (data-action="search-sheet")
+     intent="scrolltop" — scrolls window to top
+                          (data-action="scroll-top")
+     intent="filters"   — opens a filters bottom-sheet (caller provides
+                          the sheet id via `target`)
+
+   Hide-on-scroll behaviour is handled by mobile.js — it adds
+   `.m-fab--hidden` when the user scrolls down and removes on scroll up.
+
+   Usage:
+     {% from '_partials/_fab.html' import fab %}
+     {{ fab('search', aria_label=_('nav.search')) }}
+     {{ fab('filters', target='filterSheet', aria_label=_('filters.open')) }}
+     {{ fab('scrolltop', aria_label=_('a11y.scroll_top')) }}
+#}
+{% macro fab(intent='search', target='', aria_label='Search') %}
+<button type="button"
+        class="m-fab"
+        data-action="{% if intent == 'search' %}search-sheet{% elif intent == 'scrolltop' %}scroll-top{% elif intent == 'filters' %}open-sheet{% endif %}"
+        {% if intent == 'filters' and target %}data-sheet-id="{{ target }}"{% endif %}
+        aria-label="{{ aria_label }}">
+  {% if intent == 'search' %}
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+    </svg>
+  {% elif intent == 'scrolltop' %}
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 19V5m-7 7l7-7 7 7"/>
+    </svg>
+  {% elif intent == 'filters' %}
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 6h16M7 12h10M10 18h4"/>
+    </svg>
+  {% endif %}
+</button>
+{% endmacro %}

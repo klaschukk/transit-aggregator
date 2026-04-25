@@ -1,0 +1,716 @@
+/* ─────────────────────────────────────────────────────────────────────
+   Prevozni — mobile design system overlay.
+
+   This file is loaded only on viewports ≤767px via media-query on the
+   <link> tag (see base.html). Keeping it separate from app.css preserves
+   the desktop CSS budget and lets a mobile audit happen against a single
+   file.
+
+   Architecture
+     1. Typography refinements
+     2. Tactile interaction primitives
+     3. Reusable components (.m-sheet, .m-fab, .m-skeleton, .m-sticky-cta)
+     4. Card + list-item polish (.trip-card, .route-card, .see-also__card)
+     5. Header — frosted scroll + off-canvas drawer
+     6. Search form expand pattern
+     7. Empty states
+     8. prefers-reduced-motion + prefers-color-scheme: dark
+   ───────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+
+/* ── 1. Typography refinements ─────────────────────────────────────── */
+body {
+  font-size: var(--mtext-base);
+  line-height: 1.55;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+               "Inter", system-ui, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+h1 {
+  font-size: var(--mtext-2xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.18;
+}
+h2 {
+  font-size: var(--mtext-xl);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+h3 { font-size: var(--mtext-lg); font-weight: 700; line-height: 1.3; }
+.page-subtitle {
+  font-size: var(--mtext-sm);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+p { line-height: 1.65; }
+.btn, .filter-chip, .lang-pill__item, button { line-height: 1.4; }
+/* Tabular numerals everywhere times + prices appear so 09:30 stacks
+   under 14:00 cleanly. */
+.trip-card__time, .trip-card__price, .stop-row__time,
+.stats-strip__value { font-variant-numeric: tabular-nums; }
+
+
+/* ── 2. Tactile interaction primitives ───────────────────────────── */
+/* Every `<a>`, `<button>`, role="button" element gets a subtle tap
+   feedback. The transform is GPU-accelerated and respects
+   prefers-reduced-motion (overridden at end of file). */
+button:active,
+a.btn:active,
+.trip-card__buy:active,
+.lang-pill__item:active,
+.filter-chip:active,
+.see-also__card:active,
+.fav-btn:active {
+  transform: scale(var(--mtap-scale));
+  transition: transform var(--mtap-duration) var(--mease-out);
+}
+
+/* Page transitions — lift content slightly into view. fade-in already
+   exists in app.css; we layer translateY on top for mobile only. */
+.fade-in {
+  animation: m-fade-rise .25s var(--mease-out) both;
+}
+@keyframes m-fade-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ── 3a. Bottom-sheet component ──────────────────────────────────── */
+.m-sheet {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: #fff;
+  border-radius: var(--mradius-lg) var(--mradius-lg) 0 0;
+  box-shadow: var(--melev-pop);
+  transform: translateY(100%);
+  transition: transform .25s var(--mease-out);
+  padding: var(--mspace-2) var(--mspace-4) var(--mspace-6);
+  padding-bottom: max(var(--mspace-6), env(safe-area-inset-bottom));
+  z-index: 200;
+  max-height: 85vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.m-sheet--open { transform: translateY(0); }
+.m-sheet__handle {
+  width: 40px; height: 4px;
+  background: #cbd5e1;
+  border-radius: var(--mradius-pill);
+  margin: 0 auto var(--mspace-3);
+}
+.m-sheet__title {
+  font-size: var(--mtext-lg); font-weight: 700;
+  margin: 0 0 var(--mspace-3); color: var(--color-text);
+}
+.m-sheet__close {
+  position: absolute; top: var(--mspace-3); right: var(--mspace-3);
+  width: 36px; height: 36px;
+  border-radius: var(--mradius-pill);
+  background: var(--mtint-surface); color: var(--color-text);
+  border: 0; font-size: 18px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.m-sheet-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,0);
+  pointer-events: none;
+  transition: background .25s var(--mease-out);
+  z-index: 199;
+}
+.m-sheet-backdrop--open {
+  background: rgba(15,23,42,.4);
+  pointer-events: auto;
+}
+body.m-sheet-locked { overflow: hidden; }
+
+
+/* ── 3b. FAB ─────────────────────────────────────────────────────── */
+.m-fab {
+  position: fixed;
+  right: var(--mspace-4);
+  bottom: calc(var(--mspace-6) + env(safe-area-inset-bottom));
+  width: 56px; height: 56px;
+  border-radius: var(--mradius-pill);
+  background: var(--color-primary); color: #fff;
+  border: 0;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--melev-pop);
+  cursor: pointer;
+  z-index: 50;
+  transform: translateY(0);
+  transition: transform .25s var(--mease-out), opacity .2s ease;
+}
+.m-fab:hover, .m-fab:focus { background: var(--color-primary-dark); }
+.m-fab--hidden {
+  transform: translateY(120%);
+  opacity: 0;
+  pointer-events: none;
+}
+.m-fab svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+
+/* ── 3c. Skeleton loader ─────────────────────────────────────────── */
+.m-skeleton {
+  display: block;
+  background: linear-gradient(90deg, #e2e8f0 0%, #f1f5f9 50%, #e2e8f0 100%);
+  background-size: 200% 100%;
+  border-radius: var(--mradius-sm);
+  animation: m-shimmer 1.5s linear infinite;
+}
+.m-skeleton--text { height: 14px; margin: 0 0 var(--mspace-2); }
+.m-skeleton--title { height: 22px; width: 70%; margin: 0 0 var(--mspace-3); }
+.m-skeleton--card {
+  height: 96px; border-radius: var(--mradius-md);
+  margin: 0 0 var(--mspace-2);
+}
+.m-skeleton--row { height: 44px; margin: 0 0 var(--mspace-2); }
+@keyframes m-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+
+/* ── 3d. Sticky CTA bar ──────────────────────────────────────────── */
+.m-sticky-cta {
+  position: fixed;
+  left: 0; right: 0;
+  bottom: 0;
+  padding: var(--mspace-3) var(--mspace-4);
+  padding-bottom: max(var(--mspace-3), env(safe-area-inset-bottom));
+  background: var(--color-primary); color: #fff;
+  display: flex; align-items: center; gap: var(--mspace-3);
+  box-shadow: 0 -4px 16px rgba(15,23,42,.18);
+  z-index: 40;
+  transform: translateY(0);
+  transition: transform .25s var(--mease-out);
+}
+.m-sticky-cta--hidden { transform: translateY(120%); }
+.m-sticky-cta__label {
+  flex: 1;
+  font-size: var(--mtext-sm); font-weight: 600;
+  line-height: 1.3;
+}
+.m-sticky-cta__price {
+  font-size: var(--mtext-lg); font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.m-sticky-cta__btn {
+  background: #fff; color: var(--color-primary);
+  padding: var(--mspace-2) var(--mspace-4);
+  border-radius: var(--mradius-pill);
+  font-weight: 700; text-decoration: none;
+  display: inline-flex; align-items: center; gap: var(--mspace-2);
+  white-space: nowrap;
+  min-height: 40px;
+}
+.m-sticky-cta__close {
+  background: transparent; border: 0; color: rgba(255,255,255,.85);
+  width: 28px; height: 28px; border-radius: var(--mradius-pill);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 18px; line-height: 1;
+}
+.m-sticky-cta__close:hover { background: rgba(255,255,255,.12); color: #fff; }
+
+
+/* ── 4. Card polish ──────────────────────────────────────────────── */
+.trip-card {
+  background: linear-gradient(180deg, #fff 0%, var(--mtint-surface) 100%);
+  border-radius: var(--mradius-md);
+  box-shadow: var(--melev-1);
+  padding: var(--mspace-3) var(--mspace-3);
+  /* Hairline divider replaces vertical-margin gap so the list reads
+     denser without losing the per-row separation. */
+  margin-bottom: var(--mspace-2);
+  transition: box-shadow .15s ease, transform var(--mtap-duration) var(--mease-out);
+}
+.trip-card:active {
+  transform: scale(var(--mtap-scale));
+  box-shadow: var(--melev-2);
+}
+.trip-card__buy {
+  /* Ensure tap target meets 44px even when copy is short. */
+  min-height: 44px;
+}
+
+.see-also__card {
+  background: #fff;
+  border-radius: var(--mradius-md);
+  box-shadow: var(--melev-1);
+  padding: var(--mspace-3) var(--mspace-4);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--mspace-2);
+  text-decoration: none;
+  transition: box-shadow .15s ease;
+}
+.see-also__card::after {
+  content: '›';
+  color: var(--color-text-muted);
+  font-size: 24px; line-height: 1;
+  font-weight: 300;
+}
+
+
+/* ── 5. Header ───────────────────────────────────────────────────── */
+.site-header {
+  /* Frosted glass on scroll — only kicks in once the body has scrolled
+     ≥80px (mobile.js toggles `.is-scrolled` on the header). */
+  transition: background .2s ease, box-shadow .2s ease, backdrop-filter .2s ease;
+}
+.site-header.is-scrolled {
+  background: rgba(255,255,255,0.78);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: var(--melev-1);
+  border-bottom-color: transparent;
+}
+.site-header.is-hidden {
+  transform: translateY(-100%);
+  transition: transform .2s var(--mease-out);
+}
+
+/* Off-canvas drawer — slides from the right. The base `<nav>` keeps
+   its existing markup; we just swap from inline-row to drawer when
+   the toggle button is open (`<body class="m-nav-open">`). */
+.site-nav-toggle {
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  width: 44px; height: 44px;
+  background: transparent; border: 0;
+  border-radius: var(--mradius-pill);
+  cursor: pointer;
+  color: var(--color-text);
+}
+.site-nav-toggle:hover { background: var(--mtint-surface); }
+.site-nav-toggle svg { transition: transform .2s var(--mease-out); }
+body.m-nav-open .site-nav-toggle svg { transform: rotate(90deg); }
+
+/* The full nav becomes the drawer. We override existing display rules
+   only when the drawer flag is set. */
+.site-nav {
+  position: fixed;
+  top: 0; right: 0;
+  width: 80vw;
+  max-width: 320px;
+  height: 100vh; height: 100dvh;
+  background: #fff;
+  box-shadow: var(--melev-pop);
+  transform: translateX(100%);
+  transition: transform .25s var(--mease-out);
+  z-index: 210;
+  padding: calc(var(--mspace-6) + env(safe-area-inset-top))
+           var(--mspace-4) var(--mspace-4);
+  display: flex; flex-direction: column; gap: var(--mspace-1);
+  overflow-y: auto;
+}
+@media (max-width: 479px) {
+  .site-nav { width: 100vw; max-width: none; }
+}
+body.m-nav-open .site-nav { transform: translateX(0); }
+/* Drawer backdrop reuses the bottom-sheet backdrop styling so a tap
+   anywhere off the drawer dismisses it. */
+.m-nav-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,0);
+  pointer-events: none;
+  transition: background .25s var(--mease-out);
+  z-index: 205;
+}
+.m-nav-backdrop.m-sheet-backdrop--open {
+  background: rgba(15,23,42,.4);
+  pointer-events: auto;
+}
+.site-nav__link {
+  padding: var(--mspace-3) var(--mspace-3);
+  border-radius: var(--mradius-md);
+  font-size: var(--mtext-base); font-weight: 600;
+  color: var(--color-text);
+  display: flex; align-items: center; gap: var(--mspace-3);
+  text-decoration: none;
+  min-height: 48px;
+}
+.site-nav__link:hover, .site-nav__link:active { background: var(--mtint-surface); }
+.site-nav__icon { color: var(--color-primary); flex-shrink: 0; }
+/* Group dividers between sections of the off-canvas */
+.site-nav .lang-pill {
+  margin-top: var(--mspace-3);
+  padding-top: var(--mspace-3);
+  border-top: 1px solid var(--color-border);
+  display: flex; gap: var(--mspace-2);
+  flex-wrap: wrap;
+}
+.site-nav .lang-pill__item {
+  flex: 1;
+  min-height: 44px;
+  border-radius: var(--mradius-pill);
+  padding: var(--mspace-2) var(--mspace-3);
+  font-size: var(--mtext-sm); font-weight: 600;
+  background: var(--mtint-surface); border: 0;
+  color: var(--color-text);
+  display: inline-flex; align-items: center; justify-content: center;
+  text-decoration: none;
+}
+.site-nav .lang-pill__item--active {
+  background: var(--color-primary); color: #fff;
+}
+
+
+/* ── 6. Search form expand pattern ──────────────────────────────── */
+/* Resting state — single pill card on the page. When .search-form is
+   inside the home hero we don't need extra polish, but on dense pages
+   like /pretraga/ the existing form-stack is too tall; mobile.js can
+   toggle `.search-form--collapsed` to switch into the pill mode and
+   open a bottom-sheet with the full inputs on tap. */
+.search-form--collapsed {
+  display: flex; align-items: center;
+  gap: var(--mspace-2);
+  padding: var(--mspace-3);
+  background: #fff;
+  border-radius: var(--mradius-pill);
+  box-shadow: var(--melev-2);
+  cursor: pointer;
+}
+.search-form--collapsed .search-form__compact {
+  flex: 1;
+  font-size: var(--mtext-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.search-form--collapsed .search-form__compact strong {
+  color: var(--color-text); font-weight: 700;
+}
+.search-form--collapsed .search-form__icon {
+  width: 36px; height: 36px;
+  border-radius: var(--mradius-pill);
+  background: var(--color-primary); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+
+/* ── 6b. Search form polish on mobile ────────────────────────────
+   The journey-form macro already stacks vertically below 640 px via
+   app.css. Here we just bump tap targets, add elevation, and switch
+   inputs to a slightly larger font so iOS doesn't auto-zoom on focus
+   (16px is the documented threshold). */
+.journey-form {
+  background: #fff;
+  border-radius: var(--mradius-md);
+  box-shadow: var(--melev-2);
+  padding: var(--mspace-3);
+}
+.journey-form__input { font-size: 16px; min-height: 44px; }
+.journey-form__date { font-size: 16px; min-height: 44px; }
+.journey-form__swap {
+  width: 36px; height: 36px;
+  border-radius: var(--mradius-pill);
+  background: var(--mtint-surface);
+  border: 0;
+  transition: transform .25s var(--mease-back);
+}
+.journey-form__swap:active { transform: rotate(180deg); }
+
+
+/* ── 7. Empty state polish ──────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: var(--mspace-8) var(--mspace-4);
+  color: var(--color-text-muted);
+}
+.empty-state__icon {
+  width: 64px; height: 64px;
+  margin: 0 auto var(--mspace-3);
+  color: var(--color-primary);
+  opacity: .85;
+}
+.empty-state__title {
+  font-size: var(--mtext-lg); font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 var(--mspace-2);
+}
+.empty-state__body { font-size: var(--mtext-sm); margin: 0 0 var(--mspace-4); }
+.empty-state .btn { min-height: 44px; }
+
+
+/* ── 8. Reduced-motion + dark mode ───────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .fade-in { animation: none; opacity: 1; transform: none; }
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #0f172a;
+    color: #f1f5f9;
+  }
+  .site-header { background: rgba(15,23,42,.92); border-bottom-color: #1e293b; }
+  .site-header.is-scrolled {
+    background: rgba(15,23,42,.78);
+    box-shadow: 0 1px 0 rgba(255,255,255,.04);
+  }
+  .site-nav { background: #1e293b; }
+  .trip-card,
+  .see-also__card {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    box-shadow: 0 1px 2px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.3);
+  }
+  .m-sheet { background: #1e293b; color: #f1f5f9; }
+  .m-sheet__close { background: #0f172a; color: #f1f5f9; }
+  .m-skeleton {
+    background: linear-gradient(90deg, #1e293b 0%, #334155 50%, #1e293b 100%);
+    background-size: 200% 100%;
+  }
+  .empty-state__title { color: #f1f5f9; }
+}
+
+/* ── 9. Page polish — home (P28) ────────────────────────────────────
+   Goal: every section feels app-quality, not a stretched desktop. Layout
+   wraps in @media so desktop is untouched. */
+
+/* 9a. Hero — value-prop strip below the search form. .hero__valueprop is
+   appended in index.html and shows only on mobile (display:none on desktop
+   via .hero overrides further up in app.css). */
+.hero__valueprop {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--mspace-2) var(--mspace-3);
+  margin: var(--mspace-3) auto 0;
+  font-size: var(--mtext-sm);
+  color: rgba(255,255,255,.92);
+  font-weight: 500;
+  max-width: 320px;
+  text-align: center;
+}
+.hero__valueprop b { font-weight: 700; }
+.hero__valueprop span { white-space: nowrap; }
+
+/* 9b. Stats strip — horizontal scroll-snap on mobile. .home-stats already
+   exists; we override its grid to a scroll rail. */
+.home-stats {
+  display: flex !important;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding: var(--mspace-3);
+  gap: var(--mspace-2);
+  padding-left: var(--mspace-3);
+  padding-right: var(--mspace-3);
+  scrollbar-width: none;
+}
+.home-stats::-webkit-scrollbar { display: none; }
+.home-stats__item {
+  flex: 0 0 42%;
+  min-width: 130px;
+  scroll-snap-align: start;
+  background: linear-gradient(180deg,#fff,var(--mtint-surface));
+  border-radius: var(--mradius-md);
+  box-shadow: var(--melev-1);
+  padding: var(--mspace-3) var(--mspace-3);
+  text-align: center;
+}
+.home-stats__num { font-size: 28px; font-weight: 800; color: var(--color-primary); line-height: 1; }
+.home-stats__label { font-size: var(--mtext-xs); color: var(--color-text-muted); margin-top: var(--mspace-1); text-transform: uppercase; letter-spacing: .04em; }
+
+/* 9c. Popular routes — convert two-column grid into a horizontal card-rail. */
+.home-routes {
+  display: flex !important;
+  overflow-x: auto;
+  gap: var(--mspace-2);
+  scroll-snap-type: x mandatory;
+  scroll-padding: var(--mspace-3);
+  padding: 0 var(--mspace-3) var(--mspace-2);
+  scrollbar-width: none;
+  margin-left: calc(-1 * var(--mspace-3));
+  margin-right: calc(-1 * var(--mspace-3));
+}
+.home-routes::-webkit-scrollbar { display: none; }
+.home-route {
+  flex: 0 0 78%;
+  min-width: 240px;
+  scroll-snap-align: start;
+  background: #fff;
+  border-radius: var(--mradius-md);
+  box-shadow: var(--melev-1);
+  padding: var(--mspace-3) var(--mspace-3);
+}
+
+/* 9d. Cities grid — clean 2x2 with bigger touch targets. */
+.home-cities-grid {
+  grid-template-columns: 1fr 1fr !important;
+  gap: var(--mspace-2);
+}
+.home-city-card {
+  padding: var(--mspace-3);
+  border-radius: var(--mradius-md);
+  background: #fff;
+  box-shadow: var(--melev-1);
+  min-height: 84px;
+}
+.home-city-card__icon {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark, #0d9488));
+  color: #fff;
+  width: 40px; height: 40px;
+  border-radius: var(--mradius-pill);
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* 9e. How-it-works — vertical timeline replacing horizontal step row. */
+.how-it-works {
+  flex-direction: column !important;
+  gap: var(--mspace-3);
+  position: relative;
+}
+.how-it-works__step {
+  display: grid !important;
+  grid-template-columns: 48px 1fr;
+  gap: var(--mspace-3);
+  align-items: start;
+  text-align: left !important;
+}
+.how-it-works__num {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  grid-column: 1; grid-row: 1 / span 3;
+}
+.how-it-works__icon { grid-column: 2; }
+.how-it-works__label { grid-column: 2; font-weight: 600; }
+.how-it-works__desc { grid-column: 2; font-size: var(--mtext-sm); }
+
+/* 9f. Newsletter section — full-width tinted card. */
+.home-newsletter {
+  background: var(--mtint-surface);
+  padding: var(--mspace-4) var(--mspace-3);
+  border-radius: var(--mradius-md);
+  margin-bottom: var(--mspace-4);
+}
+
+/* 9g. FAQ — pure native accordion with subtle chevron. */
+.faq-item {
+  background: #fff;
+  border-radius: var(--mradius-md);
+  box-shadow: var(--melev-1);
+  margin-bottom: var(--mspace-2);
+  overflow: hidden;
+}
+.faq-item__q {
+  padding: var(--mspace-3);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  position: relative;
+  padding-right: 36px;
+  min-height: 52px;
+  display: flex; align-items: center;
+}
+.faq-item__q::-webkit-details-marker { display: none; }
+.faq-item__q::after {
+  content: '+';
+  position: absolute;
+  right: var(--mspace-3);
+  top: 50%; transform: translateY(-50%);
+  color: var(--color-text-muted);
+  font-size: 22px; line-height: 1;
+  transition: transform .2s var(--mease-out);
+}
+.faq-item[open] .faq-item__q::after { content: '−'; }
+.faq-item__a { padding: 0 var(--mspace-3) var(--mspace-3); font-size: var(--mtext-sm); }
+
+
+/* ── 10. Page polish — route_detail / city_pair (P28) ───────────── */
+
+/* 10a. Stats strip — densify into 3-column compact row. .stats-strip
+   already exists; override gap + padding. */
+.stats-strip {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--mspace-1);
+  padding: var(--mspace-2) var(--mspace-3);
+  border-radius: var(--mradius-md);
+  background: var(--mtint-surface);
+  margin-bottom: var(--mspace-3);
+}
+.stats-strip__item { padding: var(--mspace-1) 0; text-align: center; }
+.stats-strip__value { font-size: var(--mtext-lg); font-weight: 700; line-height: 1.2; }
+.stats-strip__label { font-size: 10px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .04em; }
+
+/* 10b. Day-filter chips — pills, active uses brand-fill. .filter-chip
+   already styled; we tighten on small screens. */
+.filter-chips {
+  gap: var(--mspace-2);
+  padding-bottom: var(--mspace-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.filter-chips::-webkit-scrollbar { display: none; }
+.filter-chip {
+  border-radius: var(--mradius-pill);
+  padding: var(--mspace-2) var(--mspace-3);
+  min-height: 36px;
+  white-space: nowrap;
+  background: #fff;
+  box-shadow: var(--melev-1);
+}
+.filter-chip--active {
+  background: var(--color-primary);
+  color: #fff;
+}
+.filter-chip__sub { display: block; font-size: 10px; opacity: .8; }
+
+/* 10c. SEO prose — collapse pattern. The "more" toggle is added by
+   mobile.js; we hide everything past the first ~6 lines until the
+   user expands. .seo-block__content gets max-height + fade-out gradient. */
+.seo-block__content[data-collapse="1"] {
+  max-height: 11em;
+  overflow: hidden;
+  position: relative;
+  mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+}
+.seo-block__content[data-collapse="0"] {
+  max-height: none;
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+.seo-block__more {
+  display: inline-flex !important;
+  align-items: center;
+  gap: var(--mspace-1);
+  margin-top: var(--mspace-2);
+  font-weight: 600;
+  color: var(--color-primary);
+  background: transparent;
+  border: 0;
+  padding: var(--mspace-2) 0;
+  cursor: pointer;
+  font-size: var(--mtext-sm);
+}
+
+/* 10d. Reverse-route link — visual arrow card on city_pair. */
+.reverse-route {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mspace-2);
+  background: var(--mtint-surface);
+  padding: var(--mspace-2) var(--mspace-3);
+  border-radius: var(--mradius-pill);
+  text-decoration: none;
+  color: var(--color-primary);
+  font-size: var(--mtext-sm);
+  font-weight: 600;
+  margin-top: var(--mspace-2);
+}
+
+} /* end @media (max-width: 767px) */

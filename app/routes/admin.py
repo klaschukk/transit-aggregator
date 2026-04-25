@@ -595,3 +595,134 @@ def subscriber_data_export():
             for row in sends
         ],
     }
+
+
+# ── A/B experiment dashboard ─────────────────────────────────────────────
+
+
+@admin_bp.route('/ab')
+@_basic_auth_required
+def ab_index():
+    """List of live experiments + headline numbers per variant."""
+    from app.ab_config import EXPERIMENTS
+
+    rows = []
+    for key, spec in EXPERIMENTS.items():
+        summary = analytics_db.ab_event_summary(key)
+        per_variant: dict[str, dict] = {v: {'exposures': 0, 'conversions': 0}
+                                         for v in spec.variants}
+        for r in summary:
+            v = r['variant']
+            if v not in per_variant:
+                continue
+            if r['event_type'] == 'exposure':
+                per_variant[v]['exposures'] += int(r['count'] or 0)
+            elif (r['event_type'] or '').startswith('conv:'):
+                per_variant[v]['conversions'] += int(r['count'] or 0)
+        rows.append({'key': key, 'spec': spec, 'per_variant': per_variant})
+    return render_template('admin/ab.html', rows=rows)
+
+
+@admin_bp.route('/ab/<key>')
+@_basic_auth_required
+def ab_detail(key: str):
+    """Per-experiment funnel: Wilson CI, p-values, sample-size estimate."""
+    from app.ab_config import get_spec
+    from app.ab_power import (
+        wilson_interval, two_proportion_z_test, required_sample_size,
+    )
+    from datetime import date
+
+    spec = get_spec(key)
+    if spec is None:
+        return Response('experiment not found', status=404)
+
+    summary = analytics_db.ab_event_summary(key)
+    daily = analytics_db.ab_daily_exposures(key, days=14)
+
+    per_variant: dict[str, dict] = {v: {
+        'exposures': 0, 'conversions': 0, 'unique_users': 0,
+    } for v in spec.variants}
+    for r in summary:
+        v = r['variant']
+        if v not in per_variant:
+            continue
+        if r['event_type'] == 'exposure':
+            per_variant[v]['exposures'] += int(r['count'] or 0)
+            per_variant[v]['unique_users'] += int(r['unique_users'] or 0)
+        elif (r['event_type'] or '').startswith('conv:'):
+            per_variant[v]['conversions'] += int(r['count'] or 0)
+
+    for v, d in per_variant.items():
+        n = d['exposures']
+        c = d['conversions']
+        d['rate'] = (c / n) if n > 0 else 0.0
+        low, high = wilson_interval(c, n, alpha=0.05)
+        d['ci_low'] = low
+        d['ci_high'] = high
+
+    control = spec.variants[0]
+    control_d = per_variant[control]
+    verdicts = []
+    for v in spec.variants[1:]:
+        d = per_variant[v]
+        z = two_proportion_z_test(
+            successes_a=control_d['conversions'], n_a=control_d['exposures'],
+            successes_b=d['conversions'], n_b=d['exposures'],
+        )
+        sufficient = (control_d['conversions'] >= 100
+                      and d['conversions'] >= 100)
+        verdicts.append({
+            'variant': v, 'control': control, 'p_value': z.p_value,
+            'lift': z.lift_relative, 'z': z.z,
+            'significant': z.significant and sufficient,
+            'sufficient': sufficient,
+        })
+
+    rate = control_d['rate']
+    sample = required_sample_size(rate or 0.04, mde_relative=0.10)
+    daily_per_variant = (sum(r['exposures'] for r in daily) / max(1, len(daily))
+                         / max(1, len(spec.variants)))
+    days_to_sig = sample.days_at_rate(daily_per_variant) if rate > 0 else None
+
+    today = date.today().isoformat()
+    runtime_days = (date.today() - date.fromisoformat(spec.started_at)).days \
+        if spec.started_at <= today else 0
+    eligible_to_call = runtime_days >= spec.min_runtime_days
+
+    return render_template(
+        'admin/ab_detail.html',
+        spec=spec, per_variant=per_variant, verdicts=verdicts,
+        daily=daily, sample=sample, days_to_sig=days_to_sig,
+        runtime_days=runtime_days, eligible_to_call=eligible_to_call,
+    )
+
+
+@admin_bp.route('/ab/<key>.csv')
+@_basic_auth_required
+def ab_export_csv(key: str):
+    """Raw event export — one row per exposure/conversion."""
+    import csv
+    import io
+    from app.ab_config import get_spec
+
+    spec = get_spec(key)
+    if spec is None:
+        return Response('experiment not found', status=404)
+
+    rows = analytics_db.ab_export_rows(experiment=key)
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(['ts', 'experiment', 'variant', 'event_type', 'surface',
+                     'user_seed', 'value'])
+    for r in rows:
+        writer.writerow([
+            r.get('ts'), r.get('experiment'), r.get('variant'),
+            r.get('event_type'), r.get('surface'), r.get('user_seed'),
+            r.get('value'),
+        ])
+    return Response(
+        buf.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename="ab_{key}.csv"'},
+    )

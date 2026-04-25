@@ -197,6 +197,27 @@ CREATE TABLE IF NOT EXISTS email_suppressions (
     added_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     note         VARCHAR
 );
+
+-- A/B experiment events. event_type is either 'exposure' or 'conv:<event>'.
+-- Stored denormalised (variant + experiment as plain strings) so adding a
+-- new experiment is a config edit, no DDL. user_seed is the ab_id (UUID),
+-- never raw IP.
+CREATE SEQUENCE IF NOT EXISTS ab_events_id_seq;
+CREATE TABLE IF NOT EXISTS ab_events (
+    id           BIGINT PRIMARY KEY DEFAULT nextval('ab_events_id_seq'),
+    experiment   VARCHAR NOT NULL,
+    variant      VARCHAR NOT NULL,
+    event_type   VARCHAR NOT NULL,
+    surface      VARCHAR,
+    user_seed    VARCHAR,
+    value        DOUBLE  DEFAULT 1.0,
+    ts           TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ts_date      DATE      DEFAULT CURRENT_DATE
+);
+CREATE INDEX IF NOT EXISTS ab_events_exp_idx
+    ON ab_events(experiment, event_type, ts_date);
+CREATE INDEX IF NOT EXISTS ab_events_exp_variant_idx
+    ON ab_events(experiment, variant, event_type);
 """
 
 
@@ -255,6 +276,87 @@ def insert_ba_click(
             route_slug=route_slug, surface=surface,
         )
         _local.conn = None  # reset stale connection
+
+
+def insert_ab_event(
+    experiment: str,
+    variant: str,
+    event_type: str,
+    surface: str = '',
+    user_seed: str = '',
+    value: float = 1.0,
+) -> None:
+    """Append a row to ab_events. Best-effort — DB errors are logged
+    + Sentry-captured but never raised, since A/B telemetry must not
+    take down a page render."""
+    try:
+        conn = _get_conn()
+        conn.execute(
+            "INSERT INTO ab_events (experiment, variant, event_type, surface, user_seed, value) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            [
+                (experiment or '')[:80],
+                (variant or '')[:80],
+                (event_type or '')[:60],
+                (surface or '')[:60],
+                (user_seed or '')[:64],
+                float(value),
+            ],
+        )
+    except duckdb.Error as exc:
+        logger.error("insert_ab_event failed: %s", exc)
+        observability.capture_exception(
+            exc, subsystem='analytics_db', op='insert_ab_event',
+            experiment=experiment, variant=variant,
+        )
+        _local.conn = None
+
+
+def ab_event_summary(experiment: str) -> list[dict]:
+    """Aggregate counts per (variant, event_type) for one experiment."""
+    return query(
+        """
+        SELECT variant, event_type,
+               COUNT(*) AS count,
+               COUNT(DISTINCT user_seed) AS unique_users
+        FROM ab_events
+        WHERE experiment = ?
+        GROUP BY variant, event_type
+        ORDER BY variant, event_type
+        """,
+        [experiment],
+    )
+
+
+def ab_daily_exposures(experiment: str, days: int = 14) -> list[dict]:
+    """Per-variant daily exposure counts, recent N days."""
+    return query(
+        """
+        SELECT ts_date, variant, COUNT(*) AS exposures
+        FROM ab_events
+        WHERE experiment = ?
+          AND event_type = 'exposure'
+          AND ts_date >= CURRENT_DATE - ?
+        GROUP BY ts_date, variant
+        ORDER BY ts_date DESC, variant
+        """,
+        [experiment, days],
+    )
+
+
+def ab_export_rows(experiment: str | None = None) -> list[dict]:
+    """Flat raw export for /admin/ab CSV download."""
+    if experiment:
+        return query(
+            "SELECT experiment, variant, event_type, surface, user_seed, value, ts "
+            "FROM ab_events WHERE experiment = ? ORDER BY ts",
+            [experiment],
+        )
+    return query(
+        "SELECT experiment, variant, event_type, surface, user_seed, value, ts "
+        "FROM ab_events ORDER BY ts",
+        [],
+    )
 
 
 def query(sql: str, params: list | None = None) -> list[dict]:

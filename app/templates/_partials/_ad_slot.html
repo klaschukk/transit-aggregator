@@ -1,0 +1,50 @@
+{# Reusable AdSense ad-slot macro with house-ad fallback.
+
+   Three rendering branches, picked at template-render time:
+
+     1. ADSENSE_ID empty           → render <_house_ad>
+     2. cookie_consent != 'all'    → render <_house_ad> (privacy default;
+                                      see base.html consent gate). The
+                                      AdSense JS is also gated client-side
+                                      so this stays consistent if the
+                                      cookie was set after page load.
+     3. otherwise                   → render <ins.adsbygoogle> with the
+                                      slot ID resolved from config and a
+                                      reserved-height wrapper to prevent
+                                      Cumulative Layout Shift.
+
+   Reserved heights map to the slot's `format` parameter so we can pass
+   the AdSense recommended sizes without each template having to know
+   them. `slot_id` is the env-var-resolved ID from config (the macro
+   never reads the env directly — keeps tests deterministic).
+
+   Usage:
+     {% from '_partials/_ad_slot.html' import ad_slot with context %}
+     {{ ad_slot('home_top', format='leaderboard') }}
+     {{ ad_slot('route_bottom', format='responsive') }}
+     {{ ad_slot('city_sidebar', format='skyscraper', desktop_only=True) }}
+#}
+
+{%- macro ad_slot(slot_key, format='responsive', desktop_only=False,
+                  label=True, lazy=True) -%}
+  {%- set slot_id = config.get('ADSENSE_SLOTS', {}).get(slot_key, '') -%}
+  {%- set _consent_cookie = request.cookies.get('cookie_consent', '') -%}
+  {%- set _ads_ok = config.ADSENSE_ID and slot_id and _consent_cookie == 'all' -%}
+  {%- set _wrapper_class = 'ad-slot ad-slot--' ~ format
+        ~ (' ad-slot--desktop-only' if desktop_only else '') -%}
+  <div class="{{ _wrapper_class }}" data-slot="{{ slot_key }}">
+    {% if label %}<span class="ad-slot__label">{{ _('ads.label') }}</span>{% endif %}
+    {%- if _ads_ok %}
+    <ins class="adsbygoogle ad-slot__ins"
+         style="display:block"
+         data-ad-client="{{ config.ADSENSE_ID }}"
+         data-ad-slot="{{ slot_id }}"
+         data-ad-format="{{ 'auto' if format == 'responsive' else format }}"
+         data-full-width-responsive="{{ 'true' if format == 'responsive' else 'false' }}"
+         {%- if lazy %} data-lazy="1"{% endif %}></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    {%- else -%}
+    {%- include '_partials/_house_ad.html' -%}
+    {%- endif %}
+  </div>
+{%- endmacro -%}

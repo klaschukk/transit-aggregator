@@ -138,8 +138,50 @@
   <div class="empty">No clicks yet.</div>
   {% endif %}
 
+  <h2>AdSense — last 30 days</h2>
+  {% if adsense_30 %}
+  <div class="kpis">
+    <div class="kpi">
+      <div class="kpi__v">${{ '%.2f'|format(adsense_total_30) }}</div>
+      <div class="kpi__l">Earnings · 30 days</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__v">{{ adsense_30|map(attribute='impressions')|sum }}</div>
+      <div class="kpi__l">Impressions</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__v">{{ adsense_30|map(attribute='clicks')|sum }}</div>
+      <div class="kpi__l">Clicks</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__v">{{ adsense_30|length }}</div>
+      <div class="kpi__l">Active slots</div>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Slot</th><th>Earnings (USD)</th><th>Impressions</th><th>Clicks</th><th>Avg page RPM</th></tr></thead>
+    <tbody>
+      {% for r in adsense_30 %}
+      <tr>
+        <td><code>{{ r.slot }}</code></td>
+        <td>${{ '%.2f'|format(r.earnings or 0) }}</td>
+        <td>{{ r.impressions or 0 }}</td>
+        <td>{{ r.clicks or 0 }}</td>
+        <td>${{ '%.2f'|format(r.avg_rpm or 0) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    No AdSense data yet — run <code>scripts/adsense_fetch.py</code> nightly,
+    or wait for the first cron tick after AdSense approval.
+  </div>
+  {% endif %}
+
   <p style="font-size:12px;color:#94a3b8;margin-top:32px;">
-    Data is sourced from <code>data/dbs/analytics.duckdb</code> (<code>ba_clicks</code> table).
+    Data is sourced from <code>data/dbs/analytics.duckdb</code>
+    (<code>ba_clicks</code> + <code>adsense_daily</code> tables).
     For organic page-view counts (to compute CTR) pair with the Umami dashboard
     at <a href="https://analytics.farmako.ro/" target="_blank" rel="noopener">analytics.farmako.ro</a>.
   </p>

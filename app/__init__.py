@@ -66,6 +66,64 @@ def create_app(config_name: str | None = None) -> Flask:
         traces_sample_rate=app.config.get('SENTRY_TRACES_SAMPLE_RATE', 0.1),
     )
 
+    # ── A/B framework: surface the per-browser ab_id on flask.g ────────
+    # Cookie is only written back (in after_request) when at least one
+    # experiment was actually rendered this request — keeps GDPR posture
+    # clean for crawlers and one-shot static-page hits.
+    @app.before_request
+    def _ab_prepare_id():
+        from app.ab import AB_ID_COOKIE
+        existing = request.cookies.get(AB_ID_COOKIE) if request else None
+        if existing:
+            g.ab_id = existing
+
+    @app.after_request
+    def _ab_persist_cookies(response):
+        from app.ab import response_cookies_for_variants, AB_ID_COOKIE
+        to_persist = getattr(g, '_ab_to_persist', None) or []
+        minted_id = getattr(g, '_ab_id_minted', False)
+        if not to_persist and not minted_id:
+            return response
+        existing_id = request.cookies.get(AB_ID_COOKIE) if request else None
+        new_id = getattr(g, 'ab_id', None) if minted_id and not existing_id else None
+        for name, value, kwargs in response_cookies_for_variants(to_persist, new_id):
+            response.set_cookie(name, value, **kwargs)
+        return response
+
+    # ── A/B Jinja global: ab_variant() works in every template render,
+    # including error-handler renders (404/410/500) where a request-bound
+    # context_processor occasionally doesn't fire. We never want a
+    # template to die with `'ab_variant' is undefined`. Gracefully returns
+    # the configured DEFAULT outside an app context (e.g. background-thread
+    # renders) or when the experiment isn't live yet. ──
+    def _ab_variant_global(key: str) -> str:
+        from datetime import datetime as _dt
+        from app import ab as _ab
+        from app import ab_config as _ab_config
+        spec = _ab_config.get_spec(key)
+        default = _ab_config.DEFAULTS.get(key, '')
+        if spec is None or not spec.is_live(_dt.utcnow().date().isoformat()):
+            return default
+        try:
+            if not getattr(g, 'ab_id', None):
+                import uuid as _uuid
+                g.ab_id = _uuid.uuid4().hex
+                g._ab_id_minted = True
+            variant = _ab.assign(spec)
+            if variant is None:
+                return default
+            queue = getattr(g, '_ab_to_persist', None)
+            if queue is None:
+                queue = []
+                g._ab_to_persist = queue
+            if not any(k == spec.key for k, _v in queue):
+                queue.append((spec.key, variant))
+            _ab.track_exposure(spec.key, variant, spec.surface)
+            return variant
+        except RuntimeError:
+            return default
+    app.jinja_env.globals['ab_variant'] = _ab_variant_global
+
     # ── i18n: detect language from URL prefix ──
     @app.before_request
     def detect_language():
@@ -141,6 +199,12 @@ def create_app(config_name: str | None = None) -> Flask:
         import time as _time
         review_loaded_at = f'{_time.time():.3f}'
 
+        # `ab_variant` is registered as a Jinja global in create_app
+        # (search for `_ab_variant_global`). Do NOT shadow it from this
+        # context_processor — context-processor returns override
+        # jinja_env.globals at template-resolve time, and a default-only
+        # stub here would silently kill exposure tracking + cookie
+        # issuance for the entire site.
         return {
             '_': _,
             'lang': lang,
@@ -164,12 +228,24 @@ def create_app(config_name: str | None = None) -> Flask:
     from .routes.admin import admin_bp
     from .routes.subscribe import subscribe_bp
 
+    # growth_bp owns /api/mailgun-webhook, /api/backlinks-unsubscribe and
+    # /admin/backlinks. Wrapped so a missing module (mid-refactor) takes
+    # only those endpoints down rather than the whole app.
+    growth_bp = None
+    try:
+        from .routes.growth import growth_bp as _growth_bp
+        growth_bp = _growth_bp
+    except ImportError:
+        pass
+
     app.register_blueprint(main_bp)
     app.register_blueprint(intercity_bp)
     app.register_blueprint(city_bp)
     app.register_blueprint(info_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(subscribe_bp)
+    if growth_bp is not None:
+        app.register_blueprint(growth_bp)
 
     # Register same blueprints under /en/ and /ru/ prefixes.
     # admin_bp stays unprefixed — dashboards don't need localisation.

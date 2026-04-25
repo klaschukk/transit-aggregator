@@ -327,6 +327,55 @@ def api_ba_click():
     return '', 204
 
 
+@main_bp.route('/api/ab-convert', methods=['POST'])
+@limiter.limit("120 per minute")
+@csrf.exempt
+def api_ab_convert():
+    """Record one A/B conversion event.
+
+    Payload (JSON):
+        experiment: string, must match a live experiment key
+        event:      string, free-form (e.g. "click", "submit"); stored
+                    as event_type='conv:<event>' so 'exposure' rows are
+                    never confused with conversions.
+        variant:    optional override; usually we read it from the
+                    `ab_<experiment>` cookie that ab_variant() set.
+        value:      optional float (default 1.0) — used when conversion
+                    has a magnitude (price clicked, dwell-time, etc.).
+
+    Always returns 204 on accepted-or-dropped — never reveals whether the
+    experiment exists, so a hostile crawler can't enumerate live tests.
+    """
+    from app import ab as _ab
+    from app import ab_config as _ab_config
+
+    data = request.get_json(silent=True) or {}
+    exp = str(data.get('experiment', ''))[:80]
+    event = str(data.get('event', ''))[:60]
+    variant = data.get('variant')
+    if variant is not None:
+        variant = str(variant)[:80]
+    try:
+        value = float(data.get('value', 1.0))
+    except (TypeError, ValueError):
+        value = 1.0
+
+    if not exp or not event:
+        return '', 204
+    spec = _ab_config.get_spec(exp)
+    if spec is None:
+        return '', 204
+    # Validate variant if caller passed one — otherwise track_conversion
+    # reads the sticky cookie.
+    if variant is not None and variant not in spec.variants:
+        return '', 204
+
+    _ab.track_conversion(
+        experiment=exp, event=event, value=value, variant=variant,
+    )
+    return '', 204
+
+
 @main_bp.route('/api/cities')
 @limiter.limit("30 per minute")
 def api_cities():

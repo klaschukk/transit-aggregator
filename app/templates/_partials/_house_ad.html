@@ -1,0 +1,33 @@
+{# House ad — fills the slot when AdSense is unavailable (no client id,
+   consent essentials-only, request blocked, or the script never set
+   `adsbygoogle`). Picks one of three deterministic variants by hashing
+   the request path so the same page always renders the same house ad
+   on a given session — keeps caching effective and lets us A/B which
+   creative converts.
+
+   Variants:
+     0 — newsletter signup (footer-form variant, scaled small)
+     1 — popular route promo (Beograd → Novi Sad, top searched pair)
+     2 — destinations index promo (covers Balkans audience)
+
+   The variants are deliberately interchangeable — every time AdSense is
+   serving, this never renders, and our money still works.
+#}
+{%- set _path = request.path or '/' -%}
+{%- set _variant = (_path|length) % 3 -%}
+<div class="house-ad house-ad--v{{ _variant }}">
+  {% if _variant == 0 %}
+    {% from '_partials/_newsletter_form.html' import newsletter_form with context %}
+    {{ newsletter_form(source='house_ad', variant='compact') }}
+  {% elif _variant == 1 %}
+    <a class="house-ad__cta" href="{{ lang_prefix }}/voznja/beograd-do-novi-sad/">
+      <strong>{{ _('house_ad.popular_route_title') }}</strong>
+      <span>Beograd → Novi Sad · {{ _('house_ad.popular_route_sub') }}</span>
+    </a>
+  {% else %}
+    <a class="house-ad__cta" href="{{ lang_prefix }}/destinacije/">
+      <strong>{{ _('house_ad.destinations_title') }}</strong>
+      <span>{{ _('house_ad.destinations_sub') }}</span>
+    </a>
+  {% endif %}
+</div>

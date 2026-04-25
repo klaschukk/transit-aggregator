@@ -43,7 +43,7 @@
   <div class="seo-block__icon">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></svg>
   </div>
-  <div class="seo-block__content">
+  <div class="seo-block__content" data-collapse="1">
     <h2>{{ _('city_transport.intro_h').format(city=city_label) }}</h2>
     {% if city == 'beograd' %}
       <p>{{ _('city_transport.intro_beograd_p1').format(prefix=lang_prefix)|safe }}</p>
@@ -59,6 +59,12 @@
       <p>{{ _('city_transport.intro_kragujevac_p2').format(prefix=lang_prefix)|safe }}</p>
     {% endif %}
   </div>
+  <button type="button" class="seo-block__more" data-collapse-toggle
+          data-more-label="{{ _('common.read_more') }}"
+          data-less-label="{{ _('common.read_less') }}"
+          aria-expanded="false">
+    {{ _('common.read_more') }}
+  </button>
 </div>
 
 <!-- Map (only if stops have coordinates) -->
@@ -118,6 +124,11 @@
 {% else %}
   {{ empty_state(icon='bus', text='Podaci se učitavaju...') }}
 {% endif %}
+
+{# Mid-page ad — between line-grid (anchor content) and the see-also
+   blocks (interlinking). Single slot keeps ad density at 1 per page. #}
+{% from '_partials/_ad_slot.html' import ad_slot with context %}
+{{ ad_slot('city_transport_mid', format='leaderboard') }}
 
 <!-- Interlinking: top stops + intercity -->
 {% if top_stops %}

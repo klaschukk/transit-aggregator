@@ -302,6 +302,40 @@ def test_lang_prefix_threads_through_to_tip(app_ctx):
     assert '/en/rute/' in en['tip'], f'EN tip missing /en prefix: {en["tip"]}'
 
 
+def test_city_centre_distance_appears_when_far(app_ctx):
+    """Stops > 500 m from the hand-coded centre should mention distance
+    + walking minutes. Batajnica is ~15 km from Trg Republike."""
+    stop = _make_stop(slug='far-from-centre', city='beograd',
+                      lat=44.8955, lon=20.2954, name='Batajnica')
+    out = build_prose(stop, _make_lines(3), [], None, lang='sr')
+    # 'km' + walking-minute suffix ('min') should both land.
+    assert 'km' in out['location'] and 'min' in out['location'], \
+        f'centre-distance suffix missing: {out["location"]}'
+
+
+def test_city_centre_distance_skipped_when_close(app_ctx):
+    """Stops within 500 m of the centre should NOT emit the suffix — the
+    prose would read 'udaljena 0.3 km' which is redundant with 'zona: centar'."""
+    # Trg Republike itself.
+    stop = _make_stop(slug='trg-republike-core', city='beograd',
+                      lat=44.8154, lon=20.4606, name='Trg Republike')
+    out = build_prose(stop, _make_lines(3), [], None, lang='sr')
+    assert 'km' not in out['location'], \
+        f'suffix should be suppressed near centre: {out["location"]}'
+
+
+def test_city_centre_distance_all_langs(app_ctx):
+    """Suffix must render without placeholder leaks in every supported lang."""
+    stop = _make_stop(slug='cntr-langs', city='novi-sad',
+                      lat=45.32, lon=19.70, name='Stepanovićevo')
+    for lang in ('sr', 'en', 'ru'):
+        out = build_prose(stop, _make_lines(2), [], None, lang=lang)
+        assert '{' not in out['location'], f'{lang} leaked: {out["location"]}'
+        # Should include the number somewhere.
+        assert any(c.isdigit() for c in out['location']), \
+            f'{lang} missing numeric distance: {out["location"]}'
+
+
 def test_word_count_in_spec_range(app_ctx):
     """Spec: 150-300 words (when the stop has rich data: GTFS + nearby + multiple lines).
     Loose lower bound here — templates aim for >100, real stops with GTFS top 150."""

@@ -238,6 +238,34 @@ _LOCATION_NEARBY_SUFFIX: dict[str, list[str]] = {
     ],
 }
 
+# Distance to city centre — attached to location when stop is > 500 m out.
+# Within 500 m we skip it (the prose already says "zona: centar"). Walking
+# minutes are a rough 80 m/min estimate — good enough for context, not for
+# turn-by-turn nav.
+_LOCATION_CENTER_SUFFIX: dict[str, list[str]] = {
+    'sr': [
+        ' Od centra grada udaljena je oko {center_km} km (pešice ~{center_walk_min} min).',
+        ' Udaljenost do centra {city_gen} je približno {center_km} km, što je ~{center_walk_min} min hoda.',
+    ],
+    'en': [
+        ' The stop is about {center_km} km from the city centre (~{center_walk_min} min on foot).',
+        ' Distance to downtown {city_label} is roughly {center_km} km, roughly {center_walk_min} minutes walking.',
+    ],
+    'ru': [
+        ' От центра города — около {center_km} км (~{center_walk_min} мин пешком).',
+        ' До центра {city_gen} примерно {center_km} км, примерно {center_walk_min} минут пешком.',
+    ],
+}
+
+# City centre anchors — hand-picked landmark coordinates per city. Good enough
+# for a ±300 m estimate used only as context text.
+_CITY_CENTERS: dict[str, tuple[float, float]] = {
+    'beograd': (44.8154, 20.4606),    # Trg Republike
+    'novi-sad': (45.2551, 19.8452),   # Trg Slobode
+    'nis': (43.3209, 21.8954),        # Trg Kralja Milana
+    'kragujevac': (44.0128, 20.9115), # Trg Radomira Putnika
+}
+
 
 _TIP: dict[str, list[str]] = {
     'sr': [
@@ -524,6 +552,19 @@ def _compute_slots(
     has_poi = bool(poi and poi['distance_m'] >= 50)
     poi_dist_label = {'sr': 'm', 'en': 'm', 'ru': 'м'}[lang]
 
+    # Distance to city centre — only attached when > 500 m. Inside 500 m the
+    # intro/location already says "centar" / "central", so the extra sentence
+    # is redundant. Walking time assumes 80 m/min — fine for prose context.
+    center_km: float | None = None
+    center_walk_min: int | None = None
+    if lat is not None and lon is not None and city in _CITY_CENTERS:
+        c_lat, c_lon = _CITY_CENTERS[city]
+        d_m = _haversine_m(lat, lon, c_lat, c_lon)
+        if d_m >= 500:
+            center_km = round(d_m / 1000.0, 1)
+            center_walk_min = int(round(d_m / 80.0))
+    has_center_distance = center_km is not None
+
     return {
         'stop_name': stop.get('name') or '',
         'city_label': city_label,
@@ -544,11 +585,14 @@ def _compute_slots(
         'poi_name': poi['name'] if poi else '',
         'poi_distance': (f'{poi["distance_m"]} {poi_dist_label}' if has_poi else ''),
         'nearby_list': nearby_list,
+        'center_km': center_km if center_km is not None else '',
+        'center_walk_min': center_walk_min if center_walk_min is not None else '',
         'prefix': lang_prefix,
         '_has_poi': has_poi,
         '_has_gtfs': bool((gtfs_stats or {}).get('first_departure')),
         '_has_endpoints': bool(endpoints),
         '_has_nearby': bool(nearby_list_parts),
+        '_has_center_distance': has_center_distance,
     }
 
 
@@ -597,10 +641,12 @@ def build_prose(
     # GTFS/endpoints/nearby are all missing.
     service += _pick(_SERVICE_FREQUENCY[lang], slug, 'service_freq').format(**slots)
 
-    # Location paragraph — always the district header + optional nearby list.
+    # Location paragraph — district header + optional nearby + centre distance.
     location = _pick(_LOCATION[lang], slug, 'location').format(**slots)
     if slots['_has_nearby']:
         location += _pick(_LOCATION_NEARBY_SUFFIX[lang], slug, 'location_nearby').format(**slots)
+    if slots['_has_center_distance']:
+        location += _pick(_LOCATION_CENTER_SUFFIX[lang], slug, 'location_center').format(**slots)
 
     # Travel tip — always picked.
     tip = _pick(_TIP[lang], slug, 'tip').format(**slots)

@@ -65,6 +65,46 @@ img { display: block; max-width: 100%; }
 
   --container-max: 1100px;
   --header-h: 56px;
+
+  /* Mobile design tokens (P27 foundation) — declared at :root so app.mobile.css
+     and any in-template style attributes can reference them. Desktop styles
+     don't consume most of these, but the defs need to live in app.css so the
+     mobile overlay can build on top. */
+  --mtext-xs: 12px;
+  --mtext-sm: 13px;
+  --mtext-base: 15px;
+  --mtext-lg: 17px;
+  --mtext-xl: 22px;
+  --mtext-2xl: 28px;
+  --mtext-3xl: 34px;
+
+  --mspace-1: 4px;
+  --mspace-2: 8px;
+  --mspace-3: 12px;
+  --mspace-4: 16px;
+  --mspace-5: 20px;
+  --mspace-6: 24px;
+  --mspace-8: 32px;
+  --mspace-12: 48px;
+
+  --melev-1: 0 1px 2px rgba(15,42,55,.04), 0 1px 3px rgba(15,42,55,.06);
+  --melev-2: 0 2px 6px rgba(15,42,55,.06), 0 4px 12px rgba(15,42,55,.08);
+  --melev-3: 0 4px 12px rgba(15,42,55,.08), 0 12px 24px rgba(13,148,136,.10);
+  --melev-pop: 0 8px 24px rgba(13,148,136,.18), 0 2px 6px rgba(15,42,55,.10);
+
+  --mradius-sm: 8px;
+  --mradius-md: 14px;
+  --mradius-lg: 20px;
+  --mradius-pill: 999px;
+
+  --mtap-scale: 0.97;
+  --mtap-duration: .12s;
+  --mease-out: cubic-bezier(.2, .8, .2, 1);
+  --mease-back: cubic-bezier(.34, 1.56, .64, 1);
+
+  --mtint-primary: rgba(13, 148, 136, 0.06);
+  --mtint-accent: rgba(245, 158, 11, 0.08);
+  --mtint-surface: #f8fafc;
 }
 
 /* ── 3. Typography ── */
@@ -3087,3 +3127,7 @@ select:focus-visible, textarea:focus-visible {
     background: var(--color-bg);
   }
 }
+
+/* Mobile-only elements — hidden on desktop. app.mobile.css unhides at ≤767px. */
+.hero__valueprop { display: none; }
+.seo-block__more { display: none; }

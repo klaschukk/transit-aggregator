@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}A/B experiments — Prevozni admin{% endblock %}
+{% block meta_description %}Internal admin dashboard (noindex).{% endblock %}
+
+{% block head_extra %}
+<meta name="robots" content="noindex, nofollow, noarchive">
+<style>
+.adm{max-width:1100px;margin:0 auto;padding:24px 16px;}
+.adm h1{font-size:24px;margin:0 0 20px;}
+.adm h2{font-size:15px;margin:28px 0 10px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.adm .exp{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:18px 20px;margin-bottom:14px;}
+.adm .exp__head{display:flex;align-items:baseline;gap:14px;justify-content:space-between;margin-bottom:10px;}
+.adm .exp__name{font-weight:700;font-size:16px;}
+.adm .exp__surface{font-size:12px;color:#64748b;background:#e0f2fe;padding:2px 8px;border-radius:10px;}
+.adm .exp__date{font-size:12px;color:#94a3b8;}
+.adm .exp__detail{color:#0d9488;font-size:13px;text-decoration:none;}
+.adm .exp__detail:hover{text-decoration:underline;}
+.adm .var-row{display:grid;grid-template-columns:1fr 100px 100px 100px;gap:12px;font-size:13px;padding:6px 0;border-top:1px solid #e2e8f0;}
+.adm .var-row:first-of-type{border-top:none;}
+.adm .var-row .vname{font-weight:600;}
+.adm .var-row .vrate{color:#0d9488;font-weight:600;}
+.adm .var-row .num{text-align:right;}
+.adm .empty{color:#94a3b8;font-style:italic;font-size:13px;padding:6px 0;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="adm">
+  <h1>A/B experiments</h1>
+  <p style="color:#64748b;font-size:14px;margin-bottom:24px;">
+    Live experiments and headline numbers. Click an experiment for full
+    funnel, p-value, Wilson CI, and days-to-significance.
+  </p>
+
+  {% for row in rows %}
+  <div class="exp">
+    <div class="exp__head">
+      <div>
+        <span class="exp__name">{{ row.spec.key }}</span>
+        <span class="exp__surface">{{ row.spec.surface }}</span>
+      </div>
+      <div>
+        <span class="exp__date">started {{ row.spec.started_at }}</span>
+        &nbsp;·&nbsp;
+        <a class="exp__detail" href="{{ url_for('admin.ab_detail', key=row.spec.key) }}">detail →</a>
+      </div>
+    </div>
+    <div class="var-row" style="font-weight:600;color:#475569;">
+      <span>variant</span>
+      <span class="num">exposures</span>
+      <span class="num">conversions</span>
+      <span class="num">rate</span>
+    </div>
+    {% for v, d in row.per_variant.items() %}
+    <div class="var-row">
+      <span class="vname">{{ v }}</span>
+      <span class="num">{{ d.exposures }}</span>
+      <span class="num">{{ d.conversions }}</span>
+      <span class="num vrate">
+        {%- if d.exposures -%}
+          {{ '%.2f'|format((d.conversions / d.exposures) * 100) }}%
+        {%- else -%}—{%- endif -%}
+      </span>
+    </div>
+    {% else %}
+    <div class="empty">No variants configured.</div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">No live experiments. Edit <code>app/ab_config.py</code> to declare one.</div>
+  {% endfor %}
+</div>
+{% endblock %}

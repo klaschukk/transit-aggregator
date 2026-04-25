@@ -1,47 +1,55 @@
-"""
-Crawl every URL in backlinks-targets.csv and flip status→"backlinked" for
-any page that already links back to prevozni.com.
+"""Crawl every URL in backlinks-targets.csv and flip status → 'backlinked'
+on any page that already links back to prevozni.com.
 
 Weekly cron:
+
     0 4 * * 1 /path/to/venv/bin/python /path/to/scripts/backlinks_check.py
 
-The script is deliberately forgiving — it HEADs first (cheap), only GETs
-on 2xx/3xx, and treats any 4xx/5xx as "still todo". Rate-limit is 1 req/s
-so we look like a normal visitor even on tiny blogs.
+HEADs first (cheap probe), GETs only on 2xx/3xx, treats 4xx/5xx as
+"still todo". Rate-limit 1 req/s so we look like a normal visitor on
+tiny blogs. Idempotent: the only mutations are the state columns
+(`status`, `backlink_url`, `backlink_detected_at`, `last_event`,
+`last_event_at`). Manual edits stay intact.
 
-Idempotent: re-running is safe. The only state mutation is the `status`
-column; everything else stays untouched so manual edits (new rows,
-contact_method tweaks) survive.
+Extensions over the original passive crawler:
+
+  * Detects and stores the exact URL where our link was found in
+    `backlink_url` (first match on the page).
+  * Telegram 🎉 notification on each newly-discovered backlink via
+    TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID env vars. Script stays
+    app-context-free — POSTs directly to api.telegram.org.
+  * Appends a line to docs/00_strategy/backlinks-tracker.md so the
+    human-readable log stays in sync with CSV state.
 """
 from __future__ import annotations
 
 import argparse
-import csv
+import os
+import re
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
+
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 try:
     import requests
 except ImportError:
-    print('requests module required: pip install requests', file=sys.stderr)
+    print('requests required: pip install requests', file=sys.stderr)
     sys.exit(2)
 
-ROOT = Path(__file__).resolve().parent.parent
-TARGETS_CSV = ROOT / 'docs' / '00_strategy' / 'backlinks-targets.csv'
+from app.outreach import load_targets, save_targets  # noqa: E402
 
-# What counts as "us" in the target page's HTML. Any one of these on the
-# page flips status→backlinked. List strict forms first so we don't match
-# plain "prevozni" in Serbian prose about public transport.
+TRACKER_MD = _REPO_ROOT / 'docs' / '00_strategy' / 'backlinks-tracker.md'
+
+# What counts as "us" in the target page's HTML. List strict URL-anchored
+# forms first so we don't match plain "prevozni" in Serbian prose about
+# transit. The regex pulls the matching href out so we can store it.
 LINK_PATTERNS = (
-    'href="https://prevozni.com',
-    "href='https://prevozni.com",
-    'href="https://www.prevozni.com',
-    'href="http://prevozni.com',
-    'prevozni.com/rute',
-    'prevozni.com/voznja',
-    'prevozni.com/gradski',
-    'prevozni.com/pretraga',
+    r'https?://(?:www\.)?prevozni\.com(?:/[^\s"\'<>]*)?',
 )
 
 HEADERS = {
@@ -54,71 +62,100 @@ HEADERS = {
 }
 
 
-def rows(path: Path) -> tuple[list[str], list[dict]]:
-    with path.open(encoding='utf-8') as f:
-        reader = csv.DictReader(f)
-        fieldnames = list(reader.fieldnames or [])
-        return fieldnames, list(reader)
+def _now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec='seconds')
 
 
-def write_rows(path: Path, fieldnames: list[str], data: list[dict]) -> None:
-    with path.open('w', encoding='utf-8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames,
-                                quoting=csv.QUOTE_MINIMAL)
-        writer.writeheader()
-        for row in data:
-            writer.writerow(row)
-
-
-def check_one(url: str, session: requests.Session, timeout: int) -> bool | None:
-    """Return True if page links to us, False if not, None on fetch error."""
+def check_one(
+    url: str,
+    session: requests.Session,
+    timeout: int,
+) -> tuple[bool | None, str]:
+    """Return (linked, backlink_url).
+      linked is True/False/None (None on fetch error).
+      backlink_url is the first prevozni.com URL found on the page, or ''.
+    """
     try:
-        # HEAD first — cheap probe; follow redirects up to 3 hops
         head = session.head(url, timeout=timeout, allow_redirects=True)
-        if head.status_code >= 400:
-            return None
-        # Some blogs block HEAD; treat 405 as "try GET"
-        if head.status_code != 200 and head.status_code != 405:
-            return None
+        if head.status_code >= 400 and head.status_code != 405:
+            return None, ''
     except Exception:
-        return None
+        return None, ''
 
     try:
         resp = session.get(url, timeout=timeout, allow_redirects=True)
     except Exception:
-        return None
+        return None, ''
 
-    if resp.status_code != 200:
-        return None
+    if resp.status_code != 200 or not resp.text:
+        return None, ''
 
-    text = resp.text.lower()
-    return any(pattern.lower() in text for pattern in LINK_PATTERNS)
+    for pat in LINK_PATTERNS:
+        m = re.search(pat, resp.text, re.IGNORECASE)
+        if m:
+            return True, m.group(0)
+    return False, ''
+
+
+def notify_telegram(message: str) -> bool:
+    """Direct POST to api.telegram.org — doesn't need Flask context.
+    Returns True on 2xx, False on any failure. Deliberately silent on
+    errors; the cron log captures them."""
+    token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+    chat_id = os.environ.get('TELEGRAM_CHAT_ID', '')
+    if not token or not chat_id:
+        return False
+    try:
+        resp = requests.post(
+            f'https://api.telegram.org/bot{token}/sendMessage',
+            json={'chat_id': chat_id, 'text': message[:3900],
+                  'disable_web_page_preview': True},
+            timeout=5,
+        )
+        return resp.ok
+    except Exception:
+        return False
+
+
+def _append_tracker(domain: str, url: str, backlink_url: str) -> None:
+    """One-line log entry in tracker.md. File is created if missing."""
+    line = (
+        f'- {_now_iso()}  🎉 **{domain}** — '
+        f'[source]({url}) → [backlink]({backlink_url})\n'
+    )
+    try:
+        TRACKER_MD.parent.mkdir(parents=True, exist_ok=True)
+        if not TRACKER_MD.exists():
+            TRACKER_MD.write_text(
+                '# Backlinks Tracker\n\n'
+                '> Auto-appended by scripts/backlinks_check.py on each new '
+                'backlink.\n\n',
+                encoding='utf-8',
+            )
+        with TRACKER_MD.open('a', encoding='utf-8') as f:
+            f.write(line)
+    except OSError:
+        pass
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('--csv', type=Path, default=TARGETS_CSV,
-                    help=f'CSV path (default: {TARGETS_CSV})')
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument('--csv', type=Path, default=None,
+                    help='CSV path (default: docs/00_strategy/backlinks-targets.csv)')
     ap.add_argument('--sleep', type=float, default=1.0,
                     help='seconds between requests (default: 1.0)')
-    ap.add_argument('--timeout', type=int, default=15,
-                    help='request timeout seconds (default: 15)')
+    ap.add_argument('--timeout', type=int, default=15)
     ap.add_argument('--dry-run', action='store_true',
-                    help='print diffs without writing CSV')
+                    help='print diffs without writing CSV or sending notifications')
     ap.add_argument('--only-status', nargs='+',
-                    default=['todo', 'contacted', 'responded'],
+                    default=['todo', 'enriched', 'contacted', 'replied', 'no_response'],
                     help='only check rows with these statuses')
     args = ap.parse_args()
 
-    if not args.csv.exists():
-        print(f'ERR: {args.csv} not found — run research step first',
-              file=sys.stderr)
-        return 2
-
-    fields, data = rows(args.csv)
-    if 'status' not in fields or 'url' not in fields:
-        print('ERR: CSV must have "url" and "status" columns',
-              file=sys.stderr)
+    fieldnames, rows = load_targets(args.csv)
+    if not rows:
+        print('no rows in CSV', file=sys.stderr)
         return 2
 
     session = requests.Session()
@@ -126,7 +163,7 @@ def main() -> int:
 
     checked = linked_new = errors = skipped = 0
 
-    for row in data:
+    for row in rows:
         if row.get('status') not in args.only_status:
             skipped += 1
             continue
@@ -135,18 +172,31 @@ def main() -> int:
             skipped += 1
             continue
         checked += 1
-        result = check_one(url, session, args.timeout)
+        result, found_url = check_one(url, session, args.timeout)
         if result is True:
             if row['status'] != 'backlinked':
                 linked_new += 1
-                print(f'  NEW BACKLINK: {row["domain"]} ({url})')
                 row['status'] = 'backlinked'
+                row['backlink_url'] = found_url
+                row['backlink_detected_at'] = _now_iso()
+                row['last_event'] = 'backlinked'
+                row['last_event_at'] = row['backlink_detected_at']
+                row['last_status_change'] = row['backlink_detected_at']
+                print(f'  🎉 NEW BACKLINK: {row["domain"]} → {found_url}')
+                if not args.dry_run:
+                    notify_telegram(
+                        f'🎉 New backlink\n\n'
+                        f'{row["domain"]} ({row.get("category")})\n'
+                        f'Source: {url}\n'
+                        f'Link:   {found_url}\n'
+                        f'DA:     {row.get("DA_estimate")}'
+                    )
+                    _append_tracker(row['domain'], url, found_url)
         elif result is None:
             errors += 1
         time.sleep(args.sleep)
 
-    print('')
-    print(f'Checked: {checked}, new backlinks: {linked_new}, '
+    print(f'\nChecked: {checked}, new backlinks: {linked_new}, '
           f'errors: {errors}, skipped: {skipped}')
 
     if args.dry_run:
@@ -154,8 +204,8 @@ def main() -> int:
         return 0
 
     if linked_new:
-        write_rows(args.csv, fields, data)
-        print(f'Wrote {args.csv}')
+        save_targets(fieldnames, rows, args.csv)
+        print('CSV updated.')
     return 0
 
 

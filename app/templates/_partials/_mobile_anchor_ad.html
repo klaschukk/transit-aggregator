@@ -1,0 +1,48 @@
+{# Mobile sticky anchor — 320×100 at the bottom edge of the viewport on
+   ≤640px. AdSense's highest-RPM mobile inventory.
+
+   Hidden on desktop via CSS (`@media (min-width: 641px) { display: none }`).
+   Dismiss button stores `ads_anchor_dismissed=1` for 24h so we don't
+   annoy the same visitor session-after-session — keeps the slot from
+   feeling like a popup.
+
+   Reserved height collapses (display:none) when the user has dismissed
+   it OR when consent is not 'all', so layout never reserves space we
+   won't fill.
+#}
+{%- set _consent = request.cookies.get('cookie_consent', '') -%}
+{%- set _dismissed = request.cookies.get('ads_anchor_dismissed', '') == '1' -%}
+{%- set _slot_id = config.get('ADSENSE_SLOTS', {}).get('mobile_anchor', '') -%}
+{%- if config.ADSENSE_ID and _slot_id and _consent == 'all' and not _dismissed -%}
+<div class="mobile-anchor-ad" id="mobileAnchorAd" data-slot="mobile_anchor">
+  <button type="button" class="mobile-anchor-ad__close"
+          aria-label="{{ _('ads.dismiss_aria') }}">×</button>
+  <span class="ad-slot__label">{{ _('ads.label') }}</span>
+  <ins class="adsbygoogle"
+       style="display:block;width:100%;height:60px"
+       data-ad-client="{{ config.ADSENSE_ID }}"
+       data-ad-slot="{{ _slot_id }}"
+       data-ad-format="fluid"
+       data-ad-layout-key="-fb+5w+4e-db+86"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+<script>
+/* Dismiss handler — sets a 24h cookie so the anchor doesn't reappear
+   for the same session. Hides via class so the layout collapses
+   immediately (no display:none flash). */
+(function(){
+  var el = document.getElementById('mobileAnchorAd');
+  if (!el) return;
+  var btn = el.querySelector('.mobile-anchor-ad__close');
+  if (!btn) return;
+  btn.addEventListener('click', function(){
+    el.classList.add('mobile-anchor-ad--hidden');
+    try {
+      var oneDay = 60 * 60 * 24;
+      document.cookie = 'ads_anchor_dismissed=1; path=/; max-age=' + oneDay
+                      + '; samesite=lax';
+    } catch(e){}
+  });
+})();
+</script>
+{%- endif -%}

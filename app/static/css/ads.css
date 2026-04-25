@@ -1,0 +1,33 @@
+/* AdSense slot reservations + mobile sticky anchor. Loaded only when
+   config.ADSENSE_ID is set (see base.html). Min-heights match the
+   IAB-standard slot sizes so the AdSense JS painting an ad doesn't
+   shift surrounding content (CLS = 0). */
+.ad-slot__ins,.ad-slot ins.adsbygoogle{display:block;margin:0 auto;}
+.ad-slot{contain:layout style;}
+.ad-slot--leaderboard{min-height:90px;max-width:728px;}
+.ad-slot--large-rectangle{min-height:280px;max-width:728px;}
+.ad-slot--medium-rectangle{min-height:250px;max-width:336px;}
+.ad-slot--skyscraper{min-height:600px;width:300px;}
+.ad-slot--responsive{min-height:100px;}
+.ad-slot--in-feed{min-height:90px;}
+@media(max-width:640px){
+  .ad-slot--desktop-only,.ad-slot--skyscraper{display:none;}
+  .ad-slot--large-rectangle{min-height:250px;}
+  .ad-slot--leaderboard{min-height:100px;}
+}
+/* Mobile sticky anchor — ≤640px only, padded for iOS safe-area. */
+.mobile-anchor-ad{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;
+  height:calc(80px + env(safe-area-inset-bottom,0));
+  padding-bottom:env(safe-area-inset-bottom,0);
+  background:rgba(255,255,255,.96);
+  border-top:1px solid var(--color-border);
+  box-shadow:0 -2px 10px rgba(0,0,0,.04);
+}
+.mobile-anchor-ad__close{
+  position:absolute;top:4px;right:6px;width:24px;height:24px;
+  border:0;border-radius:50%;background:rgba(0,0,0,.08);
+  color:#555;font-size:16px;line-height:1;cursor:pointer;
+}
+.mobile-anchor-ad--hidden{display:none;}
+@media(min-width:641px){.mobile-anchor-ad{display:none;}}
