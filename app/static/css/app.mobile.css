@@ -447,30 +447,10 @@ body.m-nav-open .site-nav { transform: translateX(0); }
   .fade-in { animation: none; opacity: 1; transform: none; }
 }
 
-@media (prefers-color-scheme: dark) {
-  body {
-    background: #0f172a;
-    color: #f1f5f9;
-  }
-  .site-header { background: rgba(15,23,42,.92); border-bottom-color: #1e293b; }
-  .site-header.is-scrolled {
-    background: rgba(15,23,42,.78);
-    box-shadow: 0 1px 0 rgba(255,255,255,.04);
-  }
-  .site-nav { background: #1e293b; }
-  .trip-card,
-  .see-also__card {
-    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-    box-shadow: 0 1px 2px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.3);
-  }
-  .m-sheet { background: #1e293b; color: #f1f5f9; }
-  .m-sheet__close { background: #0f172a; color: #f1f5f9; }
-  .m-skeleton {
-    background: linear-gradient(90deg, #1e293b 0%, #334155 50%, #1e293b 100%);
-    background-size: 200% 100%;
-  }
-  .empty-state__title { color: #f1f5f9; }
-}
+/* Auto dark-mode disabled per user request — phones with system dark
+   mode were rendering the whole site on a navy background which the
+   user found ugly. Keep the brand light theme everywhere until we
+   build a deliberate, designed dark variant. */
 
 /* ── 9. Page polish — home (P28) ────────────────────────────────────
    Goal: every section feels app-quality, not a stretched desktop. Layout

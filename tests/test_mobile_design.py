@@ -268,13 +268,16 @@ def test_mobile_css_respects_reduced_motion():
     assert 'transition-duration: .001ms' in chunk
 
 
-def test_mobile_css_has_dark_mode_block():
+def test_mobile_css_has_no_auto_dark_mode():
+    """Auto dark-mode was disabled — phones with system dark mode were
+    rendering on a navy background that looked broken to the user. Until
+    we ship a deliberate dark theme, no `prefers-color-scheme: dark`
+    media query may live in mobile CSS."""
     css = MOBILE_CSS.read_text()
-    assert '@media (prefers-color-scheme: dark)' in css
-    chunk = css.split('@media (prefers-color-scheme: dark)', 1)[1]
-    # Site-header + cards both need overrides for the dark surface.
-    assert '.site-header' in chunk
-    assert '.trip-card' in chunk
+    # The phrase appears once in a header comment that documents the
+    # decision; that's the only allowed occurrence. Any actual @media
+    # block would also include `@media (`, so guard on that.
+    assert '@media (prefers-color-scheme: dark)' not in css
 
 
 # ── 6. Tap target compliance for new components ───────────────────────
