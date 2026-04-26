@@ -106,11 +106,6 @@
 </button>
 
 {% set _alert_slug = (route.slug if route and route.slug else _from_slug ~ '-do-' ~ _to_slug) %}
-<section class="route-price-alert fade-in">
-  {{ newsletter_form(source='price_alert', variant='price_alert',
-                     pair_label=from_city ~ ' → ' ~ to_city,
-                     route_slug=_alert_slug) }}
-</section>
 
 <div class="results-layout">
   {% set operators = trips|map(attribute='operator')|unique|list %}
@@ -125,6 +120,15 @@
     </div>
   </div>
 </div>
+
+<!-- Price alert moved BELOW the trip list. Putting it before the trips
+     pushed actual content below the fold on mobile and made the page
+     read like a signup wall. -->
+<section class="route-price-alert fade-in fade-in--d2">
+  {{ newsletter_form(source='price_alert', variant='price_alert',
+                     pair_label=from_city ~ ' → ' ~ to_city,
+                     route_slug=_alert_slug) }}
+</section>
 
 {% elif route %}
 <a href="{{ lang_prefix }}/rute/{{ route.slug }}/" class="btn btn--primary">{{ _('city_pair.see_all_departures') }}</a>
