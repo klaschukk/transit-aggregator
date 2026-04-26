@@ -356,10 +356,24 @@ def stop_detail(city: str, stop_slug: str):
         gtfs=stop_info if stop_info.get('has_gtfs') else None,
     )
 
+    # Reviews — same source as route_detail / city_pair. Stop slug is namespaced
+    # ("stop-<city>-<slug>") so it doesn't collide with intercity rute slugs.
+    review_slug = f'stop-{city}-{stop_slug}'
+    reviews_data = []
+    reviews_aggregate = None
+    try:
+        from app import analytics_db
+        reviews_data = analytics_db.approved_reviews(review_slug)
+        reviews_aggregate = analytics_db.aggregate_rating(review_slug)
+    except Exception:
+        pass
+
     return render_template('stop_detail.html', city=city, stop=stop,
                            departures=departures, lines_at_stop=lines_at_stop,
                            nearby_stops=nearby_stops, stop_info=stop_info,
-                           prose=prose)
+                           prose=prose,
+                           review_slug=review_slug,
+                           reviews=reviews_data, reviews_agg=reviews_aggregate)
 
 
 # ── Stop prose cache (in-process, 24 h TTL) ─────────────────────────────
