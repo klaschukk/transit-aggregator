@@ -54,7 +54,10 @@ def city_hub(city: str):
         row = cached_query_one("SELECT COUNT(*) as c FROM city_stops WHERE city = ? AND lat IS NOT NULL", [city])
         stops_with_coords = row['c'] if row else 0
 
-    # Top stops by number of lines serving them
+    # Top stops by number of lines serving them. Lifted 5 → 12 so the
+    # city hub becomes a real interchange-stop hub: stop_detail pages
+    # were averaging 1 inbound link in the link-audit, this is the
+    # cheapest place to seed weight to the busiest dozen.
     top_stops = cached_query("""
         SELECT cs.slug, cs.name, COUNT(cls.line_id) as line_count
         FROM city_stops cs
@@ -62,7 +65,7 @@ def city_hub(city: str):
         WHERE cs.city = ?
         GROUP BY cs.slug, cs.name
         ORDER BY line_count DESC
-        LIMIT 5
+        LIMIT 12
     """, [city]) if db_ready() else []
 
     # Popular intercity routes departing from this city — for SEO interlinking.
@@ -79,13 +82,28 @@ def city_hub(city: str):
         GROUP BY r.id, r.slug, r.from_city, r.to_city, r.distance_km, r.from_city_slug, r.to_city_slug
         HAVING trip_count > 0
         ORDER BY trip_count DESC
-        LIMIT 8
+        LIMIT 12
+    """, [city_display], ttl=3600) if db_ready() else []
+
+    # Top operators serving intercity from this city — gives carrier
+    # pages an inbound link from each city hub and lets users discover
+    # carriers from a city-shaped query.
+    top_operators = cached_query("""
+        SELECT o.slug, o.name, COUNT(DISTINCT r.id) AS route_count
+        FROM operators o
+        JOIN trips t ON t.operator_id = o.id
+        JOIN routes r ON r.id = t.route_id
+        WHERE r.type = 'intercity' AND r.from_city = ?
+        GROUP BY o.slug, o.name
+        ORDER BY route_count DESC
+        LIMIT 6
     """, [city_display], ttl=3600) if db_ready() else []
 
     return render_template('city_transport.html', city=city, lines=lines,
                            stops_with_coords=stops_with_coords,
                            top_stops=top_stops,
                            popular_intercity=popular_intercity,
+                           top_operators=top_operators,
                            city_label=city_display)
 
 

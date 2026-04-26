@@ -183,6 +183,26 @@
 </section>
 {% endif %}
 
+{# Operators serving intercity from this city — feeds /prevoznici/{slug}/
+   pages, which were running median 2 inbound links in the audit. Each
+   city hub now adds 6 directly. #}
+{% if top_operators %}
+<section class="see-also">
+  <h2 class="see-also__title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></svg>
+    {{ _('city.carriers_from').format(city=city_label) }}
+  </h2>
+  <div class="see-also__list">
+    {% for op in top_operators %}
+    <a href="{{ lang_prefix }}/prevoznici/{{ op.slug }}/" class="see-also__link">
+      {{ op.name }}
+      <small>{{ op.route_count }} {{ _('routes.routes_label') }}</small>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
 <section class="faq-section">
   <h2 class="section__title">{{ _('city_transport.faq_heading') }}</h2>
   <div class="faq-list">

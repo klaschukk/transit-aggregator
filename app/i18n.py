@@ -473,6 +473,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'departures',
         'ru': 'рейсов',
     },
+    'routes.routes_label': {
+        'sr': 'ruta',
+        'en': 'routes',
+        'ru': 'маршрутов',
+    },
 
     # ── City transport ──
     'city.schedule': {
@@ -600,6 +605,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Popularna stajališta',
         'en': 'Popular stops',
         'ru': 'Популярные остановки',
+    },
+    'city.carriers_from': {
+        'sr': 'Prevoznici iz {city}',
+        'en': 'Carriers from {city}',
+        'ru': 'Перевозчики из {city}',
     },
     'city.intercity': {
         'sr': 'Međugradski prevoz',
