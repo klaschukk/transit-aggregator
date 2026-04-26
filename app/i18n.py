@@ -1516,6 +1516,56 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Most popular places to travel by bus and train',
         'ru': 'Самые популярные места для поездок на автобусе и поезде',
     },
+    'dest.stat_countries': {
+        'sr': 'zemalja u mreži',
+        'en': 'countries in network',
+        'ru': 'стран в сети',
+    },
+    'dest.stat_routes': {
+        'sr': 'aktivnih ruta',
+        'en': 'active routes',
+        'ru': 'активных маршрутов',
+    },
+    'dest.stat_cities': {
+        'sr': 'gradova',
+        'en': 'cities',
+        'ru': 'городов',
+    },
+    'dest.filter_all': {
+        'sr': 'Sve',
+        'en': 'All',
+        'ru': 'Все',
+    },
+    'dest.filter_balkan': {
+        'sr': 'Balkan',
+        'en': 'Balkans',
+        'ru': 'Балканы',
+    },
+    'dest.filter_eu': {
+        'sr': 'EU',
+        'en': 'EU',
+        'ru': 'ЕС',
+    },
+    'dest.filter_beyond': {
+        'sr': 'Dalje',
+        'en': 'Beyond',
+        'ru': 'Далее',
+    },
+    'carriers.stat_cross_border': {
+        'sr': 'međunarodnih prevoznika',
+        'en': 'cross-border carriers',
+        'ru': 'международных перевозчиков',
+    },
+    'carriers.filter_domestic': {
+        'sr': 'Domaći',
+        'en': 'Domestic',
+        'ru': 'Внутренние',
+    },
+    'carriers.filter_cross_border': {
+        'sr': 'Međunarodni',
+        'en': 'Cross-border',
+        'ru': 'Международные',
+    },
     'dest.meta': {
         'sr': 'Top destinacije na Balkanu — Srbija, Crna Gora, Bosna, Hrvatska, Mađarska. Autobuske i vozne veze. Prevozni.com',
         'en': 'Top Balkan destinations — Serbia, Montenegro, Bosnia, Croatia, Hungary. Bus and train connections. Prevozni.com',

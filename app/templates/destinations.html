@@ -4,7 +4,10 @@
 
 {% block head_extra %}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"ItemList","name":"{{ _('dest.title') }}","description":"{{ _('dest.meta') }}","numberOfItems":12}
+{"@context":"https://schema.org","@type":"CollectionPage","name":"{{ _('dest.title') }}","description":"{{ _('dest.meta') }}","url":"{{ canonical_url }}"}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ItemList","name":"{{ _('dest.title') }}","numberOfItems":{{ countries_meta|length }},"itemListElement":[{% for c in countries_meta %}{"@type":"ListItem","position":{{ loop.index }},"item":{"@type":"TouristDestination","name":"{{ c.name }}","url":"{{ config.BASE_URL }}{{ lang_prefix }}/destinacije/{{ c.slug }}/"}}{% if not loop.last %},{% endif %}{% endfor %}]}
 </script>
 {% set _faq_entities = [
   {'@type':'Question','name':_('dest.faq_q1'),'acceptedAnswer':{'@type':'Answer','text':_('dest.faq_a1').format(prefix=lang_prefix)|striptags}},
@@ -17,12 +20,30 @@
 {% block content %}
 
 {% from '_partials/_breadcrumb.html' import breadcrumb with context %}
+{% from '_partials/_stats_strip.html' import stats_strip %}
 {{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': _('dest.title')}]) }}
 
-<div class="page-title">
+<!-- Mobile back button -->
+<div class="mobile-back">
+  <a href="{{ lang_prefix }}/" class="mobile-back__btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>
+    <span>{{ _('breadcrumb.home') }}</span>
+  </a>
+</div>
+
+<div class="page-title fade-in">
   <h1>{{ _('dest.title') }}</h1>
   <p class="page-subtitle">{{ _('dest.subtitle') }}</p>
 </div>
+
+{# Stats strip — only renders when handler returned counts (db_ready). #}
+{% if total_intercity_routes %}
+{{ stats_strip([
+  {'value': countries_count, 'label': _('dest.stat_countries'), 'icon': 'distance'},
+  {'value': total_intercity_routes, 'label': _('dest.stat_routes'), 'icon': 'schedule'},
+  {'value': total_cities, 'label': _('dest.stat_cities')},
+]) }}
+{% endif %}
 
 <!-- SEO intro (unique prose) -->
 <div class="seo-block fade-in">
@@ -35,6 +56,60 @@
     <p>{{ _('dest.intro_p2').format(prefix=lang_prefix)|safe }}</p>
   </div>
 </div>
+
+{# Filter chips — region-based filter for the country grid below.
+   Same JS pattern as country_hub: data-region drives a tiny show/hide. #}
+{% if countries_meta %}
+<div class="filter-chips" id="destFilter">
+  <button class="filter-chip filter-chip--active" data-region="all">
+    <span>{{ _('dest.filter_all') }}</span>
+  </button>
+  <button class="filter-chip" data-region="balkan">
+    <span>{{ _('dest.filter_balkan') }}</span>
+  </button>
+  <button class="filter-chip" data-region="eu">
+    <span>{{ _('dest.filter_eu') }}</span>
+  </button>
+  <button class="filter-chip" data-region="beyond">
+    <span>{{ _('dest.filter_beyond') }}</span>
+  </button>
+</div>
+{% endif %}
+
+{# Country hub grid — lifted from a flat list to stat-overlay cards.
+   Region tags drive client-side filtering (filter-chip handler below). #}
+{% if countries_meta %}
+{% set _region_map = {
+  'crna-gora': 'balkan',
+  'bosna': 'balkan',
+  'hrvatska': 'balkan',
+  'makedonija': 'balkan',
+  'slovenija': 'eu',
+  'albanija': 'balkan',
+  'grcka': 'eu',
+  'bugarska': 'eu',
+} %}
+<section class="country-hubs">
+  <h2 class="section__title">{{ _('dest.by_country') }}</h2>
+  <div class="country-hubs__grid" id="countryHubsGrid">
+    {% for c in countries_meta %}
+    <a href="{{ lang_prefix }}/destinacije/{{ c.slug }}/" class="country-hub-card"
+       data-region="{{ _region_map.get(c.slug, 'beyond') }}">
+      <div>
+        <span class="country-hub-card__name">{{ c.name }}</span>
+        {% if c.route_count or c.min_price %}
+        <small style="display:block;font-weight:500;font-size:var(--text-xs);opacity:.75;margin-top:2px;">
+          {% if c.route_count %}{{ c.route_count }} {{ _('routes.routes_label') }}{% endif %}
+          {% if c.min_price %} · {{ _('route.from_price') }} {{ (c.min_price / config.EUR_RSD_RATE)|round|int }}€{% endif %}
+        </small>
+        {% endif %}
+      </div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 
 <div class="dest-grid">
 
@@ -125,29 +200,13 @@
 
 </div>
 
-<!-- Country hubs — internal-link surface for the eight Serbia↔X
-     country pages. Each link is a SEO-targeted hub listing every
-     route into that country, so this section gives them link equity
-     from the destinations index. -->
-<section class="country-hubs">
-  <h2 class="section__title">{{ _('dest.by_country') }}</h2>
-  <div class="country-hubs__grid">
-    {% set _hubs = [
-      ('crna-gora',  'Crna Gora'),
-      ('bosna',      'Bosna i Hercegovina'),
-      ('hrvatska',   'Hrvatska'),
-      ('makedonija', 'Severna Makedonija'),
-      ('slovenija',  'Slovenija'),
-      ('albanija',   'Albanija'),
-      ('grcka',      'Grčka'),
-      ('bugarska',   'Bugarska'),
-    ] %}
-    {% for slug, label in _hubs %}
-    <a href="{{ lang_prefix }}/destinacije/{{ slug }}/" class="country-hub-card">
-      <span class="country-hub-card__name">{{ label }}</span>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-    </a>
-    {% endfor %}
+<!-- See-also: catalogue + domestic shortcuts -->
+<section class="see-also">
+  <h2 class="see-also__title">{{ _('see_also.title') }}</h2>
+  <div class="see-also__list">
+    <a href="{{ lang_prefix }}/rute/" class="see-also__link">{{ _('see_also.all_routes') }}</a>
+    <a href="{{ lang_prefix }}/gradski/beograd/" class="see-also__link">{{ _('see_also.city_beograd') }}</a>
+    <a href="{{ lang_prefix }}/prevoznici/" class="see-also__link">{{ _('carriers.h1') }}</a>
   </div>
 </section>
 
@@ -170,4 +229,25 @@
   </div>
 </section>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* Region filter — show/hide country cards by data-region. */
+(function() {
+  var grid = document.getElementById('countryHubsGrid');
+  var bar = document.getElementById('destFilter');
+  if (!grid || !bar) return;
+  bar.querySelectorAll('.filter-chip').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      bar.querySelector('.filter-chip--active').classList.remove('filter-chip--active');
+      btn.classList.add('filter-chip--active');
+      var region = btn.dataset.region;
+      grid.querySelectorAll('.country-hub-card').forEach(function(card) {
+        card.style.display = (region === 'all' || card.dataset.region === region) ? '' : 'none';
+      });
+    });
+  });
+})();
+</script>
 {% endblock %}

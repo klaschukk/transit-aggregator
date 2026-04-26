@@ -24,7 +24,17 @@
 {% block content %}
 
 {% from '_partials/_breadcrumb.html' import breadcrumb with context %}
+{% from '_partials/_stats_strip.html' import stats_strip %}
 {% from '_partials/_empty_state.html' import empty_state %}
+
+<!-- Mobile back button -->
+<div class="mobile-back">
+  <a href="{{ lang_prefix }}/" class="mobile-back__btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>
+    <span>{{ _('breadcrumb.home') }}</span>
+  </a>
+</div>
+
 {{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': _('carriers.h1')}]) }}
 
 <div class="page-title fade-in">
@@ -33,6 +43,13 @@
 </div>
 
 {% if not page or page == 1 %}
+{# Stats strip — only on the first page (paginated pages are noindexed). #}
+{{ stats_strip([
+  {'value': total_operators|default(operators|length), 'label': _('carriers.h1'), 'icon': 'distance'},
+  {'value': total_carrier_routes|default(0), 'label': _('country.stat_routes'), 'icon': 'schedule'},
+  {'value': cross_border_count|default(0), 'label': _('carriers.stat_cross_border')},
+]) }}
+
 <!-- SEO intro (unique prose) — only on page 1 to avoid duplicate content -->
 <div class="seo-block fade-in">
   <div class="seo-block__icon">
@@ -43,6 +60,20 @@
     <p>{{ _('carriers.intro_p1').format(prefix=lang_prefix)|safe }}</p>
     <p>{{ _('carriers.intro_p2').format(prefix=lang_prefix)|safe }}</p>
   </div>
+</div>
+
+{# Region filter — Domestic vs Cross-border. Same JS pattern as
+   destinations / country_hub: data-region toggles visibility. #}
+<div class="filter-chips" id="carriersFilter">
+  <button class="filter-chip filter-chip--active" data-region="all">
+    <span>{{ _('dest.filter_all') }}</span>
+  </button>
+  <button class="filter-chip" data-region="domestic">
+    <span>{{ _('carriers.filter_domestic') }}</span>
+  </button>
+  <button class="filter-chip" data-region="cross_border">
+    <span>{{ _('carriers.filter_cross_border') }}</span>
+  </button>
 </div>
 {% endif %}
 
@@ -56,9 +87,10 @@
 {% endif %}
 
 {% if operators %}
-<div class="carrier-list">
+<div class="carrier-list" id="carrierList">
   {% for op in operators %}
-  <section class="carrier-section fade-in fade-in--d{{ loop.index0 % 5 }}" id="{{ op.slug }}">
+  <section class="carrier-section fade-in fade-in--d{{ loop.index0 % 5 }}" id="{{ op.slug }}"
+           data-region="{{ op.region|default('domestic') }}">
     <div class="carrier-section__header">
       <div class="carrier-section__icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
@@ -76,6 +108,8 @@
         </h2>
         <div class="carrier-section__meta">
           {% if op.type == 'train' %}{{ _('carriers.train') }}{% else %}{{ _('carriers.bus') }}{% endif %} · {{ op.route_count|default(0) }} {{ _('carriers.routes_count') }}
+          {% if op.min_price %} · {{ _('route.from_price') }} {{ (op.min_price / config.EUR_RSD_RATE)|round|int }}€{% endif %}
+          {% if op.countries %} · {{ op.countries|join(', ') }}{% endif %}
           {% if op.website %} · <a href="{{ op.website }}" target="_blank" rel="noopener nofollow">{{ _('carriers.website') }}</a>{% endif %}
         </div>
       </div>
@@ -110,6 +144,26 @@
 {% endif %}
 
 {% if not page or page == 1 %}
+<!-- See-also: cross-link to operator-by-country pages -->
+<section class="see-also">
+  <h2 class="see-also__title">{{ _('see_also.country_network') }}</h2>
+  <div class="see-also__list">
+    {% for slug, name in [
+      ('crna-gora','Crna Gora'),
+      ('bosna','Bosna i Hercegovina'),
+      ('hrvatska','Hrvatska'),
+      ('makedonija','Severna Makedonija'),
+      ('slovenija','Slovenija'),
+      ('grcka','Grčka'),
+      ('bugarska','Bugarska'),
+    ] %}
+    <a href="{{ lang_prefix }}/destinacije/{{ slug }}/" class="see-also__link">{{ name }}</a>
+    {% endfor %}
+    <a href="{{ lang_prefix }}/destinacije/" class="see-also__link">{{ _('nav.destinations') }}</a>
+    <a href="{{ lang_prefix }}/rute/" class="see-also__link">{{ _('see_also.all_routes') }}</a>
+  </div>
+</section>
+
 <!-- FAQ -->
 <section class="faq-section">
   <h2 class="section__title">{{ _('carriers.faq_heading') }}</h2>
@@ -142,4 +196,25 @@
 </nav>
 {% endif %}
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* Region filter for the carrier list. Same pattern as destinations. */
+(function() {
+  var bar = document.getElementById('carriersFilter');
+  var list = document.getElementById('carrierList');
+  if (!bar || !list) return;
+  bar.querySelectorAll('.filter-chip').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      bar.querySelector('.filter-chip--active').classList.remove('filter-chip--active');
+      btn.classList.add('filter-chip--active');
+      var region = btn.dataset.region;
+      list.querySelectorAll('.carrier-section').forEach(function(card) {
+        card.style.display = (region === 'all' || card.dataset.region === region) ? '' : 'none';
+      });
+    });
+  });
+})();
+</script>
 {% endblock %}

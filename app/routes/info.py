@@ -121,7 +121,56 @@ def cookie_policy():
 @info_bp.route('/destinacije/')
 def destinations():
     """Top travel destinations page — SEO content magnet."""
-    return render_template('destinations.html')
+    # Stats strip + per-country mini-overlays. Derive everything from the
+    # routes table so a city/country added to a corridor automatically
+    # shows up here without manual updates.
+    countries_meta = []
+    total_intercity_routes = 0
+    total_cities = 0
+    if db_ready():
+        for slug, info in _COUNTRY_HUBS.items():
+            placeholders = ', '.join(['?'] * len(info['cities']))
+            row = cached_query_one(f"""
+                SELECT COUNT(DISTINCT r.id) AS rc,
+                       MIN(t.price_rsd) AS min_price
+                FROM routes r
+                JOIN trips t ON t.route_id = r.id
+                WHERE r.type = 'intercity' AND t.price_rsd > 0
+                  AND (r.from_city IN ({placeholders})
+                       OR r.to_city IN ({placeholders}))
+            """, list(info['cities']) * 2, ttl=3600)
+            countries_meta.append({
+                'slug': slug,
+                'name': info['name'],
+                'route_count': row['rc'] if row else 0,
+                'min_price': row['min_price'] if row else None,
+            })
+        agg = cached_query_one("""
+            SELECT COUNT(DISTINCT r.id) AS rc,
+                   COUNT(DISTINCT r.from_city) + COUNT(DISTINCT r.to_city) AS cc
+            FROM routes r JOIN trips t ON t.route_id = r.id
+            WHERE r.type='intercity' AND t.price_rsd > 0
+        """, ttl=3600)
+        if agg:
+            total_intercity_routes = agg['rc']
+            # Approximate distinct city count: union of from + to is more
+            # accurate than the SUM above which double-counts. Re-query.
+            cities_row = cached_query_one("""
+                SELECT COUNT(DISTINCT c) AS n FROM (
+                    SELECT from_city AS c FROM routes
+                    WHERE type='intercity'
+                    UNION
+                    SELECT to_city FROM routes WHERE type='intercity'
+                )
+            """, ttl=3600)
+            total_cities = cities_row['n'] if cities_row else 0
+    return render_template(
+        'destinations.html',
+        countries_meta=countries_meta,
+        total_intercity_routes=total_intercity_routes,
+        total_cities=total_cities,
+        countries_count=len(_COUNTRY_HUBS),
+    )
 
 
 # Country slug → (display name, list of member cities as they appear in
@@ -308,6 +357,70 @@ def country_hub(country: str):
         LIMIT 6
     """, list(info['cities']) * 2, ttl=3600) if db_ready() else []
 
+    # Aggregate price + distance facts (avg, min, max) for the stats strip
+    # and the prose macro. Distance defaults to 0 on most international
+    # routes, so we filter zeros before averaging to avoid lying.
+    valid_kms = [r['distance_km'] for r in routes if r.get('distance_km')]
+    avg_distance_km = round(sum(valid_kms) / len(valid_kms)) if valid_kms else None
+    min_prices = [r['min_price_rsd'] for r in routes if r.get('min_price_rsd')]
+    avg_price_rsd = round(sum(min_prices) / len(min_prices)) if min_prices else None
+    min_price_rsd = min(min_prices) if min_prices else None
+
+    # Sample top 3 priced trips spanning the corridor — picked from the
+    # three top routes so the schedule preview shows realistic departures
+    # for the country, not a single dominant pair.
+    sample_trips: list = []
+    if routes and db_ready():
+        top_route_ids = cached_query(f"""
+            SELECT r.id FROM routes r
+            JOIN trips t ON t.route_id = r.id
+            WHERE r.type = 'intercity' AND t.price_rsd > 0
+              AND (r.from_city IN ({cities_placeholders})
+                   OR r.to_city IN ({cities_placeholders}))
+            GROUP BY r.id
+            ORDER BY COUNT(t.id) DESC LIMIT 3
+        """, list(info['cities']) * 2, ttl=3600)
+        for row in top_route_ids:
+            t_row = cached_query_one("""
+                SELECT t.departure_time, t.arrival_time, t.duration_min,
+                       t.price_rsd, o.name AS operator,
+                       r.from_city, r.to_city, r.slug AS route_slug
+                FROM trips t
+                JOIN operators o ON o.id = t.operator_id
+                JOIN routes r ON r.id = t.route_id
+                WHERE t.route_id = ? AND t.price_rsd > 0
+                ORDER BY t.price_rsd
+                LIMIT 1
+            """, [row['id']], ttl=3600)
+            if t_row:
+                sample_trips.append(t_row)
+
+    # Reviews aggregated across this country's routes — same shape as
+    # operator_detail. Caps at the top 200 routes loaded above so the IN
+    # clause stays bounded.
+    from app import analytics_db
+    country_route_slugs = [r['slug'] for r in routes]
+    country_reviews: list = []
+    country_reviews_agg = {'n': 0, 'avg': None}
+    if country_route_slugs:
+        ph = ','.join(['?'] * len(country_route_slugs))
+        country_reviews = analytics_db.query(
+            f"SELECT id, rating, comment, author_name, lang, ts, route_slug "
+            f"FROM reviews WHERE route_slug IN ({ph}) AND status = 'approved' "
+            f"ORDER BY ts DESC LIMIT 10",
+            country_route_slugs,
+        )
+        agg_row = analytics_db.query(
+            f"SELECT COUNT(*) AS n, AVG(rating) AS avg_rating "
+            f"FROM reviews WHERE route_slug IN ({ph}) AND status = 'approved'",
+            country_route_slugs,
+        )
+        if agg_row and agg_row[0]['n']:
+            country_reviews_agg = {
+                'n': int(agg_row[0]['n']),
+                'avg': round(float(agg_row[0]['avg_rating']), 1),
+            }
+
     return render_template(
         'country_hub.html',
         country_slug=country,
@@ -319,6 +432,12 @@ def country_hub(country: str):
         total_trips=sum(r['trip_count'] for r in routes),
         from_serbia_count=len(from_serbia),
         intra_count=len(intra),
+        avg_distance_km=avg_distance_km,
+        avg_price_rsd=avg_price_rsd,
+        min_price_rsd=min_price_rsd,
+        sample_trips=sample_trips,
+        reviews=country_reviews,
+        reviews_agg=country_reviews_agg,
     )
 
 
@@ -382,6 +501,32 @@ def carriers():
 
     operators = sorted(ops_by_id.values(), key=lambda o: o['route_count'], reverse=True)
 
+    # Per-operator min price + countries served — adds a stat overlay to
+    # each card and lets us tag operators by region for the filter chips.
+    op_price = {}
+    op_countries = {}
+    if db_ready():
+        price_rows = cached_query("""
+            SELECT t.operator_id, MIN(t.price_rsd) AS min_price
+            FROM trips t JOIN routes r ON r.id = t.route_id
+            WHERE r.type = 'intercity' AND t.price_rsd > 0
+            GROUP BY t.operator_id
+        """, ttl=3600)
+        for row in price_rows:
+            op_price[row['operator_id']] = row['min_price']
+    for op in operators:
+        op['min_price'] = op_price.get(op['id'])
+        # countries served — derived from the city list collected above.
+        countries = sorted({
+            _COUNTRY_HUBS[_CITY_TO_COUNTRY[c['city']]]['name']
+            for c in op.get('cities', [])
+            if c['city'] in _CITY_TO_COUNTRY
+        })
+        op['countries'] = countries
+        # region tag for filter chips: 'cross_border' if any country, else 'domestic'
+        op['region'] = 'cross_border' if countries else 'domestic'
+        op_countries[op['id']] = countries
+
     total = len(operators)
     total_pages = max(1, (total + per_page - 1) // per_page)
     if page > total_pages:
@@ -389,12 +534,20 @@ def carriers():
     start = (page - 1) * per_page
     page_operators = operators[start:start + per_page]
 
+    # Stats strip values — derived once, not paginated.
+    domestic_count = sum(1 for o in operators if o['region'] == 'domestic')
+    cross_border_count = total - domestic_count
+    total_routes = sum(o['route_count'] for o in operators)
+
     return render_template(
         'carriers_index.html',
         operators=page_operators,
         total_operators=total,
         page=page,
         total_pages=total_pages,
+        domestic_count=domestic_count,
+        cross_border_count=cross_border_count,
+        total_carrier_routes=total_routes,
     )
 
 
