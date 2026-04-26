@@ -6,10 +6,10 @@ Selection priority (spec):
   2. commission_pct midpoint (higher wins)
   3. ux_rank (lower wins — 1 is best)
 
-The resolver never returns an empty list for a valid pair because Omio
-is declared a universal fallback (`has_route` returns True for any
-non-empty, non-self pair). This matters for the template: it can trust
-that `offers[0]` exists whenever `from_slug` and `to_slug` are truthy.
+The resolver may return an empty list when no partner covers a pair —
+templates already guard with `{% if _buy_href %}` and simply hide the
+button. Bookaway is the broadest fallback (its country-page URL covers
+any pair where at least one endpoint is in its inventory map).
 
 The A/B stub (`ab_partner_order`) is a cookie-driven pre-sort that flips
 Bookaway ↔ FlixBus for half the traffic. The resolver applies it as a
@@ -21,13 +21,12 @@ from __future__ import annotations
 import hashlib
 
 from app.affiliates.base import Offer, Partner
-from app.affiliates.partners import Bookaway, FlixBus, Omio
+from app.affiliates.partners import Bookaway, FlixBus
 
 # Instantiate once — partners are stateless, single instances are fine.
 ACTIVE_PARTNERS: tuple[Partner, ...] = (
     Bookaway(),
     FlixBus(),
-    Omio(),
 )
 
 

@@ -2932,6 +2932,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Frequently asked questions',
         'ru': 'Частые вопросы',
     },
+    'dest.by_country': {
+        'sr': 'Po zemljama',
+        'en': 'By country',
+        'ru': 'По странам',
+    },
     'dest.faq_q1': {
         'sr': 'Koliko traje putovanje autobusom od Beograda do Budve?',
         'en': 'How long is the bus ride from Belgrade to Budva?',
@@ -3337,9 +3342,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Политика cookies',
     },
     'footer.partners': {
-        'sr': 'Partnerske provizije: Bookaway, FlixBus, Omio. Klikom na "Kupi" možete napustiti naš sajt.',
-        'en': 'Partner commissions: Bookaway, FlixBus, Omio. Clicking "Buy" may take you off-site.',
-        'ru': 'Партнёрские комиссии: Bookaway, FlixBus, Omio. Нажатие «Купить» может увести с сайта.',
+        'sr': 'Partnerske provizije: Bookaway, FlixBus. Klikom na "Kupi" možete napustiti naš sajt.',
+        'en': 'Partner commissions: Bookaway, FlixBus. Clicking "Buy" may take you off-site.',
+        'ru': 'Партнёрские комиссии: Bookaway, FlixBus. Нажатие «Купить» может увести с сайта.',
     },
 
     # ── Cookie consent banner ──
@@ -3461,9 +3466,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Запоминает выбранную валюту отображения (RSD или EUR).',
     },
     'cookies.page.purpose_ab': {
-        'sr': 'Dodeljuje stabilan A/B redosled partnerskih ponuda (Bookaway / FlixBus / Omio) po posetiocu.',
-        'en': 'Assigns a stable A/B ordering of partner offers (Bookaway / FlixBus / Omio) per visitor.',
-        'ru': 'Назначает стабильный A/B порядок партнёрских предложений (Bookaway / FlixBus / Omio) для посетителя.',
+        'sr': 'Dodeljuje stabilan A/B redosled partnerskih ponuda (Bookaway / FlixBus) po posetiocu.',
+        'en': 'Assigns a stable A/B ordering of partner offers (Bookaway / FlixBus) per visitor.',
+        'ru': 'Назначает стабильный A/B порядок партнёрских предложений (Bookaway / FlixBus) для посетителя.',
     },
     'cookies.page.purpose_saved': {
         'sr': 'Čuva vaše označene rute (lokalno u pretraživaču, ne šalje se na server).',
@@ -3481,9 +3486,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Третьи стороны',
     },
     'cookies.page.third_party_body': {
-        'sr': '<strong>Umami</strong> (analytics.farmako.ro) prikuplja anonimnu agregatnu statistiku poseta <strong>bez kolačića</strong> i bez ličnih identifikatora. Ako prihvatite sve kolačiće, učitavamo Umami skriptu; ako izaberete samo neophodne, skripta se ne učitava. <strong>Bookaway, FlixBus i Omio</strong> su partnerski sajtovi — kada kliknete "Kupi", napuštate naš sajt i ulazite pod njihovu politiku kolačića.',
-        'en': '<strong>Umami</strong> (analytics.farmako.ro) collects anonymous aggregate visit statistics <strong>without cookies</strong> and without personal identifiers. If you accept all cookies, we load the Umami script; if you choose essentials only, the script is not loaded. <strong>Bookaway, FlixBus and Omio</strong> are partner sites — when you click "Buy" you leave our site and fall under their cookie policy.',
-        'ru': '<strong>Umami</strong> (analytics.farmako.ro) собирает анонимную агрегированную статистику посещений <strong>без cookies</strong> и без персональных идентификаторов. Если вы принимаете все cookies, мы загружаем скрипт Umami; если выбираете только необходимые — скрипт не загружается. <strong>Bookaway, FlixBus и Omio</strong> — партнёрские сайты, при нажатии «Купить» вы покидаете наш сайт и попадаете под их политику cookies.',
+        'sr': '<strong>Umami</strong> (analytics.farmako.ro) prikuplja anonimnu agregatnu statistiku poseta <strong>bez kolačića</strong> i bez ličnih identifikatora. Ako prihvatite sve kolačiće, učitavamo Umami skriptu; ako izaberete samo neophodne, skripta se ne učitava. <strong>Bookaway i FlixBus</strong> su partnerski sajtovi — kada kliknete "Kupi", napuštate naš sajt i ulazite pod njihovu politiku kolačića.',
+        'en': '<strong>Umami</strong> (analytics.farmako.ro) collects anonymous aggregate visit statistics <strong>without cookies</strong> and without personal identifiers. If you accept all cookies, we load the Umami script; if you choose essentials only, the script is not loaded. <strong>Bookaway and FlixBus</strong> are partner sites — when you click "Buy" you leave our site and fall under their cookie policy.',
+        'ru': '<strong>Umami</strong> (analytics.farmako.ro) собирает анонимную агрегированную статистику посещений <strong>без cookies</strong> и без персональных идентификаторов. Если вы принимаете все cookies, мы загружаем скрипт Umami; если выбираете только необходимые — скрипт не загружается. <strong>Bookaway и FlixBus</strong> — партнёрские сайты, при нажатии «Купить» вы покидаете наш сайт и попадаете под их политику cookies.',
     },
     'cookies.page.disable_h': {
         'sr': 'Kako da onemogućite kolačiće',
@@ -3578,9 +3583,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': '4. Партнёрские ссылки (disclosure)',
     },
     'tos.s4_body': {
-        'sr': 'Neki linkovi za kupovinu karte (dugme "Kupi" pored polaska) vode na partnerske platforme <strong>Bookaway</strong>, <strong>FlixBus</strong> ili <strong>Omio</strong>. Ako kupite kartu preko takvog linka, Prevozni može da dobije malu proviziju koja pokriva troškove održavanja sajta. <strong>Cena koju vi plaćate se ne menja.</strong> Partnerski linkovi su jasno obeleženi kao "Kupi" a u naš sistem se beleži samo anonimni agregirani zapis klika (bez ličnih podataka) — detalji u <a href="/privatnost/">Politici privatnosti</a>.',
-        'en': 'Some ticket-purchase links (the "Buy" button next to a departure) go to partner platforms <strong>Bookaway</strong>, <strong>FlixBus</strong> or <strong>Omio</strong>. If you buy a ticket via such a link, Prevozni may receive a small commission that helps cover hosting and maintenance. <strong>The price you pay is not affected.</strong> Affiliate links are clearly labelled "Buy" and only an anonymous aggregate click record (no personal data) is stored on our side — details in the <a href="/privatnost/">Privacy Policy</a>.',
-        'ru': 'Некоторые ссылки покупки билета (кнопка «Купить» рядом с рейсом) ведут на партнёрские платформы <strong>Bookaway</strong>, <strong>FlixBus</strong> или <strong>Omio</strong>. Если вы покупаете билет по такой ссылке, Prevozni может получить небольшую комиссию, которая покрывает расходы на хостинг и поддержку. <strong>Цена для вас не меняется.</strong> Партнёрские ссылки явно помечены как «Купить», а у нас сохраняется только анонимная агрегированная запись клика (без персональных данных) — подробности в <a href="/privatnost/">Политике конфиденциальности</a>.',
+        'sr': 'Neki linkovi za kupovinu karte (dugme "Kupi" pored polaska) vode na partnerske platforme <strong>Bookaway</strong> ili <strong>FlixBus</strong>. Ako kupite kartu preko takvog linka, Prevozni može da dobije malu proviziju koja pokriva troškove održavanja sajta. <strong>Cena koju vi plaćate se ne menja.</strong> Partnerski linkovi su jasno obeleženi kao "Kupi" a u naš sistem se beleži samo anonimni agregirani zapis klika (bez ličnih podataka) — detalji u <a href="/privatnost/">Politici privatnosti</a>.',
+        'en': 'Some ticket-purchase links (the "Buy" button next to a departure) go to partner platforms <strong>Bookaway</strong> or <strong>FlixBus</strong>. If you buy a ticket via such a link, Prevozni may receive a small commission that helps cover hosting and maintenance. <strong>The price you pay is not affected.</strong> Affiliate links are clearly labelled "Buy" and only an anonymous aggregate click record (no personal data) is stored on our side — details in the <a href="/privatnost/">Privacy Policy</a>.',
+        'ru': 'Некоторые ссылки покупки билета (кнопка «Купить» рядом с рейсом) ведут на партнёрские платформы <strong>Bookaway</strong> или <strong>FlixBus</strong>. Если вы покупаете билет по такой ссылке, Prevozni может получить небольшую комиссию, которая покрывает расходы на хостинг и поддержку. <strong>Цена для вас не меняется.</strong> Партнёрские ссылки явно помечены как «Купить», а у нас сохраняется только анонимная агрегированная запись клика (без персональных данных) — подробности в <a href="/privatnost/">Политике конфиденциальности</a>.',
     },
     'tos.s5_h': {
         'sr': '5. Korisnički sadržaj (recenzije)',

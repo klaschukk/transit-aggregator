@@ -6,7 +6,7 @@
 
 1. Maximise RPM without policy risk (Google ad-density / placement / UX).
 2. Protect Core Web Vitals — LCP regression budget **≤ 500ms**, CLS = 0.
-3. Never compete with Bookaway/FlixBus/Omio CTAs (those drive higher
+3. Never compete with Bookaway/FlixBus CTAs (those drive higher
    per-visitor revenue than ad clicks at our traffic volume).
 4. Coexist cleanly with the GDPR cookie banner — no ads load until
    `cookie_consent=all` OR `essential` (latter triggers Google's

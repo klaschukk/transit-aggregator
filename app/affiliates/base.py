@@ -21,8 +21,8 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class Offer:
     """Concrete, ready-to-render affiliate offer for one route."""
-    partner_key: str        # 'bookaway', 'flixbus', 'omio'
-    partner_name: str       # 'Bookaway', 'FlixBus', 'Omio'
+    partner_key: str        # 'bookaway', 'flixbus'
+    partner_name: str       # 'Bookaway', 'FlixBus'
     url: str                # full URL with affiliate IDs + UTM params
     brand_color: str        # CSS colour for the button (hex)
     commission_pct: float   # midpoint of declared band — for ordering only

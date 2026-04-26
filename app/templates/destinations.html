@@ -125,6 +125,32 @@
 
 </div>
 
+<!-- Country hubs — internal-link surface for the eight Serbia↔X
+     country pages. Each link is a SEO-targeted hub listing every
+     route into that country, so this section gives them link equity
+     from the destinations index. -->
+<section class="country-hubs">
+  <h2 class="section__title">{{ _('dest.by_country') }}</h2>
+  <div class="country-hubs__grid">
+    {% set _hubs = [
+      ('crna-gora',  'Crna Gora'),
+      ('bosna',      'Bosna i Hercegovina'),
+      ('hrvatska',   'Hrvatska'),
+      ('makedonija', 'Severna Makedonija'),
+      ('slovenija',  'Slovenija'),
+      ('albanija',   'Albanija'),
+      ('grcka',      'Grčka'),
+      ('bugarska',   'Bugarska'),
+    ] %}
+    {% for slug, label in _hubs %}
+    <a href="{{ lang_prefix }}/destinacije/{{ slug }}/" class="country-hub-card">
+      <span class="country-hub-card__name">{{ label }}</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
 <!-- FAQ -->
 <section class="faq-section">
   <h2 class="section__title">{{ _('dest.faq_heading') }}</h2>

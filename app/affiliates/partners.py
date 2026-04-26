@@ -1,5 +1,5 @@
 """
-Concrete affiliate-partner plugins: Bookaway, FlixBus, Omio.
+Concrete affiliate-partner plugins: Bookaway, FlixBus.
 
 Each class declares (1) which origin→destination pairs it can monetise
 via `has_route()` and (2) how to build the deep-link URL with tracking
@@ -20,8 +20,6 @@ When adding a new partner:
   4. Add the class to `ACTIVE_PARTNERS` in resolve.py.
 """
 from __future__ import annotations
-
-from urllib.parse import quote_plus
 
 from app.affiliates.base import Partner
 
@@ -89,9 +87,11 @@ class Bookaway(Partner):
     AFF_ID = 4033       # approved
 
     def has_route(self, from_slug: str, to_slug: str) -> bool:
-        # Bookaway covers a pair if *either* endpoint is in its inventory
-        # (the URL resolves to the non-domestic country; the country_map
-        # lookup picks the destination first).
+        # Bookaway covers a pair if *either* endpoint is in its inventory.
+        # When only one endpoint matches, build_url falls back to the
+        # country listing page (a URL that always exists) — that keeps
+        # the affiliate query string alive instead of letting Bookaway's
+        # own redirect strip it on a non-existent route page.
         return from_slug in _BOOKAWAY_COUNTRY_MAP or to_slug in _BOOKAWAY_COUNTRY_MAP
 
     def build_url(
@@ -102,17 +102,23 @@ class Bookaway(Partner):
         to_city: str,
         utm_medium: str,
     ) -> str:
-        country = (
-            _BOOKAWAY_COUNTRY_MAP.get(to_slug)
-            or _BOOKAWAY_COUNTRY_MAP.get(from_slug)
-            or 'serbia'
-        )
-        return (
-            f'https://www.bookaway.com/routes/{country}/'
-            f'{from_slug}-to-{to_slug}'
+        from_country = _BOOKAWAY_COUNTRY_MAP.get(from_slug)
+        to_country = _BOOKAWAY_COUNTRY_MAP.get(to_slug)
+        country = to_country or from_country or 'serbia'
+        tracking = (
             f'?offer_id={self.OFFER_ID}&aff_id={self.AFF_ID}'
             f'&utm_source=prevozni&utm_medium={utm_medium}'
         )
+        # Both endpoints in inventory → deep-link to the route page.
+        # Otherwise fall back to the country listing — Bookaway has no
+        # page for e.g. mladenovac-to-beograd and their redirect strips
+        # query params, so we'd lose attribution. The country page exists
+        # and preserves ?offer_id/aff_id, so the cookie still gets set.
+        if from_country and to_country:
+            path = f'/routes/{country}/{from_slug}-to-{to_slug}'
+        else:
+            path = f'/routes/{country}/'
+        return f'https://www.bookaway.com{path}{tracking}'
 
 
 # ── FlixBus — cross-border corridors (owned operator) ──────────────
@@ -185,43 +191,3 @@ class FlixBus(Partner):
         return base
 
 
-# ── Omio — multi-modal fallback (always matches) ───────────────────
-
-class Omio(Partner):
-    """Multi-modal (bus + train + flight). Fallback when no one else covers."""
-    key = 'omio'
-    name = 'Omio'
-    brand_color = '#e91e63'
-    commission_band = (2.0, 8.0)
-    ux_rank = 3
-
-    # TODO: replace once Omio affiliate account is approved. URL works
-    # without the partner ID; clicks just won't attribute.
-    PARTNER_ID: str = 'PLACEHOLDER'
-
-    def has_route(self, from_slug: str, to_slug: str) -> bool:
-        # Omio is the safety net — it catches every pair so the resolver
-        # never returns an empty list. Multi-modal means even rail-only
-        # routes (e.g. Beograd–Minhen) still get a monetised click.
-        return bool(from_slug) and bool(to_slug) and from_slug != to_slug
-
-    def build_url(
-        self,
-        from_slug: str,
-        to_slug: str,
-        from_city: str,
-        to_city: str,
-        utm_medium: str,
-    ) -> str:
-        # Omio uses city names (not slugs) in its search query. URL-encode
-        # the original names to preserve diacritics the slug strips.
-        from_q = quote_plus(from_city or from_slug)
-        to_q = quote_plus(to_city or to_slug)
-        base = (
-            f'https://www.omio.com/search-frontend/results'
-            f'?departureCity={from_q}&arrivalCity={to_q}'
-            f'&utm_source=prevozni&utm_medium={utm_medium}'
-        )
-        if self.PARTNER_ID != 'PLACEHOLDER':
-            base += f'&partnerId={self.PARTNER_ID}'
-        return base

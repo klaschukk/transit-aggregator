@@ -6,9 +6,9 @@ don't re-research when revisiting the stack.
 
 | Partner        | Commission            | Cookie | Balkans coverage                | Deep link                                                  | Status         |
 |----------------|-----------------------|--------|---------------------------------|------------------------------------------------------------|----------------|
-| **Bookaway**   | ~5–10% per sale       | 30 d   | Strong — SR/ME/BA/HR/MK, IL hubs | `bookaway.com/routes/{country}/{from}-to-{to}?offer_id=34&aff_id=4033` | **Integrated** |
+| **Bookaway**   | ~5–10% per sale       | 30 d   | Strong — SR/ME/BA/HR/MK, IL hubs | `bookaway.com/routes/{country}/{from}-to-{to}?offer_id=34&aff_id=4033` (deep link); falls back to `routes/{country}/?…` when one endpoint isn't in inventory — preserves attribution since Bookaway's own redirect strips query params on a missing route page | **Integrated** |
 | **FlixBus**    | 3–5% (EU) / ~$6 (US)  | 30 d   | BG↔SR/HR/BA/MK/HU/BG/SI corridors; **no intra-SR** | Via Awin tracking redirect → `flixbus.com/bus/{from}-{to}` | **Integrated** |
-| **Omio**       | 2–8% (base 6%)        | 30 d   | Multi-modal; strong SR↔DE/AT, fair Balkans | `omio.com/search-frontend/bus?partnerId=<TBD>&from={from}&to={to}` | **Integrated** |
+| ~~Omio~~       | 2–8%                  | 30 d   | Multi-modal; SR↔DE/AT, fair Balkans | —                                                       | **Dropped 2026-04-26** — never approved, zero attribution, removed to declutter trip cards |
 | GetByBus       | ~5–10% (now owned by Bookaway — same inventory) | 30 d | SR/HR/BA core                   | Redundant with Bookaway                                     | Skip (duplicate) |
 | Busbud         | 2% (CJ)               | 7 d    | Thin Balkans                    | Via CJ link generator                                       | Skip (low ROI) |
 | 12Go           | 50% of booking fee (~$3 avg) | 30 d | Asia-centric, thin EU       | `12go.asia/en/travel/{from}/{to}?utm_medium=affiliate`     | Skip (wrong geography) |
@@ -28,13 +28,17 @@ Sarajevo, Budapest, Ljubljana) so it plugs the gap where Bookaway shows
 thin inventory. The trade-off is no intra-SR coverage — FlixBus does not
 sell Niš ↔ Kraljevo, so Bookaway stays primary for domestic trips.
 
-### Why add Omio
-Multi-modal (bus + train + flight + ferry) means we can monetise users who
-search a route like Beograd → Minhen, realise no bus exists, and click a
-train alternative. Omio also has the best SR↔Western-Europe mix (Munich,
-Vienna, Zurich) that neither Bookaway nor FlixBus covers well. Commission
-is lower (2–8%) but cookie is 30 d and the partner supports a proper
-search-widget integration if we later want to deep-embed results.
+### Why we dropped Omio (2026-04-26)
+Omio was originally added as a multi-modal universal-fallback partner —
+the safety net that let every trip card show a "Kupi" button even when
+Bookaway / FlixBus had no inventory. In practice the partner account was
+never approved (PARTNER_ID stayed `'PLACEHOLDER'`), so the URLs were
+non-tracking from day one. Zero commissions over the live period meant
+the only thing it produced was a third button color and extra trip-card
+chrome. Removed in favour of a tighter Bookaway URL builder that falls
+back to the country-listing page (preserves attribution) and a `{% if
+_buy_href %}` guard on the template (cards without coverage simply hide
+the buy button).
 
 ### Why skip the others
 * **GetByBus** was acquired by Bookaway. Their tickets flow through the same
@@ -52,11 +56,14 @@ search-widget integration if we later want to deep-embed results.
 Codified in `app/affiliates/resolve.py`:
 
 1. `Bookaway.has_route(from, to)` → use it (highest commission × best
-   Balkans coverage).
+   Balkans coverage). When only one endpoint is in Bookaway's inventory
+   the URL falls back to the country listing page so attribution still
+   sticks.
 2. Else `FlixBus.has_route(...)` → use it (covers the cross-border
    corridors where Bookaway is thin).
-3. Else `Omio.has_route(...)` → use it (multi-modal catch-all; always
-   returns True so the chain never falls off the end).
+3. Else no partner — the trip card hides its "Kupi" button. Acceptable
+   since pairs without either partner are rare (mostly tiny domestic
+   commuter routes; users still see schedule + price).
 
 A/B stub (`app/affiliates/ab.py`) can flip step 1 ↔ step 2 for 50% of
 traffic via cookie `ab_partner=bookaway|flixbus`, so we can measure CTR
@@ -67,14 +74,13 @@ and CVR before committing to a primary partner long-term.
 Baseline: Bookaway-only, ~1 click → ~0.05–0.1 confirmed booking × €2.5
 avg commission = €0.15/click effective EPC.
 
-With FlixBus+Omio filling coverage gaps:
-* +20–30% of currently-dead trip cards now get a buy button (routes where
-  Bookaway has no inventory). Conservative estimate: **+15% total
-  click volume**.
-* FlixBus EPC on cross-border corridors is comparable to Bookaway; Omio
-  is lower but catches queries that currently 100% bounce.
-* Net ballpark: **+20–35% affiliate revenue** once FlixBus approval lands
-  and Omio widget is live, assuming current traffic stays flat.
+With FlixBus filling cross-border coverage gaps:
+* Cross-border corridors (Beograd ↔ Sofia/Skopje/Zagreb/Sarajevo/Budapest)
+  get a second buy button next to the Bookaway one — A/B chooses which
+  shows first per visitor.
+* FlixBus EPC on cross-border corridors is comparable to Bookaway.
+* Net ballpark: **+15–25% affiliate revenue** once FlixBus approval lands,
+  assuming current traffic stays flat.
 
 Numbers are assumptions, not commitments. Validate against Umami
 `ba_clicks` + equivalent counters after 2–4 weeks of real traffic.
@@ -87,6 +93,5 @@ revenue until replaced):
 
 * [ ] FlixBus — apply via Awin (`affiliatepartner@flixbus.com`). Replace
   `FLIXBUS_AWIN_ID` in `config.py` once approved.
-* [ ] Omio — apply at `omio.com/affiliate`. Replace `OMIO_PARTNER_ID`.
 * [x] Bookaway — already approved, IDs live in templates (`offer_id=34`,
   `aff_id=4033`).

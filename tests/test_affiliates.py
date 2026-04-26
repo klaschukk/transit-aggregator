@@ -5,7 +5,6 @@ from app.affiliates import (
     Bookaway,
     FlixBus,
     Offer,
-    Omio,
     ab_partner_order,
     primary_offer,
     resolve_offers,
@@ -46,18 +45,6 @@ def test_flixbus_requires_both_endpoints_in_network():
     assert FlixBus().has_route('obrenovac', 'sarajevo') is False
 
 
-def test_omio_matches_any_non_empty_pair():
-    # Multi-modal fallback must cover everything
-    assert Omio().has_route('beograd', 'nis') is True
-    assert Omio().has_route('foo', 'bar') is True
-
-
-def test_omio_rejects_self_and_empty():
-    assert Omio().has_route('', '') is False
-    assert Omio().has_route('beograd', '') is False
-    assert Omio().has_route('beograd', 'beograd') is False
-
-
 # ── Partner.build_url() ───────────────────────────────────────────────
 
 def test_bookaway_url_keeps_offer_and_aff_ids():
@@ -79,6 +66,32 @@ def test_bookaway_url_picks_destination_country():
     assert '/routes/bosnia-and-herzegovina/' in url
 
 
+def test_bookaway_falls_back_to_country_page_for_partial_match():
+    # mladenovac is NOT in Bookaway's inventory, beograd is. The route
+    # page bookaway.com/routes/serbia/mladenovac-to-beograd doesn't exist
+    # — their server redirects to /routes/serbia/mladenovac and strips
+    # query params, killing affiliate attribution. We must instead point
+    # at a URL that exists and preserves ?offer_id/aff_id: the country
+    # listing page.
+    url = Bookaway().build_url(
+        'mladenovac', 'beograd', 'Mladenovac', 'Beograd', 'trip-card',
+    )
+    assert url.startswith('https://www.bookaway.com/routes/serbia/?')
+    assert 'offer_id=34' in url
+    assert 'aff_id=4033' in url
+    # No dead route slug in the path
+    assert 'mladenovac-to-beograd' not in url
+
+
+def test_bookaway_uses_route_page_when_both_endpoints_known():
+    # Sanity: the deep-link path is still preferred when Bookaway has
+    # both endpoints in its inventory.
+    url = Bookaway().build_url(
+        'beograd', 'budva', 'Beograd', 'Budva', 'trip-card',
+    )
+    assert '/routes/montenegro/beograd-to-budva?' in url
+
+
 def test_flixbus_placeholder_does_not_leak_param():
     # While AWIN_ID='PLACEHOLDER' the URL must not contain awin_id=
     url = FlixBus().build_url(
@@ -88,17 +101,6 @@ def test_flixbus_placeholder_does_not_leak_param():
     assert 'flixbus.com/bus/beograd-sarajevo' in url
 
 
-def test_omio_url_encodes_city_names():
-    # Diacritics must survive round-trip through URL-encoding
-    url = Omio().build_url(
-        'nis', 'uzice', 'Niš', 'Užice', 'trip-card',
-    )
-    # Ni%C5%A1 == "Niš"; U%C5%BEice == "Užice"
-    assert 'Ni%C5%A1' in url
-    assert 'U%C5%BEice' in url
-    assert 'utm_source=prevozni' in url
-
-
 # ── resolve_offers() ──────────────────────────────────────────────────
 
 def test_resolver_returns_empty_for_degenerate_pair():
@@ -106,22 +108,21 @@ def test_resolver_returns_empty_for_degenerate_pair():
     assert resolve_offers('beograd', 'beograd') == []
 
 
-def test_resolver_always_returns_at_least_omio():
-    # Omio's universal has_route means the resolver never returns []
-    offers = resolve_offers('foo', 'bar')
-    assert len(offers) >= 1
-    assert offers[-1].partner_key == 'omio'
+def test_resolver_returns_empty_when_no_partner_covers():
+    # Without Omio as a universal fallback, unknown city pairs simply
+    # have no offer — templates guard `{% if _buy_href %}` and hide.
+    # Use clearly-fake slugs to avoid colliding with real Bookaway cities
+    # like 'bar' (Bar, Montenegro).
+    offers = resolve_offers('foobar', 'bazqux')
+    assert offers == []
 
 
 def test_resolver_orders_by_commission_then_ux():
-    # For a SR domestic pair, all three partners might claim the pair?
-    # Bookaway yes, FlixBus no (intra-SR), Omio yes.
+    # For a SR domestic pair only Bookaway claims it (FlixBus skips
+    # intra-SR).
     offers = resolve_offers('beograd', 'nis', 'Beograd', 'Niš')
     keys = [o.partner_key for o in offers]
-    assert keys[0] == 'bookaway'  # highest commission (~7.5%) + best UX
-    # FlixBus skipped for SR↔SR → Omio is the sole fallback
-    assert 'flixbus' not in keys
-    assert 'omio' in keys
+    assert keys == ['bookaway']
 
 
 def test_resolver_cross_border_includes_flixbus():
@@ -131,7 +132,6 @@ def test_resolver_cross_border_includes_flixbus():
     keys = [o.partner_key for o in offers]
     assert 'bookaway' in keys
     assert 'flixbus' in keys
-    assert 'omio' in keys
     # Primary is Bookaway by default ranking
     assert keys[0] == 'bookaway'
 
