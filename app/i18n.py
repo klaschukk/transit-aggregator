@@ -785,6 +785,26 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     # ── About page ──
     'about.title': {'sr': 'O nama', 'en': 'About us', 'ru': 'О нас'},
+    'about.meta_short': {
+        'sr': 'Prevozni — besplatni red vožnje autobusa, vozova i gradskog prevoza u Srbiji. Bez registracije, na 3 jezika.',
+        'en': 'Prevozni — free bus, train and city transport schedules across Serbia. No registration, in 3 languages.',
+        'ru': 'Prevozni — бесплатное расписание автобусов, поездов и городского транспорта в Сербии. Без регистрации, на 3 языках.',
+    },
+    'about.intro_short': {
+        'sr': 'Prevozni objedinjuje raspored {routes}+ međugradskih ruta i {ops}+ prevoznika u Srbiji i regionu, plus gradski prevoz u 4 grada. Besplatno, bez registracije, na 3 jezika.',
+        'en': 'Prevozni aggregates schedules for {routes}+ intercity routes from {ops}+ carriers in Serbia and the region, plus city transit in 4 cities. Free, no signup, in 3 languages.',
+        'ru': 'Prevozni объединяет расписание {routes}+ междугородних маршрутов и {ops}+ перевозчиков в Сербии и регионе, плюс городской транспорт в 4 городах. Бесплатно, без регистрации, на 3 языках.',
+    },
+    'about.search_h': {
+        'sr': 'Pronađite vožnju',
+        'en': 'Find a ride',
+        'ru': 'Найти рейс',
+    },
+    'about.sources_short': {
+        'sr': 'Podatke prikupljamo svakodnevnim skraperima sa zvaničnih izvora — bgprevoz.rs, gspns.co.rs, jgpnis.rs, busticket4.me, polazak.rs, srbijavoz.rs i drugih. Pre putovanja proverite raspored direktno kod prevoznika; cene i polasci se mogu menjati. Prevozni je besplatan i ne prodaje karte — kupovina ide kod naših affiliate partnera.',
+        'en': 'Data is collected daily from official sources — bgprevoz.rs, gspns.co.rs, jgpnis.rs, busticket4.me, polazak.rs, srbijavoz.rs and others. Always confirm the schedule with the carrier before traveling; prices and departures can change. Prevozni is free and does not sell tickets — purchases go through our affiliate partners.',
+        'ru': 'Данные обновляются ежедневными скраперами из официальных источников — bgprevoz.rs, gspns.co.rs, jgpnis.rs, busticket4.me, polazak.rs, srbijavoz.rs и других. Перед поездкой обязательно сверяйтесь с расписанием перевозчика; цены и рейсы могут меняться. Prevozni бесплатен и не продает билеты — покупка идет через наших affiliate-партнёров.',
+    },
     'about.mission': {
         'sr': 'Prevozni prikuplja i objedinjuje podatke iz različitih izvora kako bi vam uštedeo vreme pri planiranju putovanja kroz Srbiju.',
         'en': 'Prevozni collects and aggregates data from various sources to save you time when planning travel through Serbia.',

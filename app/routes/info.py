@@ -31,8 +31,15 @@ def _validate_contact(name: str, email: str, message: str) -> str | None:
 
 @info_bp.route('/o-nama/')
 def about():
-    """About page with live stats."""
-    stats = {'routes': 0, 'lines': 0, 'stops': 0, 'operators': 0}
+    """About page — landing destination from the mobile bottom-nav.
+
+    Tuned to answer "what is this site?" in 5 seconds and put the user
+    back on the rails (search form + popular routes + city hubs).
+    Long-form team / story content lives in /vodici/ now.
+    """
+    stats = {'routes': 0, 'lines': 0, 'stops': 0, 'operators': 0, 'cities': 4}
+    popular_routes: list = []
+    cities_data: list = []
     if db_ready():
         row = cached_query_one("""
             SELECT
@@ -42,8 +49,67 @@ def about():
               (SELECT COUNT(*) FROM operators) as operators
         """, ttl=3600)
         if row:
-            stats = row
-    return render_template('about.html', stats=stats)
+            stats = dict(row)
+            stats['cities'] = 4
+
+        # Popular routes — same SELECT shape the home uses, but capped
+        # at 6 (less competing visual weight on this page).
+        popular_routes = cached_query("""
+            SELECT r.slug, r.from_city, r.to_city, r.distance_km,
+                   COUNT(t.id) AS trip_count
+            FROM routes r
+            LEFT JOIN trips t ON t.route_id = r.id
+            WHERE r.type = 'intercity'
+            GROUP BY r.id, r.slug, r.from_city, r.to_city, r.distance_km
+            ORDER BY trip_count DESC
+            LIMIT 6
+        """, ttl=3600)
+
+        # 4 city cards with line + stop counts (same shape as the home
+        # `cities_data` block so we can reuse home-cities-grid).
+        cities_data = cached_query("""
+            SELECT cl.city,
+                   COUNT(DISTINCT cl.id) AS line_count,
+                   (SELECT COUNT(*) FROM city_stops cs WHERE cs.city = cl.city) AS stop_count
+            FROM city_lines cl
+            GROUP BY cl.city
+            ORDER BY line_count DESC
+        """, ttl=3600)
+        _city_labels = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad',
+                        'nis': 'Niš', 'kragujevac': 'Kragujevac'}
+        for c in cities_data:
+            c['label'] = _city_labels.get(c['city'], c['city'].title())
+
+    # 3 most recent guides — _GUIDES dict is defined further down in
+    # this module; sort by date desc, slice 3.
+    recent_guides = sorted(
+        ({'slug': slug, **info} for slug, info in _GUIDES.items()),
+        key=lambda g: g['date'], reverse=True,
+    )[:3]
+
+    # Reviews — namespaced "page-about" so they don't collide with any
+    # route / line / city / op bucket. Wrapped in try/except so a
+    # locked analytics_db never breaks render.
+    review_slug = 'page-about'
+    reviews_data: list = []
+    reviews_aggregate = None
+    try:
+        from app import analytics_db
+        reviews_data = analytics_db.approved_reviews(review_slug)
+        reviews_aggregate = analytics_db.aggregate_rating(review_slug)
+    except Exception:
+        pass
+
+    return render_template(
+        'about.html',
+        stats=stats,
+        popular_routes=popular_routes,
+        cities_data=cities_data,
+        recent_guides=recent_guides,
+        review_slug=review_slug,
+        reviews=reviews_data,
+        reviews_agg=reviews_aggregate,
+    )
 
 
 @info_bp.route('/kontakt/', methods=['GET', 'POST'])
