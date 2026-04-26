@@ -51,6 +51,17 @@ def create_app(config_name: str | None = None) -> Flask:
         config_name = os.environ.get('FLASK_ENV', 'default')
     app.config.from_object(config_map[config_name])
 
+    # Trust nginx's X-Forwarded-* headers so request.is_secure / request.remote_addr
+    # reflect the original client request, not the loopback hop. Without this:
+    # - Cookies miss the Secure flag (is_secure=False on HTTPS pages)
+    # - Rate-limit keying buckets every visitor under 127.0.0.1
+    # nginx is the only fronting proxy, so x_for=1, x_proto=1, x_host=1 is right.
+    if config_name == 'production':
+        from werkzeug.middleware.proxy_fix import ProxyFix
+        app.wsgi_app = ProxyFix(
+            app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=0,
+        )
+
     if config_name == 'production' and not app.config.get('SECRET_KEY'):
         raise RuntimeError(
             "SECRET_KEY environment variable must be set in production"
