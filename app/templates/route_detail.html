@@ -20,6 +20,45 @@
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"{{ _('route_detail.faq.q_departures').format(from_city=route.from_city, to_city=route.to_city) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('route_detail.faq.a_departures').format(count=route.trip_count, from_city=route.from_city, to_city=route.to_city) }}"}},{"@type":"Question","name":"{{ _('route_detail.faq.q_price').format(from_city=route.from_city, to_city=route.to_city) }}","acceptedAnswer":{"@type":"Answer","text":"{% if price_min %}{{ _('route_detail.faq.a_price_from').format(min=price_min) }}{% else %}{{ _('route_detail.faq.a_price_unknown') }}{% endif %}"}},{"@type":"Question","name":"{{ _('route_detail.faq.q_operators').format(from_city=route.from_city, to_city=route.to_city) }}","acceptedAnswer":{"@type":"Answer","text":"{% if operators_on_route %}{{ _('route_detail.faq.a_operators_list').format(operators=operators_on_route|join(', ')) }}{% else %}{{ _('route_detail.faq.a_operators_unknown') }}{% endif %}"}}]}
 </script>
 {% endif %}
+{# Honest rich-snippets block — data we genuinely have. Each schema fires a
+   different SERP enhancement: TouristTrip + offers = price + duration card,
+   Service + provider = operator badge, all without UGC dependence. #}
+{% if route.distance_km or trips %}
+{% set _ttrip = {
+  '@context': 'https://schema.org',
+  '@type': 'TouristTrip',
+  'name': route.from_city ~ ' → ' ~ route.to_city,
+  'description': _('route_detail.meta_prefix') ~ ' ' ~ route.from_city ~ ' → ' ~ route.to_city,
+  'url': canonical_url,
+  'itinerary': [
+    {'@type': 'Place', 'name': route.from_city, 'address': {'@type': 'PostalAddress', 'addressCountry': 'RS', 'addressLocality': route.from_city}},
+    {'@type': 'Place', 'name': route.to_city, 'address': {'@type': 'PostalAddress', 'addressLocality': route.to_city}},
+  ],
+} %}
+{% if route.distance_km %}{% set _noop = _ttrip.update({'subjectOf': {'@type': 'CreativeWork', 'about': route.distance_km|string ~ ' km'}}) %}{% endif %}
+{% if price_min %}{% set _noop = _ttrip.update({'offers': {'@type': 'Offer', 'price': price_min|string, 'priceCurrency': 'RSD', 'availability': 'https://schema.org/InStock', 'priceSpecification': {'@type': 'PriceSpecification', 'price': price_min|string, 'priceCurrency': 'RSD', 'minPrice': price_min|string}}}) %}{% endif %}
+<script type="application/ld+json">{{ _ttrip|tojson }}</script>
+{% endif %}
+
+{# Service + Provider — surfaces the operators(s) explicitly so SERP can
+   show "Service by Lasta / Niš-Ekspres" rather than just bus-trip cards. #}
+{% if operators_on_route %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "serviceType": "Bus transportation",
+  "name": "{{ route.from_city }} → {{ route.to_city }}",
+  "areaServed": {"@type": "Country", "name": "Serbia"},
+  "provider": [
+    {% for op in operators_on_route %}
+    {"@type": "Organization", "name": "{{ op }}"}{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endif %}
+
 {# AggregateRating + Review markup — Google's documented path to ★ rich results.
    Emitted as a Product (travel offering) so the stars attach unambiguously. #}
 {% if reviews_agg and reviews_agg.n %}

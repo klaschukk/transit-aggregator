@@ -1,0 +1,43 @@
+{# Review-prompt sticky banner.
+
+   Server-side: emits a hidden div on every page. The actual show/hide
+   logic lives client-side because the trigger (a cookie set after a
+   Bookaway click) is set in JS and we want zero render-blocking work
+   in the head.
+
+   Cookie shape (set in base.html buy-click handler):
+     pending_review_route = encodeURIComponent(JSON.stringify({
+       slug: 'beograd-budva',
+       ts:   1714233600000,
+     }))
+
+   Show conditions (all must hold):
+     - Cookie present + parses cleanly
+     - Cookie age >= 12 hours (so we don't ask DURING the trip)
+     - User hasn't already dismissed THIS specific route
+       (review_dismissed_<slug>=1 cookie)
+     - User isn't on the route's own /rute/<slug>/ page (would be
+       a duplicate CTA — the form is right there)
+
+   Click "Ostavi recenziju" → /rute/<slug>/#reviews + scroll-to-form.
+   Click "X" → set review_dismissed_<slug>=1 (90 days).
+#}
+<div class="review-prompt review-prompt--hidden" id="reviewPrompt"
+     role="dialog" aria-live="polite" aria-label="{{ _('review.prompt_aria') }}"
+     hidden>
+  <div class="review-prompt__body">
+    <span class="review-prompt__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+        <path d="M12 2l2.6 6.2L21 9l-5 4.4 1.5 6.6L12 16.6 6.5 20 8 13.4 3 9l6.4-.8z"/>
+      </svg>
+    </span>
+    <span class="review-prompt__text">
+      {{ _('review.prompt_intro') }}
+      <strong data-review-pair></strong>?
+    </span>
+  </div>
+  <a class="review-prompt__cta" data-review-cta>{{ _('review.prompt_cta') }}</a>
+  <button class="review-prompt__close" type="button"
+          data-review-dismiss aria-label="{{ _('a11y.dismiss') }}">×</button>
+</div>
+<script defer src="{{ url_for('static', filename='js/review-prompt.js') }}?v={{ asset_version }}"></script>

@@ -2975,6 +2975,65 @@ select:focus-visible, textarea:focus-visible {
    toggles data-visible="true" once it confirms no `cookie_consent` cookie
    is set. `.install-banner` lives at z-index:90, so we sit above it to
    take precedence (consent must be resolved before install prompts). */
+/* Review-prompt banner — appears on subsequent visits after a Bookaway
+   click, asking the real customer to leave a review for the route they
+   bought. Sits at the bottom-right on desktop, full-width above the
+   cookie/install banners on mobile. z-index 95 = above install (90),
+   below cookie (100) so consent stays priority. */
+.review-prompt {
+  position: fixed;
+  z-index: 95;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .14);
+  max-width: 460px;
+  font-size: var(--text-sm);
+  transition: opacity .25s ease, transform .25s ease;
+  bottom: 16px;
+  right: 16px;
+}
+.review-prompt--hidden { opacity: 0; transform: translateY(8px); pointer-events: none; }
+.review-prompt__body { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+.review-prompt__icon { color: #f59e0b; flex-shrink: 0; }
+.review-prompt__text { line-height: 1.4; }
+.review-prompt__cta {
+  background: var(--color-primary-dark);
+  color: #fff;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.review-prompt__cta:hover { background: var(--color-primary); }
+.review-prompt__close {
+  background: transparent;
+  border: 0;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  color: var(--color-text-muted);
+  font-size: 18px; line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.review-prompt__close:hover { background: var(--color-bg-alt); color: var(--color-text); }
+@media (max-width: 640px) {
+  .review-prompt {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    max-width: none;
+    flex-wrap: wrap;
+  }
+  .review-prompt__body { flex-basis: 100%; }
+}
+
 .cookie-banner {
   position: fixed;
   left: 0;

@@ -12,6 +12,31 @@
   {'@type':'Question','name':_('home.faq_q3'),'acceptedAnswer':{'@type':'Answer','text':_('home.faq_a3')}}
 ] %}
 <script type="application/ld+json">{{ {'@context':'https://schema.org','@type':'FAQPage','mainEntity':_faq_entities}|tojson }}</script>
+{# SiteNavigationElement — surfaces top routes + city hubs as Google
+   sitelinks. No UGC, just real on-site navigation. #}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SiteNavigationElement",
+  "name": [
+    "Sve rute", "Gradski prevoz", "Top destinacije",
+    "Beograd → Novi Sad", "Beograd → Niš",
+    "Gradski prevoz Beograd", "Gradski prevoz Novi Sad",
+    "Crna Gora", "Bosna i Hercegovina"
+  ],
+  "url": [
+    "{{ config.BASE_URL }}/rute/",
+    "{{ config.BASE_URL }}/gradski/beograd/",
+    "{{ config.BASE_URL }}/destinacije/",
+    "{{ config.BASE_URL }}/rute/beograd-novi-sad/",
+    "{{ config.BASE_URL }}/rute/beograd-nis/",
+    "{{ config.BASE_URL }}/gradski/beograd/",
+    "{{ config.BASE_URL }}/gradski/novi-sad/",
+    "{{ config.BASE_URL }}/destinacije/crna-gora/",
+    "{{ config.BASE_URL }}/destinacije/bosna/"
+  ]
+}
+</script>
 {% endblock %}
 
 {% block main_class %}home-page{% endblock %}

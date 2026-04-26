@@ -168,6 +168,8 @@ window.addEventListener('load', function(){
 
 {% include '_partials/_mobile_anchor_ad.html' %}
 
+{% include '_partials/_review_prompt.html' %}
+
 {% block scripts %}{% endblock %}
 
 <script defer src="{{ url_for('static', filename='js/install-promo.js') }}?v={{ asset_version }}"></script>
@@ -384,6 +386,22 @@ if ('serviceWorker' in navigator) {
     };
     u('ba_click', payload);
     logBaClick(payload);
+    /* Review-prompt seed — drop a 7-day cookie naming the route the user
+       just bought a ticket for. On their next visit (any page), a sticky
+       banner asks "How was Beograd → Budva? Leave a review". Pure first-
+       party signal, no fake reviews — we just nudge real customers to
+       come back and write one. */
+    if (payload.route_slug) {
+      try {
+        var prTrip = encodeURIComponent(JSON.stringify({
+          slug: payload.route_slug,
+          ts: Date.now(),
+        }));
+        document.cookie = 'pending_review_route=' + prTrip
+          + '; path=/; max-age=' + (60*60*24*7)
+          + '; samesite=lax';
+      } catch(e){}
+    }
     /* A/B Exp 1 + Exp 2: a buy-button click is a conversion for the CTA-copy
        and CTA-color experiments. We pass the variant the server rendered
        (read from data-attrs) so the conversion always lines up with the

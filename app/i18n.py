@@ -2948,6 +2948,26 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'By country',
         'ru': 'По странам',
     },
+    'review.prompt_aria': {
+        'sr': 'Poziv da ostavite recenziju',
+        'en': 'Review request',
+        'ru': 'Запрос отзыва',
+    },
+    'review.prompt_intro': {
+        'sr': 'Kako je prošlo putovanje',
+        'en': 'How was your trip',
+        'ru': 'Как прошла поездка',
+    },
+    'review.prompt_cta': {
+        'sr': 'Ostavi recenziju',
+        'en': 'Leave a review',
+        'ru': 'Оставить отзыв',
+    },
+    'a11y.dismiss': {
+        'sr': 'Zatvori',
+        'en': 'Dismiss',
+        'ru': 'Закрыть',
+    },
     'dest.faq_q1': {
         'sr': 'Koliko traje putovanje autobusom od Beograda do Budve?',
         'en': 'How long is the bus ride from Belgrade to Budva?',
