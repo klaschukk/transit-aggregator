@@ -6,6 +6,18 @@ from app.slug import normalize_slug
 
 intercity_bp = Blueprint('intercity', __name__)
 
+# Routes Google still has in its index from a prior DB state — none of
+# these slugs ever resolve and never will (the cities don't have a
+# scheduled bus pair in our sources). Returning 410 Gone instead of
+# 404 cuts removal time roughly in half: Google retries 404s for
+# months, but treats 410 as a hard signal to drop the URL.
+_LEGACY_GONE_INTERCITY = frozenset({
+    'budva-kragujevac', 'budva-novi-pazar', 'cacak-budva',
+    'cacak-herceg-novi', 'kotor-novi-pazar', 'podgorica-cacak',
+    'podgorica-krusevac', 'sarajevo-cacak', 'sarajevo-novi-pazar',
+    'split-beograd', 'uzice-herceg-novi',
+})
+
 
 @intercity_bp.route('/rute/')
 def route_index():
@@ -54,6 +66,9 @@ def route_detail(slug: str):
                 return redirect(url_for('intercity.route_detail', slug=norm), code=301)
         # Non-ASCII legacy URLs → 410 Gone (faster Google removal than 404).
         if not slug.isascii():
+            abort(410)
+        # Known-dead slugs Google has memorised from a prior sitemap.
+        if slug in _LEGACY_GONE_INTERCITY:
             abort(410)
         abort(404)
 
