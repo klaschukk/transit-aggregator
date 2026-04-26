@@ -34,6 +34,27 @@ def city_index():
 _SUPPORTED_CITIES = ('beograd', 'novi-sad', 'nis', 'kragujevac')
 
 
+def _line_geometries_available() -> bool:
+    """Memoise whether line_geometries exists. Set on first call per
+    process; cleared by gunicorn worker recycle. The DuckDB system
+    catalog query is cheap and one round-trip beats catching an
+    exception on every line_detail render."""
+    cache_key = '_line_geom_seen'
+    seen = getattr(_line_geometries_available, cache_key, None)
+    if seen is not None:
+        return seen
+    try:
+        row = query_one(
+            "SELECT 1 FROM information_schema.tables "
+            "WHERE table_name = 'line_geometries' LIMIT 1"
+        ) if db_ready() else None
+        seen = bool(row)
+    except Exception:
+        seen = False
+    setattr(_line_geometries_available, cache_key, seen)
+    return seen
+
+
 @city_bp.route('/gradski/<city>/')
 def city_hub(city: str):
     if city not in _SUPPORTED_CITIES:
@@ -177,17 +198,19 @@ def line_detail(city: str, line_slug: str):
 
     # Road-following polyline geometry (OSM route relation) — optional,
     # falls back to straight-line-between-stops if missing. Populated by
-    # data/pipelines/scrape_route_geometries.py.
+    # data/pipelines/scrape_route_geometries.py. The pipeline is opt-in
+    # and the table only exists once it has been run, so we probe once
+    # per process and skip the per-line query otherwise — avoids spamming
+    # `DuckDB query error: Table line_geometries does not exist` in error.log
+    # 600+ times on every nightly DB rebuild.
     geometry = None
-    try:
+    if _line_geometries_available():
         geom_row = cached_query_one(
             "SELECT coords_json FROM line_geometries WHERE line_id = ?",
             [line['id']], ttl=86400,
         )
         if geom_row and geom_row.get('coords_json'):
             geometry = geom_row['coords_json']
-    except Exception:
-        geometry = None
 
     # Related lines of the same type in the same city (up to 8, excluding this line)
     related_lines = cached_query("""
