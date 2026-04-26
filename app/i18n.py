@@ -29,6 +29,36 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Menu',
         'ru': 'Меню',
     },
+    'nav.home': {
+        'sr': 'Početna',
+        'en': 'Home',
+        'ru': 'Главная',
+    },
+    'nav.routes': {
+        'sr': 'Rute',
+        'en': 'Routes',
+        'ru': 'Маршруты',
+    },
+    'nav.city': {
+        'sr': 'Gradski',
+        'en': 'City',
+        'ru': 'Город',
+    },
+    'nav.saved': {
+        'sr': 'Sačuvano',
+        'en': 'Saved',
+        'ru': 'Избранное',
+    },
+    'nav.more': {
+        'sr': 'Više',
+        'en': 'More',
+        'ru': 'Ещё',
+    },
+    'a11y.bottom_nav': {
+        'sr': 'Glavna mobilna navigacija',
+        'en': 'Primary mobile navigation',
+        'ru': 'Основная мобильная навигация',
+    },
 
     # ── Footer ──
     'footer.desc': {
@@ -1311,6 +1341,66 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Prevoznici za {country}',
         'en': 'Carriers to {country}',
         'ru': 'Перевозчики в {country}',
+    },
+    'country.subtitle': {
+        'sr': 'Međugradske autobuske rute, cene i raspored',
+        'en': 'Intercity bus routes, prices and schedules',
+        'ru': 'Междугородние автобусные маршруты, цены и расписание',
+    },
+    'country.stat_avg_distance': {
+        'sr': 'prosečna razdaljina',
+        'en': 'average distance',
+        'ru': 'средняя дистанция',
+    },
+    'country.stat_avg_price': {
+        'sr': 'prosečna cena',
+        'en': 'average price',
+        'ru': 'средняя цена',
+    },
+    'country.prose_travel_time': {
+        'sr': 'Prosečna razdaljina rute do države {country} iznosi oko {km} km, što odgovara putovanju od približno {hours} sati standardnim autobusom.',
+        'en': 'The average route distance to {country} is around {km} km, roughly {hours} hours by standard bus.',
+        'ru': 'Средняя дистанция маршрута до страны {country} — около {km} км, что соответствует поездке примерно за {hours} часов на стандартном автобусе.',
+    },
+    'country.prose_avg_price': {
+        'sr': 'Prosečna najpovoljnija cena karte za pravac {country} kreće se oko {price} dinara.',
+        'en': 'The average lowest ticket price for {country} is around {price} RSD.',
+        'ru': 'Средняя минимальная цена билета в направлении {country} — около {price} динаров.',
+    },
+    'country.prose_buy': {
+        'sr': 'Sve cene su informativne i ažurirane prema podacima naših partnera. Karte za rute do države {country} kupuju se kod naših booking partnera; mi ne naplaćujemo dodatne provizije.',
+        'en': 'All prices are indicative and updated from partner data. Tickets to {country} are purchased through our booking partners; we charge no extra fees.',
+        'ru': 'Все цены ориентировочны и обновляются по данным наших партнёров. Билеты в страну {country} покупаются у наших партнёров; мы не берём дополнительной комиссии.',
+    },
+    'country.filter_popular': {
+        'sr': 'Najpopularnije',
+        'en': 'Most popular',
+        'ru': 'Самые популярные',
+    },
+    'country.filter_cheap': {
+        'sr': 'Najjeftinije',
+        'en': 'Cheapest',
+        'ru': 'Самые дешёвые',
+    },
+    'country.filter_short': {
+        'sr': 'Najkraće',
+        'en': 'Shortest',
+        'ru': 'Самые короткие',
+    },
+    'country.sample_schedule': {
+        'sr': 'Primeri polazaka',
+        'en': 'Sample departures',
+        'ru': 'Примеры рейсов',
+    },
+    'country.reviews_heading': {
+        'sr': 'Recenzije putnika za rute do države {country}',
+        'en': 'Traveller reviews for routes to {country}',
+        'ru': 'Отзывы пассажиров о маршрутах в страну {country}',
+    },
+    'country.from_belgrade_h': {
+        'sr': 'Iz Beograda',
+        'en': 'From Belgrade',
+        'ru': 'Из Белграда',
     },
 
     'operator.cities_p': {

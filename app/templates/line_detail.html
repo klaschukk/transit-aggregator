@@ -9,6 +9,19 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"ItemList","name":"Linija {{ line.number }}: {{ line.name }}","description":"Red vožnje linije {{ line.number }} u {{ city_label }}u","numberOfItems":{{ stops|length if stops else 0 }},"itemListElement":[{% for s in stops[:20] %}{"@type":"ListItem","position":{{ loop.index }},"item":{"@type":"BusStop","name":"{{ s.name }}"{% if s.lat and s.lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ s.lat }},"longitude":{{ s.lon }}}{% endif %}}}{% if not loop.last %},{% endif %}{% endfor %}]}
 </script>
+{# BusTrip with itinerary endpoints — gives Google a single trip entity
+   the line page can map to in SERP rich results, complementing the
+   ItemList of stops above. #}
+{% if stops %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BusTrip","name":"{{ _('city.line') }} {{ line.number }} — {{ city_label }}","description":"{{ line.name }}","provider":{"@type":"Organization","name":"GSP {{ city_label }}"},"departureBusStop":{"@type":"BusStop","name":"{{ stops[0].name }}"{% if stops[0].lat and stops[0].lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stops[0].lat }},"longitude":{{ stops[0].lon }}}{% endif %}},"arrivalBusStop":{"@type":"BusStop","name":"{{ stops[-1].name }}"{% if stops[-1].lat and stops[-1].lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stops[-1].lat }},"longitude":{{ stops[-1].lon }}}{% endif %}}{% if first_dep %},"departureTime":"{{ first_dep }}"{% endif %}{% if last_dep %},"arrivalTime":"{{ last_dep }}"{% endif %}{% if reviews_agg and reviews_agg.n %},"aggregateRating":{"@type":"AggregateRating","ratingValue":{{ reviews_agg.avg }},"reviewCount":{{ reviews_agg.n }},"bestRating":5,"worstRating":1}{% endif %}}
+</script>
+{# Service + Provider — surfaces the city operator (GSP / JGSP / JGP)
+   so SERP can show the operator badge alongside the line schedule. #}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Service","serviceType":"Public bus transportation","name":"{{ _('city.line') }} {{ line.number }} {{ city_label }}","areaServed":{"@type":"City","name":"{{ city_label }}"},"provider":{"@type":"Organization","name":"GSP {{ city_label }}"}}
+</script>
+{% endif %}
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"{{ _('line_detail.faq.q_stops').format(number=line.number) }}","acceptedAnswer":{"@type":"Answer","text":"{% if stops %}{{ _('line_detail.faq.a_stops').format(number=line.number, name=line.name, city=city_label, count=stops|length, first=stops[0].name, last=stops[-1].name) }}{% else %}{{ _('line_detail.faq.a_stops_no_endpoints').format(number=line.number, name=line.name, city=city_label, count=0) }}{% endif %}"}},{"@type":"Question","name":"{{ _('line_detail.faq.q_when').format(number=line.number) }}","acceptedAnswer":{"@type":"Answer","text":"{% if first_dep and last_dep %}{{ _('line_detail.faq.a_when_range').format(number=line.number, first=first_dep, last=last_dep) }}{% else %}{{ _('line_detail.faq.a_when_unknown').format(number=line.number) }}{% endif %}"}},{"@type":"Question","name":"{{ _('line_detail.faq.q_type').format(number=line.number) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('line_detail.faq.a_type').format(number=line.number, type=line_type_label|lower, city=city_label) }}"}}]}
 </script>
@@ -22,36 +35,75 @@
 {% from '_partials/_stats_strip.html' import stats_strip %}
 {% from '_partials/_empty_state.html' import empty_state %}
 
-<!-- Mobile back button -->
+<!-- Mobile back button — matches /rute/<slug>/ chrome -->
 <div class="mobile-back">
   <a href="{{ lang_prefix }}/gradski/{{ city }}/" class="mobile-back__btn">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>
-    <span>{{ _('city.all') }} {{ _('city.lines_count') }}</span>
+    <span>{{ _('line.back_to_city') }} — {{ city_label }}</span>
   </a>
 </div>
 
 {{ breadcrumb([
-  {'url': '/gradski/' ~ city ~ '/', 'label': _('city.title') ~ ' ' ~ city_label},
+  {'url': lang_prefix ~ '/gradski/' ~ city ~ '/', 'label': _('city.title') ~ ' ' ~ city_label},
   {'label': _('city.line') ~ ' ' ~ line.number}
 ]) }}
 
-<!-- Line header -->
-<div class="line-header">
-  <span class="line-badge line-badge--lg"{% if line.color %} style="background:{{ line.color }}"{% endif %}>
-    {{ line.number }}
-  </span>
-  <div class="line-header__info">
-    <h1 class="line-header__name">{{ line.name }}</h1>
-    <p class="line-header__meta">{{ line_type_label }} · {{ stops|length if stops else 0 }} stajališta · {{ city_label }}</p>
-  </div>
+<div class="page-title fade-in">
+  <h1>
+    <span class="line-badge line-badge--lg"{% if line.color %} style="background:{{ line.color }}"{% endif %}>{{ line.number }}</span>
+    {{ line.name }}
+    <button type="button" class="js-fav-btn fav-btn" aria-label="{{ _('fav.save_aria') }}"
+            data-path="/gradski/{{ city }}/linija/{{ line.slug }}/"
+            data-key="line-{{ city }}-{{ line.slug }}"
+            data-from="{{ _('city.line') }} {{ line.number }}" data-to="{{ city_label }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+    </button>
+    <button type="button" class="share-btn" data-share-current
+            data-share-title="{{ _('city.line') }} {{ line.number }} {{ city_label }} | Prevozni"
+            aria-label="{{ _('a11y.share') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true">
+        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+        <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/>
+      </svg>
+    </button>
+  </h1>
+  <p class="page-subtitle">{{ line_type_label }} — {{ city_label }}</p>
+  <a href="{{ lang_prefix }}/gradski/{{ city }}/" class="reverse-route">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>
+    {{ _('line.back_to_city') }} {{ city_label }}
+  </a>
 </div>
 
-<!-- Stats strip -->
+<!-- Stats strip — same vocabulary + icons as /rute/<slug>/ -->
 {{ stats_strip([
-  {'value': stops|length if stops else 0, 'label': 'stajališta', 'icon': 'stop'},
-  {'value': line_type_label, 'label': 'tip', 'icon': 'type'},
-] + ([{'value': first_dep ~ ' – ' ~ last_dep, 'label': 'polasci', 'icon': 'schedule'}] if first_dep and last_dep else [])
+  {'value': stops|length if stops else 0, 'label': _('line.stop_count_label'), 'icon': 'distance'},
+  {'value': line_type_label, 'label': _('line.type_label')},
+] + ([{'value': first_dep ~ ' – ' ~ last_dep, 'label': _('line.service_label'), 'icon': 'schedule'}] if first_dep and last_dep else [])
 ) }}
+
+<!-- Buy-ticket-style CTA card — two actions to satisfy the "I'm here
+     looking for a way to plan a trip" intent: jump to network search
+     or to the line route map further down. -->
+<div class="buy-ticket fade-in fade-in--d1">
+  <div class="buy-ticket__header">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    <span>{{ _('line.action_title') }}</span>
+  </div>
+  <div class="buy-ticket__links">
+    <a href="{{ lang_prefix }}/pretraga/?od={{ city_label|urlencode }}"
+       class="buy-ticket__btn"
+       style="background: var(--color-primary-dark);">
+      {{ _('line.action_search') }}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+    </a>
+    <a href="#lineMap" class="buy-ticket__btn"
+       style="background: var(--color-primary);">
+      {{ _('line.action_map') }}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    </a>
+  </div>
+  <p class="buy-ticket__note">{{ _('stop.action_note') }}</p>
+</div>
 
 <!-- Map -->
 <div class="city-map-wrap">
@@ -213,6 +265,19 @@
   </div>
 </div>
 {% endif %}
+
+<!-- Reviews section — same partial /rute/<slug>/ uses. Slug is
+     namespaced ("line-<city>-<slug>") so a Beograd L7 review and
+     a Niš L7 review don't aggregate into the same bucket. -->
+{% from '_partials/_reviews.html' import reviews_section with context %}
+{{ reviews_section(review_slug, reviews, reviews_agg) }}
+
+<!-- Newsletter form, source='line_detail' so analytics distinguishes
+     line-driven signups from footer / route_detail / stop_detail. -->
+<section class="route-price-alert fade-in fade-in--d3">
+  {% from '_partials/_newsletter_form.html' import newsletter_form with context %}
+  {{ newsletter_form(source='line_detail') }}
+</section>
 
 {% endblock %}
 

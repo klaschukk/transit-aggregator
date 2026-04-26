@@ -232,6 +232,19 @@ def line_detail(city: str, line_slug: str):
         interchange=interchange_stops,
     )
 
+    # Reviews — same pattern as stop_detail. Slug is "line-<city>-<slug>"
+    # so a Beograd L7 review and a Niš L7 review don't aggregate into the
+    # same bucket.
+    review_slug = f'line-{city}-{line_slug}'
+    reviews_data = []
+    reviews_aggregate = None
+    try:
+        from app import analytics_db
+        reviews_data = analytics_db.approved_reviews(review_slug)
+        reviews_aggregate = analytics_db.aggregate_rating(review_slug)
+    except Exception:
+        pass
+
     return render_template('line_detail.html', city=city, line=line, stops=stops,
                            schedule=schedule, has_gtfs=has_gtfs,
                            first_dep=first_dep, last_dep=last_dep,
@@ -239,7 +252,9 @@ def line_detail(city: str, line_slug: str):
                            geometry=geometry,
                            related_lines=related_lines,
                            interchange_stops=interchange_stops,
-                           prose=prose)
+                           prose=prose,
+                           review_slug=review_slug,
+                           reviews=reviews_data, reviews_agg=reviews_aggregate)
 
 
 @city_bp.route('/gradski/<city>/stajaliste/<stop_slug>/')
