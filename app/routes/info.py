@@ -676,31 +676,19 @@ def operator_detail(slug: str):
                 LIMIT 4
             """, list(top_origins[:3]) + [op['id']] + own_route_ids, ttl=3600)
 
-    # Reviews aggregated across this operator's routes — one row per
-    # review keyed by route_slug. Unique slugs are short (≤ ~150 even
-    # for the largest operator), so a single IN-list scan is fine.
-    from app import analytics_db
-    op_route_slugs = [r['slug'] for r in routes]
+    # Reviews — same namespacing as line/city. Slug is "op-<operator>"
+    # so a Lasta review and a Niš-Ekspres review don't aggregate into
+    # the same bucket. Wrapped in try/except so a locked analytics_db
+    # never breaks the page render.
+    review_slug = f'op-{op["slug"]}'
     op_reviews: list = []
-    op_reviews_agg = {'n': 0, 'avg': None}
-    if op_route_slugs:
-        ph = ','.join(['?'] * len(op_route_slugs))
-        op_reviews = analytics_db.query(
-            f"SELECT id, rating, comment, author_name, lang, ts, route_slug "
-            f"FROM reviews WHERE route_slug IN ({ph}) AND status = 'approved' "
-            f"ORDER BY ts DESC LIMIT 10",
-            op_route_slugs,
-        )
-        agg_row = analytics_db.query(
-            f"SELECT COUNT(*) AS n, AVG(rating) AS avg_rating "
-            f"FROM reviews WHERE route_slug IN ({ph}) AND status = 'approved'",
-            op_route_slugs,
-        )
-        if agg_row and agg_row[0]['n']:
-            op_reviews_agg = {
-                'n': int(agg_row[0]['n']),
-                'avg': round(float(agg_row[0]['avg_rating']), 1),
-            }
+    op_reviews_agg = None
+    try:
+        from app import analytics_db
+        op_reviews = analytics_db.approved_reviews(review_slug)
+        op_reviews_agg = analytics_db.aggregate_rating(review_slug)
+    except Exception:
+        pass
 
     return render_template(
         'operator_detail.html',
@@ -718,6 +706,7 @@ def operator_detail(slug: str):
         countries_served=countries_served,
         sample_trips=sample_trips,
         competitor_routes=competitor_routes,
+        review_slug=review_slug,
         reviews=op_reviews,
         reviews_agg=op_reviews_agg,
     )
