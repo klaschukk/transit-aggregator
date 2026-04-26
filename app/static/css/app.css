@@ -1334,6 +1334,11 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .seo-block__content { flex: 1; min-width: 0; }
 .seo-block h2 { font-size: var(--text-base); margin-bottom: 8px; }
 .seo-block p { font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.6; margin: 0; }
+/* Three-paragraph rules-based prose on /gradski/{city}/linija/{slug}/.
+   Adds vertical rhythm between the geography / schedule / transfers
+   paragraphs the line_prose builder emits — base .seo-block has margin:0
+   on <p>, which collapses three paragraphs into one wall of text. */
+.line-prose .seo-block__content p + p { margin-top: 10px; }
 /* Buy ticket affiliate block */
 .buy-ticket {
   margin: 24px 0; padding: 20px 24px; border-radius: 12px;

@@ -249,6 +249,46 @@ _TRANSFERS_CLOSE: dict[str, list[str]] = {
     ],
 }
 
+# Always-on closing facts on the transfers paragraph — anchors line type +
+# service profile. Pure description from `line.type` + stop coordinates;
+# zero fabrication. Bulks no-GTFS lines past the 120-word indexability
+# floor without inventing schedule data.
+_TRANSFERS_PROFILE: dict[str, list[str]] = {
+    'sr': [
+        ' Linija {line_number} u sistemu gradskog prevoza {city_gen} pripada kategoriji '
+        '{line_type_label}, sa ukupno {stop_count} stajališta na trasi i prosečnim razmakom '
+        'od oko {avg_gap_m} m između susednih stanica — to je {density_label} pokrivenost koridora.',
+        ' Trasa linije {line_number} ({line_type_label}) ima {stop_count} stajališta na '
+        'pravcu od {terminal_a} do {terminal_b}; razmak između stajališta u proseku je '
+        '{avg_gap_m} m, što odgovara {density_label} koridoru u {city_loc}.',
+        ' Sa {stop_count} stajališta i prosečnim razmakom od {avg_gap_m} m, linija {line_number} '
+        '({line_type_label}) pruža {density_label} pokrivenost dela {city_gen} između '
+        '{terminal_a} i {terminal_b}.',
+    ],
+    'en': [
+        ' Line {line_number} in the {city_label} transit network falls in the {line_type_label} '
+        'category, with {stop_count} stops along the route and an average spacing of around '
+        '{avg_gap_m} m between adjacent stations — a {density_label} corridor coverage.',
+        ' The route of line {line_number} ({line_type_label}) has {stop_count} stops on the '
+        'corridor from {terminal_a} to {terminal_b}; the average stop-to-stop spacing is '
+        '{avg_gap_m} m, characteristic of a {density_label} corridor in {city_label}.',
+        ' With {stop_count} stops and an average spacing of {avg_gap_m} m, line {line_number} '
+        '({line_type_label}) provides {density_label} coverage of the {city_label} area '
+        'between {terminal_a} and {terminal_b}.',
+    ],
+    'ru': [
+        ' Линия {line_number} в сети городского транспорта {city_gen} относится к категории '
+        '{line_type_label}, всего {stop_count} остановок на трассе и средний интервал около '
+        '{avg_gap_m} м между соседними станциями — это {density_label} покрытие коридора.',
+        ' Трасса линии {line_number} ({line_type_label}) включает {stop_count} остановок на '
+        'направлении от {terminal_a} до {terminal_b}; среднее расстояние между остановками '
+        '{avg_gap_m} м, что характерно для {density_label} коридора в {city_loc}.',
+        ' С {stop_count} остановками и средним интервалом {avg_gap_m} м линия {line_number} '
+        '({line_type_label}) обеспечивает {density_label} покрытие части {city_gen} между '
+        '{terminal_a} и {terminal_b}.',
+    ],
+}
+
 
 # ── Labels (mirroring stop_prose.py — keep cases consistent) ────────────
 
@@ -522,9 +562,12 @@ def build_prose(
     transfers = ''
     if slots['_has_transfers']:
         transfers = _pick(_TRANSFERS[lang], slug, 'transfers').format(**slots)
-    # Always append the closing CTA so even a transfer-less line has
-    # at least one "transfers" sentence with an internal link to the
-    # city hub.
+    # Always append a profile sentence (pure facts: type + stop count +
+    # spacing + density tier + terminals) and the closing CTA. The profile
+    # sentence is what pushes no-GTFS lines past the 120-word indexability
+    # floor without fabricating schedule data.
+    if slots['_has_density']:
+        transfers += _pick(_TRANSFERS_PROFILE[lang], slug, 'transfers_profile').format(**slots)
     transfers += _pick(_TRANSFERS_CLOSE[lang], slug, 'transfers_close').format(**slots)
 
     return {
