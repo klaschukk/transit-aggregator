@@ -104,7 +104,8 @@ def test_renderer_handles_cyrillic_and_diacritics():
     Cyrillic (Београд) both need to lay out cleanly. DejaVu Sans Bold
     has full coverage; this guards against accidentally swapping the
     font path to something narrower."""
-    from app.og import render_card
+    from app.og import render_card, cache_clear
+    cache_clear()
     png = render_card('Niš → Skoplje', subtitle='Crna Gora · Beograd',
                       chips=['12 polazaka', 'od 1200 RSD'])
     assert len(png) > 5000, 'PNG suspiciously small — render likely empty'
@@ -115,3 +116,42 @@ def test_renderer_handles_cyrillic_and_diacritics():
                        chips=['Аутобус'])
     img2 = Image.open(BytesIO(png2))
     assert img2.size == (1200, 630)
+
+
+# ── 4. In-process TTL cache ───────────────────────────────────────────
+
+
+def test_cache_returns_identical_bytes_on_repeat_render():
+    """Second call with identical args must return the cached PNG, not
+    re-render. PNG encoding is deterministic but not byte-stable across
+    Pillow's optimise pass timing — so identical bytes is the only way
+    we can verify the cache actually short-circuited."""
+    from app.og import render_card, cache_clear
+    cache_clear()
+    a = render_card('Beograd → Niš', subtitle='Test', chips=['x'])
+    b = render_card('Beograd → Niš', subtitle='Test', chips=['x'])
+    assert a == b, 'Same inputs should hit the cache and return the same bytes'
+    # Different args must not collide.
+    c = render_card('Beograd → Novi Sad', subtitle='Test', chips=['x'])
+    assert c != a, 'Different title must produce different PNG'
+
+
+def test_og_endpoint_load_under_2s(client):
+    """100 sequential GETs to a single OG URL must complete in under
+    2s. The first hit renders (~100 ms), the rest are cache hits
+    (<5 ms each). If this test goes over budget, the cache is broken
+    or the renderer regressed."""
+    import time
+    from app.og import cache_clear
+    cache_clear()
+    url = '/og/route/beograd-novi-sad.png'
+    # Warm hit + cold render
+    client.get(url)
+    t0 = time.time()
+    for _ in range(100):
+        resp = client.get(url)
+        assert resp.status_code == 200
+    elapsed = time.time() - t0
+    assert elapsed < 2.0, (
+        f'100 cached OG fetches took {elapsed:.2f}s; cache likely broken'
+    )

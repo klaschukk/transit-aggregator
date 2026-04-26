@@ -28,8 +28,10 @@ route handles that. Never raise from this module's public functions.
 """
 from __future__ import annotations
 
+import time
 from io import BytesIO
 from pathlib import Path
+from threading import Lock
 from typing import Optional
 
 from PIL import Image, ImageDraw, ImageFont
@@ -135,10 +137,48 @@ def _wordmark(draw: ImageDraw.ImageDraw) -> None:
     draw.text((_PAD_X, _PAD_Y - 8), 'Prevozni', font=font, fill=_FG)
 
 
+# In-process TTL cache. Cloudflare + browser already cache the
+# response, but a CDN miss (different POP, purged edge) shouldn't pay
+# the 100 ms render cost twice for the same slug. Bounded at 256
+# entries so a slug-fuzzing attacker can't grow the dict unbounded;
+# LRU-ish eviction by recency-of-set.
+_CACHE_TTL = 3600  # 1 hour
+_CACHE_MAX = 256
+_cache: dict[tuple, tuple[float, bytes]] = {}
+_cache_lock = Lock()
+
+
+def _cache_get(key: tuple) -> Optional[bytes]:
+    with _cache_lock:
+        entry = _cache.get(key)
+        if not entry:
+            return None
+        ts, png = entry
+        if time.time() - ts > _CACHE_TTL:
+            _cache.pop(key, None)
+            return None
+        return png
+
+
+def _cache_set(key: tuple, png: bytes) -> None:
+    with _cache_lock:
+        if len(_cache) >= _CACHE_MAX:
+            # Evict the oldest entry (the one with the smallest ts).
+            oldest = min(_cache.items(), key=lambda kv: kv[1][0])[0]
+            _cache.pop(oldest, None)
+        _cache[key] = (time.time(), png)
+
+
 def render_card(title: str, subtitle: str = '',
                 chips: Optional[list[str]] = None) -> bytes:
     """Render a 1200×630 OG card to PNG bytes. Title is auto-fit;
-    subtitle and chips are optional."""
+    subtitle and chips are optional. Memoised by (title, subtitle,
+    chips) so a CDN miss doesn't re-render the same slug twice."""
+    key = (title, subtitle, tuple(chips or ()))
+    cached = _cache_get(key)
+    if cached is not None:
+        return cached
+
     img = _gradient_bg_fast()
     draw = ImageDraw.Draw(img, 'RGBA')
 
@@ -191,7 +231,15 @@ def render_card(title: str, subtitle: str = '',
 
     out = BytesIO()
     img.save(out, format='PNG', optimize=True)
-    return out.getvalue()
+    png = out.getvalue()
+    _cache_set(key, png)
+    return png
+
+
+def cache_clear() -> None:
+    """Test hook — flush the in-process cache between runs."""
+    with _cache_lock:
+        _cache.clear()
 
 
 def static_fallback_bytes() -> bytes:
