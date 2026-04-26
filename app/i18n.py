@@ -275,6 +275,21 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Find bus, train or city transport in one place',
         'ru': 'Найдите автобус, поезд или городской транспорт в одном месте',
     },
+    'home.hero_sub_descriptive': {
+        'sr': 'Pronađite autobus, voz ili gradski prevoz na jednom mestu',
+        'en': 'Find bus, train or city transport in one place',
+        'ru': 'Найдите автобус, поезд или городской транспорт в одном месте',
+    },
+    'home.hero_sub_feature_list': {
+        'sr': '335 ruta · 70 prevoznika · 4 grada · besplatno',
+        'en': '335 routes · 70 carriers · 4 cities · free',
+        'ru': '335 маршрутов · 70 перевозчиков · 4 города · бесплатно',
+    },
+    'home.hero_sub_price_compare': {
+        'sr': 'Uporedite cene Lasta, Niš-Ekspres i drugih — bez naknade',
+        'en': 'Compare Lasta, Niš-Ekspres and other carriers — no fee',
+        'ru': 'Сравните цены Lasta, Niš-Ekspres и других — без комиссии',
+    },
     'home.search_from': {
         'sr': 'Odakle?',
         'en': 'From?',
@@ -391,6 +406,26 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Reklama',
         'en': 'Advertisement',
         'ru': 'Реклама',
+    },
+    'house_ad.popular_route_title': {
+        'sr': 'Najtraženija ruta',
+        'en': 'Most popular route',
+        'ru': 'Самый популярный маршрут',
+    },
+    'house_ad.popular_route_sub': {
+        'sr': 'Pogledaj polaske i cene',
+        'en': 'See departures and prices',
+        'ru': 'Посмотреть рейсы и цены',
+    },
+    'house_ad.destinations_title': {
+        'sr': 'Top destinacije',
+        'en': 'Top destinations',
+        'ru': 'Топ направлений',
+    },
+    'house_ad.destinations_sub': {
+        'sr': 'Balkan i Evropa autobusom',
+        'en': 'Balkans & Europe by bus',
+        'ru': 'Балканы и Европа автобусом',
     },
     'common.now': {
         'sr': 'sada',
