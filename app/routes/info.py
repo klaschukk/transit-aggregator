@@ -190,15 +190,34 @@ _COUNTRY_HUBS: dict[str, dict] = {
     },
     'bosna': {
         'name': 'Bosna i Hercegovina',
-        'cities': ('Sarajevo', 'Banja Luka', 'Tuzla', 'Mostar', 'Trebinje'),
+        'cities': ('Sarajevo', 'Banja Luka', 'Tuzla', 'Mostar', 'Trebinje',
+                   'Zenica'),
     },
     'hrvatska': {
         'name': 'Hrvatska',
-        'cities': ('Zagreb', 'Split', 'Dubrovnik', 'Rijeka', 'Osijek', 'Vukovar'),
+        'cities': ('Zagreb', 'Split', 'Dubrovnik', 'Rijeka', 'Osijek',
+                   'Vukovar', 'Pula', 'Zadar'),
     },
     'makedonija': {
         'name': 'Severna Makedonija',
-        'cities': ('Skopje', 'Ohrid', 'Bitola', 'Kumanovo'),
+        'cities': ('Skopje', 'Skoplje', 'Ohrid', 'Bitola', 'Bitolj',
+                   'Kumanovo', 'Štip'),
+    },
+    'slovenija': {
+        'name': 'Slovenija',
+        'cities': ('Ljubljana', 'Maribor', 'Koper', 'Celje'),
+    },
+    'albanija': {
+        'name': 'Albanija',
+        'cities': ('Tirana', 'Drač', 'Drac', 'Skadar', 'Vlora'),
+    },
+    'grcka': {
+        'name': 'Grčka',
+        'cities': ('Thessaloniki', 'Solun', 'Atina', 'Athens', 'Patras'),
+    },
+    'bugarska': {
+        'name': 'Bugarska',
+        'cities': ('Sofia', 'Sofija', 'Plovdiv', 'Varna', 'Burgas'),
     },
 }
 
