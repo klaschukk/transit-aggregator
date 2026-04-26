@@ -2095,6 +2095,33 @@ main { animation: fadeInUp .25s ease both; }
   .country-hubs__grid { grid-template-columns: repeat(4, 1fr); }
 }
 
+/* Country cross-link card — surfaced on route_detail/city_pair pages
+   when the destination sits in a known country hub. Same teal palette
+   as .country-hub-card so the visual link reads as "this leaf belongs
+   to that hub". */
+.see-also--country { margin-top: 24px; }
+.country-card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+  border: 1px solid #99f6e4;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--color-primary-dark);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  min-height: 56px;
+}
+.country-card__icon { flex-shrink: 0; color: var(--color-primary); }
+.country-card__body { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.country-card__title { font-size: var(--text-sm); font-weight: 700; }
+.country-card__hint { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 400; }
+.country-card__arrow { flex-shrink: 0; opacity: .7; }
+.country-card:hover {
+  transform: translateX(2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+}
+
 .see-also__grid {
   display: grid;
   grid-template-columns: 1fr;

@@ -206,6 +206,22 @@
 {% from '_partials/_ad_slot.html' import ad_slot with context %}
 {{ ad_slot('city_pair_bottom', format='leaderboard') }}
 
+{# Country hub cross-link — see route_detail.html for rationale. #}
+{% if destination_country %}
+<section class="see-also see-also--country">
+  <a href="{{ lang_prefix }}/destinacije/{{ destination_country.slug }}/" class="country-card">
+    <div class="country-card__icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    </div>
+    <div class="country-card__body">
+      <span class="country-card__title">{{ _('country.routes_heading') }} {{ destination_country.name }}</span>
+      <span class="country-card__hint">{{ _('see_also.country_hint') }}</span>
+    </div>
+    <svg class="country-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+  </a>
+</section>
+{% endif %}
+
 {% if related_pairs %}
 <section class="see-also">
   <h2 class="see-also__title">

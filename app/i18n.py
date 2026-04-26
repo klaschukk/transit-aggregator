@@ -744,6 +744,16 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'see_also.city_desc': {'sr': 'Linije, stajališta, mapa', 'en': 'Lines, stops, map', 'ru': 'Линии, остановки, карта'},
     'see_also.about': {'sr': 'O nama', 'en': 'About us', 'ru': 'О нас'},
     'see_also.about_desc': {'sr': 'Misija i izvori podataka', 'en': 'Mission and data sources', 'ru': 'Миссия и источники данных'},
+    'see_also.country_hint': {
+        'sr': 'Pogledajte sve rute do destinacija u ovoj zemlji',
+        'en': 'See all routes to destinations in this country',
+        'ru': 'Все маршруты до направлений в этой стране',
+    },
+    'see_also.country_network': {
+        'sr': 'Druge zemlje na Prevozni',
+        'en': 'Other countries on Prevozni',
+        'ru': 'Другие страны на Prevozni',
+    },
 
     # ── Route pages ──
     'route.schedule': {'sr': 'Red vožnje', 'en': 'Schedule', 'ru': 'Расписание'},
@@ -1233,6 +1243,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'day.day_after': {'sr': 'Prekosutra', 'en': 'Day after', 'ru': 'Послезавтра'},
 
     'route.similar': {'sr': 'Slične rute iz', 'en': 'Similar routes from', 'ru': 'Похожие маршруты из'},
+    'route.other_from': {'sr': 'Drugi pravci iz', 'en': 'Other routes from', 'ru': 'Другие направления из'},
     'route.about': {'sr': 'O ruti', 'en': 'About route', 'ru': 'О маршруте'},
 
     # ── Destinations page ──

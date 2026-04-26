@@ -75,11 +75,21 @@
   {{ empty_state(icon='bus', text=_('country.no_routes')) }}
 {% endif %}
 
-<!-- Other countries + internal links -->
+<!-- Other countries — link to every other hub so PageRank flows across
+     the full network, not just the four we hard-coded historically. -->
 <section class="see-also">
-  <h2 class="see-also__title">{{ _('see_also.title') }}</h2>
+  <h2 class="see-also__title">{{ _('see_also.country_network') }}</h2>
   <div class="see-also__list">
-    {% for slug, name in [('crna-gora','Crna Gora'), ('bosna','Bosna i Hercegovina'), ('hrvatska','Hrvatska'), ('makedonija','Severna Makedonija')] if slug != country_slug %}
+    {% for slug, name in [
+      ('crna-gora','Crna Gora'),
+      ('bosna','Bosna i Hercegovina'),
+      ('hrvatska','Hrvatska'),
+      ('makedonija','Severna Makedonija'),
+      ('slovenija','Slovenija'),
+      ('albanija','Albanija'),
+      ('grcka','Grčka'),
+      ('bugarska','Bugarska'),
+    ] if slug != country_slug %}
     <a href="{{ lang_prefix }}/destinacije/{{ slug }}/" class="see-also__link">{{ name }}</a>
     {% endfor %}
     <a href="{{ lang_prefix }}/rute/" class="see-also__link">{{ _('see_also.all_routes') }}</a>

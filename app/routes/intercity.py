@@ -92,14 +92,24 @@ def route_detail(slug: str):
     """, [route['to_city'], route['from_city']]) if db_ready() else None
     reverse_slug = reverse_route['slug'] if reverse_route else None
 
-    # Similar routes from the same origin city
+    # "Drugi pravci iz {origin}" — top siblings from the same origin,
+    # ordered by trip volume so the strongest internal-link recipients
+    # win. Skipped at render time when <2 siblings (PageRank dilution
+    # isn't worth a one-card section).
     similar_routes = cached_query("""
-        SELECT slug, from_city, to_city, distance_km
-        FROM routes
-        WHERE from_city = ? AND slug != ? AND type = 'intercity'
-        ORDER BY to_city
-        LIMIT 4
+        SELECT r.slug, r.from_city, r.to_city, r.distance_km,
+               COUNT(DISTINCT t.id) AS trip_count
+        FROM routes r
+        LEFT JOIN trips t ON t.route_id = r.id
+        WHERE r.from_city = ? AND r.slug != ? AND r.type = 'intercity'
+        GROUP BY r.slug, r.from_city, r.to_city, r.distance_km
+        HAVING trip_count > 0
+        ORDER BY trip_count DESC, r.to_city
+        LIMIT 5
     """, [route['from_city'], slug], ttl=3600)
+
+    from app.routes.info import country_hub_for_city
+    destination_country = country_hub_for_city(route['to_city'])
 
     from app import analytics_db
     reviews_list = analytics_db.approved_reviews(slug)
@@ -108,6 +118,7 @@ def route_detail(slug: str):
     return render_template('route_detail.html', route=route, trips=trips,
                            days=days, selected_day=selected_day,
                            similar_routes=similar_routes,
+                           destination_country=destination_country,
                            operators_on_route=operators_on_route,
                            price_min=price_min, price_max=price_max,
                            reverse_slug=reverse_slug,
@@ -213,10 +224,14 @@ def city_pair(from_city: str, to_city: str):
     reviews_list = analytics_db.approved_reviews(canonical_slug)
     reviews_agg = analytics_db.aggregate_rating(canonical_slug)
 
+    from app.routes.info import country_hub_for_city
+    destination_country = country_hub_for_city(route['to_city']) if route else None
+
     return render_template('city_pair.html',
                            route=route, trips=trips, route_info=route_info,
                            related_pairs=related_pairs,
                            onward_pairs=onward_pairs,
+                           destination_country=destination_country,
                            from_city=from_city.replace('-', ' ').title(),
                            to_city=to_city.replace('-', ' ').title(),
                            reviews=reviews_list, reviews_agg=reviews_agg,

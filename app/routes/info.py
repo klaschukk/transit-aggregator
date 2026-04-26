@@ -222,6 +222,30 @@ _COUNTRY_HUBS: dict[str, dict] = {
 }
 
 
+# Reverse index: city name → country slug. Built once at import time so
+# route/city_pair views can ask "does this destination sit in a country
+# hub?" in O(1) without rescanning _COUNTRY_HUBS on every request.
+_CITY_TO_COUNTRY: dict[str, str] = {
+    city: slug
+    for slug, info in _COUNTRY_HUBS.items()
+    for city in info['cities']
+}
+
+
+def country_hub_for_city(city_name: str) -> dict | None:
+    """Return {'slug', 'name'} of the country hub containing this city, or None.
+
+    Used by route_detail/city_pair to surface a "Sve rute za {Country}"
+    cross-link when the destination is a known international hub.
+    """
+    if not city_name:
+        return None
+    slug = _CITY_TO_COUNTRY.get(city_name)
+    if not slug:
+        return None
+    return {'slug': slug, 'name': _COUNTRY_HUBS[slug]['name']}
+
+
 @info_bp.route('/destinacije/<country>/')
 def country_hub(country: str):
     """Country-level catalog of intercity routes touching a target country.
