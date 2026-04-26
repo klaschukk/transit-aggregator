@@ -162,15 +162,6 @@
     });
   }
 
-  // Bottom-nav "More" tab opens the same off-canvas drawer the hamburger
-  // does — keeps a single source of truth for the overflow menu.
-  document.addEventListener('click', function (ev) {
-    var trigger = ev.target.closest('[data-action="open-nav"]');
-    if (!trigger) return;
-    ev.preventDefault();
-    if (body.classList.contains('m-nav-open')) closeNav(); else openNav();
-  });
-
 
   /* ── Header + FAB scroll behaviour ──────────────────────────────── */
   // One scroll listener drives:

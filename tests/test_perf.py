@@ -17,7 +17,7 @@ import pytest
 
 
 BUDGETS_GZIPPED = {
-    "/": 16200,                                # +200B for mobile bottom-nav HTML
+    "/": 16000,                                # +1KB for toast bundle + skeleton stub
     "/rute/": 70000,
     "/rute/beograd-novi-sad/": 21000,          # +1KB for share button + toast wiring
     "/voznja/beograd-do-budva/": 19000,        # same — share button + toast wiring
