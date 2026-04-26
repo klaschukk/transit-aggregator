@@ -291,11 +291,29 @@ def country_hub(country: str):
              if r['from_city'] in info['cities']
              and r['to_city'] in info['cities']]
 
+    # Operators serving this country — gives /prevoznici/{slug}/ pages
+    # an inbound from every country hub (8 hubs × ~6 ops = ~48 extra
+    # operator-page edges concentrated on carriers that actually run
+    # the international corridors).
+    top_country_operators = cached_query(f"""
+        SELECT o.slug, o.name, COUNT(DISTINCT r.id) AS route_count
+        FROM operators o
+        JOIN trips t ON t.operator_id = o.id
+        JOIN routes r ON r.id = t.route_id
+        WHERE r.type = 'intercity' AND t.price_rsd > 0
+          AND (r.from_city IN ({cities_placeholders})
+               OR r.to_city IN ({cities_placeholders}))
+        GROUP BY o.slug, o.name
+        ORDER BY route_count DESC
+        LIMIT 6
+    """, list(info['cities']) * 2, ttl=3600) if db_ready() else []
+
     return render_template(
         'country_hub.html',
         country_slug=country,
         country_name=info['name'],
         routes=routes,
+        top_country_operators=top_country_operators,
         cities=cities_in_country,
         total_routes=len(routes),
         total_trips=sum(r['trip_count'] for r in routes),

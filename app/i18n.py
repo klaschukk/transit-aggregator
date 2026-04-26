@@ -1213,6 +1213,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Cities in {country} covered: {cities}. Click a route to see departures, ticket prices and partner purchase links.',
         'ru': 'Города в {country}, охваченные сервисом: {cities}. Нажмите на маршрут чтобы увидеть отправления, цены билетов и покупку у партнёра.',
     },
+    'country.carriers_h': {
+        'sr': 'Prevoznici za {country}',
+        'en': 'Carriers to {country}',
+        'ru': 'Перевозчики в {country}',
+    },
 
     'operator.cities_p': {
         'sr': 'Najčešće tačke u mreži prevoznika {name}: {cities}. Kliknite na rutu da vidite konkretne polaske, cene i karte za kupovinu.',

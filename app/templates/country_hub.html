@@ -75,6 +75,25 @@
   {{ empty_state(icon='bus', text=_('country.no_routes')) }}
 {% endif %}
 
+{# Operators serving this corridor — country pages had 0 inbound
+   edges to /prevoznici/ before; this lifts top international carriers. #}
+{% if top_country_operators %}
+<section class="see-also">
+  <h2 class="see-also__title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></svg>
+    {{ _('country.carriers_h').format(country=country_name) }}
+  </h2>
+  <div class="see-also__list">
+    {% for op in top_country_operators %}
+    <a href="{{ lang_prefix }}/prevoznici/{{ op.slug }}/" class="see-also__link">
+      {{ op.name }}
+      <small>{{ op.route_count }} {{ _('routes.routes_label') }}</small>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
 <!-- Other countries — link to every other hub so PageRank flows across
      the full network, not just the four we hard-coded historically. -->
 <section class="see-also">
