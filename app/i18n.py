@@ -1731,6 +1731,76 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Прямой маршрут отсутствует в базе',
     },
 
+    # ── city_pair body prose (was hardcoded SR; now translated) ──
+    'city_pair.subtitle_daily': {
+        'sr': '{count} polazaka dnevno',
+        'en': '{count} departures per day',
+        'ru': '{count} отправлений в день',
+    },
+    'city_pair.subtitle_from_price': {
+        'sr': 'od', 'en': 'from', 'ru': 'от',
+    },
+    'city_pair.seo_h2': {
+        'sr': '{from_city} — {to_city}: prevoz',
+        'en': '{from_city} — {to_city}: travel',
+        'ru': '{from_city} — {to_city}: транспорт',
+    },
+    'city_pair.prose_distance': {
+        'sr': 'Rastojanje između {from_city} i {to_city} iznosi {km} km.',
+        'en': 'The distance between {from_city} and {to_city} is {km} km.',
+        'ru': 'Расстояние между {from_city} и {to_city} составляет {km} км.',
+    },
+    'city_pair.prose_duration_range': {
+        'sr': 'Putovanje traje od {h_min}h {m_min}min do {h_max}h {m_max}min u zavisnosti od prevoznika.',
+        'en': 'The journey takes {h_min}h {m_min}min to {h_max}h {m_max}min depending on the carrier.',
+        'ru': 'Поездка занимает от {h_min}ч {m_min}мин до {h_max}ч {m_max}мин в зависимости от перевозчика.',
+    },
+    'city_pair.prose_operators': {
+        'sr': 'Na ovoj ruti voze: {operators}.',
+        'en': 'Carriers on this route: {operators}.',
+        'ru': 'На этом маршруте работают перевозчики: {operators}.',
+    },
+    'city_pair.prose_price_range': {
+        'sr': 'Cene karata kreću se od {min} do {max} RSD ({eur_min}–{eur_max}€).',
+        'en': 'Ticket prices range from {min} to {max} RSD ({eur_min}–{eur_max}€).',
+        'ru': 'Цены на билеты — от {min} до {max} RSD ({eur_min}–{eur_max}€).',
+    },
+    'city_pair.prose_first_last': {
+        'sr': 'Prvi polazak je u {first}, a poslednji u {last}.',
+        'en': 'The first departure is at {first}, the last at {last}.',
+        'ru': 'Первое отправление в {first}, последнее в {last}.',
+    },
+    'city_pair.carriers_count': {
+        'sr': 'Na liniji {from_city} — {to_city} voze {n} prevoznika: {operators}.',
+        'en': 'There are {n} carriers on {from_city} — {to_city}: {operators}.',
+        'ru': 'На линии {from_city} — {to_city} работают {n} перевозчиков: {operators}.',
+    },
+    'city_pair.cheapest_op': {
+        'sr': 'Najjeftinije karte nudi {operator}.',
+        'en': 'The cheapest tickets are offered by {operator}.',
+        'ru': 'Самые дешёвые билеты предлагает {operator}.',
+    },
+    'city_pair.prices_range_buy': {
+        'sr': 'Karte od {min} RSD ({eur_min}€) do {max} RSD ({eur_max}€). Kupite na blagajni autobuske stanice ili online.',
+        'en': 'Tickets from {min} RSD ({eur_min}€) to {max} RSD ({eur_max}€). Buy at the bus station counter or online.',
+        'ru': 'Билеты от {min} RSD ({eur_min}€) до {max} RSD ({eur_max}€). Покупка в кассе автовокзала или онлайн.',
+    },
+    'city_pair.tip_first_last_short': {
+        'sr': 'Prvi polazak u {first}, poslednji u {last}.',
+        'en': 'First departure {first}, last {last}.',
+        'ru': 'Первое отправление {first}, последнее {last}.',
+    },
+    'city_pair.tip_duration': {
+        'sr': 'Putovanje traje {h_min}h {m_min}min{suffix}.',
+        'en': 'Journey takes {h_min}h {m_min}min{suffix}.',
+        'ru': 'Поездка занимает {h_min}ч {m_min}мин{suffix}.',
+    },
+    'city_pair.tip_duration_range_suffix': {
+        'sr': '–{h_max}h {m_max}min',
+        'en': '–{h_max}h {m_max}min',
+        'ru': '–{h_max}ч {m_max}мин',
+    },
+
     # ── route_detail.html ──
     'route_detail.title_suffix': {
         'sr': 'red vožnje',
@@ -3107,6 +3177,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
     'review.form_heading': {
         'sr': 'Ostavite vašu recenziju', 'en': 'Leave your review', 'ru': 'Оставить отзыв',
+    },
+    'review.cta_short': {
+        'sr': 'Ostavite recenziju',
+        'en': 'Write a review',
+        'ru': 'Оставить отзыв',
     },
     'review.rating_label': {
         'sr': 'Ocena (1–5)', 'en': 'Rating (1–5)', 'ru': 'Оценка (1–5)',

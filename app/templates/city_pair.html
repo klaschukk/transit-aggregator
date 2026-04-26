@@ -82,8 +82,8 @@
     </button>
   </h1>
   <p class="page-subtitle">
-    {% if route %}{{ route.trip_count|default(0) }} polazaka dnevno{% if route.distance_km %} · {{ route.distance_km }} km{% endif %}{% endif %}
-    {% if route and route.min_price_rsd %} · od
+    {% if route %}{{ _('city_pair.subtitle_daily').format(count=route.trip_count|default(0)) }}{% if route.distance_km %} · {{ route.distance_km }} km{% endif %}{% endif %}
+    {% if route and route.min_price_rsd %} · {{ _('city_pair.subtitle_from_price') }}
       <span class="ccy-rsd">{{ route.min_price_rsd }} RSD</span><span class="ccy-eur">{{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }} €</span>
     {% endif %}
   </p>
@@ -141,13 +141,13 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
   </div>
   <div class="seo-block__content" data-collapse="1">
-    <h2>{{ from_city }} — {{ to_city }}: prevoz</h2>
+    <h2>{{ _('city_pair.seo_h2').format(from_city=from_city, to_city=to_city) }}</h2>
     <p>
-      {% if route.distance_km %}Rastojanje između {{ from_city }} i {{ to_city }} iznosi {{ route.distance_km }} km. {% endif %}
-      {% if route_info.duration_min and route_info.duration_max %}Putovanje traje od {{ route_info.duration_min // 60 }}h {{ route_info.duration_min % 60 }}min do {{ route_info.duration_max // 60 }}h {{ route_info.duration_max % 60 }}min u zavisnosti od prevoznika. {% endif %}
-      {% if route_info.operators %}Na ovoj ruti voze: {{ route_info.operators|join(', ') }}. {% endif %}
-      {% if route_info.price_min and route_info.price_max %}Cene karata kreću se od {{ route_info.price_min }} do {{ route_info.price_max }} RSD ({{ (route_info.price_min / config.EUR_RSD_RATE)|round|int }}–{{ (route_info.price_max / config.EUR_RSD_RATE)|round|int }}€). {% endif %}
-      {% if route_info.first_departure and route_info.last_departure %}Prvi polazak je u {{ route_info.first_departure }}, a poslednji u {{ route_info.last_departure }}.{% endif %}
+      {% if route.distance_km %}{{ _('city_pair.prose_distance').format(from_city=from_city, to_city=to_city, km=route.distance_km) }} {% endif %}
+      {% if route_info.duration_min and route_info.duration_max %}{{ _('city_pair.prose_duration_range').format(h_min=route_info.duration_min // 60, m_min=route_info.duration_min % 60, h_max=route_info.duration_max // 60, m_max=route_info.duration_max % 60) }} {% endif %}
+      {% if route_info.operators %}{{ _('city_pair.prose_operators').format(operators=route_info.operators|join(', ')) }} {% endif %}
+      {% if route_info.price_min and route_info.price_max %}{{ _('city_pair.prose_price_range').format(min=route_info.price_min, max=route_info.price_max, eur_min=(route_info.price_min / config.EUR_RSD_RATE)|round|int, eur_max=(route_info.price_max / config.EUR_RSD_RATE)|round|int) }} {% endif %}
+      {% if route_info.first_departure and route_info.last_departure %}{{ _('city_pair.prose_first_last').format(first=route_info.first_departure, last=route_info.last_departure) }}{% endif %}
     </p>
   </div>
   <button type="button" class="seo-block__more" data-collapse-toggle
@@ -164,9 +164,8 @@
   <div class="info-card">
     <div class="info-card__heading">{{ _('city_pair.carriers_heading') }}</div>
     {% if route_info and route_info.operators %}
-    <p>Na liniji {{ from_city }} — {{ to_city }} voze {{ route_info.operators|length }} prevoznika:
-       {{ route_info.operators|join(', ') }}.
-       {% if route_info.cheapest_operator %}Najjeftinije karte nudi {{ route_info.cheapest_operator }}.{% endif %}</p>
+    <p>{{ _('city_pair.carriers_count').format(from_city=from_city, to_city=to_city, n=route_info.operators|length, operators=route_info.operators|join(', ')) }}
+       {% if route_info.cheapest_operator %} {{ _('city_pair.cheapest_op').format(operator=route_info.cheapest_operator) }}{% endif %}</p>
     {% else %}
     <p>{{ _('city_pair.carriers_hint') }}</p>
     {% endif %}
@@ -174,9 +173,7 @@
   <div class="info-card">
     <div class="info-card__heading">{{ _('city_pair.prices_heading') }}</div>
     {% if route_info and route_info.price_min %}
-    <p>Karte od {{ route_info.price_min }} RSD ({{ (route_info.price_min / config.EUR_RSD_RATE)|round|int }}€)
-       do {{ route_info.price_max }} RSD ({{ (route_info.price_max / config.EUR_RSD_RATE)|round|int }}€).
-       Kupite na blagajni autobuske stanice ili online.</p>
+    <p>{{ _('city_pair.prices_range_buy').format(min=route_info.price_min, max=route_info.price_max, eur_min=(route_info.price_min / config.EUR_RSD_RATE)|round|int, eur_max=(route_info.price_max / config.EUR_RSD_RATE)|round|int) }}</p>
     {% else %}
     <p>{{ _('city_pair.prices_hint') }}</p>
     {% endif %}
@@ -184,9 +181,9 @@
   <div class="info-card">
     <div class="info-card__heading">{{ _('city_pair.tips_heading') }}</div>
     <ul>
-      {% if route_info and route_info.first_departure %}<li>Prvi polazak u {{ route_info.first_departure }}, poslednji u {{ route_info.last_departure }}.</li>{% endif %}
+      {% if route_info and route_info.first_departure %}<li>{{ _('city_pair.tip_first_last_short').format(first=route_info.first_departure, last=route_info.last_departure) }}</li>{% endif %}
       <li>{{ _('city_pair.tip_buy_early') }}</li>
-      {% if route_info and route_info.duration_min %}<li>Putovanje traje {{ route_info.duration_min // 60 }}h {{ route_info.duration_min % 60 }}min{% if route_info.duration_max != route_info.duration_min %}–{{ route_info.duration_max // 60 }}h {{ route_info.duration_max % 60 }}min{% endif %}.</li>{% endif %}
+      {% if route_info and route_info.duration_min %}{% set _suffix = (_('city_pair.tip_duration_range_suffix').format(h_max=route_info.duration_max // 60, m_max=route_info.duration_max % 60)) if route_info.duration_max != route_info.duration_min else '' %}<li>{{ _('city_pair.tip_duration').format(h_min=route_info.duration_min // 60, m_min=route_info.duration_min % 60, suffix=_suffix) }}</li>{% endif %}
     </ul>
   </div>
 </div>
