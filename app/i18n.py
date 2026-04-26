@@ -29,6 +29,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Menu',
         'ru': 'Меню',
     },
+    'a11y.mobile_nav': {
+        'sr': 'Donja navigacija',
+        'en': 'Bottom navigation',
+        'ru': 'Нижняя навигация',
+    },
     'nav.home': {
         'sr': 'Početna',
         'en': 'Home',

@@ -171,6 +171,8 @@ window.addEventListener('load', function(){
 
 {% include '_partials/_review_prompt.html' %}
 
+{% include '_partials/_mobile_bottom_nav.html' %}
+
 {% block scripts %}{% endblock %}
 
 <script defer src="{{ url_for('static', filename='js/install-promo.js') }}?v={{ asset_version }}"></script>

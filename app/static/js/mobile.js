@@ -183,6 +183,15 @@
     document.querySelectorAll('.m-fab').forEach(function (fab) {
       fab.classList.toggle('m-fab--hidden', goingDown);
     });
+    // Bottom-nav auto-hide — same scroll-down/up pattern as the FAB.
+    // Always shown in the first 32px (top of page, near search form).
+    if (y < 32) {
+      body.removeAttribute('data-bnav-hidden');
+    } else if (goingDown) {
+      body.setAttribute('data-bnav-hidden', '');
+    } else if (y < lastScrollY) {
+      body.removeAttribute('data-bnav-hidden');
+    }
     var sticky = document.querySelector('[data-sticky-cta]');
     if (sticky && !sticky.dataset.dismissed) {
       // Show after user has scrolled past one trip (~600 px) and only

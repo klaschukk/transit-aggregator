@@ -876,4 +876,60 @@ body.m-nav-open .site-nav#siteNav {
   border-radius: var(--mradius-md);
 }
 
+/* ── Mobile bottom-nav v2 — slim ────────────────────────────────────── */
+/* 48px bar, 4 tabs, icon-only. v1 was 60px + labels + 5 tabs and ate the
+   fold; this version is half the height and stays out of the way.
+   `--m-bnav-h` reserves space at the bottom of every page so trailing
+   content doesn't hide under the bar. Auto-hide on scroll-down via JS
+   that flips body[data-bnav-hidden]. */
+:root { --m-bnav-h: calc(48px + env(safe-area-inset-bottom, 0px)); }
+
+.m-bnav {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 50;
+  display: flex;
+  height: var(--m-bnav-h);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: rgba(255, 255, 255, .94);
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
+  backdrop-filter: saturate(180%) blur(10px);
+  border-top: 1px solid var(--color-border);
+  transition: transform .22s var(--mease-out);
+  /* Slide off-screen when body[data-bnav-hidden] is set by mobile.js. */
+}
+body[data-bnav-hidden] .m-bnav { transform: translateY(120%); }
+.m-bnav__tab {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  transition: color .15s var(--mease-out);
+  min-height: 44px;  /* keep WCAG tap target even though bar is 48 */
+}
+.m-bnav__tab:active { color: var(--color-primary); }
+.m-bnav__tab--active { color: var(--color-primary); }
+.m-bnav__tab--active svg {
+  /* tiny visual emphasis — slightly thicker stroke on the active icon */
+  stroke-width: 2;
+}
+
+/* Reserve trailing space so site footer + cookie banner stay visible. */
+body { padding-bottom: var(--m-bnav-h); }
+
+/* Stack other fixed-bottom UI above the bnav so they don't overlap. */
+.cookie-banner { bottom: var(--m-bnav-h); }
+.m-sticky-cta { bottom: var(--m-bnav-h); padding-bottom: var(--mspace-3); }
+.review-prompt { bottom: calc(var(--m-bnav-h) + 8px); }
+
+/* When the off-canvas drawer is open, hide the bnav so it doesn't sit
+   over the drawer's tap targets. */
+.m-nav-open .m-bnav { transform: translateY(120%); }
+
 } /* end @media (max-width: 767px) */
