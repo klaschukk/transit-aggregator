@@ -262,6 +262,14 @@ body.m-sheet-locked { overflow: hidden; }
      ≥80px (mobile.js toggles `.is-scrolled` on the header). */
   transition: background .2s ease, box-shadow .2s ease, backdrop-filter .2s ease;
 }
+/* When the dropdown is open, lift the whole header above the backdrop.
+   The header is a stacking context (`position: sticky; z-index: 100`
+   from app.css) so the dropdown's `z-index: 220` is bounded by the
+   header's root-level z-index, NOT compared to the backdrop directly.
+   Without this, the backdrop (z-index 215, sibling of header in body)
+   visually covers the dropdown and intercepts every tap on a menu
+   item — closing the menu instead of navigating. */
+body.m-nav-open .site-header { z-index: 230; }
 .site-header.is-scrolled {
   background: rgba(255,255,255,0.78);
   backdrop-filter: blur(16px) saturate(180%);
