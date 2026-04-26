@@ -74,7 +74,8 @@ def route_detail(slug: str):
 
     trips = query("""
         SELECT t.departure_time, t.arrival_time, t.duration_min,
-               t.price_rsd, COALESCE(o.name, '') as operator
+               t.price_rsd, COALESCE(o.name, '') as operator,
+               COALESCE(o.slug, '') as operator_slug
         FROM trips t
         LEFT JOIN operators o ON o.id = t.operator_id
         WHERE t.route_id = (SELECT id FROM routes WHERE slug = ?)
@@ -95,6 +96,10 @@ def route_detail(slug: str):
 
     # Enrichment data from filtered trips
     operators_on_route = sorted(set(t['operator'] for t in trips if t.get('operator')))
+    # name → slug map for templated linking to /prevoznici/{slug}/
+    operator_slugs = {t['operator']: t['operator_slug']
+                      for t in trips
+                      if t.get('operator') and t.get('operator_slug')}
     prices = [t['price_rsd'] for t in trips if t.get('price_rsd')]
     price_min = min(prices) if prices else None
     price_max = max(prices) if prices else None
@@ -135,6 +140,7 @@ def route_detail(slug: str):
                            similar_routes=similar_routes,
                            destination_country=destination_country,
                            operators_on_route=operators_on_route,
+                           operator_slugs=operator_slugs,
                            price_min=price_min, price_max=price_max,
                            reverse_slug=reverse_slug,
                            reviews=reviews_list, reviews_agg=reviews_agg)
@@ -166,7 +172,7 @@ def city_pair(from_city: str, to_city: str):
     if route:
         trips = query("""
             SELECT t.departure_time, t.arrival_time, t.duration_min,
-                   t.price_rsd, o.name as operator
+                   t.price_rsd, o.name as operator, o.slug as operator_slug
             FROM trips t
             JOIN operators o ON o.id = t.operator_id
             WHERE t.route_id = ?
@@ -177,6 +183,12 @@ def city_pair(from_city: str, to_city: str):
     route_info: dict = {}
     if trips:
         operators_list = sorted(set(t['operator'] for t in trips if t.get('operator')))
+        # name → slug map for /prevoznici/{slug}/ links in the template
+        route_info['operator_slugs'] = {
+            t['operator']: t['operator_slug']
+            for t in trips
+            if t.get('operator') and t.get('operator_slug')
+        }
         prices = [t['price_rsd'] for t in trips if t.get('price_rsd')]
         # Clamp duration outliers: scraped trips occasionally have bogus duration_min
         # (parser quirks on midnight-crossing or malformed arrival_time). Floor at

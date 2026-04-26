@@ -1259,6 +1259,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     'route.similar': {'sr': 'Slične rute iz', 'en': 'Similar routes from', 'ru': 'Похожие маршруты из'},
     'route.other_from': {'sr': 'Drugi pravci iz', 'en': 'Other routes from', 'ru': 'Другие направления из'},
+    'route.carriers_on_route': {
+        'sr': 'Prevoznici na ovoj ruti',
+        'en': 'Carriers on this route',
+        'ru': 'Перевозчики на этом маршруте',
+    },
     'route.about': {'sr': 'O ruti', 'en': 'About route', 'ru': 'О маршруте'},
 
     # ── Destinations page ──

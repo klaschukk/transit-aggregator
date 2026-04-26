@@ -203,6 +203,22 @@
 {% from '_partials/_ad_slot.html' import ad_slot with context %}
 {{ ad_slot('city_pair_bottom', format='leaderboard') }}
 
+{# Carriers on this route — links to /prevoznici/{slug}/ pages.
+   Same source as route_detail; capped at 8. #}
+{% if route_info and route_info.operator_slugs %}
+<section class="see-also">
+  <h2 class="see-also__title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></svg>
+    {{ _('route.carriers_on_route') }}
+  </h2>
+  <div class="see-also__list">
+    {% for name, opslug in route_info.operator_slugs.items() %}{% if loop.index <= 8 %}
+    <a href="{{ lang_prefix }}/prevoznici/{{ opslug }}/" class="see-also__link">{{ name }}</a>
+    {% endif %}{% endfor %}
+  </div>
+</section>
+{% endif %}
+
 {# Country hub cross-link — see route_detail.html for rationale. #}
 {% if destination_country %}
 <section class="see-also see-also--country">

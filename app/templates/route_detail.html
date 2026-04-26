@@ -306,6 +306,24 @@
 </div>
 {% endif %}
 
+{# Carriers on this route — one of the load-bearing inbound link
+   sources for /prevoznici/{slug}/ pages, which scored 100% below the
+   5-inbound floor in the link audit. Capped at 8 to stay under the
+   per-page 12-link ceiling (most routes only have 1-3 anyway). #}
+{% if operator_slugs %}
+<section class="see-also">
+  <h2 class="see-also__title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></svg>
+    {{ _('route.carriers_on_route') }}
+  </h2>
+  <div class="see-also__list">
+    {% for name, opslug in operator_slugs.items() %}{% if loop.index <= 8 %}
+    <a href="{{ lang_prefix }}/prevoznici/{{ opslug }}/" class="see-also__link">{{ name }}</a>
+    {% endif %}{% endfor %}
+  </div>
+</section>
+{% endif %}
+
 {# Country hub cross-link — fires only when the destination is a member
    of one of the international hubs (Crna Gora, Bosna, Hrvatska, …).
    Surfaces a wide-net page Google can pick up as a category landing,
