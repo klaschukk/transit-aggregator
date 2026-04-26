@@ -430,7 +430,8 @@ def operator_detail(slug: str):
     routes = cached_query("""
         SELECT r.slug, r.from_city, r.to_city, r.distance_km,
                COUNT(DISTINCT t.id) AS trip_count,
-               MIN(t.price_rsd) AS min_price_rsd
+               MIN(t.price_rsd) AS min_price_rsd,
+               MAX(t.price_rsd) AS max_price_rsd
         FROM routes r
         JOIN trips t ON t.route_id = r.id
         WHERE t.operator_id = ? AND r.type = 'intercity' AND t.price_rsd > 0
@@ -440,6 +441,114 @@ def operator_detail(slug: str):
 
     cities = sorted({c for r in routes for c in (r['from_city'], r['to_city'])})
 
+    # Price + trip aggregates (factual prose inputs)
+    prices = [r['min_price_rsd'] for r in routes if r.get('min_price_rsd')]
+    max_prices = [r['max_price_rsd'] for r in routes if r.get('max_price_rsd')]
+    price_min = min(prices) if prices else None
+    price_max = max(max_prices) if max_prices else None
+    avg_price = round(sum(prices) / len(prices)) if prices else None
+
+    # Top departure cities (origin) and top destination cities — used in
+    # the prose macro to write factual sentences without hallucination.
+    from collections import Counter
+    origin_cnt: Counter = Counter()
+    dest_cnt: Counter = Counter()
+    for r in routes:
+        origin_cnt[r['from_city']] += r['trip_count'] or 0
+        dest_cnt[r['to_city']] += r['trip_count'] or 0
+    top_origins = [c for c, _ in origin_cnt.most_common(5)]
+    top_destinations = [c for c, _ in dest_cnt.most_common(5)]
+
+    # Countries served — derive from actual destination cities, not hard-coded.
+    countries_served = sorted({
+        _COUNTRY_HUBS[_CITY_TO_COUNTRY[c]]['name']
+        for c in (set(origin_cnt) | set(dest_cnt))
+        if c in _CITY_TO_COUNTRY
+    })
+
+    daily_trips_avg = (
+        round(sum(r['trip_count'] or 0 for r in routes) / 7) if routes else 0
+    )
+
+    # Sample top 3 trips with prices for the schedule preview block —
+    # one departure each from the operator's 3 most-popular routes.
+    sample_trips = []
+    if routes and db_ready():
+        from app.db import query as _q
+        top_3_route_ids_rows = cached_query("""
+            SELECT r.id FROM routes r
+            JOIN trips t ON t.route_id = r.id
+            WHERE t.operator_id = ? AND r.type = 'intercity' AND t.price_rsd > 0
+            GROUP BY r.id, r.slug
+            ORDER BY COUNT(t.id) DESC LIMIT 3
+        """, [op['id']], ttl=3600)
+        for row in top_3_route_ids_rows:
+            t_row = cached_query_one("""
+                SELECT t.departure_time, t.arrival_time, t.duration_min,
+                       t.price_rsd, o.name AS operator,
+                       r.from_city, r.to_city, r.slug AS route_slug
+                FROM trips t
+                JOIN operators o ON o.id = t.operator_id
+                JOIN routes r ON r.id = t.route_id
+                WHERE t.route_id = ? AND t.operator_id = ? AND t.price_rsd > 0
+                ORDER BY t.departure_time
+                LIMIT 1
+            """, [row['id'], op['id']], ttl=3600)
+            if t_row:
+                sample_trips.append(t_row)
+
+    # Routes operated by competitors on the same corridors — 4 routes the
+    # operator does NOT run, picked from the top origins to keep them
+    # contextually relevant. Gives /prevoznici/{competitor}/ pages
+    # inbound from every operator detail page.
+    competitor_routes = []
+    if top_origins and db_ready():
+        own_route_ids = [r['slug'] for r in routes]
+        if own_route_ids:
+            placeholders = ', '.join(['?'] * len(own_route_ids))
+            origins_ph = ', '.join(['?'] * len(top_origins[:3]))
+            competitor_routes = cached_query(f"""
+                SELECT DISTINCT r.slug, r.from_city, r.to_city, r.distance_km,
+                       COUNT(DISTINCT t.id) AS trip_count,
+                       MIN(t.price_rsd) AS min_price_rsd
+                FROM routes r
+                JOIN trips t ON t.route_id = r.id
+                WHERE r.from_city IN ({origins_ph})
+                  AND r.type = 'intercity'
+                  AND t.price_rsd > 0
+                  AND t.operator_id != ?
+                  AND r.slug NOT IN ({placeholders})
+                GROUP BY r.slug, r.from_city, r.to_city, r.distance_km
+                ORDER BY trip_count DESC
+                LIMIT 4
+            """, list(top_origins[:3]) + [op['id']] + own_route_ids, ttl=3600)
+
+    # Reviews aggregated across this operator's routes — one row per
+    # review keyed by route_slug. Unique slugs are short (≤ ~150 even
+    # for the largest operator), so a single IN-list scan is fine.
+    from app import analytics_db
+    op_route_slugs = [r['slug'] for r in routes]
+    op_reviews: list = []
+    op_reviews_agg = {'n': 0, 'avg': None}
+    if op_route_slugs:
+        ph = ','.join(['?'] * len(op_route_slugs))
+        op_reviews = analytics_db.query(
+            f"SELECT id, rating, comment, author_name, lang, ts, route_slug "
+            f"FROM reviews WHERE route_slug IN ({ph}) AND status = 'approved' "
+            f"ORDER BY ts DESC LIMIT 10",
+            op_route_slugs,
+        )
+        agg_row = analytics_db.query(
+            f"SELECT COUNT(*) AS n, AVG(rating) AS avg_rating "
+            f"FROM reviews WHERE route_slug IN ({ph}) AND status = 'approved'",
+            op_route_slugs,
+        )
+        if agg_row and agg_row[0]['n']:
+            op_reviews_agg = {
+                'n': int(agg_row[0]['n']),
+                'avg': round(float(agg_row[0]['avg_rating']), 1),
+            }
+
     return render_template(
         'operator_detail.html',
         operator=op,
@@ -447,6 +556,17 @@ def operator_detail(slug: str):
         cities=cities,
         total_routes=len(routes),
         total_trips=sum(r['trip_count'] for r in routes),
+        daily_trips_avg=daily_trips_avg,
+        price_min=price_min,
+        price_max=price_max,
+        avg_price=avg_price,
+        top_origins=top_origins,
+        top_destinations=top_destinations,
+        countries_served=countries_served,
+        sample_trips=sample_trips,
+        competitor_routes=competitor_routes,
+        reviews=op_reviews,
+        reviews_agg=op_reviews_agg,
     )
 
 

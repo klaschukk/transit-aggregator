@@ -1,0 +1,49 @@
+{# Operator prose macro — 2–3 factual sentences built from DB facts.
+
+   Each sentence is gated on the data that supports it. If a fact is
+   missing for a given operator, the sentence is omitted (no fillers).
+
+   Args:
+     operator         — {name, type}
+     total_routes     — int
+     total_trips      — int
+     top_origins      — list[str], origin cities ordered by trip count
+     top_destinations — list[str], destination cities ordered by trip count
+     countries_served — list[str] (display names)
+     price_min        — int RSD, may be None
+     price_max        — int RSD, may be None
+     avg_price        — int RSD, may be None
+#}
+{% macro operator_prose(operator, total_routes, total_trips,
+                        top_origins, top_destinations,
+                        countries_served, price_min, price_max,
+                        avg_price) %}
+<p>
+  {%- if total_routes and top_origins -%}
+    {{ _('operator.prose_serves').format(
+        name=operator.name,
+        n=total_routes,
+        cities=top_origins[:3]|join(', ')
+    ) }}
+  {%- elif total_routes -%}
+    {{ _('operator.prose_serves_no_cities').format(
+        name=operator.name, n=total_routes
+    ) }}
+  {%- endif %}
+  {% if price_min and price_max and price_min != price_max -%}
+    {{ _('operator.prose_price_range').format(min=price_min, max=price_max) }}
+  {%- elif avg_price -%}
+    {{ _('operator.prose_price_avg').format(avg=avg_price) }}
+  {%- endif %}
+  {% if top_destinations -%}
+    {{ _('operator.prose_top_destinations').format(
+        cities=top_destinations[:5]|join(', ')
+    ) }}
+  {%- endif %}
+  {% if countries_served and countries_served|length >= 2 -%}
+    {{ _('operator.prose_countries').format(
+        countries=countries_served|join(', ')
+    ) }}
+  {%- endif %}
+</p>
+{% endmacro %}

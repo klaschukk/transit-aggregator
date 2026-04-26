@@ -850,6 +850,100 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'stop.title': {'sr': 'Stajalište', 'en': 'Stop', 'ru': 'Остановка'},
     'stop.on_map': {'sr': 'na mapi', 'en': 'on map', 'ru': 'на карте'},
     'stop.nearby': {'sr': 'Obližnja stajališta', 'en': 'Nearby stops', 'ru': 'Ближайшие остановки'},
+    # New strings introduced when porting route_detail chrome to stop_detail
+    # (parity audit 2026-04-26).
+    'stop.subtitle': {
+        'sr': 'Stajalište gradskog prevoza',
+        'en': 'Public transport stop',
+        'ru': 'Остановка городского транспорта',
+    },
+    'stop.back_to_city': {
+        'sr': 'Sve linije i stajališta',
+        'en': 'All lines and stops',
+        'ru': 'Все линии и остановки',
+    },
+    'stop.lines_count_label': {
+        'sr': 'linija', 'en': 'lines', 'ru': 'линий',
+    },
+    'stop.first_dep_label': {
+        'sr': 'prvi polazak', 'en': 'first departure', 'ru': 'первый рейс',
+    },
+    'stop.last_dep_label': {
+        'sr': 'poslednji polazak', 'en': 'last departure', 'ru': 'последний рейс',
+    },
+    'stop.coords_label': {
+        'sr': 'na mapi', 'en': 'on map', 'ru': 'на карте',
+    },
+    'stop.action_title': {
+        'sr': 'Planiraj putovanje',
+        'en': 'Plan your trip',
+        'ru': 'Спланировать поездку',
+    },
+    'stop.action_search': {
+        'sr': 'Pretraži polaske odavde',
+        'en': 'Search departures from here',
+        'ru': 'Найти рейсы отсюда',
+    },
+    'stop.action_maps': {
+        'sr': 'Otvori u mapama',
+        'en': 'Open in maps',
+        'ru': 'Открыть на карте',
+    },
+    'stop.action_note': {
+        'sr': 'ETA se računa na osnovu zvaničnog GTFS reda vožnje.',
+        'en': 'ETA is computed from the official GTFS schedule.',
+        'ru': 'ETA рассчитывается по официальному расписанию GTFS.',
+    },
+    'stop.lines_via': {
+        'sr': 'Linije kroz ovo stajalište',
+        'en': 'Lines via this stop',
+        'ru': 'Линии через эту остановку',
+    },
+
+    # ── Line detail (parity-port) ──
+    'line.subtitle': {
+        'sr': 'Linija gradskog prevoza',
+        'en': 'Public transport line',
+        'ru': 'Линия городского транспорта',
+    },
+    'line.back_to_city': {
+        'sr': 'Sve linije',
+        'en': 'All lines',
+        'ru': 'Все линии',
+    },
+    'line.action_title': {
+        'sr': 'Saznaj kada krećeš',
+        'en': 'Find your departure',
+        'ru': 'Найди свой рейс',
+    },
+    'line.action_search': {
+        'sr': 'Pretraži kroz mrežu linija',
+        'en': 'Search the line network',
+        'ru': 'Поиск по сети линий',
+    },
+    'line.action_map': {
+        'sr': 'Pogledaj trasu na mapi',
+        'en': 'See route on map',
+        'ru': 'Посмотреть маршрут на карте',
+    },
+    'line.stop_count_label': {
+        'sr': 'stajališta', 'en': 'stops', 'ru': 'остановок',
+    },
+    'line.type_label': {
+        'sr': 'tip', 'en': 'type', 'ru': 'тип',
+    },
+    'line.service_label': {
+        'sr': 'polasci', 'en': 'service', 'ru': 'рейсы',
+    },
+    'line.filter_all': {
+        'sr': 'Svi polasci', 'en': 'All departures', 'ru': 'Все рейсы',
+    },
+    'line.filter_workday': {
+        'sr': 'Radni dan', 'en': 'Workday', 'ru': 'Будни',
+    },
+    'line.filter_weekend': {
+        'sr': 'Vikend', 'en': 'Weekend', 'ru': 'Выходные',
+    },
 
     # ── City index ──
     'city_index.title': {
@@ -1223,6 +1317,56 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Najčešće tačke u mreži prevoznika {name}: {cities}. Kliknite na rutu da vidite konkretne polaske, cene i karte za kupovinu.',
         'en': 'Most frequent endpoints in {name}\'s network: {cities}. Click a route to see departures, prices and ticket purchase links.',
         'ru': 'Наиболее частые точки в сети {name}: {cities}. Нажмите на маршрут чтобы увидеть конкретные отправления, цены и ссылки на покупку.',
+    },
+    'operator.prose_serves': {
+        'sr': '{name} servisira {n} međugradskih ruta sa polascima iz gradova {cities}.',
+        'en': '{name} runs {n} intercity routes with departures from {cities}.',
+        'ru': '{name} обслуживает {n} междугородних маршрутов с отправлениями из городов {cities}.',
+    },
+    'operator.prose_serves_no_cities': {
+        'sr': '{name} servisira {n} međugradskih ruta.',
+        'en': '{name} runs {n} intercity routes.',
+        'ru': '{name} обслуживает {n} междугородних маршрутов.',
+    },
+    'operator.prose_price_range': {
+        'sr': 'Cene karata kreću se od {min} do {max} dinara, u zavisnosti od relacije i datuma polaska.',
+        'en': 'Ticket prices range from {min} to {max} RSD depending on the route and travel date.',
+        'ru': 'Цены билетов варьируются от {min} до {max} динаров в зависимости от маршрута и даты выезда.',
+    },
+    'operator.prose_price_avg': {
+        'sr': 'Prosečna cena karte iznosi oko {avg} dinara po polasku.',
+        'en': 'The average ticket price is around {avg} RSD per departure.',
+        'ru': 'Средняя цена билета — около {avg} динаров за поездку.',
+    },
+    'operator.prose_top_destinations': {
+        'sr': 'Najčešća odredišta: {cities}.',
+        'en': 'Most frequent destinations: {cities}.',
+        'ru': 'Самые частые направления: {cities}.',
+    },
+    'operator.prose_countries': {
+        'sr': 'Prevoznik takođe povezuje Srbiju sa državama: {countries}.',
+        'en': 'The carrier also connects Serbia with: {countries}.',
+        'ru': 'Перевозчик также связывает Сербию со странами: {countries}.',
+    },
+    'operator.prose_buy': {
+        'sr': 'Na Prevozni.com možete porediti cene i raspored polazaka prevoznika {name} pre kupovine. Karte se kupuju kod naših partnera; mi ne naplaćujemo dodatne provizije i ne prodajemo karte direktno.',
+        'en': 'On Prevozni.com you can compare {name} prices and timetables before buying. Tickets are purchased through our partners — we charge no extra fees and do not sell tickets directly.',
+        'ru': 'На Prevozni.com можно сравнить цены и расписание перевозчика {name} перед покупкой. Билеты приобретаются у наших партнёров — мы не берём дополнительных комиссий и не продаём билеты напрямую.',
+    },
+    'operator.sample_schedule': {
+        'sr': 'Primeri polazaka',
+        'en': 'Sample departures',
+        'ru': 'Примеры рейсов',
+    },
+    'operator.competitors_h': {
+        'sr': 'Iste pravce kod drugih prevoznika',
+        'en': 'Same corridors with other carriers',
+        'ru': 'Те же направления у других перевозчиков',
+    },
+    'operator.reviews_heading': {
+        'sr': 'Recenzije putnika za prevoznika {name}',
+        'en': 'Traveller reviews for {name}',
+        'ru': 'Отзывы пассажиров о перевозчике {name}',
     },
 
     # ── Buy ticket ──

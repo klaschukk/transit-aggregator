@@ -196,7 +196,7 @@ def test_robots_has_sitemap(client):
 _JSONLD_PAGES = [
     ("/", "WebSite"),
     ("/rute/beograd-novi-sad/", "ItemList"),
-    ("/gradski/beograd/stajaliste/sajam/", "BusStop"),
+    ("/gradski/beograd/stajaliste/sajam/", "BusStation"),
     ("/prevoznici/", "ItemList"),
     ("/voznja/beograd-do-novi-sad/", "FAQPage"),
 ]
