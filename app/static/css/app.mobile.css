@@ -426,6 +426,59 @@ body.m-nav-open .site-nav#siteNav {
 }
 
 
+/* ── 5b. Mobile back button ─────────────────────────────────────────
+   On mobile the desktop breadcrumb collapses to an iOS-style "← {parent}"
+   pill: the last `.breadcrumb__link` (the immediate parent — Home for top
+   pages, the city for line/stop pages, etc.) becomes a 44px tap target
+   with an arrow prefix. Separators and the current-page span are hidden,
+   so the "wayfinding" stays the H1 below. CSS-only — works against the
+   existing breadcrumb macro markup, no template changes needed. */
+.breadcrumb {
+  padding: var(--mspace-2) 0;
+  gap: 0;
+  flex-wrap: nowrap;
+}
+.breadcrumb__sep,
+.breadcrumb__current { display: none; }
+.breadcrumb__link { display: none; }
+/* The LAST link in the breadcrumb (the immediate parent — current page
+   itself is a span, never a link) becomes the back pill. */
+.breadcrumb__link:last-of-type {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mspace-2);
+  min-height: 40px;
+  padding: var(--mspace-2) var(--mspace-3) var(--mspace-2) var(--mspace-2);
+  border-radius: var(--mradius-pill);
+  background: var(--mtint-surface);
+  color: var(--color-text);
+  font-size: var(--mtext-sm);
+  font-weight: 600;
+  text-decoration: none;
+  max-width: 60vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.breadcrumb__link:last-of-type:hover,
+.breadcrumb__link:last-of-type:active {
+  background: var(--color-border);
+  text-decoration: none;
+}
+.breadcrumb__link:last-of-type::before {
+  content: "";
+  display: inline-block;
+  width: 18px; height: 18px;
+  flex-shrink: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 12H5M12 19l-7-7 7-7'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+/* The 3 detail pages (route/stop/line) have an explicit `.mobile-back`
+   block predating this. Now that the breadcrumb pill covers every page
+   uniformly, hide the duplicate. The block stays in the templates for
+   markup stability — just suppressed visually. */
+.mobile-back { display: none; }
+
+
 /* ── 6. Search form expand pattern ──────────────────────────────── */
 /* Resting state — single pill card on the page. When .search-form is
    inside the home hero we don't need extra polish, but on dense pages
