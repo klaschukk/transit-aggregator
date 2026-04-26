@@ -2,7 +2,7 @@ import re
 import time
 from datetime import datetime
 
-from flask import Blueprint, render_template, request, make_response, jsonify, current_app
+from flask import Blueprint, render_template, request, make_response, jsonify, current_app, abort
 
 from app.db import query, cached_query, cached_query_one, db_ready
 from app.extensions import limiter, csrf
@@ -547,6 +547,204 @@ def _sitemap_lastmod() -> str:
     return datetime.now().strftime('%Y-%m-%d')
 
 
+# ── Per-URL lastmod (real freshness signal) ────────────────────────────
+#
+# Replaces the flat "all URLs share transit.duckdb mtime" signal. Each URL
+# now carries the date of its underlying scraper output, so Google sees
+# genuine deltas across runs and prioritises freshly-rescraped URLs in
+# the crawl queue. No new DB column — derive from data/raw/*.json mtimes
+# (one date per scraper) plus a small (operator-slug → source) map.
+#
+# Cache the per-URL lookup for 5 minutes so we don't hit the filesystem
+# 3500× per crawl (each Googlebot fetch of the index → 4 shards → render).
+
+_LASTMOD_CACHE: dict = {'ts': 0.0, 'src': {}, 'lookup': {}}
+_LASTMOD_TTL_S = 300
+
+
+def _file_date(path) -> str | None:
+    try:
+        if path.exists():
+            return datetime.fromtimestamp(path.stat().st_mtime).strftime('%Y-%m-%d')
+    except OSError:
+        pass
+    return None
+
+
+def _source_mtimes() -> dict[str, str]:
+    """Latest data-file mtime per scraper source. Keys identify the
+    scraper that owns a given table-row; values are the date that
+    scraper last produced output. New scraper sources go here."""
+    from pathlib import Path
+    raw = Path(current_app.root_path).parent / 'data' / 'raw'
+    sources = {
+        'busticket4_dom':   raw / 'intercity_routes.json',
+        'busticket4_intl':  raw / 'international_routes.json',
+        'busticket4_pairs': raw / 'intercity' / 'routes.json',
+        'lasta':            raw / 'lasta' / 'trips.json',
+        'balkan':           raw / 'balkan_routes.json',
+        'srbvoz':           raw / 'srbvoz_trains.json',
+        'gsp_lines':        raw / 'gsp_lines.json',
+        'gsp_stops':        raw / 'gsp_stops.json',
+        'gspns_lines':      raw / 'novi-sad' / 'lines.json',
+        'gspns_stops':      raw / 'novi-sad' / 'osm_stops.json',
+        'gspns_stops_v1':   raw / 'novi_sad_osm_stops.json',
+        'gspns_route_stops': raw / 'novi_sad_route_stops.json',
+        'nis_lines':        raw / 'nis' / 'lines.json',
+        'nis_stops':        raw / 'nis' / 'stops.json',
+        'nis_route_stops':  raw / 'nis_route_stops.json',
+        'kragujevac':       raw / 'kragujevac' / 'lines.json',
+    }
+    out = {}
+    for k, p in sources.items():
+        d = _file_date(p)
+        if d:
+            out[k] = d
+    return out
+
+
+# Operator slug → scraper source key. Most operators are scraped via
+# busticket4_dom (the umbrella domestic-bus catalogue). Lasta + Srbija
+# Voz have dedicated scrapers. Anything not in the map falls back to
+# busticket4_dom so we always have *some* signal.
+_OP_SOURCE = {
+    'lasta':         'lasta',
+    'srbija-voz':    'srbvoz',
+    'srbijavoz':     'srbvoz',
+    'srbija_voz':    'srbvoz',
+}
+
+
+def _city_line_source(city: str) -> str:
+    return {
+        'beograd':    'gsp_lines',
+        'novi-sad':   'gspns_lines',
+        'nis':        'nis_lines',
+        'kragujevac': 'kragujevac',
+    }.get(city, 'gsp_lines')
+
+
+def _city_stop_source(city: str) -> tuple[str, str | None]:
+    """Two source keys per city: the stops scrape, and the route-stops
+    linkage scrape if separate. Per-stop lastmod = MAX of both."""
+    return {
+        'beograd':    ('gsp_stops', None),
+        'novi-sad':   ('gspns_stops', 'gspns_route_stops'),
+        'nis':        ('nis_stops',  'nis_route_stops'),
+        'kragujevac': ('kragujevac', None),
+    }.get(city, ('gsp_stops', None))
+
+
+def _build_lastmod_lookup(default_mtime: str) -> dict:
+    """Pre-compute every URL → date mapping in one TTL window.
+
+    Returns nested dict: {category: {key: 'YYYY-MM-DD'}} where category
+    is one of 'route', 'op', 'line', 'stop' and key is the row slug
+    (for routes/ops/stops) or '<city>/<slug>' (for lines)."""
+    now = time.time()
+    if now - _LASTMOD_CACHE['ts'] < _LASTMOD_TTL_S and _LASTMOD_CACHE['lookup']:
+        return _LASTMOD_CACHE['lookup']
+
+    src = _source_mtimes()
+    lookup = {'route': {}, 'op': {}, 'line': {}, 'stop': {}}
+
+    if not db_ready():
+        _LASTMOD_CACHE['ts'] = now
+        _LASTMOD_CACHE['src'] = src
+        _LASTMOD_CACHE['lookup'] = lookup
+        return lookup
+
+    # Routes — one row per route_slug, MAX over the operator-source mtimes
+    # serving that route. International routes get the busticket4_intl
+    # mtime as a floor; balkan routes pick up balkan mtime.
+    route_rows = query("""
+        SELECT r.slug, r.from_city_slug, r.to_city_slug, r.from_city, r.to_city,
+               LIST(DISTINCT o.slug) AS op_slugs
+        FROM routes r
+        JOIN trips t ON t.route_id = r.id
+        JOIN operators o ON o.id = t.operator_id
+        WHERE r.type = 'intercity'
+        GROUP BY r.slug, r.from_city_slug, r.to_city_slug, r.from_city, r.to_city
+    """)
+    intl_cities = {
+        'Sarajevo','Banja Luka','Tuzla','Mostar','Trebinje','Zenica',
+        'Zagreb','Split','Dubrovnik','Rijeka','Osijek','Vukovar','Pula','Zadar',
+        'Skopje','Skoplje','Ohrid','Bitola','Bitolj','Kumanovo','Štip',
+        'Ljubljana','Maribor','Koper','Celje',
+        'Tirana','Drač','Drac','Skadar','Vlora',
+        'Thessaloniki','Solun','Atina','Athens','Patras',
+        'Sofia','Sofija','Plovdiv','Varna','Burgas',
+        'Podgorica','Budva','Herceg Novi','Kotor','Tivat','Bar','Nikšić',
+        'Ulcinj','Cetinje','Bijelo Polje',
+        'Budapest','Vienna','Istanbul',
+    }
+    for row in route_rows:
+        candidates = [default_mtime]
+        if row['op_slugs']:
+            for op_slug in row['op_slugs']:
+                key = _OP_SOURCE.get(op_slug, 'busticket4_dom')
+                if key in src:
+                    candidates.append(src[key])
+        # International route → also factor in busticket4_intl + balkan
+        # mtimes since those JSONs are the source of intl pairs.
+        if row['from_city'] in intl_cities or row['to_city'] in intl_cities:
+            for k in ('busticket4_intl', 'balkan'):
+                if k in src:
+                    candidates.append(src[k])
+        d = max(candidates)
+        lookup['route'][row['slug']] = d
+        # Pairs share the same date — same SQL row, different URL shape.
+        if row['from_city_slug'] and row['to_city_slug']:
+            lookup['route'][f'{row["from_city_slug"]}-do-{row["to_city_slug"]}'] = d
+
+    # Operators — MAX over their own scraper + the routes they cover.
+    # An operator scraped today on a corridor that hasn't changed since
+    # last week still gets today's date because the operator-page itself
+    # is the underlying signal.
+    op_rows = query("""
+        SELECT o.slug, MIN(r.id) AS _any
+        FROM operators o
+        JOIN trips t ON t.operator_id = o.id
+        JOIN routes r ON r.id = t.route_id
+        WHERE t.price_rsd > 0
+        GROUP BY o.slug
+    """)
+    for row in op_rows:
+        op_slug = row['slug']
+        key = _OP_SOURCE.get(op_slug, 'busticket4_dom')
+        lookup['op'][op_slug] = src.get(key, default_mtime)
+
+    # Lines — by city.
+    line_rows = query("SELECT city, slug FROM city_lines")
+    for row in line_rows:
+        key = _city_line_source(row['city'])
+        lookup['line'][f'{row["city"]}/{row["slug"]}'] = src.get(key, default_mtime)
+
+    # Stops — by city, MAX of stops-source and route-stops-linkage source.
+    stop_rows = query("SELECT slug, city FROM city_stops")
+    for row in stop_rows:
+        s_key, link_key = _city_stop_source(row['city'])
+        candidates = [default_mtime]
+        if s_key in src:
+            candidates.append(src[s_key])
+        if link_key and link_key in src:
+            candidates.append(src[link_key])
+        lookup['stop'][f'{row["city"]}/{row["slug"]}'] = max(candidates)
+
+    _LASTMOD_CACHE['ts'] = now
+    _LASTMOD_CACHE['src'] = src
+    _LASTMOD_CACHE['lookup'] = lookup
+    return lookup
+
+
+def _lastmod_for(category: str, key: str, default: str) -> str:
+    """Look up per-URL lastmod from the precomputed dict. Falls back to
+    the global db mtime when no row-level signal is available (new
+    scraper, missing source file, etc.)."""
+    lookup = _build_lastmod_lookup(default)
+    return lookup.get(category, {}).get(key, default)
+
+
 def _urlset(pages: list[str]) -> "Response":  # noqa: F821
     xml = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -1060,6 +1258,46 @@ def robots():
     ]
     resp = make_response('\n'.join(lines) + '\n')
     resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
+
+# IndexNow protocol — Bing/Yandex/Naver re-crawl in 5-30 minutes
+# instead of the 3-14 days a young domain waits for organic
+# crawl. The key file at /<key>.txt is the domain-ownership proof
+# IndexNow checks before accepting our urlList POST. Key lives in
+# data/secrets/indexnow.key (gitignored, mode 0600). Generate via:
+#   python3 -c "import secrets; print(secrets.token_hex(16))" \
+#     > data/secrets/indexnow.key
+_INDEXNOW_KEY_RE = re.compile(r'^[a-f0-9]{32}$')
+
+
+def _read_indexnow_key():
+    from pathlib import Path
+    p = Path(current_app.root_path).parent / 'data' / 'secrets' / 'indexnow.key'
+    try:
+        return p.read_text(encoding='utf-8').strip()
+    except OSError:
+        return None
+
+
+@main_bp.route('/<key>.txt')
+def indexnow_key_file(key: str):
+    """Domain-ownership proof for IndexNow. The body is just the key
+    itself; IndexNow's verifier hits the URL we name in keyLocation
+    and checks the body matches the key in our urlList POST.
+
+    Only matches 32-char hex slugs so this doesn't collide with any
+    other .txt route — robots.txt + ads.txt continue to win because
+    Flask matches them first in registration order.
+    """
+    if not _INDEXNOW_KEY_RE.match(key):
+        abort(404)
+    real = _read_indexnow_key()
+    if not real or key != real:
+        abort(404)
+    resp = make_response(key)
+    resp.headers['Content-Type'] = 'text/plain; charset=utf-8'
+    resp.headers['Cache-Control'] = 'public, max-age=86400'
     return resp
 
 

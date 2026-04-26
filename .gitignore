@@ -17,6 +17,11 @@ data/gsc/
 .gsc-credentials.json
 *.gsc-credentials.json
 
+# Secrets (IndexNow key, future API tokens). The IndexNow key is
+# also served at /<key>.txt for domain verification — that's
+# public-by-design, but keeping it out of git keeps grep clean.
+data/secrets/
+
 # Scraper progress/cache files
 *_progress.json
 city_ids.json
