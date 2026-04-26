@@ -23,19 +23,7 @@
 
 <div class="page-title">
   <h1>{{ _('route_index.h1') }}</h1>
-  <p class="page-subtitle">{{ routes|length if routes else 0 }} {{ _('route_index.subtitle') }}</p>
-</div>
-
-<!-- SEO intro (unique prose) -->
-<div class="seo-block fade-in">
-  <div class="seo-block__icon">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></svg>
-  </div>
-  <div class="seo-block__content">
-    <h2>{{ _('route_index.intro_h') }}</h2>
-    <p>{{ _('route_index.intro_p1').format(prefix=lang_prefix)|safe }}</p>
-    <p>{{ _('route_index.intro_p2').format(prefix=lang_prefix)|safe }}</p>
-  </div>
+  <p class="page-subtitle">{{ routes|length if routes else 0 }} {{ _('route_index.subtitle') }} · {{ _('route_index.subtitle_short') }}</p>
 </div>
 
 {% if popular_routes %}
@@ -137,6 +125,20 @@
     </a>
   </div>
 </section>
+
+<!-- SEO intro prose — moved below the grid so users land on the
+     functional catalogue first. Long-form SEO copy still indexed at
+     the same depth, just out of the way of the primary task. -->
+<div class="seo-block fade-in">
+  <div class="seo-block__icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></svg>
+  </div>
+  <div class="seo-block__content">
+    <h2>{{ _('route_index.intro_h') }}</h2>
+    <p>{{ _('route_index.intro_p1').format(prefix=lang_prefix)|safe }}</p>
+    <p>{{ _('route_index.intro_p2').format(prefix=lang_prefix)|safe }}</p>
+  </div>
+</div>
 
 <!-- FAQ -->
 <section class="faq-section">

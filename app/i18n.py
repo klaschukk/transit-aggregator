@@ -24,6 +24,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Search',
         'ru': 'Поиск',
     },
+    'nav.about': {
+        'sr': 'O nama',
+        'en': 'About',
+        'ru': 'О нас',
+    },
     'nav.menu': {
         'sr': 'Meni',
         'en': 'Menu',
@@ -1785,6 +1790,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'ruta · autobus i voz',
         'en': 'routes · bus and train',
         'ru': 'маршрутов · автобус и поезд',
+    },
+    'route_index.subtitle_short': {
+        'sr': 'pretraži ili izaberi sa liste',
+        'en': 'search or pick from the list',
+        'ru': 'найди или выбери из списка',
     },
     'route_index.filter_placeholder': {
         'sr': 'Pretraži po gradu...',
