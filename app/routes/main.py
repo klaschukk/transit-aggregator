@@ -562,8 +562,21 @@ def _urlset(pages: list[str]) -> "Response":  # noqa: F821
 
 
 def _build_url_fn(base: str, lastmod: str):
-    """Return an `url(loc, freq, prio)` fn that emits one <url> per language
-    with full hreflang alternates. Shared by every sitemap shard."""
+    """Return an `url(loc, freq, prio)` fn that emits ONE <url> per logical
+    page with hreflang alternates pointing at every locale.
+
+    Earlier shape emitted N <url> tags (one per locale), each with the same
+    alternate-set — tripling sitemap size to ~9k URLs and starving Google's
+    crawl budget on a young site (GSC: 7355 "Discovered, currently not
+    indexed", almost all /en/ + /ru/ variants).
+
+    Google's localized-versions guidance treats one canonical <loc> with
+    hreflang alternates as equivalent to multiple <loc>s — Googlebot follows
+    the alternates and discovers the per-locale URLs anyway, just spread
+    across crawl cycles instead of all submitted at once. Trade-off: slower
+    discovery of /en/ + /ru/ pages, but the /sr/ canonical (90% of traffic)
+    actually gets crawled.
+    """
     from app.i18n import SUPPORTED_LANGS, DEFAULT_LANG
 
     def _loc_for(lang: str, loc: str) -> str:
@@ -580,14 +593,11 @@ def _build_url_fn(base: str, lastmod: str):
             f'<xhtml:link rel="alternate" hreflang="x-default" '
             f'href="{_loc_for(DEFAULT_LANG, loc)}"/>'
         )
-        parts = []
-        for l in SUPPORTED_LANGS:
-            parts.append(
-                f'<url><loc>{_loc_for(l, loc)}</loc>'
-                f'<lastmod>{mod}</lastmod><changefreq>{freq}</changefreq>'
-                f'<priority>{prio}</priority>{alternates}</url>'
-            )
-        return ''.join(parts)
+        return (
+            f'<url><loc>{_loc_for(DEFAULT_LANG, loc)}</loc>'
+            f'<lastmod>{mod}</lastmod><changefreq>{freq}</changefreq>'
+            f'<priority>{prio}</priority>{alternates}</url>'
+        )
 
     return url
 
