@@ -189,21 +189,42 @@ def line_detail(city: str, line_slug: str):
     except Exception:
         geometry = None
 
-    # Related lines of the same type in the same city (up to 6, excluding this line)
+    # Related lines of the same type in the same city (up to 8, excluding this line)
     related_lines = cached_query("""
         SELECT number, name, slug, color, type
         FROM city_lines
         WHERE city = ? AND type = ? AND id != ?
         ORDER BY CAST(REGEXP_REPLACE(number, '[^0-9]', '', 'g') || '0' AS INTEGER)
-        LIMIT 6
+        LIMIT 8
     """, [city, line.get('type', 'bus'), line['id']], ttl=3600) if db_ready() else []
+
+    # Interchange stops on this line — stops that serve the most other
+    # lines (excluding the terminals, which we list separately). These
+    # are the high-value stop_detail pages and giving each line a
+    # 4-stop interchange block redirects PageRank to them from every
+    # line page that touches them. ~611 lines × 4 stops = ~2.4K extra
+    # inbound edges concentrated on busy stops.
+    interchange_stops = cached_query("""
+        WITH this_line_stops AS (
+          SELECT stop_id FROM city_line_stops WHERE line_id = ?
+        )
+        SELECT cs.slug, cs.name, COUNT(DISTINCT cls.line_id) AS line_count
+        FROM city_stops cs
+        JOIN city_line_stops cls ON cls.stop_id = cs.id
+        WHERE cs.id IN (SELECT stop_id FROM this_line_stops)
+        GROUP BY cs.slug, cs.name
+        HAVING line_count > 1
+        ORDER BY line_count DESC, cs.name
+        LIMIT 4
+    """, [line['id']], ttl=3600) if db_ready() else []
 
     return render_template('line_detail.html', city=city, line=line, stops=stops,
                            schedule=schedule, has_gtfs=has_gtfs,
                            first_dep=first_dep, last_dep=last_dep,
                            line_type_label=line_type_label,
                            geometry=geometry,
-                           related_lines=related_lines)
+                           related_lines=related_lines,
+                           interchange_stops=interchange_stops)
 
 
 @city_bp.route('/gradski/<city>/stajaliste/<stop_slug>/')

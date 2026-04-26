@@ -611,6 +611,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Carriers from {city}',
         'ru': 'Перевозчики из {city}',
     },
+    'line.interchange_stops': {
+        'sr': 'Glavna stajališta — presedanja',
+        'en': 'Major interchange stops',
+        'ru': 'Главные пересадочные остановки',
+    },
     'city.intercity': {
         'sr': 'Međugradski prevoz',
         'en': 'Intercity transport',

@@ -157,6 +157,27 @@
 </section>
 {% endif %}
 
+{# Interchange stops on this line — multi-line stops only, 4 max.
+   Pulls weight from each line page into the stops that connect the
+   most other lines (high-value stop_detail nodes in the audit). #}
+{% if interchange_stops %}
+<section class="see-also">
+  <h2 class="see-also__title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    {{ _('line.interchange_stops') }}
+  </h2>
+  <div class="see-also__list">
+    {% for s in interchange_stops %}
+    <a href="{{ lang_prefix }}/gradski/{{ city }}/stajaliste/{{ s.slug }}/" class="see-also__link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      {{ s.name }}
+      <small>{{ s.line_count }} {{ _('city.lines_count') }}</small>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
 <!-- Back to city hub -->
 <section class="see-also">
   <h2 class="see-also__title">
