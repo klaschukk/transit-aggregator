@@ -765,6 +765,236 @@ def favourites():
     return render_template('favourites.html')
 
 
+# ── Open Graph card renderer ────────────────────────────────────────
+# Per-page 1200×630 PNGs for share previews. The static og-image.png
+# stays as the universal fallback; these dynamic variants ship a card
+# with title + key facts so social referrals (Facebook, Twitter/X,
+# LinkedIn, Telegram, Google Discover) get a relevant preview.
+
+_OG_HEADERS = {
+    # 1 day cache + immutable: each card's content is bound to a slug
+    # and changes only when our data does. CF + browser keeps it warm
+    # so social-bot follow-up requests don't hit the renderer twice.
+    'Content-Type': 'image/png',
+    'Cache-Control': 'public, max-age=86400, immutable',
+}
+
+
+def _og_response(png_bytes: bytes):
+    resp = make_response(png_bytes)
+    for k, v in _OG_HEADERS.items():
+        resp.headers[k] = v
+    return resp
+
+
+def _og_fallback():
+    """Static fallback when DB lookup fails or slug doesn't resolve.
+    Always returns 200 so social bots cache something rather than
+    retry-storming a 404."""
+    from app.og import static_fallback_bytes
+    return _og_response(static_fallback_bytes())
+
+
+@main_bp.route('/og/route/<slug>.png')
+def og_route(slug: str):
+    if not _SLUG_RE.match(slug):
+        return _og_fallback()
+    if not db_ready():
+        return _og_fallback()
+    row = cached_query_one("""
+        SELECT r.from_city, r.to_city, r.distance_km,
+               COUNT(DISTINCT t.id) AS trip_count,
+               MIN(t.price_rsd) AS min_price
+        FROM routes r LEFT JOIN trips t ON t.route_id = r.id
+        WHERE r.slug = ? AND r.type = 'intercity'
+        GROUP BY r.from_city, r.to_city, r.distance_km
+    """, [slug])
+    if not row:
+        return _og_fallback()
+    from app.og import render_card
+    title = f"{row['from_city']} → {row['to_city']}"
+    chips = []
+    if row.get('distance_km'):
+        chips.append(f"{int(row['distance_km'])} km")
+    if row.get('trip_count'):
+        chips.append(f"{row['trip_count']} polazaka")
+    if row.get('min_price'):
+        chips.append(f"od {int(row['min_price'])} RSD")
+    try:
+        png = render_card(title, subtitle='Direktni autobus', chips=chips)
+    except Exception:
+        return _og_fallback()
+    return _og_response(png)
+
+
+@main_bp.route('/og/voznja/<from_city>-do-<to_city>.png')
+def og_voznja(from_city: str, to_city: str):
+    if not (_SLUG_RE.match(from_city) and _SLUG_RE.match(to_city)):
+        return _og_fallback()
+    if not db_ready():
+        return _og_fallback()
+    row = cached_query_one("""
+        SELECT r.from_city, r.to_city, r.distance_km,
+               COUNT(DISTINCT t.id) AS trip_count,
+               MIN(t.price_rsd) AS min_price
+        FROM routes r LEFT JOIN trips t ON t.route_id = r.id
+        WHERE lower(r.from_city_slug) = lower(?)
+          AND lower(r.to_city_slug) = lower(?)
+          AND r.type = 'intercity'
+        GROUP BY r.from_city, r.to_city, r.distance_km
+    """, [from_city, to_city])
+    if not row:
+        return _og_fallback()
+    from app.og import render_card
+    title = f"{row['from_city']} → {row['to_city']}"
+    chips = []
+    if row.get('distance_km'):
+        chips.append(f"{int(row['distance_km'])} km")
+    if row.get('trip_count'):
+        chips.append(f"{row['trip_count']} polazaka")
+    if row.get('min_price'):
+        chips.append(f"od {int(row['min_price'])} RSD")
+    try:
+        png = render_card(title, subtitle='Pretraga polazaka', chips=chips)
+    except Exception:
+        return _og_fallback()
+    return _og_response(png)
+
+
+@main_bp.route('/og/line/<city>/<slug>.png')
+def og_line(city: str, slug: str):
+    if not (_SLUG_RE.match(city) and _SLUG_RE.match(slug)):
+        return _og_fallback()
+    if not db_ready():
+        return _og_fallback()
+    row = cached_query_one("""
+        SELECT cl.number, cl.name, cl.type, cl.city,
+               COUNT(cls.stop_id) AS stop_count
+        FROM city_lines cl
+        LEFT JOIN city_line_stops cls ON cls.line_id = cl.id
+        WHERE cl.city = ? AND cl.slug = ?
+        GROUP BY cl.id, cl.number, cl.name, cl.type, cl.city
+    """, [city, slug])
+    if not row:
+        return _og_fallback()
+    from app.og import render_card
+    city_label = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad',
+                  'nis': 'Niš', 'kragujevac': 'Kragujevac'}.get(city, city.title())
+    type_label = {'tram': 'Tramvaj', 'trolleybus': 'Trolejbus',
+                  'bus': 'Autobus', 'night': 'Noćna linija',
+                  'e-bus': 'E-bus', 'suburban': 'Prigradska',
+                  'bg-voz': 'BG:Voz'}.get(row.get('type') or '', 'Linija')
+    title = f"Linija {row['number']}"
+    sub = f"{city_label} · {row['name']}" if row.get('name') else city_label
+    chips = [type_label]
+    if row.get('stop_count'):
+        chips.append(f"{row['stop_count']} stajališta")
+    try:
+        png = render_card(title, subtitle=sub, chips=chips)
+    except Exception:
+        return _og_fallback()
+    return _og_response(png)
+
+
+@main_bp.route('/og/stop/<city>/<slug>.png')
+def og_stop(city: str, slug: str):
+    if not (_SLUG_RE.match(city) and _SLUG_RE.match(slug)):
+        return _og_fallback()
+    if not db_ready():
+        return _og_fallback()
+    row = cached_query_one("""
+        SELECT cs.name, cs.city,
+               COUNT(DISTINCT cls.line_id) AS line_count
+        FROM city_stops cs
+        LEFT JOIN city_line_stops cls ON cls.stop_id = cs.id
+        WHERE cs.city = ? AND cs.slug = ?
+        GROUP BY cs.id, cs.name, cs.city
+    """, [city, slug])
+    if not row:
+        return _og_fallback()
+    from app.og import render_card
+    city_label = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad',
+                  'nis': 'Niš', 'kragujevac': 'Kragujevac'}.get(city, city.title())
+    title = row.get('name') or slug.replace('-', ' ').title()
+    chips = [city_label]
+    if row.get('line_count'):
+        chips.append(f"{row['line_count']} linija")
+    try:
+        png = render_card(title, subtitle='Stajalište', chips=chips)
+    except Exception:
+        return _og_fallback()
+    return _og_response(png)
+
+
+@main_bp.route('/og/operator/<slug>.png')
+def og_operator(slug: str):
+    if not _SLUG_RE.match(slug):
+        return _og_fallback()
+    if not db_ready():
+        return _og_fallback()
+    row = cached_query_one("""
+        SELECT o.name,
+               COUNT(DISTINCT t.route_id) AS route_count,
+               COUNT(DISTINCT r.from_city) + COUNT(DISTINCT r.to_city) AS city_count
+        FROM operators o
+        LEFT JOIN trips t ON t.operator_id = o.id
+        LEFT JOIN routes r ON r.id = t.route_id AND r.type = 'intercity'
+        WHERE o.slug = ?
+        GROUP BY o.id, o.name
+    """, [slug])
+    if not row:
+        return _og_fallback()
+    from app.og import render_card
+    title = row.get('name') or slug.replace('-', ' ').title()
+    chips = []
+    if row.get('route_count'):
+        chips.append(f"{row['route_count']} ruta")
+    if row.get('city_count'):
+        chips.append(f"{row['city_count']} gradova")
+    try:
+        png = render_card(title, subtitle='Prevoznik', chips=chips or ['Prevoznik'])
+    except Exception:
+        return _og_fallback()
+    return _og_response(png)
+
+
+@main_bp.route('/og/country/<slug>.png')
+def og_country(slug: str):
+    if not _SLUG_RE.match(slug):
+        return _og_fallback()
+    # Reuse country metadata from the country_hub handler so this stays
+    # in sync if the country list grows.
+    try:
+        from app.routes.info import _COUNTRY_HUBS  # type: ignore[attr-defined]
+    except Exception:
+        return _og_fallback()
+    info = _COUNTRY_HUBS.get(slug)
+    if not info:
+        return _og_fallback()
+    name = info['name']
+    chips: list[str] = ['Destinacija']
+    if db_ready():
+        cities = info.get('cities', [])
+        if cities:
+            placeholders = ', '.join(['?'] * len(cities))
+            row = cached_query_one(
+                f"""SELECT COUNT(DISTINCT r.id) AS n
+                    FROM routes r JOIN trips t ON t.route_id = r.id
+                    WHERE r.type = 'intercity' AND t.price_rsd > 0
+                      AND (r.from_city IN ({placeholders})
+                           OR r.to_city IN ({placeholders}))""",
+                list(cities) + list(cities),
+            )
+            if row and row.get('n'):
+                chips.append(f"{row['n']} ruta")
+    from app.og import render_card
+    try:
+        png = render_card(name, subtitle='Autobusi iz Srbije', chips=chips)
+    except Exception:
+        return _og_fallback()
+    return _og_response(png)
+
+
 @main_bp.route('/offline.html')
 def offline_page():
     """Cached by the service worker as the offline fallback shell."""

@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 
-from flask import Blueprint, render_template, abort, request, redirect, url_for
+from flask import Blueprint, render_template, abort, request, redirect, url_for, current_app
 from app.db import query, query_one, cached_query, db_ready
 from app.slug import normalize_slug
 
@@ -137,6 +137,7 @@ def route_detail(slug: str):
     reviews_list = analytics_db.approved_reviews(slug)
     reviews_agg = analytics_db.aggregate_rating(slug)
 
+    og_image_url = f"{current_app.config['BASE_URL']}/og/route/{slug}.png"
     return render_template('route_detail.html', route=route, trips=trips,
                            days=days, selected_day=selected_day,
                            similar_routes=similar_routes,
@@ -145,7 +146,8 @@ def route_detail(slug: str):
                            operator_slugs=operator_slugs,
                            price_min=price_min, price_max=price_max,
                            reverse_slug=reverse_slug,
-                           reviews=reviews_list, reviews_agg=reviews_agg)
+                           reviews=reviews_list, reviews_agg=reviews_agg,
+                           og_image_url=og_image_url)
 
 
 @intercity_bp.route('/voznja/<from_city>-do-<to_city>/')
@@ -256,6 +258,7 @@ def city_pair(from_city: str, to_city: str):
     from app.routes.info import country_hub_for_city
     destination_country = country_hub_for_city(route['to_city']) if route else None
 
+    og_image_url = f"{current_app.config['BASE_URL']}/og/voznja/{from_city}-do-{to_city}.png"
     return render_template('city_pair.html',
                            route=route, trips=trips, route_info=route_info,
                            related_pairs=related_pairs,
@@ -264,4 +267,5 @@ def city_pair(from_city: str, to_city: str):
                            from_city=from_city.replace('-', ' ').title(),
                            to_city=to_city.replace('-', ' ').title(),
                            reviews=reviews_list, reviews_agg=reviews_agg,
-                           review_route_slug=canonical_slug)
+                           review_route_slug=canonical_slug,
+                           og_image_url=og_image_url)

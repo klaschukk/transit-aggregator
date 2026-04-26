@@ -26,14 +26,15 @@
 {%- for l in supported_langs if l != lang %}
 <meta property="og:locale:alternate" content="{{ {'sr':'sr_RS','en':'en_US','ru':'ru_RU'}[l] }}">
 {%- endfor %}
-<meta property="og:image" content="https://prevozni.com/static/img/og-image.png">
+{% set _og_url = og_image_url|default(config.BASE_URL ~ '/static/img/og-image.png') %}
+<meta property="og:image" content="{{ _og_url }}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="{{ _('meta.og_image_alt') }}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ self.title() }}">
 <meta name="twitter:description" content="{{ self.meta_description() }}">
-<meta name="twitter:image" content="https://prevozni.com/static/img/og-image.png">
+<meta name="twitter:image" content="{{ _og_url }}">
 <link rel="icon" type="image/svg+xml" href="/static/favicon/favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon/favicon-32x32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png">

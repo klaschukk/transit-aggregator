@@ -409,6 +409,8 @@ def country_hub(country: str):
     except Exception:
         pass
 
+    from flask import current_app
+    og_image_url = f"{current_app.config['BASE_URL']}/og/country/{country}.png"
     return render_template(
         'country_hub.html',
         country_slug=country,
@@ -427,6 +429,7 @@ def country_hub(country: str):
         review_slug=review_slug,
         reviews=country_reviews,
         reviews_agg=country_reviews_agg,
+        og_image_url=og_image_url,
     )
 
 
@@ -679,6 +682,8 @@ def operator_detail(slug: str):
     except Exception:
         pass
 
+    from flask import current_app
+    og_image_url = f"{current_app.config['BASE_URL']}/og/operator/{slug}.png"
     return render_template(
         'operator_detail.html',
         operator=op,
@@ -698,6 +703,7 @@ def operator_detail(slug: str):
         review_slug=review_slug,
         reviews=op_reviews,
         reviews_agg=op_reviews_agg,
+        og_image_url=og_image_url,
     )
 
 

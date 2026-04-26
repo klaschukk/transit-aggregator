@@ -1,7 +1,7 @@
 import threading
 from datetime import datetime
 
-from flask import Blueprint, render_template, abort, request, jsonify, redirect, url_for
+from flask import Blueprint, render_template, abort, request, jsonify, redirect, url_for, current_app
 from app.db import query, query_one, cached_query, cached_query_one, db_ready
 from app.extensions import limiter
 from app.slug import normalize_slug
@@ -284,6 +284,7 @@ def line_detail(city: str, line_slug: str):
     except Exception:
         pass
 
+    og_image_url = f"{current_app.config['BASE_URL']}/og/line/{city}/{line_slug}.png"
     return render_template('line_detail.html', city=city, line=line, stops=stops,
                            schedule=schedule, has_gtfs=has_gtfs,
                            first_dep=first_dep, last_dep=last_dep,
@@ -293,7 +294,8 @@ def line_detail(city: str, line_slug: str):
                            interchange_stops=interchange_stops,
                            prose=prose,
                            review_slug=review_slug,
-                           reviews=reviews_data, reviews_agg=reviews_aggregate)
+                           reviews=reviews_data, reviews_agg=reviews_aggregate,
+                           og_image_url=og_image_url)
 
 
 @city_bp.route('/gradski/<city>/stajaliste/<stop_slug>/')
@@ -422,12 +424,14 @@ def stop_detail(city: str, stop_slug: str):
     except Exception:
         pass
 
+    og_image_url = f"{current_app.config['BASE_URL']}/og/stop/{city}/{stop_slug}.png"
     return render_template('stop_detail.html', city=city, stop=stop,
                            departures=departures, lines_at_stop=lines_at_stop,
                            nearby_stops=nearby_stops, stop_info=stop_info,
                            prose=prose,
                            review_slug=review_slug,
-                           reviews=reviews_data, reviews_agg=reviews_aggregate)
+                           reviews=reviews_data, reviews_agg=reviews_aggregate,
+                           og_image_url=og_image_url)
 
 
 # ── Stop prose cache (in-process, 24 h TTL) ─────────────────────────────
