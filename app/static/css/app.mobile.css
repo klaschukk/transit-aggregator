@@ -375,12 +375,9 @@ body.m-nav-open .site-nav#siteNav {
   height: 16px;
   color: var(--color-primary);
 }
-.site-nav#siteNav .site-nav__search {
-  width: 100%;
-  height: auto;
-  border-radius: var(--mradius-sm);
-  background: transparent;
-}
+/* Search shortcut is the same as the logo (both → "/"), redundant in
+   the dropdown. Keep it on desktop where it lives as a header icon. */
+.site-nav#siteNav .site-nav__search { display: none; }
 /* Pill groups sit on their own row(s); divider before the first one. */
 .site-nav#siteNav .lang-pill {
   display: flex;
