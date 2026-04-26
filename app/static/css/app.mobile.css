@@ -261,11 +261,6 @@ body.m-sheet-locked { overflow: hidden; }
   /* Frosted glass on scroll — only kicks in once the body has scrolled
      ≥80px (mobile.js toggles `.is-scrolled` on the header). */
   transition: background .2s ease, box-shadow .2s ease, backdrop-filter .2s ease;
-  /* Header anchors the dropdown (`.site-nav` is `position: absolute` to
-     this stacking context) and stays above the dropdown's invisible
-     click-catcher. */
-  position: sticky;
-  z-index: 215;
 }
 .site-header.is-scrolled {
   background: rgba(255,255,255,0.78);
@@ -295,91 +290,134 @@ body.m-sheet-locked { overflow: hidden; }
 .site-nav-toggle svg { transition: transform .2s var(--mease-out); }
 body.m-nav-open .site-nav-toggle svg { transform: rotate(90deg); }
 
-.site-nav {
-  position: absolute;
-  top: calc(100% + var(--mspace-1));
+/* Dropdown panel — `position: fixed` to viewport so notch / safe-area /
+   parent flex context can't shrink it. Anchored top-right under the
+   header. Higher specificity (`body.m-nav-open .site-nav` / chained
+   selectors) used everywhere because app.css desktop rules like
+   `.site-nav { align-items: center }` and `.site-nav__icon { display:
+   none }` would otherwise win on equal specificity by coming first
+   in the cascade. */
+.site-nav#siteNav {
+  position: fixed;
+  top: calc(var(--header-h) + env(safe-area-inset-top) + var(--mspace-1));
   right: var(--mspace-2);
-  width: 260px;
+  left: auto;
+  bottom: auto;
+  width: 240px;
   max-width: calc(100vw - var(--mspace-3) * 2);
+  height: auto;
+  margin: 0;
   background: #fff;
   border: 1px solid var(--color-border);
   border-radius: var(--mradius-md);
   box-shadow: var(--melev-pop);
   padding: var(--mspace-2);
-  display: flex; flex-direction: column; gap: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 2px;
   opacity: 0;
   transform: translateY(-6px);
   transition: opacity .15s ease, transform .15s ease;
   pointer-events: none;
   visibility: hidden;
-  z-index: 210;
+  z-index: 220;
   max-height: calc(100dvh - var(--header-h) - var(--mspace-4));
   overflow-y: auto;
-  /* Block touch scroll-chaining into the page below. */
   overscroll-behavior: contain;
 }
-body.m-nav-open .site-nav {
+body.m-nav-open .site-nav#siteNav {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
   visibility: visible;
 }
-/* Invisible click-catcher behind the dropdown; tap anywhere off it to
-   close. Sits below the header (215) and dropdown (210) so it never
-   blocks the toggle or the menu items themselves. */
+/* Invisible click-catcher behind the dropdown. Sits below the dropdown
+   (220) and above the page so a tap outside closes the menu. */
 .m-nav-backdrop {
   position: fixed; inset: 0;
   background: transparent;
   pointer-events: none;
-  z-index: 205;
+  z-index: 215;
 }
 .m-nav-backdrop.m-sheet-backdrop--open { pointer-events: auto; }
 
-.site-nav__link {
-  /* Override desktop `.site-nav__link { height: 100% }` so links sit at
-     content height inside the dropdown instead of stretching. */
+/* Each link is a full-width row inside the dropdown. The chained
+   `.site-nav#siteNav .site-nav__link` beats the same-specificity
+   desktop rule from app.css. */
+.site-nav#siteNav .site-nav__link {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--mspace-2);
+  width: 100%;
   height: auto;
   flex: 0 0 auto;
   padding: var(--mspace-2) var(--mspace-3);
   border-radius: var(--mradius-sm);
-  font-size: var(--mtext-sm); font-weight: 600;
+  font-size: var(--mtext-sm);
+  font-weight: 600;
   color: var(--color-text);
-  display: flex; align-items: center; gap: var(--mspace-2);
   text-decoration: none;
   min-height: 40px;
+  white-space: nowrap;
 }
-.site-nav__link:hover, .site-nav__link:active { background: var(--mtint-surface); }
-.site-nav__icon { color: var(--color-primary); flex-shrink: 0; width: 16px; height: 16px; }
-.site-nav__search {
-  height: auto; width: auto;
+.site-nav#siteNav .site-nav__link:hover,
+.site-nav#siteNav .site-nav__link:active {
+  background: var(--mtint-surface);
+}
+/* Force icons visible (desktop hides them with `display: none`). */
+.site-nav#siteNav .site-nav__icon {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--color-primary);
+}
+.site-nav#siteNav .site-nav__search {
+  width: 100%;
+  height: auto;
   border-radius: var(--mradius-sm);
-  justify-content: flex-start;
-  flex: 0 0 auto;
+  background: transparent;
 }
-/* Bootstrap-style dropdown-divider before the first pill group. */
-.site-nav > .lang-pill:first-of-type {
+/* Pill groups sit on their own row(s); divider before the first one. */
+.site-nav#siteNav .lang-pill {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  flex: 0 0 auto;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  border-radius: 0;
+  overflow: visible;
+}
+.site-nav#siteNav > .lang-pill:first-of-type {
   margin-top: var(--mspace-2);
   padding-top: var(--mspace-2);
   border-top: 1px solid var(--color-border);
 }
-.site-nav .lang-pill {
-  display: flex; gap: 4px;
-  flex-wrap: wrap;
-  flex: 0 0 auto;
-}
-.site-nav .lang-pill__item {
-  flex: 1;
-  min-height: 44px;
+.site-nav#siteNav .lang-pill__item {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 36px;
+  border: 0;
   border-radius: var(--mradius-pill);
-  padding: var(--mspace-2) var(--mspace-3);
-  font-size: var(--mtext-sm); font-weight: 600;
-  background: var(--mtint-surface); border: 0;
+  padding: var(--mspace-1) var(--mspace-2);
+  font-size: var(--mtext-sm);
+  font-weight: 600;
+  background: var(--mtint-surface);
   color: var(--color-text);
-  display: inline-flex; align-items: center; justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-decoration: none;
 }
-.site-nav .lang-pill__item--active {
-  background: var(--color-primary); color: #fff;
+.site-nav#siteNav .lang-pill__item--active {
+  background: var(--color-primary);
+  color: #fff;
 }
 
 
