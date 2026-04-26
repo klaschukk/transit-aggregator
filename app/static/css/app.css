@@ -180,8 +180,6 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   transition: background .2s ease, color .2s ease;
 }
 .site-nav__search:hover { background: var(--color-bg-alt); color: var(--color-primary); }
-/* In mobile dropdown, search shows as text link — hide icon-only on mobile */
-.site-nav.is-open .site-nav__search { display: none; }
 /* Language pill switcher */
 .lang-pill {
   display: flex; margin-left: 8px;
@@ -191,8 +189,8 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   padding: 4px 8px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.03em;
   color: var(--color-text-muted); text-decoration: none; transition: all 0.15s;
   border-right: 1px solid var(--color-border);
-  /* Inline display on desktop keeps the pill compact; below 640px the nav
-     dropdown overrides to a larger hit area (see `.site-nav.is-open` rule). */
+  /* Inline display on desktop keeps the pill compact; on mobile the
+     off-canvas drawer overrides to a larger hit area (see app.mobile.css). */
   min-width: 32px; min-height: 28px;
   display: inline-flex; align-items: center; justify-content: center;
 }
@@ -212,57 +210,8 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .site-nav-toggle svg { transition: transform .3s ease; }
 .site-nav-toggle[aria-expanded="true"] svg { transform: rotate(90deg); }
 
-/* Mobile nav — dropdown below header */
-.site-nav.is-open {
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  top: var(--header-h);
-  left: 8px; right: 8px;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 6px;
-  box-shadow: 0 12px 32px rgba(0,0,0,0.14);
-  z-index: 99;
-  animation: slideDown .2s ease;
-  gap: 2px;
-  margin-top: 6px;
-}
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.site-nav.is-open .site-nav__link {
-  padding: 13px 14px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  border-radius: 8px;
-  height: auto;
-  color: var(--color-text);
-  transition: background 0.15s;
-}
-.site-nav.is-open .site-nav__link:hover,
-.site-nav.is-open .site-nav__link:active { background: var(--color-bg-alt); }
-.site-nav.is-open .site-nav__icon { display: inline-block; color: var(--color-primary); flex-shrink: 0; }
-.site-nav.is-open .site-nav__link { display: flex; align-items: center; gap: 12px; }
-.site-nav.is-open .site-nav__search { display: none; }
-.site-nav.is-open .lang-pill {
-  margin: 4px 8px 4px; align-self: flex-start;
-  border-top: 1px solid var(--color-border);
-  border-radius: 0 0 6px 6px;
-  padding-top: 8px;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-}
-/* Within the open mobile nav sheet, currency + language pills should be
-   comfortable to tap with a thumb — 44×44 minimum, a touch larger than
-   the desktop header where the pills are header-ornamental. */
-.site-nav.is-open .lang-pill__item {
-  min-height: 44px;
-  padding: 10px 14px;
-  font-size: var(--text-sm);
-}
+/* Mobile drawer styles live in app.mobile.css — keyed off `body.m-nav-open`,
+   slides in from the right. Do NOT add `.site-nav.is-open` rules here. */
 
 @media (min-width: 640px) {
   .site-nav { display: flex; }
@@ -1517,9 +1466,6 @@ input:focus-visible,
      primitive can appear bare on /politika-kolacica/ and body-level uses,
      so ensure a thumbable target. The in-sheet override below still wins. */
   .lang-pill__item { min-height: 36px; }
-
-  /* Mobile sheet pill needs more thumb room between items (was gap:0). */
-  .site-nav.is-open .lang-pill { gap: 4px; }
 
   /* Star save button — ensure 44×44 on narrow screens even when the
      surrounding header is tight. */

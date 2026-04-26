@@ -111,9 +111,21 @@
   /* ── Off-canvas nav drawer ──────────────────────────────────────── */
   var navToggle = document.getElementById('navToggle');
   var navBackdrop = document.querySelector('[data-nav-backdrop]');
+  var siteNav = document.getElementById('siteNav');
+  var navIconSvg = navToggle && navToggle.querySelector('svg');
+  var HAMBURGER_ICON = '<path d="M3 12h18M3 6h18M3 18h18"/>';
+  var CLOSE_ICON = '<path d="M18 6L6 18M6 6l12 12"/>';
+  function setNavIcon(open) {
+    if (navIconSvg) navIconSvg.innerHTML = open ? CLOSE_ICON : HAMBURGER_ICON;
+  }
+  // Drawer is in the DOM at all times; mark it inert when closed so keyboard
+  // users + screen readers skip it. Removed when open or on desktop.
+  if (siteNav) siteNav.setAttribute('inert', '');
   function closeNav() {
     body.classList.remove('m-nav-open', 'm-sheet-locked');
     if (navToggle) navToggle.setAttribute('aria-expanded', 'false');
+    if (siteNav) siteNav.setAttribute('inert', '');
+    setNavIcon(false);
     if (navBackdrop) {
       navBackdrop.classList.remove('m-sheet-backdrop--open');
       // Match transition duration before hiding so the fade plays out.
@@ -123,6 +135,8 @@
   function openNav() {
     body.classList.add('m-nav-open', 'm-sheet-locked');
     if (navToggle) navToggle.setAttribute('aria-expanded', 'true');
+    if (siteNav) siteNav.removeAttribute('inert');
+    setNavIcon(true);
     if (navBackdrop) {
       navBackdrop.removeAttribute('hidden');
       void navBackdrop.offsetWidth;  // reflow
@@ -130,7 +144,8 @@
     }
   }
   if (navToggle) {
-    navToggle.addEventListener('click', function () {
+    navToggle.addEventListener('click', function (ev) {
+      ev.stopPropagation();
       if (body.classList.contains('m-nav-open')) closeNav(); else openNav();
     });
     // Close on link click — natural pattern; user navigates and drawer closes.

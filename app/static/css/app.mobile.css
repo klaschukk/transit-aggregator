@@ -543,16 +543,20 @@ body.m-nav-open .site-nav { transform: translateX(0); }
   display: flex; align-items: center; justify-content: center;
 }
 
-/* 9e. How-it-works — vertical timeline replacing horizontal step row. */
+/* 9e. How-it-works — vertical timeline replacing horizontal step row.
+   Hide the decorative icon on mobile; the numbered circle is enough
+   wayfinding and dropping the icon kills the broken centered-svg layout. */
 .how-it-works {
-  flex-direction: column !important;
-  gap: var(--mspace-3);
-  position: relative;
+  display: flex !important;
+  flex-direction: column;
+  gap: var(--mspace-4);
+  text-align: left !important;
 }
 .how-it-works__step {
   display: grid !important;
-  grid-template-columns: 48px 1fr;
-  gap: var(--mspace-3);
+  grid-template-columns: 36px 1fr;
+  column-gap: var(--mspace-3);
+  row-gap: 2px;
   align-items: start;
   text-align: left !important;
 }
@@ -561,13 +565,26 @@ body.m-nav-open .site-nav { transform: translateX(0); }
   border-radius: 50%;
   background: var(--color-primary);
   color: #fff;
+  font-size: var(--mtext-sm);
   font-weight: 700;
   display: flex; align-items: center; justify-content: center;
-  grid-column: 1; grid-row: 1 / span 3;
+  grid-column: 1; grid-row: 1 / span 2;
+  margin: 0 !important;
 }
-.how-it-works__icon { grid-column: 2; }
-.how-it-works__label { grid-column: 2; font-weight: 600; }
-.how-it-works__desc { grid-column: 2; font-size: var(--mtext-sm); }
+.how-it-works__icon { display: none !important; }
+.how-it-works__label {
+  grid-column: 2; grid-row: 1;
+  font-size: var(--mtext-base);
+  font-weight: 700;
+  margin: 0;
+  align-self: center;
+}
+.how-it-works__desc {
+  grid-column: 2; grid-row: 2;
+  font-size: var(--mtext-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+}
 
 /* 9f. Newsletter section — full-width tinted card. */
 .home-newsletter {

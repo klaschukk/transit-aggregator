@@ -30,16 +30,18 @@ import pytest
     '/voznja/beograd-do-novi-sad/',
     '/gradski/beograd/',
 ])
-def test_pages_render_house_ad_when_adsense_disabled(client, path):
-    """Default config has ADSENSE_ID='' — every ad-bearing page must
-    render the house-ad partial in the slot wrapper. The slot wrapper
-    itself stays present so reserved layout space is unchanged."""
+def test_pages_render_nothing_when_adsense_disabled(client, path):
+    """Until AdSense is approved (post-1000-visit threshold per the
+    project plan) ADSENSE_ID is empty. The house-ad fallback was leaking
+    unstyled "Reklama" + raw promo text onto every page, so the macro
+    now early-returns when ADSENSE_ID is empty. Reserved layout space
+    will reappear automatically once AdSense is enabled."""
     resp = client.get(path)
     if resp.status_code == 404:
         pytest.skip(f'page {path} not present in test DB')
     assert resp.status_code == 200, path
-    assert b'class="ad-slot' in resp.data, path
-    assert b'house-ad' in resp.data, path
+    assert b'class="ad-slot' not in resp.data, path
+    assert b'house-ad' not in resp.data, path
 
 
 def test_no_adsense_script_loaded_when_id_empty(client):
@@ -167,25 +169,43 @@ def test_admin_revenue_handles_missing_adsense_table(client):
 # ── 5. Slot-level template macro behaviour ──────────────────────────────
 
 
-def test_ads_label_translated_in_slot(client):
-    """Every slot wrapper carries the `ads.label` translation so users
-    know it's an ad zone — required by AdSense policy on disclosure."""
-    resp = client.get('/')
-    assert resp.status_code == 200
-    # In SR (default) the label is 'Reklama'; verify *any* recognised
-    # form so an i18n tweak doesn't accidentally void disclosure.
-    body = resp.data
-    assert (b'Reklama' in body or b'Advertisement' in body
-            or b'\xd0\xa0\xd0\xb5\xd0\xba\xd0\xbb\xd0\xb0\xd0\xbc' in body), \
-        'no ad label found — disclosure missing'
+def test_ads_label_translated_when_adsense_enabled(client, app):
+    """When ADSENSE_ID + slot id + consent are all set, the slot wrapper
+    must carry the localised `ads.label` text — required by AdSense
+    policy on disclosure. We simulate the ads-on state because the
+    macro now early-returns whenever ADSENSE_ID is empty."""
+    original_id = app.config.get('ADSENSE_ID', '')
+    original_slots = dict(app.config.get('ADSENSE_SLOTS', {}))
+    try:
+        app.config['ADSENSE_ID'] = 'ca-pub-1234567890'
+        app.config['ADSENSE_SLOTS'] = {**original_slots, 'home_top': '999'}
+        client.set_cookie(key='cookie_consent', value='all',
+                          path='/', domain='localhost')
+        resp = client.get('/')
+        assert resp.status_code == 200
+        body = resp.data
+        assert (b'Reklama' in body or b'Advertisement' in body
+                or b'\xd0\xa0\xd0\xb5\xd0\xba\xd0\xbb\xd0\xb0\xd0\xbc' in body), \
+            'no ad label found — disclosure missing'
+    finally:
+        app.config['ADSENSE_ID'] = original_id
+        app.config['ADSENSE_SLOTS'] = original_slots
 
 
-def test_ad_slot_wrappers_present_on_route_detail(client):
-    """The bottom slot wrapper must exist on a route page even when ads
-    are disabled — `min-height` reservation is what prevents CLS when
-    ads later flip on."""
-    resp = client.get('/rute/beograd-novi-sad/')
-    if resp.status_code == 404:
-        pytest.skip('route not in test DB')
-    assert resp.status_code == 200
-    assert b'data-slot="route_bottom"' in resp.data
+def test_ad_slot_wrappers_appear_when_adsense_enabled(client, app):
+    """The bottom slot wrapper must exist on a route page once AdSense
+    is enabled — `min-height` reservation is what prevents CLS once ads
+    are live. Until then the macro renders nothing at all."""
+    original_id = app.config.get('ADSENSE_ID', '')
+    original_slots = dict(app.config.get('ADSENSE_SLOTS', {}))
+    try:
+        app.config['ADSENSE_ID'] = 'ca-pub-1234567890'
+        app.config['ADSENSE_SLOTS'] = {**original_slots, 'route_bottom': '999'}
+        resp = client.get('/rute/beograd-novi-sad/')
+        if resp.status_code == 404:
+            pytest.skip('route not in test DB')
+        assert resp.status_code == 200
+        assert b'data-slot="route_bottom"' in resp.data
+    finally:
+        app.config['ADSENSE_ID'] = original_id
+        app.config['ADSENSE_SLOTS'] = original_slots

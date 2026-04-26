@@ -27,9 +27,15 @@
 
 {%- macro ad_slot(slot_key, format='responsive', desktop_only=False,
                   label=True, lazy=True) -%}
+  {#- Until AdSense is approved (CLAUDE.md: "после 1000+ визитов"),
+      ADSENSE_ID is empty, so the only thing this macro could render is
+      the unstyled house-ad fallback — which leaks "Reklama" and raw
+      promo text onto every page. Skip rendering entirely until the env
+      var is set. Once AdSense lands, full path resumes automatically. -#}
+  {%- if not config.ADSENSE_ID -%}{%- else -%}
   {%- set slot_id = config.get('ADSENSE_SLOTS', {}).get(slot_key, '') -%}
   {%- set _consent_cookie = request.cookies.get('cookie_consent', '') -%}
-  {%- set _ads_ok = config.ADSENSE_ID and slot_id and _consent_cookie == 'all' -%}
+  {%- set _ads_ok = slot_id and _consent_cookie == 'all' -%}
   {%- set _wrapper_class = 'ad-slot ad-slot--' ~ format
         ~ (' ad-slot--desktop-only' if desktop_only else '') -%}
   <div class="{{ _wrapper_class }}" data-slot="{{ slot_key }}">
@@ -47,4 +53,5 @@
     {%- include '_partials/_house_ad.html' -%}
     {%- endif %}
   </div>
+  {%- endif -%}
 {%- endmacro -%}
