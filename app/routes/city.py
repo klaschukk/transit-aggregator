@@ -218,13 +218,28 @@ def line_detail(city: str, line_slug: str):
         LIMIT 4
     """, [line['id']], ttl=3600) if db_ready() else []
 
+    # E-E-A-T prose: rules-based 150–250-word unique block per line, cached
+    # on (slug, lang). Replaces the duplicate 2-paragraph boilerplate that
+    # used to live in line_detail.html and made every line page register
+    # as near-duplicate content in GSC.
+    from flask import g as _g
+    _lang = getattr(_g, 'lang', 'sr')
+    _lang_prefix = getattr(_g, 'lang_prefix', '')
+    prose = _line_prose_cached(
+        line_slug=line_slug, lang=_lang, lang_prefix=_lang_prefix,
+        line=line, stops=stops,
+        schedule_rd=schedule.get('RD'), schedule_sat=schedule.get('S'),
+        interchange=interchange_stops,
+    )
+
     return render_template('line_detail.html', city=city, line=line, stops=stops,
                            schedule=schedule, has_gtfs=has_gtfs,
                            first_dep=first_dep, last_dep=last_dep,
                            line_type_label=line_type_label,
                            geometry=geometry,
                            related_lines=related_lines,
-                           interchange_stops=interchange_stops)
+                           interchange_stops=interchange_stops,
+                           prose=prose)
 
 
 @city_bp.route('/gradski/<city>/stajaliste/<stop_slug>/')
@@ -370,6 +385,40 @@ def _stop_prose_cached(*, stop_slug, lang, lang_prefix, stop, lines, nearby, gtf
     with _STOP_PROSE_CACHE_LOCK:
         _STOP_PROSE_CACHE[key] = prose
         _STOP_PROSE_CACHE_STAMPS[key] = now
+    return prose
+
+
+# ── Line prose cache (in-process, 24 h TTL) ─────────────────────────────
+# Mirrors _STOP_PROSE_CACHE. ~611 lines × 3 langs = 1833 entries; trivial.
+# Cache key intentionally excludes city — slug is unique within a city
+# but a single key namespace across cities still avoids collisions because
+# slugs include city-specific prefixes (e.g. 'linija-2a' vs '4').
+
+_LINE_PROSE_CACHE: dict[tuple[str, str], dict] = {}
+_LINE_PROSE_CACHE_LOCK = threading.Lock()
+_LINE_PROSE_CACHE_TTL = 24 * 3600
+_LINE_PROSE_CACHE_STAMPS: dict[tuple[str, str], float] = {}
+
+
+def _line_prose_cached(*, line_slug, lang, lang_prefix, line, stops,
+                       schedule_rd, schedule_sat, interchange):
+    import time as _time
+    from app.content.line_prose import build_prose
+    key = (line_slug, lang)
+    now = _time.time()
+    with _LINE_PROSE_CACHE_LOCK:
+        stamp = _LINE_PROSE_CACHE_STAMPS.get(key, 0)
+        if key in _LINE_PROSE_CACHE and now - stamp < _LINE_PROSE_CACHE_TTL:
+            return _LINE_PROSE_CACHE[key]
+    prose = build_prose(
+        line, stops,
+        schedule_rd=schedule_rd, schedule_sat=schedule_sat,
+        interchange=interchange,
+        lang=lang, lang_prefix=lang_prefix,
+    )
+    with _LINE_PROSE_CACHE_LOCK:
+        _LINE_PROSE_CACHE[key] = prose
+        _LINE_PROSE_CACHE_STAMPS[key] = now
     return prose
 
 

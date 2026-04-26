@@ -196,32 +196,23 @@
   </div>
 </section>
 
-<!-- Unique SEO prose block (≥200 words) -->
-<div class="seo-block fade-in fade-in--d3">
+<!-- Rules-based unique prose (≥120 words from DB facts) — replaces the
+     2-paragraph boilerplate that used to be identical across 600+ line
+     pages. Each paragraph is gated: schedule + transfers only render
+     when the underlying data is present. -->
+{% if prose and prose.geography %}
+<div class="seo-block line-prose fade-in fade-in--d3">
   <div class="seo-block__icon">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
   </div>
   <div class="seo-block__content">
-    <h2>O liniji {{ line.number }} — {{ city_label }}</h2>
-    <p>
-      Linija {{ line.number }} je {{ line_type_label|lower }} u sistemu gradskog prevoza grada {{ city_label }}a.
-      {% if stops %}Trasa obuhvata {{ stops|length }} stajališta, počevši od polaznog stajališta {{ stops[0].name }} i završavajući se na krajnjem stajalištu {{ stops[-1].name }}.{% endif %}
-      {% if has_gtfs and first_dep and last_dep %}Prema zvaničnom GTFS redu vožnje, prvi polazak sa početne stanice je u {{ first_dep }}, a poslednji u {{ last_dep }}.
-      Linija saobraća radnim danom sa redovnim intervalima, dok se vikendom frekvencija polazaka smanjuje.{% endif %}
-      {% if stops and stops|length > 2 %}Putnici mogu da koriste ovu liniju za povezivanje ključnih delova grada — linija prolazi kroz nekoliko važnih stajališta
-      uključujući {{ stops[1].name }}{% if stops|length > 3 %}, {{ stops[stops|length // 2].name }}{% endif %}{% if stops|length > 4 %} i {{ stops[-2].name }}{% endif %}.{% endif %}
-      Za tačno vreme dolaska na određeno stajalište preporučujemo da proverite naše detaljne stranice stajališta ili koristite zvanične aplikacije gradskog prevoznika.
-    </p>
-    <p>
-      Gradski prevoz u {{ city_label }}u predstavlja osnovni način kretanja za stanovnike i posetioce grada.
-      Linija {{ line.number }} je deo mreže koja pokriva glavne saobraćajne koridore, povezujući stambene četvrti sa poslovnim i
-      obrazovnim centrima. Karte za gradski prevoz možete kupiti na kioscima, u vozilima kod vozača ili preko mobilnih aplikacija
-      u zavisnosti od prevoznika. Za najažurnije informacije o eventualnim izmenama trase ili privremenim skretanjima pratite
-      zvanična obaveštenja gradskog prevoznika. Prevozni.com prikazuje red vožnje besplatno i bez registracije, omogućavajući
-      brz pregled svih linija, stajališta i polazaka na jednom mestu.
-    </p>
+    <h2>{{ _('line_prose.heading').format(number=line.number, city=city_label) }}</h2>
+    <p>{{ prose.geography }}</p>
+    {% if prose.schedule %}<p>{{ prose.schedule }}</p>{% endif %}
+    {% if prose.transfers %}<p>{{ prose.transfers|safe }}</p>{% endif %}
   </div>
 </div>
+{% endif %}
 
 {% endblock %}
 

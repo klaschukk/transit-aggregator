@@ -94,6 +94,22 @@
 </section>
 {% endif %}
 
+{# Travel guides — guide pages were the smallest bucket (4 pages) and
+   all of them ran median 2 inbound (only the /vodici/ index linked
+   to them). Surfacing the 3 evergreen guides on every country hub
+   adds 8 hubs × 3 guides = ~24 inbound edges across the bucket. #}
+<section class="see-also">
+  <h2 class="see-also__title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 016.5 17H20V4H6.5A2.5 2.5 0 004 6.5v13z"/><path d="M4 19.5V17"/></svg>
+    {{ _('guides.index_h1') }}
+  </h2>
+  <div class="see-also__list">
+    <a href="{{ lang_prefix }}/vodici/kako-doci-beograd-budva/" class="see-also__link">{{ _('guides.beograd_budva.title') }}</a>
+    <a href="{{ lang_prefix }}/vodici/najjeftinije-autobus-karte-srbija/" class="see-also__link">{{ _('guides.cheap_tickets.title') }}</a>
+    <a href="{{ lang_prefix }}/vodici/autobus-ili-voz-srbija/" class="see-also__link">{{ _('guides.bus_vs_train.title') }}</a>
+  </div>
+</section>
+
 <!-- Other countries — link to every other hub so PageRank flows across
      the full network, not just the four we hard-coded historically. -->
 <section class="see-also">

@@ -3180,6 +3180,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'About the {stop_name} stop',
         'ru': 'Об остановке {stop_name}',
     },
+    'line_prose.heading': {
+        'sr': 'O liniji {number} — {city}',
+        'en': 'About line {number} in {city}',
+        'ru': 'О линии {number} — {city}',
+    },
 
     # ── Reviews / UGC ──
     'review.heading': {

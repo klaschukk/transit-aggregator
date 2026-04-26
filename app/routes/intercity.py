@@ -115,7 +115,9 @@ def route_detail(slug: str):
     # "Drugi pravci iz {origin}" — top siblings from the same origin,
     # ordered by trip volume so the strongest internal-link recipients
     # win. Skipped at render time when <2 siblings (PageRank dilution
-    # isn't worth a one-card section).
+    # isn't worth a one-card section). Limit 8 — gives long-tail
+    # sibling routes (123 of 453 had <5 inbound after audit-pass-1)
+    # a chance to climb above the floor.
     similar_routes = cached_query("""
         SELECT r.slug, r.from_city, r.to_city, r.distance_km,
                COUNT(DISTINCT t.id) AS trip_count
@@ -125,7 +127,7 @@ def route_detail(slug: str):
         GROUP BY r.slug, r.from_city, r.to_city, r.distance_km
         HAVING trip_count > 0
         ORDER BY trip_count DESC, r.to_city
-        LIMIT 5
+        LIMIT 8
     """, [route['from_city'], slug], ttl=3600)
 
     from app.routes.info import country_hub_for_city
@@ -227,7 +229,7 @@ def city_pair(from_city: str, to_city: str):
             GROUP BY r.from_city, r.to_city, r.from_city_slug, r.to_city_slug, r.distance_km
             HAVING trip_count > 0
             ORDER BY trip_count DESC
-            LIMIT 5
+            LIMIT 8
         """, [route['from_city'], route['to_city']], ttl=3600)
 
         # Onward: routes departing from the destination city — helps Google
@@ -241,7 +243,7 @@ def city_pair(from_city: str, to_city: str):
             GROUP BY r.from_city, r.to_city, r.from_city_slug, r.to_city_slug, r.distance_km
             HAVING trip_count > 0
             ORDER BY trip_count DESC
-            LIMIT 5
+            LIMIT 8
         """, [route['to_city'], route['from_city']], ttl=3600)
 
     # Reviews aggregate across both /voznja/ and /rute/ via the canonical
