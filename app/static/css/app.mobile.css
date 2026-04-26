@@ -261,14 +261,11 @@ body.m-sheet-locked { overflow: hidden; }
   /* Frosted glass on scroll — only kicks in once the body has scrolled
      ≥80px (mobile.js toggles `.is-scrolled` on the header). */
   transition: background .2s ease, box-shadow .2s ease, backdrop-filter .2s ease;
-}
-/* Drawer is z-index 210; lift the header (and its toggle button) above
-   the drawer when open so the X close button remains tappable. */
-body.m-nav-open .site-header {
-  z-index: 220;
-  background: transparent;
-  border-bottom-color: transparent;
-  box-shadow: none;
+  /* Header anchors the dropdown (`.site-nav` is `position: absolute` to
+     this stacking context) and stays above the dropdown's invisible
+     click-catcher. */
+  position: sticky;
+  z-index: 215;
 }
 .site-header.is-scrolled {
   background: rgba(255,255,255,0.78);
@@ -282,9 +279,9 @@ body.m-nav-open .site-header {
   transition: transform .2s var(--mease-out);
 }
 
-/* Off-canvas drawer — slides from the right. The base `<nav>` keeps
-   its existing markup; we just swap from inline-row to drawer when
-   the toggle button is open (`<body class="m-nav-open">`). */
+/* Bootstrap-style dropdown — the toggle pops a compact menu below the
+   header, anchored to the right. Body `m-nav-open` flag gates the open
+   state. No drawer, no body-lock, no slide; just show/hide a panel. */
 .site-nav-toggle {
   display: inline-flex;
   align-items: center; justify-content: center;
@@ -293,92 +290,82 @@ body.m-nav-open .site-header {
   border-radius: var(--mradius-pill);
   cursor: pointer;
   color: var(--color-text);
-  position: relative;
-  z-index: 100;
 }
 .site-nav-toggle:hover { background: var(--mtint-surface); }
 .site-nav-toggle svg { transition: transform .2s var(--mease-out); }
-/* Drawer sits at z-index 210; raise the toggle above it when open so
-   the X stays visible and tappable to close the drawer. */
-body.m-nav-open .site-nav-toggle {
-  z-index: 220;
-  color: var(--color-text);
-}
 body.m-nav-open .site-nav-toggle svg { transform: rotate(90deg); }
 
-/* The full nav becomes the drawer. We override existing display rules
-   only when the drawer flag is set. */
 .site-nav {
-  position: fixed;
-  top: 0; right: 0;
-  width: 80vw;
-  max-width: 320px;
-  height: 100vh; height: 100dvh;
+  position: absolute;
+  top: calc(100% + var(--mspace-1));
+  right: var(--mspace-2);
+  width: 260px;
+  max-width: calc(100vw - var(--mspace-3) * 2);
   background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--mradius-md);
   box-shadow: var(--melev-pop);
-  transform: translateX(100%);
-  transition: transform .25s var(--mease-out);
+  padding: var(--mspace-2);
+  display: flex; flex-direction: column; gap: 2px;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity .15s ease, transform .15s ease;
+  pointer-events: none;
+  visibility: hidden;
   z-index: 210;
-  /* Top padding clears the (now-lifted) header so the logo + X close
-     button remain visible above the drawer surface. */
-  padding: calc(var(--header-h) + var(--mspace-3) + env(safe-area-inset-top))
-           var(--mspace-4) var(--mspace-4);
-  display: flex; flex-direction: column; gap: var(--mspace-1);
+  max-height: calc(100dvh - var(--header-h) - var(--mspace-4));
   overflow-y: auto;
+  /* Block touch scroll-chaining into the page below. */
+  overscroll-behavior: contain;
 }
-@media (max-width: 479px) {
-  .site-nav { width: 100vw; max-width: none; }
+body.m-nav-open .site-nav {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  visibility: visible;
 }
-body.m-nav-open .site-nav { transform: translateX(0); }
-/* Drawer backdrop reuses the bottom-sheet backdrop styling so a tap
-   anywhere off the drawer dismisses it. */
+/* Invisible click-catcher behind the dropdown; tap anywhere off it to
+   close. Sits below the header (215) and dropdown (210) so it never
+   blocks the toggle or the menu items themselves. */
 .m-nav-backdrop {
   position: fixed; inset: 0;
-  background: rgba(15,23,42,0);
+  background: transparent;
   pointer-events: none;
-  transition: background .25s var(--mease-out);
   z-index: 205;
 }
-.m-nav-backdrop.m-sheet-backdrop--open {
-  background: rgba(15,23,42,.4);
-  pointer-events: auto;
-}
+.m-nav-backdrop.m-sheet-backdrop--open { pointer-events: auto; }
+
 .site-nav__link {
-  /* Override desktop `.site-nav__link { height: 100% }` from app.css —
-     in column flex it would make each link a flex item competing for
-     full drawer height, spreading items across 100dvh instead of
-     stacking compactly at the top. */
+  /* Override desktop `.site-nav__link { height: 100% }` so links sit at
+     content height inside the dropdown instead of stretching. */
   height: auto;
   flex: 0 0 auto;
-  padding: var(--mspace-3) var(--mspace-3);
-  border-radius: var(--mradius-md);
-  font-size: var(--mtext-base); font-weight: 600;
+  padding: var(--mspace-2) var(--mspace-3);
+  border-radius: var(--mradius-sm);
+  font-size: var(--mtext-sm); font-weight: 600;
   color: var(--color-text);
-  display: flex; align-items: center; gap: var(--mspace-3);
+  display: flex; align-items: center; gap: var(--mspace-2);
   text-decoration: none;
-  min-height: 48px;
+  min-height: 40px;
 }
 .site-nav__link:hover, .site-nav__link:active { background: var(--mtint-surface); }
-.site-nav__icon { color: var(--color-primary); flex-shrink: 0; }
-/* Search link is icon-only on desktop; in the drawer give it the same
-   row treatment as the other links so it doesn't render as a tiny pill. */
+.site-nav__icon { color: var(--color-primary); flex-shrink: 0; width: 16px; height: 16px; }
 .site-nav__search {
   height: auto; width: auto;
-  border-radius: var(--mradius-md);
+  border-radius: var(--mradius-sm);
   justify-content: flex-start;
   flex: 0 0 auto;
 }
-/* Section divider above the FIRST pill group only — currency + language
-   live side by side, a divider between them looks like a typo. */
+/* Bootstrap-style dropdown-divider before the first pill group. */
+.site-nav > .lang-pill:first-of-type {
+  margin-top: var(--mspace-2);
+  padding-top: var(--mspace-2);
+  border-top: 1px solid var(--color-border);
+}
 .site-nav .lang-pill {
-  display: flex; gap: var(--mspace-2);
+  display: flex; gap: 4px;
   flex-wrap: wrap;
   flex: 0 0 auto;
-}
-.site-nav > .lang-pill:first-of-type {
-  margin-top: var(--mspace-3);
-  padding-top: var(--mspace-3);
-  border-top: 1px solid var(--color-border);
 }
 .site-nav .lang-pill__item {
   flex: 1;

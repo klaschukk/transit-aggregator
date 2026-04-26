@@ -122,24 +122,22 @@
   // users + screen readers skip it. Removed when open or on desktop.
   if (siteNav) siteNav.setAttribute('inert', '');
   function closeNav() {
-    body.classList.remove('m-nav-open', 'm-sheet-locked');
+    body.classList.remove('m-nav-open');
     if (navToggle) navToggle.setAttribute('aria-expanded', 'false');
     if (siteNav) siteNav.setAttribute('inert', '');
     setNavIcon(false);
     if (navBackdrop) {
       navBackdrop.classList.remove('m-sheet-backdrop--open');
-      // Match transition duration before hiding so the fade plays out.
-      setTimeout(function () { navBackdrop.setAttribute('hidden', ''); }, 260);
+      navBackdrop.setAttribute('hidden', '');
     }
   }
   function openNav() {
-    body.classList.add('m-nav-open', 'm-sheet-locked');
+    body.classList.add('m-nav-open');
     if (navToggle) navToggle.setAttribute('aria-expanded', 'true');
     if (siteNav) siteNav.removeAttribute('inert');
     setNavIcon(true);
     if (navBackdrop) {
       navBackdrop.removeAttribute('hidden');
-      void navBackdrop.offsetWidth;  // reflow
       navBackdrop.classList.add('m-sheet-backdrop--open');
     }
   }
