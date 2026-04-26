@@ -510,31 +510,46 @@ body.m-nav-open .site-nav { transform: translateX(0); }
 .hero__valueprop b { font-weight: 700; }
 .hero__valueprop span { white-space: nowrap; }
 
-/* 9b. Stats strip — horizontal scroll-snap on mobile. .home-stats already
-   exists; we override its grid to a scroll rail. */
+/* 9b. Stats — 2x2 grid on mobile. The previous horizontal scroll-rail
+   forced the user to swipe to see the last two of four numbers, which
+   is anti-pattern for a "we have N routes / N stops / N cities"
+   credibility strip. A 2x2 grid shows everything at once with no
+   interaction cost. */
 .home-stats {
-  display: flex !important;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-padding: var(--mspace-3);
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
   gap: var(--mspace-2);
-  padding-left: var(--mspace-3);
-  padding-right: var(--mspace-3);
-  scrollbar-width: none;
+  padding: 0 var(--mspace-3);
+  margin-top: -16px;
+  overflow: visible;
 }
-.home-stats::-webkit-scrollbar { display: none; }
 .home-stats__item {
-  flex: 0 0 42%;
-  min-width: 130px;
-  scroll-snap-align: start;
-  background: linear-gradient(180deg,#fff,var(--mtint-surface));
+  background: linear-gradient(180deg, #fff, var(--mtint-surface));
+  border: 1px solid var(--color-border);
   border-radius: var(--mradius-md);
   box-shadow: var(--melev-1);
-  padding: var(--mspace-3) var(--mspace-3);
+  padding: var(--mspace-3) var(--mspace-2);
   text-align: center;
 }
-.home-stats__num { font-size: 28px; font-weight: 800; color: var(--color-primary); line-height: 1; }
-.home-stats__label { font-size: var(--mtext-xs); color: var(--color-text-muted); margin-top: var(--mspace-1); text-transform: uppercase; letter-spacing: .04em; }
+.home-stats__icon {
+  display: block;
+  width: 22px; height: 22px;
+  margin: 0 auto var(--mspace-1);
+  color: var(--color-primary);
+}
+.home-stats__num {
+  font-size: var(--mtext-xl);
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.home-stats__label {
+  font-size: var(--mtext-xs);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  font-weight: 600;
+}
 
 /* 9c. Popular routes — convert two-column grid into a horizontal card-rail. */
 .home-routes {
