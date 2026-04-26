@@ -4,6 +4,14 @@
 {% block meta_description %}{{ operator.name }}: {{ total_routes }} {{ _('operator.meta_routes') }}, {{ total_trips }} {{ _('operator.meta_trips') }}. {{ _('operator.meta_cta') }}{% endblock %}
 
 {% block head_extra %}
+{# Empty operator (no priced routes after filter) → noindex defensively.
+   The sitemap query already excludes these as of 2026-04-26 audit, but a
+   user/crawler can still hit the URL directly. Without this, the thin
+   page (~660 bytes, no route list) would re-enter Google's index on
+   organic discovery. #}
+{% if not routes %}
+<meta name="robots" content="noindex, follow">
+{% endif %}
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Organization","name":"{{ operator.name }}","url":"{{ canonical_url }}"{% if operator.website %},"sameAs":["{{ operator.website }}"]{% endif %},"areaServed":[{"@type":"Country","name":"Serbia"},{"@type":"Country","name":"Montenegro"}]}
 </script>

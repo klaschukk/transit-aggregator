@@ -681,10 +681,15 @@ def sitemap_routes():
         for r in routes:
             pages.append(url(f'/rute/{r["slug"]}/', 'daily', '0.7'))
 
+        # Operators must have at least one PRICED trip — without a price the
+        # operator_detail page renders an empty route list (the handler filters
+        # routes by `t.price_rsd > 0`), producing ~660-byte soft-404 pages
+        # that waste crawl budget. Audit on 2026-04-26 found 49/70 operators
+        # in this state. The healthy 21 all have ≥1 priced trip.
         operators = cached_query("""
             SELECT DISTINCT o.slug FROM operators o
             JOIN trips t ON t.operator_id = o.id
-            WHERE o.slug IS NOT NULL
+            WHERE o.slug IS NOT NULL AND t.price_rsd > 0
         """, ttl=3600)
         for op in operators:
             pages.append(url(f'/prevoznici/{op["slug"]}/', 'weekly', '0.5'))
