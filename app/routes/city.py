@@ -263,18 +263,22 @@ def stop_detail(city: str, stop_slug: str):
 
     departures = []
 
-    # Nearby stops by coordinates
+    # Nearby stops by coordinates. Lifted 5 → 10 and widened the box
+    # 0.005 → 0.008 deg (~900m) so stops in less-dense outer zones (the
+    # ones that score 1-2 inbound in the link audit) actually find
+    # neighbours to point at. Cap at 10 to stay under the 12-link
+    # ceiling for the section.
     nearby_stops = []
     if stop.get('lat') and stop.get('lon'):
         nearby_stops = query("""
             SELECT slug, name, lat, lon
             FROM city_stops
             WHERE city = ?
-              AND lat BETWEEN ? - 0.005 AND ? + 0.005
-              AND lon BETWEEN ? - 0.005 AND ? + 0.005
+              AND lat BETWEEN ? - 0.008 AND ? + 0.008
+              AND lon BETWEEN ? - 0.008 AND ? + 0.008
               AND slug != ?
               AND lat IS NOT NULL
-            LIMIT 5
+            LIMIT 10
         """, [city, stop['lat'], stop['lat'], stop['lon'], stop['lon'], stop_slug])
 
     # Compute stop_info for SEO content enrichment
