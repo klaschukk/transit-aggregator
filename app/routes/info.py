@@ -395,31 +395,19 @@ def country_hub(country: str):
             if t_row:
                 sample_trips.append(t_row)
 
-    # Reviews aggregated across this country's routes — same shape as
-    # operator_detail. Caps at the top 200 routes loaded above so the IN
-    # clause stays bounded.
-    from app import analytics_db
-    country_route_slugs = [r['slug'] for r in routes]
+    # Reviews — same namespacing as operator/line/city. Slug is
+    # "country-<slug>" so each country pools its own bucket and the
+    # AggregateRating attaches to the country entity directly. Wrapped
+    # in try/except so a locked analytics_db never breaks render.
+    review_slug = f'country-{country}'
     country_reviews: list = []
-    country_reviews_agg = {'n': 0, 'avg': None}
-    if country_route_slugs:
-        ph = ','.join(['?'] * len(country_route_slugs))
-        country_reviews = analytics_db.query(
-            f"SELECT id, rating, comment, author_name, lang, ts, route_slug "
-            f"FROM reviews WHERE route_slug IN ({ph}) AND status = 'approved' "
-            f"ORDER BY ts DESC LIMIT 10",
-            country_route_slugs,
-        )
-        agg_row = analytics_db.query(
-            f"SELECT COUNT(*) AS n, AVG(rating) AS avg_rating "
-            f"FROM reviews WHERE route_slug IN ({ph}) AND status = 'approved'",
-            country_route_slugs,
-        )
-        if agg_row and agg_row[0]['n']:
-            country_reviews_agg = {
-                'n': int(agg_row[0]['n']),
-                'avg': round(float(agg_row[0]['avg_rating']), 1),
-            }
+    country_reviews_agg = None
+    try:
+        from app import analytics_db
+        country_reviews = analytics_db.approved_reviews(review_slug)
+        country_reviews_agg = analytics_db.aggregate_rating(review_slug)
+    except Exception:
+        pass
 
     return render_template(
         'country_hub.html',
@@ -436,6 +424,7 @@ def country_hub(country: str):
         avg_price_rsd=avg_price_rsd,
         min_price_rsd=min_price_rsd,
         sample_trips=sample_trips,
+        review_slug=review_slug,
         reviews=country_reviews,
         reviews_agg=country_reviews_agg,
     )
