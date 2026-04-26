@@ -21,9 +21,10 @@ def test_ads_txt_served(client):
 
 def test_newsletter_form_on_home(client):
     html = client.get('/').data.decode()
-    # Two forms expected: hero variant + footer variant
-    assert html.count('<form class="newsletter-form') == 2
-    assert 'newsletter-form--hero' in html
+    # Only the footer variant — the hero newsletter strip was removed
+    # because it interrupted the search → results path on first scroll.
+    assert html.count('<form class="newsletter-form') == 1
+    assert 'newsletter-form--hero' not in html
     assert 'newsletter-form--footer' in html
 
 

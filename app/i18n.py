@@ -96,6 +96,25 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Cookies',
         'ru': 'Cookies',
     },
+    'privacy.cookies_ab_h': {
+        'sr': 'A/B testiranje',
+        'en': 'A/B testing',
+        'ru': 'A/B-тестирование',
+    },
+    'privacy.cookies_ab_body': {
+        'sr': 'Da bismo merili koje varijante stranica daju bolje iskustvo, '
+              'koristimo prvi kolačić <code>ab_v1</code> (1 godina). On '
+              'sadrži samo nasumičan identifikator i ne povezuje se ni sa '
+              'jednim ličnim podatkom.',
+        'en': 'To measure which page variants deliver a better experience, '
+              'we set a first-party <code>ab_v1</code> cookie (1 year). It '
+              'contains only a random identifier and is not linked to any '
+              'personal data.',
+        'ru': 'Чтобы понять какие варианты страниц работают лучше, мы '
+              'устанавливаем cookie <code>ab_v1</code> (на 1 год). В нём '
+              'хранится только случайный идентификатор, не связанный ни с '
+              'какими личными данными.',
+    },
     'privacy.cookies_body': {
         'sr': 'Koristimo samo neophodne kolačiće (npr. CSRF token). Ne koristimo reklamne niti praćeće kolačiće trećih strana.',
         'en': 'We use only essential cookies (e.g. CSRF token). No third-party advertising or tracking cookies.',
