@@ -27,16 +27,55 @@
 
 {% from '_partials/_breadcrumb.html' import breadcrumb with context %}
 {% from '_partials/_empty_state.html' import empty_state %}
+{% from '_partials/_stats_strip.html' import stats_strip %}
+
+<!-- Mobile back button — matches /rute/<slug>/ chrome -->
+<div class="mobile-back">
+  <a href="{{ lang_prefix }}/" class="mobile-back__btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>
+    <span>{{ _('breadcrumb.home') }}</span>
+  </a>
+</div>
 
 {{ breadcrumb([
   {'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')},
   {'label': _('city.title') ~ ' ' ~ city_label}
 ]) }}
 
-<div class="page-title">
-  <h1>{{ _('city.title') }} {{ city_label }}</h1>
+<div class="page-title fade-in">
+  <h1>
+    {{ _('city.title') }} {{ city_label }}
+    <button type="button" class="js-fav-btn fav-btn" aria-label="{{ _('fav.save_aria') }}"
+            data-path="/gradski/{{ city }}/"
+            data-key="city-{{ city }}"
+            data-from="{{ city_label }}" data-to="">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+    </button>
+    <button type="button" class="share-btn" data-share-current
+            data-share-title="{{ _('city.title') }} {{ city_label }} | Prevozni"
+            aria-label="{{ _('a11y.share') }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true">
+        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+        <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/>
+      </svg>
+    </button>
+  </h1>
   <p class="page-subtitle">{{ lines|length }} {{ _('city.lines_count') }}{% if stops_with_coords %} · {{ stops_with_coords }} {{ _('city.stops_on_map') }}{% endif %}</p>
+  <a href="{{ lang_prefix }}/rute/" class="reverse-route">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+    {{ _('city.intercity') }} — {{ city_label }}
+  </a>
 </div>
+
+<!-- Stats strip — same vocabulary + icons as /rute/<slug>/. Lines and
+     stops are always present; tram/trolley count adds a third pill on
+     cities that have rail-grade transit (Beograd, Novi Sad). -->
+{% set _tram_count = lines|selectattr('type', 'equalto', 'tram')|list|length + lines|selectattr('type', 'equalto', 'trolleybus')|list|length %}
+{{ stats_strip([
+  {'value': lines|length, 'label': _('city.lines_count'), 'icon': 'distance'},
+  {'value': stops_with_coords or 0, 'label': _('city.stops_label'), 'icon': 'schedule'},
+] + ([{'value': _tram_count, 'label': _('city.tram_trolley_label')}] if _tram_count else [])
+) }}
 
 <!-- SEO intro (per-city unique prose) -->
 <div class="seo-block fade-in">
@@ -202,6 +241,19 @@
   </div>
 </section>
 {% endif %}
+
+<!-- Reviews section — same partial /rute/<slug>/ uses. Slug is
+     namespaced ("city-<city>") so reviews don't collide with route or
+     line buckets and aggregate per-city. -->
+{% from '_partials/_reviews.html' import reviews_section with context %}
+{{ reviews_section(review_slug, reviews, reviews_agg) }}
+
+<!-- Newsletter form, source='city_transport' — distinguishes city-hub
+     signups from footer / route_detail / line_detail in analytics. -->
+<section class="route-price-alert fade-in fade-in--d3">
+  {% from '_partials/_newsletter_form.html' import newsletter_form with context %}
+  {{ newsletter_form(source='city_transport') }}
+</section>
 
 <section class="faq-section">
   <h2 class="section__title">{{ _('city_transport.faq_heading') }}</h2>

@@ -631,6 +631,16 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'stops on map',
         'ru': 'остановок на карте',
     },
+    'city.stops_label': {
+        'sr': 'stajališta',
+        'en': 'stops',
+        'ru': 'остановок',
+    },
+    'city.tram_trolley_label': {
+        'sr': 'tramvaja i trolejbusa',
+        'en': 'tram + trolley lines',
+        'ru': 'трамв./троллейб.',
+    },
     'city.popular_stops': {
         'sr': 'Popularna stajališta',
         'en': 'Popular stops',

@@ -120,12 +120,28 @@ def city_hub(city: str):
         LIMIT 6
     """, [city_display], ttl=3600) if db_ready() else []
 
+    # Reviews — same pattern as line_detail / stop_detail. Slug is
+    # "city-<city>" so a Beograd review and a Novi Sad review don't
+    # aggregate into the same bucket.
+    review_slug = f'city-{city}'
+    reviews_data: list = []
+    reviews_aggregate = None
+    try:
+        from app import analytics_db
+        reviews_data = analytics_db.approved_reviews(review_slug)
+        reviews_aggregate = analytics_db.aggregate_rating(review_slug)
+    except Exception:
+        pass
+
     return render_template('city_transport.html', city=city, lines=lines,
                            stops_with_coords=stops_with_coords,
                            top_stops=top_stops,
                            popular_intercity=popular_intercity,
                            top_operators=top_operators,
-                           city_label=city_display)
+                           city_label=city_display,
+                           review_slug=review_slug,
+                           reviews=reviews_data,
+                           reviews_agg=reviews_aggregate)
 
 
 @city_bp.route('/gradski/<city>/linija/<line_slug>/')
