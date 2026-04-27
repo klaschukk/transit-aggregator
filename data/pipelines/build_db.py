@@ -88,7 +88,33 @@ def type_color(line_type: str) -> str:
 
 def build() -> None:
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+    # Preserve line_geometries across rebuilds — the table is populated
+    # by the standalone scrape_route_geometries.py script (Overpass /
+    # OSM relations, ~30-60 min, ~600 lines). OSM relations change
+    # rarely; refetching nightly wastes Overpass quota. Snapshot the
+    # rows here so the new DB starts with the same polyline coverage.
+    #
+    # Apr 25 incident: previous build() did unconditional unlink() →
+    # line_geometries wiped → line_detail polyline maps fell back to
+    # straight-line-between-stops + 600× ERROR/render in error.log
+    # before 9b8a7a4 added the try/except memoise. Root fix is here:
+    # carry the rows over so the table never goes empty.
+    preserved_geom: list = []
     if DB_PATH.exists():
+        try:
+            _old = duckdb.connect(str(DB_PATH), read_only=True)
+            preserved_geom = _old.execute(
+                "SELECT line_id, city, coords_json, way_count, "
+                "       node_count, fetched_at "
+                "FROM line_geometries"
+            ).fetchall()
+            _old.close()
+            print(f"Snapshotted {len(preserved_geom)} line_geometries rows from old DB")
+        except duckdb.Error:
+            # First-ever rebuild, or table genuinely missing — fine,
+            # the standalone scraper backfills on next run.
+            preserved_geom = []
         DB_PATH.unlink()
 
     conn = duckdb.connect(str(DB_PATH))
@@ -125,9 +151,51 @@ def build() -> None:
         _load_sample_data(conn)
 
     _verify_slug_invariant(conn)
+    _restore_line_geometries(conn, preserved_geom)
 
     conn.close()
     print(f"Built {DB_PATH} successfully")
+
+
+def _restore_line_geometries(
+    conn: duckdb.DuckDBPyConnection,
+    preserved: list,
+) -> None:
+    """Recreate the line_geometries table with the rows snapshotted before
+    the unlink. Drops dangling rows whose line_id no longer exists in the
+    rebuilt city_lines (a line removed upstream shouldn't keep its old
+    polyline).
+
+    The standalone scrape_route_geometries.py creates the same schema with
+    `CREATE TABLE IF NOT EXISTS`, so a first-time run with `preserved=[]`
+    leaves the table absent here and the scraper builds it on next run.
+    """
+    if not preserved:
+        return
+    conn.execute(
+        """
+        CREATE TABLE line_geometries (
+            line_id INTEGER PRIMARY KEY,
+            city VARCHAR,
+            coords_json VARCHAR,
+            way_count INTEGER,
+            node_count INTEGER,
+            fetched_at TIMESTAMP
+        )
+        """
+    )
+    new_line_ids = {
+        r[0] for r in conn.execute("SELECT id FROM city_lines").fetchall()
+    }
+    kept = [row for row in preserved if row[0] in new_line_ids]
+    conn.executemany(
+        "INSERT INTO line_geometries VALUES (?, ?, ?, ?, ?, ?)",
+        kept,
+    )
+    print(
+        f"Restored {len(kept)}/{len(preserved)} line_geometries rows "
+        f"(dropped {len(preserved) - len(kept)} dangling)"
+    )
 
 
 def _verify_slug_invariant(conn: duckdb.DuckDBPyConnection) -> None:

@@ -86,11 +86,23 @@ def ensure_table(conn: duckdb.DuckDBPyConnection) -> None:
 
 
 def _overpass_fetch(query: str) -> dict | None:
-    """POST a query to Overpass, try mirrors on failure. Returns parsed JSON or None."""
+    """POST a query to Overpass, try mirrors on failure. Returns parsed JSON or None.
+
+    User-Agent is mandatory: Overpass started returning 406 Not Acceptable
+    on the default `python-requests/X.Y` UA in early 2026. Identifying the
+    project + a contact URL is what every Overpass mirror's policy asks
+    for; without it the request silently fails on every line.
+    """
+    headers = {
+        "User-Agent": "prevozni-route-geom/1.0 (+https://prevozni.com)",
+    }
     last_err = None
     for endpoint in OVERPASS_ENDPOINTS:
         try:
-            resp = requests.post(endpoint, data={"data": query}, timeout=REQUEST_TIMEOUT)
+            resp = requests.post(
+                endpoint, data={"data": query},
+                headers=headers, timeout=REQUEST_TIMEOUT,
+            )
             if resp.status_code in (429, 504, 503):
                 last_err = f"{endpoint}: HTTP {resp.status_code}"
                 log.debug("  %s returned %s", endpoint.split("/")[2], resp.status_code)
