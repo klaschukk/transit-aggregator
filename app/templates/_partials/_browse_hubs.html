@@ -1,0 +1,49 @@
+{# Contextual links to the 5 top-level category hubs that GSC reported
+   as "Discovered, currently not indexed". Footer + main nav already point
+   at them, but those links carry low weight; this block lives in
+   above-the-fold see-also context on the heaviest-rendered detail
+   templates (route_detail, city_pair, line_detail, stop_detail) so each
+   hub picks up ~3500 contextual inbound links — far past Google's
+   "weak hub" threshold.
+
+   Hubs covered:
+     /rute/                  — intercity catalogue
+     /gradski/               — city-transport index
+     /prevoznici/            — carriers
+     /autobuske-stanice/     — stations
+     /destinacije/           — destinations index (parent of crna-gora)
+#}
+<section class="see-also see-also--browse">
+  <h2 class="see-also__title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+         width="18" height="18" aria-hidden="true">
+      <rect x="3" y="3" width="7" height="7" rx="1"/>
+      <rect x="14" y="3" width="7" height="7" rx="1"/>
+      <rect x="3" y="14" width="7" height="7" rx="1"/>
+      <rect x="14" y="14" width="7" height="7" rx="1"/>
+    </svg>
+    {{ _('browse.title') }}
+  </h2>
+  <div class="see-also__grid">
+    <a href="{{ lang_prefix }}/rute/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('browse.routes') }}</span>
+      <span class="see-also__card-meta">{{ _('browse.routes_meta') }}</span>
+    </a>
+    <a href="{{ lang_prefix }}/gradski/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('browse.cities') }}</span>
+      <span class="see-also__card-meta">{{ _('browse.cities_meta') }}</span>
+    </a>
+    <a href="{{ lang_prefix }}/prevoznici/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('browse.carriers') }}</span>
+      <span class="see-also__card-meta">{{ _('browse.carriers_meta') }}</span>
+    </a>
+    <a href="{{ lang_prefix }}/autobuske-stanice/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('browse.stations') }}</span>
+      <span class="see-also__card-meta">{{ _('browse.stations_meta') }}</span>
+    </a>
+    <a href="{{ lang_prefix }}/destinacije/" class="see-also__card">
+      <span class="see-also__card-title">{{ _('browse.destinations') }}</span>
+      <span class="see-also__card-meta">{{ _('browse.destinations_meta') }}</span>
+    </a>
+  </div>
+</section>

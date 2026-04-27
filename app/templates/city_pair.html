@@ -202,6 +202,8 @@
   {{ empty_state(icon='search', text=_('city_pair.no_direct'), sub=from_city ~ ' → ' ~ to_city) }}
 {% endif %}
 
+{% include '_partials/_browse_hubs.html' %}
+
 {% if route %}
 {% from '_partials/_reviews.html' import reviews_section with context %}
 {{ reviews_section(review_route_slug, reviews, reviews_agg) }}

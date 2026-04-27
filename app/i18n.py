@@ -69,6 +69,61 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Primary mobile navigation',
         'ru': 'Основная мобильная навигация',
     },
+    'browse.title': {
+        'sr': 'Pregledaj sve',
+        'en': 'Browse all',
+        'ru': 'Смотреть все',
+    },
+    'browse.routes': {
+        'sr': 'Sve rute',
+        'en': 'All routes',
+        'ru': 'Все маршруты',
+    },
+    'browse.routes_meta': {
+        'sr': 'Međugradski autobusi i vozovi',
+        'en': 'Intercity buses and trains',
+        'ru': 'Междугородние автобусы и поезда',
+    },
+    'browse.cities': {
+        'sr': 'Gradski prevoz',
+        'en': 'City transport',
+        'ru': 'Городской транспорт',
+    },
+    'browse.cities_meta': {
+        'sr': 'Beograd, Novi Sad, Niš, Kragujevac',
+        'en': 'Beograd, Novi Sad, Niš, Kragujevac',
+        'ru': 'Белград, Нови-Сад, Ниш, Крагуевац',
+    },
+    'browse.carriers': {
+        'sr': 'Prevoznici',
+        'en': 'Carriers',
+        'ru': 'Перевозчики',
+    },
+    'browse.carriers_meta': {
+        'sr': 'Lasta, Niš-Ekspres, OZLEM i drugi',
+        'en': 'Lasta, Niš-Ekspres, OZLEM and others',
+        'ru': 'Lasta, Niš-Ekspres, OZLEM и другие',
+    },
+    'browse.stations': {
+        'sr': 'Autobuske stanice',
+        'en': 'Bus stations',
+        'ru': 'Автобусные станции',
+    },
+    'browse.stations_meta': {
+        'sr': 'Polasci, adrese, šalteri',
+        'en': 'Departures, addresses, ticket counters',
+        'ru': 'Отправления, адреса, кассы',
+    },
+    'browse.destinations': {
+        'sr': 'Destinacije',
+        'en': 'Destinations',
+        'ru': 'Направления',
+    },
+    'browse.destinations_meta': {
+        'sr': 'Crna Gora, Bosna, Hrvatska i druge',
+        'en': 'Montenegro, Bosnia, Croatia and others',
+        'ru': 'Черногория, Босния, Хорватия и другие',
+    },
 
     # ── Footer ──
     'footer.desc': {

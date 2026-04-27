@@ -290,6 +290,8 @@
    Variant value is exposed both as a body data-attr (for CSS) and as a
    `data-ab-variant` on the form so the conversion JS can include the
    correct variant when posting /api/ab-convert. #}
+{% include '_partials/_browse_hubs.html' %}
+
 {% set _review_cta_variant = ab_variant('review_cta_v1') %}
 <div data-ab-review-cta="{{ _review_cta_variant }}">
 {% from '_partials/_reviews.html' import reviews_section with context %}
