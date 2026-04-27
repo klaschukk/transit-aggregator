@@ -64,6 +64,17 @@ def route_detail(slug: str):
             )
             if alt:
                 return redirect(url_for('intercity.route_detail', slug=norm), code=301)
+        # User typed /rute/X-do-Y/ confusing it with /voznja/X-do-Y/ pattern —
+        # if /rute/X-Y/ exists, send them there. Safe because no real route
+        # slug contains '-do-' (verified in DB).
+        if '-do-' in slug:
+            without_do = slug.replace('-do-', '-', 1)
+            alt = query_one(
+                "SELECT slug FROM routes WHERE slug = ? AND type = 'intercity'",
+                [without_do],
+            )
+            if alt:
+                return redirect(url_for('intercity.route_detail', slug=without_do), code=301)
         # Non-ASCII legacy URLs → 410 Gone (faster Google removal than 404).
         if not slug.isascii():
             abort(410)

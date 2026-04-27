@@ -45,6 +45,21 @@ def test_page_status(client, url, expected_status):
     assert resp.status_code == expected_status
 
 
+def test_rute_with_do_redirects_to_clean_slug(client):
+    # Users sometimes type /rute/X-do-Y/ confusing it with the /voznja/X-do-Y/
+    # pattern. If /rute/X-Y/ exists, 301 to it instead of 404.
+    resp = client.get("/rute/beograd-do-novi-sad/")
+    assert resp.status_code == 301
+    assert resp.headers["Location"].endswith("/rute/beograd-novi-sad/")
+
+
+def test_rute_with_do_404s_when_target_missing(client):
+    # Don't blanket-redirect — only when the cleaned slug exists. If neither
+    # /rute/X-do-Y/ nor /rute/X-Y/ exists, return 404 (or 410 for legacy).
+    resp = client.get("/rute/nepostojeci-do-takode-nepostojeci/")
+    assert resp.status_code == 404
+
+
 # ── b) API endpoints ─────────────────────────────────────────────────
 
 
