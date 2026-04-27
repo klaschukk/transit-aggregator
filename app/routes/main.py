@@ -420,24 +420,50 @@ def health():
     critical_ok = True  # transit_db + logs — sets overall http code
     degraded = False    # analytics_db, nightly — surfaces but doesn't 503
 
-    # ── transit_db: file present, age, route count ──────────────────────
+    # ── transit_db: file present, age, every load-bearing table ────────
+    #
+    # Apr 25 incident: build_db.py unlinked the DB and recreated every
+    # table EXCEPT line_geometries (populated by a separate scraper).
+    # /health only checked `routes` count, so it stayed 200 while
+    # /gradski/<city>/linija/<slug>/ silently 500'd for ~17h before
+    # log-spam revealed the gap. Probe each load-bearing table with a
+    # COUNT(*) and 503 the whole probe if any are missing/empty.
+    #
+    # Tables in the list MUST be pre-populated by the nightly pipeline.
+    # Don't add tables that legitimately can be empty (gtfs_*, stations
+    # for cities without train data, etc.) — false positives erode
+    # trust in the 503 signal.
+    _CRITICAL_TABLES = (
+        'routes', 'trips',
+        'city_lines', 'city_stops', 'city_line_stops',
+        'operators', 'line_geometries',
+    )
+
     db_path_str = current_app.config['DUCKDB_PATH']
     db_path = Path(db_path_str)
-    transit = {'ok': False, 'age_hours': None, 'routes': None}
+    transit: dict = {'ok': False, 'age_hours': None, 'routes': None,
+                     'tables': {}, 'missing': []}
     if db_path.exists():
         try:
             age_s = time.time() - db_path.stat().st_mtime
             transit['age_hours'] = round(age_s / 3600, 1)
         except OSError:
             pass
-        try:
-            row = cached_query_one(
-                "SELECT COUNT(*) AS c FROM routes", ttl=60
-            )
-            transit['routes'] = int(row['c']) if row else None
-            transit['ok'] = bool(transit['routes'])
-        except Exception:  # noqa: BLE001 — /health must never raise
-            transit['ok'] = False
+        for tbl in _CRITICAL_TABLES:
+            count: int | None = None
+            try:
+                row = cached_query_one(
+                    f"SELECT COUNT(*) AS c FROM {tbl}", ttl=60
+                )
+                count = int(row['c']) if row else 0
+            except Exception:  # noqa: BLE001 — /health must never raise
+                count = None  # missing or unreadable
+            transit['tables'][tbl] = count
+            if not count:
+                transit['missing'].append(tbl)
+        # Back-compat alias for existing dashboards / cron alerts.
+        transit['routes'] = transit['tables'].get('routes')
+        transit['ok'] = not transit['missing']
     if not transit['ok']:
         critical_ok = False
     # Stale data warning — nightly refresh didn't run or failed silently.
@@ -487,7 +513,7 @@ def health():
         checks['disk_free_pct'] = None
 
     # ── nightly refresh status (written by scripts/nightly_refresh.sh) ──
-    nightly = {'last_run': None, 'status': None, 'age_hours': None}
+    nightly: dict = {'last_run': None, 'status': None, 'age_hours': None}
     marker = logs_dir / 'last_refresh.json'
     try:
         if marker.exists():
@@ -499,6 +525,19 @@ def health():
                 nightly['age_hours'] = round(
                     (time.time() - float(finished_ts)) / 3600, 1
                 )
+            # Per-scraper status (added 2026-04-27 — see follow-up doc).
+            # Surface the names of any scraper whose last run failed so a
+            # human glancing at /health knows which source-key to mistrust.
+            scrapers = payload.get('scrapers') or {}
+            failed_scrapers = sorted(
+                k for k, v in scrapers.items()
+                if isinstance(v, str) and v.startswith('fail')
+            )
+            if failed_scrapers:
+                nightly['failed_scrapers'] = failed_scrapers
+                # A partial-failure isn't critical (data is stale, not gone),
+                # but it's a degraded signal worth bumping into /health.
+                degraded = True
     except (OSError, ValueError, TypeError):
         pass
     if nightly['status'] == 'fail':

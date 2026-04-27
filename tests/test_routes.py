@@ -1,6 +1,8 @@
 """Tests for all routes — status codes, API responses, SEO, and data quality."""
 
 import json
+import time
+from pathlib import Path
 
 import pytest
 
@@ -204,6 +206,37 @@ def test_health_has_db_field(client):
     data = json.loads(client.get("/health").data)
     assert data["checks"]["transit_db"]["ok"] is True
     assert data["status"] in ("ok", "degraded")
+
+
+def test_health_surfaces_failed_scrapers(client, tmp_path, monkeypatch, app):
+    """When last_refresh.json reports a per-scraper failure, /health
+    surfaces the failed names under nightly.failed_scrapers and flips
+    status to 'degraded'."""
+    import json as _json
+    logs_dir = Path(app.root_path).parent / 'logs'
+    marker = logs_dir / 'last_refresh.json'
+    backup = marker.read_text(encoding='utf-8') if marker.exists() else None
+    try:
+        marker.write_text(_json.dumps({
+            'status': 'ok',
+            'finished_at': '2026-04-27T01:00:00Z',
+            'finished_ts': time.time() - 3600,
+            'duration_s': 60,
+            'health_http': '200',
+            'scrapers': {
+                'scrape_lasta': 'fail:1',
+                'scrape_intercity': 'ok',
+                'scrape_srbvoz': 'ok',
+            },
+        }))
+        data = _json.loads(client.get('/health').data)
+        assert data['checks']['nightly']['failed_scrapers'] == ['scrape_lasta']
+        assert data['status'] == 'degraded'
+    finally:
+        if backup is not None:
+            marker.write_text(backup, encoding='utf-8')
+        else:
+            marker.unlink(missing_ok=True)
 
 
 # ── f) JSON-LD validation ───────────────────────────────────────────
