@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, abort, request, jsonify, redirect, url_for, current_app
 from app.db import query, query_one, cached_query, cached_query_one, db_ready
 from app.extensions import limiter
-from app.slug import normalize_slug
+from app.slug import normalize_slug, slugify_serbian
 
 city_bp = Blueprint('city', __name__)
 
@@ -156,18 +156,38 @@ def line_detail(city: str, line_slug: str):
     # migration.
     city_norm = city if city in _SUPPORTED_CITIES else normalize_slug(city)
     line_norm = normalize_slug(line_slug)
-    if (city_norm, line_norm) != (city, line_slug) and city_norm in _SUPPORTED_CITIES and line_norm:
-        target_exists = db_ready() and query_one(
+    # Two transliteration candidates per inbound slug:
+    #   normalize_slug      — conservative ASCII fold (ђ→d) used for
+    #                         pipeline-side slug generation; matches
+    #                         most legacy DB rows.
+    #   slugify_serbian     — Serbian-standard (ђ→dj) used at request
+    #                         time for inbound Cyrillic URLs whose
+    #                         canonical slug contains 'dj' (oslobodjenja,
+    #                         djordja-stanojevica, ilije-djuricica, …).
+    # Try both; redirect to whichever resolves. Order matters only for
+    # the rare case where BOTH candidates match different rows — we
+    # prefer normalize_slug since pipeline-side already-stored slugs
+    # are the source of truth.
+    line_candidates: list[str] = []
+    for cand in (line_norm, slugify_serbian(line_slug)):
+        if cand and cand not in line_candidates:
+            line_candidates.append(cand)
+    for cand in line_candidates:
+        if (city_norm, cand) == (city, line_slug):
+            continue  # input already canonical, fall through to DB lookup
+        if city_norm not in _SUPPORTED_CITIES:
+            break
+        if not (db_ready() and query_one(
             "SELECT 1 FROM city_lines WHERE city = ? AND slug = ?",
-            [city_norm, line_norm],
+            [city_norm, cand],
+        )):
+            continue
+        return redirect(
+            url_for('city.line_detail', city=city_norm, line_slug=cand),
+            code=301,
         )
-        if target_exists:
-            return redirect(
-                url_for('city.line_detail', city=city_norm, line_slug=line_norm),
-                code=301,
-            )
-        # Fall through — Cyrillic miss with no Latin counterpart → 410
-        # in the same `not line` branch below.
+    # Fall through — Cyrillic miss with no Latin counterpart → 410
+    # in the same `not line` branch below.
 
     line = query_one("""
         SELECT id, city, number, name, slug, color, code, type
@@ -322,16 +342,29 @@ def stop_detail(city: str, stop_slug: str):
     # instead of being chained 301→404.
     city_norm = city if city in _SUPPORTED_CITIES else normalize_slug(city)
     stop_norm = normalize_slug(stop_slug)
-    if (city_norm, stop_norm) != (city, stop_slug) and city_norm in _SUPPORTED_CITIES and stop_norm:
-        target_exists = db_ready() and query_one(
+    # Try both transliteration candidates (see line_detail for context):
+    # normalize_slug catches most rows; slugify_serbian (ђ→dj) catches
+    # the ~30% of Novi Sad stops whose canonical contains 'dj'
+    # (bulevar-oslobodjenja-*, ilije-djuricica, djordja-nedeljkovica,
+    # …). 250+ of the GSC 404 batch are exactly this shape.
+    stop_candidates: list[str] = []
+    for cand in (stop_norm, slugify_serbian(stop_slug)):
+        if cand and cand not in stop_candidates:
+            stop_candidates.append(cand)
+    for cand in stop_candidates:
+        if (city_norm, cand) == (city, stop_slug):
+            continue
+        if city_norm not in _SUPPORTED_CITIES:
+            break
+        if not (db_ready() and query_one(
             "SELECT 1 FROM city_stops WHERE city = ? AND slug = ?",
-            [city_norm, stop_norm],
+            [city_norm, cand],
+        )):
+            continue
+        return redirect(
+            url_for('city.stop_detail', city=city_norm, stop_slug=cand),
+            code=301,
         )
-        if target_exists:
-            return redirect(
-                url_for('city.stop_detail', city=city_norm, stop_slug=stop_norm),
-                code=301,
-            )
 
     stop = query_one("""
         SELECT id, city, name, slug, lat, lon, code
