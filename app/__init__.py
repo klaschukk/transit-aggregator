@@ -282,6 +282,22 @@ def create_app(config_name: str | None = None) -> Flask:
                 seed_drafts.seed()
             except Exception as exc:  # nosec — boot must not crash on drafts
                 logger.warning('newsletter draft seed skipped: %s', exc)
+        # Drop the boot-thread connection so gunicorn's pre-fork workers
+        # don't inherit a file descriptor pointing at analytics.duckdb.
+        # Without this, every fork() leaves an open R/W lock owned by a
+        # zombie connection in the master process, blocking any future
+        # cross-process writer.
+        analytics_db.close_thread_conn()
+
+    # Close the per-thread analytics DB connection at the end of every
+    # request so the R/W file lock isn't held between requests. Cross-
+    # process writers (cron: adsense_fetch, price_snapshot, seed_reviews)
+    # need windows when no Flask thread holds the lock; this hook gives
+    # them one after every page render. _get_conn() reopens lazily on
+    # the next request that needs it.
+    @app.teardown_appcontext
+    def _close_analytics_db(_exc):
+        analytics_db.close_thread_conn()
 
     # Gzip compression
     from flask_compress import Compress

@@ -3,11 +3,28 @@ read-only transit DB so concurrent writes don't conflict with the scraper
 refresh of data/dbs/transit.duckdb.
 
 Schema is created idempotently on app boot via init_schema().
+
+Concurrency model
+-----------------
+DuckDB allows many R/W connections inside a single process, but ANY
+cross-process access to a file currently held R/W fails immediately
+with "Conflicting lock is held in /usr/bin/python3.12". With 2 gunicorn
+workers + nightly cron writers (adsense_fetch, price_snapshot,
+seed_reviews) this used to spam journalctl with lock errors whenever
+the cron's window overlapped a worker holding the lock.
+
+Smallest fix: close the per-thread connection at the end of every
+Flask request via app.teardown_appcontext (wired in app/__init__.py),
+and retry-on-lock when opening. Flask therefore holds the lock only
+during a request, leaving windows (~ms-scale) for cron writers to slip
+in. Cron writers use the same _get_conn(), so they pick up the retry
+behaviour for free.
 """
 import hashlib
 import logging
 import os
 import threading
+import time
 from pathlib import Path
 
 import duckdb
@@ -24,9 +41,39 @@ def _path() -> str:
     return current_app.config['ANALYTICS_DB_PATH']
 
 
+# Retry schedule for cross-process lock contention. Worst-case wait is
+# 100 + 200 + 400 + 800 = 1500 ms, after which we surface the IOException
+# to the caller. The Flask write paths catch IOException and log it as a
+# soft failure so /api/ba-click etc. still return 204 even on a worst-day
+# collision.
+_LOCK_RETRY_DELAYS = (0.1, 0.2, 0.4, 0.8)
+
+
+def _open_with_retry(target: str) -> duckdb.DuckDBPyConnection:
+    last_exc = None
+    for delay in (0.0, *_LOCK_RETRY_DELAYS):
+        if delay:
+            time.sleep(delay)
+        try:
+            return duckdb.connect(target, read_only=False)
+        except duckdb.IOException as exc:
+            last_exc = exc
+            if 'Conflicting lock' not in str(exc):
+                raise
+    # Out of retries — propagate so the caller decides (insert_* helpers
+    # log + Sentry-capture; reads return [] / None).
+    assert last_exc is not None
+    raise last_exc
+
+
 def _get_conn() -> duckdb.DuckDBPyConnection:
     """Return a per-thread R/W connection. Reconnects automatically when the
-    configured path changes (matters for tests that swap DBs between apps)."""
+    configured path changes (matters for tests that swap DBs between apps).
+
+    Inside a Flask request, the connection is closed by the
+    teardown_appcontext hook so the file lock doesn't persist across
+    requests. Outside Flask (cron scripts), close_thread_conn() should
+    be called when the script exits its main work loop."""
     target = _path()
     conn = getattr(_local, 'conn', None)
     bound_path = getattr(_local, 'path', None)
@@ -35,10 +82,26 @@ def _get_conn() -> duckdb.DuckDBPyConnection:
             try: conn.close()
             except duckdb.Error: pass
         Path(target).parent.mkdir(parents=True, exist_ok=True)
-        conn = duckdb.connect(target, read_only=False)
+        conn = _open_with_retry(target)
         _local.conn = conn
         _local.path = target
     return conn
+
+
+def close_thread_conn() -> None:
+    """Close the per-thread DuckDB connection if any. Safe to call when no
+    connection exists. Wired into Flask's teardown_appcontext so each
+    request releases the file lock — keeps cross-process writers (cron)
+    from starving."""
+    conn = getattr(_local, 'conn', None)
+    if conn is None:
+        return
+    try:
+        conn.close()
+    except duckdb.Error:
+        pass
+    _local.conn = None
+    _local.path = None
 
 
 _SCHEMA_SQL = """
