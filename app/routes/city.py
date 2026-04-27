@@ -147,14 +147,27 @@ def city_hub(city: str):
 @city_bp.route('/gradski/<city>/linija/<line_slug>/')
 def line_detail(city: str, line_slug: str):
     # Canonicalize both path segments before DB lookup: cyrillic/uppercase/
-    # diacritic variants redirect to the ASCII canonical form.
+    # diacritic variants redirect to the ASCII canonical form *only when
+    # the canonical slug actually resolves to a row*. A blanket
+    # transliterate-and-redirect emits 301 → 404 chains for legacy URLs
+    # that no longer correspond to any line, wasting crawl budget. The
+    # existence-gated path was added 2026-04-27 after GSC reported 313
+    # 404s on URL-encoded Cyrillic stop/line slugs from a legacy
+    # migration.
     city_norm = city if city in _SUPPORTED_CITIES else normalize_slug(city)
     line_norm = normalize_slug(line_slug)
     if (city_norm, line_norm) != (city, line_slug) and city_norm in _SUPPORTED_CITIES and line_norm:
-        return redirect(
-            url_for('city.line_detail', city=city_norm, line_slug=line_norm),
-            code=301,
+        target_exists = db_ready() and query_one(
+            "SELECT 1 FROM city_lines WHERE city = ? AND slug = ?",
+            [city_norm, line_norm],
         )
+        if target_exists:
+            return redirect(
+                url_for('city.line_detail', city=city_norm, line_slug=line_norm),
+                code=301,
+            )
+        # Fall through — Cyrillic miss with no Latin counterpart → 410
+        # in the same `not line` branch below.
 
     line = query_one("""
         SELECT id, city, number, name, slug, color, code, type
@@ -300,13 +313,25 @@ def line_detail(city: str, line_slug: str):
 
 @city_bp.route('/gradski/<city>/stajaliste/<stop_slug>/')
 def stop_detail(city: str, stop_slug: str):
+    # Existence-gated cyrillic→latin redirect: only 301 to the canonical
+    # ASCII slug when that slug actually resolves to a row. GSC reported
+    # 313 404s on URL-encoded cyrillic stop slugs from a legacy
+    # migration; ~75% transliterate to a current Latin canonical and get
+    # caught here. The remaining ~25% (stops removed upstream) fall
+    # through to abort(410) below so Google drops them permanently
+    # instead of being chained 301→404.
     city_norm = city if city in _SUPPORTED_CITIES else normalize_slug(city)
     stop_norm = normalize_slug(stop_slug)
     if (city_norm, stop_norm) != (city, stop_slug) and city_norm in _SUPPORTED_CITIES and stop_norm:
-        return redirect(
-            url_for('city.stop_detail', city=city_norm, stop_slug=stop_norm),
-            code=301,
+        target_exists = db_ready() and query_one(
+            "SELECT 1 FROM city_stops WHERE city = ? AND slug = ?",
+            [city_norm, stop_norm],
         )
+        if target_exists:
+            return redirect(
+                url_for('city.stop_detail', city=city_norm, stop_slug=stop_norm),
+                code=301,
+            )
 
     stop = query_one("""
         SELECT id, city, name, slug, lat, lon, code

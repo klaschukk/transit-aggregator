@@ -23,12 +23,13 @@ import pytest
         ("/gradski/nis/", 200),
         ("/gradski/NEPOSTOJECI/", 404),
         ("/gradski/beograd/linija/linija-2a/", 200),
-        # UPPERCASE slugs now canonical-redirect to lowercase (301); the
-        # lowercase target is what returns 404.
-        ("/gradski/beograd/linija/NEPOSTOJECI/", 301),
+        # UPPERCASE slug only redirects when its lowercase target row
+        # exists in city_lines — otherwise 404 directly (the prior 301→404
+        # chain wastes crawl budget; existence-gated since 2026-04-27).
+        ("/gradski/beograd/linija/NEPOSTOJECI/", 404),
         ("/gradski/beograd/linija/nepostojeci/", 404),
         ("/gradski/beograd/stajaliste/sajam/", 200),
-        ("/gradski/beograd/stajaliste/NEPOSTOJECI/", 301),
+        ("/gradski/beograd/stajaliste/NEPOSTOJECI/", 404),
         ("/gradski/beograd/stajaliste/nepostojeci/", 404),
         ("/prevoznici/", 200),
         ("/autobuske-stanice/", 200),
