@@ -16,7 +16,7 @@ import logging
 import re
 import sys
 import time
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import requests
@@ -283,6 +283,10 @@ def main() -> None:
 
     for i, (from_city, to_city) in enumerate(pairs, 1):
         trips = fetch_schedule(session, from_city, to_city, travel_date)
+        # Per-row scraped_at — see scrape_intercity for rationale.
+        scraped_at = datetime.now(timezone.utc).isoformat(timespec='seconds')
+        for trip in trips:
+            trip['scraped_at'] = scraped_at
 
         if trips:
             route = {
@@ -291,6 +295,7 @@ def main() -> None:
                 'slug': f'{_city_to_slug(from_city)}-{_city_to_slug(to_city)}',
                 'distance_km': trips[0].get('distance_km', 0),
                 'trips': trips,
+                'scraped_at': scraped_at,
             }
             routes.append(route)
             log.info(f'[{i}/{total}] {from_city} → {to_city}: {len(trips)} departures')
@@ -313,6 +318,7 @@ def main() -> None:
                 'price_rsd': trip['price'],
                 'operator': trip['operator'],
                 'type': trip['type'],
+                'scraped_at': trip.get('scraped_at') or route.get('scraped_at'),
             })
 
     # Save nested routes

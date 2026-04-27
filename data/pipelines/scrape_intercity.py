@@ -19,7 +19,7 @@ import json
 import logging
 import sys
 import time
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import requests
@@ -320,6 +320,15 @@ def main() -> None:
 
         trips = search_departures(session, from_city, from_id, to_city, to_id, travel_date)
 
+        # Per-row scraped_at — every trip carries the wall-clock at the
+        # moment its parent pair was fetched. Different pairs in the
+        # same run land seconds apart; that's the granularity we need
+        # so a partial-rerun (e.g. retry of one pair) surfaces its own
+        # newer timestamp without bumping the whole file's mtime.
+        scraped_at = datetime.now(timezone.utc).isoformat(timespec='seconds')
+        for trip in trips:
+            trip['scraped_at'] = scraped_at
+
         if trips:
             routes.append({
                 'from_city': from_city,
@@ -327,6 +336,7 @@ def main() -> None:
                 'slug': f'{normalize_slug(from_city)}-{normalize_slug(to_city)}',
                 'distance_km': _get_distance(from_city, to_city),
                 'trips': trips,
+                'scraped_at': scraped_at,
             })
             log.info(f'[{i}/{total}] {from_city} → {to_city}: {len(trips)} departures')
         else:
@@ -349,6 +359,7 @@ def main() -> None:
                 'price_rsd': trip['price'],
                 'operator': trip['operator'],
                 'type': trip['type'],
+                'scraped_at': trip.get('scraped_at') or route.get('scraped_at'),
             })
 
     with open(OUT_DIR / 'routes.json', 'w', encoding='utf-8') as f:

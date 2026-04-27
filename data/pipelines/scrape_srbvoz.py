@@ -10,7 +10,7 @@ import json
 import logging
 import re
 import time
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import requests
@@ -217,6 +217,10 @@ def main() -> None:
             log.warning(f'Skipping {from_city} → {to_city}: missing station')
             continue
         trips = scrape_pair(session, from_st, to_st, from_city, to_city)
+        # Per-row scraped_at — see scrape_intercity for rationale.
+        scraped_at = datetime.now(timezone.utc).isoformat(timespec='seconds')
+        for trip in trips:
+            trip['scraped_at'] = scraped_at
         all_trips.extend(trips)
         time.sleep(1.0)
 
