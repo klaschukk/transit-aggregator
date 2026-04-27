@@ -679,19 +679,20 @@ def _build_lastmod_lookup(default_mtime: str) -> dict:
         'Budapest','Vienna','Istanbul',
     }
     for row in route_rows:
-        candidates = [default_mtime]
+        # Source-file mtimes only — no default_mtime in the MAX, otherwise
+        # the global db rebuild date wins every comparison and flattens
+        # the per-URL signal.
+        candidates: list[str] = []
         if row['op_slugs']:
             for op_slug in row['op_slugs']:
                 key = _OP_SOURCE.get(op_slug, 'busticket4_dom')
                 if key in src:
                     candidates.append(src[key])
-        # International route → also factor in busticket4_intl + balkan
-        # mtimes since those JSONs are the source of intl pairs.
         if row['from_city'] in intl_cities or row['to_city'] in intl_cities:
             for k in ('busticket4_intl', 'balkan'):
                 if k in src:
                     candidates.append(src[k])
-        d = max(candidates)
+        d = max(candidates) if candidates else default_mtime
         lookup['route'][row['slug']] = d
         # Pairs share the same date — same SQL row, different URL shape.
         if row['from_city_slug'] and row['to_city_slug']:
@@ -724,12 +725,14 @@ def _build_lastmod_lookup(default_mtime: str) -> dict:
     stop_rows = query("SELECT slug, city FROM city_stops")
     for row in stop_rows:
         s_key, link_key = _city_stop_source(row['city'])
-        candidates = [default_mtime]
+        candidates: list[str] = []
         if s_key in src:
             candidates.append(src[s_key])
         if link_key and link_key in src:
             candidates.append(src[link_key])
-        lookup['stop'][f'{row["city"]}/{row["slug"]}'] = max(candidates)
+        lookup['stop'][f'{row["city"]}/{row["slug"]}'] = (
+            max(candidates) if candidates else default_mtime
+        )
 
     _LASTMOD_CACHE['ts'] = now
     _LASTMOD_CACHE['src'] = src
@@ -866,9 +869,14 @@ def sitemap_core():
 def sitemap_routes():
     """Intercity route-detail pages (/rute/<slug>/) + operator-detail pages
     (/prevoznici/<slug>/). Both are hub-like catalog entries; same shard
-    keeps their freshness signal aligned with the routes table."""
+    keeps their freshness signal aligned with the routes table.
+
+    Per-URL lastmod: route → MAX scraper-source mtime over operators
+    serving that route. Operator → mtime of its dedicated scraper
+    (lasta/srbvoz) or the busticket4 umbrella catalogue."""
     base = current_app.config['BASE_URL']
-    url = _build_url_fn(base, _sitemap_lastmod())
+    default_mtime = _sitemap_lastmod()
+    url = _build_url_fn(base, default_mtime)
     pages: list[str] = []
     if db_ready():
         routes = cached_query("""
@@ -877,7 +885,8 @@ def sitemap_routes():
               AND EXISTS (SELECT 1 FROM trips t WHERE t.route_id = r.id AND t.price_rsd > 0)
         """, ttl=3600)
         for r in routes:
-            pages.append(url(f'/rute/{r["slug"]}/', 'daily', '0.7'))
+            mod = _lastmod_for('route', r['slug'], default_mtime)
+            pages.append(url(f'/rute/{r["slug"]}/', 'daily', '0.7', mod=mod))
 
         # Operators must have at least one PRICED trip — without a price the
         # operator_detail page renders an empty route list (the handler filters
@@ -890,15 +899,21 @@ def sitemap_routes():
             WHERE o.slug IS NOT NULL AND t.price_rsd > 0
         """, ttl=3600)
         for op in operators:
-            pages.append(url(f'/prevoznici/{op["slug"]}/', 'weekly', '0.5'))
+            mod = _lastmod_for('op', op['slug'], default_mtime)
+            pages.append(url(f'/prevoznici/{op["slug"]}/', 'weekly', '0.5', mod=mod))
     return _urlset(pages)
 
 
 @main_bp.route('/sitemap-pairs.xml')
 def sitemap_pairs():
-    """SEO city-pair pages (/voznja/<from>-do-<to>/). Same trips filter."""
+    """SEO city-pair pages (/voznja/<from>-do-<to>/). Same trips filter.
+
+    Per-URL lastmod: same MAX over operator-source mtimes as the
+    matching /rute/<slug>/ entry — pairs are an alternate URL shape
+    over the same row."""
     base = current_app.config['BASE_URL']
-    url = _build_url_fn(base, _sitemap_lastmod())
+    default_mtime = _sitemap_lastmod()
+    url = _build_url_fn(base, default_mtime)
     pages: list[str] = []
     if db_ready():
         pairs = cached_query("""
@@ -907,25 +922,33 @@ def sitemap_pairs():
               AND EXISTS (SELECT 1 FROM trips t WHERE t.route_id = r.id AND t.price_rsd > 0)
         """, ttl=3600)
         for r in pairs:
+            pair_key = f'{r["from_city_slug"]}-do-{r["to_city_slug"]}'
+            mod = _lastmod_for('route', pair_key, default_mtime)
             pages.append(
-                url(f'/voznja/{r["from_city_slug"]}-do-{r["to_city_slug"]}/',
-                    'weekly', '0.6')
+                url(f'/voznja/{pair_key}/', 'weekly', '0.6', mod=mod)
             )
     return _urlset(pages)
 
 
 @main_bp.route('/sitemap-lines.xml')
 def sitemap_lines():
-    """City transit line-detail pages (/gradski/<city>/linija/<slug>/)."""
+    """City transit line-detail pages (/gradski/<city>/linija/<slug>/).
+
+    Per-URL lastmod: per-city scraper output mtime (gsp_lines.json,
+    novi-sad/lines.json, nis/lines.json, kragujevac/lines.json)."""
     base = current_app.config['BASE_URL']
-    url = _build_url_fn(base, _sitemap_lastmod())
+    default_mtime = _sitemap_lastmod()
+    url = _build_url_fn(base, default_mtime)
     pages: list[str] = []
     if db_ready():
         lines = cached_query("SELECT city, slug FROM city_lines", ttl=3600)
         for line in lines:
+            mod = _lastmod_for('line',
+                               f'{line["city"]}/{line["slug"]}',
+                               default_mtime)
             pages.append(
                 url(f'/gradski/{line["city"]}/linija/{line["slug"]}/',
-                    'weekly', '0.5')
+                    'weekly', '0.5', mod=mod)
             )
     return _urlset(pages)
 
@@ -934,9 +957,14 @@ def sitemap_lines():
 def sitemap_stops():
     """City stop-detail pages (/gradski/<city>/stajaliste/<slug>/). Only
     stops with 2+ lines AND coordinates — thin single-line stops stay out
-    of the index to save crawl budget."""
+    of the index to save crawl budget.
+
+    Per-URL lastmod: MAX of (city-stops scrape mtime, route-stops
+    linkage scrape mtime). Picks up the older signal when stops were
+    re-scraped but their line-linkage table wasn't."""
     base = current_app.config['BASE_URL']
-    url = _build_url_fn(base, _sitemap_lastmod())
+    default_mtime = _sitemap_lastmod()
+    url = _build_url_fn(base, default_mtime)
     pages: list[str] = []
     if db_ready():
         stops = cached_query("""
@@ -948,9 +976,12 @@ def sitemap_stops():
             HAVING COUNT(DISTINCT cls.line_id) >= 2
         """, ttl=3600)
         for s in stops:
+            mod = _lastmod_for('stop',
+                               f'{s["city"]}/{s["slug"]}',
+                               default_mtime)
             pages.append(
                 url(f'/gradski/{s["city"]}/stajaliste/{s["slug"]}/',
-                    'monthly', '0.2')
+                    'monthly', '0.2', mod=mod)
             )
     return _urlset(pages)
 
