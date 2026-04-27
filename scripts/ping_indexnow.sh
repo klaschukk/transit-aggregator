@@ -55,9 +55,12 @@ if [ "$TOTAL" -eq 0 ]; then
   exit 3
 fi
 
-# Step 2: chunk into 10K-URL batches. IndexNow's published cap is
-# 10K per submission; we send 9000 to leave headroom.
-BATCH=9000
+# Step 2: chunk into batches. IndexNow's published cap is 10K per
+# submission; in practice 3457 URLs sometimes 403'd on first run
+# (rate-limit during fresh-key validation), so split into 1000-URL
+# batches with a brief sleep between them. Slower ramp keeps Bing's
+# Cloudflare-style anti-burst quiet.
+BATCH=1000
 CHUNK_DIR=$(mktemp -d -t indexnow-chunks.XXXXXX)
 trap 'rm -rf "$TMP" "${TMP}.json" "$CHUNK_DIR"' EXIT
 split -l $BATCH "$TMP" "$CHUNK_DIR/chunk."
@@ -82,12 +85,24 @@ PY
     -X POST "$ENDPOINT" \
     -H "Content-Type: application/json; charset=utf-8" \
     --data-binary @"${TMP}.json" 2>/dev/null || echo "000")
+  # One retry on 403 — fresh-key validation can race with the first
+  # submission. Sleep 5 s then resend the same body.
+  if [ "$CODE" = "403" ]; then
+    sleep 5
+    CODE=$(curl -s -o /dev/null -w "%{http_code}" -m 30 \
+      -X POST "$ENDPOINT" \
+      -H "Content-Type: application/json; charset=utf-8" \
+      --data-binary @"${TMP}.json" 2>/dev/null || echo "000")
+    echo "chunk $(basename "$chunk") retried 403 → HTTP $CODE" >> "$LOG"
+  fi
   N=$(wc -l < "$chunk" | tr -d ' ')
   echo "chunk $(basename "$chunk") urls=$N → HTTP $CODE" >> "$LOG"
   case "$CODE" in
     2*) OK=$((OK+1)) ;;
     *)  FAIL=$((FAIL+1)) ;;
   esac
+  # Be a polite client — 1 s between batches.
+  sleep 1
 done
 
 echo "$(date -u +%FT%TZ) DONE total=$TOTAL ok=$OK fail=$FAIL" >> "$LOG"

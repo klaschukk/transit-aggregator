@@ -27,18 +27,22 @@ echo "=== START $(date -u) ===" >> "$LOG"
 
 cd "$PROJECT" || exit 1
 
-# Step 1: ping search engines about the sitemap. No auth required for
-# either endpoint; the request is a hint, not authoritative — so we
-# fire-and-forget and only log the response code.
-SITEMAP_URL="https://prevozni.com/sitemap.xml"
-for engine in \
-    "google:https://www.google.com/ping?sitemap=${SITEMAP_URL}" \
-    "bing:https://www.bing.com/ping?sitemap=${SITEMAP_URL}"; do
-  name="${engine%%:*}"
-  url="${engine#*:}"
-  code=$(curl -s -o /dev/null -w "%{http_code}" -m 10 "$url" 2>/dev/null || echo "000")
-  echo "ping $name → $code" >> "$LOG"
-done
+# Step 1: ping search engines.
+#
+# Google deprecated /ping?sitemap= in 2023 (verified 404 in 2026);
+# Bing /ping?sitemap= now 410-Gone. The replacement for Bing/Yandex/
+# Naver/Seznam/Yep is IndexNow — submit the urlList in one batched
+# POST, indexes within 5-30 minutes for participating engines.
+#
+# Google honours sitemap-lastmod for re-crawl decisions, so the
+# /sitemap-*.xml `<lastmod>` we already emit on every shard is the
+# only signal we have left short of the Indexing API (OAuth, out of
+# scope until GSC creds land).
+if [ -x "$PROJECT/scripts/ping_indexnow.sh" ]; then
+  echo "running ping_indexnow..." >> "$LOG"
+  "$PROJECT/scripts/ping_indexnow.sh" >> "$LOG" 2>&1
+  echo "ping_indexnow exit=$?" >> "$LOG"
+fi
 
 # Step 2: refresh scrapers if last enrichment is stale. The nightly
 # enrich job runs at 03:00 UTC; if it failed for any reason this is the
