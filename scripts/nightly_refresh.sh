@@ -112,6 +112,11 @@ $VENV -u scripts/enrich_post_build.py >> "$LOG" 2>&1 || true
 $VENV -u data/pipelines/scrape_route_geometries.py >> "$LOG" 2>&1 \
   || echo "WARN: scrape_route_geometries failed ($?)" >> "$LOG"
 
+# Per-entity row-count snapshot. Captures upstream scrape drift the
+# file-mtime freshness signal misses. Non-fatal — analytics_db is the
+# read path here, transit_db rebuild is what already shipped.
+$VENV -u scripts/data_snapshot.py >> "$LOG" 2>&1 || echo "WARN: data_snapshot failed ($?)" >> "$LOG"
+
 # Price-alert snapshot + scan. Non-fatal — an email-send outage must not
 # block the nightly refresh. Snapshot must run before scan.
 $VENV -u scripts/price_snapshot.py   >> "$LOG" 2>&1 || echo "WARN: price_snapshot failed ($?)" >> "$LOG"

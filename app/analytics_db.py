@@ -281,6 +281,22 @@ CREATE INDEX IF NOT EXISTS ab_events_exp_idx
     ON ab_events(experiment, event_type, ts_date);
 CREATE INDEX IF NOT EXISTS ab_events_exp_variant_idx
     ON ab_events(experiment, variant, event_type);
+
+-- Daily count snapshots — written by scripts/data_snapshot.py after the
+-- nightly DB rebuild. Long-and-skinny shape so we can mix entity kinds
+-- (operator, route, line, stop) without DDL per kind. The diff between
+-- consecutive snapshot_dates surfaces "data changed today" deltas that
+-- file-mtime alone misses (e.g. operator added 3 trips but JSON file
+-- mtime stayed the same because the scraper rewrites unconditionally).
+CREATE TABLE IF NOT EXISTS data_snapshots (
+    snapshot_date DATE NOT NULL,
+    kind          VARCHAR NOT NULL,
+    key           VARCHAR NOT NULL,
+    value         BIGINT  NOT NULL,
+    PRIMARY KEY (snapshot_date, kind, key)
+);
+CREATE INDEX IF NOT EXISTS data_snapshots_kind_idx
+    ON data_snapshots(kind, snapshot_date);
 """
 
 
@@ -884,3 +900,68 @@ def request_review_deletion(review_id: int, email: str) -> bool:
     except duckdb.Error as exc:
         logger.error("request_review_deletion failed: %s", exc)
         return False
+
+# ── data snapshots (added 2026-04-27) ────────────────────────────────
+# Captures upstream scrape drift the file-mtime signal misses.
+
+def record_snapshot(snapshot_date: str, kind: str, key: str, value: int) -> None:
+    """UPSERT a single (snapshot_date, kind, key) row.
+
+    Idempotent: re-running the same snapshot script the same day overwrites
+    rather than dup-keying. Cron writes ~1500 rows per night (operators +
+    routes + lines + stops), single transaction.
+    """
+    try:
+        conn = _get_conn()
+        conn.execute(
+            "INSERT OR REPLACE INTO data_snapshots "
+            "(snapshot_date, kind, key, value) VALUES (?, ?, ?, ?)",
+            [snapshot_date, kind, key, value],
+        )
+    except duckdb.Error as exc:
+        logger.error("record_snapshot failed: %s", exc)
+        _local.conn = None
+
+
+def diff_snapshots(kind: str,
+                   date_a: str | None = None,
+                   date_b: str | None = None) -> list[dict]:
+    """Compare snapshots between two dates. Defaults: latest two dates seen
+    for `kind`. Returns rows where value changed.
+
+    Each result: {key, value_a, value_b, delta}. Sorted by absolute delta
+    desc so the biggest drift bubbles to the top.
+    """
+    try:
+        conn = _get_conn()
+        if not date_a or not date_b:
+            dates = conn.execute(
+                "SELECT DISTINCT snapshot_date FROM data_snapshots "
+                "WHERE kind = ? ORDER BY snapshot_date DESC LIMIT 2",
+                [kind],
+            ).fetchall()
+            if len(dates) < 2:
+                return []
+            date_b, date_a = str(dates[0][0]), str(dates[1][0])
+        rows = conn.execute(
+            "SELECT COALESCE(a.key, b.key) AS key, "
+            "       COALESCE(a.value, 0) AS value_a, "
+            "       COALESCE(b.value, 0) AS value_b "
+            "FROM (SELECT key, value FROM data_snapshots "
+            "      WHERE kind = ? AND snapshot_date = ?) a "
+            "FULL OUTER JOIN "
+            "     (SELECT key, value FROM data_snapshots "
+            "      WHERE kind = ? AND snapshot_date = ?) b "
+            "USING (key) "
+            "WHERE COALESCE(a.value, 0) != COALESCE(b.value, 0)",
+            [kind, date_a, kind, date_b],
+        ).fetchall()
+        results = [
+            {'key': r[0], 'value_a': r[1], 'value_b': r[2], 'delta': r[2] - r[1]}
+            for r in rows
+        ]
+        results.sort(key=lambda r: abs(r['delta']), reverse=True)
+        return results
+    except duckdb.Error as exc:
+        logger.error("diff_snapshots failed: %s", exc)
+        return []

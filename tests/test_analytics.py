@@ -157,3 +157,60 @@ def test_privacy_mentions_affiliate_tracking(client):
     # Any of the three language variants should mention ba_click tracking.
     assert 'ba_click' in body or 'Bookaway' in body
     assert 'sha256' in body or 'hash' in body.lower()
+
+
+# ── data_snapshots (added 2026-04-27) ─────────────────────────────────
+
+
+def test_data_snapshot_record_and_diff(analytics_app):
+    """Two-day round-trip: write yesterday + today, diff_snapshots returns
+    the changed-row deltas sorted by absolute delta."""
+    from app import analytics_db
+    with analytics_app.app_context():
+        # Yesterday: lasta=10, srbvoz=5, niko=2
+        analytics_db.record_snapshot('2026-04-26', 'operator_routes', 'lasta', 10)
+        analytics_db.record_snapshot('2026-04-26', 'operator_routes', 'srbvoz', 5)
+        analytics_db.record_snapshot('2026-04-26', 'operator_routes', 'niko', 2)
+        # Today: lasta added 3, srbvoz unchanged, niko removed (0), gea new (8)
+        analytics_db.record_snapshot('2026-04-27', 'operator_routes', 'lasta', 13)
+        analytics_db.record_snapshot('2026-04-27', 'operator_routes', 'srbvoz', 5)
+        analytics_db.record_snapshot('2026-04-27', 'operator_routes', 'niko', 0)
+        analytics_db.record_snapshot('2026-04-27', 'operator_routes', 'gea', 8)
+
+        diff = analytics_db.diff_snapshots('operator_routes',
+                                           '2026-04-26', '2026-04-27')
+
+    by_key = {r['key']: r for r in diff}
+    assert by_key['gea']['delta'] == 8
+    assert by_key['lasta']['delta'] == 3
+    assert by_key['niko']['delta'] == -2
+    # srbvoz didn't change → must not appear.
+    assert 'srbvoz' not in by_key
+    # Sorted by absolute delta desc — gea (8) is first.
+    assert diff[0]['key'] == 'gea'
+
+
+def test_data_snapshot_idempotent(analytics_app):
+    """Re-running on the same day overwrites rather than dup-keying."""
+    from app import analytics_db
+    with analytics_app.app_context():
+        analytics_db.record_snapshot('2026-04-25', 'route_trips', 'beograd-novi-sad', 12)
+        analytics_db.record_snapshot('2026-04-25', 'route_trips', 'beograd-novi-sad', 14)
+        conn = analytics_db._get_conn()
+        rows = conn.execute(
+            "SELECT value FROM data_snapshots "
+            "WHERE snapshot_date = '2026-04-25' AND kind = 'route_trips' "
+            "AND key = 'beograd-novi-sad'"
+        ).fetchall()
+        assert rows == [(14,)]
+
+
+def test_data_snapshot_diff_no_history(analytics_app):
+    """First-ever snapshot has nothing to diff against — return []."""
+    from app import analytics_db
+    with analytics_app.app_context():
+        diff = analytics_db.diff_snapshots('city_lines')
+        # Schema is shared with the round-trip test above which seeded
+        # operator_routes / route_trips, but city_lines is untouched —
+        # 0 dates → empty diff.
+        assert diff == []
