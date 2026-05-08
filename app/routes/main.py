@@ -436,8 +436,11 @@ def health():
     _CRITICAL_TABLES = (
         'routes', 'trips',
         'city_lines', 'city_stops', 'city_line_stops',
-        'operators', 'line_geometries',
+        'operators',
     )
+    # Populated by scrape_route_geometries.py (runs separately, 30-60 min).
+    # Empty on fresh deploys — warn but don't 503.
+    _WARN_TABLES = ('line_geometries',)
 
     db_path_str = current_app.config['DUCKDB_PATH']
     db_path = Path(db_path_str)
