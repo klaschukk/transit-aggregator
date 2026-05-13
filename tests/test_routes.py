@@ -5,12 +5,13 @@ import time
 from pathlib import Path
 
 import pytest
-from app.db import query
 
 
 def _route_count() -> int:
     try:
-        return (query("SELECT COUNT(*) FROM routes") or [[0]])[0][0]
+        from app.db import query
+        result = query("SELECT COUNT(*) FROM routes")
+        return (result or [[0]])[0][0]
     except Exception:
         return 0
 
@@ -204,10 +205,7 @@ def test_rute_has_routes(client, app):
     assert html.count("route-card") >= 50, "Expected at least 50 routes"
 
 
-def test_prevoznici_has_operators(client, app):
-    with app.app_context():
-        if _route_count() < 50:
-            pytest.skip("seed DB too small for operator floor check")
+def test_prevoznici_has_operators(client):
     html = client.get("/prevoznici/").data.decode()
     assert html.count("carrier-section") >= 5, "Expected at least 5 operators"
 
@@ -215,7 +213,7 @@ def test_prevoznici_has_operators(client, app):
 def test_gradski_beograd_has_lines(client, app):
     with app.app_context():
         if _route_count() < 50:
-            pytest.skip("seed DB too small for Beograd lines floor check")
+            pytest.skip("seed DB too small for line floor check")
     html = client.get("/gradski/beograd/").data.decode()
     assert html.count("data-num") >= 100, "Expected at least 100 lines"
 
@@ -223,7 +221,7 @@ def test_gradski_beograd_has_lines(client, app):
 def test_gradski_novi_sad_has_lines(client, app):
     with app.app_context():
         if _route_count() < 50:
-            pytest.skip("seed DB too small for Novi Sad lines floor check")
+            pytest.skip("seed DB too small for line floor check")
     html = client.get("/gradski/novi-sad/").data.decode()
     assert html.count("data-num") >= 10, "Expected at least 10 Novi Sad lines"
 

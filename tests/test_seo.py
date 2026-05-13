@@ -4,12 +4,13 @@ import json
 import re
 
 import pytest
-from app.db import query
 
 
 def _route_count() -> int:
     try:
-        return (query("SELECT COUNT(*) FROM routes") or [[0]])[0][0]
+        from app.db import query
+        result = query("SELECT COUNT(*) FROM routes")
+        return (result or [[0]])[0][0]
     except Exception:
         return 0
 
