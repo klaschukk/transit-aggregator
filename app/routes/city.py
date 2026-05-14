@@ -196,7 +196,6 @@ def line_detail(city: str, line_slug: str):
     """, [city, line_slug]) if db_ready() else None
 
     if not line:
-        # Non-ASCII legacy URLs → 410 Gone (Google drops permanently).
         if not line_slug.isascii() or '---' in line_slug:
             abort(410)
         abort(404)
@@ -373,10 +372,9 @@ def stop_detail(city: str, stop_slug: str):
     """, [city, stop_slug]) if db_ready() else None
 
     if not stop:
-        # Legacy URLs from a prior DB state (cyrillic, triple-dash, or
-        # numeric-only scraper artefacts like "/stajaliste/1/") won't come
-        # back — 410 Gone tells Google to drop them permanently. Clean
-        # ASCII misses stay 404 (may be typos).
+        # Non-ASCII (Cyrillic legacy), triple-dash artefacts, and pure-numeric
+        # slugs won't ever come back → 410 so Google deindexes permanently.
+        # Clean ASCII misses stay 404 (could be typos in external links).
         if not stop_slug.isascii() or '---' in stop_slug or stop_slug.isdigit():
             abort(410)
         abort(404)

@@ -71,36 +71,20 @@
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ config.GA_TRACKING_ID }}');</script>
 {% endif %}
 {% if config.ADSENSE_ID %}
-{# AdSense bootstrap — consent-aware. Three cases:
-
-     cookie_consent=all       → personalized ads, full tracking
-     cookie_consent=essential → non-personalized ads (NPA=1)
-     no consent yet           → script not loaded, house ad fallback
-                                rendered server-side via _ad_slot.html
-
-   `requestNonPersonalizedAds` must be set BEFORE the loader script so
-   the very first impression respects the choice. The cookie consent
-   handler in this same file dynamically reloads the page when the user
-   moves from essential→all so the NPA flag flips to 0 cleanly. #}
+{# AdSense — static tag so Google's verification crawler sees it.
+   NPA flag set before any push() call: personalized when consent=all,
+   non-personalized otherwise (GDPR-safe for unconsented visitors). #}
 <script>
 (function(){
-  try {
-    var m = document.cookie.match(/(?:^|; )cookie_consent=([^;]+)/);
-    var consent = m ? m[1] : '';
-    if (consent !== 'all' && consent !== 'essential') return;
-    window.adsbygoogle = window.adsbygoogle || [];
-    if (consent === 'essential') {
-      window.adsbygoogle.requestNonPersonalizedAds = 1;
-    }
-    var s = document.createElement('script');
-    s.async = true;
-    s.crossOrigin = 'anonymous';
-    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config.ADSENSE_ID }}';
-    s.setAttribute('data-adsbygoogle', '1');
-    document.head.appendChild(s);
-  } catch(e){}
+  var m = document.cookie.match(/(?:^|; )cookie_consent=([^;]+)/);
+  var consent = m ? m[1] : '';
+  window.adsbygoogle = window.adsbygoogle || [];
+  if (consent !== 'all') {
+    window.adsbygoogle.requestNonPersonalizedAds = 1;
+  }
 })();
 </script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config.ADSENSE_ID }}" crossorigin="anonymous"></script>
 {# Adblock detector — sets a cookie if `adsbygoogle` is still undefined
    5s after page load. House ads check the cookie on the next request
    and skip the slot script entirely so adblock users see the house

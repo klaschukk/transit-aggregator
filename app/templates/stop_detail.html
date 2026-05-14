@@ -219,6 +219,9 @@
   {{ newsletter_form(source='stop_detail') }}
 </section>
 
+{% from '_partials/_ad_slot.html' import ad_slot with context %}
+{{ ad_slot('stop_bottom', format='responsive') }}
+
 {% endblock %}
 
 {% block scripts %}

@@ -5,6 +5,7 @@ import re
 from flask import Blueprint, abort, redirect, render_template, url_for
 
 from app.db import cached_query, cached_query_one, db_ready
+from app.extensions import limiter
 from app.slug import normalize_slug
 
 info_bp = Blueprint('info', __name__)
@@ -113,6 +114,8 @@ def about():
 
 
 @info_bp.route('/kontakt/', methods=['GET', 'POST'])
+@limiter.limit("5 per hour", methods=["POST"],
+               exempt_when=lambda: __import__('flask').current_app.testing)
 def contact():
     from flask import request, current_app
     sent = False

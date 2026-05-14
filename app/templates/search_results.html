@@ -94,6 +94,9 @@
   <div class="empty-state__sub">{{ from_city }} → {{ to_city }}</div>
 </div>
 
+{% from '_partials/_ad_slot.html' import ad_slot with context %}
+{{ ad_slot('search_mid', format='responsive') }}
+
 <!-- Buy ticket externally — fallback when no trips in DB for this pair.
      Shows every applicable partner so at least one link monetises the
      dead-end search (users who bounce here from Google are the highest-
