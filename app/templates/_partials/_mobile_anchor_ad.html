@@ -14,7 +14,7 @@
 {%- set _dismissed = request.cookies.get('ads_anchor_dismissed', '') == '1' -%}
 {%- set _slot_id = config.get('ADSENSE_SLOTS', {}).get('mobile_anchor', '') -%}
 {%- set _npa = (_consent != 'all') -%}
-{%- if config.ADSENSE_ID and not _dismissed -%}
+{%- if config.ADSENSE_ID and _slot_id and not _dismissed -%}
 <div class="mobile-anchor-ad" id="mobileAnchorAd" data-slot="mobile_anchor">
   <button type="button" class="mobile-anchor-ad__close"
           aria-label="{{ _('ads.dismiss_aria') }}">×</button>
