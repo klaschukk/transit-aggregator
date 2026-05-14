@@ -114,7 +114,8 @@ def about():
 
 
 @info_bp.route('/kontakt/', methods=['GET', 'POST'])
-@limiter.limit("5 per hour", methods=["POST"])
+@limiter.limit("5 per hour", methods=["POST"],
+               exempt_when=lambda: __import__('flask').current_app.testing)
 def contact():
     from flask import request, current_app
     sent = False
