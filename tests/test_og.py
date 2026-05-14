@@ -8,10 +8,15 @@ Lock in the contract for /og/<type>/<slug>.png:
 """
 from __future__ import annotations
 
+import os
 from io import BytesIO
 
 import pytest
 from PIL import Image
+
+_FONT_PATH = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
+_has_fonts = os.path.exists(_FONT_PATH)
+_skip_no_fonts = pytest.mark.skipif(not _has_fonts, reason='DejaVu fonts not installed on slim CI image')
 
 
 # ── 1. /og/<type>/<slug>.png contract ─────────────────────────────────
@@ -99,14 +104,12 @@ def test_homepage_keeps_static_og_fallback(client):
 # ── 3. Cyrillic + accented Latin render without crashing ──────────────
 
 
+@_skip_no_fonts
 def test_renderer_handles_cyrillic_and_diacritics():
     """Direct unit test of the renderer — Serbian Latin (ć, š, đ) and
     Cyrillic (Београд) both need to lay out cleanly. DejaVu Sans Bold
     has full coverage; this guards against accidentally swapping the
     font path to something narrower."""
-    import os
-    if not os.path.exists('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'):
-        pytest.skip('DejaVu fonts not installed — skipping on slim CI image')
     from app.og import render_card, cache_clear
     cache_clear()
     png = render_card('Niš → Skoplje', subtitle='Crna Gora · Beograd',
@@ -124,6 +127,7 @@ def test_renderer_handles_cyrillic_and_diacritics():
 # ── 4. In-process TTL cache ───────────────────────────────────────────
 
 
+@_skip_no_fonts
 def test_cache_returns_identical_bytes_on_repeat_render():
     """Second call with identical args must return the cached PNG, not
     re-render. PNG encoding is deterministic but not byte-stable across
@@ -139,6 +143,7 @@ def test_cache_returns_identical_bytes_on_repeat_render():
     assert c != a, 'Different title must produce different PNG'
 
 
+@_skip_no_fonts
 def test_og_endpoint_load_under_2s(client):
     """100 sequential GETs to a single OG URL must complete in under
     2s. The first hit renders (~100 ms), the rest are cache hits
