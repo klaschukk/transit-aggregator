@@ -104,6 +104,9 @@ def test_renderer_handles_cyrillic_and_diacritics():
     Cyrillic (Београд) both need to lay out cleanly. DejaVu Sans Bold
     has full coverage; this guards against accidentally swapping the
     font path to something narrower."""
+    import os
+    if not os.path.exists('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'):
+        pytest.skip('DejaVu fonts not installed — skipping on slim CI image')
     from app.og import render_card, cache_clear
     cache_clear()
     png = render_card('Niš → Skoplje', subtitle='Crna Gora · Beograd',
