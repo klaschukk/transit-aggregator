@@ -13,7 +13,8 @@
 {%- set _consent = request.cookies.get('cookie_consent', '') -%}
 {%- set _dismissed = request.cookies.get('ads_anchor_dismissed', '') == '1' -%}
 {%- set _slot_id = config.get('ADSENSE_SLOTS', {}).get('mobile_anchor', '') -%}
-{%- if config.ADSENSE_ID and _slot_id and _consent == 'all' and not _dismissed -%}
+{%- set _npa = (_consent != 'all') -%}
+{%- if config.ADSENSE_ID and not _dismissed -%}
 <div class="mobile-anchor-ad" id="mobileAnchorAd" data-slot="mobile_anchor">
   <button type="button" class="mobile-anchor-ad__close"
           aria-label="{{ _('ads.dismiss_aria') }}">×</button>
@@ -21,10 +22,10 @@
   <ins class="adsbygoogle"
        style="display:block;width:100%;height:60px"
        data-ad-client="{{ config.ADSENSE_ID }}"
-       data-ad-slot="{{ _slot_id }}"
-       data-ad-format="fluid"
-       data-ad-layout-key="-fb+5w+4e-db+86"></ins>
-  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+       {%- if _slot_id %} data-ad-slot="{{ _slot_id }}"{% endif %}
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({{ '{npa:1}' if _npa else '{}' }});</script>
 </div>
 <script>
 /* Dismiss handler — sets a 24h cookie so the anchor doesn't reappear

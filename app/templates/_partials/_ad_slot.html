@@ -1,22 +1,10 @@
-{# Reusable AdSense ad-slot macro with house-ad fallback.
+{# Reusable AdSense ad-slot macro.
 
-   Three rendering branches, picked at template-render time:
-
-     1. ADSENSE_ID empty           → render <_house_ad>
-     2. cookie_consent != 'all'    → render <_house_ad> (privacy default;
-                                      see base.html consent gate). The
-                                      AdSense JS is also gated client-side
-                                      so this stays consistent if the
-                                      cookie was set after page load.
-     3. otherwise                   → render <ins.adsbygoogle> with the
-                                      slot ID resolved from config and a
-                                      reserved-height wrapper to prevent
-                                      Cumulative Layout Shift.
-
-   Reserved heights map to the slot's `format` parameter so we can pass
-   the AdSense recommended sizes without each template having to know
-   them. `slot_id` is the env-var-resolved ID from config (the macro
-   never reads the env directly — keeps tests deterministic).
+   Rendering logic (ADSENSE_ID must be set — else renders nothing):
+     cookie_consent == 'all'  → personalized ads
+     anything else            → non-personalized ads (npa:1, GDPR-safe)
+     slot_id set in config    → specific slot
+     slot_id not set          → Auto Ads placement hint (no data-ad-slot)
 
    Usage:
      {% from '_partials/_ad_slot.html' import ad_slot with context %}
@@ -25,33 +13,21 @@
      {{ ad_slot('city_sidebar', format='skyscraper', desktop_only=True) }}
 #}
 
-{%- macro ad_slot(slot_key, format='responsive', desktop_only=False,
-                  label=True, lazy=True) -%}
-  {#- Until AdSense is approved (CLAUDE.md: "после 1000+ визитов"),
-      ADSENSE_ID is empty, so the only thing this macro could render is
-      the unstyled house-ad fallback — which leaks "Reklama" and raw
-      promo text onto every page. Skip rendering entirely until the env
-      var is set. Once AdSense lands, full path resumes automatically. -#}
-  {%- if not config.ADSENSE_ID -%}{%- else -%}
-  {%- set slot_id = config.get('ADSENSE_SLOTS', {}).get(slot_key, '') -%}
-  {%- set _consent_cookie = request.cookies.get('cookie_consent', '') -%}
-  {%- set _ads_ok = slot_id and _consent_cookie == 'all' -%}
-  {%- set _wrapper_class = 'ad-slot ad-slot--' ~ format
-        ~ (' ad-slot--desktop-only' if desktop_only else '') -%}
-  <div class="{{ _wrapper_class }}" data-slot="{{ slot_key }}">
-    {% if label %}<span class="ad-slot__label">{{ _('ads.label') }}</span>{% endif %}
-    {%- if _ads_ok %}
-    <ins class="adsbygoogle ad-slot__ins"
-         style="display:block"
-         data-ad-client="{{ config.ADSENSE_ID }}"
-         data-ad-slot="{{ slot_id }}"
-         data-ad-format="{{ 'auto' if format == 'responsive' else format }}"
-         data-full-width-responsive="{{ 'true' if format == 'responsive' else 'false' }}"
-         {%- if lazy %} data-lazy="1"{% endif %}></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    {%- else -%}
-    {%- include '_partials/_house_ad.html' -%}
-    {%- endif %}
-  </div>
-  {%- endif -%}
+{%- macro ad_slot(slot_key, format='responsive', desktop_only=False, label=True) -%}
+{%- if config.ADSENSE_ID -%}
+{%- set slot_id = config.get('ADSENSE_SLOTS', {}).get(slot_key, '') -%}
+{%- set _consent = request.cookies.get('cookie_consent', '') -%}
+{%- set _npa = (_consent != 'all') -%}
+{%- set _cls = 'ad-slot ad-slot--' ~ format ~ (' ad-slot--desktop-only' if desktop_only else '') -%}
+<div class="{{ _cls }}" data-slot="{{ slot_key }}">
+  {%- if label %}<span class="ad-slot__label">{{ _('ads.label') }}</span>{% endif %}
+  <ins class="adsbygoogle ad-slot__ins"
+       style="display:block"
+       data-ad-client="{{ config.ADSENSE_ID }}"
+       {%- if slot_id %} data-ad-slot="{{ slot_id }}"{% endif %}
+       data-ad-format="{{ 'auto' if format == 'responsive' else format }}"
+       data-full-width-responsive="{{ 'true' if format == 'responsive' else 'false' }}"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({{ '{npa:1}' if _npa else '{}' }});</script>
+</div>
+{%- endif -%}
 {%- endmacro -%}
