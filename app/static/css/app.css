@@ -3297,3 +3297,64 @@ select:focus-visible, textarea:focus-visible {
 /* Mobile-only elements — hidden on desktop. app.mobile.css unhides at ≤767px. */
 .hero__valueprop { display: none; }
 .seo-block__more { display: none; }
+
+/* ── AdSense slots ────────────────────────────────────────────────────
+   .ad-slot wraps every ins.adsbygoogle injection. The label sits above
+   the creative in muted text to satisfy Google's labelling requirement.
+   desktop-only slots collapse on mobile so no empty space is reserved. */
+.ad-slot {
+  margin: 24px 0;
+  text-align: center;
+}
+.ad-slot__label {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 4px;
+}
+.ad-slot__ins { min-height: 90px; }
+@media (max-width: 640px) {
+  .ad-slot--desktop-only { display: none; }
+}
+
+/* ── Mobile sticky anchor ─────────────────────────────────────────────
+   Fixed 60px band at the bottom on ≤640px. Hides on desktop via media
+   query. Dismissed state: add .mobile-anchor-ad--hidden to collapse. */
+.mobile-anchor-ad {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+  padding: 4px 8px 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 -2px 8px rgba(0,0,0,.08);
+}
+.mobile-anchor-ad .ad-slot__label {
+  margin: 0;
+  white-space: nowrap;
+}
+.mobile-anchor-ad__close {
+  flex-shrink: 0;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s;
+}
+.mobile-anchor-ad__close:hover { background: var(--color-bg-alt); }
+.mobile-anchor-ad--hidden { display: none; }
+@media (min-width: 641px) {
+  .mobile-anchor-ad { display: none; }
+}
