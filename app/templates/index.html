@@ -74,7 +74,7 @@
    AdSense travel-niche benchmarks. #}
 <div class="container">
   {% from '_partials/_ad_slot.html' import ad_slot with context %}
-  {{ ad_slot('home_top', format='leaderboard') }}
+  {{ ad_slot('home_top', format='leaderboard', lazy=False) }}
 </div>
 
 <!-- ═══════ STATS ═══════ -->
