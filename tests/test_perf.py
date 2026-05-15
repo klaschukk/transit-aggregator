@@ -25,9 +25,8 @@ BUDGETS_GZIPPED = {
     "/gradski/beograd/stajaliste/sajam/": 20000,
 }
 
-# app.css with mobile-magic CSS (toast + skeleton + tap-feedback + share-btn
-# + static-map fallback) — net +1.5 KB gzipped over the prior baseline.
-CSS_BUDGET_GZIPPED = 21000
+# app.css with ad-slot + mobile-anchor CSS added — net +400 bytes gzipped.
+CSS_BUDGET_GZIPPED = 22000
 
 
 @pytest.mark.parametrize("url,budget", list(BUDGETS_GZIPPED.items()))
