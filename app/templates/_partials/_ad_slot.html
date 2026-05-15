@@ -5,20 +5,35 @@
      anything else            → non-personalized ads (npa:1, GDPR-safe)
      slot_id set in config    → specific slot
      slot_id not set          → Auto Ads placement hint (no data-ad-slot)
+     lazy=True (default)      → IntersectionObserver loads ins only when
+                                 scrolled within 200px of viewport (better CWV)
+     lazy=False               → immediate push() at parse time (above-fold slots)
 
    Usage:
-     {% from '_partials/_ad_slot.html' import ad_slot with context %}
-     {{ ad_slot('home_top', format='leaderboard') }}
-     {{ ad_slot('route_bottom', format='responsive') }}
-     {{ ad_slot('city_sidebar', format='skyscraper', desktop_only=True) }}
+     from '_partials/_ad_slot.html' import ad_slot with context
+     ad_slot('home_top', format='leaderboard', lazy=False)    <- above fold, immediate
+     ad_slot('route_bottom', format='responsive')             <- below fold, lazy
+     ad_slot('city_sidebar', format='skyscraper', desktop_only=True)
 #}
 
-{%- macro ad_slot(slot_key, format='responsive', desktop_only=False, label=True) -%}
+{%- macro ad_slot(slot_key, format='responsive', desktop_only=False, label=True, lazy=True) -%}
 {%- if config.ADSENSE_ID -%}
 {%- set slot_id = config.get('ADSENSE_SLOTS', {}).get(slot_key, '') -%}
 {%- set _consent = request.cookies.get('cookie_consent', '') -%}
 {%- set _npa = (_consent != 'all') -%}
-{%- set _cls = 'ad-slot ad-slot--' ~ format ~ (' ad-slot--desktop-only' if desktop_only else '') -%}
+{%- set _cls = 'ad-slot ad-slot--' ~ format
+               ~ (' ad-slot--desktop-only' if desktop_only else '')
+               ~ (' js-ad-lazy' if lazy else '') -%}
+{%- if lazy %}
+<div class="{{ _cls }}" data-slot="{{ slot_key }}"
+     data-ad-client="{{ config.ADSENSE_ID }}"
+     {%- if slot_id %} data-ad-slot-id="{{ slot_id }}"{% endif %}
+     data-ad-format="{{ 'auto' if format == 'responsive' else format }}"
+     data-ad-responsive="{{ 'true' if format == 'responsive' else 'false' }}"
+     data-ad-npa="{{ 'true' if _npa else 'false' }}">
+  {%- if label %}<span class="ad-slot__label">{{ _('ads.label') }}</span>{% endif %}
+</div>
+{%- else %}
 <div class="{{ _cls }}" data-slot="{{ slot_key }}">
   {%- if label %}<span class="ad-slot__label">{{ _('ads.label') }}</span>{% endif %}
   <ins class="adsbygoogle ad-slot__ins"
@@ -29,5 +44,6 @@
        data-full-width-responsive="{{ 'true' if format == 'responsive' else 'false' }}"></ins>
   <script>(adsbygoogle = window.adsbygoogle || []).push({{ '{npa:1}' if _npa else '{}' }});</script>
 </div>
+{%- endif %}
 {%- endif -%}
 {%- endmacro -%}
