@@ -21,7 +21,7 @@ class Config:
     # needs a valid ads.txt for re-approval).
     ADSENSE_PUB_ID = os.environ.get('ADSENSE_PUB_ID', ADSENSE_ID)
     # Per-slot ad-unit IDs. Set ADSENSE_SLOT_<KEY> env vars from the
-    # AdSense console; missing keys render the house ad instead.
+    # AdSense console; missing keys skip rendering (no house ad).
     # Keys must match the strings passed to ad_slot() in templates.
     ADSENSE_SLOTS = {
         'home_top':           os.environ.get('ADSENSE_SLOT_HOME_TOP', ''),
@@ -31,6 +31,9 @@ class Config:
         'city_transport_mid': os.environ.get('ADSENSE_SLOT_CITY_TRANSPORT_MID', ''),
         'catalog_in_feed':    os.environ.get('ADSENSE_SLOT_CATALOG_IN_FEED', ''),
         'guide_sidebar':      os.environ.get('ADSENSE_SLOT_GUIDE_SIDEBAR', ''),
+        'search_mid':         os.environ.get('ADSENSE_SLOT_SEARCH_MID', ''),
+        'stop_bottom':        os.environ.get('ADSENSE_SLOT_STOP_BOTTOM', ''),
+        'line_bottom':        os.environ.get('ADSENSE_SLOT_LINE_BOTTOM', ''),
         'mobile_anchor':      os.environ.get('ADSENSE_SLOT_MOBILE_ANCHOR', ''),
     }
     CONTACT_EMAIL = os.environ.get('CONTACT_EMAIL', '')

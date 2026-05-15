@@ -21,3 +21,10 @@ python -u data/pipelines/build_db.py 2>&1 | tee -a "$LOG"
 systemctl start transit
 
 log "Done!"
+
+# Write last_refresh.json so /health shows nightly status
+python3 -c "
+import json, time
+with open('$DIR/logs/last_refresh.json', 'w') as f:
+    json.dump({'finished_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'finished_ts': time.time(), 'status': 'ok'}, f)
+"
