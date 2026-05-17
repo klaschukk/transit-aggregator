@@ -78,13 +78,15 @@ def _validate_review(form: dict) -> tuple[str | None, dict]:
 def index():
     """Homepage with search form."""
     popular_routes = cached_query("""
-        SELECT r.slug, r.from_city, r.to_city, r.distance_km, COUNT(t.id) as trip_count
+        SELECT r.slug, r.from_city, r.to_city, r.distance_km,
+               COUNT(t.id) as trip_count,
+               MIN(t.price_rsd) as min_price_rsd
         FROM routes r
         LEFT JOIN trips t ON t.route_id = r.id
         WHERE r.type = 'intercity'
         GROUP BY r.id, r.slug, r.from_city, r.to_city, r.distance_km
         ORDER BY trip_count DESC
-        LIMIT 8
+        LIMIT 10
     """) if db_ready() else []
 
     cities = cached_query("""
