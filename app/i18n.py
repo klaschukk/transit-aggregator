@@ -4147,6 +4147,16 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'We may update these terms from time to time. Each new version is published on this page with a change date. If a change materially affects your rights, we publish a homepage banner at least 14 days in advance. Continued use of the site after publication constitutes acceptance of the updated terms.',
         'ru': 'Мы можем периодически обновлять эти условия. Каждая новая версия публикуется на этой странице с датой изменения. Если изменение существенно затрагивает ваши права, мы вывешиваем баннер на главной странице минимум за 14 дней. Продолжение использования сайта после публикации означает принятие обновлённых условий.',
     },
+
+    'home.quick_label': {'sr': 'Popularno:', 'en': 'Popular:', 'ru': 'Популярно:'},
+    'home.quick_links_aria': {'sr': 'Popularni maršruti', 'en': 'Popular routes', 'ru': 'Популярные маршруты'},
+
+    'seasonal.tip_heading': {'sr': 'Planirate posetu?', 'en': 'Planning a visit?', 'ru': 'Планируете поездку?'},
+    'seasonal.tip_route': {
+        'sr': 'Rezervišite smeštaj u {to_city} na vreme — leto je sezona najveće potražnje.',
+        'en': 'Book accommodation in {to_city} early — summer is peak season.',
+        'ru': 'Забронируйте жильё в {to_city} заранее — летом высокий сезон.',
+    },
 }
 
 SUPPORTED_LANGS = ('sr', 'en', 'ru')
