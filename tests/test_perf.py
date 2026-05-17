@@ -17,16 +17,16 @@ import pytest
 
 
 BUDGETS_GZIPPED = {
-    "/": 16000,                                # +1KB for toast bundle + skeleton stub
+    "/": 18000,                                # raised: feature strip + scroll-reveal JS
     "/rute/": 70000,
-    "/rute/beograd-novi-sad/": 21000,          # +1KB for share button + toast wiring
-    "/voznja/beograd-do-budva/": 19000,        # same — share button + toast wiring
-    "/gradski/beograd/": 45000,
-    "/gradski/beograd/stajaliste/sajam/": 20000,
+    "/rute/beograd-novi-sad/": 22000,          # raised: scroll-reveal JS on all pages
+    "/voznja/beograd-do-budva/": 20000,        # raised: scroll-reveal JS on all pages
+    "/gradski/beograd/": 46000,
+    "/gradski/beograd/stajaliste/sajam/": 22000,
 }
 
-# app.css with ad-slot + mobile-anchor CSS added — net +400 bytes gzipped.
-CSS_BUDGET_GZIPPED = 22000
+# raised: animation system (scroll-reveal keyframes, hero stagger, card hovers)
+CSS_BUDGET_GZIPPED = 23000
 
 
 @pytest.mark.parametrize("url,budget", list(BUDGETS_GZIPPED.items()))

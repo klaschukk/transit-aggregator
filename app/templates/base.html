@@ -298,6 +298,61 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
+/* ── Scroll-reveal + stats counter ──────────────────────────────────────
+   Adds .is-visible to .fade-in elements as they enter the viewport so
+   CSS triggers the animation only when the element is actually seen.
+   Also animates .home-stats__num with a count-up when the stats section
+   scrolls into view — makes the numbers feel alive on the homepage. */
+(function(){
+  /* Immediate fallback: no IntersectionObserver or reduced-motion */
+  var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!('IntersectionObserver' in window) || prefersReduced) {
+    document.querySelectorAll('.fade-in').forEach(function(el){ el.classList.add('is-visible'); });
+    return;
+  }
+
+  /* Scroll-reveal observer */
+  var revealObs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (!e.isIntersecting) return;
+      e.target.classList.add('is-visible');
+      revealObs.unobserve(e.target);
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -32px 0px' });
+
+  document.querySelectorAll('.fade-in').forEach(function(el){
+    /* Hero children animate via CSS keyframes already — skip observer */
+    if (el.closest('.hero')) { el.classList.add('is-visible'); return; }
+    revealObs.observe(el);
+  });
+
+  /* Stats count-up */
+  var statsEl = document.querySelector('.home-stats');
+  if (!statsEl) return;
+  var counted = false;
+  var statsObs = new IntersectionObserver(function(entries){
+    if (counted || !entries[0].isIntersecting) return;
+    counted = true;
+    statsEl.querySelectorAll('.home-stats__num').forEach(function(num){
+      var target = parseInt(num.textContent.replace(/\D/g, ''), 10);
+      if (!target || target < 2) return;
+      var start = performance.now();
+      var dur = 900;
+      (function tick(now){
+        var p = Math.min((now - start) / dur, 1);
+        var ease = 1 - Math.pow(1 - p, 3);
+        num.textContent = Math.round(ease * target);
+        if (p < 1) { requestAnimationFrame(tick); }
+        else { num.textContent = target; num.classList.add('counted'); }
+      })(start);
+    });
+    statsObs.unobserve(statsEl);
+  }, { threshold: 0.3 });
+  statsObs.observe(statsEl);
+})();
+</script>
+
+<script>
 /* ── Centralised analytics tracker ──────────────────────────────────────
    All event wiring lives here so individual templates stay markup-only.
    Fires two sinks in parallel:

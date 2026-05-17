@@ -73,7 +73,7 @@
     <div class="hero__valueprop" aria-label="{{ _('home.valueprop_aria') }}">
       <span><b>{{ stats.routes }}+</b> {{ _('common.routes') }}</span>
       <span><b>70+</b> {{ _('common.carriers') }}</span>
-      <span><b>3</b> {{ _('common.languages') }}</span>
+      <span><b>6</b> {{ _('common.countries') }}</span>
       <span><b>{{ _('home.valueprop_free') }}</b></span>
     </div>
   </div>
@@ -119,7 +119,47 @@
   </div>
 </section>
 
-<!-- ═══════ HOW IT WORKS ═══════ -->
+<!-- ═══════ FEATURE HIGHLIGHT STRIP ═══════ -->
+<section class="home-features container fade-in">
+  <a href="{{ lang_prefix }}/gradski/beograd/" class="home-feat-card">
+    <div class="home-feat-card__icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28" aria-hidden="true">
+        <path d="M12 22s8-7 8-13a8 8 0 10-16 0c0 6 8 13 8 13z"/><circle cx="12" cy="9" r="2.5"/>
+        <path d="M3 9h3m12 0h3M12 2v3"/>
+      </svg>
+    </div>
+    <div class="home-feat-card__body">
+      <div class="home-feat-card__label">{{ _('home.feat_map_label') }}</div>
+      <div class="home-feat-card__desc"><b>{{ stats.stops }}+</b> {{ _('home.feat_map_sub') }}</div>
+    </div>
+    <svg class="home-feat-card__arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M3 8h10m-4-4l4 4-4 4"/></svg>
+  </a>
+  <a href="{{ lang_prefix }}/destinacije/" class="home-feat-card">
+    <div class="home-feat-card__icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/>
+      </svg>
+    </div>
+    <div class="home-feat-card__body">
+      <div class="home-feat-card__label">{{ _('home.feat_region_label') }}</div>
+      <div class="home-feat-card__desc">{{ _('home.feat_region_desc') }}</div>
+    </div>
+    <svg class="home-feat-card__arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M3 8h10m-4-4l4 4-4 4"/></svg>
+  </a>
+  <a href="{{ lang_prefix }}/rute/" class="home-feat-card">
+    <div class="home-feat-card__icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+      </svg>
+    </div>
+    <div class="home-feat-card__body">
+      <div class="home-feat-card__label">{{ _('home.feat_schedule_label') }}</div>
+      <div class="home-feat-card__desc"><b>{{ stats.routes }}+</b> {{ _('home.feat_schedule_sub') }}</div>
+    </div>
+    <svg class="home-feat-card__arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M3 8h10m-4-4l4 4-4 4"/></svg>
+  </a>
+</section>
+
 <!-- ═══════ TWO COLUMNS: Routes + City ═══════ -->
 <section class="home-section container">
   <div class="home-duo">
@@ -221,7 +261,7 @@
         <div class="home-benefits__desc">{{ _('benefits.free_desc') }}</div>
       </div>
       <div class="home-benefits__item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path d="M12 22s8-7 8-13a8 8 0 10-16 0c0 6 8 13 8 13z"/><circle cx="12" cy="9" r="2.5"/></svg>
         <div class="home-benefits__label">{{ _('benefits.mobile') }}</div>
         <div class="home-benefits__desc">{{ _('benefits.mobile_desc') }}</div>
       </div>

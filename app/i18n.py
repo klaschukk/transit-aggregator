@@ -390,14 +390,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Найдите автобус, поезд или городской транспорт в одном месте',
     },
     'home.hero_sub_descriptive': {
-        'sr': 'Pronađite autobus, voz ili gradski prevoz na jednom mestu',
-        'en': 'Find bus, train or city transport in one place',
-        'ru': 'Найдите автобус, поезд или городской транспорт в одном месте',
+        'sr': 'Autobus, voz i gradska mreža — Srbija, Crna Gora, BiH i region',
+        'en': 'Bus, train and city transport — Serbia, Montenegro, BiH & region',
+        'ru': 'Автобус, поезд и городской транспорт — Сербия, Черногория, БиГ и регион',
     },
     'home.hero_sub_feature_list': {
-        'sr': '335 ruta · 70 prevoznika · 4 grada · besplatno',
-        'en': '335 routes · 70 carriers · 4 cities · free',
-        'ru': '335 маршрутов · 70 перевозчиков · 4 города · бесплатно',
+        'sr': '335 ruta · karta stajališta · 6 zemalja · besplatno',
+        'en': '335 routes · stop map · 6 countries · free',
+        'ru': '335 маршрутов · карта остановок · 6 стран · бесплатно',
     },
     'home.hero_sub_price_compare': {
         'sr': 'Uporedite cene Lasta, Niš-Ekspres i drugih — bez naknade',
@@ -505,6 +505,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'jezika',
         'en': 'languages',
         'ru': 'языка',
+    },
+    'common.countries': {
+        'sr': 'zemalja',
+        'en': 'countries',
+        'ru': 'стран',
     },
     'home.valueprop_aria': {
         'sr': 'Ključne brojke',
@@ -650,14 +655,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Без регистрации, без скрытых платежей',
     },
     'benefits.mobile': {
-        'sr': 'Mobilni pristup',
-        'en': 'Mobile friendly',
-        'ru': 'Для мобильных',
+        'sr': 'Interaktivna karta',
+        'en': 'Interactive map',
+        'ru': 'Интерактивная карта',
     },
     'benefits.mobile_desc': {
-        'sr': 'Optimizovano za telefon i tablet',
-        'en': 'Optimized for phone and tablet',
-        'ru': 'Оптимизировано для телефона и планшета',
+        'sr': 'Mapa svih stajališta sa vremenima dolaska',
+        'en': 'Map of all stops with arrival times',
+        'ru': 'Карта всех остановок со временем прибытия',
     },
     'benefits.realtime': {
         'sr': 'Aktuelni podaci',
@@ -675,9 +680,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Всё в одном месте',
     },
     'benefits.allinone_desc': {
-        'sr': 'Autobus, voz, tramvaj — cela Srbija',
-        'en': 'Bus, train, tram — all of Serbia',
-        'ru': 'Автобус, поезд, трамвай — вся Сербия',
+        'sr': 'Autobus, voz, tramvaj — Srbija, Crna Gora, BiH i region',
+        'en': 'Bus, train, tram — Serbia, Montenegro, BiH & region',
+        'ru': 'Автобус, поезд, трамвай — Сербия, Черногория, БиГ и регион',
     },
 
     # ── City transport page ──
@@ -4150,6 +4155,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     'home.quick_label': {'sr': 'Popularno:', 'en': 'Popular:', 'ru': 'Популярно:'},
     'home.quick_links_aria': {'sr': 'Popularni maršruti', 'en': 'Popular routes', 'ru': 'Популярные маршруты'},
+
+    'home.feat_map_label': {'sr': 'Interaktivna karta', 'en': 'Interactive map', 'ru': 'Интерактивная карта'},
+    'home.feat_map_sub': {'sr': 'stajališta · vreme dolaska', 'en': 'stops · arrival times', 'ru': 'остановок · время прибытия'},
+    'home.feat_region_label': {'sr': 'Srbija i region', 'en': 'Serbia & region', 'ru': 'Сербия и регион'},
+    'home.feat_region_desc': {'sr': 'Crna Gora, BiH, Hrvatska i još', 'en': 'Montenegro, BiH, Croatia & more', 'ru': 'Черногория, БиГ, Хорватия и ещё'},
+    'home.feat_schedule_label': {'sr': 'Aktuelni polasci', 'en': 'Live schedules', 'ru': 'Актуальные отправления'},
+    'home.feat_schedule_sub': {'sr': 'ruta · gradskih linija', 'en': 'routes · city lines', 'ru': 'маршрутов · линий'},
 
     'seasonal.tip_heading': {'sr': 'Planirate posetu?', 'en': 'Planning a visit?', 'ru': 'Планируете поездку?'},
     'seasonal.tip_route': {
