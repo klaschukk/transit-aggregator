@@ -3502,3 +3502,210 @@ select:focus-visible, textarea:focus-visible {
   .home-features { grid-template-columns: 1fr; }
   .home-feat-card__arrow { display: none; }
 }
+
+/* ═══════════════════════════════════════════════════
+   Visual polish — trip cards, stats, cards, sort bar
+   ═══════════════════════════════════════════════════ */
+
+/* Transport-type left accent on trip cards */
+.trip-card[data-type="train"]   { border-left: 3px solid var(--color-train);   padding-left: 17px; }
+.trip-card[data-type="tram"]    { border-left: 3px solid var(--color-tram);    padding-left: 17px; }
+.trip-card[data-type="trolley"] { border-left: 3px solid var(--color-trolley); padding-left: 17px; }
+.trip-card[data-type="bus"]     { border-left: 3px solid var(--color-bus);     padding-left: 17px; }
+
+/* Stronger trip-card hover + buy button glow */
+@media (hover: hover) {
+  .trip-list .trip-card:hover {
+    box-shadow: 0 6px 24px rgba(0,0,0,.1);
+    transform: translateY(-2px);
+  }
+  .trip-card:hover .trip-card__buy {
+    box-shadow: 0 4px 14px rgba(245,158,11,.4);
+    transform: translateY(-1px);
+  }
+}
+
+/* Stats numbers — gradient for visual impact */
+.home-stats__num {
+  background: linear-gradient(135deg, var(--color-primary-dark) 20%, #0d9488 80%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Section heading left accent bar */
+.home-section__title,
+.section__title {
+  padding-left: 14px;
+  position: relative;
+}
+.home-section__title::before,
+.section__title::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0;
+  width: 4px; height: 100%;
+  background: linear-gradient(to bottom, var(--color-primary), var(--color-primary-dark));
+  border-radius: 2px;
+}
+
+/* Popular / see-also cards — left teal accent */
+.popular-card,
+.see-also__card {
+  border-left: 3px solid var(--color-primary);
+  padding-left: 13px;
+  background: linear-gradient(to right, rgba(13,148,136,.03) 0%, transparent 60%);
+}
+@media (hover: hover) {
+  .popular-card:hover,
+  .see-also__card:hover {
+    border-left-color: var(--color-primary-dark);
+    box-shadow: 0 4px 16px rgba(13,148,136,.12);
+    transform: translateY(-2px);
+  }
+}
+
+/* Sort bar — subtle background container */
+.sort-bar {
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 8px 14px;
+  margin-bottom: 16px;
+}
+
+/* Trip count — brand accent background */
+.trip-count {
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-md);
+}
+
+/* Feature cards icon — gradient background */
+.home-feat-card__icon {
+  background: linear-gradient(135deg, rgba(13,148,136,.18), rgba(13,148,136,.07));
+}
+
+/* Route cards — stronger hover */
+@media (hover: hover) {
+  .route-card:hover {
+    border-left-color: var(--color-primary-dark);
+    box-shadow: 0 4px 16px rgba(13,148,136,.13);
+    transform: translateY(-2px);
+  }
+}
+
+/* Home city cards — gradient on hover */
+@media (hover: hover) {
+  .home-city-card:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 16px rgba(13,148,136,.12);
+    transform: translateY(-2px);
+  }
+}
+
+/* FAQ items — nicer open state */
+.faq-item[open] {
+  background: linear-gradient(to bottom, rgba(13,148,136,.03), transparent);
+  border-radius: var(--radius-md);
+}
+.faq-item[open] .faq-item__q {
+  color: var(--color-primary-dark);
+}
+
+/* Buy ticket block — more prominent */
+.buy-ticket {
+  border: 2px solid var(--color-primary);
+  background: linear-gradient(135deg, rgba(13,148,136,.05) 0%, transparent 60%);
+}
+
+/* Dest cards (destinations page) — stronger hover */
+@media (hover: hover) {
+  .dest-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  }
+}
+
+/* Trip list — add subtle depth */
+.trip-list { box-shadow: var(--shadow-sm); }
+
+/* Stats strip — gradient values */
+.stats-strip__value {
+  background: linear-gradient(135deg, var(--color-primary-dark) 20%, var(--color-primary) 80%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Filter chips — active state with gradient */
+.filter-chip--active {
+  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
+  border-color: var(--color-primary-dark);
+  color: #fff;
+}
+
+/* Reverse route link — pill button style */
+.reverse-route {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  background: var(--color-bg-alt);
+  transition: border-color .15s, background .15s;
+  margin-top: 6px;
+}
+.reverse-route:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  opacity: 1;
+}
+
+/* Error page 404 code — gradient */
+.error-page__code {
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 60%, var(--color-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Home benefits grid — icons get primary color */
+.home-benefits__item svg {
+  color: var(--color-primary);
+}
+
+/* City cards — icon background accent */
+.home-city-card__icon {
+  background: linear-gradient(135deg, rgba(13,148,136,.15), rgba(13,148,136,.06));
+  border-radius: var(--radius-md);
+  padding: 8px;
+  color: var(--color-primary);
+}
+
+/* Buy ticket block — gradient border */
+.buy-ticket {
+  border-left: 4px solid var(--color-primary);
+}
+
+/* Search results — found badge and arrow */
+.search-found-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-weight: 700;
+  font-size: var(--text-xs);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+}
+.search-arrow {
+  color: var(--color-primary);
+  font-weight: 400;
+}
