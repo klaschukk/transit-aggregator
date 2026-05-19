@@ -1719,6 +1719,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Pearl of the Adriatic. City walls, Old Town, Game of Thrones filming locations.',
         'ru': 'Жемчужина Адриатики. Городские стены, Старый город, локации «Игры престолов».',
     },
+    'dest.split': {
+        'sr': 'Dioklecijanova palata, plaže Bačvice, brodske linije za ostrva Jadrana.',
+        'en': "Diocletian's Palace, Bačvice beach, ferry connections to Adriatic islands.",
+        'ru': 'Дворец Диоклетиана, пляж Бачвице, паромы на острова Адриатики.',
+    },
     'dest.budapest': {
         'sr': 'Glavni grad Mađarske. Termalni bazeni, Budimski zamak, Parlament, Dunav noću.',
         'en': 'Capital of Hungary. Thermal baths, Buda Castle, Parliament, Danube by night.',

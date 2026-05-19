@@ -1414,7 +1414,11 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 }
 .dest-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); transform: translateY(-2px); }
 .dest-card__header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.dest-card__emoji { font-size: 2rem; line-height: 1; }
+.dest-card__icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: var(--radius-md); flex-shrink: 0;
+  background: var(--color-primary-light); color: var(--color-primary-dark);
+}
 .dest-card__city { font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--color-text); }
 .dest-card__country { font-size: 0.78rem; color: var(--color-text-muted); font-weight: 500; }
 .dest-card__desc { font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.5; margin-bottom: 14px; }
@@ -2138,6 +2142,8 @@ main { animation: fadeInUp .25s ease both; }
   min-height: 48px;
 }
 .country-hub-card svg { flex-shrink: 0; opacity: .7; }
+.country-hub-card__name { display: block; }
+.country-hub-card__meta { display: block; font-weight: 500; font-size: var(--text-xs); opacity: .75; margin-top: 2px; }
 .country-hub-card:hover {
   transform: translateX(2px);
   box-shadow: var(--shadow-md);
