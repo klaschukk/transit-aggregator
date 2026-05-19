@@ -25,8 +25,8 @@ BUDGETS_GZIPPED = {
     "/gradski/beograd/stajaliste/sajam/": 22000,
 }
 
-# raised: animation system (scroll-reveal keyframes, hero stagger, card hovers)
-CSS_BUDGET_GZIPPED = 23000
+# raised: visual polish (trip-card type accents, gradient text, container styling)
+CSS_BUDGET_GZIPPED = 24000
 
 
 @pytest.mark.parametrize("url,budget", list(BUDGETS_GZIPPED.items()))

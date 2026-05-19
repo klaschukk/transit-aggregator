@@ -298,6 +298,20 @@ if ('serviceWorker' in navigator) {
 </script>
 
 <script>
+/* ── Date input: pre-fill today + block past dates ──────────────────────
+   The journey-form has a date input (name="datum") that starts empty.
+   We set it to today so the user sees a meaningful default without waiting
+   for the backend. The min attr prevents picking past dates. */
+(function(){
+  var d = document.querySelector('.journey-form__date');
+  if (!d) return;
+  var today = new Date().toISOString().split('T')[0];
+  d.setAttribute('min', today);
+  if (!d.value) d.value = today;
+})();
+</script>
+
+<script>
 /* ── Scroll-reveal + stats counter ──────────────────────────────────────
    Adds .is-visible to .fade-in elements as they enter the viewport so
    CSS triggers the animation only when the element is actually seen.
