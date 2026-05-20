@@ -488,6 +488,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 }
 .empty-state__text { font-size: var(--text-base); font-weight: 500; }
 .empty-state__sub { font-size: var(--text-sm); }
+.page-cta { text-align: center; margin-top: 24px; }
 
 /* Error actions */
 .error-actions {
@@ -1077,8 +1078,8 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 /* City map */
 .city-map-wrap {
   /* Aspect ratio reserves vertical space before Leaflet finishes loading
-     so CLS stays at 0. We still cap with min/max so very tall/short
-     viewports don't produce awkward strips. */
+     so CLS stays at 0. Mobile: capped height. Desktop: fixed 480px so
+     the map fills the full container width without aspect-ratio shrinkage. */
   aspect-ratio: 16 / 10;
   min-height: 250px;
   max-height: 420px;
@@ -1086,11 +1087,14 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   overflow: hidden;
   margin-bottom: 24px;
   border: 1px solid var(--color-border);
-  /* Leaflet handles pinch/drag internally; telling the browser this
-     element won't double-tap-zoom keeps surrounding page scroll snappy
-     on iOS and prevents a subtle touch delay when the user starts the
-     gesture just inside the map bounds. */
   touch-action: pan-x pan-y pinch-zoom;
+}
+@media (min-width: 768px) {
+  .city-map-wrap {
+    aspect-ratio: unset;
+    height: 480px;
+    max-height: none;
+  }
 }
 .city-map { height: 100%; }
 

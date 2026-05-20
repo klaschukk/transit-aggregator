@@ -21,7 +21,7 @@
 {% from '_partials/_empty_state.html' import empty_state %}
 {{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': _('breadcrumb.all_routes')}]) }}
 
-<div class="page-title">
+<div class="page-title fade-in">
   <h1>{{ _('route_index.h1') }}</h1>
   <p class="page-subtitle">{{ routes|length if routes else 0 }} {{ _('route_index.subtitle') }} · {{ _('route_index.subtitle_short') }}</p>
 </div>
