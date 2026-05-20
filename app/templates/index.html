@@ -181,7 +181,7 @@
             <span class="home-route__meta">{{ route.trip_count }} {{ _('routes.departures') }}</span>
             {% endif %}
             {% if route.min_price_rsd %}
-            <span class="home-route__price">od {{ route.min_price_rsd }} RSD</span>
+            <span class="home-route__price">{{ _('route.from_price') }} <span class="ccy-rsd">{{ route.min_price_rsd }} RSD</span><span class="ccy-eur">{{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }} €</span></span>
             {% endif %}
           </div>
         </a>
