@@ -1074,6 +1074,20 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'line.filter_weekend': {
         'sr': 'Vikend', 'en': 'Weekend', 'ru': 'Выходные',
     },
+    'line.day_workday': {
+        'sr': 'Radni dan', 'en': 'Weekday', 'ru': 'Будни',
+    },
+    'line.day_saturday': {
+        'sr': 'Subota', 'en': 'Saturday', 'ru': 'Суббота',
+    },
+    'line.day_sunday': {
+        'sr': 'Nedelja', 'en': 'Sunday', 'ru': 'Воскресенье',
+    },
+    'line.schedule_from_first': {
+        'sr': 'polasci od prvog stajališta',
+        'en': 'from first stop',
+        'ru': 'от первой остановки',
+    },
 
     # ── City index ──
     'city_index.title': {
