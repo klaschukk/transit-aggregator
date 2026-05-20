@@ -143,10 +143,10 @@
 <section class="section schedule-section">
   <h2 class="section__title">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-    Red vožnje — polasci od prvog stajališta
+    {{ _('line_detail.schedule_heading') }} — {{ _('line.schedule_from_first') }}
   </h2>
 
-  {% set day_labels = {'RD': 'Radni dan', 'S': 'Subota', 'N': 'Nedelja'} %}
+  {% set day_labels = {'RD': _('line.day_workday'), 'S': _('line.day_saturday'), 'N': _('line.day_sunday')} %}
   {% set day_icons = {'RD': 'work', 'S': 'sat', 'N': 'sun'} %}
 
   <div class="schedule-tabs">
