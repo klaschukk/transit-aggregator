@@ -3883,6 +3883,75 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Эта ссылка уже была использована или недействительна.',
     },
 
+    # ── Operator detail FAQ ──
+    'operator.faq.q_routes': {
+        'sr': 'Koliko ruta ima {name}?',
+        'en': 'How many routes does {name} operate?',
+        'ru': 'Сколько маршрутов у {name}?',
+    },
+    'operator.faq.a_routes_bus': {
+        'sr': '{name} saobraća na {count} autobuskih ruta. Najpopularniji pravci: {top}.',
+        'en': '{name} operates {count} bus routes. Most popular: {top}.',
+        'ru': '{name} обслуживает {count} автобусных маршрутов. Популярные направления: {top}.',
+    },
+    'operator.faq.a_routes_train': {
+        'sr': '{name} saobraća na {count} voznih ruta. Najpopularniji pravci: {top}.',
+        'en': '{name} operates {count} train routes. Most popular: {top}.',
+        'ru': '{name} обслуживает {count} железнодорожных маршрутов. Популярные направления: {top}.',
+    },
+    'operator.faq.q_cities': {
+        'sr': 'Koje gradove opslužuje {name}?',
+        'en': 'Which cities does {name} serve?',
+        'ru': 'Какие города обслуживает {name}?',
+    },
+    'operator.faq.a_cities': {
+        'sr': '{name} povezuje gradove: {cities}.',
+        'en': '{name} connects the following cities: {cities}.',
+        'ru': '{name} связывает города: {cities}.',
+    },
+    'operator.faq.q_price': {
+        'sr': 'Koliko košta karta kod {name}?',
+        'en': 'How much does a ticket cost with {name}?',
+        'ru': 'Сколько стоит билет у {name}?',
+    },
+    'operator.faq.a_price': {
+        'sr': 'Cene karata {name} kreću se od {min} do {max} RSD (oko {min_eur}–{max_eur} €), u zavisnosti od pravca.',
+        'en': 'Ticket prices for {name} range from {min} to {max} RSD (approx. {min_eur}–{max_eur} €), depending on the route.',
+        'ru': 'Цены на билеты {name} — от {min} до {max} RSD (около {min_eur}–{max_eur} €), в зависимости от маршрута.',
+    },
+
+    # ── Country hub FAQ ──
+    'country.faq.q_travel': {
+        'sr': 'Kako putovati autobusom u {country}?',
+        'en': 'How to travel by bus to {country}?',
+        'ru': 'Как добраться автобусом в {country}?',
+    },
+    'country.faq.a_travel': {
+        'sr': 'Iz Srbije postoji {count} direktnih autobuskih linija za {country}, iz gradova: {cities}. Prevoz traje od nekoliko sati do celog dana.',
+        'en': 'From Serbia there are {count} direct bus routes to {country}, departing from: {cities}.',
+        'ru': 'Из Сербии в {country} курсирует {count} прямых автобусных маршрутов из городов: {cities}.',
+    },
+    'country.faq.q_price': {
+        'sr': 'Koliko košta karta do {country}?',
+        'en': 'How much is a bus ticket to {country}?',
+        'ru': 'Сколько стоит билет в {country}?',
+    },
+    'country.faq.a_price': {
+        'sr': 'Karte za {country} kreću se od {min} RSD (oko {min_eur} €). Cena zavisi od polaznog grada i prevoznika.',
+        'en': 'Tickets to {country} start from {min} RSD (approx. {min_eur} €). Price depends on departure city and carrier.',
+        'ru': 'Билеты в {country} — от {min} RSD (около {min_eur} €). Цена зависит от города отправления и перевозчика.',
+    },
+    'country.faq.q_cities': {
+        'sr': 'Iz kojih gradova Srbije ima direktnih veza za {country}?',
+        'en': 'Which Serbian cities have direct connections to {country}?',
+        'ru': 'Из каких городов Сербии есть прямые рейсы в {country}?',
+    },
+    'country.faq.a_cities': {
+        'sr': 'Direktni autobusi za {country} polaze iz: {cities}.',
+        'en': 'Direct buses to {country} depart from: {cities}.',
+        'ru': 'Прямые автобусы в {country} отправляются из: {cities}.',
+    },
+
     # ── PWA install promo ──
     'pwa.install_title': {
         'sr': 'Instalirajte Prevozni',

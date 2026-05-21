@@ -40,6 +40,18 @@
 }
 </script>
 {% endif %}
+{% if routes %}
+{%- set _top = (routes[:3] | map(attribute='from_city') | list + routes[:3] | map(attribute='to_city') | list) | unique | list %}
+{%- set _top_str = _top[:4] | join(', ') %}
+{%- set _cities_str = (cities[:6] | join(', ')) if cities else _top_str %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"{{ _('operator.faq.q_routes').format(name=operator.name) }}","acceptedAnswer":{"@type":"Answer","text":"{{ (_('operator.faq.a_routes_train') if operator.type == 'train' else _('operator.faq.a_routes_bus')).format(name=operator.name, count=total_routes, top=_top_str) }}"}},
+{"@type":"Question","name":"{{ _('operator.faq.q_cities').format(name=operator.name) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('operator.faq.a_cities').format(name=operator.name, cities=_cities_str) }}"}}{% if price_min and price_max %},
+{"@type":"Question","name":"{{ _('operator.faq.q_price').format(name=operator.name) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('operator.faq.a_price').format(name=operator.name, min=price_min, max=price_max, min_eur=(price_min/config.EUR_RSD_RATE)|round|int, max_eur=(price_max/config.EUR_RSD_RATE)|round|int) }}"}}{% endif %}
+]}
+</script>
+{% endif %}
 {% endblock %}
 
 {% block content %}

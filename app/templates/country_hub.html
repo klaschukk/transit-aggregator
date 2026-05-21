@@ -27,6 +27,17 @@
 }
 </script>
 {% endif %}
+{% if routes %}
+{%- set _from_cities = routes | map(attribute='from_city') | unique | list %}
+{%- set _from_cities_str = _from_cities[:5] | join(', ') %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"{{ _('country.faq.q_travel').format(country=country_name) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('country.faq.a_travel').format(country=country_name, count=total_routes, cities=_from_cities_str) }}"}},
+{"@type":"Question","name":"{{ _('country.faq.q_cities').format(country=country_name) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('country.faq.a_cities').format(country=country_name, cities=_from_cities_str) }}"}}{% if min_price_rsd %},
+{"@type":"Question","name":"{{ _('country.faq.q_price').format(country=country_name) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('country.faq.a_price').format(country=country_name, min=min_price_rsd, min_eur=(min_price_rsd/config.EUR_RSD_RATE)|round|int) }}"}}{% endif %}
+]}
+</script>
+{% endif %}
 {% endif %}
 {% endblock %}
 
