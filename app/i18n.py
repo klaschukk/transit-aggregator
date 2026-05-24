@@ -2336,6 +2336,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Compare departures, prices and travel time. Free.',
         'ru': 'Сравните отправления, цены и время в пути. Бесплатно.',
     },
+    'line_detail.title': {
+        'sr': 'Red vožnje',
+        'en': 'Schedule',
+        'ru': 'Расписание',
+    },
     'line_detail.title_line_city': {
         'sr': 'stanice i red vožnje',
         'en': 'stops and schedule',
