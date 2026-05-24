@@ -98,7 +98,7 @@
       <div>
         <span class="country-hub-card__name">{{ c.name }}</span>
         {% if c.route_count or c.min_price %}
-        <small style="display:block;font-weight:500;font-size:var(--text-xs);opacity:.75;margin-top:2px;">
+        <small class="country-hub-card__meta">
           {% if c.route_count %}{{ c.route_count }} {{ _('routes.routes_label') }}{% endif %}
           {% if c.min_price %} · {{ _('route.from_price') }} {{ (c.min_price / config.EUR_RSD_RATE)|round|int }}€{% endif %}
         </small>
@@ -114,57 +114,57 @@
 <div class="dest-grid">
 
   {% set destinations = [
-    {'city': 'Beograd', 'country': 'dest.serbia', 'desc': 'dest.beograd', 'emoji': '🏛', 'routes': [
+    {'city': 'Beograd', 'country': 'dest.serbia', 'desc': 'dest.beograd', 'routes': [
       {'slug': 'beograd-novi-sad', 'label': 'Novi Sad'},
       {'slug': 'beograd-nis', 'label': 'Niš'},
       {'slug': 'beograd-budva', 'label': 'Budva'},
     ], 'city_slug': 'beograd'},
-    {'city': 'Budva', 'country': 'dest.montenegro', 'desc': 'dest.budva', 'emoji': '🏖', 'routes': [
+    {'city': 'Budva', 'country': 'dest.montenegro', 'desc': 'dest.budva', 'routes': [
       {'slug': 'beograd-budva', 'label': 'Beograd'},
       {'slug': 'budva-beograd', 'label': 'Beograd (return)'},
     ]},
-    {'city': 'Herceg Novi', 'country': 'dest.montenegro', 'desc': 'dest.herceg_novi', 'emoji': '⛵', 'routes': [
+    {'city': 'Herceg Novi', 'country': 'dest.montenegro', 'desc': 'dest.herceg_novi', 'routes': [
       {'slug': 'beograd-herceg-novi', 'label': 'Beograd'},
       {'slug': 'herceg-novi-beograd', 'label': 'Beograd (return)'},
     ]},
-    {'city': 'Kotor', 'country': 'dest.montenegro', 'desc': 'dest.kotor', 'emoji': '🏰', 'routes': [
+    {'city': 'Kotor', 'country': 'dest.montenegro', 'desc': 'dest.kotor', 'routes': [
       {'slug': 'beograd-kotor', 'label': 'Beograd'},
     ]},
-    {'city': 'Novi Sad', 'country': 'dest.serbia', 'desc': 'dest.novi_sad', 'emoji': '🎵', 'routes': [
+    {'city': 'Novi Sad', 'country': 'dest.serbia', 'desc': 'dest.novi_sad', 'routes': [
       {'slug': 'beograd-novi-sad', 'label': 'Beograd'},
     ], 'city_slug': 'novi-sad'},
-    {'city': 'Niš', 'country': 'dest.serbia', 'desc': 'dest.nis', 'emoji': '🏛', 'routes': [
+    {'city': 'Niš', 'country': 'dest.serbia', 'desc': 'dest.nis', 'routes': [
       {'slug': 'beograd-nis', 'label': 'Beograd'},
       {'slug': 'nis-skopje', 'label': 'Skopje'},
       {'slug': 'nis-sofia', 'label': 'Sofia'},
     ], 'city_slug': 'nis'},
-    {'city': 'Sarajevo', 'country': 'dest.bosnia', 'desc': 'dest.sarajevo', 'emoji': '🕌', 'routes': [
+    {'city': 'Sarajevo', 'country': 'dest.bosnia', 'desc': 'dest.sarajevo', 'routes': [
       {'slug': 'beograd-sarajevo', 'label': 'Beograd'},
     ]},
-    {'city': 'Dubrovnik', 'country': 'dest.croatia', 'desc': 'dest.dubrovnik', 'emoji': '🌊', 'routes': [
+    {'city': 'Dubrovnik', 'country': 'dest.croatia', 'desc': 'dest.dubrovnik', 'routes': [
       {'slug': 'beograd-dubrovnik', 'label': 'Beograd'},
     ]},
-    {'city': 'Budapest', 'country': 'dest.hungary', 'desc': 'dest.budapest', 'emoji': '🌉', 'routes': [
+    {'city': 'Budapest', 'country': 'dest.hungary', 'desc': 'dest.budapest', 'routes': [
       {'slug': 'beograd-budapest', 'label': 'Beograd'},
       {'slug': 'novi-sad-budapest', 'label': 'Novi Sad'},
       {'slug': 'subotica-budapest', 'label': 'Subotica'},
     ]},
-    {'city': 'Thessaloniki', 'country': 'dest.greece', 'desc': 'dest.thessaloniki', 'emoji': '☀', 'routes': [
+    {'city': 'Thessaloniki', 'country': 'dest.greece', 'desc': 'dest.thessaloniki', 'routes': [
       {'slug': 'beograd-thessaloniki', 'label': 'Beograd'},
     ]},
-    {'city': 'Skopje', 'country': 'dest.north_macedonia', 'desc': 'dest.skopje', 'emoji': '⛰', 'routes': [
+    {'city': 'Skopje', 'country': 'dest.north_macedonia', 'desc': 'dest.skopje', 'routes': [
       {'slug': 'beograd-skopje', 'label': 'Beograd'},
       {'slug': 'nis-skopje', 'label': 'Niš'},
     ]},
-    {'city': 'Vienna', 'country': 'dest.austria', 'desc': 'dest.vienna', 'emoji': '🎼', 'routes': [
+    {'city': 'Vienna', 'country': 'dest.austria', 'desc': 'dest.vienna', 'routes': [
       {'slug': 'beograd-vienna', 'label': 'Beograd'},
       {'slug': 'budapest-vienna', 'label': 'Budapest'},
     ]},
-    {'city': 'Istanbul', 'country': 'dest.turkey', 'desc': 'dest.istanbul', 'emoji': '🕌', 'routes': [
+    {'city': 'Istanbul', 'country': 'dest.turkey', 'desc': 'dest.istanbul', 'routes': [
       {'slug': 'beograd-istanbul', 'label': 'Beograd'},
       {'slug': 'nis-istanbul', 'label': 'Niš'},
     ]},
-    {'city': 'Split', 'country': 'dest.croatia', 'desc': 'dest.dubrovnik', 'emoji': '🏖', 'routes': [
+    {'city': 'Split', 'country': 'dest.croatia', 'desc': 'dest.split', 'routes': [
       {'slug': 'beograd-split', 'label': 'Beograd'},
       {'slug': 'split-dubrovnik', 'label': 'Dubrovnik'},
       {'slug': 'zagreb-split', 'label': 'Zagreb'},
@@ -174,7 +174,9 @@
   {% for dest in destinations %}
   <div class="dest-card">
     <div class="dest-card__header">
-      <span class="dest-card__emoji">{{ dest.emoji }}</span>
+      <span class="dest-card__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      </span>
       <div>
         <h2 class="dest-card__city">{{ dest.city }}</h2>
         <span class="dest-card__country">{{ _(dest.country) }}</span>

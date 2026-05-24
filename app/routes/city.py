@@ -196,6 +196,8 @@ def line_detail(city: str, line_slug: str):
     """, [city, line_slug]) if db_ready() else None
 
     if not line:
+        if not db_ready():
+            abort(503)
         if not line_slug.isascii() or '---' in line_slug:
             abort(410)
         abort(404)
@@ -372,6 +374,8 @@ def stop_detail(city: str, stop_slug: str):
     """, [city, stop_slug]) if db_ready() else None
 
     if not stop:
+        if not db_ready():
+            abort(503)
         # Non-ASCII (Cyrillic legacy), triple-dash artefacts, and pure-numeric
         # slugs won't ever come back → 410 so Google deindexes permanently.
         # Clean ASCII misses stay 404 (could be typos in external links).
