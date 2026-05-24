@@ -1,26 +1,21 @@
 {% extends "base.html" %}
 {% block title %}
-  {% if ok %}Odjava uspešna{% else %}Link nije važeći{% endif %} | Prevozni
+  {% if ok %}{{ _('sub.unsub.h1_ok') }}{% else %}{{ _('sub.unsub.h1_error') }}{% endif %} | Prevozni
 {% endblock %}
 {% block meta_robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
-<div class="page-title">
+<div class="page-title fade-in">
   {% if ok %}
-    <h1>Odjavili ste se ✓</h1>
-    <p class="page-subtitle">
-      Više nećete dobijati email od nas. Ako ste se odjavili greškom,
-      možete se prijaviti ponovo na početnoj strani.
-    </p>
+    <h1>{{ _('sub.unsub.h1_ok') }}</h1>
+    <p class="page-subtitle">{{ _('sub.unsub.body_ok') }}</p>
   {% else %}
-    <h1>Link nije važeći</h1>
-    <p class="page-subtitle">
-      Ovaj link je već iskorišćen ili nije ispravan.
-    </p>
+    <h1>{{ _('sub.unsub.h1_error') }}</h1>
+    <p class="page-subtitle">{{ _('sub.unsub.body_error') }}</p>
   {% endif %}
 
   <p class="page-cta">
-    <a href="{{ lang_prefix }}/" class="btn btn--primary">Nazad na početnu</a>
+    <a href="{{ lang_prefix }}/" class="btn btn--primary">{{ _('sub.confirm.back') }}</a>
   </p>
 </div>
 {% endblock %}

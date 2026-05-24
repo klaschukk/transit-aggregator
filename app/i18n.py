@@ -3829,6 +3829,45 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'политикой конфиденциальности',
     },
 
+    # ── Subscribe confirm / unsubscribe pages ──
+    'sub.confirm.title_ok': {'sr': 'Pretplata potvrđena', 'en': 'Subscription confirmed', 'ru': 'Подписка подтверждена'},
+    'sub.confirm.title_already': {'sr': 'Već ste pretplaćeni', 'en': 'Already subscribed', 'ru': 'Уже подписаны'},
+    'sub.confirm.title_expired': {'sr': 'Link je istekao', 'en': 'Link expired', 'ru': 'Ссылка устарела'},
+    'sub.confirm.title_error': {'sr': 'Nešto nije u redu', 'en': 'Something went wrong', 'ru': 'Что-то пошло не так'},
+    'sub.confirm.body_ok': {
+        'sr': 'Poslali smo vam dobrodošlicu na email. Jednom nedeljno ćete dobijati najjeftinije karte i nove rute.',
+        'en': 'We sent you a welcome email. Once a week you will receive the cheapest tickets and new routes.',
+        'ru': 'Мы отправили вам приветственное письмо. Раз в неделю вы будете получать лучшие цены и новые маршруты.',
+    },
+    'sub.confirm.body_already': {
+        'sr': 'Ovaj email je već potvrđen ranije — ne morate ništa da radite.',
+        'en': "This email was already confirmed — you don't need to do anything.",
+        'ru': 'Этот email уже подтверждён — ничего делать не нужно.',
+    },
+    'sub.confirm.body_expired': {
+        'sr': 'Potvrdni link traje 7 dana. Prijavite se ponovo sa iste adrese da dobijete svež link.',
+        'en': 'Confirmation links are valid for 7 days. Sign up again with the same address to get a fresh link.',
+        'ru': 'Ссылка действует 7 дней. Подпишитесь заново с того же адреса, чтобы получить новую.',
+    },
+    'sub.confirm.body_error': {
+        'sr': 'Pokušajte da se prijavite ponovo.',
+        'en': 'Please try signing up again.',
+        'ru': 'Попробуйте подписаться снова.',
+    },
+    'sub.confirm.back': {'sr': 'Nazad na početnu', 'en': 'Back to home', 'ru': 'На главную'},
+    'sub.unsub.h1_ok': {'sr': 'Odjavili ste se', 'en': "You've unsubscribed", 'ru': 'Вы отписались'},
+    'sub.unsub.body_ok': {
+        'sr': 'Više nećete dobijati email od nas. Ako ste se odjavili greškom, možete se prijaviti ponovo na početnoj strani.',
+        'en': 'You will no longer receive emails from us. If you unsubscribed by mistake, you can sign up again on the home page.',
+        'ru': 'Вы больше не будете получать письма от нас. Если вы отписались по ошибке, можете подписаться снова на главной странице.',
+    },
+    'sub.unsub.h1_error': {'sr': 'Link nije važeći', 'en': 'Invalid link', 'ru': 'Недействительная ссылка'},
+    'sub.unsub.body_error': {
+        'sr': 'Ovaj link je već iskorišćen ili nije ispravan.',
+        'en': 'This link has already been used or is not valid.',
+        'ru': 'Эта ссылка уже была использована или недействительна.',
+    },
+
     # ── PWA install promo ──
     'pwa.install_title': {
         'sr': 'Instalirajte Prevozni',
