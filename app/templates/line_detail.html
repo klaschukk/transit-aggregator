@@ -91,13 +91,11 @@
   </div>
   <div class="buy-ticket__links">
     <a href="{{ lang_prefix }}/pretraga/?od={{ city_label|urlencode }}"
-       class="buy-ticket__btn"
-       style="background: var(--color-primary-dark);">
+       class="buy-ticket__btn buy-ticket__btn--dark">
       {{ _('line.action_search') }}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
     </a>
-    <a href="#lineMap" class="buy-ticket__btn"
-       style="background: var(--color-primary);">
+    <a href="#lineMap" class="buy-ticket__btn buy-ticket__btn--primary">
       {{ _('line.action_map') }}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
     </a>
