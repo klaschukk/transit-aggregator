@@ -2,7 +2,7 @@
 {% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš'} %}
 {% set city_label = city_names.get(city, city|title) %}
 
-{% block title %}{{ _('stop_detail.stop_prefix') }} {{ stop.name|truncate(28, True, '…') }} ({{ city_label }}): {{ _('stop_detail.title_stop_city') }} {{ current_year }} | Prevozni{% endblock %}
+{% block title %}{{ _('stop_detail.stop_prefix') }} {{ stop.name }} ({{ city_label }}): {{ _('stop_detail.title_stop_city') }} {{ current_year }} | Prevozni{% endblock %}
 {% block meta_description %}{{ _('stop_detail.stop_prefix') }} {{ stop.name }}, {{ city_label }}: {% if stop_info and stop_info.line_count %}{{ stop_info.line_count }} {{ _('stop_detail.meta_lines_suffix') }}, {% endif %}{{ _('line_detail.schedule_heading') }}{% if stop_info and stop_info.first_departure %} {{ stop_info.first_departure }}–{{ stop_info.last_departure }}{% endif %}. {{ _('stop_detail.meta_eta') }}{% endblock %}
 
 {% block head_extra %}
