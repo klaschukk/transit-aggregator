@@ -196,6 +196,9 @@
 </nav>
 {% endif %}
 
+{% from '_partials/_ad_slot.html' import ad_slot with context %}
+{{ ad_slot('carriers_bottom', format='leaderboard') }}
+
 {% endblock %}
 
 {% block scripts %}
