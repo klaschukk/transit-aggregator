@@ -41,4 +41,7 @@
   </div>
 </section>
 
+{% from '_partials/_ad_slot.html' import ad_slot with context %}
+{{ ad_slot('guide_bottom', format='leaderboard') }}
+
 {% endblock %}
