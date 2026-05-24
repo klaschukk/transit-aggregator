@@ -2029,6 +2029,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'stations',
         'ru': 'станций',
     },
+    'stations.meta_extra': {
+        'sr': 'Adrese, red vožnje i polasci.',
+        'en': 'Addresses, schedules and departures.',
+        'ru': 'Адреса, расписание и отправления.',
+    },
     'stations.routes_count': {
         'sr': 'ruta',
         'en': 'routes',
