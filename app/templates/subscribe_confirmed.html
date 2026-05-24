@@ -1,38 +1,30 @@
 {% extends "base.html" %}
 {% block title %}
-  {% if result == 'ok' %}Pretplata potvrđena
-  {% elif result == 'already' %}Već ste pretplaćeni
-  {% elif result == 'expired' %}Link je istekao
-  {% else %}Prevozni{% endif %} | Prevozni
+  {% if result == 'ok' %}{{ _('sub.confirm.title_ok') }}
+  {% elif result == 'already' %}{{ _('sub.confirm.title_already') }}
+  {% elif result == 'expired' %}{{ _('sub.confirm.title_expired') }}
+  {% else %}{{ _('sub.confirm.title_error') }}{% endif %} | Prevozni
 {% endblock %}
 {% block meta_robots %}noindex, nofollow{% endblock %}
 
 {% block content %}
 <div class="page-title fade-in">
   {% if result == 'ok' %}
-    <h1>Pretplata potvrđena ✓</h1>
-    <p class="page-subtitle">
-      Poslali smo vam dobrodošlicu na email. Jednom nedeljno ćete
-      dobijati najjeftinije karte i nove rute.
-    </p>
+    <h1>{{ _('sub.confirm.title_ok') }}</h1>
+    <p class="page-subtitle">{{ _('sub.confirm.body_ok') }}</p>
   {% elif result == 'already' %}
-    <h1>Već ste pretplaćeni</h1>
-    <p class="page-subtitle">
-      Ovaj email je već potvrđen ranije — ne morate ništa da radite.
-    </p>
+    <h1>{{ _('sub.confirm.title_already') }}</h1>
+    <p class="page-subtitle">{{ _('sub.confirm.body_already') }}</p>
   {% elif result == 'expired' %}
-    <h1>Link je istekao</h1>
-    <p class="page-subtitle">
-      Potvrdni link traje 7 dana. Prijavite se ponovo sa iste adrese
-      da dobijete svež link.
-    </p>
+    <h1>{{ _('sub.confirm.title_expired') }}</h1>
+    <p class="page-subtitle">{{ _('sub.confirm.body_expired') }}</p>
   {% else %}
-    <h1>Nešto nije u redu</h1>
-    <p class="page-subtitle">Pokušajte da se prijavite ponovo.</p>
+    <h1>{{ _('sub.confirm.title_error') }}</h1>
+    <p class="page-subtitle">{{ _('sub.confirm.body_error') }}</p>
   {% endif %}
 
   <p class="page-cta">
-    <a href="{{ lang_prefix }}/" class="btn btn--primary">Nazad na početnu</a>
+    <a href="{{ lang_prefix }}/" class="btn btn--primary">{{ _('sub.confirm.back') }}</a>
   </p>
 </div>
 {% endblock %}
