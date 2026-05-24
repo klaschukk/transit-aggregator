@@ -1369,6 +1369,10 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .buy-ticket__btn--bookaway:hover { background: #065f46; }
 .buy-ticket__btn--flixbus { background: #73d700; }
 .buy-ticket__btn--flixbus:hover { filter: brightness(0.92); }
+.buy-ticket__btn--primary { background: var(--color-primary); }
+.buy-ticket__btn--primary:hover { filter: brightness(0.9); }
+.buy-ticket__btn--dark { background: var(--color-primary-dark); }
+.buy-ticket__btn--dark:hover { filter: brightness(0.9); }
 
 /* Multi-partner block (route_detail bottom) */
 .partners-block {

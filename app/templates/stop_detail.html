@@ -102,16 +102,14 @@
   </div>
   <div class="buy-ticket__links">
     <a href="{{ lang_prefix }}/pretraga/?od={{ stop.name|urlencode }}"
-       class="buy-ticket__btn"
-       style="background: var(--color-primary-dark);">
+       class="buy-ticket__btn buy-ticket__btn--dark">
       {{ _('stop.action_search') }}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
     </a>
     {% if stop.lat and stop.lon %}
     <a href="https://www.google.com/maps/search/?api=1&query={{ stop.lat }},{{ stop.lon }}"
        target="_blank" rel="noopener"
-       class="buy-ticket__btn"
-       style="background: var(--color-primary);">
+       class="buy-ticket__btn buy-ticket__btn--primary">
       {{ _('stop.action_maps') }}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg>
     </a>
