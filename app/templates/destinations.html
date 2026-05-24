@@ -229,6 +229,9 @@
   </div>
 </section>
 
+{% from '_partials/_ad_slot.html' import ad_slot with context %}
+{{ ad_slot('destinations_bottom', format='leaderboard') }}
+
 {% endblock %}
 
 {% block scripts %}
