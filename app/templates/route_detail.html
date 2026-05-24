@@ -5,7 +5,7 @@
      >22 chars (mid)   → "{pair} — {route_detail.title_short} | Prevozni"
      else (short)      → "{pair}: {N} polazaka dnevno | Prevozni" #}
 {% set _pair_name = route.from_city ~ ' → ' ~ route.to_city %}
-{% block title %}{% if _pair_name|length > 28 %}{{ _pair_name }} | Prevozni{% elif _pair_name|length > 20 %}{{ _pair_name }} — {{ _('route_detail.title_short') }} | Prevozni{% else %}{{ _pair_name }}: {{ route.trip_count }} {{ _('route_detail.title_departures') }} | Prevozni{% endif %}{% endblock %}
+{% block title %}{% if _pair_name|length > 28 %}{{ _pair_name }}: {{ _('route_detail.title_short') }} {{ current_year }} | Prevozni{% elif _pair_name|length > 20 %}{{ _pair_name }} — {{ _('route_detail.title_short') }} | Prevozni{% else %}{{ _pair_name }}: {{ route.trip_count }} {{ _('route_detail.title_departures') }} | Prevozni{% endif %}{% endblock %}
 {% block meta_description %}{{ _('route_detail.meta_prefix') }} {{ _pair_name }}{% if route.distance_km %} ({{ route.distance_km }} km){% endif %}: {% if route.trip_count %}{{ route.trip_count }} {{ _('route_detail.meta_daily') }}{% if price_min %}, {{ _('route_detail.meta_from')|lower }} {{ price_min }} RSD{% endif %}. {% endif %}{% if reviews_agg and reviews_agg.n and reviews_agg.n >= 5 %}{{ reviews_agg.avg }}★ ({{ reviews_agg.n }}). {% endif %}{{ _('route_detail.meta_body') }}{% endblock %}
 
 {% block head_extra %}

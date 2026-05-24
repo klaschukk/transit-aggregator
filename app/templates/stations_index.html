@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{{ _('stations.title') }} — Prevozni{% endblock %}
-{% block meta_description %}{{ _('stations.meta') }} {{ stations|length }} {{ _('stations.count_suffix') }} — Beograd, Novi Sad, Niš.{% endblock %}
+{% block title %}{{ _('stations.title') }} {{ current_year }} — Prevozni{% endblock %}
+{% block meta_description %}{{ _('stations.meta') }} {{ stations|length }} {{ _('stations.count_suffix') }} — Beograd, Novi Sad, Niš. {{ _('stations.meta_extra') }}{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
