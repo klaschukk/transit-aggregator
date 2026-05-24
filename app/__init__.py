@@ -345,6 +345,7 @@ def create_app(config_name: str | None = None) -> Flask:
             'max-age=63072000; includeSubDomains; preload',
         )
         response.headers.setdefault('X-Content-Type-Options', 'nosniff')
+        response.headers.setdefault('X-Frame-Options', 'SAMEORIGIN')
         response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
         response.headers.setdefault(
             'Permissions-Policy',
