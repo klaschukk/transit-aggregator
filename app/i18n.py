@@ -3883,6 +3883,16 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Эта ссылка уже была использована или недействительна.',
     },
 
+    # ── Misc UI strings ──
+    'city.loading': {'sr': 'Podaci se učitavaju...', 'en': 'Loading data...', 'ru': 'Загрузка...'},
+    'line.no_stops': {'sr': 'Nema podataka o stajalištima', 'en': 'No stop data available', 'ru': 'Нет данных об остановках'},
+    'stop.no_lines': {'sr': 'Nema podataka o linijama', 'en': 'No line data available', 'ru': 'Нет данных о маршрутах'},
+    'line.schedule_unavailable': {
+        'sr': 'Tačan raspored trenutno nije dostupan. Proverite na stajalištima ili na sajtu prevoznika.',
+        'en': 'The exact schedule is not available at this time. Check at the stops or on the carrier website.',
+        'ru': 'Точное расписание временно недоступно. Уточняйте на остановках или на сайте перевозчика.',
+    },
+
     # ── PWA install promo ──
     'pwa.install_title': {
         'sr': 'Instalirajte Prevozni',
