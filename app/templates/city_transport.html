@@ -161,7 +161,7 @@
   {% endfor %}
 </div>
 {% else %}
-  {{ empty_state(icon='bus', text='Podaci se učitavaju...') }}
+  {{ empty_state(icon='bus', text=_('city.loading')) }}
 {% endif %}
 
 {# Mid-page ad — between line-grid (anchor content) and the see-also

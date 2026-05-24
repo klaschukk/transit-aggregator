@@ -135,7 +135,7 @@
   {% endfor %}
 </div>
 {% else %}
-  {{ empty_state(icon='stop', text='Nema podataka o stajalištima') }}
+  {{ empty_state(icon='stop', text=_('line.no_stops')) }}
 {% endif %}
 
 <!-- ═══ GTFS Schedule ═══ -->
@@ -184,8 +184,7 @@
     </div>
     <div class="seo-block__content">
       <h2>{{ _('line_detail.schedule_heading') }}</h2>
-      <p>Tačan raspored za liniju {{ line.number }} trenutno nije dostupan.
-         Proverite na stajalištima ili na sajtu GSP Beograd.</p>
+      <p>{{ _('line.schedule_unavailable') }}</p>
     </div>
   </div>
 </section>

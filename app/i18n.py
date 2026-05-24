@@ -4227,6 +4227,15 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Book accommodation in {to_city} early — summer is peak season.',
         'ru': 'Забронируйте жильё в {to_city} заранее — летом высокий сезон.',
     },
+
+    'city.loading': {'sr': 'Podaci se učitavaju...', 'en': 'Loading data...', 'ru': 'Загрузка...'},
+    'line.no_stops': {'sr': 'Nema podataka o stajalištima', 'en': 'No stop data available', 'ru': 'Нет данных об остановках'},
+    'stop.no_lines': {'sr': 'Nema podataka o linijama', 'en': 'No line data available', 'ru': 'Нет данных о маршрутах'},
+    'line.schedule_unavailable': {
+        'sr': 'Tačan raspored trenutno nije dostupan. Proverite direktno kod prevoznika ili na autobuskoj stanici.',
+        'en': 'Exact schedule is not currently available. Please check directly with the carrier or at the bus station.',
+        'ru': 'Точное расписание временно недоступно. Уточните у перевозчика или на автовокзале.',
+    },
 }
 
 SUPPORTED_LANGS = ('sr', 'en', 'ru')
