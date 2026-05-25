@@ -46,7 +46,8 @@
    most cases (low priority), but they don't apply or block render. The
    net cost on desktop is one ~5KB gzipped GET that doesn't affect FCP. #}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/app.mobile.css') }}?v={{ asset_version }}" media="(max-width: 767px)">
-{% if config.ADSENSE_ID %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ads.css') }}?v={{ asset_version }}">{% endif %}
+{% if config.ADSENSE_ID %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ads.css') }}?v={{ asset_version }}">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config.ADSENSE_ID }}" crossorigin="anonymous"></script>{% endif %}
 <script>
 /* Umami loader — GDPR-gated. Only loads analytics when the user
    explicitly consented to "all" cookies. `essential` (or no cookie at all
