@@ -284,7 +284,7 @@ def test_deletion_request_requires_matching_email(rv_client, rv_app):
         row = analytics_db.query(
             "SELECT deletion_requested FROM reviews WHERE id = ?", [rid]
         )
-    assert row[0]['deletion_requested'] is False
+    assert row[0]['deletion_requested'] == False
 
     # Correct email — still 200, but deletion_requested flips.
     r = rv_client.post(
@@ -297,7 +297,7 @@ def test_deletion_request_requires_matching_email(rv_client, rv_app):
         row = analytics_db.query(
             "SELECT deletion_requested FROM reviews WHERE id = ?", [rid]
         )
-    assert row[0]['deletion_requested'] is True
+    assert row[0]['deletion_requested'] == True
 
 
 # ── Page-level schema.org ──
