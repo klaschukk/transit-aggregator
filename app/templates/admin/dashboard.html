@@ -1,0 +1,213 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block head_extra %}
+<style>
+.dash { max-width: 1100px; margin: 0 auto; padding: 28px 24px; }
+
+/* KPI cards */
+.dash-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.dash-kpi {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+  padding: 18px 20px; display: flex; flex-direction: column; gap: 6px;
+  transition: box-shadow .15s;
+}
+.dash-kpi:hover { box-shadow: 0 4px 16px rgba(0,0,0,.06); }
+.dash-kpi__label { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #94a3b8; }
+.dash-kpi__value { font-size: 28px; font-weight: 700; color: #0f172a; line-height: 1.1; }
+.dash-kpi__sub { font-size: 12px; color: #64748b; }
+.dash-kpi--alert .dash-kpi__value { color: #f59e0b; }
+.dash-kpi--green .dash-kpi__value { color: #10b981; }
+
+/* Two-col layout */
+.dash-cols { display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; }
+@media (max-width: 900px) { .dash-cols { grid-template-columns: 1fr; } }
+
+/* Section card */
+.dash-card {
+  background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;
+}
+.dash-card__head {
+  padding: 14px 18px; border-bottom: 1px solid #f1f5f9;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.dash-card__head h2 { font-size: 13px; font-weight: 600; color: #0f172a; margin: 0; }
+.dash-card__head a { font-size: 12px; color: #0d9488; }
+.dash-card__head a:hover { text-decoration: underline; }
+.dash-card__body { padding: 0; }
+
+/* Pending reviews */
+.rev-row {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 18px; border-bottom: 1px solid #f8fafc;
+}
+.rev-row:last-child { border-bottom: none; }
+.rev-stars { color: #f59e0b; font-size: 12px; letter-spacing: 1px; flex-shrink: 0; margin-top: 2px; }
+.rev-body { flex: 1; min-width: 0; }
+.rev-meta { font-size: 11px; color: #94a3b8; margin-bottom: 3px; }
+.rev-meta strong { color: #475569; }
+.rev-comment { font-size: 13px; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rev-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.rev-btn {
+  padding: 4px 10px; font-size: 11px; font-weight: 600;
+  border: none; border-radius: 5px; cursor: pointer;
+}
+.rev-btn--ok { background: #dcfce7; color: #166534; }
+.rev-btn--ok:hover { background: #bbf7d0; }
+.rev-btn--no { background: #f1f5f9; color: #64748b; }
+.rev-btn--no:hover { background: #e2e8f0; }
+.rev-empty { padding: 28px 18px; text-align: center; color: #94a3b8; font-size: 13px; }
+
+/* Quick links */
+.dash-links { display: flex; flex-direction: column; gap: 0; }
+.dash-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 18px; border-bottom: 1px solid #f8fafc; color: #334155;
+  font-size: 13.5px; font-weight: 500; transition: background .1s;
+}
+.dash-link:last-child { border-bottom: none; }
+.dash-link:hover { background: #f8fafc; }
+.dash-link svg { width: 15px; height: 15px; stroke: #94a3b8; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.dash-link:hover svg { stroke: #0d9488; }
+.dash-link__arrow { margin-left: auto; color: #cbd5e1; font-size: 12px; }
+
+/* Activity bar */
+.dash-bar-row { display: flex; align-items: center; gap: 10px; padding: 8px 18px; border-bottom: 1px solid #f8fafc; }
+.dash-bar-row:last-child { border-bottom: none; }
+.dash-bar-label { font-size: 12px; color: #64748b; width: 90px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dash-bar-track { flex: 1; height: 6px; background: #f1f5f9; border-radius: 99px; overflow: hidden; }
+.dash-bar-fill { height: 100%; background: #0d9488; border-radius: 99px; transition: width .3s; }
+.dash-bar-val { font-size: 12px; font-weight: 600; color: #334155; width: 28px; text-align: right; flex-shrink: 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash">
+
+  <!-- KPI row -->
+  <div class="dash-kpis">
+    <div class="dash-kpi {% if pending_reviews > 0 %}dash-kpi--alert{% endif %}">
+      <span class="dash-kpi__label">Pending reviews</span>
+      <span class="dash-kpi__value">{{ pending_reviews }}</span>
+      <span class="dash-kpi__sub">{{ total_reviews }} ukupno</span>
+    </div>
+    <div class="dash-kpi dash-kpi--green">
+      <span class="dash-kpi__label">Subscribers</span>
+      <span class="dash-kpi__value">{{ subscribers }}</span>
+      <span class="dash-kpi__sub">confirmed</span>
+    </div>
+    <div class="dash-kpi">
+      <span class="dash-kpi__label">BA clicks · 7d</span>
+      <span class="dash-kpi__value">{{ clicks_7d }}</span>
+      <span class="dash-kpi__sub">{{ clicks_30d }} za 30 dana</span>
+    </div>
+    <div class="dash-kpi">
+      <span class="dash-kpi__label">Routes in DB</span>
+      <span class="dash-kpi__value">{{ routes_count }}</span>
+      <span class="dash-kpi__sub">{{ trips_count }} trips</span>
+    </div>
+  </div>
+
+  <div class="dash-cols">
+    <!-- Pending reviews -->
+    <div class="dash-card">
+      <div class="dash-card__head">
+        <h2>Pending reviews{% if pending_reviews > 0 %} ({{ pending_reviews }}){% endif %}</h2>
+        <a href="/admin/reviews">See all →</a>
+      </div>
+      <div class="dash-card__body">
+        {% if queue %}
+          {% for r in queue %}
+          <div class="rev-row">
+            <span class="rev-stars">{{ '★' * r.rating }}{{ '☆' * (5 - r.rating) }}</span>
+            <div class="rev-body">
+              <div class="rev-meta">
+                <strong>{{ r.author_name or 'Anonymous' }}</strong>
+                · <a href="/{% if r.route_slug and r.route_slug.startswith('line-') %}gradski/{% else %}rute/{% endif %}{{ r.route_slug }}/" target="_blank" style="color:#0d9488;">{{ r.route_slug }}</a>
+                · {{ r.ts[:10] if r.ts else '?' }}
+              </div>
+              <div class="rev-comment">{{ r.comment }}</div>
+            </div>
+            <div class="rev-actions">
+              <form method="post" action="/admin/reviews/{{ r.id }}/approve" style="display:inline;">
+                <button class="rev-btn rev-btn--ok" type="submit">✓</button>
+              </form>
+              <form method="post" action="/admin/reviews/{{ r.id }}/reject" style="display:inline;">
+                <button class="rev-btn rev-btn--no" type="submit">✕</button>
+              </form>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="rev-empty">Queue is empty — no pending reviews.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right column -->
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+      <!-- Quick links -->
+      <div class="dash-card">
+        <div class="dash-card__head"><h2>Quick links</h2></div>
+        <div class="dash-card__body dash-links">
+          <a href="/admin/subscribers" class="dash-link">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Subscribers
+            <span class="dash-link__arrow">›</span>
+          </a>
+          <a href="/admin/revenue" class="dash-link">
+            <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Bookaway clicks
+            <span class="dash-link__arrow">›</span>
+          </a>
+          <a href="/admin/newsletter" class="dash-link">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Newsletter
+            <span class="dash-link__arrow">›</span>
+          </a>
+          <a href="/admin/price-alerts" class="dash-link">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            Price alerts
+            <span class="dash-link__arrow">›</span>
+          </a>
+          <a href="/admin/ab" class="dash-link">
+            <svg viewBox="0 0 24 24"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+            A/B tests
+            <span class="dash-link__arrow">›</span>
+          </a>
+          <a href="/health" target="_blank" class="dash-link">
+            <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            Health check
+            <span class="dash-link__arrow">›</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Top BA routes -->
+      {% if top_routes %}
+      <div class="dash-card">
+        <div class="dash-card__head">
+          <h2>Top BA routes · 7d</h2>
+          <a href="/admin/revenue">Revenue →</a>
+        </div>
+        <div class="dash-card__body">
+          {% set max_clicks = top_routes[0].clicks if top_routes else 1 %}
+          {% for r in top_routes %}
+          <div class="dash-bar-row">
+            <span class="dash-bar-label" title="{{ r.route_slug }}">{{ r.route_slug }}</span>
+            <div class="dash-bar-track">
+              <div class="dash-bar-fill" style="width:{{ ((r.clicks / max_clicks) * 100)|int }}%"></div>
+            </div>
+            <span class="dash-bar-val">{{ r.clicks }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}
