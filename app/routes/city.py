@@ -33,6 +33,21 @@ def city_index():
 
 _SUPPORTED_CITIES = ('beograd', 'novi-sad', 'nis', 'kragujevac')
 
+# Slug renames after a data re-crawl — 301 so Google transfers PageRank
+# to the successor and drops the old URL. Keyed by city → old_slug → new_slug.
+# None means the stop/line was removed entirely → redirect to city hub.
+_LINE_SLUG_REDIRECTS: dict[str, dict[str, str]] = {
+    'beograd': {
+        'linija-31l': 'linija-31',   # 31Л variant merged into regular 31
+        'linija-6a':  'linija-6',    # 6А variant merged into regular 6
+    },
+}
+_STOP_SLUG_REDIRECTS: dict[str, dict[str, str | None]] = {
+    'novi-sad': {
+        'rumenacka-dom-zdravlja': None,  # stop removed upstream → city hub
+    },
+}
+
 
 def _line_geometries_available() -> bool:
     """Memoise whether line_geometries exists. Set on first call per
@@ -146,6 +161,11 @@ def city_hub(city: str):
 
 @city_bp.route('/gradski/<city>/linija/<line_slug>/')
 def line_detail(city: str, line_slug: str):
+    # Static redirects for slugs renamed in a DB re-crawl (GSC 404 list).
+    if line_slug in _LINE_SLUG_REDIRECTS.get(city, {}):
+        new_slug = _LINE_SLUG_REDIRECTS[city][line_slug]
+        return redirect(url_for('city.line_detail', city=city, line_slug=new_slug), code=301)
+
     # Canonicalize both path segments before DB lookup: cyrillic/uppercase/
     # diacritic variants redirect to the ASCII canonical form *only when
     # the canonical slug actually resolves to a row*. A blanket
@@ -334,6 +354,13 @@ def line_detail(city: str, line_slug: str):
 
 @city_bp.route('/gradski/<city>/stajaliste/<stop_slug>/')
 def stop_detail(city: str, stop_slug: str):
+    # Static redirects for stops renamed or removed in a DB re-crawl.
+    if stop_slug in _STOP_SLUG_REDIRECTS.get(city, {}):
+        new_slug = _STOP_SLUG_REDIRECTS[city][stop_slug]
+        if new_slug:
+            return redirect(url_for('city.stop_detail', city=city, stop_slug=new_slug), code=301)
+        return redirect(url_for('city.city_hub', city=city), code=301)
+
     # Existence-gated cyrillic→latin redirect: only 301 to the canonical
     # ASCII slug when that slug actually resolves to a row. GSC reported
     # 313 404s on URL-encoded cyrillic stop slugs from a legacy
