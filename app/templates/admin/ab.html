@@ -1,9 +1,8 @@
-{% extends "base.html" %}
-{% block title %}A/B experiments — Prevozni admin{% endblock %}
-{% block meta_description %}Internal admin dashboard (noindex).{% endblock %}
+{% extends "admin/base_admin.html" %}
+{% block title %}A/B Tests{% endblock %}
+{% block page_title %}A/B Experiments{% endblock %}
 
 {% block head_extra %}
-<meta name="robots" content="noindex, nofollow, noarchive">
 <style>
 .adm{max-width:1100px;margin:0 auto;padding:24px 16px;}
 .adm h1{font-size:24px;margin:0 0 20px;}

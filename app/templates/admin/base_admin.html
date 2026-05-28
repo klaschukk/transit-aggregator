@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <title>{% block title %}Admin{% endblock %} — Prevozni</title>
+  <style>
+    :root {
+      --color-border: #e2e8f0; --color-bg-alt: #f8fafc; --color-bg: #fff;
+      --color-text-muted: #64748b; --color-primary: #0d9488; --color-primary-dark: #0f766e;
+      --text-sm: 13px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif; background: #f1f5f9; color: #1e293b; line-height: 1.5; font-size: 14px; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; }
+    h1 { font-size: 22px; margin: 0 0 8px; }
+    h2 { font-size: 16px; margin: 24px 0 10px; }
+    code { font-family: ui-monospace, monospace; font-size: .9em; background: #f1f5f9; padding: 1px 5px; border-radius: 4px; }
+    small { font-size: 12px; }
+    .page-subtitle { font-size: 13px; color: var(--color-text-muted); margin-bottom: 16px; }
+    .schedule-disclaimer { background: #fef3c7; border: 1px solid #fde68a; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; text-decoration: none; font-family: inherit; }
+    .btn--primary { background: var(--color-primary); color: #fff; }
+    .btn--primary:hover { background: var(--color-primary-dark); }
+    .btn--outline { border: 1px solid var(--color-border); background: #fff; color: #334155; }
+    .btn--outline:hover { background: #f1f5f9; }
+    .btn--danger { background: #ef4444; color: #fff; }
+    .btn--danger:hover { background: #dc2626; }
+
+    /* ── Sidebar ── */
+    .adm-sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0; width: 224px;
+      background: #0f172a; display: flex; flex-direction: column;
+      overflow-y: auto; z-index: 100;
+    }
+    .adm-logo {
+      padding: 18px 16px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      display: flex; align-items: center; gap: 9px; flex-shrink: 0;
+    }
+    .adm-logo svg { flex-shrink: 0; }
+    .adm-logo__text { font-size: 15px; font-weight: 700; color: #f8fafc; letter-spacing: -.02em; }
+    .adm-logo__badge {
+      font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      background: #0d9488; color: #fff; padding: 2px 6px; border-radius: 4px; margin-left: auto;
+    }
+    .adm-nav { padding: 6px 0 10px; flex: 1; }
+    .adm-nav__sep {
+      font-size: 9.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: #334155; padding: 14px 16px 4px; pointer-events: none;
+    }
+    .adm-nav__item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 14px 8px 13px; margin: 1px 8px; border-radius: 7px;
+      color: #94a3b8; font-size: 13.5px; font-weight: 500;
+      transition: background .12s, color .12s; border-left: 3px solid transparent;
+    }
+    .adm-nav__item:hover { background: rgba(255,255,255,.06); color: #e2e8f0; }
+    .adm-nav__item.on { background: rgba(13,148,136,.18); color: #2dd4bf; border-left-color: #0d9488; }
+    .adm-nav__left { display: flex; align-items: center; gap: 8px; }
+    .adm-nav__left svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+    .adm-pill {
+      font-size: 10px; font-weight: 700; background: #ef4444; color: #fff;
+      padding: 1px 6px; border-radius: 99px; min-width: 18px; text-align: center; line-height: 1.6;
+    }
+    .adm-sidebar__footer {
+      padding: 12px 16px; border-top: 1px solid rgba(255,255,255,.07); flex-shrink: 0;
+    }
+    .adm-sidebar__footer a { font-size: 12px; color: #475569; }
+    .adm-sidebar__footer a:hover { color: #94a3b8; }
+
+    /* ── Main ── */
+    .adm-main { margin-left: 224px; min-height: 100vh; display: flex; flex-direction: column; }
+    .adm-topbar {
+      background: #fff; border-bottom: 1px solid #e2e8f0;
+      padding: 0 24px; height: 52px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 10; flex-shrink: 0;
+    }
+    .adm-topbar__title { font-size: 15px; font-weight: 600; color: #0f172a; }
+    .adm-topbar__right { font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 14px; }
+    .adm-topbar__clock { font-variant-numeric: tabular-nums; font-size: 11px; }
+    .adm-topbar__user {
+      display: flex; align-items: center; gap: 6px;
+      background: #f1f5f9; padding: 4px 10px 4px 8px; border-radius: 99px; color: #475569;
+    }
+    .adm-topbar__user::before {
+      content: ''; display: inline-block; width: 20px; height: 20px;
+      background: #0d9488; border-radius: 50%;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
+      background-size: 12px; background-repeat: no-repeat; background-position: center;
+    }
+    .adm-body { flex: 1; }
+  </style>
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+
+<aside class="adm-sidebar">
+  <div class="adm-logo">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+    </svg>
+    <span class="adm-logo__text">Prevozni</span>
+    <span class="adm-logo__badge">admin</span>
+  </div>
+
+  <nav class="adm-nav" aria-label="Admin navigation">
+    <span class="adm-nav__sep">Overview</span>
+    <a href="/admin" class="adm-nav__item {{ 'on' if request.path in ('/admin', '/admin/') else '' }}">
+      <span class="adm-nav__left">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </span>
+    </a>
+
+    <span class="adm-nav__sep">Content</span>
+    <a href="/admin/reviews" class="adm-nav__item {{ 'on' if request.path.startswith('/admin/reviews') else '' }}">
+      <span class="adm-nav__left">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Reviews
+      </span>
+      {%- if g.admin_pending_reviews > 0 %}<span class="adm-pill">{{ g.admin_pending_reviews }}</span>{%- endif %}
+    </a>
+
+    <span class="adm-nav__sep">Growth</span>
+    <a href="/admin/subscribers" class="adm-nav__item {{ 'on' if request.path.startswith('/admin/subscribers') else '' }}">
+      <span class="adm-nav__left">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Subscribers
+      </span>
+    </a>
+    <a href="/admin/revenue" class="adm-nav__item {{ 'on' if request.path.startswith('/admin/revenue') else '' }}">
+      <span class="adm-nav__left">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Revenue
+      </span>
+    </a>
+    <a href="/admin/price-alerts" class="adm-nav__item {{ 'on' if request.path.startswith('/admin/price-alerts') else '' }}">
+      <span class="adm-nav__left">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Price Alerts
+      </span>
+    </a>
+    <a href="/admin/newsletter" class="adm-nav__item {{ 'on' if request.path.startswith('/admin/newsletter') else '' }}">
+      <span class="adm-nav__left">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Newsletter
+      </span>
+    </a>
+
+    <span class="adm-nav__sep">Analytics</span>
+    <a href="/admin/ab" class="adm-nav__item {{ 'on' if request.path.startswith('/admin/ab') else '' }}">
+      <span class="adm-nav__left">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        A/B Tests
+      </span>
+    </a>
+  </nav>
+
+  <div class="adm-sidebar__footer">
+    <a href="/" target="_blank" rel="noopener">← prevozni.com</a>
+  </div>
+</aside>
+
+<div class="adm-main">
+  <div class="adm-topbar">
+    <span class="adm-topbar__title">{% block page_title %}Admin{% endblock %}</span>
+    <div class="adm-topbar__right">
+      <span class="adm-topbar__clock" id="adm-clock"></span>
+      <span class="adm-topbar__user">klaschuk</span>
+    </div>
+  </div>
+  <div class="adm-body">
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+<script>
+(function(){
+  function tick(){
+    var el = document.getElementById('adm-clock');
+    if (!el) return;
+    el.textContent = new Date().toLocaleTimeString('sr-RS', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  }
+  tick(); setInterval(tick, 1000);
+})();
+</script>
+</body>
+</html>

@@ -1,15 +1,13 @@
-{% extends "base.html" %}
-{% block title %}Reviews moderation — Prevozni admin{% endblock %}
-{% block meta_description %}Internal admin page (noindex).{% endblock %}
+{% extends "admin/base_admin.html" %}
+{% block title %}Reviews{% endblock %}
+{% block page_title %}Reviews moderation{% endblock %}
 
 {% block head_extra %}
-<meta name="robots" content="noindex, nofollow, noarchive">
 <style>
-.adm{max-width:1100px;margin:0 auto;padding:24px 16px;}
-.adm h1{font-size:24px;margin:0 0 10px;}
+.adm{max-width:1100px;margin:0 auto;padding:24px;}
 .adm .sub{color:#64748b;margin-bottom:20px;font-size:13px;}
 .adm .kpis{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
-.adm .kpi{padding:10px 14px;border-radius:8px;background:#f1f5f9;font-size:13px;}
+.adm .kpi{padding:10px 14px;border-radius:8px;background:#fff;border:1px solid #e2e8f0;font-size:13px;}
 .adm .kpi strong{color:#0d9488;font-size:18px;margin-right:6px;}
 .adm .tabs{margin-bottom:16px;}
 .adm .tabs a{display:inline-block;padding:6px 12px;border:1px solid #cbd5e1;border-radius:6px;margin-right:6px;font-size:13px;text-decoration:none;color:#334155;}
@@ -41,9 +39,7 @@
 
 {% block content %}
 <div class="adm">
-  <h1>Reviews moderation</h1>
-  <p class="sub">User-generated reviews awaiting approval. Approve to publish
-    on <code>route_detail</code>; reject for spam; delete soft-wipes PII.</p>
+  <p class="sub">User-generated reviews awaiting approval. Approve to publish on route pages; reject for spam; delete soft-wipes PII.</p>
 
   <div class="kpis">
     <div class="kpi"><strong>{{ counts.get('pending', 0) }}</strong>pending</div>
@@ -68,7 +64,7 @@
           <a href="/rute/{{ r.route_slug }}/" target="_blank" rel="noopener">{{ r.route_slug }}</a>
         </span>
         <span>·</span>
-        <span>{{ r.ts.strftime('%Y-%m-%d %H:%M') if r.ts else '' }}</span>
+        <span>{{ r.ts[:16] if r.ts is string else r.ts.strftime('%Y-%m-%d %H:%M') if r.ts else '' }}</span>
         <span>·</span>
         <span>lang={{ r.lang or '?' }}</span>
         {% if r.status %}<span class="badge badge--{{ r.status }}">{{ r.status }}</span>{% endif %}
