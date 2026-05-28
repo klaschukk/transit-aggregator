@@ -10,6 +10,7 @@ Run order:
 Falls back to sample data if raw files are missing.
 """
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -27,6 +28,7 @@ BASE_DIR = Path(__file__).parent.parent
 RAW_DIR = BASE_DIR / 'raw'
 GTFS_DIR = BASE_DIR / 'gtfs'
 DB_PATH = BASE_DIR / 'dbs' / 'transit.duckdb'
+TMP_PATH = DB_PATH.with_name('transit.duckdb.tmp')
 
 # Approximate road distances (km) between Serbian cities
 DISTANCES: dict[tuple[str, str], int] = {
@@ -89,6 +91,11 @@ def type_color(line_type: str) -> str:
 def build() -> None:
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
+    # Clean up any leftover tmp file from a previously failed build.
+    for leftover in (TMP_PATH, TMP_PATH.parent / (TMP_PATH.name + '.wal')):
+        if leftover.exists():
+            leftover.unlink()
+
     # Preserve line_geometries across rebuilds — the table is populated
     # by the standalone scrape_route_geometries.py script (Overpass /
     # OSM relations, ~30-60 min, ~600 lines). OSM relations change
@@ -115,9 +122,12 @@ def build() -> None:
             # First-ever rebuild, or table genuinely missing — fine,
             # the standalone scraper backfills on next run.
             preserved_geom = []
-        DB_PATH.unlink()
 
-    conn = duckdb.connect(str(DB_PATH))
+    # Write to a temp file so the live transit.duckdb stays intact and
+    # gunicorn workers keep serving during the build (zero downtime).
+    # os.replace() at the end is atomic on Linux: workers reconnect on
+    # their next IOException instead of getting 502s for 2 minutes.
+    conn = duckdb.connect(str(TMP_PATH))
     _create_schema(conn)
 
     # Load from real scraped data if available, else fall back to samples
@@ -154,6 +164,14 @@ def build() -> None:
     _restore_line_geometries(conn, preserved_geom)
 
     conn.close()
+    # Remove WAL file (checkpointed on close, but clean up before rename).
+    tmp_wal = TMP_PATH.parent / (TMP_PATH.name + '.wal')
+    if tmp_wal.exists():
+        tmp_wal.unlink()
+    # Atomic replace: transit.duckdb.tmp → transit.duckdb.
+    # Workers holding the old inode continue serving until their next
+    # IOException triggers the reconnect in app/db.py.
+    os.replace(TMP_PATH, DB_PATH)
     print(f"Built {DB_PATH} successfully")
 
 
