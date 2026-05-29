@@ -1,0 +1,51 @@
+{% extends "guides/_guide_base.html" %}
+
+{% block guide_body %}
+<p>{{ _('guides.more.p1') }}</p>
+
+<h2>{{ _('guides.more.h2_destinations') }}</h2>
+<p>{{ _('guides.more.p2') }}</p>
+
+{% if sea_routes %}
+<div class="route-trips">
+  <table class="trips-table">
+    <thead>
+      <tr>
+        <th>{{ _('nav.destinations') }}</th>
+        <th>{{ _('common.price') }}</th>
+        <th>{{ _('route.per_day') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in sea_routes %}
+      <tr>
+        <td>
+          <a href="{{ lang_prefix }}/voznja/beograd-do-{{ r.to_city_slug }}/">{{ r.to_city }}</a>
+        </td>
+        <td>
+          {% if r.min_price_rsd %}
+            {{ _('route.from_price') }}
+            <span class="ccy-rsd">{{ r.min_price_rsd }} RSD</span>
+            <span class="ccy-eur">{{ (r.min_price_rsd / (config.EUR_RSD_RATE or 117))|round|int }} €</span>
+          {% else %}
+            <span class="price-free">{{ _('home.valueprop_free') }}</span>
+          {% endif %}
+        </td>
+        <td>{{ r.trip_count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<h2>{{ _('guides.more.h2_tips') }}</h2>
+<p>{{ _('guides.more.p3')|safe }}</p>
+
+<h2>{{ _('guides.more.h2_routes') }}</h2>
+<p>
+  <a class="btn btn--primary" href="{{ lang_prefix }}/destinacije/crna-gora/">
+    {{ _('guides.more.cta') }}
+  </a>
+</p>
+{% endblock %}

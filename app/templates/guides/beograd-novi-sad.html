@@ -1,0 +1,53 @@
+{% extends "guides/_guide_base.html" %}
+
+{% block guide_body %}
+<p>{{ _('guides.beograd_ns.p1') }}</p>
+
+<h2>{{ _('guides.beograd_ns.h2_options') }}</h2>
+<p>{{ _('guides.beograd_ns.p2')|safe }}</p>
+
+<h2>{{ _('guides.beograd_ns.h2_price') }}</h2>
+<p>{{ _('guides.beograd_ns.p3')|safe }}</p>
+
+<h2>{{ _('guides.beograd_ns.h2_tips') }}</h2>
+<p>{{ _('guides.beograd_ns.p4')|safe }}</p>
+
+{% if trips %}
+<h2>{{ _('guides.beograd_ns.h2_departures') }}</h2>
+<div class="route-trips">
+  <table class="trips-table">
+    <thead>
+      <tr>
+        <th>{{ _('common.departure') }}</th>
+        <th>{{ _('common.arrival') }}</th>
+        <th>{{ _('common.carrier') }}</th>
+        <th>{{ _('common.price') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in trips %}
+      <tr>
+        <td><strong>{{ t.departure_time[:5] if t.departure_time else '—' }}</strong></td>
+        <td>{{ t.arrival_time[:5] if t.arrival_time else '—' }}</td>
+        <td>{{ t.operator or '—' }}</td>
+        <td>
+          {% if t.price_rsd %}
+            <span class="ccy-rsd">{{ t.price_rsd }} RSD</span>
+            <span class="ccy-eur">{{ (t.price_rsd / (config.EUR_RSD_RATE or 117))|round|int }} €</span>
+          {% else %}
+            <span class="price-free">{{ _('home.valueprop_free') }}</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<p>
+  <a class="btn btn--primary" href="{{ lang_prefix }}/voznja/beograd-do-novi-sad/">
+    {{ _('guides.beograd_ns.cta') }}
+  </a>
+</p>
+{% endblock %}

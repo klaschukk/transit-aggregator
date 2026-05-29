@@ -1,0 +1,20 @@
+{% extends "guides/_guide_base.html" %}
+
+{% block guide_body %}
+<p>{{ _('guides.flixbus.p1') }}</p>
+
+<h2>{{ _('guides.flixbus.h2_lines') }}</h2>
+<p>{{ _('guides.flixbus.p2')|safe }}</p>
+
+<h2>{{ _('guides.flixbus.h2_compare') }}</h2>
+<p>{{ _('guides.flixbus.p3')|safe }}</p>
+
+<h2>{{ _('guides.flixbus.h2_tips') }}</h2>
+<p>{{ _('guides.flixbus.p4')|safe }}</p>
+
+<p>
+  <a class="btn btn--primary" href="{{ lang_prefix }}/rute/">
+    {{ _('guides.flixbus.cta') }}
+  </a>
+</p>
+{% endblock %}

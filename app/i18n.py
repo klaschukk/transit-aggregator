@@ -4256,6 +4256,273 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Exact schedule is not currently available. Please check directly with the carrier or at the bus station.',
         'ru': 'Точное расписание временно недоступно. Уточните у перевозчика или на автовокзале.',
     },
+
+    # ── Guide: Beograd–Novi Sad ──
+    'guides.beograd_ns.title': {
+        'sr': 'Autobus Beograd–Novi Sad: cene, red vožnje, saveti',
+        'en': 'Bus Belgrade–Novi Sad: prices, schedule, tips',
+        'ru': 'Автобус Белград–Нови-Сад: цены, расписание, советы',
+    },
+    'guides.beograd_ns.meta': {
+        'sr': 'Sve o prevozu Beograd–Novi Sad: cene karata od 640 RSD, vreme putovanja 1–2h, poređenje autobusa i voza i aktuelni polasci.',
+        'en': 'Everything about Belgrade–Novi Sad transport: ticket prices from 640 RSD, 1–2h travel time, bus vs train comparison and current departures.',
+        'ru': 'Всё о транспорте Белград–Нови-Сад: билеты от 640 динаров, время в пути 1–2ч, сравнение автобуса и поезда, актуальные рейсы.',
+    },
+    'guides.beograd_ns.p1': {
+        'sr': 'Beograd i Novi Sad razdvaja svega 90 km auto-putom, a taj rastojanje možete prevaliti autobusom, vozom ili privatnim prevozom. '
+              'Ovo je najpopularnija domaća linija — dnevno saobraća više od 30 polazaka, a cene su pristupačne za svaki budžet.',
+        'en': 'Belgrade and Novi Sad are only 90 km apart by motorway, and you can cover that distance by bus, train or private transport. '
+              'This is the most popular domestic route — over 30 departures run daily at prices to suit every budget.',
+        'ru': 'Белград и Нови-Сад разделяют всего 90 км по автостраде. Добраться можно автобусом, поездом или на машине. '
+              'Это самый популярный внутренний маршрут: более 30 рейсов в день по доступным ценам.',
+    },
+    'guides.beograd_ns.h2_options': {
+        'sr': 'Opcije prevoza',
+        'en': 'Transport options',
+        'ru': 'Варианты транспорта',
+    },
+    'guides.beograd_ns.p2': {
+        'sr': '<strong>Autobus</strong> — najčešći izbor. Lasta, Jugoprevoz i drugi prevoznici voze svakih sat-dva tokom dana i noći. '
+              'Polasci su sa Beogradske autobuske stanice (BAS), a dolasak na Novi Sad AS. Vreme vožnje: 60–90 minuta.<br><br>'
+              '<strong>Voz</strong> — Srbija Voz ima nekoliko polazaka dnevno, vreme vožnje oko 1h 30min. '
+              'Pojedini polasci su besplatni za putnike sa kartom daljinskog voza.<br><br>'
+              '<strong>BlaBlaCar / taxi</strong> — fleksibilno, ali skuplje. Idealno ako putujete u grupi.',
+        'en': '<strong>Bus</strong> — the most common choice. Lasta, Jugoprevoz and other carriers run every hour or two day and night. '
+              'Departures from Belgrade Bus Station (BAS), arriving at Novi Sad Bus Station. Travel time: 60–90 minutes.<br><br>'
+              '<strong>Train</strong> — Srbija Voz has several daily departures, travel time around 1h 30min. '
+              'Some trips are free for passengers with an intercity train ticket.<br><br>'
+              '<strong>BlaBlaCar / taxi</strong> — flexible but more expensive. Ideal for groups.',
+        'ru': '<strong>Автобус</strong> — самый распространённый вариант. Lasta, Jugoprevoz и другие перевозчики ходят каждые час-два круглосуточно. '
+              'Отправление с Белградского автовокзала (BAS), прибытие на Новисадский автовокзал. Время в пути: 60–90 минут.<br><br>'
+              '<strong>Поезд</strong> — у Srbija Voz несколько рейсов в день, время в пути около 1ч 30мин. '
+              'Некоторые поездки бесплатны для пассажиров с билетом на дальний поезд.<br><br>'
+              '<strong>BlaBlaCar / такси</strong> — гибко, но дороже. Идеально для поездки группой.',
+    },
+    'guides.beograd_ns.h2_price': {
+        'sr': 'Cene karata',
+        'en': 'Ticket prices',
+        'ru': 'Цены на билеты',
+    },
+    'guides.beograd_ns.p3': {
+        'sr': 'Autobuska karta košta između <strong>640 i 1 050 RSD</strong> (5–9 €) u zavisnosti od prevoznika i polaska. '
+              'Noćni polasci i polasci manjim prevoznicima su često jeftiniji. '
+              'Voz Srbija Voz — cena varira, ali postoje povoljne dnevne karte. '
+              'Kupovina karte online ili direktno na blagajni — nema razlike u ceni.',
+        'en': 'A bus ticket costs between <strong>640 and 1,050 RSD</strong> (5–9 €) depending on the carrier and departure. '
+              'Night departures and smaller carriers are often cheaper. '
+              'Srbija Voz train — price varies but affordable daily tickets are available. '
+              'Buying a ticket online or at the counter makes no difference in price.',
+        'ru': 'Автобусный билет стоит от <strong>640 до 1 050 динаров</strong> (5–9 €) в зависимости от перевозчика и рейса. '
+              'Ночные рейсы и небольшие перевозчики зачастую дешевле. '
+              'Поезд Srbija Voz — цена варьируется, но есть доступные дневные билеты. '
+              'Разницы между онлайн-покупкой и кассой нет.',
+    },
+    'guides.beograd_ns.h2_tips': {
+        'sr': 'Korisni saveti',
+        'en': 'Useful tips',
+        'ru': 'Полезные советы',
+    },
+    'guides.beograd_ns.p4': {
+        'sr': '• Putujete vikendom ili praznikom? Kupite kartu unapred — popularni polasci se pune brzo.<br>'
+              '• Autobuska stanica u Novom Sadu je u centru — lako se dolazi peške do Bulevara oslobođenja i tržnog centra.<br>'
+              '• Noćni polasci (posle ponoći) su jeftiniji i dobra opcija ako vam nije hitno.<br>'
+              '• Parkiranje u NS može biti skupo vikendom — autobus je pametnije rešenje.',
+        'en': '• Travelling at the weekend or on a holiday? Buy your ticket in advance — popular departures fill up fast.<br>'
+              '• Novi Sad Bus Station is in the centre — it\'s easy to walk to Bulevar oslobođenja and the shopping centre.<br>'
+              '• Night departures (after midnight) are cheaper and a good option if you\'re not in a hurry.<br>'
+              '• Parking in NS can be expensive at weekends — the bus is the smarter choice.',
+        'ru': '• Едете в выходные или праздник? Купите билет заранее — популярные рейсы быстро заполняются.<br>'
+              '• Автовокзал Нови-Сада находится в центре — до Бульвара освобождения и торгового центра пешком.<br>'
+              '• Ночные рейсы (после полуночи) дешевле и подходят, если не торопитесь.<br>'
+              '• Парковка в Нови-Саде в выходные дорогая — автобус выгоднее.',
+    },
+    'guides.beograd_ns.h2_departures': {
+        'sr': 'Aktuelni polasci',
+        'en': 'Current departures',
+        'ru': 'Актуальные рейсы',
+    },
+    'guides.beograd_ns.cta': {
+        'sr': 'Pogledaj sve polaske',
+        'en': 'View all departures',
+        'ru': 'Смотреть все рейсы',
+    },
+
+    # ── Guide: Prevoz do mora ──
+    'guides.more.title': {
+        'sr': 'Prevoz do mora iz Beograda — autobus, cene, letnji red vožnje',
+        'en': 'Transport to the sea from Belgrade — bus, prices, summer schedule',
+        'ru': 'Транспорт к морю из Белграда — автобус, цены, летнее расписание',
+    },
+    'guides.more.meta': {
+        'sr': 'Kako doći do mora iz Beograda autobusom: Budva, Bar, Herceg Novi, Split, Dubrovnik — cene, vreme putovanja i letnji saveti.',
+        'en': 'How to get to the sea from Belgrade by bus: Budva, Bar, Herceg Novi, Split, Dubrovnik — prices, travel times and summer tips.',
+        'ru': 'Как добраться до моря из Белграда автобусом: Будва, Бар, Херцег-Нови, Сплит, Дубровник — цены, время в пути и советы на лето.',
+    },
+    'guides.more.p1': {
+        'sr': 'Leto je — i Beograd se prazni. Hiljade putnika svake sezone kreću prema Jadranskom i Jonskom moru, '
+              'a autobus ostaje najpopularniji i najisplativiji način prevoza. '
+              'Evo svega što treba da znate pre nego što krenete.',
+        'en': 'It\'s summer — and Belgrade empties out. Thousands of passengers head to the Adriatic and Ionian Sea each season, '
+              'and the bus remains the most popular and cost-effective way to travel. '
+              'Here\'s everything you need to know before you set off.',
+        'ru': 'Лето — и Белград пустеет. Тысячи пассажиров каждый сезон направляются к Адриатическому и Ионическому морям, '
+              'а автобус остаётся самым популярным и выгодным способом добраться. '
+              'Вот всё, что нужно знать перед отправлением.',
+    },
+    'guides.more.h2_destinations': {
+        'sr': 'Najpopularnije destinacije i cene',
+        'en': 'Most popular destinations and prices',
+        'ru': 'Самые популярные направления и цены',
+    },
+    'guides.more.p2': {
+        'sr': 'Iz Beograda saobraćaju direktne linije do svih glavnih primorskih gradova. '
+              'Cene su okvirne i mogu se razlikovati po prevozniku i sezoni:',
+        'en': 'Direct lines from Belgrade run to all the main coastal towns. '
+              'Prices are approximate and may vary by carrier and season:',
+        'ru': 'Из Белграда ходят прямые рейсы во все основные прибрежные города. '
+              'Цены приблизительные и могут варьироваться в зависимости от перевозчика и сезона:',
+    },
+    'guides.more.h2_tips': {
+        'sr': 'Saveti za letnje putovanje',
+        'en': 'Summer travel tips',
+        'ru': 'Советы для летних поездок',
+    },
+    'guides.more.p3': {
+        'sr': '• <strong>Kupite kartu 2–3 nedelje unapred</strong> — leto je vrhunac sezone, autobuske karte nestaju brzo posebno za vikende.<br>'
+              '• <strong>Noćni polasci</strong> su zlatni standard: krećete uveče, budite se na moru. Uštedite na hotelu.<br>'
+              '• <strong>Pratite prtljag</strong> — svaki kofer u prtljažniku autobus naplaćuje posebno (obično 200–300 RSD).<br>'
+              '• <strong>Crna Gora</strong>: Budva je najpopularnija, ali Bar ima bolji autobuski terminal i niže cene.<br>'
+              '• <strong>Hrvatska</strong>: Split i Dubrovnik zahtevaju granični prelaz — pripremite dokumenta na vidljivom mestu.',
+        'en': '• <strong>Buy your ticket 2–3 weeks in advance</strong> — summer is peak season and bus tickets sell out fast, especially at weekends.<br>'
+              '• <strong>Night departures</strong> are the golden standard: leave in the evening, wake up by the sea. Save on accommodation.<br>'
+              '• <strong>Watch your luggage</strong> — each bag in the hold is charged separately (usually 200–300 RSD).<br>'
+              '• <strong>Montenegro</strong>: Budva is the most popular, but Bar has a better bus terminal and lower prices.<br>'
+              '• <strong>Croatia</strong>: Split and Dubrovnik require a border crossing — keep your documents within easy reach.',
+        'ru': '• <strong>Купите билет за 2–3 недели</strong> — лето пиковый сезон, автобусные билеты раскупаются быстро, особенно на выходные.<br>'
+              '• <strong>Ночные рейсы</strong> — золотой стандарт: уезжаете вечером, просыпаетесь у моря. Экономите на ночлеге.<br>'
+              '• <strong>Следите за багажом</strong> — каждый чемодан в багажном отсеке оплачивается отдельно (обычно 200–300 динаров).<br>'
+              '• <strong>Черногория</strong>: Будва самая популярная, но Бар лучший терминал и цены ниже.<br>'
+              '• <strong>Хорватия</strong>: Сплит и Дубровник — пограничный переход, держите документы под рукой.',
+    },
+    'guides.more.h2_routes': {
+        'sr': 'Aktuelne linije do mora',
+        'en': 'Current sea routes',
+        'ru': 'Актуальные маршруты к морю',
+    },
+    'guides.more.cta': {
+        'sr': 'Pretraži karte za more',
+        'en': 'Search sea tickets',
+        'ru': 'Найти билеты к морю',
+    },
+
+    # ── Guide: FlixBus Srbija ──
+    'guides.flixbus.title': {
+        'sr': 'FlixBus Srbija — linije, cene i poređenje sa domaćim prevozom',
+        'en': 'FlixBus Serbia — routes, prices and comparison with local carriers',
+        'ru': 'FlixBus Сербия — маршруты, цены и сравнение с местными перевозчиками',
+    },
+    'guides.flixbus.meta': {
+        'sr': 'FlixBus linije kroz Srbiju, poređenje sa Lastom i BEX-om — kad je FlixBus jeftiniji i kad da birate domaći prevoz.',
+        'en': 'FlixBus routes through Serbia, comparison with Lasta and BEX — when FlixBus is cheaper and when to choose a local carrier.',
+        'ru': 'Маршруты FlixBus через Сербию, сравнение с Lasta и BEX — когда FlixBus дешевле и когда выбрать местного перевозчика.',
+    },
+    'guides.flixbus.p1': {
+        'sr': 'FlixBus je 2019. ušao na srpsko tržište i od tada nudi međunarodne i tranzitne linije kroz Srbiju. '
+              'Zeleni autobusi su postali prepoznatljivi, ali da li su uvek i najjeftiniji? '
+              'Upored smo FlixBus sa domaćim prevoznicima da biste mogli da donesete pravu odluku.',
+        'en': 'FlixBus entered the Serbian market in 2019 and has since offered international and transit routes through Serbia. '
+              'The green buses have become a familiar sight, but are they always the cheapest option? '
+              'We\'ve compared FlixBus with local carriers so you can make the right choice.',
+        'ru': 'FlixBus вышел на сербский рынок в 2019 году и с тех пор предлагает международные и транзитные маршруты через Сербию. '
+              'Зелёные автобусы стали узнаваемы, но всегда ли они самые дешёвые? '
+              'Мы сравнили FlixBus с местными перевозчиkami, чтобы вы приняли правильное решение.',
+    },
+    'guides.flixbus.h2_lines': {
+        'sr': 'FlixBus linije koje prolaze kroz Srbiju',
+        'en': 'FlixBus routes through Serbia',
+        'ru': 'Маршруты FlixBus через Сербию',
+    },
+    'guides.flixbus.p2': {
+        'sr': 'FlixBus ne nudi domaći prevoz unutar Srbije, ali saobraća na brojnim međunarodnim linijama koje prolaze kroz Beograd:<br><br>'
+              '• <strong>Beograd → Budimpešta</strong> (4–5h, od ~15 €)<br>'
+              '• <strong>Beograd → Beč</strong> (8h, od ~20 €)<br>'
+              '• <strong>Beograd → Zagreb</strong> (5h, od ~12 €)<br>'
+              '• <strong>Beograd → Ljubljana</strong> (7h, od ~15 €)<br>'
+              '• <strong>Beograd → Skoplje</strong> (4h, od ~10 €)<br><br>'
+              'Polasci su sa BAS stanice u centru Beograda. Karte se kupuju isključivo online na <strong>flixbus.rs</strong>.',
+        'en': 'FlixBus does not offer domestic transport within Serbia, but it operates on many international routes passing through Belgrade:<br><br>'
+              '• <strong>Belgrade → Budapest</strong> (4–5h, from ~€15)<br>'
+              '• <strong>Belgrade → Vienna</strong> (8h, from ~€20)<br>'
+              '• <strong>Belgrade → Zagreb</strong> (5h, from ~€12)<br>'
+              '• <strong>Belgrade → Ljubljana</strong> (7h, from ~€15)<br>'
+              '• <strong>Belgrade → Skopje</strong> (4h, from ~€10)<br><br>'
+              'Departures are from BAS station in central Belgrade. Tickets are purchased exclusively online at <strong>flixbus.rs</strong>.',
+        'ru': 'FlixBus не предлагает внутренние перевозки по Сербии, но работает на международных маршрутах через Белград:<br><br>'
+              '• <strong>Белград → Будапешт</strong> (4–5ч, от ~15 €)<br>'
+              '• <strong>Белград → Вена</strong> (8ч, от ~20 €)<br>'
+              '• <strong>Белград → Загреб</strong> (5ч, от ~12 €)<br>'
+              '• <strong>Белград → Любляна</strong> (7ч, от ~15 €)<br>'
+              '• <strong>Белград → Скопье</strong> (4ч, от ~10 €)<br><br>'
+              'Отправление с автовокзала BAS в центре Белграда. Билеты покупаются только онлайн на <strong>flixbus.rs</strong>.',
+    },
+    'guides.flixbus.h2_compare': {
+        'sr': 'FlixBus vs domaći prevoz — kad šta birati',
+        'en': 'FlixBus vs local carriers — when to choose what',
+        'ru': 'FlixBus vs местные перевозчики — когда что выбрать',
+    },
+    'guides.flixbus.p3': {
+        'sr': '<strong>Izaberite FlixBus kada:</strong><br>'
+              '• Putujete u inostranstvo (Mađarska, Austrija, Hrvatska) — FlixBus je često konkurentan u ceni i nudi udobne autobuse.<br>'
+              '• Volite online rezervaciju sa mogućnošću promene karte.<br>'
+              '• Putujete noću i cimate besplatnu Wi-Fi i USB punjač.<br><br>'
+              '<strong>Izaberite domaći prevoz (Lasta, BEX, Niš-Ekspres) kada:</strong><br>'
+              '• Putujete unutar Srbije — FlixBus ne pokriva ove destinacije.<br>'
+              '• Idete na more (Crna Gora, Jadran) — domaći prevoznici imaju gustu mrežu primorskih linija.<br>'
+              '• Kupujete kartu u poslednjem trenutku na blagajni.',
+        'en': '<strong>Choose FlixBus when:</strong><br>'
+              '• You\'re travelling abroad (Hungary, Austria, Croatia) — FlixBus is often competitive on price and offers comfortable coaches.<br>'
+              '• You prefer online booking with the option to change your ticket.<br>'
+              '• You\'re travelling at night and value free Wi-Fi and a USB charger.<br><br>'
+              '<strong>Choose a local carrier (Lasta, BEX, Niš-Ekspres) when:</strong><br>'
+              '• You\'re travelling within Serbia — FlixBus doesn\'t cover these destinations.<br>'
+              '• You\'re heading to the sea (Montenegro, Adriatic) — local carriers have a dense network of coastal routes.<br>'
+              '• You\'re buying a last-minute ticket at the counter.',
+        'ru': '<strong>Выбирайте FlixBus, когда:</strong><br>'
+              '• Едете за границу (Венгрия, Австрия, Хорватия) — FlixBus часто конкурентен по цене и предлагает комфортные автобусы.<br>'
+              '• Предпочитаете онлайн-бронирование с возможностью изменить билет.<br>'
+              '• Едете ночью и цените бесплатный Wi-Fi и USB-зарядку.<br><br>'
+              '<strong>Выбирайте местного перевозчика (Lasta, BEX, Niš-Ekspres), когда:</strong><br>'
+              '• Путешествуете внутри Сербии — FlixBus эти направления не охватывает.<br>'
+              '• Едете к морю (Черногория, Адриатика) — у местных перевозчиков густая сеть прибрежных маршрутов.<br>'
+              '• Покупаете билет в последний момент на кассе.',
+    },
+    'guides.flixbus.h2_tips': {
+        'sr': 'Saveti za putovanje FlixBusom',
+        'en': 'Tips for travelling with FlixBus',
+        'ru': 'Советы для поездок на FlixBus',
+    },
+    'guides.flixbus.p4': {
+        'sr': '• Karte su najjeftinije ako kupujete 4–6 nedelja unapred.<br>'
+              '• FlixBus ima program lojalnosti — skupljate poene za svaku kartu.<br>'
+              '• Kašnjenja su moguća na tranzitnim linijama (autobus dolazi iz druge države).<br>'
+              '• Prtljag: jedan komad u prtljažniku besplatno, ručni prtljag na sedištu.<br>'
+              '• U Srbiji FlixBus nema sopstvene stanice — koristite BAS ili oznake na mapi na aplikaciji.',
+        'en': '• Tickets are cheapest if you buy 4–6 weeks in advance.<br>'
+              '• FlixBus has a loyalty programme — you earn points for every ticket.<br>'
+              '• Delays are possible on transit routes (the bus is coming from another country).<br>'
+              '• Luggage: one piece in the hold free of charge, hand luggage at your seat.<br>'
+              '• In Serbia, FlixBus has no dedicated stations — use BAS or the map markers in the app.',
+        'ru': '• Билеты дешевле всего за 4–6 недель до поездки.<br>'
+              '• У FlixBus есть программа лояльности — баллы за каждый билет.<br>'
+              '• Задержки возможны на транзитных маршрутах (автобус едет из другой страны).<br>'
+              '• Багаж: одно место в багажном отсеке бесплатно, ручная кладь на сиденье.<br>'
+              '• В Сербии у FlixBus нет своих станций — используйте BAS или маркеры на карте в приложении.',
+    },
+    'guides.flixbus.cta': {
+        'sr': 'Pretraži domaće polaske',
+        'en': 'Search local departures',
+        'ru': 'Найти внутренние рейсы',
+    },
 }
 
 SUPPORTED_LANGS = ('sr', 'en', 'ru')
