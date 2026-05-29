@@ -13,9 +13,9 @@ intercity_bp = Blueprint('intercity', __name__)
 # months, but treats 410 as a hard signal to drop the URL.
 _LEGACY_GONE_INTERCITY = frozenset({
     'budva-kragujevac', 'budva-novi-pazar', 'cacak-budva',
-    'cacak-herceg-novi', 'kotor-novi-pazar', 'podgorica-cacak',
-    'podgorica-krusevac', 'sarajevo-cacak', 'sarajevo-novi-pazar',
-    'split-beograd', 'uzice-herceg-novi',
+    'cacak-herceg-novi', 'kotor-kragujevac', 'kotor-novi-pazar',
+    'podgorica-cacak', 'podgorica-krusevac', 'sarajevo-cacak',
+    'sarajevo-novi-pazar', 'split-beograd', 'uzice-herceg-novi',
 })
 
 

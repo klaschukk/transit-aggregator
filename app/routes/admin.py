@@ -9,10 +9,11 @@ from functools import wraps
 
 from flask import (
     Blueprint, render_template, current_app, Response, request, redirect,
-    url_for, flash,
+    url_for, flash, g,
 )
 
 from app import analytics_db
+from app.db import query as transit_query
 from app.extensions import csrf
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
@@ -41,12 +42,65 @@ def _basic_auth_required(f):
     return wrapper
 
 
+@admin_bp.before_request
+def _admin_context():
+    try:
+        rows = analytics_db.query("SELECT COUNT(*) AS c FROM reviews WHERE status='pending'")
+        g.admin_pending_reviews = rows[0]['c'] if rows else 0
+    except Exception:
+        g.admin_pending_reviews = 0
+
+
 @admin_bp.after_request
 def _no_index(resp):
     # Belt-and-braces — admin pages must never end up in a search index.
     resp.headers['X-Robots-Tag'] = 'noindex, nofollow, noarchive'
     resp.headers['Cache-Control'] = 'private, no-store'
     return resp
+
+
+@admin_bp.route('')
+@admin_bp.route('/')
+@_basic_auth_required
+def dashboard():
+    pending_rows = analytics_db.query("SELECT COUNT(*) AS c FROM reviews WHERE status='pending'")
+    total_rows   = analytics_db.query("SELECT COUNT(*) AS c FROM reviews")
+    sub_rows     = analytics_db.query("SELECT COUNT(*) AS c FROM subscribers WHERE confirmed=1")
+    clicks_7d    = _total_clicks_since(7)
+    clicks_30d   = _total_clicks_since(30)
+
+    queue = analytics_db.query(
+        "SELECT id, route_slug, rating, comment, author_name, ts "
+        "FROM reviews WHERE status='pending' ORDER BY ts DESC LIMIT 10"
+    )
+    top_routes = analytics_db.query("""
+        SELECT route_slug, COUNT(*) AS clicks
+        FROM ba_clicks
+        WHERE ts >= CURRENT_TIMESTAMP - INTERVAL '7 days'
+          AND route_slug != ''
+        GROUP BY route_slug ORDER BY clicks DESC LIMIT 7
+    """)
+
+    try:
+        rc = transit_query("SELECT COUNT(*) AS c FROM routes")
+        tc = transit_query("SELECT COUNT(*) AS c FROM trips")
+        routes_count = rc[0]['c'] if rc else 0
+        trips_count  = tc[0]['c'] if tc else 0
+    except Exception:
+        routes_count = trips_count = 0
+
+    return render_template(
+        'admin/dashboard.html',
+        pending_reviews=pending_rows[0]['c'] if pending_rows else 0,
+        total_reviews=total_rows[0]['c'] if total_rows else 0,
+        subscribers=sub_rows[0]['c'] if sub_rows else 0,
+        clicks_7d=clicks_7d,
+        clicks_30d=clicks_30d,
+        queue=queue,
+        top_routes=top_routes,
+        routes_count=routes_count,
+        trips_count=trips_count,
+    )
 
 
 @admin_bp.route('/revenue')
