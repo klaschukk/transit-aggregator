@@ -40,6 +40,9 @@ _LINE_SLUG_REDIRECTS: dict[str, dict[str, str]] = {
     'beograd': {
         'linija-31l': 'linija-31',   # 31Л variant merged into regular 31
         'linija-6a':  'linija-6',    # 6А variant merged into regular 6
+        'linija-29l': 'linija-29',   # 29Л variant merged into regular 29
+        'linija-12l': 'linija-12',   # 12Л variant merged into regular 12
+        'linija-28a': 'linija-28',   # 28А variant merged into regular 28
     },
 }
 _STOP_SLUG_REDIRECTS: dict[str, dict[str, str | None]] = {
@@ -220,6 +223,8 @@ def line_detail(city: str, line_slug: str):
             abort(503)
         if not line_slug.isascii() or '---' in line_slug:
             abort(410)
+        if city in _SUPPORTED_CITIES:
+            return redirect(url_for('city.city_hub', city=city), code=301)
         abort(404)
 
     stops = query("""
@@ -408,6 +413,8 @@ def stop_detail(city: str, stop_slug: str):
         # Clean ASCII misses stay 404 (could be typos in external links).
         if not stop_slug.isascii() or '---' in stop_slug or stop_slug.isdigit():
             abort(410)
+        if city in _SUPPORTED_CITIES:
+            return redirect(url_for('city.city_hub', city=city), code=301)
         abort(404)
 
     # Lines serving this stop via city_line_stops
