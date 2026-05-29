@@ -16,9 +16,7 @@ log "Enriching stop coordinates..."
 python -u data/pipelines/enrich_stops_coords.py 2>&1 | tee -a "$LOG" || log "WARN: enrich_stops_coords failed"
 
 log "Rebuilding transit.duckdb..."
-systemctl stop transit
 python -u data/pipelines/build_db.py 2>&1 | tee -a "$LOG"
-systemctl start transit
 
 log "Done!"
 
