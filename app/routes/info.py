@@ -264,6 +264,24 @@ _GUIDES: dict[str, dict] = {
         'date': '2026-04-05',
         'category_key': 'guides.cat_tips',
     },
+    'beograd-novi-sad': {
+        'title_key': 'guides.beograd_ns.title',
+        'meta_key': 'guides.beograd_ns.meta',
+        'date': '2026-05-29',
+        'category_key': 'guides.cat_travel',
+    },
+    'prevoz-do-mora': {
+        'title_key': 'guides.more.title',
+        'meta_key': 'guides.more.meta',
+        'date': '2026-05-29',
+        'category_key': 'guides.cat_travel',
+    },
+    'flixbus-srbija': {
+        'title_key': 'guides.flixbus.title',
+        'meta_key': 'guides.flixbus.meta',
+        'date': '2026-05-29',
+        'category_key': 'guides.cat_tips',
+    },
 }
 
 
@@ -284,6 +302,49 @@ def guides_index():
     return render_template('guides_index.html', guides=guides)
 
 
+def _guide_context_beograd_ns() -> dict:
+    trips: list = []
+    if db_ready():
+        rows = cached_query("""
+            SELECT t.departure_time, t.arrival_time, t.price_rsd, t.duration_min,
+                   o.name AS operator
+            FROM trips t
+            JOIN routes r ON r.id = t.route_id
+            LEFT JOIN operators o ON o.id = t.operator_id
+            WHERE r.from_city = 'Beograd' AND r.to_city = 'Novi Sad'
+              AND t.is_active = true
+            ORDER BY t.departure_time
+            LIMIT 12
+        """, ttl=3600)
+        trips = [dict(row) for row in rows] if rows else []
+    return {'trips': trips}
+
+
+def _guide_context_more() -> dict:
+    sea_routes: list = []
+    if db_ready():
+        rows = cached_query("""
+            SELECT r.to_city, MIN(t.price_rsd) AS min_price_rsd, COUNT(*) AS trip_count,
+                   r.from_city_slug, r.to_city_slug
+            FROM trips t
+            JOIN routes r ON r.id = t.route_id
+            WHERE r.from_city = 'Beograd'
+              AND r.to_city IN ('Bar','Budva','Herceg Novi','Kotor','Tivat',
+                                'Split','Dubrovnik','Ulcinj')
+              AND t.is_active = true
+            GROUP BY r.to_city, r.from_city_slug, r.to_city_slug
+            ORDER BY min_price_rsd NULLS LAST
+        """, ttl=3600)
+        sea_routes = [dict(row) for row in rows] if rows else []
+    return {'sea_routes': sea_routes}
+
+
+_GUIDE_EXTRA_CONTEXT: dict[str, object] = {
+    'beograd-novi-sad': _guide_context_beograd_ns,
+    'prevoz-do-mora': _guide_context_more,
+}
+
+
 @info_bp.route('/vodici/<slug>/')
 def guide_detail(slug: str):
     """Render a single guide. Body lives in templates/guides/<slug>.html."""
@@ -293,10 +354,15 @@ def guide_detail(slug: str):
         if norm in _GUIDES and norm != slug:
             return redirect(url_for('info.guide_detail', slug=norm), code=301)
         abort(404)
+    extra: dict = {}
+    ctx_fn = _GUIDE_EXTRA_CONTEXT.get(slug)
+    if ctx_fn:
+        extra = ctx_fn()
     return render_template(
         f'guides/{slug}.html',
         guide_slug=slug,
         guide_info=info,
+        **extra,
     )
 
 
