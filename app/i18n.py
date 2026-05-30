@@ -4523,6 +4523,8 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Search local departures',
         'ru': 'Найти внутренние рейсы',
     },
+    # ── Operator/Country FAQ ──
+
 }
 
 SUPPORTED_LANGS = ('sr', 'en', 'ru')
