@@ -285,6 +285,18 @@ _GUIDES: dict[str, dict] = {
 }
 
 
+@info_bp.route('/vodic/')
+def guides_index_alias():
+    """301 redirect: /vodic/ → /vodici/ (canonical with double-i)."""
+    return redirect(url_for('info.guides_index'), code=301)
+
+
+@info_bp.route('/vodic/<slug>/')
+def guide_detail_alias(slug: str):
+    """301 redirect: /vodic/{slug}/ → /vodici/{slug}/."""
+    return redirect(url_for('info.guide_detail', slug=slug), code=301)
+
+
 @info_bp.route('/vodici/')
 def guides_index():
     """Index of all SEO guides — evergreen long-form content."""
