@@ -4259,14 +4259,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     # ── Guide: Beograd–Novi Sad ──
     'guides.beograd_ns.title': {
-        'sr': 'Autobus Beograd–Novi Sad: cene, red vožnje, saveti',
-        'en': 'Bus Belgrade–Novi Sad: prices, schedule, tips',
-        'ru': 'Автобус Белград–Нови-Сад: цены, расписание, советы',
+        'sr': 'Autobus Beograd → Novi Sad {year} — Cene i Red Vožnje',
+        'en': 'Bus Belgrade → Novi Sad {year} — Prices and Schedule',
+        'ru': 'Автобус Белград → Нови-Сад {year} — Цены и Расписание',
     },
     'guides.beograd_ns.meta': {
-        'sr': 'Sve o prevozu Beograd–Novi Sad: cene karata od 640 RSD, vreme putovanja 1–2h, poređenje autobusa i voza i aktuelni polasci.',
-        'en': 'Everything about Belgrade–Novi Sad transport: ticket prices from 640 RSD, 1–2h travel time, bus vs train comparison and current departures.',
-        'ru': 'Всё о транспорте Белград–Нови-Сад: билеты от 640 динаров, время в пути 1–2ч, сравнение автобуса и поезда, актуальные рейсы.',
+        'sr': 'Sve o prevozu Beograd–Novi Sad: cene od 640 RSD, vreme 1–2h, poređenje autobusa i voza. Aktuelni polasci iz DuckDB baze →',
+        'en': 'Everything about Belgrade–Novi Sad transport: from 640 RSD, 1–2h, bus vs train comparison. Live departures →',
+        'ru': 'Всё о маршруте Белград–Нови-Сад: от 640 динаров, 1–2ч, автобус vs поезд. Актуальные рейсы →',
     },
     'guides.beograd_ns.p1': {
         'sr': 'Beograd i Novi Sad razdvaja svega 90 km auto-putom, a taj rastojanje možete prevaliti autobusom, vozom ili privatnim prevozom. '
@@ -4349,14 +4349,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     # ── Guide: Prevoz do mora ──
     'guides.more.title': {
-        'sr': 'Prevoz do mora iz Beograda — autobus, cene, letnji red vožnje',
-        'en': 'Transport to the sea from Belgrade — bus, prices, summer schedule',
-        'ru': 'Транспорт к морю из Белграда — автобус, цены, летнее расписание',
+        'sr': 'Prevoz do mora iz Srbije {year} — Autobus, Cene, Saveti',
+        'en': 'Transport to the Sea from Serbia {year} — Bus, Prices, Tips',
+        'ru': 'Транспорт к морю из Сербии {year} — Автобус, Цены, Советы',
     },
     'guides.more.meta': {
-        'sr': 'Kako doći do mora iz Beograda autobusom: Budva, Bar, Herceg Novi, Split, Dubrovnik — cene, vreme putovanja i letnji saveti.',
-        'en': 'How to get to the sea from Belgrade by bus: Budva, Bar, Herceg Novi, Split, Dubrovnik — prices, travel times and summer tips.',
-        'ru': 'Как добраться до моря из Белграда автобусом: Будва, Бар, Херцег-Нови, Сплит, Дубровник — цены, время в пути и советы на лето.',
+        'sr': 'Prevoz do mora iz Srbije autobusom {year}: Bar, Budva, Herceg Novi, Split — cene, vreme i letnji saveti →',
+        'en': 'Transport to the sea from Serbia by bus {year}: Bar, Budva, Herceg Novi, Split — prices, times and tips →',
+        'ru': 'Транспорт к морю из Сербии автобусом {year}: Бар, Будва, Херцег-Нови, Сплит — цены, время и советы →',
     },
     'guides.more.p1': {
         'sr': 'Leto je — i Beograd se prazni. Hiljade putnika svake sezone kreću prema Jadranskom i Jonskom moru, '
@@ -4417,14 +4417,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     # ── Guide: FlixBus Srbija ──
     'guides.flixbus.title': {
-        'sr': 'FlixBus Srbija — linije, cene i poređenje sa domaćim prevozom',
-        'en': 'FlixBus Serbia — routes, prices and comparison with local carriers',
-        'ru': 'FlixBus Сербия — маршруты, цены и сравнение с местными перевозчиками',
+        'sr': 'FlixBus Srbija {year} — Linije, Cene i Poređenje',
+        'en': 'FlixBus Serbia {year} — Routes, Prices and Comparison',
+        'ru': 'FlixBus Сербия {year} — Маршруты, Цены и Сравнение',
     },
     'guides.flixbus.meta': {
-        'sr': 'FlixBus linije kroz Srbiju, poređenje sa Lastom i BEX-om — kad je FlixBus jeftiniji i kad da birate domaći prevoz.',
-        'en': 'FlixBus routes through Serbia, comparison with Lasta and BEX — when FlixBus is cheaper and when to choose a local carrier.',
-        'ru': 'Маршруты FlixBus через Сербию, сравнение с Lasta и BEX — когда FlixBus дешевле и когда выбрать местного перевозчика.',
+        'sr': 'FlixBus Srbija {year}: linije, cene i poređenje sa Lastom i BEX-om — kad izabrati FlixBus, a kad domaći prevoz →',
+        'en': 'FlixBus Serbia {year}: routes, prices and comparison with Lasta and BEX — when to pick FlixBus vs local →',
+        'ru': 'FlixBus Сербия {year}: маршруты, цены и сравнение с Lasta и BEX — когда выбрать FlixBus, а когда местный →',
     },
     'guides.flixbus.p1': {
         'sr': 'FlixBus je 2019. ušao na srpsko tržište i od tada nudi međunarodne i tranzitne linije kroz Srbiju. '
