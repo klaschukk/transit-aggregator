@@ -185,11 +185,13 @@ def search():
             LIMIT 6
         """)
 
-    return render_template('search_results.html',
-                           results=results, from_city=from_city,
-                           to_city=to_city, datum=date,
-                           min_price=min_price,
-                           popular_routes=popular_routes)
+    resp = make_response(render_template('search_results.html',
+                                         results=results, from_city=from_city,
+                                         to_city=to_city, datum=date,
+                                         min_price=min_price,
+                                         popular_routes=popular_routes))
+    resp.headers['X-Robots-Tag'] = 'noindex, nofollow'
+    return resp
 
 
 @main_bp.route('/api/review/<route_slug>', methods=['POST'])
