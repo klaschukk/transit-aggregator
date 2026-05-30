@@ -4259,9 +4259,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     # ── Guide: Beograd–Novi Sad ──
     'guides.beograd_ns.title': {
-        'sr': 'Autobus Beograd–Novi Sad: cene, red vožnje, saveti',
-        'en': 'Bus Belgrade–Novi Sad: prices, schedule, tips',
-        'ru': 'Автобус Белград–Нови-Сад: цены, расписание, советы',
+        'sr': 'Autobus Beograd → Novi Sad {year} — Cene i Red Vožnje',
+        'en': 'Bus Belgrade → Novi Sad {year} — Prices and Schedule',
+        'ru': 'Автобус Белград → Нови-Сад {year} — Цены и Расписание',
     },
     'guides.beograd_ns.meta': {
         'sr': 'Sve o prevozu Beograd–Novi Sad: cene karata od 640 RSD, vreme putovanja 1–2h, poređenje autobusa i voza i aktuelni polasci.',
@@ -4349,9 +4349,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     # ── Guide: Prevoz do mora ──
     'guides.more.title': {
-        'sr': 'Prevoz do mora iz Beograda — autobus, cene, letnji red vožnje',
-        'en': 'Transport to the sea from Belgrade — bus, prices, summer schedule',
-        'ru': 'Транспорт к морю из Белграда — автобус, цены, летнее расписание',
+        'sr': 'Prevoz do mora iz Srbije {year} — Autobus, Cene, Saveti',
+        'en': 'Transport to the Sea from Serbia {year} — Bus, Prices, Tips',
+        'ru': 'Транспорт к морю из Сербии {year} — Автобус, Цены, Советы',
     },
     'guides.more.meta': {
         'sr': 'Kako doći do mora iz Beograda autobusom: Budva, Bar, Herceg Novi, Split, Dubrovnik — cene, vreme putovanja i letnji saveti.',
@@ -4417,9 +4417,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     # ── Guide: FlixBus Srbija ──
     'guides.flixbus.title': {
-        'sr': 'FlixBus Srbija — linije, cene i poređenje sa domaćim prevozom',
-        'en': 'FlixBus Serbia — routes, prices and comparison with local carriers',
-        'ru': 'FlixBus Сербия — маршруты, цены и сравнение с местными перевозчиками',
+        'sr': 'FlixBus Srbija {year} — Linije, Cene i Poređenje',
+        'en': 'FlixBus Serbia {year} — Routes, Prices and Comparison',
+        'ru': 'FlixBus Сербия {year} — Маршруты, Цены и Сравнение',
     },
     'guides.flixbus.meta': {
         'sr': 'FlixBus linije kroz Srbiju, poređenje sa Lastom i BEX-om — kad je FlixBus jeftiniji i kad da birate domaći prevoz.',

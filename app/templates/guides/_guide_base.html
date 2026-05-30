@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _(guide_info.title_key) }} | Prevozni{% endblock %}
-{% block meta_description %}{{ _(guide_info.meta_key) }}{% endblock %}
+{% set _guide_title = _(guide_info.title_key).replace('{year}', current_year|string) %}
+{% set _guide_meta  = _(guide_info.meta_key).replace('{year}', current_year|string) %}
+{% block title %}{{ _guide_title }} | Prevozni{% endblock %}
+{% block meta_description %}{{ _guide_meta }}{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Article","headline":"{{ _(guide_info.title_key) }}","datePublished":"{{ guide_info.date }}","dateModified":"{{ guide_info.date }}","author":{"@type":"Organization","name":"Prevozni"},"publisher":{"@type":"Organization","name":"Prevozni","url":"{{ config.BASE_URL }}/"}}
+{"@context":"https://schema.org","@type":"Article","headline":"{{ _guide_title }}","description":"{{ _guide_meta }}","datePublished":"{{ guide_info.date }}","dateModified":"{{ guide_info.date }}","author":{"@type":"Organization","name":"Prevozni","url":"{{ config.BASE_URL }}/"},"publisher":{"@type":"Organization","name":"Prevozni","url":"{{ config.BASE_URL }}/"},"mainEntityOfPage":{"@type":"WebPage","@id":"{{ request.url }}"}}
 </script>
 {% endblock %}
 
