@@ -2281,6 +2281,17 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'schedule and prices',
         'ru': 'расписание и цены',
     },
+    'route_detail.title_rv': {
+        'sr': 'red vožnje', 'en': 'schedule', 'ru': 'расписание',
+    },
+    'route_detail.title_cene': {
+        'sr': 'cene', 'en': 'prices', 'ru': 'цены',
+    },
+    'route_detail.meta_compact': {
+        'sr': 'Uporedi red vožnje, cene i prevoznike. Kupi kartu online — besplatno.',
+        'en': 'Compare schedules, prices and carriers. Buy a ticket online — free.',
+        'ru': 'Сравни расписание, цены и перевозчиков. Купи билет онлайн — бесплатно.',
+    },
     'route_detail.meta_compare_cta': {
         'sr': 'Uporedi prevoznike i cene besplatno.',
         'en': 'Compare carriers and prices for free.',
