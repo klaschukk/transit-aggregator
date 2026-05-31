@@ -958,6 +958,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'See also the reverse direction',
         'ru': 'Смотрите также обратное направление',
     },
+    'carriers.title_seo': {
+        'sr': 'Autobuski prevoznici u Srbiji',
+        'en': 'Bus carriers in Serbia',
+        'ru': 'Автобусные перевозчики Сербии',
+    },
     'route.all_routes': {'sr': 'Sve rute', 'en': 'All routes', 'ru': 'Все маршруты'},
     'route.filter_all': {'sr': 'Svi polasci', 'en': 'All departures', 'ru': 'Все рейсы'},
     'route.workday': {'sr': 'Radnim danom', 'en': 'Weekdays', 'ru': 'Будни'},
@@ -1624,6 +1629,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Top destinacije na Balkanu',
         'en': 'Top Balkan destinations',
         'ru': 'Лучшие направления на Балканах',
+    },
+    'dest.title_kw': {
+        'sr': 'autobus i voz', 'en': 'bus and train', 'ru': 'автобус и поезд',
     },
     'dest.subtitle': {
         'sr': 'Najpopularnija mesta za putovanje autobusom i vozom',
