@@ -62,7 +62,7 @@
     {% if popular_routes %}
     <div class="hero__quick-links" aria-label="{{ _('home.quick_links_aria') }}">
       <span class="hero__quick-label">{{ _('home.quick_label') }}</span>
-      {% for r in popular_routes[:6] %}
+      {% for r in popular_routes[:4] %}
       <a href="{{ lang_prefix }}/rute/{{ r.slug }}/" class="hero__quick-chip">
         {{ r.from_city }} → {{ r.to_city }}
       </a>
@@ -251,32 +251,6 @@
   </div>
 </section>
 
-<!-- ═══════ BENEFITS ═══════ -->
-<section class="home-benefits">
-  <div class="container">
-    <div class="home-benefits__grid">
-      <div class="home-benefits__item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <div class="home-benefits__label">{{ _('benefits.free') }}</div>
-        <div class="home-benefits__desc">{{ _('benefits.free_desc') }}</div>
-      </div>
-      <div class="home-benefits__item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path d="M12 22s8-7 8-13a8 8 0 10-16 0c0 6 8 13 8 13z"/><circle cx="12" cy="9" r="2.5"/></svg>
-        <div class="home-benefits__label">{{ _('benefits.mobile') }}</div>
-        <div class="home-benefits__desc">{{ _('benefits.mobile_desc') }}</div>
-      </div>
-      <div class="home-benefits__item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        <div class="home-benefits__label">{{ _('benefits.realtime') }}</div>
-        <div class="home-benefits__desc">{{ _('benefits.realtime_desc') }}</div>
-      </div>
-      <div class="home-benefits__item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        <div class="home-benefits__label">{{ _('benefits.allinone') }}</div>
-        <div class="home-benefits__desc">{{ _('benefits.allinone_desc') }}</div>
-      </div>
-    </div>
-  </div>
-</section>
+{# benefits section removed — duplicated info already in home-features strip #}
 
 {% endblock %}
