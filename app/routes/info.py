@@ -370,10 +370,12 @@ def guide_detail(slug: str):
     ctx_fn = _GUIDE_EXTRA_CONTEXT.get(slug)
     if ctx_fn:
         extra = ctx_fn()
+    from datetime import datetime
     return render_template(
         f'guides/{slug}.html',
         guide_slug=slug,
         guide_info=info,
+        current_year=datetime.now().year,
         **extra,
     )
 
