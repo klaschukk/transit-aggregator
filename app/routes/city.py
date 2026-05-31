@@ -223,8 +223,6 @@ def line_detail(city: str, line_slug: str):
             abort(503)
         if not line_slug.isascii() or '---' in line_slug:
             abort(410)
-        if city in _SUPPORTED_CITIES:
-            return redirect(url_for('city.city_hub', city=city), code=301)
         abort(404)
 
     stops = query("""
@@ -413,8 +411,6 @@ def stop_detail(city: str, stop_slug: str):
         # Clean ASCII misses stay 404 (could be typos in external links).
         if not stop_slug.isascii() or '---' in stop_slug or stop_slug.isdigit():
             abort(410)
-        if city in _SUPPORTED_CITIES:
-            return redirect(url_for('city.city_hub', city=city), code=301)
         abort(404)
 
     # Lines serving this stop via city_line_stops
