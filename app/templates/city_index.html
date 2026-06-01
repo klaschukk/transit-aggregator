@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{{ _('city_index.title') }} — Prevozni{% endblock %}
-{% block meta_description %}{{ _('city_index.title') }} — {{ _('city_index.subtitle') }}. Beograd, Novi Sad, Niš.{% endblock %}
+{% block title %}{{ _('city_index.title') }} {{ current_year }} — Prevozni{% endblock %}
+{% block meta_description %}{{ _('city_index.title') }} {{ current_year }} — {{ _('city_index.subtitle') }}. Beograd, Novi Sad, Niš i Kragujevac. {{ _('city_index.meta_cta') }}{% endblock %}
 
 {% block head_extra %}
 {% set _faq_entities = [
