@@ -1520,7 +1520,7 @@ def _chat_session_key() -> str:
     return sid if (sid and len(sid) == 36) else 'anon'
 
 
-@main_bp.route('/api/chat', methods=['POST'])
+
 @csrf.exempt
 @limiter.limit("20 per 5 minutes", key_func=_chat_session_key)
 def api_chat():
