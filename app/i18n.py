@@ -517,9 +517,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Ключевые цифры',
     },
     'home.valueprop_free': {
-        'sr': 'Besplatno',
-        'en': 'Free',
-        'ru': 'Бесплатно',
+        'sr': 'besplatno',
+        'en': 'free',
+        'ru': 'бесплатно',
     },
     'ads.label': {
         'sr': 'Reklama',
