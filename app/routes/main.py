@@ -1,8 +1,11 @@
+import json as _json
 import re
 import time
+from pathlib import Path
+import uuid
 from datetime import datetime
 
-from flask import Blueprint, render_template, request, make_response, jsonify, current_app, abort
+from flask import Blueprint, render_template, request, make_response, jsonify, current_app, abort, redirect, Response, stream_with_context
 
 from app.db import query, cached_query, cached_query_one, db_ready
 from app.extensions import limiter, csrf
@@ -1050,12 +1053,36 @@ def favourites():
 # LinkedIn, Telegram, Google Discover) get a relevant preview.
 
 _OG_HEADERS = {
-    # 1 day cache + immutable: each card's content is bound to a slug
-    # and changes only when our data does. CF + browser keeps it warm
-    # so social-bot follow-up requests don't hit the renderer twice.
     'Content-Type': 'image/png',
-    'Cache-Control': 'public, max-age=86400, immutable',
+    # 7 days: OG cards change only on nightly rebuild; disk cache absorbs
+    # repeated social-bot hits without re-rendering via Pillow each time.
+    'Cache-Control': 'public, max-age=604800, immutable',
 }
+
+_OG_CACHE_DIR = Path(__file__).parent.parent.parent / 'data' / 'cache' / 'og'
+_OG_CACHE_TTL = 86400  # 24 h — regenerate if nightly data changed
+
+
+def _og_cached(cache_key: str, generate) -> 'Response':
+    """Return OG PNG from disk cache; generate + persist on miss."""
+    _OG_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    cache_path = _OG_CACHE_DIR / f'{cache_key}.png'
+    if cache_path.exists() and (time.time() - cache_path.stat().st_mtime) < _OG_CACHE_TTL:
+        resp = make_response(cache_path.read_bytes())
+        for k, v in _OG_HEADERS.items():
+            resp.headers[k] = v
+        return resp
+    try:
+        png = generate()
+    except Exception:
+        return _og_fallback()
+    if png:
+        try:
+            cache_path.write_bytes(png)
+        except OSError:
+            pass
+        return _og_response(png)
+    return _og_fallback()
 
 
 def _og_response(png_bytes: bytes):
@@ -1098,11 +1125,7 @@ def og_route(slug: str):
         chips.append(f"{row['trip_count']} polazaka")
     if row.get('min_price'):
         chips.append(f"od {int(row['min_price'])} RSD")
-    try:
-        png = render_card(title, subtitle='Direktni autobus', chips=chips)
-    except Exception:
-        return _og_fallback()
-    return _og_response(png)
+    return _og_cached(f'route-{slug}', lambda: render_card(title, subtitle='Direktni autobus', chips=chips))
 
 
 @main_bp.route('/og/voznja/<from_city>-do-<to_city>.png')
@@ -1132,11 +1155,7 @@ def og_voznja(from_city: str, to_city: str):
         chips.append(f"{row['trip_count']} polazaka")
     if row.get('min_price'):
         chips.append(f"od {int(row['min_price'])} RSD")
-    try:
-        png = render_card(title, subtitle='Pretraga polazaka', chips=chips)
-    except Exception:
-        return _og_fallback()
-    return _og_response(png)
+    return _og_cached(f'voznja-{from_city}-{to_city}', lambda: render_card(title, subtitle='Pretraga polazaka', chips=chips))
 
 
 @main_bp.route('/og/line/<city>/<slug>.png')
@@ -1167,11 +1186,7 @@ def og_line(city: str, slug: str):
     chips = [type_label]
     if row.get('stop_count'):
         chips.append(f"{row['stop_count']} stajališta")
-    try:
-        png = render_card(title, subtitle=sub, chips=chips)
-    except Exception:
-        return _og_fallback()
-    return _og_response(png)
+    return _og_cached(f'line-{city}-{slug}', lambda: render_card(title, subtitle=sub, chips=chips))
 
 
 @main_bp.route('/og/stop/<city>/<slug>.png')
@@ -1197,11 +1212,7 @@ def og_stop(city: str, slug: str):
     chips = [city_label]
     if row.get('line_count'):
         chips.append(f"{row['line_count']} linija")
-    try:
-        png = render_card(title, subtitle='Stajalište', chips=chips)
-    except Exception:
-        return _og_fallback()
-    return _og_response(png)
+    return _og_cached(f'stop-{city}-{slug}', lambda: render_card(title, subtitle='Stajalište', chips=chips))
 
 
 @main_bp.route('/og/operator/<slug>.png')
@@ -1230,10 +1241,9 @@ def og_operator(slug: str):
     if row.get('city_count'):
         chips.append(f"{row['city_count']} gradova")
     try:
-        png = render_card(title, subtitle='Prevoznik', chips=chips or ['Prevoznik'])
+        return _og_cached(f'operator-{slug}', lambda: render_card(title, subtitle='Prevoznik', chips=chips or ['Prevoznik']))
     except Exception:
         return _og_fallback()
-    return _og_response(png)
 
 
 @main_bp.route('/og/country/<slug>.png')
@@ -1267,10 +1277,9 @@ def og_country(slug: str):
                 chips.append(f"{row['n']} ruta")
     from app.og import render_card
     try:
-        png = render_card(name, subtitle='Autobusi iz Srbije', chips=chips)
+        return _og_cached(f'country-{slug}', lambda: render_card(name, subtitle='Autobusi iz Srbije', chips=chips))
     except Exception:
         return _og_fallback()
-    return _og_response(png)
 
 
 @main_bp.route('/offline.html')
@@ -1380,6 +1389,24 @@ def indexnow_key_file(key: str):
     resp.headers['Cache-Control'] = 'public, max-age=86400'
     return resp
 
+@main_bp.route('/apple-touch-icon.png')
+@main_bp.route('/apple-touch-icon-precomposed.png')
+def apple_touch_icon():
+    return redirect('/static/favicon/apple-touch-icon.png', code=301)
+
+
+@main_bp.route('/sitemap_index.xml')
+def sitemap_index_legacy():
+    return redirect('/sitemap.xml', code=301)
+
+
+@main_bp.route('/.well-known/traffic-advice')
+def traffic_advice():
+    resp = make_response('[]')
+    resp.headers['Content-Type'] = 'application/trafficadvice+json'
+    resp.headers['Cache-Control'] = 'public, max-age=86400'
+    return resp
+
 
 @main_bp.route('/ads.txt')
 def ads_txt():
@@ -1399,3 +1426,108 @@ def ads_txt():
     resp = make_response(body)
     resp.headers['Content-Type'] = 'text/plain'
     return resp
+
+
+# ── AI Chat widget ────────────────────────────────────────────────────────────
+
+_CHAT_SYSTEM = """Ti si pomoćnik na sajtu Prevozni.com — besplatnom agregatu javnog prevoza u Srbiji.
+
+Šta znaš:
+- Međugradski autobusi i vozovi: 517 ruta, 2777 polazaka, 66 prevoznika (Lasta, Niš-Ekspres, Srbija Voz itd.)
+- Gradski prevoz: Beograd (514 linija), Novi Sad (61), Niš (53), Kragujevac (23)
+- Cene karata, vremena polazaka, operateri, trajanje putovanja
+- URL struktura: /rute/{slug}/ za međugradske, /voznja/{od}-do-{do}/ za parove gradova,
+  /gradski/{grad}/ za gradski prevoz, /pretraga/?od=X&do=Y za pretragu
+
+Pravila:
+- Govori jezikom korisnika (srpski/engleski/ruski)
+- Budi kratak i konkretan — maksimalno 3 recenице
+- Ako korisnik pita o konkretnoj ruti ili liniji, koristi podatke iz konteksta stranice
+- Ne izmisljaj cene ni vremena — samo opisuj sta sajt nudi
+- Ne pominjaj konkurentske sajtove"""
+
+
+def _chat_session_key() -> str:
+    sid = request.cookies.get('chat_sid', '')
+    return sid if (sid and len(sid) == 36) else 'anon'
+
+
+@main_bp.route('/api/chat', methods=['POST'])
+@csrf.exempt
+@limiter.limit("20 per 5 minutes", key_func=_chat_session_key)
+def api_chat():
+    data = request.get_json(silent=True) or {}
+    messages = data.get('messages', [])
+    page_ctx = data.get('page_context', {})
+
+    if not isinstance(messages, list) or not messages or len(messages) > 20:
+        return jsonify(error='invalid'), 400
+
+    safe = []
+    for m in messages[-10:]:
+        role = m.get('role', '')
+        content = str(m.get('content', ''))[:800]
+        if role in ('user', 'assistant') and content.strip():
+            safe.append({'role': role, 'content': content})
+    if not safe:
+        return jsonify(error='invalid'), 400
+
+    api_key = current_app.config.get('GROQ_API_KEY', '')
+    if not api_key:
+        return jsonify(error='unavailable'), 503
+
+    system = _CHAT_SYSTEM
+    if isinstance(page_ctx, dict) and page_ctx:
+        system += '\n\nKontekst trenutne stranice:\n' + _json.dumps(page_ctx, ensure_ascii=False)
+
+    import urllib.request as _ur
+    payload = _json.dumps({
+        'model': 'llama-3.1-8b-instant',
+        'messages': [{'role': 'system', 'content': system}] + safe,
+        'max_tokens': 350,
+        'temperature': 0.6,
+        'stream': True,
+    }).encode()
+
+    req = _ur.Request(
+        'https://api.groq.com/openai/v1/chat/completions',
+        data=payload,
+        headers={
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json',
+            'Accept': 'text/event-stream',
+        },
+        method='POST',
+    )
+
+    def _stream():
+        try:
+            with _ur.urlopen(req, timeout=15) as resp:
+                for raw_line in resp:
+                    line = raw_line.decode('utf-8').strip()
+                    if not line.startswith('data:'):
+                        continue
+                    chunk = line[5:].strip()
+                    if chunk == '[DONE]':
+                        yield 'data: [DONE]\n\n'
+                        return
+                    try:
+                        delta = _json.loads(chunk)['choices'][0]['delta'].get('content', '')
+                        if delta:
+                            yield f'data: {_json.dumps(delta, ensure_ascii=False)}\n\n'
+                    except Exception:
+                        continue
+        except Exception:
+            yield 'data: {"error":"unavailable"}\n\n'
+
+    needs_sid = not request.cookies.get('chat_sid')
+    new_sid = str(uuid.uuid4()) if needs_sid else ''
+
+    sse = Response(
+        stream_with_context(_stream()),
+        content_type='text/event-stream',
+        headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'},
+    )
+    if needs_sid:
+        sse.set_cookie('chat_sid', new_sid, max_age=60 * 60 * 24 * 90, httponly=True, samesite='Lax')
+    return sse

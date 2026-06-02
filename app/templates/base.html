@@ -41,12 +41,12 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png">
 <link rel="manifest" href="/static/site.webmanifest">
 {% block head_extra %}{% endblock %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v={{ asset_version }}">
+{% if not config.DEBUG %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dist/app.css') }}?v={{ asset_version }}">{% else %}<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v={{ asset_version }}">{% endif %}
 {# Mobile design system overlay — only fetched when the viewport actually
    matches. Browsers still download the resource for `media` mismatches in
    most cases (low priority), but they don't apply or block render. The
    net cost on desktop is one ~5KB gzipped GET that doesn't affect FCP. #}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/app.mobile.css') }}?v={{ asset_version }}" media="(max-width: 767px)">
+{% if not config.DEBUG %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dist/app.mobile.css') }}?v={{ asset_version }}" media="(max-width: 767px)">{% else %}<link rel="stylesheet" href="{{ url_for('static', filename='css/app.mobile.css') }}?v={{ asset_version }}" media="(max-width: 767px)">{% endif %}
 {% if config.ADSENSE_ID %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ads.css') }}?v={{ asset_version }}">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config.ADSENSE_ID }}" crossorigin="anonymous"></script>{% endif %}
 <script>
@@ -136,7 +136,7 @@ window.addEventListener('load', function(){
 })();
 </script>
 </head>
-<body data-ab-ccy="{{ _ccy_variant }}">
+<body data-ab-ccy="{{ _ccy_variant }}" data-page-context="{{ page_context_json|default('{}')|e }}">
 <svg aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden"><symbol id="ic-arrow-r" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-7-7l7 7-7 7"/></symbol></svg>
 
 <a href="#main-content" class="skip-link">{{ _('a11y.skip_to_content') }}</a>
@@ -829,5 +829,109 @@ if ('serviceWorker' in navigator) {
    so loading it everywhere is cheap. `defer` makes sure it runs after
    parsing without blocking the LCP path. #}
 <script src="{{ url_for('static', filename='js/mobile.js') }}?v={{ asset_version }}" defer></script>
+
+<!-- ── AI Chat widget ── -->
+<div id="chatWidget" class="chat-widget" aria-live="polite" aria-label="AI pomoćnik">
+  <button id="chatToggle" class="chat-toggle" aria-expanded="false" aria-controls="chatBox">
+    <svg id="chatIconOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" aria-hidden="true"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    <svg id="chatIconClose" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true" style="display:none"><path d="M18 6L6 18M6 6l12 12"/></svg>
+  </button>
+  <div id="chatBox" class="chat-box" hidden>
+    <div class="chat-header">
+      <span class="chat-header__title">AI Pomoćnik</span>
+      <span class="chat-header__sub">{{ _('chat.powered_by') if _('chat.powered_by') != 'chat.powered_by' else 'Prevozni · AI' }}</span>
+    </div>
+    <div id="chatMessages" class="chat-messages">
+      <div class="chat-msg chat-msg--bot">
+        <span>{{ _('chat.greeting') if _('chat.greeting') != 'chat.greeting' else 'Zdravo! Pitaj me o redovima vožnje, cenama karata ili linijama gradskog prevoza.' }}</span>
+      </div>
+    </div>
+    <form id="chatForm" class="chat-form" autocomplete="off">
+      <input id="chatInput" class="chat-input" type="text" placeholder="{{ _('chat.placeholder') if _('chat.placeholder') != 'chat.placeholder' else 'Pitaj nešto...' }}" maxlength="300" aria-label="Poruka">
+      <button type="submit" class="chat-send" aria-label="Pošalji">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+      </button>
+    </form>
+  </div>
+</div>
+<script>
+(function(){
+  var toggle=document.getElementById('chatToggle');
+  var box=document.getElementById('chatBox');
+  var iconOpen=document.getElementById('chatIconOpen');
+  var iconClose=document.getElementById('chatIconClose');
+  var form=document.getElementById('chatForm');
+  var input=document.getElementById('chatInput');
+  var msgs=document.getElementById('chatMessages');
+  var history=[];
+
+  toggle.addEventListener('click',function(){
+    var open=box.hidden;
+    box.hidden=!open;
+    toggle.setAttribute('aria-expanded',open?'true':'false');
+    iconOpen.style.display=open?'none':'';
+    iconClose.style.display=open?'':'none';
+    if(open)input.focus();
+  });
+
+  function addMsg(role,text){
+    var d=document.createElement('div');
+    d.className='chat-msg chat-msg--'+(role==='user'?'user':'bot');
+    var s=document.createElement('span');
+    s.textContent=text;
+    d.appendChild(s);
+    msgs.appendChild(d);
+    msgs.scrollTop=msgs.scrollHeight;
+  }
+
+  function setTyping(on){
+    var el=document.getElementById('chatTyping');
+    if(on&&!el){
+      var d=document.createElement('div');
+      d.id='chatTyping';d.className='chat-msg chat-msg--bot chat-msg--typing';
+      d.innerHTML='<span></span><span></span><span></span>';
+      msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+    } else if(!on&&el){el.remove();}
+  }
+
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var text=input.value.trim();
+    if(!text)return;
+    input.value='';
+    addMsg('user',text);
+    history.push({role:'user',content:text});
+    input.disabled=true;
+
+    var ctx={};try{ctx=JSON.parse(document.body.dataset.pageContext||'{}');}catch(e){}
+    fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({messages:history.slice(-10),page_context:ctx})
+    }).then(function(r){
+      if(!r.ok||!r.body){setTyping(false);addMsg('bot','Greška u konekciji.');input.disabled=false;input.focus();return;}
+      setTyping(false);
+      var botSpan=addMsg('bot','');var fullText='';
+      var reader=r.body.getReader();var decoder=new TextDecoder();var buf='';
+      function read(){
+        reader.read().then(function(chunk){
+          if(chunk.done){history.push({role:'assistant',content:fullText});input.disabled=false;input.focus();return;}
+          buf+=decoder.decode(chunk.value,{stream:true});
+          var lines=buf.split('\n');buf=lines.pop();
+          lines.forEach(function(line){
+            if(!line.startsWith('data:'))return;
+            var data=line.slice(5).trim();if(data==='[DONE]')return;
+            try{var token=JSON.parse(data);if(typeof token==='string'){fullText+=token;botSpan.textContent=fullText;msgs.scrollTop=msgs.scrollHeight;}}
+            catch(e){}
+          });read();
+        }).catch(function(){input.disabled=false;input.focus();});
+      }
+      read();
+    }).catch(function(){
+      setTyping(false);addMsg('bot','Greška u konekciji. Pokušaj ponovo.');input.disabled=false;input.focus();
+    });
+  });
+})();
+</script>
 </body>
 </html>

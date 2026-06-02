@@ -52,3 +52,7 @@ benovite.com/
 .gstack/
 data/transit.db
 seonaut-main/
+
+# Generated at deploy time
+data/cache/
+app/static/css/dist/

@@ -322,8 +322,17 @@ def create_app(config_name: str | None = None) -> Flask:
     # a round-trip for freshness but lets Back/Forward restore instantly.
     @app.after_request
     def add_cache_headers(response):
-        if request.path.startswith('/static/'):
-            response.headers['Cache-Control'] = 'public, max-age=86400'
+        path = request.path
+        if path.startswith('/static/'):
+            # Assets are versioned with ?v=<sha> — safe to cache 1 year
+            response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+        elif path.startswith('/og/'):
+            # OG images keyed by slug — 7-day cache, regenerated nightly
+            response.headers['Cache-Control'] = 'public, max-age=604800'
+        elif path in ('/', '/rute/', '/gradski/beograd/', '/gradski/novi-sad/',
+                      '/gradski/nis/', '/gradski/kragujevac/'):
+            # High-traffic hub pages — 5-min CDN cache with stale fallback
+            response.headers['Cache-Control'] = 'public, max-age=300, stale-while-revalidate=60'
         elif 'text/html' in (response.content_type or ''):
             response.headers['Cache-Control'] = 'no-cache, must-revalidate'
         return response

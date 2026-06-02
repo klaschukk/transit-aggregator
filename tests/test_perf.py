@@ -17,16 +17,16 @@ import pytest
 
 
 BUDGETS_GZIPPED = {
-    "/": 18000,                                # raised: feature strip + scroll-reveal JS
+    "/": 19500,                                # raised: chat widget HTML + streaming JS
     "/rute/": 70000,
-    "/rute/beograd-novi-sad/": 22000,          # raised: scroll-reveal JS on all pages
-    "/voznja/beograd-do-budva/": 20000,        # raised: scroll-reveal JS on all pages
+    "/rute/beograd-novi-sad/": 23000,          # raised: chat widget JS
+    "/voznja/beograd-do-budva/": 21500,        # raised: hero tabs JS
     "/gradski/beograd/": 46000,
-    "/gradski/beograd/stajaliste/sajam/": 22000,
+    "/gradski/beograd/stajaliste/sajam/": 23000,  # raised: chat widget JS
 }
 
-# raised: visual polish (trip-card type accents, gradient text, container styling)
-CSS_BUDGET_GZIPPED = 24000
+# raised: chat widget CSS + visual polish
+CSS_BUDGET_GZIPPED = 26000
 
 
 @pytest.mark.parametrize("url,budget", list(BUDGETS_GZIPPED.items()))
