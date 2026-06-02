@@ -901,22 +901,35 @@ if ('serviceWorker' in navigator) {
     input.value='';
     addMsg('user',text);
     history.push({role:'user',content:text});
-    setTyping(true);
     input.disabled=true;
 
+    var ctx={};try{ctx=JSON.parse(document.body.dataset.pageContext||'{}');}catch(e){}
     fetch('/api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({messages:history.slice(-10)})
-    }).then(function(r){return r.json();}).then(function(d){
+      body:JSON.stringify({messages:history.slice(-10),page_context:ctx})
+    }).then(function(r){
+      if(!r.ok||!r.body){setTyping(false);addMsg('bot','Greška u konekciji.');input.disabled=false;input.focus();return;}
       setTyping(false);
-      var reply=d.reply||'Извините, нешто је пошло наопако.';
-      addMsg('bot',reply);
-      history.push({role:'assistant',content:reply});
+      var botSpan=addMsg('bot','');var fullText='';
+      var reader=r.body.getReader();var decoder=new TextDecoder();var buf='';
+      function read(){
+        reader.read().then(function(chunk){
+          if(chunk.done){history.push({role:'assistant',content:fullText});input.disabled=false;input.focus();return;}
+          buf+=decoder.decode(chunk.value,{stream:true});
+          var lines=buf.split('\n');buf=lines.pop();
+          lines.forEach(function(line){
+            if(!line.startsWith('data:'))return;
+            var data=line.slice(5).trim();if(data==='[DONE]')return;
+            try{var token=JSON.parse(data);if(typeof token==='string'){fullText+=token;botSpan.textContent=fullText;msgs.scrollTop=msgs.scrollHeight;}}
+            catch(e){}
+          });read();
+        }).catch(function(){input.disabled=false;input.focus();});
+      }
+      read();
     }).catch(function(){
-      setTyping(false);
-      addMsg('bot','Greška u konekciji. Pokušaj ponovo.');
-    }).finally(function(){input.disabled=false;input.focus();});
+      setTyping(false);addMsg('bot','Greška u konekciji. Pokušaj ponovo.');input.disabled=false;input.focus();
+    });
   });
 })();
 </script>
