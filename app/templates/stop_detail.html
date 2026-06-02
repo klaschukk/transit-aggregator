@@ -225,34 +225,33 @@
 {% block scripts %}
 {% if stop.lat and stop.lon %}
 <script>
-/* Leaflet async-loader — stop map is the LCP candidate (hero position), so we
-   fetch Leaflet immediately during HTML parse (no IntersectionObserver gate)
-   but still append via JS so the request doesn't render-block. The CSS ships
-   with media=print then swaps to all on load to avoid blocking first paint. */
+/* Mapbox GL JS for stop map — LCP candidate, load immediately via async JS. */
 (function() {
-  var mapEl = document.getElementById('stopMap');
-  if (!mapEl) return;
   var lat = {{ stop.lat }}, lon = {{ stop.lon }};
-
   var css = document.createElement('link');
-  css.rel = 'stylesheet';
-  css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-  css.crossOrigin = '';
-  css.media = 'print';
-  css.onload = function(){ this.media = 'all'; };
+  css.rel = 'stylesheet'; css.href = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css';
+  css.media = 'print'; css.onload = function(){ this.media = 'all'; };
   document.head.appendChild(css);
-
   var js = document.createElement('script');
-  js.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-  js.crossOrigin = '';
+  js.src = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';
   js.async = true;
   js.onload = function() {
-    if (typeof L === 'undefined') return;
-    var map = L.map('stopMap', { zoomControl: false, attributionControl: false, dragging: false, scrollWheelZoom: false }).setView([lat, lon], 16);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-    L.circleMarker([lat, lon], {
-      radius: 12, color: '#0d9488', fillColor: '#fff', fillOpacity: 1, weight: 3
-    }).addTo(map);
+    if (typeof mapboxgl === 'undefined') return;
+    mapboxgl.accessToken = '{{ config.MAPBOX_TOKEN }}';
+    var map = new mapboxgl.Map({
+      container: 'stopMap',
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: [lon, lat], zoom: 16,
+      interactive: false,
+      attributionControl: false
+    });
+    /* Stop marker — teal ring, white fill */
+    var el = document.createElement('div');
+    el.style.cssText = 'width:24px;height:24px;border-radius:50%;'
+      + 'background:#fff;border:3px solid #0d9488;'
+      + 'box-shadow:0 2px 8px rgba(13,148,136,.4);';
+    new mapboxgl.Marker({ element: el, anchor: 'center' })
+      .setLngLat([lon, lat]).addTo(map);
   };
   document.head.appendChild(js);
 })();

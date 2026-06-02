@@ -285,96 +285,101 @@
 
 {% block scripts %}
 <script>
-/* Leaflet lazy-loader — fetch CSS+JS only when map enters viewport (IO),
-   fallback eager for older browsers. Saves 42KB + 150-250ms main-thread. */
+/* Mapbox GL JS lazy-loader for line route map (IntersectionObserver-gated). */
 (function() {
   var mapEl = document.getElementById('lineMap');
   if (!mapEl) return;
-  var LEAFLET_CSS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-  var LEAFLET_JS  = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  var MB_CSS = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css';
+  var MB_JS  = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';
   var loaded = false;
 
-  function loadLeaflet() {
-    if (loaded) return;
-    loaded = true;
-    var css = document.createElement('link');
-    css.rel = 'stylesheet'; css.href = LEAFLET_CSS; css.crossOrigin = '';
+  function loadMapbox() {
+    if (loaded) return; loaded = true;
+    var css = document.createElement('link'); css.rel = 'stylesheet'; css.href = MB_CSS;
     document.head.appendChild(css);
-    var js = document.createElement('script');
-    js.src = LEAFLET_JS; js.crossOrigin = '';
-    js.onload = initMap;
+    var js = document.createElement('script'); js.src = MB_JS; js.onload = initMap;
     document.head.appendChild(js);
   }
 
-  if (!('IntersectionObserver' in window)) { loadLeaflet(); return; }
+  if (!('IntersectionObserver' in window)) { loadMapbox(); return; }
   var io = new IntersectionObserver(function(entries) {
-    if (entries.some(function(e){ return e.isIntersecting; })) {
-      io.disconnect();
-      loadLeaflet();
-    }
+    if (entries.some(function(e){ return e.isIntersecting; })) { io.disconnect(); loadMapbox(); }
   }, { rootMargin: '200px' });
   io.observe(mapEl);
 
   function initMap() {
-  /* ── Map ── */
-  if (typeof L === 'undefined') return;
-  var map = L.map('lineMap', { zoomControl: false, attributionControl: false })
-    .setView([44.8176, 20.4569], 13);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-  L.control.zoom({ position: 'bottomright' }).addTo(map);
+    if (typeof mapboxgl === 'undefined') return;
+    mapboxgl.accessToken = '{{ config.MAPBOX_TOKEN }}';
+    var lineColor = '{{ line.color or "#0d9488" }}';
 
-  var coords = [];
-  var lineColor = '{{ line.color or "#0d9488" }}';
-  {% if stops %}
-  {% for stop in stops %}
-  {% if stop.lat and stop.lon %}
-  coords.push([{{ stop.lat }}, {{ stop.lon }}]);
-  L.circleMarker([{{ stop.lat }}, {{ stop.lon }}], {
-    radius: {{ 7 if loop.first or loop.last else 4 }},
-    color: lineColor,
-    fillColor: '{{ "#fff" if not (loop.first or loop.last) else (line.color or "#0d9488") }}',
-    fillOpacity: 1, weight: 2
-  }).addTo(map).bindPopup('{{ stop.name }}');
-  {% endif %}
-  {% endfor %}
-  {% endif %}
+    /* Collect stop coords as [lng, lat] */
+    var coords = [];
+    {% if stops %}{% for stop in stops %}{% if stop.lat and stop.lon %}
+    coords.push([{{ stop.lon }}, {{ stop.lat }}]);
+    {% endif %}{% endfor %}{% endif %}
 
-  /* Draw route. Priority: real OSM route-relation geometry (road-following),
-     fallback to straight-line segments between stops when geometry is
-     missing. Bad segments in fallback (>3km between consecutive stops) are
-     skipped so we don't draw long wrong lines. */
-  {% if geometry %}
-  var routeCoords = {{ geometry | safe }};
-  if (routeCoords && routeCoords.length > 1) {
-    /* Subtle white halo below + crisp coloured path on top */
-    L.polyline(routeCoords, { color: '#fff', weight: 7, opacity: 0.35 }).addTo(map);
-    L.polyline(routeCoords, { color: lineColor, weight: 4, opacity: 0.9 }).addTo(map);
-    map.fitBounds(routeCoords, { padding: [30, 30] });
-  } else if (coords.length > 1) {
-    map.fitBounds(coords, { padding: [30, 30] });
-  }
-  {% else %}
-  function haversine(a, b) {
-    var R = 6371, dLat = (b[0]-a[0])*Math.PI/180, dLon = (b[1]-a[1])*Math.PI/180;
-    var x = Math.sin(dLat/2)*Math.sin(dLat/2) +
-            Math.cos(a[0]*Math.PI/180)*Math.cos(b[0]*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
-    return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
-  }
-  if (coords.length > 1) {
-    var seg = [coords[0]];
-    for (var i = 1; i < coords.length; i++) {
-      if (haversine(coords[i-1], coords[i]) < 3) {
-        seg.push(coords[i]);
-      } else {
-        if (seg.length > 1) L.polyline(seg, { color: lineColor, weight: 3, opacity: 0.6, dashArray: '6,6' }).addTo(map);
-        seg = [coords[i]];
+    var initCenter = coords.length ? coords[Math.floor(coords.length/2)] : [20.4569, 44.8176];
+    var map = new mapboxgl.Map({
+      container: 'lineMap',
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: initCenter, zoom: 13, attributionControl: false
+    });
+    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
+
+    map.on('load', function() {
+      /* ── Route geometry ── */
+      {% if geometry %}
+      var routeCoords = {{ geometry | safe }};
+      if (routeCoords && routeCoords.length > 1) {
+        map.addSource('route', { type: 'geojson', data: {
+          type: 'Feature', geometry: { type: 'LineString', coordinates: routeCoords }
+        }});
+        map.addLayer({ id: 'route-halo', type: 'line', source: 'route',
+          paint: { 'line-color': '#fff', 'line-width': 7, 'line-opacity': 0.35 }});
+        map.addLayer({ id: 'route-line', type: 'line', source: 'route',
+          paint: { 'line-color': lineColor, 'line-width': 4, 'line-opacity': 0.9 }});
+        var bounds = routeCoords.reduce(function(b,c){ return b.extend(c); },
+          new mapboxgl.LngLatBounds(routeCoords[0], routeCoords[0]));
+        map.fitBounds(bounds, { padding: 40 });
       }
-    }
-    if (seg.length > 1) L.polyline(seg, { color: lineColor, weight: 3, opacity: 0.6, dashArray: '6,6' }).addTo(map);
-    map.fitBounds(coords, { padding: [30, 30] });
-  }
-  {% endif %}
+      {% else %}
+      if (coords.length > 1) {
+        function hav(a,b){var R=6371,dLat=(b[1]-a[1])*Math.PI/180,dLon=(b[0]-a[0])*Math.PI/180;
+          var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a[1]*Math.PI/180)*Math.cos(b[1]*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+          return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+        var segs=[], seg=[coords[0]];
+        for(var i=1;i<coords.length;i++){
+          if(hav(coords[i-1],coords[i])<3){seg.push(coords[i]);}
+          else{if(seg.length>1)segs.push(seg);seg=[coords[i]];}
+        }
+        if(seg.length>1)segs.push(seg);
+        segs.forEach(function(s,idx){
+          map.addSource('s'+idx,{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:s}}});
+          map.addLayer({id:'s'+idx,type:'line',source:'s'+idx,
+            paint:{'line-color':lineColor,'line-width':3,'line-opacity':0.6,'line-dasharray':[2,2]}});
+        });
+        var bounds=coords.reduce(function(b,c){return b.extend(c);},
+          new mapboxgl.LngLatBounds(coords[0],coords[0]));
+        map.fitBounds(bounds,{padding:40});
+      }
+      {% endif %}
 
+      /* ── Stop markers ── */
+      {% if stops %}{% for stop in stops %}{% if stop.lat and stop.lon %}
+      (function(){
+        var terminal={{ 'true' if loop.first or loop.last else 'false' }};
+        var sz=terminal?'12px':'8px';
+        var el=document.createElement('div');
+        el.style.cssText='width:'+sz+';height:'+sz+';border-radius:50%;'
+          +'background:'+(terminal?lineColor:'#fff')+';border:2px solid '+lineColor
+          +';box-shadow:0 1px 4px rgba(0,0,0,.3);cursor:pointer;';
+        new mapboxgl.Marker({element:el,anchor:'center'})
+          .setLngLat([{{stop.lon}},{{stop.lat}}])
+          .setPopup(new mapboxgl.Popup({offset:8}).setHTML('{{stop.name|e}}'))
+          .addTo(map);
+      })();
+      {% endif %}{% endfor %}{% endif %}
+    });
   }
 })();
 </script>

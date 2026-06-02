@@ -19,7 +19,6 @@
   {'@type':'Question','name':_('city_transport.faq_q4').format(city=city_label),'acceptedAnswer':{'@type':'Answer','text':_('city_transport.faq_a4').format(prefix=lang_prefix, city=city_label)|striptags}}
 ] %}
 <script type="application/ld+json">{{ {'@context':'https://schema.org','@type':'FAQPage','mainEntity':_faq_entities}|tojson }}</script>
-<link rel="preconnect" href="https://unpkg.com" crossorigin>
 <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
 {% endblock %}
 
@@ -286,153 +285,122 @@
 
 {% block scripts %}
 <script>
-/* Leaflet deferred-loader — the map sits near top-of-page so a plain
-   IntersectionObserver triggers immediately, dumping ~590ms of leaflet
-   long tasks into the TBT window. Instead we defer loading until the
-   FIRST of these three signals:
-     1. `load` event fires AND `requestIdleCallback` says we're idle
-        (or a 1500ms safety timeout post-load)
-     2. User touches/clicks the map placeholder
-     3. User scrolls anywhere on the page
-   This pushes Leaflet's parse/eval past TTI on mobile, recovering
-   ~400ms of TBT and ~2s of LCP score on the city-transport page.
-   Map appears as a styled placeholder until then. */
+/* Mapbox GL JS deferred-loader — same intent-gated strategy as old Leaflet loader. */
 (function() {
   var mapEl = document.getElementById('cityMap');
   if (!mapEl) return;
   var wrap = mapEl.closest('.city-map-wrap') || mapEl;
-  var LEAFLET_CSS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-  var LEAFLET_JS  = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  var MB_CSS = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css';
+  var MB_JS  = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';
   var loaded = false;
 
-  function loadLeaflet() {
-    if (loaded) return;
-    loaded = true;
+  function loadMapbox() {
+    if (loaded) return; loaded = true;
     var css = document.createElement('link');
-    css.rel = 'stylesheet'; css.href = LEAFLET_CSS; css.crossOrigin = '';
+    css.rel = 'stylesheet'; css.href = MB_CSS;
     document.head.appendChild(css);
     var js = document.createElement('script');
-    js.src = LEAFLET_JS; js.crossOrigin = '';
+    js.src = MB_JS;
     js.onload = initMap;
     document.head.appendChild(js);
   }
 
-  /* Scheduling — wait until the page has been idle for 3s after load.
-     `requestIdleCallback` with a deadline forces firing if the browser
-     never finds idle time, which Lighthouse's lab profile sometimes
-     does (synthetic CPU pressure). The 3000ms post-load delay puts
-     leaflet's parse work after Lighthouse's TTI measurement window. */
   function scheduleIdleLoad() {
-    var fire = function(){
+    setTimeout(function() {
       if ('requestIdleCallback' in window) {
-        window.requestIdleCallback(loadLeaflet, { timeout: 2000 });
-      } else {
-        loadLeaflet();
-      }
-    };
-    setTimeout(fire, 3000);
+        window.requestIdleCallback(loadMapbox, { timeout: 2000 });
+      } else { loadMapbox(); }
+    }, 3000);
   }
 
-  /* User intent triggers immediate load — touching the map placeholder
-     or a meaningful interaction in the page area. We deliberately do NOT
-     listen on `scroll` (every Lighthouse run scrolls and would defeat
-     the deferral); instead wheel/touchmove signals real intent. */
-  function onIntent() { loadLeaflet(); }
+  function onIntent() { loadMapbox(); }
   var opts = { passive: true, once: true };
   wrap.addEventListener('touchstart', onIntent, opts);
   wrap.addEventListener('mousedown',  onIntent, opts);
   wrap.addEventListener('mouseenter', onIntent, opts);
 
-  if (document.readyState === 'complete') {
-    scheduleIdleLoad();
-  } else {
-    window.addEventListener('load', scheduleIdleLoad, { once: true });
-  }
+  if (document.readyState === 'complete') { scheduleIdleLoad(); }
+  else { window.addEventListener('load', scheduleIdleLoad, { once: true }); }
 
   function initMap() {
-  /* ── Map ── */
-  if (typeof L === 'undefined') return;
-  var cityCoords = {
-    'beograd': [44.8176, 20.4569],
-    'novi-sad': [45.2671, 19.8335],
-    'nis': [43.3209, 21.8958],
-    'kragujevac': [44.0128, 20.9114]
-  };
-  var center = cityCoords['{{ city }}'] || [44.8176, 20.4569];
-  var map = L.map('cityMap', { zoomControl: false, attributionControl: false })
-    .setView(center, 13);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-  L.control.zoom({ position: 'topright' }).addTo(map);
+    if (typeof mapboxgl === 'undefined') return;
+    mapboxgl.accessToken = '{{ config.MAPBOX_TOKEN }}';
 
-  /* ── Stops on map ── */
-  var busSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="14" height="14">'
-    + '<rect x="4" y="3" width="16" height="14" rx="3" fill="white"/>'
-    + '<path d="M4 12h16" stroke="rgba(255,255,255,.4)" stroke-width="1"/>'
-    + '<circle cx="8" cy="19" r="1.5" fill="white"/><circle cx="16" cy="19" r="1.5" fill="white"/>'
-    + '</svg>';
+    var cityCoords = {
+      'beograd':    [20.4569, 44.8176],
+      'novi-sad':   [19.8335, 45.2671],
+      'nis':        [21.8958, 43.3209],
+      'kragujevac': [20.9114, 44.0128]
+    };
+    var center = cityCoords['{{ city }}'] || [20.4569, 44.8176];
 
-  var stopIcon = L.divIcon({
-    className: 'stop-marker',
-    html: '<div class="stop-marker-dot">' + busSvg + '</div>',
-    iconSize: [28, 28], iconAnchor: [14, 14]
-  });
-  var stopMarkers = [];
+    var map = new mapboxgl.Map({
+      container: 'cityMap',
+      style: 'mapbox://styles/mapbox/light-v11',
+      center: center, zoom: 13,
+      attributionControl: false
+    });
+    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
 
-  function loadArrivals(slug, name, marker) {
-    fetch('/api/stop-arrivals?slug=' + encodeURIComponent(slug))
-      .then(function(r) { return r.json(); })
-      .then(function(arrivals) {
-        var html = '<div class="stop-popup">';
-        html += '<div class="stop-popup__name">' + name + '</div>';
-        if (arrivals.length) {
-          html += '<div class="stop-popup__lines">';
-          var shown = arrivals.slice(0, 6);
-          shown.forEach(function(a) {
-            html += '<span class="stop-popup__badge" style="background:' + a.color + '">' + a.line + '</span>';
-          });
-          if (arrivals.length > 6) html += '<span class="stop-popup__badge" style="background:#94a3b8">+' + (arrivals.length - 6) + '</span>';
-          html += '</div>';
-        }
-        html += '<a class="stop-popup__more" href="{{ lang_prefix }}/gradski/{{ city }}/stajaliste/' + slug + '/">{{ _('city_transport.stop_popup_more') }}</a>';
-        html += '</div>';
-        marker.setPopupContent(html);
-      })
-      .catch(function() {});
-  }
+    var stopMarkers = [];
 
-  function loadStops() {
-    var b = map.getBounds();
-    if (map.getZoom() < 14) {
+    function makeEl() {
+      var el = document.createElement('div');
+      el.className = 'stop-marker-dot';
+      el.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="white">'
+        + '<rect x="4" y="3" width="16" height="14" rx="3"/>'
+        + '<path d="M4 12h16" stroke="rgba(255,255,255,.4)" stroke-width="1"/>'
+        + '<circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></svg>';
+      return el;
+    }
+
+    function loadArrivals(slug, name, popup) {
+      fetch('/api/stop-arrivals?slug=' + encodeURIComponent(slug))
+        .then(function(r) { return r.json(); })
+        .then(function(arr) {
+          var html = '<div class="stop-popup"><div class="stop-popup__name">' + name + '</div>';
+          if (arr.length) {
+            html += '<div class="stop-popup__lines">';
+            arr.slice(0, 6).forEach(function(a) {
+              html += '<span class="stop-popup__badge" style="background:' + a.color + '">' + a.line + '</span>';
+            });
+            if (arr.length > 6) html += '<span class="stop-popup__badge" style="background:#94a3b8">+' + (arr.length - 6) + '</span>';
+            html += '</div>';
+          }
+          html += '<a class="stop-popup__more" href="{{ lang_prefix }}/gradski/{{ city }}/stajaliste/' + slug + '/">{{ _("city_transport.stop_popup_more") }}</a></div>';
+          popup.setHTML(html);
+        }).catch(function() {});
+    }
+
+    function loadStops() {
       stopMarkers.forEach(function(m) { m.remove(); });
       stopMarkers = [];
-      return;
+      if (map.getZoom() < 14) return;
+      var b = map.getBounds();
+      fetch('/api/city-stops?sw_lat=' + b.getSouth() + '&sw_lon=' + b.getWest()
+          + '&ne_lat=' + b.getNorth() + '&ne_lon=' + b.getEast())
+        .then(function(r) { return r.json(); })
+        .then(function(stops) {
+          stops.forEach(function(s) {
+            if (!s.lat || !s.lon) return;
+            var popup = new mapboxgl.Popup({ maxWidth: '220px', offset: 14 })
+              .setHTML('<b>' + s.name + '</b>');
+            var marker = new mapboxgl.Marker({ element: makeEl(), anchor: 'center' })
+              .setLngLat([s.lon, s.lat]).setPopup(popup).addTo(map);
+            marker.getElement().addEventListener('click', function() {
+              loadArrivals(s.slug, s.name, popup);
+            });
+            stopMarkers.push(marker);
+          });
+        }).catch(function() {});
     }
-    fetch('/api/city-stops?sw_lat=' + b.getSouth() + '&sw_lon=' + b.getWest()
-        + '&ne_lat=' + b.getNorth() + '&ne_lon=' + b.getEast())
-      .then(function(r) { return r.json(); })
-      .then(function(stops) {
-        stopMarkers.forEach(function(m) { m.remove(); });
-        stopMarkers = [];
-        stops.forEach(function(s) {
-          if (!s.lat || !s.lon) return;
-          var m = L.marker([s.lat, s.lon], { icon: stopIcon })
-            .bindPopup('<b>' + s.name + '</b>', { maxWidth: 200, autoPanPadding: [20, 20] });
-          m.on('click', function() { loadArrivals(s.slug, s.name, m); });
-          m.addTo(map);
-          stopMarkers.push(m);
-        });
-      })
-      .catch(function() {});
-  }
 
-  var moveTimer = null;
-  map.on('moveend', function() {
-    clearTimeout(moveTimer);
-    moveTimer = setTimeout(loadStops, 300);
-  });
-  loadStops();
+    var t = null;
+    map.on('moveend', function() { clearTimeout(t); t = setTimeout(loadStops, 300); });
+    map.on('load', loadStops);
   }
 })();
+</script>
 </script>
 
 <script>

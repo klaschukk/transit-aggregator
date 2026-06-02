@@ -57,16 +57,17 @@ def test_app_css_size_limit(client):
     )
 
 
-def test_no_eager_leaflet_on_map_pages(client):
-    """Guard: map templates must not regress back to render-blocking Leaflet.
-    Lazy pattern loads via dynamic <script> injection; eager pattern uses a
-    static <script src="https://unpkg.com/leaflet..."> tag which would undo
-    the 40KB/200ms savings documented in docs/06_tech/perf-baseline.md."""
+def test_no_eager_map_script_on_map_pages(client):
+    """Guard: map templates must not use render-blocking static script tags.
+    Both Leaflet (old) and Mapbox GL (current) must be loaded via dynamic
+    <script> injection so the library parse stays off the critical path."""
     for url in ("/gradski/beograd/", "/gradski/beograd/linija/linija-2a/"):
         html = client.get(url).data.decode()
-        # Inline JS string references are fine — actual static tag is not.
         assert '<script src="https://unpkg.com/leaflet' not in html, (
-            f"{url} regressed to eager Leaflet <script> tag; use lazy loader"
+            f"{url} regressed to eager Leaflet <script> tag"
+        )
+        assert '<script src="https://api.mapbox.com' not in html, (
+            f"{url} has eager static Mapbox GL tag; must use dynamic injection"
         )
 
 
