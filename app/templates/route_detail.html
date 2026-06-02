@@ -9,7 +9,7 @@
 {% block meta_description %}{{ _('route_detail.meta_prefix') }} {{ _pair_name }}{% if route.distance_km %} ({{ route.distance_km }} km){% endif %}: {% if route.trip_count %}{{ route.trip_count }} {{ _('route_detail.meta_daily') }}{% if price_min %}, {{ _('route_detail.meta_from')|lower }} {{ price_min }} RSD{% endif %}. {% endif %}{% if reviews_agg and reviews_agg.n and reviews_agg.n >= 5 %}{{ reviews_agg.avg }}★ ({{ reviews_agg.n }}). {% endif %}{{ _('route_detail.meta_body') }}{% endblock %}
 
 {% block head_extra %}
-{% if request.args.get('dan') or not trips %}
+{% if request.args.get('dan') %}
 <meta name="robots" content="noindex, follow">
 {% endif %}
 <script type="application/ld+json">
