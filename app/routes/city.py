@@ -1,3 +1,4 @@
+import json as _json
 import threading
 from datetime import datetime
 
@@ -47,7 +48,25 @@ _LINE_SLUG_REDIRECTS: dict[str, dict[str, str]] = {
 }
 _STOP_SLUG_REDIRECTS: dict[str, dict[str, str | None]] = {
     'novi-sad': {
-        'rumenacka-dom-zdravlja': None,  # stop removed upstream → city hub
+        'rumenacka-dom-zdravlja':                    None,
+        'sentandrejski-put-partizanska':             None,
+        'bulevar-mihajla-pupina-pothodnik':          None,
+        'bulevar-slobodana-jovanovica-dom-zdravlja': None,
+        'rumenacki-put-gradsko-groblje':             None,
+        'futoski-put-bulevar-patrijarha-pavla':      None,
+        'temerinska-najlon-pijaca':                  None,
+        'bulevar-evrope-cara-dusana':                None,
+        'bulevar-cara-lazara-dom-zdravlja':          None,
+        'uspenska-safarikova':                       None,
+        'paragovo-iriski-put-2':                     None,
+        'sentandrejski-put-benzinska-pumpa':         None,
+        'bulevar-oslobodjenja-brace-ribnikar':       None,
+        'sentandrejski-put-savska':                  None,
+        'rakovac-3-raskrsnica':                      None,
+        'bulevar-kralja-petra-prvog-sajam':          None,
+        'kac-svetosavska-63':                        None,
+        'sremski-karlovci-karlovacka-gimnazija':     None,
+        'petrovaradin-zeleznicka-stanica':           None,
     },
 }
 
@@ -151,6 +170,11 @@ def city_hub(city: str):
     except Exception:
         pass
 
+    page_context_json = _json.dumps({
+        'type': 'city_transport',
+        'city': city_display,
+        'line_count': len(lines) if lines else 0,
+    }, ensure_ascii=False)
     return render_template('city_transport.html', city=city, lines=lines,
                            stops_with_coords=stops_with_coords,
                            top_stops=top_stops,
@@ -159,7 +183,8 @@ def city_hub(city: str):
                            city_label=city_display,
                            review_slug=review_slug,
                            reviews=reviews_data,
-                           reviews_agg=reviews_aggregate)
+                           reviews_agg=reviews_aggregate,
+                           page_context_json=page_context_json)
 
 
 @city_bp.route('/gradski/<city>/linija/<line_slug>/')
@@ -342,6 +367,14 @@ def line_detail(city: str, line_slug: str):
         pass
 
     og_image_url = f"{current_app.config['BASE_URL']}/og/line/{city}/{line_slug}.png"
+    city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš', 'kragujevac': 'Kragujevac'}
+    page_context_json = _json.dumps({
+        'type': 'line',
+        'city': city_names.get(city, city),
+        'line_number': line.get('number') if line else None,
+        'line_name': line.get('name') if line else None,
+        'stop_count': len(stops) if stops else 0,
+    }, ensure_ascii=False)
     return render_template('line_detail.html', city=city, line=line, stops=stops,
                            schedule=schedule, has_gtfs=has_gtfs,
                            first_dep=first_dep, last_dep=last_dep,
@@ -352,7 +385,8 @@ def line_detail(city: str, line_slug: str):
                            prose=prose,
                            review_slug=review_slug,
                            reviews=reviews_data, reviews_agg=reviews_aggregate,
-                           og_image_url=og_image_url)
+                           og_image_url=og_image_url,
+                           page_context_json=page_context_json)
 
 
 @city_bp.route('/gradski/<city>/stajaliste/<stop_slug>/')
@@ -515,13 +549,21 @@ def stop_detail(city: str, stop_slug: str):
         pass
 
     og_image_url = f"{current_app.config['BASE_URL']}/og/stop/{city}/{stop_slug}.png"
+    city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš', 'kragujevac': 'Kragujevac'}
+    page_context_json = _json.dumps({
+        'type': 'stop',
+        'city': city_names.get(city, city),
+        'stop_name': stop.get('name') if stop else None,
+        'line_count': stop_info.get('line_count') if stop_info else 0,
+    }, ensure_ascii=False)
     return render_template('stop_detail.html', city=city, stop=stop,
                            departures=departures, lines_at_stop=lines_at_stop,
                            nearby_stops=nearby_stops, stop_info=stop_info,
                            prose=prose,
                            review_slug=review_slug,
                            reviews=reviews_data, reviews_agg=reviews_aggregate,
-                           og_image_url=og_image_url)
+                           og_image_url=og_image_url,
+                           page_context_json=page_context_json)
 
 
 # ── Stop prose cache (in-process, 24 h TTL) ─────────────────────────────

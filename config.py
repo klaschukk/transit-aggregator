@@ -40,6 +40,7 @@ class Config:
     TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
     TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '')
     YANDEX_VERIFICATION = os.environ.get('YANDEX_VERIFICATION', '')
+    GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
 
     # Analytics / monetization. IP_HASH_SALT fed into sha256 so stored hashes
     # aren't trivially reversible; rotate it to invalidate historical series.

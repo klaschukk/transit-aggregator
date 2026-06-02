@@ -9,6 +9,12 @@ log "Starting nightly enrich..."
 cd "$DIR"
 source venv/bin/activate
 
+log "Minifying CSS..."
+python -u scripts/minify_css.py 2>&1 | tee -a "$LOG" || log "WARN: minify_css failed"
+
+log "Cleaning OG image cache (>7 days)..."
+find data/cache/og -name "*.png" -mtime +7 -delete 2>/dev/null || true
+
 log "Scraping Niš stops (Overpass OSM)..."
 python -u data/pipelines/scrape_nis_stops.py 2>&1 | tee -a "$LOG" || log "WARN: scrape_nis_stops failed"
 
