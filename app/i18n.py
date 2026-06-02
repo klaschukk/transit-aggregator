@@ -253,14 +253,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     # ── Homepage ──
     'home.title': {
-        'sr': 'Prevozni — red vožnje autobusa i vozova u Srbiji',
-        'en': 'Prevozni — bus and train schedules in Serbia',
-        'ru': 'Prevozni — расписание автобусов и поездов в Сербии',
+        'sr': 'Prevozni — Red Vožnje Srbija 2026: Autobus i Voz',
+        'en': 'Prevozni — Serbia Bus & Train 2026: Schedules & Prices',
+        'ru': 'Prevozni — Автобусы Сербии 2026: Расписание и Цены',
     },
     'home.meta': {
-        'sr': 'Pronađite autobus ili voz između gradova Srbije i Balkana. Red vožnje, cene, prevoznici. Besplatno i bez registracije, u 3 jezika.',
-        'en': 'Find a bus or train between cities in Serbia and the Balkans. Schedules, prices, carriers. Free, no registration, in 3 languages.',
-        'ru': 'Найдите автобус или поезд между городами Сербии и Балкан. Расписание, цены, перевозчики. Бесплатно, без регистрации, на 3 языках.',
+        'sr': 'Autobus i voz između gradova Srbije — red vožnje, cene od 350 din, 500+ ruta. Beograd, Novi Sad, Niš i region. Pronađi besplatno →',
+        'en': 'Bus and train in Serbia 2026 — schedules, prices from 350 RSD, 500+ routes. Belgrade, Novi Sad, Niš. Find for free →',
+        'ru': 'Автобусы и поезда по Сербии 2026 — расписание, цены от 350 din, 500+ маршрутов. Белград, Нови-Сад, Ниш. Бесплатно →',
     },
     'about.title_suffix': {
         'sr': 'Prevozni Srbija, misija i kontakt',
@@ -1091,9 +1091,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     # ── City index ──
     'city_index.title': {
-        'sr': 'Gradski prevoz u Srbiji',
-        'en': 'City transport in Serbia',
-        'ru': 'Городской транспорт Сербии',
+        'sr': 'Gradski Prevoz Srbija — Linije i Red Vožnje',
+        'en': 'City Transport Serbia — Lines & Schedule',
+        'ru': 'Городской Транспорт Сербии — Линии и Расписание',
     },
 
     # ── Carriers / Stations ──
@@ -1871,14 +1871,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     # ── route_index.html ──
     'route_index.title': {
-        'sr': 'Sve međugradske rute u Srbiji',
-        'en': 'All intercity routes in Serbia',
-        'ru': 'Все междугородные маршруты в Сербии',
+        'sr': 'Autobuske Linije Srbija — Red Vožnje i Cene',
+        'en': 'Serbia Bus Routes — Schedules & Prices',
+        'ru': 'Автобусные Маршруты Сербии — Расписание и Цены',
     },
     'route_index.meta': {
-        'sr': 'međugradskih autobuskih ruta u Srbiji. Red vožnje, cene i prevoznici — Beograd, Novi Sad, Niš i drugi gradovi.',
-        'en': 'intercity bus routes in Serbia. Schedules, prices and carriers — Belgrade, Novi Sad, Niš and other cities.',
-        'ru': 'междугородных автобусных маршрутов в Сербии. Расписание, цены и перевозчики — Белград, Нови-Сад, Ниш и другие города.',
+        'sr': 'autobuskih ruta u Srbiji 2026. Red vožnje, cene i prevoznici — Beograd, Novi Sad, Niš i dalje. Pronađi polazak →',
+        'en': 'bus routes in Serbia 2026. Schedules, prices and carriers — Belgrade, Novi Sad, Niš and beyond. Find for free →',
+        'ru': 'автобусных маршрутов в Сербии 2026. Расписание, цены и перевозчики — Белград, Нови-Сад, Ниш. Найди бесплатно →',
     },
     'route_index.h1': {
         'sr': 'Međugradske rute',
@@ -1943,14 +1943,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     # ── carriers_index.html ──
     'carriers.title': {
-        'sr': 'Prevoznici u Srbiji',
-        'en': 'Carriers in Serbia',
-        'ru': 'Перевозчики в Сербии',
+        'sr': 'Autobuski Prevoznici Srbije — Spisak i Kontakti',
+        'en': 'Bus Carriers Serbia — List & Contacts',
+        'ru': 'Перевозчики Сербии — Список и Контакты',
     },
     'carriers.meta': {
-        'sr': 'Lista autobuskih i železničkih prevoznika u Srbiji. Lasta, Niš-Ekspres, Srbija Voz i drugi.',
-        'en': 'List of bus and train carriers in Serbia. Lasta, Niš-Ekspres, Srbija Voz and others.',
-        'ru': 'Список автобусных и железнодорожных перевозчиков в Сербии. Lasta, Niš-Ekspres, Srbija Voz и другие.',
+        'sr': 'Autobuski i železnički prevoznici u Srbiji 2026: Lasta, Niš-Ekspres, Srbija Voz i drugi.',
+        'en': 'Bus and train carriers in Serbia 2026: Lasta, Niš-Ekspres, Srbija Voz and others.',
+        'ru': 'Автобусные и железнодорожные перевозчики Сербии 2026: Lasta, Niš-Ekspres, Srbija Voz и другие.',
     },
     'carriers.h1': {
         'sr': 'Prevoznici',
@@ -2015,14 +2015,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     # ── stations_index.html ──
     'stations.title': {
-        'sr': 'Autobuske i železničke stanice u Srbiji',
-        'en': 'Bus and railway stations in Serbia',
-        'ru': 'Автобусные и железнодорожные станции в Сербии',
+        'sr': 'Autobuske Stanice Srbije — Raspored i Info',
+        'en': 'Serbia Bus Stations — Schedules & Info',
+        'ru': 'Автобусные Станции Сербии — Расписание и Инфо',
     },
     'stations.meta': {
-        'sr': 'Lista autobuskih i železničkih stanica u Srbiji.',
-        'en': 'List of bus and railway stations in Serbia.',
-        'ru': 'Список автобусных и железнодорожных станций в Сербии.',
+        'sr': 'Autobuske i železničke stanice u Srbiji.',
+        'en': 'Bus and railway stations in Serbia.',
+        'ru': 'Автобусные и железнодорожные станции в Сербии.',
     },
     'stations.h1': {
         'sr': 'Autobuske i železničke stanice',
@@ -2035,9 +2035,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'станций',
     },
     'stations.meta_extra': {
-        'sr': 'Adrese, red vožnje i polasci.',
-        'en': 'Addresses, schedules and departures.',
-        'ru': 'Адреса, расписание и отправления.',
+        'sr': 'Adrese, red vožnje i polasci. Proveri pre puta →',
+        'en': 'Addresses, schedules and departures. Check before you travel →',
+        'ru': 'Адреса, расписание и отправления. Проверь перед поездкой →',
     },
     'stations.routes_count': {
         'sr': 'ruta',
@@ -2080,6 +2080,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Linije, stajališta i red vožnje',
         'en': 'Lines, stops and schedules',
         'ru': 'Линии, остановки и расписание',
+    },
+    'city_index.meta_cta': {
+        'sr': 'Pronađi besplatno →',
+        'en': 'Find for free →',
+        'ru': 'Найди бесплатно →',
     },
     'city_index.lines_suffix': {
         'sr': 'linija',
@@ -2342,9 +2347,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Сравните отправления, цены и время в пути. Бесплатно.',
     },
     'line_detail.title': {
-        'sr': 'Red vožnje',
-        'en': 'Schedule',
-        'ru': 'Расписание',
+        'sr': 'Red Vožnje Linije',
+        'en': 'Line Schedule',
+        'ru': 'Расписание Линии',
     },
     'line_detail.title_line_city': {
         'sr': 'stanice i red vožnje',
@@ -2436,9 +2441,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'линий, остановок и отправлений.',
     },
     'city_transport.meta_extra': {
-        'sr': 'Interaktivna mapa stajališta, red vožnje po danima, dolasci uživo. Besplatno.',
-        'en': 'Interactive stops map, schedule by day, live arrivals. Free, no registration.',
-        'ru': 'Интерактивная карта остановок, расписание по дням, прибытия в реальном времени. Бесплатно.',
+        'sr': 'Interaktivna mapa stajališta, red vožnje i dolasci uživo. Besplatno →',
+        'en': 'Interactive stop map, schedules and live arrivals. Free →',
+        'ru': 'Интерактивная карта остановок, расписание и прибытия онлайн. Бесплатно →',
     },
     'city_transport.stop_popup_more': {
         'sr': 'Polasci →',
