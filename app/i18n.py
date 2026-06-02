@@ -519,7 +519,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'home.valueprop_free': {
         'sr': 'Besplatno',
         'en': 'Free',
-        'ru': 'Бесплатно',
+        'ru': 'бесплатно',
     },
     'ads.label': {
         'sr': 'Reklama',
