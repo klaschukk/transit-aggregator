@@ -40,6 +40,9 @@ _LINE_SLUG_REDIRECTS: dict[str, dict[str, str]] = {
     'beograd': {
         'linija-31l': 'linija-31',   # 31Л variant merged into regular 31
         'linija-6a':  'linija-6',    # 6А variant merged into regular 6
+        'linija-29l': 'linija-29',   # 29Л variant merged into regular 29
+        'linija-12l': 'linija-12',   # 12Л variant merged into regular 12
+        'linija-28a': 'linija-28',   # 28А variant merged into regular 28
     },
 }
 _STOP_SLUG_REDIRECTS: dict[str, dict[str, str | None]] = {

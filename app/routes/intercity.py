@@ -12,11 +12,72 @@ intercity_bp = Blueprint('intercity', __name__)
 # 404 cuts removal time roughly in half: Google retries 404s for
 # months, but treats 410 as a hard signal to drop the URL.
 _LEGACY_GONE_INTERCITY = frozenset({
+    # originally listed
     'budva-kragujevac', 'budva-novi-pazar', 'cacak-budva',
     'cacak-herceg-novi', 'kotor-kragujevac', 'kotor-novi-pazar',
     'podgorica-cacak', 'podgorica-krusevac', 'sarajevo-cacak',
     'sarajevo-novi-pazar', 'split-beograd', 'uzice-herceg-novi',
+    # single city names (never valid route slugs)
+    'beograd', 'nis', 'novi-sad', 'kragujevac', 'kotor', 'budva', 'niksic',
+    'mostar', 'ohrid', 'skoplje', 'skopje', 'stip', 'sofija', 'zenica',
+    'sarajevo', 'temerin', 'senta', 'sombor', 'pula', 'rijeka', 'zadar',
+    'trebinje', 'bitolj', 'indija', 'becej', 'krusevac', 'lazarevac',
+    'jagodina', 'loznica', 'mladenovac', 'obrenovac', 'pancevo', 'pozarevac',
+    'smederevo', 'stara-pazova', 'subotica', 'valjevo', 'uzice', 'leskovac',
+    'gornji-milanovac', 'bor', 'ivanjica', 'backa-palanka', 'nonexistent-route',
+    # international pairs not in DB
+    'beograd-istanbul', 'beograd-budapest', 'beograd-thessaloniki',
+    'beograd-split', 'beograd-vienna', 'beograd-frankfurt', 'beograd-munich',
+    'beograd-bucharest', 'beograd-niksic', 'beograd-rijeka', 'beograd-dubrovnik',
+    'beograd-trebinje', 'beograd-ulcinj', 'beograd-tivat', 'beograd-timisoara',
+    'beograd-zagreb', 'beograd-solun', 'beograd-bar',
+    'novi-sad-budapest', 'novi-sad-vienna', 'novi-sad-zagreb',
+    'skoplje-solun', 'skopje-ohrid', 'ohrid-skopje',
+    'budapest-beograd', 'budapest-vienna', 'budapest-zagreb',
+    'zagreb-budapest', 'zagreb-split', 'zagreb-beograd', 'zagreb-osijek',
+    'zagreb-ljubljana', 'ljubljana-zagreb', 'osijek-dubrovnik', 'osijek-zagreb',
+    'dubrovnik-split', 'thessaloniki-beograd', 'thessaloniki-skopje',
+    'thessaloniki-sofia', 'sofia-skopje', 'timisoara-beograd',
+    'tivat-beograd', 'vienna-beograd', 'rijeka-beograd',
+    'cacak-mostar', 'cacak-podgorica', 'cacak-sarajevo', 'cacak-kotor',
+    'mostar-cacak', 'mostar-uzice', 'ivanjica-uzice',
+    'budva-cacak', 'budva-kraljevo', 'budva-uzice', 'budva-banja-luka',
+    'herceg-novi-banja-luka', 'herceg-novi-cacak', 'herceg-novi-kragujevac',
+    'herceg-novi-kraljevo', 'herceg-novi-novi-pazar', 'herceg-novi-uzice',
+    'kotor-cacak', 'kotor-banja-luka', 'kotor-kraljevo', 'kotor-uzice',
+    'kotor-mostar',
+    'novi-pazar-budva', 'novi-pazar-herceg-novi', 'novi-pazar-istanbul',
+    'novi-pazar-kotor', 'novi-pazar-podgorica', 'novi-pazar-sarajevo',
+    'podgorica-banja-luka', 'podgorica-kragujevac', 'podgorica-kraljevo',
+    'podgorica-mostar', 'podgorica-novi-pazar', 'podgorica-uzice',
+    'sarajevo-subotica', 'sarajevo-uzice',
+    'skoplje', 'solun', 'bar-beograd',
+    'krusevac-podgorica', 'kragujevac-budva', 'kragujevac-herceg-novi',
+    'kragujevac-kotor', 'kragujevac-podgorica',
+    'kraljevo-budva', 'kraljevo-herceg-novi', 'kraljevo-kotor', 'kraljevo-podgorica',
+    'uzice-budva', 'uzice-kotor', 'uzice-mostar', 'uzice-podgorica', 'uzice-sarajevo',
+    'subotica-budapest', 'subotica-szeged',
+    'istanbul-novi-pazar', 'nis-istanbul',
 })
+
+# Spelling/alias redirects for routes Google indexed under old slug formats.
+# These are checked before the DB lookup so no extra query is needed on miss.
+_ROUTE_SLUG_REDIRECTS: dict[str, str] = {
+    # English city names → Serbian slugs in DB
+    'beograd-skopje':    'beograd-skoplje',
+    'beograd-sofia':     'beograd-sofija',
+    'nis-sofia':         'nis-sofija',
+    'nis-skopje':        'nis-skoplje',
+    'nis-thessaloniki':  'nis-solun',
+    # reverse slugs → canonical forward direction
+    'solun-nis':         'nis-solun',
+    'atina-nis':         'nis-atina',
+    'atina-novi-sad':    'novi-sad-atina',
+    'skopje-beograd':    'beograd-skoplje',
+    'sofia-beograd':     'beograd-sofija',
+    'solun-novi-sad':    'novi-sad-solun',
+    'skopje-nis':        'nis-skoplje',
+}
 
 
 @intercity_bp.route('/rute/')
@@ -78,6 +139,12 @@ def route_detail(slug: str):
         # Non-ASCII legacy URLs → 410 Gone (faster Google removal than 404).
         if not slug.isascii():
             abort(410)
+        # Spelling/alias redirects (e.g. beograd-skopje → beograd-skoplje).
+        if slug in _ROUTE_SLUG_REDIRECTS:
+            return redirect(
+                url_for('intercity.route_detail', slug=_ROUTE_SLUG_REDIRECTS[slug]),
+                code=301,
+            )
         # Known-dead slugs Google has memorised from a prior sitemap.
         if slug in _LEGACY_GONE_INTERCITY:
             abort(410)
