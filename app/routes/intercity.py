@@ -1,3 +1,4 @@
+import json as _json
 from datetime import date, timedelta
 
 from flask import Blueprint, render_template, abort, request, redirect, url_for, current_app
@@ -216,6 +217,15 @@ def route_detail(slug: str):
     reviews_agg = analytics_db.aggregate_rating(slug)
 
     og_image_url = f"{current_app.config['BASE_URL']}/og/route/{slug}.png"
+    page_context_json = _json.dumps({
+        'type': 'route',
+        'from': route['from_city'],
+        'to': route['to_city'],
+        'trips': route.get('trip_count'),
+        'price_min': price_min,
+        'operators': (operators_on_route or [])[:3],
+        'distance_km': route.get('distance_km'),
+    }, ensure_ascii=False)
     return render_template('route_detail.html', route=route, trips=trips,
                            days=days, selected_day=selected_day,
                            similar_routes=similar_routes,
@@ -225,7 +235,8 @@ def route_detail(slug: str):
                            price_min=price_min, price_max=price_max,
                            reverse_slug=reverse_slug,
                            reviews=reviews_list, reviews_agg=reviews_agg,
-                           og_image_url=og_image_url)
+                           og_image_url=og_image_url,
+                           page_context_json=page_context_json)
 
 
 @intercity_bp.route('/voznja/<from_city>-do-<to_city>/')
@@ -337,13 +348,25 @@ def city_pair(from_city: str, to_city: str):
     destination_country = country_hub_for_city(route['to_city']) if route else None
 
     og_image_url = f"{current_app.config['BASE_URL']}/og/voznja/{from_city}-do-{to_city}.png"
+    _fc = from_city.replace('-', ' ').title()
+    _tc = to_city.replace('-', ' ').title()
+    page_context_json = _json.dumps({
+        'type': 'city_pair',
+        'from': _fc,
+        'to': _tc,
+        'trips': route.get('trip_count') if route else None,
+        'price_min': route.get('min_price_rsd') if route else None,
+        'operators': (route_info.get('operators') or [])[:3] if route_info else [],
+        'distance_km': route.get('distance_km') if route else None,
+    }, ensure_ascii=False)
     return render_template('city_pair.html',
                            route=route, trips=trips, route_info=route_info,
                            related_pairs=related_pairs,
                            onward_pairs=onward_pairs,
                            destination_country=destination_country,
-                           from_city=from_city.replace('-', ' ').title(),
-                           to_city=to_city.replace('-', ' ').title(),
+                           from_city=_fc,
+                           to_city=_tc,
                            reviews=reviews_list, reviews_agg=reviews_agg,
                            review_route_slug=canonical_slug,
-                           og_image_url=og_image_url)
+                           og_image_url=og_image_url,
+                           page_context_json=page_context_json)
