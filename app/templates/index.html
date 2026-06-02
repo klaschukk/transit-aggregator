@@ -55,20 +55,50 @@
     <p class="hero__sub" data-ab-hero-sub="{{ _hero_variant }}">
       {{ _('home.hero_sub_' ~ _hero_variant) }}
     </p>
-    <div class="hero__form">
-      {% from '_partials/_search_form.html' import search_form with context %}
-      {{ search_form(t={'from': _('home.search_from'), 'to': _('home.search_to'), 'btn': _('home.search_btn')}, prefix=lang_prefix) }}
+    <div class="hero__search-wrap">
+      <div class="hero__tabs" role="tablist">
+        <button class="hero__tab hero__tab--active" role="tab" aria-selected="true" data-panel="hero-panel-intercity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" aria-hidden="true"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+          {{ _('city.intercity') }}
+        </button>
+        <button class="hero__tab" role="tab" aria-selected="false" data-panel="hero-panel-city">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          {{ _('nav.city_transport') }}
+        </button>
+      </div>
+
+      <div id="hero-panel-intercity" class="hero__panel" role="tabpanel">
+        <div class="hero__form">
+          {% from '_partials/_search_form.html' import search_form with context %}
+          {{ search_form(t={'from': _('home.search_from'), 'to': _('home.search_to'), 'btn': _('home.search_btn')}, prefix=lang_prefix) }}
+        </div>
+        {% if popular_routes %}
+        <div class="hero__quick-links" aria-label="{{ _('home.quick_links_aria') }}">
+          <span class="hero__quick-label">{{ _('home.quick_label') }}</span>
+          {% for r in popular_routes[:6] %}
+          <a href="{{ lang_prefix }}/rute/{{ r.slug }}/" class="hero__quick-chip">
+            {{ r.from_city }} → {{ r.to_city }}
+          </a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <div id="hero-panel-city" class="hero__panel" role="tabpanel" hidden>
+        <div class="hero__city-grid">
+          {% for c in cities_data %}
+          <a href="{{ lang_prefix }}/gradski/{{ c.city }}/" class="hero__city-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            <div class="hero__city-info">
+              <span class="hero__city-name">{{ c.label }}</span>
+              <span class="hero__city-meta">{{ c.line_count }} {{ _('common.lines') }}</span>
+            </div>
+            <svg class="hero__city-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M3 8h10m-4-4l4 4-4 4"/></svg>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
     </div>
-    {% if popular_routes %}
-    <div class="hero__quick-links" aria-label="{{ _('home.quick_links_aria') }}">
-      <span class="hero__quick-label">{{ _('home.quick_label') }}</span>
-      {% for r in popular_routes[:6] %}
-      <a href="{{ lang_prefix }}/rute/{{ r.slug }}/" class="hero__quick-chip">
-        {{ r.from_city }} → {{ r.to_city }}
-      </a>
-      {% endfor %}
-    </div>
-    {% endif %}
     {# Mobile-only value-prop strip (hidden ≥768px via app.mobile.css scoping). #}
     <div class="hero__valueprop" aria-label="{{ _('home.valueprop_aria') }}">
       <span><b>{{ stats.routes }}+</b> {{ _('common.routes') }}</span>
@@ -251,32 +281,25 @@
   </div>
 </section>
 
-<!-- ═══════ BENEFITS ═══════ -->
-<section class="home-benefits">
-  <div class="container">
-    <div class="home-benefits__grid">
-      <div class="home-benefits__item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <div class="home-benefits__label">{{ _('benefits.free') }}</div>
-        <div class="home-benefits__desc">{{ _('benefits.free_desc') }}</div>
-      </div>
-      <div class="home-benefits__item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path d="M12 22s8-7 8-13a8 8 0 10-16 0c0 6 8 13 8 13z"/><circle cx="12" cy="9" r="2.5"/></svg>
-        <div class="home-benefits__label">{{ _('benefits.mobile') }}</div>
-        <div class="home-benefits__desc">{{ _('benefits.mobile_desc') }}</div>
-      </div>
-      <div class="home-benefits__item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        <div class="home-benefits__label">{{ _('benefits.realtime') }}</div>
-        <div class="home-benefits__desc">{{ _('benefits.realtime_desc') }}</div>
-      </div>
-      <div class="home-benefits__item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        <div class="home-benefits__label">{{ _('benefits.allinone') }}</div>
-        <div class="home-benefits__desc">{{ _('benefits.allinone_desc') }}</div>
-      </div>
-    </div>
-  </div>
-</section>
+{% endblock %}
 
+{% block scripts %}
+<script>
+(function() {
+  var tabs = document.querySelectorAll('.hero__tab');
+  if (!tabs.length) return;
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      tabs.forEach(function(t) {
+        t.classList.remove('hero__tab--active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      document.querySelectorAll('.hero__panel').forEach(function(p) { p.hidden = true; });
+      tab.classList.add('hero__tab--active');
+      tab.setAttribute('aria-selected', 'true');
+      document.getElementById(tab.dataset.panel).hidden = false;
+    });
+  });
+})();
+</script>
 {% endblock %}
