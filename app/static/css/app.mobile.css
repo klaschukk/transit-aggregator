@@ -936,4 +936,17 @@ body { padding-bottom: var(--m-bnav-h); }
 .chat-widget { bottom: calc(var(--m-bnav-h, 48px) + 16px); right: 12px; left: 12px; align-items: flex-end; }
 .chat-box { width: 100%; max-height: 70vh; }
 
+/* ── Focus-visible on colored mobile surfaces ──────────────────────
+   The global teal :focus-visible outline (app.css) disappears against
+   the primary-coloured FAB, sticky CTA and active language pill. Use a
+   high-contrast white ring there so keyboard focus stays visible on
+   touch devices paired with a keyboard. */
+.m-fab:focus-visible,
+.m-sticky-cta__btn:focus-visible,
+.m-sticky-cta__close:focus-visible,
+.lang-pill__item--active:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
 } /* end @media (max-width: 767px) */
