@@ -279,6 +279,8 @@
    right after so readers reaching this scroll depth are still engaged. #}
 {% from '_partials/_ad_slot.html' import ad_slot with context %}
 {{ ad_slot('route_bottom', format='leaderboard') }}
+{% from '_partials/_bookaway_ad.html' import bookaway_ads with context %}
+{{ bookaway_ads('route-detail') }}
 
 <!-- Reviews (UGC) — below the prose block, above similar routes -->
 {# A/B Exp 5: review_cta_v1 — placement of the "leave a review" CTA.

@@ -56,6 +56,72 @@
     </div>
   </div>
 
+  {% if ba_api %}
+  <h2>Bookaway API — official stats · {{ ba_api.window_days }} days</h2>
+  <div class="kpis">
+    <div class="kpi">
+      <div class="kpi__v">{{ ba_api.summary.clicks }}</div>
+      <div class="kpi__l">Clicks (Bookaway-counted)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__v">{{ ba_api.summary.conversions }}</div>
+      <div class="kpi__l">Conversions</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__v">${{ '%.2f'|format(ba_api.summary.payout) }}</div>
+      <div class="kpi__l">Payout earned</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__v">{{ '%.2f'|format(ba_api.summary.cr) }}%</div>
+      <div class="kpi__l">Conversion rate</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__v">${{ '%.4f'|format(ba_api.summary.epc) }}</div>
+      <div class="kpi__l">EPC (earnings/click)</div>
+    </div>
+  </div>
+
+  {% if ba_api.summary.clicks and not ba_api.summary.conversions %}
+  <div class="empty" style="background:#fef2f2;color:#b91c1c;border-radius:10px;font-style:normal;">
+    <strong>{{ ba_api.summary.clicks }} clicks, 0 conversions.</strong>
+    Klikovi na "Kupi" idu, ali nijedna kupovina nije pripisana. Proveri da li je
+    postback/pixel za konverzije podešen u Bookaway panelu (Tools → Pixels/Postbacks),
+    i da deep-linkovi vode na stranicu gde se kupovina zaista završava.
+  </div>
+  {% endif %}
+
+  <h2>Bookaway API — daily payout &amp; conversions</h2>
+  {% if ba_api.daily %}
+  <table>
+    <thead><tr><th>Day</th><th>Clicks</th><th>Conversions</th><th>Payout</th></tr></thead>
+    <tbody>
+      {% for d in ba_api.daily|reverse %}
+      <tr><td>{{ d.day }}</td><td>{{ d.clicks }}</td><td>{{ d.conversions }}</td><td>${{ '%.2f'|format(d.payout) }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">No API rows for this window.</div>
+  {% endif %}
+
+  <h2>Bookaway API — available offers</h2>
+  {% if ba_api.offers %}
+  <table>
+    <thead><tr><th>ID</th><th>Name</th><th>Payout</th><th>Type</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for o in ba_api.offers %}
+      <tr><td>{{ o.id }}</td><td>{{ o.name }}</td><td>{{ o.payout }}</td><td>{{ o.payout_type }}</td><td><span class="surface">{{ o.status }}</span></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">No offers returned.</div>
+  {% endif %}
+  {% else %}
+  <h2>Bookaway API</h2>
+  <div class="empty">API key not configured — set <code>BOOKAWAY_API_KEY</code> to show live conversions &amp; payout.</div>
+  {% endif %}
+
   <h2>Daily clicks (last 30 days)</h2>
   {% if daily %}
   <div class="chart" aria-label="Daily bookaway clicks">

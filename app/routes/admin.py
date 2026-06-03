@@ -76,7 +76,7 @@ def dashboard():
     top_routes = analytics_db.query("""
         SELECT route_slug, COUNT(*) AS clicks
         FROM ba_clicks
-        WHERE ts >= CURRENT_TIMESTAMP - INTERVAL '7 days'
+        WHERE julianday(ts) >= julianday('now') - 7
           AND route_slug != ''
         GROUP BY route_slug ORDER BY clicks DESC LIMIT 7
     """)
@@ -113,7 +113,7 @@ def revenue():
     top_routes_7 = analytics_db.query("""
         SELECT route_slug, surface, COUNT(*) AS clicks
         FROM ba_clicks
-        WHERE ts >= CURRENT_TIMESTAMP - INTERVAL '7 days'
+        WHERE julianday(ts) >= julianday('now') - 7
           AND route_slug != ''
         GROUP BY route_slug, surface
         ORDER BY clicks DESC
@@ -122,7 +122,7 @@ def revenue():
     top_routes_30 = analytics_db.query("""
         SELECT route_slug, surface, COUNT(*) AS clicks
         FROM ba_clicks
-        WHERE ts >= CURRENT_TIMESTAMP - INTERVAL '30 days'
+        WHERE julianday(ts) >= julianday('now') - 30
           AND route_slug != ''
         GROUP BY route_slug, surface
         ORDER BY clicks DESC
@@ -132,23 +132,39 @@ def revenue():
     by_surface_30 = analytics_db.query("""
         SELECT COALESCE(NULLIF(surface, ''), 'unknown') AS surface, COUNT(*) AS clicks
         FROM ba_clicks
-        WHERE ts >= CURRENT_TIMESTAMP - INTERVAL '30 days'
+        WHERE julianday(ts) >= julianday('now') - 30
         GROUP BY surface
         ORDER BY clicks DESC
     """)
 
     daily = analytics_db.query("""
-        SELECT CAST(ts AS DATE) AS day, COUNT(*) AS clicks
+        SELECT date(ts) AS day, COUNT(*) AS clicks
         FROM ba_clicks
-        WHERE ts >= CURRENT_TIMESTAMP - INTERVAL '30 days'
+        WHERE julianday(ts) >= julianday('now') - 30
         GROUP BY day
         ORDER BY day
     """)
+
+    # date(ts) returns an ISO string in SQLite; parse to a date so the
+    # template's strftime keeps working.
+    from datetime import date as _date
+    for r in daily:
+        if isinstance(r.get('day'), str):
+            try:
+                r['day'] = _date.fromisoformat(r['day'])
+            except ValueError:
+                pass
 
     # Normalise for the bar chart: max daily for sizing bars.
     max_daily = max((r['clicks'] for r in daily), default=1) or 1
     for r in daily:
         r['pct'] = int((r['clicks'] / max_daily) * 100)
+
+    # Real Bookaway numbers (clicks/conversions/payout) from the affiliate API.
+    # None when no key is configured or the API is unreachable — the template
+    # then shows a "not configured" hint instead of failing.
+    from app.affiliates import bookaway_api
+    ba_api = bookaway_api.get_dashboard(30)
 
     return render_template(
         'admin/revenue.html',
@@ -158,6 +174,7 @@ def revenue():
         top_routes_30=top_routes_30,
         by_surface_30=by_surface_30,
         daily=daily,
+        ba_api=ba_api,
     )
 
 
@@ -166,7 +183,7 @@ def _total_clicks_since(days: int) -> int:
     # we control, not user input.
     days = max(1, int(days))
     rows = analytics_db.query(
-        f"SELECT COUNT(*) AS c FROM ba_clicks WHERE ts >= CURRENT_TIMESTAMP - INTERVAL '{days} days'"
+        f"SELECT COUNT(*) AS c FROM ba_clicks WHERE julianday(ts) >= julianday('now') - {days}"
     )
     return rows[0]['c'] if rows else 0
 
@@ -257,7 +274,7 @@ def price_alerts():
     by_day = analytics_db.query(
         "SELECT CAST(sent_at AS DATE) AS day, COUNT(*) AS c "
         "FROM price_alerts_sent "
-        "WHERE sent_at >= CURRENT_TIMESTAMP - INTERVAL '30 days' "
+        "WHERE julianday(sent_at) >= julianday('now') - 30 "
         "GROUP BY day ORDER BY day DESC"
     )
     return render_template(

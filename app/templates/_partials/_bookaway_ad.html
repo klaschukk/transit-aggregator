@@ -1,0 +1,25 @@
+{# Bookaway (HasOffers) ad-group slot.
+
+   Renders one ad slot per campaign id in config.BOOKAWAY_AD_CAMPAIGNS
+   (e.g. "386,387"). Off entirely when that config is empty, so the public
+   site stays clean until the ad groups have active creatives in the Bookaway
+   panel. Reuses the existing .ad-slot styling for visual consistency with
+   the AdSense slots. This is a separate ad network from AdSense, so the two
+   are independent — whichever is configured renders.
+
+   Usage:  {% from "_partials/_bookaway_ad.html" import bookaway_ads with context %}
+           {{ bookaway_ads('route-detail') }} #}
+{%- macro bookaway_ads(surface='') -%}
+{%- set campaigns = (config.BOOKAWAY_AD_CAMPAIGNS or '').split(',') | map('trim') | select | list -%}
+{%- if campaigns -%}
+{%- set net = config.BOOKAWAY_NETWORK_ID or 'bookaway2' -%}
+{%- set aff = config.BOOKAWAY_AFF_ID or '4033' -%}
+<aside class="ad-slot ad-slot--leaderboard ba-ad" data-surface="{{ surface }}">
+  <span class="ad-slot__label">{{ _('ads.label') }}</span>
+  {%- for c in campaigns %}
+  <div id="ba-ad-{{ c }}" class="ba-ad__slot"></div>
+  <script src="https://{{ net }}.go2cloud.org/aff_ad?campaign_id={{ c }}&aff_id={{ aff }}&format=js&divid=ba-ad-{{ c }}" type="text/javascript"></script>
+  {%- endfor %}
+</aside>
+{%- endif -%}
+{%- endmacro -%}
