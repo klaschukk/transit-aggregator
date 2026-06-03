@@ -1430,21 +1430,32 @@ def ads_txt():
 
 # ── AI Chat widget ────────────────────────────────────────────────────────────
 
-_CHAT_SYSTEM = """Ti si pomoćnik na sajtu Prevozni.com — besplatnom agregatu javnog prevoza u Srbiji.
+# Groq is fronted by Cloudflare, which 403s requests whose User-Agent looks
+# like a bot (the urllib default "Python-urllib/x.y" is blocked). A plain
+# product UA passes — without it every chat call fails and the widget hangs.
+_CHAT_UA = 'PrevozniBot/1.0 (+https://prevozni.com)'
+# 70B model: noticeably sharper answers than 8b-instant, still fast on Groq.
+_CHAT_MODEL = 'llama-3.3-70b-versatile'
 
-Šta znaš:
-- Međugradski autobusi i vozovi: 517 ruta, 2777 polazaka, 66 prevoznika (Lasta, Niš-Ekspres, Srbija Voz itd.)
-- Gradski prevoz: Beograd (514 linija), Novi Sad (61), Niš (53), Kragujevac (23)
-- Cene karata, vremena polazaka, operateri, trajanje putovanja
-- URL struktura: /rute/{slug}/ za međugradske, /voznja/{od}-do-{do}/ za parove gradova,
-  /gradski/{grad}/ za gradski prevoz, /pretraga/?od=X&do=Y za pretragu
+_CHAT_SYSTEM = """Ti si AI pomoćnik na sajtu Prevozni.com — besplatnom agregatu javnog prevoza u Srbiji (međugradski autobusi i vozovi + gradski prevoz).
+
+Šta sajt pokriva:
+- Međugradske rute autobusa i vozova širom Srbije, sa cenama karata, vremenima polazaka, prevoznicima (Lasta, Niš-Ekspres, Srbija Voz, BusTicket4.me itd.) i trajanjem putovanja.
+- Gradski prevoz: Beograd, Novi Sad, Niš i Kragujevac — linije, stajališta i procene dolaska.
+- Međunarodne linije ka Crnoj Gori, BiH, Hrvatskoj, Sloveniji, Makedoniji, Turskoj.
+
+Kako da uputiš korisnika (uvek daj koristan sledeći korak — link ili putanju):
+- Konkretna ruta između dva grada → /voznja/{od}-do-{do}/ (npr. /voznja/beograd-do-novi-sad/).
+- Pretraga polazaka → /pretraga/?od=GRAD&do=GRAD.
+- Gradski prevoz nekog grada → /gradski/{grad}/.
+- Spisak svih ruta → /rute/.
 
 Pravila:
-- Govori jezikom korisnika (srpski/engleski/ruski)
-- Budi kratak i konkretan — maksimalno 3 recenице
-- Ako korisnik pita o konkretnoj ruti ili liniji, koristi podatke iz konteksta stranice
-- Ne izmisljaj cene ni vremena — samo opisuj sta sajt nudi
-- Ne pominjaj konkurentske sajtove"""
+- NAJVAŽNIJE: odgovori na ISTOM jeziku na kojem je poslednja poruka korisnika. Engleski upit → odgovor na engleskom. Ruski upit → odgovor na ruskom. Srpski upit → odgovor na srpskom. Nikada ne menjaj jezik korisnika.
+- Budi kratak, ljubazan i konkretan: 1–3 rečenice + relevantan link/putanja.
+- Ako u kontekstu stranice ima podataka (broj polazaka, cena, prevoznici), koristi ih; inače uputi korisnika na odgovarajuću stranicu.
+- Nikad ne izmišljaj tačne cene, vremena ili polaske kojih nema u kontekstu — radije reci gde da ih proveri.
+- Ne spominji konkurentske sajtove. Ostani u temi prevoza u Srbiji."""
 
 
 def _chat_session_key() -> str:
@@ -1482,7 +1493,7 @@ def api_chat():
 
     import urllib.request as _ur
     payload = _json.dumps({
-        'model': 'llama-3.1-8b-instant',
+        'model': _CHAT_MODEL,
         'messages': [{'role': 'system', 'content': system}] + safe,
         'max_tokens': 350,
         'temperature': 0.6,
@@ -1496,6 +1507,7 @@ def api_chat():
             'Authorization': f'Bearer {api_key}',
             'Content-Type': 'application/json',
             'Accept': 'text/event-stream',
+            'User-Agent': _CHAT_UA,
         },
         method='POST',
     )

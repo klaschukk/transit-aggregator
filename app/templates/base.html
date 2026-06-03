@@ -882,6 +882,25 @@ if ('serviceWorker' in navigator) {
     d.appendChild(s);
     msgs.appendChild(d);
     msgs.scrollTop=msgs.scrollHeight;
+    return s;
+  }
+
+  /* Render assistant text safely: turn internal links into clickable
+     anchors (markdown [label](/path) and bare /paths), everything else
+     stays plain text. Only same-site paths starting with "/" are linked —
+     never external URLs — so there is no injection surface. */
+  function renderBot(span,text){
+    span.textContent='';
+    var re=/\[([^\]]+)\]\((\/[^)\s]*)\)|(\/[A-Za-z0-9][\w\-\/?=&%.]*)/g;
+    var last=0,m;
+    while((m=re.exec(text))){
+      if(m.index>last)span.appendChild(document.createTextNode(text.slice(last,m.index)));
+      var href=m[2]||m[3];var label=m[1]||m[3];
+      var a=document.createElement('a');a.href=href;a.textContent=label;
+      span.appendChild(a);
+      last=re.lastIndex;
+    }
+    if(last<text.length)span.appendChild(document.createTextNode(text.slice(last)));
   }
 
   function setTyping(on){
@@ -915,7 +934,7 @@ if ('serviceWorker' in navigator) {
       var reader=r.body.getReader();var decoder=new TextDecoder();var buf='';
       function read(){
         reader.read().then(function(chunk){
-          if(chunk.done){history.push({role:'assistant',content:fullText});input.disabled=false;input.focus();return;}
+          if(chunk.done){if(fullText)renderBot(botSpan,fullText);history.push({role:'assistant',content:fullText});input.disabled=false;input.focus();return;}
           buf+=decoder.decode(chunk.value,{stream:true});
           var lines=buf.split('\n');buf=lines.pop();
           lines.forEach(function(line){
