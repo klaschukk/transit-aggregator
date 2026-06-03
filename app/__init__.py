@@ -49,6 +49,18 @@ def create_app(config_name: str | None = None) -> Flask:
 
     if config_name is None:
         config_name = os.environ.get('FLASK_ENV', 'default')
+    # Defensive: a malformed unit/.env can leak the literal "FLASK_ENV=production"
+    # into the value (double assignment), which crashed every gunicorn worker on
+    # boot with KeyError → site-wide 5xx. Recover the real name instead of dying.
+    if config_name not in config_map:
+        recovered = config_name.split('=')[-1].strip()
+        if recovered in config_map:
+            logger.warning("Malformed FLASK_ENV %r; recovered as %r", config_name, recovered)
+            config_name = recovered
+        else:
+            fallback = 'production' if 'production' in config_map else 'default'
+            logger.error("Unknown FLASK_ENV %r; falling back to %r", config_name, fallback)
+            config_name = fallback
     app.config.from_object(config_map[config_name])
 
     # Trust nginx's X-Forwarded-* headers so request.is_secure / request.remote_addr
