@@ -397,7 +397,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 
 /* Section */
 .section { margin-bottom: 32px; }
-.section__title { margin-bottom: 16px; font-size: var(--text-lg); }
+.section__title { margin-bottom: 16px; font-size: var(--text-xl); }
 
 /* Breadcrumb */
 .breadcrumb {
@@ -1018,7 +1018,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   margin-top: 40px;
 }
 .home-section:first-of-type { border-top: none; margin-top: 0; }
-.home-section__title { font-size: var(--text-lg); margin-bottom: 20px; }
+.home-section__title { font-size: var(--text-xl); margin-bottom: 20px; }
 
 /* How it works */
 .how-it-works {
@@ -1434,7 +1434,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   flex-shrink: 0;
 }
 .seo-block__content { flex: 1; min-width: 0; }
-.seo-block h2 { font-size: var(--text-base); margin-bottom: 8px; }
+.seo-block h2 { font-size: var(--text-xl); margin-bottom: 8px; }
 .seo-block p { font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.6; margin: 0; }
 /* Three-paragraph rules-based prose on /gradski/{city}/linija/{slug}/.
    Adds vertical rhythm between the geography / schedule / transfers
@@ -1828,7 +1828,7 @@ main { animation: fadeInUp .25s ease both; }
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: var(--text-base);
+  font-size: var(--text-lg);
   font-weight: 700;
   margin-bottom: 12px;
   color: var(--color-text);
@@ -1894,7 +1894,7 @@ main { animation: fadeInUp .25s ease both; }
   flex-shrink: 0;
 }
 .about-mission__text h2 {
-  font-size: var(--text-lg);
+  font-size: var(--text-xl);
   margin-bottom: 8px;
 }
 .about-mission__text p {
@@ -2220,7 +2220,7 @@ main { animation: fadeInUp .25s ease both; }
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: var(--text-base);
+  font-size: var(--text-lg);
   font-weight: 700;
   margin-bottom: 12px;
   color: var(--color-text);
@@ -2641,7 +2641,7 @@ html.ccy-eur span.ccy-eur { display: inline; }
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: var(--text-lg);
+  font-size: var(--text-xl);
   font-weight: 800;
   margin-bottom: 12px;
   padding-bottom: 8px;
@@ -2756,7 +2756,7 @@ select:focus-visible, textarea:focus-visible {
   border-top: 1px solid var(--color-border);
 }
 .reviews__title {
-  font-size: 1.15rem;
+  font-size: var(--text-xl);
   margin: 0 0 8px;
 }
 .reviews__summary {

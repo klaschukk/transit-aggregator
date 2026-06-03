@@ -41,6 +41,13 @@ h2 {
   line-height: 1.25;
 }
 h3 { font-size: var(--mtext-lg); font-weight: 700; line-height: 1.3; }
+/* Section-title hierarchy — mirror the desktop bump on the mobile scale
+   so section H2s clear body text (they were flat at ~16px before). */
+.seo-block h2, .section__title, .home-section__title,
+.about-mission__text h2, .reviews__title, .station-group__title {
+  font-size: var(--mtext-xl);
+}
+.stop-lines__title, .see-also__title { font-size: var(--mtext-lg); }
 .page-subtitle {
   font-size: var(--mtext-sm);
   color: var(--color-text-muted);
