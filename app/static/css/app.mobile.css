@@ -932,4 +932,8 @@ body { padding-bottom: var(--m-bnav-h); }
    over the drawer's tap targets. */
 .m-nav-open .m-bnav { transform: translateY(120%); }
 
+/* AI chat widget: full-width panel, lifted above the bottom nav bar. */
+.chat-widget { bottom: calc(var(--m-bnav-h, 48px) + 16px); right: 12px; left: 12px; align-items: flex-end; }
+.chat-box { width: 100%; max-height: 70vh; }
+
 } /* end @media (max-width: 767px) */
