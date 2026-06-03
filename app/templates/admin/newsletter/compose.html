@@ -17,9 +17,10 @@
   .nl-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 24px; }
   .nl-validate { background: var(--color-bg-alt); padding: 12px 16px; border-radius: 8px; margin-top: 16px; font-size: 13px; }
   .nl-score { font-size: 28px; font-weight: 800; color: var(--color-primary-dark); }
+  .nl-score--fail { color: var(--admin-danger-text); }
   .nl-reason { padding: 4px 0; }
-  .nl-reason--fail { color: #991b1b; }
-  .nl-reason--warn { color: #b45309; }
+  .nl-reason--fail { color: var(--admin-danger-text); }
+  .nl-reason--warn { color: var(--admin-warn-accent); }
   .nl-reason--info { color: var(--color-text-muted); }
   .nl-preview { width: 100%; height: 600px; border: 1px solid var(--color-border); border-radius: 8px; }
   .nl-aud { background: var(--color-bg-alt); padding: 12px 16px; border-radius: 8px; margin: 12px 0; }
@@ -74,7 +75,7 @@
 
   <h2>Audience filter (JSON)</h2>
   <div class="nl-aud">
-    <p style="margin:0 0 8px;color:var(--color-text-muted);font-size:13px">
+    <p class="adm-meta-note">
       Keys: <code>lang</code>, <code>source</code>, <code>route_slug</code>,
       <code>min_days_old</code>, <code>max_days_old</code>,
       <code>exclude_unsubscribed</code>, <code>exclude_suppressed</code>.
@@ -138,10 +139,10 @@
         var per = j.per_language || {};
         Object.keys(per).forEach(function(l){ if (per[l].score < worst) worst = per[l].score; });
         scoreEl.textContent = worst + '/100';
-        scoreEl.style.color = worst >= j.passing_score ? '#0f766e' : '#991b1b';
+        scoreEl.classList.toggle('nl-score--fail', worst < j.passing_score);
         var html = '<p>Audience: <strong>' + j.audience_count + '</strong> subscriber(s).</p>';
         Object.keys(per).forEach(function(l){
-          html += '<p><strong>' + l.toUpperCase() + '</strong> — score ' + per[l].score + '/100</p><ul style="margin:0 0 8px 24px">';
+          html += '<p><strong>' + l.toUpperCase() + '</strong> — score ' + per[l].score + '/100</p><ul class="adm-score-list">';
           (per[l].reasons || []).forEach(function(r){
             html += '<li class="nl-reason nl-reason--' + r.severity + '">' + r.severity + ': ' + r.message + (r.detail ? ' — <em>' + r.detail + '</em>' : '') + '</li>';
           });

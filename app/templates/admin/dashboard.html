@@ -9,16 +9,16 @@
 /* KPI cards */
 .dash-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 28px; }
 .dash-kpi {
-  background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+  background: #fff; border: 1px solid var(--color-border); border-radius: 12px;
   padding: 18px 20px; display: flex; flex-direction: column; gap: 6px;
   transition: box-shadow .15s;
 }
 .dash-kpi:hover { box-shadow: 0 4px 16px rgba(0,0,0,.06); }
-.dash-kpi__label { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #94a3b8; }
-.dash-kpi__value { font-size: 28px; font-weight: 700; color: #0f172a; line-height: 1.1; }
-.dash-kpi__sub { font-size: 12px; color: #64748b; }
-.dash-kpi--alert .dash-kpi__value { color: #f59e0b; }
-.dash-kpi--green .dash-kpi__value { color: #10b981; }
+.dash-kpi__label { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--admin-faint); }
+.dash-kpi__value { font-size: 28px; font-weight: 700; color: var(--color-text); line-height: 1.1; }
+.dash-kpi__sub { font-size: 12px; color: var(--color-text-muted); }
+.dash-kpi--alert .dash-kpi__value { color: var(--color-accent); }
+.dash-kpi--green .dash-kpi__value { color: var(--admin-success); }
 
 /* Two-col layout */
 .dash-cols { display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; }
@@ -26,59 +26,59 @@
 
 /* Section card */
 .dash-card {
-  background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;
+  background: #fff; border: 1px solid var(--color-border); border-radius: 12px; overflow: hidden;
 }
 .dash-card__head {
-  padding: 14px 18px; border-bottom: 1px solid #f1f5f9;
+  padding: 14px 18px; border-bottom: 1px solid var(--admin-chip);
   display: flex; align-items: center; justify-content: space-between;
 }
-.dash-card__head h2 { font-size: 13px; font-weight: 600; color: #0f172a; margin: 0; }
-.dash-card__head a { font-size: 12px; color: #0d9488; }
+.dash-card__head h2 { font-size: 13px; font-weight: 600; color: var(--color-text); margin: 0; }
+.dash-card__head a { font-size: 12px; color: var(--color-primary); }
 .dash-card__head a:hover { text-decoration: underline; }
 .dash-card__body { padding: 0; }
 
 /* Pending reviews */
 .rev-row {
   display: flex; gap: 12px; align-items: flex-start;
-  padding: 12px 18px; border-bottom: 1px solid #f8fafc;
+  padding: 12px 18px; border-bottom: 1px solid var(--color-bg-alt);
 }
 .rev-row:last-child { border-bottom: none; }
-.rev-stars { color: #f59e0b; font-size: 12px; letter-spacing: 1px; flex-shrink: 0; margin-top: 2px; }
+.rev-stars { color: var(--color-accent); font-size: 12px; letter-spacing: 1px; flex-shrink: 0; margin-top: 2px; }
 .rev-body { flex: 1; min-width: 0; }
-.rev-meta { font-size: 11px; color: #94a3b8; margin-bottom: 3px; }
-.rev-meta strong { color: #475569; }
-.rev-comment { font-size: 13px; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rev-meta { font-size: 11px; color: var(--admin-faint); margin-bottom: 3px; }
+.rev-meta strong { color: var(--color-text-muted); }
+.rev-comment { font-size: 13px; color: var(--admin-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rev-actions { display: flex; gap: 6px; flex-shrink: 0; }
 .rev-btn {
   padding: 4px 10px; font-size: 11px; font-weight: 600;
   border: none; border-radius: 5px; cursor: pointer;
 }
-.rev-btn--ok { background: #dcfce7; color: #166534; }
-.rev-btn--ok:hover { background: #bbf7d0; }
-.rev-btn--no { background: #f1f5f9; color: #64748b; }
-.rev-btn--no:hover { background: #e2e8f0; }
-.rev-empty { padding: 28px 18px; text-align: center; color: #94a3b8; font-size: 13px; }
+.rev-btn--ok { background: var(--admin-success-bg); color: var(--admin-success-text); }
+.rev-btn--ok:hover { background: var(--admin-success-bg-strong); }
+.rev-btn--no { background: var(--admin-chip); color: var(--color-text-muted); }
+.rev-btn--no:hover { background: var(--color-border); }
+.rev-empty { padding: 28px 18px; text-align: center; color: var(--admin-faint); font-size: 13px; }
 
 /* Quick links */
 .dash-links { display: flex; flex-direction: column; gap: 0; }
 .dash-link {
   display: flex; align-items: center; gap: 10px;
-  padding: 13px 18px; border-bottom: 1px solid #f8fafc; color: #334155;
+  padding: 13px 18px; border-bottom: 1px solid var(--color-bg-alt); color: var(--admin-text);
   font-size: 13.5px; font-weight: 500; transition: background .1s;
 }
 .dash-link:last-child { border-bottom: none; }
-.dash-link:hover { background: #f8fafc; }
-.dash-link svg { width: 15px; height: 15px; stroke: #94a3b8; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
-.dash-link:hover svg { stroke: #0d9488; }
-.dash-link__arrow { margin-left: auto; color: #cbd5e1; font-size: 12px; }
+.dash-link:hover { background: var(--color-bg-alt); }
+.dash-link svg { width: 15px; height: 15px; stroke: var(--admin-faint); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.dash-link:hover svg { stroke: var(--color-primary); }
+.dash-link__arrow { margin-left: auto; color: var(--admin-line-soft); font-size: 12px; }
 
 /* Activity bar */
-.dash-bar-row { display: flex; align-items: center; gap: 10px; padding: 8px 18px; border-bottom: 1px solid #f8fafc; }
+.dash-bar-row { display: flex; align-items: center; gap: 10px; padding: 8px 18px; border-bottom: 1px solid var(--color-bg-alt); }
 .dash-bar-row:last-child { border-bottom: none; }
-.dash-bar-label { font-size: 12px; color: #64748b; width: 90px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dash-bar-track { flex: 1; height: 6px; background: #f1f5f9; border-radius: 99px; overflow: hidden; }
-.dash-bar-fill { height: 100%; background: #0d9488; border-radius: 99px; transition: width .3s; }
-.dash-bar-val { font-size: 12px; font-weight: 600; color: #334155; width: 28px; text-align: right; flex-shrink: 0; }
+.dash-bar-label { font-size: 12px; color: var(--color-text-muted); width: 90px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dash-bar-track { flex: 1; height: 6px; background: var(--admin-chip); border-radius: 99px; overflow: hidden; }
+.dash-bar-fill { height: 100%; background: var(--color-primary); border-radius: 99px; transition: width .3s; }
+.dash-bar-val { font-size: 12px; font-weight: 600; color: var(--admin-text); width: 28px; text-align: right; flex-shrink: 0; }
 </style>
 {% endblock %}
 
@@ -124,16 +124,16 @@
             <div class="rev-body">
               <div class="rev-meta">
                 <strong>{{ r.author_name or 'Anonymous' }}</strong>
-                · <a href="/{% if r.route_slug and r.route_slug.startswith('line-') %}gradski/{% else %}rute/{% endif %}{{ r.route_slug }}/" target="_blank" style="color:#0d9488;">{{ r.route_slug }}</a>
+                · <a href="/{% if r.route_slug and r.route_slug.startswith('line-') %}gradski/{% else %}rute/{% endif %}{{ r.route_slug }}/" target="_blank" class="adm-link">{{ r.route_slug }}</a>
                 · {{ r.ts[:10] if r.ts else '?' }}
               </div>
               <div class="rev-comment">{{ r.comment }}</div>
             </div>
             <div class="rev-actions">
-              <form method="post" action="/admin/reviews/{{ r.id }}/approve" style="display:inline;">
+              <form method="post" action="/admin/reviews/{{ r.id }}/approve" class="form-inline">
                 <button class="rev-btn rev-btn--ok" type="submit">✓</button>
               </form>
-              <form method="post" action="/admin/reviews/{{ r.id }}/reject" style="display:inline;">
+              <form method="post" action="/admin/reviews/{{ r.id }}/reject" class="form-inline">
                 <button class="rev-btn rev-btn--no" type="submit">✕</button>
               </form>
             </div>
@@ -146,7 +146,7 @@
     </div>
 
     <!-- Right column -->
-    <div style="display:flex;flex-direction:column;gap:16px;">
+    <div class="adm-col">
 
       <!-- Quick links -->
       <div class="dash-card">

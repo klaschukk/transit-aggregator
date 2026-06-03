@@ -5,35 +5,35 @@
 {% block head_extra %}
 <style>
 .adm{max-width:1100px;margin:0 auto;padding:24px;}
-.adm .sub{color:#64748b;margin-bottom:20px;font-size:13px;}
+.adm .sub{color:var(--color-text-muted);margin-bottom:20px;font-size:13px;}
 .adm .kpis{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
-.adm .kpi{padding:10px 14px;border-radius:8px;background:#fff;border:1px solid #e2e8f0;font-size:13px;}
-.adm .kpi strong{color:#0d9488;font-size:18px;margin-right:6px;}
+.adm .kpi{padding:10px 14px;border-radius:8px;background:#fff;border:1px solid var(--color-border);font-size:13px;}
+.adm .kpi strong{color:var(--color-primary);font-size:18px;margin-right:6px;}
 .adm .tabs{margin-bottom:16px;}
-.adm .tabs a{display:inline-block;padding:6px 12px;border:1px solid #cbd5e1;border-radius:6px;margin-right:6px;font-size:13px;text-decoration:none;color:#334155;}
-.adm .tabs a.on{background:#0d9488;color:#fff;border-color:#0d9488;}
-.adm .card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin-bottom:12px;}
-.adm .card--deletion{border-color:#ef4444;background:#fef2f2;}
-.adm .card--approved{border-color:#10b981;}
-.adm .card--rejected{border-color:#94a3b8;opacity:.7;}
-.adm .hdr{display:flex;gap:12px;align-items:center;font-size:13px;color:#475569;flex-wrap:wrap;}
-.adm .stars{color:#f59e0b;letter-spacing:2px;}
-.adm .slug a{color:#0d9488;text-decoration:none;}
-.adm .comment{margin:10px 0;padding:10px 12px;background:#f8fafc;border-radius:6px;font-size:14px;line-height:1.5;white-space:pre-wrap;}
+.adm .tabs a{display:inline-block;padding:6px 12px;border:1px solid var(--admin-line-soft);border-radius:6px;margin-right:6px;font-size:13px;text-decoration:none;color:var(--admin-text);}
+.adm .tabs a.on{background:var(--color-primary);color:#fff;border-color:var(--color-primary);}
+.adm .card{background:#fff;border:1px solid var(--color-border);border-radius:10px;padding:14px 16px;margin-bottom:12px;}
+.adm .card--deletion{border-color:var(--admin-danger);background:var(--admin-danger-bg-soft);}
+.adm .card--approved{border-color:var(--admin-success);}
+.adm .card--rejected{border-color:var(--admin-faint);opacity:.7;}
+.adm .hdr{display:flex;gap:12px;align-items:center;font-size:13px;color:var(--color-text-muted);flex-wrap:wrap;}
+.adm .stars{color:var(--color-accent);letter-spacing:2px;}
+.adm .slug a{color:var(--color-primary);text-decoration:none;}
+.adm .comment{margin:10px 0;padding:10px 12px;background:var(--color-bg-alt);border-radius:6px;font-size:14px;line-height:1.5;white-space:pre-wrap;}
 .adm .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:.03em;}
-.adm .badge--pending{background:#fef3c7;color:#92400e;}
-.adm .badge--approved{background:#d1fae5;color:#065f46;}
-.adm .badge--rejected{background:#e2e8f0;color:#475569;}
-.adm .badge--deleted{background:#fee2e2;color:#991b1b;}
-.adm .badge--gdpr{background:#ef4444;color:#fff;}
+.adm .badge--pending{background:var(--admin-warn-bg);color:var(--admin-warn-text-strong);}
+.adm .badge--approved{background:var(--admin-success-soft-bg);color:var(--admin-success-soft-text);}
+.adm .badge--rejected{background:var(--color-border);color:var(--color-text-muted);}
+.adm .badge--deleted{background:var(--admin-danger-bg);color:var(--admin-danger-text);}
+.adm .badge--gdpr{background:var(--admin-danger);color:#fff;}
 .adm .actions{display:flex;gap:8px;margin-top:10px;}
 .adm .actions button{padding:6px 12px;font-size:13px;border:0;border-radius:6px;cursor:pointer;font-weight:500;}
-.adm .btn-approve{background:#10b981;color:#fff;}
-.adm .btn-reject{background:#f1f5f9;color:#334155;}
-.adm .btn-delete{background:#ef4444;color:#fff;}
+.adm .btn-approve{background:var(--admin-success);color:#fff;}
+.adm .btn-reject{background:var(--admin-chip);color:var(--admin-text);}
+.adm .btn-delete{background:var(--admin-danger);color:#fff;}
 .adm .actions button:hover{filter:brightness(1.1);}
-.adm .empty{padding:40px;text-align:center;color:#94a3b8;}
-.adm .note{font-size:12px;color:#64748b;font-style:italic;margin-top:6px;}
+.adm .empty{padding:40px;text-align:center;color:var(--admin-faint);}
+.adm .note{font-size:12px;color:var(--color-text-muted);font-style:italic;margin-top:6px;}
 </style>
 {% endblock %}
 
@@ -77,15 +77,15 @@
 
       <div class="actions">
         {% if r.status == 'pending' and not r.deletion_requested %}
-        <form method="post" action="/admin/reviews/{{ r.id }}/approve" style="display:inline;">
+        <form method="post" action="/admin/reviews/{{ r.id }}/approve" class="form-inline">
           <button class="btn-approve" type="submit">Approve</button>
         </form>
-        <form method="post" action="/admin/reviews/{{ r.id }}/reject" style="display:inline;">
+        <form method="post" action="/admin/reviews/{{ r.id }}/reject" class="form-inline">
           <button class="btn-reject" type="submit">Reject</button>
         </form>
         {% endif %}
         {% if r.deletion_requested or r.status == 'approved' %}
-        <form method="post" action="/admin/reviews/{{ r.id }}/delete" style="display:inline;"
+        <form method="post" action="/admin/reviews/{{ r.id }}/delete" class="form-inline"
               onsubmit="return confirm('Soft-delete review {{ r.id }} (PII will be wiped)?');">
           <button class="btn-delete" type="submit">
             {% if r.deletion_requested %}Confirm GDPR delete{% else %}Delete{% endif %}
@@ -101,7 +101,7 @@
     </div>
   {% endif %}
 
-  <p style="font-size:12px;color:#94a3b8;margin-top:24px;">
+  <p class="adm-note adm-note--tight">
     Rejected reviews stay in <code>reviews</code> for audit; deleted ones are
     soft-deleted (PII wiped). Trusted authors (3+ approved via same email)
     auto-approve on submit.

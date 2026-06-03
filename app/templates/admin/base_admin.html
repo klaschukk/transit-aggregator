@@ -5,102 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow, noarchive">
   <title>{% block title %}Admin{% endblock %} — Prevozni</title>
-  <style>
-    :root {
-      --color-border: #e2e8f0; --color-bg-alt: #f8fafc; --color-bg: #fff;
-      --color-text-muted: #64748b; --color-primary: #0d9488; --color-primary-dark: #0f766e;
-      --text-sm: 13px;
-    }
-    *, *::before, *::after { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif; background: #f1f5f9; color: #1e293b; line-height: 1.5; font-size: 14px; }
-    a { color: inherit; text-decoration: none; }
-    button { font-family: inherit; cursor: pointer; }
-    h1 { font-size: 22px; margin: 0 0 8px; }
-    h2 { font-size: 16px; margin: 24px 0 10px; }
-    code { font-family: ui-monospace, monospace; font-size: .9em; background: #f1f5f9; padding: 1px 5px; border-radius: 4px; }
-    small { font-size: 12px; }
-    .page-subtitle { font-size: 13px; color: var(--color-text-muted); margin-bottom: 16px; }
-    .schedule-disclaimer { background: #fef3c7; border: 1px solid #fde68a; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
-    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 7px; font-size: 13px; font-weight: 600; border: none; cursor: pointer; text-decoration: none; font-family: inherit; }
-    .btn--primary { background: var(--color-primary); color: #fff; }
-    .btn--primary:hover { background: var(--color-primary-dark); }
-    .btn--outline { border: 1px solid var(--color-border); background: #fff; color: #334155; }
-    .btn--outline:hover { background: #f1f5f9; }
-    .btn--danger { background: #ef4444; color: #fff; }
-    .btn--danger:hover { background: #dc2626; }
-
-    /* ── Sidebar ── */
-    .adm-sidebar {
-      position: fixed; top: 0; left: 0; bottom: 0; width: 224px;
-      background: #0f172a; display: flex; flex-direction: column;
-      overflow-y: auto; z-index: 100;
-    }
-    .adm-logo {
-      padding: 18px 16px 16px;
-      border-bottom: 1px solid rgba(255,255,255,.07);
-      display: flex; align-items: center; gap: 9px; flex-shrink: 0;
-    }
-    .adm-logo svg { flex-shrink: 0; }
-    .adm-logo__text { font-size: 15px; font-weight: 700; color: #f8fafc; letter-spacing: -.02em; }
-    .adm-logo__badge {
-      font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-      background: #0d9488; color: #fff; padding: 2px 6px; border-radius: 4px; margin-left: auto;
-    }
-    .adm-nav { padding: 6px 0 10px; flex: 1; }
-    .adm-nav__sep {
-      font-size: 9.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-      color: #334155; padding: 14px 16px 4px; pointer-events: none;
-    }
-    .adm-nav__item {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 8px 14px 8px 13px; margin: 1px 8px; border-radius: 7px;
-      color: #94a3b8; font-size: 13.5px; font-weight: 500;
-      transition: background .12s, color .12s; border-left: 3px solid transparent;
-    }
-    .adm-nav__item:hover { background: rgba(255,255,255,.06); color: #e2e8f0; }
-    .adm-nav__item.on { background: rgba(13,148,136,.18); color: #2dd4bf; border-left-color: #0d9488; }
-    .adm-nav__left { display: flex; align-items: center; gap: 8px; }
-    .adm-nav__left svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
-    .adm-pill {
-      font-size: 10px; font-weight: 700; background: #ef4444; color: #fff;
-      padding: 1px 6px; border-radius: 99px; min-width: 18px; text-align: center; line-height: 1.6;
-    }
-    .adm-sidebar__footer {
-      padding: 12px 16px; border-top: 1px solid rgba(255,255,255,.07); flex-shrink: 0;
-    }
-    .adm-sidebar__footer a { font-size: 12px; color: #475569; }
-    .adm-sidebar__footer a:hover { color: #94a3b8; }
-
-    /* ── Main ── */
-    .adm-main { margin-left: 224px; min-height: 100vh; display: flex; flex-direction: column; }
-    .adm-topbar {
-      background: #fff; border-bottom: 1px solid #e2e8f0;
-      padding: 0 24px; height: 52px;
-      display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; z-index: 10; flex-shrink: 0;
-    }
-    .adm-topbar__title { font-size: 15px; font-weight: 600; color: #0f172a; }
-    .adm-topbar__right { font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 14px; }
-    .adm-topbar__clock { font-variant-numeric: tabular-nums; font-size: 11px; }
-    .adm-topbar__user {
-      display: flex; align-items: center; gap: 6px;
-      background: #f1f5f9; padding: 4px 10px 4px 8px; border-radius: 99px; color: #475569;
-    }
-    .adm-topbar__user::before {
-      content: ''; display: inline-block; width: 20px; height: 20px;
-      background: #0d9488; border-radius: 50%;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
-      background-size: 12px; background-repeat: no-repeat; background-position: center;
-    }
-    .adm-body { flex: 1; }
-  </style>
+  {% if not config.DEBUG %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dist/app.css') }}?v={{ asset_version }}">{% else %}<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v={{ asset_version }}">{% endif %}
+  {% if not config.DEBUG %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dist/admin.css') }}?v={{ asset_version }}">{% else %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}?v={{ asset_version }}">{% endif %}
   {% block head_extra %}{% endblock %}
 </head>
 <body>
 
 <aside class="adm-sidebar">
   <div class="adm-logo">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
     </svg>
     <span class="adm-logo__text">Prevozni</span>

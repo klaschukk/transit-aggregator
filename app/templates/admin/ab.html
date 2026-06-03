@@ -6,27 +6,28 @@
 <style>
 .adm{max-width:1100px;margin:0 auto;padding:24px 16px;}
 .adm h1{font-size:24px;margin:0 0 20px;}
-.adm h2{font-size:15px;margin:28px 0 10px;color:#475569;text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
-.adm .exp{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:18px 20px;margin-bottom:14px;}
+.adm h2{font-size:15px;margin:28px 0 10px;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.adm .exp{background:var(--color-bg-alt);border:1px solid var(--color-border);border-radius:10px;padding:18px 20px;margin-bottom:14px;}
 .adm .exp__head{display:flex;align-items:baseline;gap:14px;justify-content:space-between;margin-bottom:10px;}
 .adm .exp__name{font-weight:700;font-size:16px;}
-.adm .exp__surface{font-size:12px;color:#64748b;background:#e0f2fe;padding:2px 8px;border-radius:10px;}
-.adm .exp__date{font-size:12px;color:#94a3b8;}
-.adm .exp__detail{color:#0d9488;font-size:13px;text-decoration:none;}
+.adm .exp__surface{font-size:12px;color:var(--color-text-muted);background:var(--admin-info-bg);padding:2px 8px;border-radius:10px;}
+.adm .exp__date{font-size:12px;color:var(--admin-faint);}
+.adm .exp__detail{color:var(--color-primary);font-size:13px;text-decoration:none;}
 .adm .exp__detail:hover{text-decoration:underline;}
-.adm .var-row{display:grid;grid-template-columns:1fr 100px 100px 100px;gap:12px;font-size:13px;padding:6px 0;border-top:1px solid #e2e8f0;}
+.adm .var-row{display:grid;grid-template-columns:1fr 100px 100px 100px;gap:12px;font-size:13px;padding:6px 0;border-top:1px solid var(--color-border);}
 .adm .var-row:first-of-type{border-top:none;}
 .adm .var-row .vname{font-weight:600;}
-.adm .var-row .vrate{color:#0d9488;font-weight:600;}
+.adm .var-row .vrate{color:var(--color-primary);font-weight:600;}
 .adm .var-row .num{text-align:right;}
-.adm .empty{color:#94a3b8;font-style:italic;font-size:13px;padding:6px 0;}
+.adm .var-row--head{font-weight:600;color:var(--color-text-muted);}
+.adm .empty{color:var(--admin-faint);font-style:italic;font-size:13px;padding:6px 0;}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="adm">
   <h1>A/B experiments</h1>
-  <p style="color:#64748b;font-size:14px;margin-bottom:24px;">
+  <p class="page-subtitle">
     Live experiments and headline numbers. Click an experiment for full
     funnel, p-value, Wilson CI, and days-to-significance.
   </p>
@@ -44,7 +45,7 @@
         <a class="exp__detail" href="{{ url_for('admin.ab_detail', key=row.spec.key) }}">detail →</a>
       </div>
     </div>
-    <div class="var-row" style="font-weight:600;color:#475569;">
+    <div class="var-row var-row--head">
       <span>variant</span>
       <span class="num">exposures</span>
       <span class="num">conversions</span>

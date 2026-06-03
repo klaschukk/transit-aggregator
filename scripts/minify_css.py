@@ -19,6 +19,7 @@ sources = [
     'app/static/css/app.css',
     'app/static/css/app.mobile.css',
     'app/static/css/ads.css',
+    'app/static/css/admin.css',
 ]
 
 dist = ROOT / 'app' / 'static' / 'css' / 'dist'

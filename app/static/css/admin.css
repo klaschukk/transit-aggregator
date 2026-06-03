@@ -1,0 +1,190 @@
+/* ============================================================
+   PREVOZNI — Admin overlay
+   Loaded AFTER app.css. Consumes the shared base tokens
+   (var(--color-*), var(--text-*)) from app.css and adds an
+   --admin-* layer ON TOP for the dark shell + dashboard
+   surfaces. It NEVER redefines a base token — the admin used to
+   ship its own :root that diverged (--color-text-muted #64748b vs
+   the real #475569, --text-sm 13px vs 0.875rem); that override is
+   gone, this overlay sits above instead.
+   0 !important, 0 hardcoded design colors that aren't named here.
+   ============================================================ */
+
+:root {
+  /* Admin uses a system font stack on purpose — the public web fonts
+     (Manrope/Golos, declared @font-face in app.css) stay out of the
+     internal tool. */
+  --admin-font: system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+
+  /* Neutral surfaces — slate steps the public palette doesn't expose.
+     Steps that DO match a base token are written as that token in the
+     rules below (border → --color-border, subtle bg → --color-bg-alt,
+     muted text → --color-text-muted) so there is one source of truth. */
+  --admin-app-bg: #f1f5f9;        /* slate-100 — page background */
+  --admin-chip: #f1f5f9;          /* slate-100 — pills, code, track fills */
+  --admin-row-hover: #fafbfc;     /* off-white table row hover */
+  --admin-line-soft: #cbd5e1;     /* slate-300 — hairlines, arrows */
+  --admin-text: #334155;          /* slate-700 — default body text */
+  --admin-text-strong: #1e293b;   /* slate-800 — emphasis */
+  --admin-faint: #94a3b8;         /* slate-400 — captions, icons */
+
+  /* Dark shell */
+  --admin-shell-bg: #0f172a;      /* slate-900 sidebar */
+  --admin-shell-line: rgba(255,255,255,.07);
+  --admin-shell-sep: #334155;     /* slate-700 nav section labels */
+  --admin-shell-item: #94a3b8;    /* slate-400 nav item text */
+  --admin-shell-item-hover: #e2e8f0;
+  --admin-shell-tint: rgba(255,255,255,.06);
+  --admin-bright: #2dd4bf;        /* teal-300 active accent on dark */
+  --admin-active-bg: rgba(13,148,136,.18);
+
+  /* Status — admin dashboards */
+  --admin-success: #10b981;
+  --admin-success-bg: #dcfce7;
+  --admin-success-bg-strong: #bbf7d0;
+  --admin-success-text: #166534;
+  --admin-success-soft-bg: #d1fae5;
+  --admin-success-soft-text: #065f46;
+  --admin-danger: #ef4444;
+  --admin-danger-strong: #dc2626;
+  --admin-danger-bg: #fee2e2;
+  --admin-danger-bg-soft: #fef2f2;
+  --admin-danger-text: #991b1b;
+  --admin-warn-bg: #fef3c7;
+  --admin-warn-border: #fde68a;
+  --admin-warn-bg-alt: #fef9c3;
+  --admin-warn-strong: #facc15;
+  --admin-warn-text: #854d0e;
+  --admin-warn-text-strong: #92400e;
+  --admin-warn-accent: #b45309;
+  --admin-info-bg: #e0f2fe;
+  --admin-info-text: #075985;
+  --admin-purple-bg: #ede9fe;
+  --admin-purple-text: #5b21b6;
+}
+
+/* ── Cascade neutralizers ──────────────────────────────────────────
+   app.css ships site-wide element + .btn rules that would otherwise
+   bleed into the admin (web-font headings, 44px pill buttons). Pin the
+   admin's own look back; admin.css loads last so per-property wins. */
+body {
+  font-family: var(--admin-font);
+  font-size: 14px;
+  line-height: 1.5;
+  background: var(--admin-app-bg);
+  color: var(--admin-text-strong);
+}
+h1, h2, h3, h4 {
+  font-family: var(--admin-font);
+  font-weight: 700;
+  color: var(--admin-text-strong);
+  letter-spacing: normal;
+  text-wrap: balance;
+}
+h1 { font-size: 22px; line-height: 1.25; margin: 0 0 8px; }
+h2 { font-size: 16px; margin: 24px 0 10px; }
+small { font-size: var(--text-xs); }
+code {
+  font-family: ui-monospace, monospace; font-size: .9em;
+  background: var(--admin-chip); padding: 1px 5px; border-radius: 4px;
+}
+
+/* Buttons — compact admin variant (app.css .btn is a 44px pill). */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px; height: auto; padding: 7px 14px;
+  border: none; border-radius: 7px;
+  font-family: inherit; font-size: var(--text-sm); font-weight: 600;
+  cursor: pointer; text-decoration: none;
+  transition: background .15s ease, color .15s ease;
+}
+.btn:active { transform: none; }
+.btn--primary { background: var(--color-primary); color: #fff; }
+.btn--primary:hover { background: var(--color-primary-dark); }
+.btn--outline { background: #fff; color: var(--admin-text); border: 1px solid var(--color-border); }
+.btn--outline:hover { background: var(--admin-chip); }
+.btn--danger { background: var(--admin-danger); color: #fff; }
+.btn--danger:hover { background: var(--admin-danger-strong); }
+
+.page-subtitle { font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: 16px; }
+.schedule-disclaimer {
+  background: var(--admin-warn-bg); border: 1px solid var(--admin-warn-border);
+  padding: 10px 14px; border-radius: 8px; font-size: var(--text-sm); margin-bottom: 16px;
+}
+
+/* ── Sidebar ── */
+.adm-sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0; width: 224px;
+  background: var(--admin-shell-bg); display: flex; flex-direction: column;
+  overflow-y: auto; z-index: 100;
+}
+.adm-logo {
+  padding: 18px 16px 16px;
+  border-bottom: 1px solid var(--admin-shell-line);
+  display: flex; align-items: center; gap: 9px; flex-shrink: 0;
+}
+.adm-logo svg { flex-shrink: 0; color: var(--color-primary); }
+.adm-logo__text { font-size: 15px; font-weight: 700; color: var(--color-bg-alt); letter-spacing: -.02em; }
+.adm-logo__badge {
+  font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  background: var(--color-primary); color: #fff; padding: 2px 6px; border-radius: 4px; margin-left: auto;
+}
+.adm-nav { padding: 6px 0 10px; flex: 1; }
+.adm-nav__sep {
+  font-size: 9.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--admin-shell-sep); padding: 14px 16px 4px; pointer-events: none;
+}
+.adm-nav__item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px 8px 13px; margin: 1px 8px; border-radius: 7px;
+  color: var(--admin-shell-item); font-size: 13.5px; font-weight: 500;
+  transition: background .12s, color .12s; border-left: 3px solid transparent;
+}
+.adm-nav__item:hover { background: var(--admin-shell-tint); color: var(--admin-shell-item-hover); }
+.adm-nav__item.on { background: var(--admin-active-bg); color: var(--admin-bright); border-left-color: var(--color-primary); }
+.adm-nav__left { display: flex; align-items: center; gap: 8px; }
+.adm-nav__left svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.adm-pill {
+  font-size: 10px; font-weight: 700; background: var(--admin-danger); color: #fff;
+  padding: 1px 6px; border-radius: 99px; min-width: 18px; text-align: center; line-height: 1.6;
+}
+.adm-sidebar__footer {
+  padding: 12px 16px; border-top: 1px solid var(--admin-shell-line); flex-shrink: 0;
+}
+.adm-sidebar__footer a { font-size: 12px; color: var(--color-text-muted); }
+.adm-sidebar__footer a:hover { color: var(--admin-shell-item); }
+
+/* ── Main ── */
+.adm-main { margin-left: 224px; min-height: 100vh; display: flex; flex-direction: column; }
+.adm-topbar {
+  background: var(--color-bg); border-bottom: 1px solid var(--color-border);
+  padding: 0 24px; height: 52px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 10; flex-shrink: 0;
+}
+.adm-topbar__title { font-size: 15px; font-weight: 600; color: var(--color-text); }
+.adm-topbar__right { font-size: 12px; color: var(--admin-faint); display: flex; align-items: center; gap: 14px; }
+.adm-topbar__clock { font-variant-numeric: tabular-nums; font-size: 11px; }
+.adm-topbar__user {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--admin-chip); padding: 4px 10px 4px 8px; border-radius: 99px; color: var(--color-text-muted);
+}
+.adm-topbar__user::before {
+  content: ''; display: inline-block; width: 20px; height: 20px;
+  background: var(--color-primary); border-radius: 50%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
+  background-size: 12px; background-repeat: no-repeat; background-position: center;
+}
+.adm-body { flex: 1; }
+
+/* ── Small content utilities (replace static inline styles in templates) ── */
+.adm-wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+.adm-note { font-size: 12px; color: var(--admin-faint); margin-top: 32px; }
+.adm-note--tight { margin-top: 24px; }
+.adm-muted { color: var(--color-text-muted); }
+.adm-col { display: flex; flex-direction: column; gap: 16px; }
+.adm-link { color: var(--color-primary); }
+.form-inline { display: inline; }
+.adm-meta-note { margin: 0 0 8px; color: var(--color-text-muted); font-size: 13px; }
+.adm-score-list { margin: 0 0 8px 24px; }
+.adm-mt { margin-top: 32px; }
