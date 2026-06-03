@@ -47,15 +47,30 @@ def test_flixbus_requires_both_endpoints_in_network():
 
 # ── Partner.build_url() ───────────────────────────────────────────────
 
-def test_bookaway_url_keeps_offer_and_aff_ids():
+def _dest(url: str) -> str:
+    """Decode the deep-link destination from the aff_c `url=` param."""
+    from urllib.parse import parse_qs, unquote, urlparse
+    return unquote(parse_qs(urlparse(url).query).get('url', [''])[0])
+
+
+def test_bookaway_url_routes_through_tune_tracker():
+    # Links MUST go through the TUNE click tracker (aff_c) so a click is
+    # registered and the conversion cookie is set — otherwise nothing is
+    # ever attributed (the "362 clicks, 0 conversions" root cause).
     url = Bookaway().build_url(
         'beograd', 'nis', 'Beograd', 'Niš', 'route-detail',
     )
+    assert url.startswith('https://bookaway2.go2cloud.org/aff_c?')
     assert 'offer_id=34' in url
     assert 'aff_id=4033' in url
-    assert 'utm_source=prevozni' in url
-    assert 'utm_medium=route-detail' in url
-    assert '/routes/serbia/beograd-to-nis' in url
+    # Per-route / per-surface attribution via sub IDs.
+    assert 'aff_sub=beograd-nis' in url
+    assert 'aff_sub2=route-detail' in url
+    # The destination deep-link is carried (encoded) in url=.
+    dest = _dest(url)
+    assert dest.startswith('https://www.bookaway.com/routes/serbia/beograd-to-nis')
+    assert 'utm_source=prevozni' in dest
+    assert 'utm_medium=route-detail' in dest
 
 
 def test_bookaway_url_picks_destination_country():
@@ -63,24 +78,22 @@ def test_bookaway_url_picks_destination_country():
         'beograd', 'sarajevo', 'Beograd', 'Sarajevo', 'trip-card',
     )
     # Destination country wins (Bookaway groups URLs by arrival country)
-    assert '/routes/bosnia-and-herzegovina/' in url
+    assert '/routes/bosnia-and-herzegovina/' in _dest(url)
 
 
 def test_bookaway_falls_back_to_country_page_for_partial_match():
     # mladenovac is NOT in Bookaway's inventory, beograd is. The route
-    # page bookaway.com/routes/serbia/mladenovac-to-beograd doesn't exist
-    # — their server redirects to /routes/serbia/mladenovac and strips
-    # query params, killing affiliate attribution. We must instead point
-    # at a URL that exists and preserves ?offer_id/aff_id: the country
-    # listing page.
+    # page bookaway.com/routes/serbia/mladenovac-to-beograd doesn't exist,
+    # so the destination falls back to the country listing page. The click
+    # still goes through the tracker, so attribution survives.
     url = Bookaway().build_url(
         'mladenovac', 'beograd', 'Mladenovac', 'Beograd', 'trip-card',
     )
-    assert url.startswith('https://www.bookaway.com/routes/serbia/?')
-    assert 'offer_id=34' in url
-    assert 'aff_id=4033' in url
-    # No dead route slug in the path
-    assert 'mladenovac-to-beograd' not in url
+    assert url.startswith('https://bookaway2.go2cloud.org/aff_c?')
+    dest = _dest(url)
+    assert dest.startswith('https://www.bookaway.com/routes/serbia/?')
+    # No dead route slug in the destination path
+    assert 'mladenovac-to-beograd' not in dest
 
 
 def test_bookaway_uses_route_page_when_both_endpoints_known():
@@ -89,7 +102,7 @@ def test_bookaway_uses_route_page_when_both_endpoints_known():
     url = Bookaway().build_url(
         'beograd', 'budva', 'Beograd', 'Budva', 'trip-card',
     )
-    assert '/routes/montenegro/beograd-to-budva?' in url
+    assert '/routes/montenegro/beograd-to-budva?' in _dest(url)
 
 
 def test_flixbus_placeholder_does_not_leak_param():

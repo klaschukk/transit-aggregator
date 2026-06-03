@@ -21,6 +21,8 @@ When adding a new partner:
 """
 from __future__ import annotations
 
+from urllib.parse import quote
+
 from app.affiliates.base import Partner
 
 # ── Bookaway — primary partner (already approved) ──────────────────
@@ -85,13 +87,19 @@ class Bookaway(Partner):
 
     OFFER_ID = 34       # approved
     AFF_ID = 4033       # approved
+    # TUNE/HasOffers click-tracking host for this network. Links MUST go
+    # through it (aff_c) — that's what mints the transaction_id and sets the
+    # enc_aff_session cookie the conversion postback keys off. Pointing
+    # straight at bookaway.com with ?offer_id/?aff_id as plain query params
+    # does NOT register a click, so conversions can never be attributed
+    # (root cause of "362 clicks, 0 conversions" — Bookaway audit, Jun 2026).
+    TRACKING_HOST = 'bookaway2.go2cloud.org'
 
     def has_route(self, from_slug: str, to_slug: str) -> bool:
         # Bookaway covers a pair if *either* endpoint is in its inventory.
         # When only one endpoint matches, build_url falls back to the
-        # country listing page (a URL that always exists) — that keeps
-        # the affiliate query string alive instead of letting Bookaway's
-        # own redirect strip it on a non-existent route page.
+        # country listing page (a URL that always exists) so the tracked
+        # click still lands somewhere valid.
         return from_slug in _BOOKAWAY_COUNTRY_MAP or to_slug in _BOOKAWAY_COUNTRY_MAP
 
     def build_url(
@@ -105,20 +113,27 @@ class Bookaway(Partner):
         from_country = _BOOKAWAY_COUNTRY_MAP.get(from_slug)
         to_country = _BOOKAWAY_COUNTRY_MAP.get(to_slug)
         country = to_country or from_country or 'serbia'
-        tracking = (
-            f'?offer_id={self.OFFER_ID}&aff_id={self.AFF_ID}'
-            f'&utm_source=prevozni&utm_medium={utm_medium}'
-        )
         # Both endpoints in inventory → deep-link to the route page.
-        # Otherwise fall back to the country listing — Bookaway has no
-        # page for e.g. mladenovac-to-beograd and their redirect strips
-        # query params, so we'd lose attribution. The country page exists
-        # and preserves ?offer_id/aff_id, so the cookie still gets set.
+        # Otherwise fall back to the country listing page.
         if from_country and to_country:
             path = f'/routes/{country}/{from_slug}-to-{to_slug}'
         else:
             path = f'/routes/{country}/'
-        return f'https://www.bookaway.com{path}{tracking}'
+        dest = (
+            f'https://www.bookaway.com{path}'
+            f'?utm_source=prevozni&utm_medium={utm_medium}'
+        )
+        # Route through the TUNE tracker. aff_sub/aff_sub2 give per-route and
+        # per-surface conversion attribution in the affiliate reports without
+        # any panel change. `url` carries the (encoded) deep-link destination.
+        aff_sub = f'{from_slug}-{to_slug}'[:255]
+        return (
+            f'https://{self.TRACKING_HOST}/aff_c'
+            f'?offer_id={self.OFFER_ID}&aff_id={self.AFF_ID}'
+            f'&aff_sub={quote(aff_sub, safe="")}'
+            f'&aff_sub2={quote(utm_medium, safe="")}'
+            f'&url={quote(dest, safe="")}'
+        )
 
 
 # ── FlixBus — cross-border corridors (owned operator) ──────────────
