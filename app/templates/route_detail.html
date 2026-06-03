@@ -137,10 +137,10 @@
   {% endif %}
 </div>
 
-{{ stats_strip([
-  {'value': route.distance_km|default(0), 'label': 'km', 'icon': 'distance'},
-  {'value': route.trip_count|default(0), 'label': _('route.daily_departures'), 'icon': 'schedule'},
-] + ([{'value': (route.min_price_rsd / config.EUR_RSD_RATE)|round|int ~ '€', 'label': _('route.from_price'), 'icon': 'price'}] if route.min_price_rsd else [])) }}
+{{ stats_strip(
+  ([{'value': route.distance_km, 'label': 'km', 'icon': 'distance'}] if route.distance_km else [])
+  + [{'value': route.trip_count|default(0), 'label': _('route.daily_departures'), 'icon': 'schedule'}]
+  + ([{'value': (route.min_price_rsd / config.EUR_RSD_RATE)|round|int ~ '€', 'label': _('route.from_price'), 'icon': 'price'}] if route.min_price_rsd else [])) }}
 
 <!-- Day filter -->
 <div class="filter-chips">
@@ -255,8 +255,8 @@
      the height clip only at ≤767px — desktop reads the full prose. #}
   <div class="seo-block__content" data-collapse="1">
     <h2>{{ _('route.about') }} {{ route.from_city }} — {{ route.to_city }}</h2>
-    <p>{{ _('route.prose_distance').format(from_city=route.from_city, to_city=route.to_city, km=route.distance_km|default(0)) }}
-       {% if route.distance_km %}{{ _('route.prose_duration').format(hours=(route.distance_km / 80)|round|int) }}{% endif %}
+    <p>{% if route.distance_km %}{{ _('route.prose_distance').format(from_city=route.from_city, to_city=route.to_city, km=route.distance_km) }}
+       {{ _('route.prose_duration').format(hours=(route.distance_km / 80)|round|int) }}{% endif %}
        {% if operators_on_route %}{{ _('route.prose_operators').format(ops=operators_on_route|join(', ')) }}{% endif %}
        {% if price_min and price_max and price_min != price_max %}{{ _('route.prose_price_range').format(min=price_min, max=price_max) }}
        {% elif price_min %}{{ _('route.prose_price_single').format(price=price_min) }}{% endif %}
