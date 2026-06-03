@@ -7,7 +7,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 16px; -webkit-text-size-adjust: 100%; height: 100%; scroll-behavior: smooth; }
 body {
-  font-family: var(--font);
+  font-family: var(--font-body);
   background: var(--color-bg);
   color: var(--color-text);
   line-height: 1.5;
@@ -24,6 +24,28 @@ input[type="reset"], label { touch-action: manipulation; }
 ul, ol { list-style: none; }
 img { display: block; max-width: 100%; }
 [hidden] { display: none !important; }
+
+
+/* ── 1b. Fonts ──
+   Self-hosted, subset (Latin + Latin-Extended for Serbian đčćšž + full
+   Cyrillic incl. Serbian ђјљњћџ), variable woff2. font-display: swap so
+   text paints immediately in the metric-similar system fallback; the
+   critical face is <link rel=preload>-ed in base.html to kill FOUT.
+   Manrope = display/headings, Golos Text = body. Both OFL (see fonts/). */
+@font-face {
+  font-family: 'Manrope';
+  src: url('/static/fonts/Manrope-var.woff2') format('woff2');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Golos Text';
+  src: url('/static/fonts/GolosText-var.woff2') format('woff2');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
 
 
 /* ── 2. Tokens ── */
@@ -47,7 +69,12 @@ img { display: block; max-width: 100%; }
   --color-trolley: #fb8c00;
   --color-night: #1e1b4b;
 
-  --font: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Two roles: a geometric display face for headings, a humanist body
+     face for reading. Fallbacks are metric-similar system fonts so the
+     swap from fallback → web font barely shifts layout (low CLS). */
+  --font-display: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body: 'Golos Text', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font: var(--font-body); /* back-compat alias: inputs/buttons/textareas */
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
@@ -110,7 +137,7 @@ img { display: block; max-width: 100%; }
 }
 
 /* ── 3. Typography ── */
-h1, h2, h3, h4 { line-height: 1.2; font-weight: 800; color: var(--color-text); }
+h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.2; font-weight: 800; color: var(--color-text); }
 h1 { font-size: var(--text-2xl); }
 h2 { font-size: var(--text-xl); }
 h3 { font-size: var(--text-lg); }

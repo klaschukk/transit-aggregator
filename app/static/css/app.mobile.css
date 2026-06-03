@@ -23,8 +23,7 @@
 body {
   font-size: var(--mtext-base);
   line-height: 1.55;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
-               "Inter", system-ui, "Segoe UI", sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
