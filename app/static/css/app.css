@@ -66,6 +66,23 @@ img { display: block; max-width: 100%; }
   --container-max: 1100px;
   --header-h: 56px;
 
+  /* Spacing scale (desktop): 4px grid + half-step midpoints; mirror of --mspace-*. */
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;
+  --space-2-5: 10px;
+  --space-3: 12px;
+  --space-3-5: 14px;
+  --space-4: 16px;
+  --space-4-5: 18px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
   /* Mobile design tokens (P27 foundation) — declared at :root so app.mobile.css
      and any in-template style attributes can reference them. Desktop styles
      don't consume most of these, but the defs need to live in app.css so the
