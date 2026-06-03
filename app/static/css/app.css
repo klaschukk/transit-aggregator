@@ -75,13 +75,17 @@ img { display: block; max-width: 100%; }
   --font-display: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-body: 'Golos Text', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font: var(--font-body); /* back-compat alias: inputs/buttons/textareas */
+  /* Modular scale — 1.25 (major third) from --text-base up:
+     16 → 20 → 25 → 31 → 39px. xs/sm stay at the 12px legibility
+     floor (caption sizes), not the geometric 10/12.8px. The two
+     display steps are fluid but cap exactly on the modular value. */
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.25rem;
-  --text-2xl: clamp(1.5rem, 4vw, 2.25rem);
-  --text-3xl: clamp(1.75rem, 5vw, 3rem);
+  --text-lg: 1.25rem;
+  --text-xl: 1.5625rem;
+  --text-2xl: clamp(1.5rem, 1.1rem + 2vw, 1.9375rem);
+  --text-3xl: clamp(1.75rem, 1.2rem + 2.75vw, 2.4375rem);
 
   --radius-sm: 6px;
   --radius-md: 12px;
@@ -99,13 +103,15 @@ img { display: block; max-width: 100%; }
      and any in-template style attributes can reference them. Desktop styles
      don't consume most of these, but the defs need to live in app.css so the
      mobile overlay can build on top. */
+  /* Mobile scale mirrors the desktop 1.25 ramp from --mtext-base (15px)
+     up: 15 → 19 → 23 → 29 → 37px. xs/sm held at the caption floor. */
   --mtext-xs: 12px;
   --mtext-sm: 13px;
   --mtext-base: 15px;
-  --mtext-lg: 17px;
-  --mtext-xl: 22px;
-  --mtext-2xl: 28px;
-  --mtext-3xl: 34px;
+  --mtext-lg: 19px;
+  --mtext-xl: 23px;
+  --mtext-2xl: 29px;
+  --mtext-3xl: 37px;
 
   --mspace-1: 4px;
   --mspace-2: 8px;
