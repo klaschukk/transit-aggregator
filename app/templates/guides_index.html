@@ -32,7 +32,7 @@
     {% for g in guides %}
     <a href="{{ lang_prefix }}/vodici/{{ g.slug }}/" class="route-card fade-in fade-in--d{{ loop.index0 % 5 }}">
       <div class="route-card__cities">
-        <span class="route-card__from">{{ _(g.title_key) }}</span>
+        <span class="route-card__from">{{ _(g.title_key).replace('{year}', current_year|string) }}</span>
       </div>
       <div class="route-card__meta">
         {{ _(g.category_key) }} · {{ g.date }}

@@ -110,7 +110,7 @@
   <div class="see-also__grid">
     {% for g in recent_guides %}
     <a href="{{ lang_prefix }}/vodici/{{ g.slug }}/" class="see-also__card">
-      <span class="see-also__card-title">{{ _(g.title_key) }}</span>
+      <span class="see-also__card-title">{{ _(g.title_key).replace('{year}', current_year|string) }}</span>
       <span class="see-also__card-meta">{{ _(g.category_key) }} · {{ g.date }}</span>
     </a>
     {% endfor %}
