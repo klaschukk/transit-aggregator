@@ -6,7 +6,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-from flask import Flask, render_template, request, g
+from flask import Flask, render_template, request, g, abort, make_response
 from config import config_map
 from .i18n import get_text, SUPPORTED_LANGS, DEFAULT_LANG
 from . import observability
@@ -159,6 +159,32 @@ def create_app(config_name: str | None = None) -> Flask:
                 g.lang = lang
                 g.lang_prefix = f'/{lang}'
                 break
+
+    # ── DB-availability guard ──────────────────────────────────────────
+    # The DuckDB file is briefly absent during the nightly rebuild
+    # (db_ready() → False). Without this, the DB-backed detail handlers fall
+    # through to abort(404), so Googlebot crawling that window logged live
+    # pages as "Not found (404)" — the bulk of GSC's 1572. Serve 503 +
+    # Retry-After for those paths instead, so crawlers come back and keep the
+    # URL indexed. Static / info / robots / sitemap paths don't need the DB
+    # and keep working.
+    _DB_BACKED_PREFIXES = (
+        '/rute', '/voznja', '/gradski', '/prevoznici',
+        '/autobuske-stanice', '/pretraga',
+    )
+
+    @app.before_request
+    def _serve_503_while_db_rebuilds():
+        from app.db import db_ready
+        if db_ready():
+            return
+        p = request.path
+        for lp in ('/en', '/ru'):
+            if p == lp or p.startswith(lp + '/'):
+                p = p[len(lp):] or '/'
+                break
+        if p == '/' or p.startswith(_DB_BACKED_PREFIXES):
+            abort(503)
 
     @app.context_processor
     def inject_i18n():
@@ -426,5 +452,26 @@ def create_app(config_name: str | None = None) -> Flask:
     @app.errorhandler(500)
     def server_error(e):
         return render_template('500.html'), 500
+
+    @app.errorhandler(503)
+    def service_unavailable(e):
+        # DB temporarily missing (nightly rebuild swaps the DuckDB file). Body
+        # is inline on purpose — render_template would run the context
+        # processor, which can touch request/DB state mid-rebuild. Retry-After
+        # is the signal Google reads to come back instead of dropping the URL.
+        html = (
+            '<!doctype html><html lang="sr"><head><meta charset="utf-8">'
+            '<meta name="viewport" content="width=device-width, initial-scale=1">'
+            '<meta name="robots" content="noindex">'
+            '<title>Trenutno nedostupno — Prevozni</title></head>'
+            '<body style="font-family:system-ui,-apple-system,sans-serif;'
+            'max-width:34rem;margin:4rem auto;padding:0 1rem;text-align:center;color:#0f172a">'
+            '<h1 style="font-size:1.5rem">Osvežavamo podatke</h1>'
+            '<p>Stranica je privremeno nedostupna. Pokušajte ponovo za koji minut.</p>'
+            '</body></html>'
+        )
+        resp = make_response(html, 503)
+        resp.headers['Retry-After'] = '120'
+        return resp
 
     return app
