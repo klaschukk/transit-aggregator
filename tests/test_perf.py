@@ -17,10 +17,10 @@ import pytest
 
 
 BUDGETS_GZIPPED = {
-    "/": 19500,                                # raised: chat widget HTML + streaming JS
+    "/": 20100,                                # raised: a11y combobox + tabs keyboard/ARIA JS
     "/rute/": 70000,
-    "/rute/beograd-novi-sad/": 23000,          # raised: chat widget JS
-    "/voznja/beograd-do-budva/": 21500,        # raised: hero tabs JS
+    "/rute/beograd-novi-sad/": 23300,          # raised: a11y combobox keyboard/ARIA JS
+    "/voznja/beograd-do-budva/": 21900,        # raised: a11y combobox keyboard/ARIA JS
     "/gradski/beograd/": 46000,
     "/gradski/beograd/stajaliste/sajam/": 23000,  # raised: chat widget JS
 }

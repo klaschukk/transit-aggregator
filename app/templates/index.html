@@ -57,17 +57,17 @@
     </p>
     <div class="hero__search-wrap">
       <div class="hero__tabs" role="tablist">
-        <button class="hero__tab hero__tab--active" role="tab" aria-selected="true" data-panel="hero-panel-intercity">
+        <button class="hero__tab hero__tab--active" role="tab" id="hero-tab-intercity" aria-selected="true" aria-controls="hero-panel-intercity" tabindex="0" data-panel="hero-panel-intercity">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" aria-hidden="true"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
           {{ _('city.intercity') }}
         </button>
-        <button class="hero__tab" role="tab" aria-selected="false" data-panel="hero-panel-city">
+        <button class="hero__tab" role="tab" id="hero-tab-city" aria-selected="false" aria-controls="hero-panel-city" tabindex="-1" data-panel="hero-panel-city">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
           {{ _('nav.city_transport') }}
         </button>
       </div>
 
-      <div id="hero-panel-intercity" class="hero__panel" role="tabpanel">
+      <div id="hero-panel-intercity" class="hero__panel" role="tabpanel" aria-labelledby="hero-tab-intercity">
         <div class="hero__form">
           {% from '_partials/_search_form.html' import search_form with context %}
           {{ search_form(t={'from': _('home.search_from'), 'to': _('home.search_to'), 'btn': _('home.search_btn')}, prefix=lang_prefix) }}
@@ -84,7 +84,7 @@
         {% endif %}
       </div>
 
-      <div id="hero-panel-city" class="hero__panel" role="tabpanel" hidden>
+      <div id="hero-panel-city" class="hero__panel" role="tabpanel" aria-labelledby="hero-tab-city" hidden>
         <div class="hero__city-grid">
           {% for c in cities_data %}
           <a href="{{ lang_prefix }}/gradski/{{ c.city }}/" class="hero__city-btn">
@@ -286,18 +286,30 @@
 {% block scripts %}
 <script>
 (function() {
-  var tabs = document.querySelectorAll('.hero__tab');
+  /* WAI-ARIA tabs: roving tabindex + arrow/Home/End keyboard nav. */
+  var tablist = document.querySelector('.hero__tabs');
+  if (!tablist) return;
+  var tabs = Array.prototype.slice.call(tablist.querySelectorAll('.hero__tab'));
   if (!tabs.length) return;
-  tabs.forEach(function(tab) {
-    tab.addEventListener('click', function() {
-      tabs.forEach(function(t) {
-        t.classList.remove('hero__tab--active');
-        t.setAttribute('aria-selected', 'false');
-      });
-      document.querySelectorAll('.hero__panel').forEach(function(p) { p.hidden = true; });
-      tab.classList.add('hero__tab--active');
-      tab.setAttribute('aria-selected', 'true');
-      document.getElementById(tab.dataset.panel).hidden = false;
+
+  function selectTab(tab, setFocus) {
+    tabs.forEach(function(t) {
+      var on = t === tab;
+      t.classList.toggle('hero__tab--active', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.dataset.panel).hidden = !on;
+    });
+    if (setFocus) tab.focus();
+  }
+
+  tabs.forEach(function(tab, i) {
+    tab.addEventListener('click', function() { selectTab(tab); });
+    tab.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); selectTab(tabs[(i + 1) % tabs.length], true); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); selectTab(tabs[(i - 1 + tabs.length) % tabs.length], true); }
+      else if (e.key === 'Home') { e.preventDefault(); selectTab(tabs[0], true); }
+      else if (e.key === 'End') { e.preventDefault(); selectTab(tabs[tabs.length - 1], true); }
     });
   });
 })();

@@ -686,7 +686,7 @@ if ('serviceWorker' in navigator) {
     dateInput.min = dateInput.value;
   }
 
-  /* ── City autocomplete ── */
+  /* ── City autocomplete — WAI-ARIA combobox + keyboard ── */
   /* Early-return on pages without search form (most of the site). The selector
      query is cheap; the real cost is the per-input listener wiring + i18n
      string interpolation below that runs on every template render. */
@@ -698,64 +698,103 @@ if ('serviceWorker' in navigator) {
     var timer = null;
     var activeIdx = -1;
 
+    /* Real city rows only; skeleton/empty rows carry no role=option. */
+    function options() { return dropdown.querySelectorAll('[role="option"]'); }
+
+    function close() {
+      dropdown.classList.remove('is-open');
+      input.setAttribute('aria-expanded', 'false');
+      input.removeAttribute('aria-activedescendant');
+      activeIdx = -1;
+    }
+
+    /* aria-activedescendant keeps DOM focus on the input while a screen
+       reader announces the highlighted option. */
+    function setActive(idx) {
+      var opts = options();
+      activeIdx = idx;
+      opts.forEach(function(it, i) {
+        var on = i === idx;
+        it.classList.toggle('is-active', on);
+        it.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      if (idx >= 0 && opts[idx]) {
+        input.setAttribute('aria-activedescendant', opts[idx].id);
+        opts[idx].scrollIntoView({ block: 'nearest' });
+      } else {
+        input.removeAttribute('aria-activedescendant');
+      }
+    }
+
+    function select(opt) {
+      input.value = opt.dataset.value;
+      close();
+      /* Focus next input */
+      var next = input.id === 'fromCity' ? document.getElementById('toCity') : document.getElementById('tripDate');
+      if (next) next.focus();
+    }
+
     function show(items) {
       if (!items.length) {
-        dropdown.innerHTML = '<div class="autocomplete__empty">{{ _('meta.city_not_found') }}</div>';
+        dropdown.innerHTML = '<div class="autocomplete__empty" role="status">{{ _('meta.city_not_found') }}</div>';
         dropdown.classList.add('is-open');
+        input.setAttribute('aria-expanded', 'true');
+        input.removeAttribute('aria-activedescendant');
+        activeIdx = -1;
         return;
       }
       dropdown.innerHTML = items.map(function(city, i) {
-        return '<div class="autocomplete__item" data-value="' + city + '">' +
-          '<svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>' +
+        return '<div class="autocomplete__item" role="option" id="' + dropdown.id + '-opt-' + i + '" aria-selected="false" data-value="' + city + '">' +
+          '<svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14" aria-hidden="true"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>' +
           city + '</div>';
       }).join('');
       dropdown.classList.add('is-open');
+      input.setAttribute('aria-expanded', 'true');
       activeIdx = -1;
     }
 
     input.addEventListener('input', function() {
       clearTimeout(timer);
       var q = input.value.trim();
-      if (q.length < 1) { dropdown.classList.remove('is-open'); return; }
-      // Show 3-row shimmer while the autocomplete request is in flight.
-      // Cleared by show(); .catch() also resets so a network failure
-      // doesn't leave the user staring at a permanent placeholder.
+      if (q.length < 1) { close(); return; }
+      // 3-row shimmer while the request is in flight; aria-hidden so a screen
+      // reader doesn't read skeletons as options. show()/catch() clear it.
       dropdown.innerHTML =
-        '<div class="autocomplete__item"><span class="skeleton-row" style="width:60%"></span></div>' +
-        '<div class="autocomplete__item"><span class="skeleton-row" style="width:40%"></span></div>' +
-        '<div class="autocomplete__item"><span class="skeleton-row" style="width:75%"></span></div>';
+        '<div class="autocomplete__item" aria-hidden="true"><span class="skeleton-row" style="width:60%"></span></div>' +
+        '<div class="autocomplete__item" aria-hidden="true"><span class="skeleton-row" style="width:40%"></span></div>' +
+        '<div class="autocomplete__item" aria-hidden="true"><span class="skeleton-row" style="width:75%"></span></div>';
       dropdown.classList.add('is-open');
+      input.setAttribute('aria-expanded', 'true');
       timer = setTimeout(function() {
         fetch('/api/cities?q=' + encodeURIComponent(q))
           .then(function(r) { return r.json(); })
           .then(show)
-          .catch(function() { dropdown.classList.remove('is-open'); });
+          .catch(close);
       }, 150);
     });
 
     dropdown.addEventListener('click', function(e) {
-      var item = e.target.closest('.autocomplete__item');
+      var item = e.target.closest('[role="option"]');
       if (!item) return;
-      input.value = item.dataset.value;
-      dropdown.classList.remove('is-open');
-      /* Focus next input */
-      var next = input.id === 'fromCity' ? document.getElementById('toCity') : document.getElementById('tripDate');
-      if (next) next.focus();
+      select(item);
     });
 
     input.addEventListener('keydown', function(e) {
-      var items = dropdown.querySelectorAll('.autocomplete__item');
-      if (!items.length || !dropdown.classList.contains('is-open')) return;
-      if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, items.length - 1); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, 0); }
-      else if (e.key === 'Enter' && activeIdx >= 0) { e.preventDefault(); items[activeIdx].click(); return; }
-      else return;
-      items.forEach(function(it, i) { it.classList.toggle('is-active', i === activeIdx); });
+      if (e.key === 'Escape') {
+        if (dropdown.classList.contains('is-open')) { e.preventDefault(); close(); }
+        return;
+      }
+      var opts = options();
+      if (!opts.length || !dropdown.classList.contains('is-open')) return;
+      if (e.key === 'ArrowDown') { e.preventDefault(); setActive(activeIdx + 1 >= opts.length ? 0 : activeIdx + 1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(activeIdx <= 0 ? opts.length - 1 : activeIdx - 1); }
+      else if (e.key === 'Enter') { if (activeIdx >= 0) { e.preventDefault(); select(opts[activeIdx]); } }
+      else if (e.key === 'Tab') { close(); }
     });
 
     document.addEventListener('click', function(e) {
       if (!input.contains(e.target) && !dropdown.contains(e.target)) {
-        dropdown.classList.remove('is-open');
+        close();
       }
     });
   });
