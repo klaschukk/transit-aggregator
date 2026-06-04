@@ -2,7 +2,7 @@ import html
 import logging
 import re
 
-from flask import Blueprint, abort, redirect, render_template, url_for
+from flask import Blueprint, abort, redirect, render_template, url_for, g
 
 from app.db import cached_query, cached_query_one, db_ready
 from app.extensions import limiter
@@ -732,6 +732,12 @@ def operator_detail(slug: str):
         GROUP BY r.slug, r.from_city, r.to_city, r.distance_km
         ORDER BY trip_count DESC, r.from_city, r.to_city
     """, [op['id']], ttl=3600)
+
+    # Thin-content guard: an operator with no priced routes renders an empty
+    # list (a ~660-byte soft-404). It is already excluded from the sitemap;
+    # noindex it too so it stops sitting in "crawled, currently not indexed".
+    if not routes:
+        g.meta_robots = 'noindex, follow'
 
     cities = sorted({c for r in routes for c in (r['from_city'], r['to_city'])})
 

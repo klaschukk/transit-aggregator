@@ -244,6 +244,10 @@ def create_app(config_name: str | None = None) -> Flask:
             'clean_path': clean_path,
             'canonical_url': canonical_url,
             'hreflang_urls': hreflang_urls,
+            # Thin pages (route with no priced trips, pair with no route row)
+            # set g.meta_robots = 'noindex, follow' to stay out of the index
+            # while still passing link equity. Everything else is indexable.
+            'meta_robots': getattr(g, 'meta_robots', 'index, follow, max-image-preview:large'),
             'asset_version': _ASSET_VERSION,
             'current_year': _dt.utcnow().year,
             'affiliate_offers': affiliate_offers,

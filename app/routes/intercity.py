@@ -215,6 +215,14 @@ def route_detail(slug: str):
     reviews_list = analytics_db.approved_reviews(slug)
     reviews_agg = analytics_db.aggregate_rating(slug)
 
+    # Thin-content guard: a route with no PRICED trips renders an empty
+    # schedule (trips may exist with price 0, so check the max). It is already
+    # excluded from the sitemap (same priced-trip filter); noindex it too so
+    # Google stops logging it under "crawled, currently not indexed".
+    # Re-indexes on its own once priced trips return.
+    if (route.get('max_price_rsd') or 0) <= 0:
+        g.meta_robots = 'noindex, follow'
+
     og_image_url = f"{current_app.config['BASE_URL']}/og/route/{slug}.png"
     return render_template('route_detail.html', route=route, trips=trips,
                            days=days, selected_day=selected_day,
@@ -340,6 +348,10 @@ def city_pair(from_city: str, to_city: str):
     # referencing (handled as thin content separately).
     if route and route.get('slug'):
         g.canonical_path = f"/rute/{route['slug']}/"
+    else:
+        # No backing route row → empty pair page (no schedule, no owner to
+        # fold onto). Thin content: keep it reachable but out of the index.
+        g.meta_robots = 'noindex, follow'
 
     from app.routes.info import country_hub_for_city
     destination_country = country_hub_for_city(route['to_city']) if route else None
