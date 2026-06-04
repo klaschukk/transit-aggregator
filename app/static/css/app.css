@@ -177,7 +177,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   width: 100%;
   max-width: var(--container-max);
   margin: 0 auto;
-  padding: 0 var(--text-base);
+  padding: 0 var(--space-4);
 }
 
 /* ── 5. Header ── */
