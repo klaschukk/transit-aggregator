@@ -68,6 +68,27 @@ img { display: block; max-width: 100%; }
   --color-tram: #e53935;
   --color-trolley: #fb8c00;
   --color-night: #1e1b4b;
+  --color-primary-300: #5eead4;
+  --color-primary-darker: #115e59;   /* primary button :hover */
+  /* Status / feedback — de-facto tokens, now named. Contrast ratios are
+     documented at point of use; do not lighten. */
+  --color-danger: #dc2626;
+  --color-danger-strong: #b91c1c;
+  --color-danger-text: #991b1b;
+  --color-danger-bg: #fee2e2;
+  --color-danger-50: #fef2f2;
+  --color-danger-bright: #ef4444;
+  --color-success-bg: #d1fae5;
+  --color-success-strong: #065f46;   /* on success bg / bookaway :hover */
+  --color-success-50: #ecfdf5;
+  --color-bookaway: #047857;         /* emerald-700, white text clears AA */
+  --color-flixbus: #73d700;
+  --color-hero-1: #0a1628;           /* hero gradient */
+  --color-hero-2: #0c3d6b;
+  --color-print-ink: #333;           /* print stylesheet greys */
+  --color-print-rule: #ccc;
+  --color-print-fill: #eee;
+  --color-print-muted: #666;
 
   /* Two roles: a geometric display face for headings, a humanist body
      face for reading. Fallbacks are metric-similar system fonts so the
@@ -255,7 +276,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .lang-pill__item:last-child { border-right: none; }
 .lang-pill__item:hover { background: var(--color-bg-alt); color: var(--color-text); }
 .lang-pill__item--active { background: var(--color-primary); color: #fff; }
-.lang-pill__item--active:hover { background: var(--color-primary-dark, #0f766e); color: #fff; }
+.lang-pill__item--active:hover { background: var(--color-primary-dark); color: #fff; }
 .site-nav-toggle {
   margin-left: auto;
   width: 44px; height: 44px;
@@ -465,7 +486,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   background: var(--color-primary-dark);
   color: var(--color-bg);
 }
-.btn--primary:hover { background: #115e59; }
+.btn--primary:hover { background: var(--color-primary-darker); }
 .btn--accent {
   background: var(--color-accent);
   /* Orange #f59e0b + white text was ~2.2:1 (WCAG fail). Dark text on
@@ -869,7 +890,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 /* Hero */
 .hero {
   position: relative;
-  background: linear-gradient(145deg, #0a1628 0%, #0c3d6b 45%, var(--color-primary) 100%);
+  background: linear-gradient(145deg, var(--color-hero-1) 0%, var(--color-hero-2) 45%, var(--color-primary) 100%);
   padding: var(--space-12) 0 36px /* off-scale */;
   overflow: hidden;
 }
@@ -1278,7 +1299,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 
 /* ETA badges */
 .eta { font-weight: 700; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
-.eta--now { color: #e53935; }
+.eta--now { color: var(--color-tram); }
 .eta--soon { color: var(--color-primary); }
 .eta--later { color: var(--color-text-muted); }
 
@@ -1468,7 +1489,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 /* Buy ticket affiliate block */
 .buy-ticket {
   margin: var(--space-6) 0; padding: var(--space-5) var(--space-6); border-radius: 12px;
-  background: linear-gradient(135deg, var(--color-primary-50) 0%, #ecfdf5 100%);
+  background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-success-50) 100%);
   border: 1px solid var(--color-primary-200);
 }
 .buy-ticket__header {
@@ -1487,9 +1508,9 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .buy-ticket__btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 /* Bookaway green: #059669 + white = 3.76:1 (AA fail at 13.6px normal).
    #047857 clears 4.65:1 and matches the old :hover — no visual jump. */
-.buy-ticket__btn--bookaway { background: #047857; }
-.buy-ticket__btn--bookaway:hover { background: #065f46; }
-.buy-ticket__btn--flixbus { background: #73d700; }
+.buy-ticket__btn--bookaway { background: var(--color-bookaway); }
+.buy-ticket__btn--bookaway:hover { background: var(--color-success-strong); }
+.buy-ticket__btn--flixbus { background: var(--color-flixbus); }
 .buy-ticket__btn--flixbus:hover { filter: brightness(0.92); }
 .buy-ticket__btn--primary { background: var(--color-primary); }
 .buy-ticket__btn--primary:hover { filter: brightness(0.9); }
@@ -2535,31 +2556,31 @@ html.ccy-eur span.ccy-eur { display: inline; }
     padding: var(--space-4) 0;
   }
   .hero__title { color: #000; font-size: 18pt; }
-  .hero__sub { color: #333; }
+  .hero__sub { color: var(--color-print-ink); }
 
   /* Trip list: keep readable */
   .trip-list {
-    border: 1px solid #ccc;
+    border: 1px solid var(--color-print-rule);
     border-radius: 0;
   }
   .trip-card {
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid var(--color-print-rule);
     padding: var(--space-2) var(--space-3);
     break-inside: avoid;
   }
-  .trip-card__carrier { background: #eee; color: #000; }
+  .trip-card__carrier { background: var(--color-print-fill); color: #000; }
   .trip-card__price { background: none; color: #000; }
 
   /* Stop timeline: keep readable */
-  .stop-timeline { border: 1px solid #ccc; border-radius: 0; }
+  .stop-timeline { border: 1px solid var(--color-print-rule); border-radius: 0; }
   .stop-row { break-inside: avoid; }
 
   /* Stats strip */
-  .stats-strip { border: 1px solid #ccc; border-radius: 0; background: none; }
+  .stats-strip { border: 1px solid var(--color-print-rule); border-radius: 0; background: none; }
   .stats-strip__value { color: #000; }
 
   /* Links: show URL */
-  a[href]::after { content: " (" attr(href) ")"; font-size: 9pt; color: #666; }
+  a[href]::after { content: " (" attr(href) ")"; font-size: 9pt; color: var(--color-print-muted); }
   .site-logo a::after,
   nav a::after,
   .btn::after,
@@ -2819,7 +2840,7 @@ select:focus-visible, textarea:focus-visible {
   font-size: 1rem;
 }
 .review-card__author {
-  color: var(--color-text, #1e293b);
+  color: var(--color-text);
   font-weight: 600;
 }
 .review-card__sep {
@@ -2848,7 +2869,7 @@ select:focus-visible, textarea:focus-visible {
   padding: 0;
 }
 .review-card__del:hover {
-  color: #ef4444;
+  color: var(--color-danger-bright);
 }
 
 .review-form-wrap {
@@ -2915,12 +2936,12 @@ select:focus-visible, textarea:focus-visible {
   font-size: 0.9rem;
 }
 .review-form__status--ok {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--color-success-bg);
+  color: var(--color-success-strong);
 }
 .review-form__status--err {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
 }
 
 .rating-widget {
@@ -3128,8 +3149,8 @@ select:focus-visible, textarea:focus-visible {
   color: var(--color-primary-dark);
 }
 .newsletter-form__status--err {
-  background: #fef2f2;
-  color: #b91c1c;
+  background: var(--color-danger-50);
+  color: var(--color-danger-strong);
 }
 
 /* Home hero variant */
@@ -3188,7 +3209,7 @@ select:focus-visible, textarea:focus-visible {
 }
 .review-prompt--hidden { opacity: 0; transform: translateY(8px); pointer-events: none; }
 .review-prompt__body { display: flex; align-items: center; gap: var(--space-2); flex: 1; min-width: 0; }
-.review-prompt__icon { color: #f59e0b; flex-shrink: 0; }
+.review-prompt__icon { color: var(--color-accent); flex-shrink: 0; }
 .review-prompt__text { line-height: 1.4; }
 .review-prompt__cta {
   background: var(--color-primary-dark);
@@ -3359,7 +3380,7 @@ select:focus-visible, textarea:focus-visible {
 .toast--success { border-left-color: var(--color-success); }
 .toast--info    { border-left-color: var(--color-primary); }
 .toast--warning { border-left-color: var(--color-accent); }
-.toast--error   { border-left-color: #dc2626; }
+.toast--error   { border-left-color: var(--color-danger); }
 @media (prefers-reduced-motion: reduce) {
   .toast { transform: none; transition: opacity .15s linear; }
   .toast--leaving { transform: none; }
@@ -3916,7 +3937,7 @@ select:focus-visible, textarea:focus-visible {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #5eead4;
+  background: var(--color-primary-300);
   box-shadow: 0 0 0 0 rgba(94, 234, 212, .7);
   animation: chatPulse 2s infinite;
 }
