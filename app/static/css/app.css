@@ -881,7 +881,10 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 }
 .autocomplete.is-open { display: block; }
 .autocomplete__item {
-  padding: var(--space-2-5) var(--space-3-5);
+  /* 12px block padding lifts the row to a 46px tap target (was 42); these
+     are keyboard-navigable combobox options so the larger hit area helps
+     both pointer and switch users. */
+  padding: var(--space-3) var(--space-3-5);
   font-size: var(--text-sm);
   font-weight: 500;
   cursor: pointer;
@@ -1132,27 +1135,10 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .home-city-card__icon { color: var(--color-primary); flex-shrink: 0; }
 .home-city-card__name { font-size: var(--text-lg); font-weight: 800; }
 .home-city-card__desc { font-size: var(--text-sm); color: var(--color-primary-dark); font-weight: 600; }
-/* Benefits strip */
-.home-benefits {
-  margin-top: var(--space-12);
-  padding: var(--space-8) 0;
-  background: var(--color-bg-alt);
-  border-top: 1px solid var(--color-border);
-}
-.home-benefits__grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-6);
-  text-align: center;
-}
-.home-benefits__item svg { color: var(--color-primary); margin-bottom: var(--space-2); }
-.home-benefits__label { font-size: var(--text-sm); font-weight: 700; margin-bottom: var(--space-0-5); }
-.home-benefits__desc { font-size: var(--text-xs); color: var(--color-text-muted); }
 
 /* ── Home responsive ── */
 @media (min-width: 640px) {
   .how-it-works { grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
-  .home-benefits__grid { grid-template-columns: repeat(4, 1fr); }
 }
 @media (min-width: 768px) {
   .hero { padding: var(--space-16) 0 var(--space-12); }
@@ -1337,16 +1323,6 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 }
 .line-badge--sm { min-width: 32px; height: 24px; padding: 0 var(--space-1-5); font-size: 11px; }
 .line-badge--lg { min-width: 56px; height: 40px; padding: 0 var(--space-3-5); font-size: var(--text-xl); }
-/* Line header */
-.line-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
-  padding-top: var(--space-6);
-}
-.line-header__name { font-size: var(--text-xl); font-weight: 800; margin: 0 0 var(--space-0-5); }
-.line-header__meta { font-size: var(--text-sm); color: var(--color-text-muted); margin: 0; }
 
 /* Direction bar */
 .direction-bar {
@@ -1865,30 +1841,6 @@ main { animation: fadeInUp .25s ease both; }
   z-index: 1;
 }
 .stop-hero__map .city-map { height: 100%; }
-.stop-hero__info {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3-5);
-  padding: var(--space-4) var(--space-5);
-}
-.stop-hero__icon {
-  width: 48px; height: 48px;
-  border-radius: var(--radius-md);
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.stop-hero__name {
-  font-size: var(--text-lg);
-  font-weight: 800;
-  margin: 0 0 var(--space-0-5);
-}
-.stop-hero__meta {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  margin: 0;
-}
 
 /* ── Stop lines list ── */
 .stop-lines {
@@ -1949,57 +1901,6 @@ main { animation: fadeInUp .25s ease both; }
   100% { background-position: -200% 0; }
 }
 
-/* ── About page ── */
-.about-mission {
-  display: flex;
-  gap: var(--space-5);
-  padding: var(--space-6);
-  background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-primary-light) 100%);
-  border: 1px solid var(--color-primary-200);
-  border-radius: var(--radius-lg);
-  margin-bottom: var(--space-8);
-}
-.about-mission__icon {
-  color: var(--color-primary);
-  flex-shrink: 0;
-}
-.about-mission__text h2 {
-  font-size: var(--text-xl);
-  margin-bottom: var(--space-2);
-}
-.about-mission__text p {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  line-height: 1.7;
-  margin-bottom: var(--space-2);
-}
-.about-mission__text p:last-child { margin-bottom: 0; }
-
-.about-stats {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-3);
-}
-.about-stat {
-  text-align: center;
-  padding: var(--space-5) var(--space-3);
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-}
-.about-stat__value {
-  font-size: var(--text-2xl);
-  font-weight: 800;
-  color: var(--color-primary);
-}
-.about-stat__label {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  margin-top: var(--space-1);
-}
-@media (min-width: 640px) {
-  .about-stats { grid-template-columns: repeat(4, 1fr); }
-}
 
 /* ── Contact page ── */
 .contact-layout {
@@ -2620,7 +2521,6 @@ html.ccy-eur span.ccy-eur { display: inline; }
 .breadcrumb__current { color: var(--color-text); font-weight: 600; }
 .site-logo__text { white-space: nowrap; }
 .carrier-section__info { flex: 1; min-width: 0; }
-.line-header__info { flex: 1; min-width: 0; }
 .station-card__info { flex: 1; min-width: 0; }
 .home-city-card__info { flex: 1; min-width: 0; }
 .search-hero__inner { text-align: center; max-width: 600px; margin: 0 auto; }
@@ -2758,7 +2658,7 @@ html.ccy-eur span.ccy-eur { display: inline; }
 /* Clickable cards — cursor pointer */
 a[class*="card"], a[class*="route"], a[class*="link"],
 .dest-card, .home-route, .home-city-card, .see-also__card,
-.line-card, .stop-row, .filter-chip, .time-chip,
+.stop-row, .filter-chip, .time-chip,
 .home-lines__item { cursor: pointer; }
 
 /* Smooth hover lift for all cards */
@@ -3431,7 +3331,6 @@ select:focus-visible, textarea:focus-visible {
 .skeleton-row { height: 14px; margin: var(--space-1-5) 0; }
 .skeleton-row--lg { height: 20px; }
 .skeleton-row--xl { height: 28px; }
-.skeleton-block { height: 64px; }
 @keyframes skeleton-shimmer {
   0%   { background-position: 100% 50%; }
   100% { background-position: -100% 50%; }
@@ -3860,10 +3759,6 @@ select:focus-visible, textarea:focus-visible {
   background-clip: text;
 }
 
-/* Home benefits grid — icons get primary color */
-.home-benefits__item svg {
-  color: var(--color-primary);
-}
 
 /* City cards — icon background accent */
 .home-city-card__icon {
