@@ -18,7 +18,10 @@
 
 set -o pipefail
 
-PROJECT=/home/klaschuk/transit
+# Resolve the repo root from this script's own location so the cron works
+# regardless of where the repo lives (was hard-coded to a path that no longer
+# exists, /home/klaschuk/transit, which silently failed every run).
+PROJECT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 KEY_FILE=$PROJECT/data/secrets/indexnow.key
 LOG=$PROJECT/logs/indexnow.log
 HOST=prevozni.com
