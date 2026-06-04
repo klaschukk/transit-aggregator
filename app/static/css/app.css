@@ -1655,6 +1655,20 @@ a:focus:not(:focus-visible),
 button:focus:not(:focus-visible),
 input:focus:not(:focus-visible) { outline: none; }
 
+/* Colour-surface focus: the global teal ring is near-invisible on
+   primary/accent/brand-coloured buttons. Give those a white inner ring
+   plus a teal halo so focus reads against both the button and the page.
+   (Mobile FAB/sticky-CTA get the same treatment in app.mobile.css.) */
+.btn--primary:focus-visible,
+.btn--accent:focus-visible,
+.buy-ticket__btn:focus-visible,
+.filter-chip--active:focus-visible,
+.lang-pill__item--active:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -4px;
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
 /* Input focus-visible: use border instead of outline */
 input:focus-visible,
 .journey-form__input:focus-visible,
@@ -1709,8 +1723,8 @@ input:focus-visible,
 
   /* Header pills were ornamental on desktop (28px). On mobile the same
      primitive can appear bare on /politika-kolacica/ and body-level uses,
-     so ensure a thumbable target. The in-sheet override below still wins. */
-  .lang-pill__item { min-height: 36px; }
+     so give a full 44px thumb target. The in-sheet override below matches. */
+  .lang-pill__item { min-height: 44px; }
 
   /* Star save button — ensure 44×44 on narrow screens even when the
      surrounding header is tight. */
@@ -3547,8 +3561,10 @@ select:focus-visible, textarea:focus-visible {
 }
 .mobile-anchor-ad__close {
   flex-shrink: 0;
-  min-width: 28px;
-  min-height: 28px;
+  /* 44×44 thumb target (was 28). The sticky band is 60px tall, so the
+     larger hit area fits without changing layout. */
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 50%;
   font-size: 1.1rem;
   line-height: 1;

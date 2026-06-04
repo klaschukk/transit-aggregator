@@ -413,7 +413,7 @@ body.m-nav-open .site-nav#siteNav {
 .site-nav#siteNav .lang-pill__item {
   flex: 1 1 0;
   min-width: 0;
-  min-height: 36px;
+  min-height: 44px;
   border: 0;
   border-radius: var(--mradius-pill);
   padding: var(--mspace-1) var(--mspace-2);
