@@ -120,6 +120,17 @@ img { display: block; max-width: 100%; }
   --container-max: 1100px;
   --header-h: 56px;
 
+  /* Breakpoint scale — sm/md/lg. CSS @media can't read custom properties, so
+     media queries hard-code these px values; this block is the single
+     documented reference (also readable from JS via getComputedStyle).
+       min-width (mobile-first, up):        640 / 768 / 1024
+       max-width (down, non-overlapping):   639 / 767
+     Plus two intentional max+min toggle PAIRS — 640|641 and 767|768 — kept on
+     purpose; do not collapse them. New queries must come from this set. */
+  --bp-sm: 640px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+
   /* Spacing scale (desktop): 4px grid + half-step midpoints; mirror of --mspace-*. */
   --space-0-5: 2px;
   --space-1: 4px;
@@ -2934,7 +2945,7 @@ select:focus-visible, textarea:focus-visible {
   grid-template-columns: 1fr 1fr;
   gap: var(--space-3);
 }
-@media (max-width: 600px) {
+@media (max-width: 639px) {
   .review-form__fields { grid-template-columns: 1fr; }
 }
 .review-form__consent {
