@@ -8,7 +8,8 @@ variables:
   DEPLOY_DIR: "/root/klaschuk/transit-aggregator"
 
 # ──────────────────────────────────────────────
-# TEST — runs on GitLab shared runners
+# TEST (CI) — runs on every push to main and on merge requests.
+# This is the gate: code only reaches `deploy` after the suite is green.
 # ──────────────────────────────────────────────
 test:
   stage: test
@@ -31,16 +32,18 @@ test:
   allow_failure: false
 
 # ──────────────────────────────────────────────
-# DEPLOY — SSH into production server
-# Requires CI/CD variable DEPLOY_SSH_KEY (base64-encoded private key)
-# Add in GitLab: Settings → CI/CD → Variables
+# DEPLOY — MANUAL (no continuous deployment).
+# Continuous deploy was removed: it reset the production tree to origin/main
+# automatically and repeatedly wiped in-progress work. Deploy is now an
+# explicit decision — click ▶ on this job in the GitLab pipeline when you
+# want to ship. Requires CI/CD variable DEPLOY_SSH_KEY (base64 private key).
 # ──────────────────────────────────────────────
 deploy:
   stage: deploy
   image: alpine:latest
   only:
     - main
-  when: on_success
+  when: manual          # ← was `on_success` (auto). Now a manual button.
   before_script:
     - apk add --no-cache openssh-client
     - mkdir -p ~/.ssh
@@ -55,6 +58,7 @@ deploy:
          git fetch origin main && \
          git reset --hard origin/main && \
          venv/bin/pip install -r requirements.txt -q && \
+         venv/bin/python scripts/minify_css.py && \
          systemctl restart transit && \
          sleep 3 && \
          curl -sf http://127.0.0.1:8000/health | python3 -c \"import sys,json; d=json.load(sys.stdin); print('Deploy OK, status:', d['transit']['status'])\""
