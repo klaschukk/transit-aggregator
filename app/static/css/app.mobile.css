@@ -934,6 +934,17 @@ body { padding-bottom: var(--m-bnav-h); }
 .m-sticky-cta { bottom: var(--m-bnav-h); padding-bottom: var(--mspace-3); }
 .review-prompt { bottom: calc(var(--m-bnav-h) + 8px); }
 
+/* AdSense bottom anchor was pinned to bottom:0 z-index 200 in app.css and
+   sat *on top of* the bnav, hiding the navigation. Lift it above the bar
+   like the rest of the fixed-bottom UI, and reserve its 60px band (+8 pad)
+   so trailing content isn't hidden either. :has() collapses the reservation
+   the instant the user dismisses the ad (and no-ops where unsupported —
+   the lift above the bnav still applies). */
+.mobile-anchor-ad { bottom: var(--m-bnav-h); }
+body:has(.mobile-anchor-ad:not(.mobile-anchor-ad--hidden)) {
+  padding-bottom: calc(var(--m-bnav-h) + 68px);
+}
+
 /* When the off-canvas drawer is open, hide the bnav so it doesn't sit
    over the drawer's tap targets. */
 .m-nav-open .m-bnav { transform: translateY(120%); }
