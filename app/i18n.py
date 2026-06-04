@@ -3195,11 +3195,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
     'city_transport.faq_a4': {
         'sr': 'Za međugradski prevoz koristite našu stranicu <a href="{prefix}/rute/">svih ruta</a> ili direktno tražite polazak preko '
-              '<a href="{prefix}/pretraga/?od={city}">polazaka iz {city}a</a>. Prikazujemo autobuske i železničke rute sa cenom, trajanjem i brojem polazaka.',
+              '<a rel="nofollow" href="{prefix}/pretraga/?od={city}">polazaka iz {city}a</a>. Prikazujemo autobuske i železničke rute sa cenom, trajanjem i brojem polazaka.',
         'en': 'For intercity travel use the <a href="{prefix}/rute/">all-routes page</a> or search directly via '
-              '<a href="{prefix}/pretraga/?od={city}">departures from {city}</a>. We show bus and train routes with price, duration and departure count.',
+              '<a rel="nofollow" href="{prefix}/pretraga/?od={city}">departures from {city}</a>. We show bus and train routes with price, duration and departure count.',
         'ru': 'Для междугородних поездок используйте <a href="{prefix}/rute/">страницу всех маршрутов</a> или ищите напрямую через '
-              '<a href="{prefix}/pretraga/?od={city}">рейсы из {city}</a>. Показываем автобусные и ж/д маршруты с ценой, временем и количеством рейсов.',
+              '<a rel="nofollow" href="{prefix}/pretraga/?od={city}">рейсы из {city}</a>. Показываем автобусные и ж/д маршруты с ценой, временем и количеством рейсов.',
     },
 
     # ── Hub SEO intros & FAQ: carriers_index (/prevoznici/) ──

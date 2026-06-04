@@ -149,7 +149,7 @@
   <h2 class="section__title">{{ _("home.popular_routes") }}</h2>
   <div class="popular-grid">
     {% for route in popular_routes %}
-    <a href="{{ lang_prefix }}/pretraga/?od={{ route.from_city|urlencode }}&do={{ route.to_city|urlencode }}" class="popular-card">
+    <a rel="nofollow" href="{{ lang_prefix }}/pretraga/?od={{ route.from_city|urlencode }}&do={{ route.to_city|urlencode }}" class="popular-card">
       <span class="popular-card__from">{{ route.from_city }}</span>
       <span class="popular-card__arrow">→</span>
       <span class="popular-card__to">{{ route.to_city }}</span>

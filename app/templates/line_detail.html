@@ -90,7 +90,7 @@
     <span>{{ _('line.action_title') }}</span>
   </div>
   <div class="buy-ticket__links">
-    <a href="{{ lang_prefix }}/pretraga/?od={{ city_label|urlencode }}"
+    <a rel="nofollow" href="{{ lang_prefix }}/pretraga/?od={{ city_label|urlencode }}"
        class="buy-ticket__btn buy-ticket__btn--dark">
       {{ _('line.action_search') }}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
@@ -238,7 +238,7 @@
       <span class="see-also__card-title">{{ _('city.all') }} {{ _('city.lines_count') }} {{ city_label }}</span>
       <span class="see-also__card-meta">{{ _('nav.city_transport') }}</span>
     </a>
-    <a href="{{ lang_prefix }}/pretraga/?od={{ city_label }}" class="see-also__card">
+    <a rel="nofollow" href="{{ lang_prefix }}/pretraga/?od={{ city_label }}" class="see-also__card">
       <span class="see-also__card-title">{{ _('city.departures_from') }} {{ city_label }}</span>
       <span class="see-also__card-meta">{{ _('city.search_dest') }}</span>
     </a>
