@@ -1,5 +1,7 @@
-{# Empty state macro — SVG icons, no emoji #}
-{% macro empty_state(icon='search', text='Nema podataka', sub='') %}
+{# Empty state macro — SVG icons, no emoji.
+   Optional action_url + action_label render a focusable CTA so an empty
+   list is never a dead end (spacing comes from .empty-state's flex gap). #}
+{% macro empty_state(icon='search', text='Nema podataka', sub='', action_url='', action_label='') %}
 <div class="empty-state">
   <div class="empty-state__icon">
     {% if icon == 'search' %}
@@ -17,9 +19,16 @@
       <rect x="6" y="2" width="12" height="20" rx="2"/>
       <path d="M10 18h4M6 7h12M6 12h12"/>
     </svg>
+    {% elif icon == 'star' %}
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" role="img" aria-label="{{ text }}">
+      <path d="M12 3l2.6 5.3 5.9.9-4.2 4.1 1 5.8L12 16.9 6.7 19.2l1-5.8L3.5 9.2l5.9-.9z"/>
+    </svg>
     {% endif %}
   </div>
   <div class="empty-state__text">{{ text }}</div>
   {% if sub %}<div class="empty-state__sub">{{ sub }}</div>{% endif %}
+  {% if action_url and action_label %}
+  <a href="{{ action_url }}" class="btn btn--outline empty-state__action">{{ action_label }}</a>
+  {% endif %}
 </div>
 {% endmacro %}

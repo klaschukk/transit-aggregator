@@ -86,16 +86,9 @@
 </div>
 
 {% else %}
-<!-- No results — suggestions -->
-<div class="empty-state">
-  <div class="empty-state__icon">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
-      <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-    </svg>
-  </div>
-  <div class="empty-state__text">{{ _('search.no_results') }}</div>
-  <div class="empty-state__sub">{{ from_city }} → {{ to_city }}</div>
-</div>
+<!-- No results — warm empty state with a way forward -->
+{{ empty_state(icon='search', text=_('search.no_results'), sub=from_city ~ ' → ' ~ to_city,
+               action_url=lang_prefix ~ '/rute/', action_label=_('see_also.all_routes')) }}
 
 {% from '_partials/_ad_slot.html' import ad_slot with context %}
 {{ ad_slot('search_mid', format='responsive') }}
