@@ -914,7 +914,6 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'search.no_results': {'sr': 'Nema rezultata', 'en': 'No results', 'ru': 'Нет результатов'},
 
     # ── Error pages ──
-    'error.404_title': {'sr': 'Stranica nije pronađena', 'en': 'Page not found', 'ru': 'Страница не найдена'},
     'error.404_text': {
         'sr': 'Stranica koju tražite ne postoji ili je uklonjena.',
         'en': 'The page you are looking for does not exist or has been removed.',
@@ -928,12 +927,10 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
 
     # ── Carriers page ──
-    'carriers.title': {'sr': 'Prevoznici u Srbiji', 'en': 'Carriers in Serbia', 'ru': 'Перевозчики Сербии'},
     'carriers.bus': {'sr': 'Autobuski prevoznici', 'en': 'Bus carriers', 'ru': 'Автобусные перевозчики'},
     'carriers.train': {'sr': 'Železnički prevoznici', 'en': 'Train carriers', 'ru': 'Железнодорожные перевозчики'},
 
     # ── Stations page ──
-    'stations.title': {'sr': 'Autobuske i železničke stanice', 'en': 'Bus and train stations', 'ru': 'Автобусные и ж/д станции'},
 
     # ── Line detail ──
     'line.stops': {'sr': 'stajališta', 'en': 'stops', 'ru': 'остановок'},
@@ -1097,8 +1094,6 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
 
     # ── Carriers / Stations ──
-    'carriers.routes_count': {'sr': 'ruta', 'en': 'routes', 'ru': 'маршрутов'},
-    'carriers.website': {'sr': 'Sajt', 'en': 'Website', 'ru': 'Сайт'},
     'stations.train': {'sr': 'Železničke stanice', 'en': 'Train stations', 'ru': 'Ж/д станции'},
 
     'search_results.sort_duration': {
@@ -3889,14 +3884,6 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
 
     # ── Misc UI strings ──
-    'city.loading': {'sr': 'Podaci se učitavaju...', 'en': 'Loading data...', 'ru': 'Загрузка...'},
-    'line.no_stops': {'sr': 'Nema podataka o stajalištima', 'en': 'No stop data available', 'ru': 'Нет данных об остановках'},
-    'stop.no_lines': {'sr': 'Nema podataka o linijama', 'en': 'No line data available', 'ru': 'Нет данных о маршрутах'},
-    'line.schedule_unavailable': {
-        'sr': 'Tačan raspored trenutno nije dostupan. Proverite na stajalištima ili na sajtu prevoznika.',
-        'en': 'The exact schedule is not available at this time. Check at the stops or on the carrier website.',
-        'ru': 'Точное расписание временно недоступно. Уточняйте на остановках или на сайте перевозчика.',
-    },
 
     # ── PWA install promo ──
     'pwa.install_title': {
