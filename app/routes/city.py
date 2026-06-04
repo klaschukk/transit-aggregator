@@ -246,9 +246,10 @@ def line_detail(city: str, line_slug: str):
     if not line:
         if not db_ready():
             abort(503)
-        if not line_slug.isascii() or '---' in line_slug:
-            abort(410)
-        abort(404)
+        # Genuine miss with the DB up = the line is gone (restructured or
+        # renumbered in a re-crawl), not transient → 410 for fast deindex
+        # rather than lingering in GSC "Not found (404)".
+        abort(410)
 
     stops = query("""
         SELECT cs.name, cs.slug, cs.lat, cs.lon,
@@ -440,12 +441,13 @@ def stop_detail(city: str, stop_slug: str):
     if not stop:
         if not db_ready():
             abort(503)
-        # Non-ASCII (Cyrillic legacy), triple-dash artefacts, and pure-numeric
-        # slugs won't ever come back → 410 so Google deindexes permanently.
-        # Clean ASCII misses stay 404 (could be typos in external links).
-        if not stop_slug.isascii() or '---' in stop_slug or stop_slug.isdigit():
-            abort(410)
-        abort(404)
+        # Genuine miss with the DB up = the stop is gone, not transient. The
+        # 2026 re-scrape dropped ~886 stops (3770→2884); their indexed URLs
+        # (clean-ASCII slugs like banostor-1, mas-polazni-peron-broj-13) are
+        # permanently dead. 410 deindexes them fast instead of leaving them
+        # stuck in GSC "Not found (404)" for months; renamed stops are
+        # re-found via the new slug already listed in sitemap-stops.
+        abort(410)
 
     # Lines serving this stop via city_line_stops
     lines_at_stop = query("""

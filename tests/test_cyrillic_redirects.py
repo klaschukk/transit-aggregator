@@ -131,11 +131,12 @@ def test_cyrillic_line_redirects_when_latin_canonical_exists(client):
     assert "/gradski/beograd/linija/linija-15/" in resp.headers["Location"]
 
 
-def test_ascii_misspelling_keeps_404(client):
-    """Pure ASCII slugs that simply don't exist (typos) stay 404 — the
-    Cyrillic logic must not affect this code path."""
+def test_ascii_miss_is_410_gone(client):
+    """An ASCII stop slug that doesn't resolve (DB up) is a removed
+    programmatic page (the re-scrape dropped ~886 stops), so it returns 410
+    Gone for fast deindex — the Cyrillic logic must not turn it into a 301."""
     resp = client.get(
         "/gradski/beograd/stajaliste/this-stop-definitely-does-not-exist/",
         follow_redirects=False,
     )
-    assert resp.status_code == 404
+    assert resp.status_code == 410

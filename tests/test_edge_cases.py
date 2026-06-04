@@ -41,13 +41,14 @@ def test_long_city_query(client):
 
 
 def test_long_slug(client):
+    # Single-token miss → 410 Gone (retired hub scheme); just must not 500.
     resp = client.get("/rute/" + "x" * 1000 + "/")
-    assert resp.status_code == 404
+    assert resp.status_code in (404, 410)
 
 
 def test_long_stop_slug(client):
     resp = client.get("/gradski/beograd/stajaliste/" + "y" * 500 + "/")
-    assert resp.status_code == 404
+    assert resp.status_code in (404, 410)
 
 
 # ── SQL injection attempts ──
@@ -75,7 +76,7 @@ def test_sqli_search(client):
 
 def test_sqli_route_slug(client):
     resp = client.get("/rute/' OR '1'='1/")
-    assert resp.status_code in (200, 404)
+    assert resp.status_code in (200, 404, 410)
 
 
 def test_sqli_city_stops(client):
@@ -138,7 +139,7 @@ def test_trailing_junk(client):
 
 def test_null_byte_in_url(client):
     resp = client.get("/rute/test%00/")
-    assert resp.status_code in (200, 400, 404)
+    assert resp.status_code in (200, 400, 404, 410)
 
 
 def test_dot_dot_in_static(client):

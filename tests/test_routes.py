@@ -25,21 +25,22 @@ def _route_count() -> int:
         ("/", 200),
         ("/rute/", 200),
         ("/rute/beograd-novi-sad/", 200),
-        ("/rute/NEPOSTOJECI/", 404),
+        # Single-token /rute/<x>/ is the retired city-hub scheme → 410 Gone.
+        ("/rute/NEPOSTOJECI/", 410),
         ("/gradski/", 200),
         ("/gradski/beograd/", 200),
         ("/gradski/novi-sad/", 200),
         ("/gradski/nis/", 200),
         ("/gradski/NEPOSTOJECI/", 404),
         ("/gradski/beograd/linija/linija-2a/", 200),
-        # UPPERCASE slug only redirects when its lowercase target row
-        # exists in city_lines — otherwise 404 directly (the prior 301→404
-        # chain wastes crawl budget; existence-gated since 2026-04-27).
-        ("/gradski/beograd/linija/NEPOSTOJECI/", 404),
-        ("/gradski/beograd/linija/nepostojeci/", 404),
+        # A missing line/stop with the DB up is a removed programmatic page
+        # (re-scrape dropped ~886 stops) → 410 Gone so Google deindexes fast,
+        # not 404 which lingers in GSC "Not found" for months.
+        ("/gradski/beograd/linija/NEPOSTOJECI/", 410),
+        ("/gradski/beograd/linija/nepostojeci/", 410),
         ("/gradski/beograd/stajaliste/sajam/", 200),
-        ("/gradski/beograd/stajaliste/NEPOSTOJECI/", 404),
-        ("/gradski/beograd/stajaliste/nepostojeci/", 404),
+        ("/gradski/beograd/stajaliste/NEPOSTOJECI/", 410),
+        ("/gradski/beograd/stajaliste/nepostojeci/", 410),
         ("/prevoznici/", 200),
         ("/autobuske-stanice/", 200),
         ("/o-nama/", 200),
