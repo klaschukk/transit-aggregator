@@ -66,9 +66,9 @@ def test_bookaway_url_routes_through_tune_tracker():
     # Per-route / per-surface attribution via sub IDs.
     assert 'aff_sub=beograd-nis' in url
     assert 'aff_sub2=route-detail' in url
-    # The destination deep-link is carried (encoded) in url=. It points at the
-    # country listing page (NOT a /beograd-to-nis pair path — bookaway's pair
-    # URLs need English city slugs and 404 on ours).
+    # The destination deep-link is carried (encoded) in url=. beograd:nis is a
+    # verified pair, so it deep-links to the exact route using Bookaway's
+    # ENGLISH slug (belgrade-to-nis), never our raw 'beograd-to-nis' (404s).
     dest = _dest(url)
     assert dest.startswith('https://www.bookaway.com/routes/serbia/')
     assert 'beograd-to-nis' not in dest
@@ -76,40 +76,49 @@ def test_bookaway_url_routes_through_tune_tracker():
     assert 'utm_medium=route-detail' in dest
 
 
-def test_bookaway_url_picks_destination_country():
-    url = Bookaway().build_url(
+def test_bookaway_verified_pair_uses_english_slug_under_from_country():
+    # A verified pair deep-links to the EXACT route (best conversion), using
+    # Bookaway's English slug under the DEPARTURE country: beograd->belgrade,
+    # serbia (from), even for a cross-border pair like beograd->sarajevo.
+    from app.affiliates.partners import _VERIFIED_PAIRS
+    assert 'beograd:sarajevo' in _VERIFIED_PAIRS, "allowlist not loaded"
+    dest = _dest(Bookaway().build_url(
         'beograd', 'sarajevo', 'Beograd', 'Sarajevo', 'trip-card',
-    )
-    # Destination country wins (Bookaway groups URLs by arrival country)
-    assert '/routes/bosnia-and-herzegovina/' in _dest(url)
+    ))
+    assert dest.startswith(
+        'https://www.bookaway.com/routes/serbia/belgrade-to-sarajevo')
+    assert 'beograd-to-sarajevo' not in dest  # never our raw slug
 
 
 def test_bookaway_falls_back_to_country_page_for_partial_match():
-    # mladenovac is NOT in Bookaway's inventory, beograd is. The route
-    # page bookaway.com/routes/serbia/mladenovac-to-beograd doesn't exist,
-    # so the destination falls back to the country listing page. The click
-    # still goes through the tracker, so attribution survives.
+    # mladenovac is NOT in Bookaway's inventory, so no verified pair exists.
+    # Destination falls back to the country listing page (always 200). The
+    # click still goes through the tracker, so attribution survives.
+    from app.affiliates.partners import _VERIFIED_PAIRS
+    assert 'mladenovac:beograd' not in _VERIFIED_PAIRS
     url = Bookaway().build_url(
         'mladenovac', 'beograd', 'Mladenovac', 'Beograd', 'trip-card',
     )
     assert url.startswith('https://bookaway2.go2cloud.org/aff_c?')
     dest = _dest(url)
     assert dest.startswith('https://www.bookaway.com/routes/serbia/?')
-    # No dead route slug in the destination path
-    assert 'mladenovac-to-beograd' not in dest
+    assert 'mladenovac-to-beograd' not in dest  # no dead pair path
 
 
-def test_bookaway_never_emits_pair_path_that_404s():
-    # Even when Bookaway has both endpoints, we deep-link to the country
-    # listing — a /routes/{country}/{from}-to-{to} pair path with our Serbian
-    # slugs 404s on bookaway (their pair URLs use English slugs). Country page
-    # always resolves and keeps the tracked click landing somewhere valid.
-    url = Bookaway().build_url(
-        'beograd', 'budva', 'Beograd', 'Budva', 'trip-card',
+def test_bookaway_unverified_pair_never_emits_404_pair_path():
+    # Invariant: a pair path is emitted ONLY for allowlisted pairs. An eligible
+    # but UNVERIFIED pair (Bookaway has no inventory for it) must fall back to
+    # the country page, never a guessed /{from}-to-{to} path that 404s.
+    from app.affiliates.partners import _VERIFIED_PAIRS, _BOOKAWAY_COUNTRY_MAP
+    pair = next(
+        (a, b)
+        for a in _BOOKAWAY_COUNTRY_MAP for b in _BOOKAWAY_COUNTRY_MAP
+        if a != b and f'{a}:{b}' not in _VERIFIED_PAIRS
     )
-    dest = _dest(url)
-    assert dest.startswith('https://www.bookaway.com/routes/montenegro/?')
-    assert 'beograd-to-budva' not in dest
+    dest = _dest(Bookaway().build_url(pair[0], pair[1], 'A', 'B', 'trip-card'))
+    path = dest.split('?')[0].split('bookaway.com')[1]
+    assert path.startswith('/routes/')
+    assert '-to-' not in path  # country listing, not a pair path
 
 
 def test_flixbus_placeholder_does_not_leak_param():
