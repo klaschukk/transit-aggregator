@@ -4,6 +4,7 @@
 <html lang="{{ _lang_html }}">
 <head>
 <meta charset="UTF-8">
+<script>document.documentElement.className+=' js';</script>{# `js` flag → CSS below reveals .fade-in for no-JS visitors #}
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0d9488">
 <meta name="robots" content="{{ meta_robots }}">
@@ -53,6 +54,7 @@
    most cases (low priority), but they don't apply or block render. The
    net cost on desktop is one ~5KB gzipped GET that doesn't affect FCP. #}
 {% if not config.DEBUG %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dist/app.mobile.css') }}?v={{ asset_version }}" media="(max-width: 767px)">{% else %}<link rel="stylesheet" href="{{ url_for('static', filename='css/app.mobile.css') }}?v={{ asset_version }}" media="(max-width: 767px)">{% endif %}
+<style>html:not(.js) .fade-in{opacity:1;transform:none}</style>
 {% if config.ADSENSE_ID %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ads.css') }}?v={{ asset_version }}">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config.ADSENSE_ID }}" crossorigin="anonymous"></script>{% endif %}
 <script>
