@@ -73,12 +73,21 @@ def test_has_canonical(client, url):
 
 @pytest.mark.parametrize("url", _ALL_PAGES)
 def test_canonical_has_path(client, url):
-    """Canonical URL must contain the page path (domain varies by config)."""
+    """Canonical URL must contain the page path (domain varies by config).
+
+    Exception: /voznja/<a>-do-<b>/ canonicalises onto its /rute/<a>-<b>/ owner
+    (cannibalisation fix), so its canonical is the owner path, not self.
+    """
     html = client.get(url).data.decode()
     m = re.search(r'rel="canonical"\s+href="([^"]*)"', html)
     assert m, f"No canonical href on {url}"
     canon = m.group(1)
-    assert url.rstrip("/") in canon or url == "/", f"Path missing from canonical: {canon}"
+    if url.startswith("/voznja/"):
+        owner = "/rute/" + url[len("/voznja/"):].replace("-do-", "-", 1)
+        assert owner.rstrip("/") in canon, \
+            f"voznja must canonicalise to its /rute/ owner, got: {canon}"
+    else:
+        assert url.rstrip("/") in canon or url == "/", f"Path missing from canonical: {canon}"
 
 
 # ── OG tags ──

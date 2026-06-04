@@ -181,22 +181,29 @@ def create_app(config_name: str | None = None) -> Flask:
         else:
             clean_path = path
 
-        # Per-variant self-referencing canonical:
-        #   sr (default) → BASE_URL + clean_path
-        #   en/ru        → BASE_URL + /{lang} + clean_path
+        # Canonical/hreflang may point at a DIFFERENT path than the current
+        # one: a route can set `g.canonical_path` to consolidate a duplicate
+        # onto its owner (e.g. /voznja/<a>-do-<b>/ → its /rute/<slug>/ owner).
+        # `clean_path` itself stays request-based so the language switcher and
+        # other self-links keep pointing at the current page.
+        canon_path = getattr(g, 'canonical_path', None) or clean_path
+
+        # Per-variant canonical:
+        #   sr (default) → BASE_URL + canon_path
+        #   en/ru        → BASE_URL + /{lang} + canon_path
         base_url = app.config.get('BASE_URL', '')
         if lang == DEFAULT_LANG:
-            canonical_url = base_url + clean_path
+            canonical_url = base_url + canon_path
         else:
-            canonical_url = f"{base_url}/{lang}{clean_path}"
+            canonical_url = f"{base_url}/{lang}{canon_path}"
 
         hreflang_urls = {}
         for l in SUPPORTED_LANGS:
             if l == DEFAULT_LANG:
-                hreflang_urls[l] = base_url + clean_path
+                hreflang_urls[l] = base_url + canon_path
             else:
-                hreflang_urls[l] = f"{base_url}/{l}{clean_path}"
-        hreflang_urls['x-default'] = base_url + clean_path
+                hreflang_urls[l] = f"{base_url}/{l}{canon_path}"
+        hreflang_urls['x-default'] = base_url + canon_path
 
         from datetime import datetime as _dt
         from app.affiliates import resolve_offers as _resolve_offers, ab_partner_order as _ab_order

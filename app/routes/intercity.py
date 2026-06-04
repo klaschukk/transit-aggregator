@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 
-from flask import Blueprint, render_template, abort, request, redirect, url_for, current_app
+from flask import Blueprint, render_template, abort, request, redirect, url_for, current_app, g
 from app.db import query, query_one, cached_query, db_ready
 from app.slug import normalize_slug
 
@@ -332,6 +332,14 @@ def city_pair(from_city: str, to_city: str):
     canonical_slug = route['slug'] if route and route.get('slug') else f'{from_city}-do-{to_city}'
     reviews_list = analytics_db.approved_reviews(canonical_slug)
     reviews_agg = analytics_db.aggregate_rating(canonical_slug)
+
+    # Cannibalisation fix: /voznja/<a>-do-<b>/ and /rute/<slug>/ render the same
+    # route row. /rute/ is the canonical owner (richer page, 4× the internal
+    # links, higher sitemap priority), so when this pair has a real route we
+    # point canonical + hreflang at it. Pairs with no route row keep self-
+    # referencing (handled as thin content separately).
+    if route and route.get('slug'):
+        g.canonical_path = f"/rute/{route['slug']}/"
 
     from app.routes.info import country_hub_for_city
     destination_country = country_hub_for_city(route['to_city']) if route else None
