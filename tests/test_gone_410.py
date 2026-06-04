@@ -27,10 +27,11 @@ def test_single_token_route_is_410(client):
         assert client.get(f"/rute/{slug}/").status_code == 410, slug
 
 
-def test_hyphenated_missing_route_stays_404(client):
-    # Looks like a from-to slug → could be a typo or not-yet-scraped route.
-    # Keep 404 (retryable), don't over-claim 410.
-    assert client.get("/rute/beograd-thiscitydoesnotexistxyz/").status_code == 404
+def test_missing_pair_route_is_410(client):
+    # A from-to slug that doesn't resolve is a removed route (dropped pair or
+    # multi-word city hub like banja-luka) → 410 Gone, same as stops/lines.
+    assert client.get("/rute/beograd-thiscitydoesnotexistxyz/").status_code == 410
+    assert client.get("/rute/sofia-thessaloniki/").status_code == 410
 
 
 def test_valid_pages_still_200(client, db):

@@ -148,13 +148,14 @@ def route_detail(slug: str):
         # Known-dead slugs Google has memorised from a prior sitemap.
         if slug in _LEGACY_GONE_INTERCITY:
             abort(410)
-        # Single-token slugs (/rute/jagodina/, /rute/budimpesta/, ...) are a
-        # retired city-hub URL scheme — a live intercity route slug is always
-        # from-to (hyphenated), so they can never resolve. 410, not 404, to
-        # clear them out of GSC fast.
-        if '-' not in slug:
-            abort(410)
-        abort(404)
+        # Any remaining miss (DB up, normalised, not a -do- confusion) is a
+        # removed route: the retired single-token /rute/<city>/ hub scheme
+        # (jagodina, budimpesta), multi-word city hubs (banja-luka,
+        # sremska-mitrovica) and dropped international pairs (sofia-thessaloniki)
+        # all 404'd in GSC. 410 deindexes them fast; a genuinely new route is
+        # served the moment it's scraped and re-found via the sitemap, so the
+        # transient-wrong window is negligible.
+        abort(410)
 
     trips = query("""
         SELECT t.departure_time, t.arrival_time, t.duration_min,

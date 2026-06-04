@@ -64,11 +64,11 @@ def test_rute_with_do_redirects_to_clean_slug(client):
     assert resp.headers["Location"].endswith("/rute/beograd-novi-sad/")
 
 
-def test_rute_with_do_404s_when_target_missing(client):
-    # Don't blanket-redirect — only when the cleaned slug exists. If neither
-    # /rute/X-do-Y/ nor /rute/X-Y/ exists, return 404 (or 410 for legacy).
+def test_rute_with_do_410s_when_target_missing(client):
+    # Don't blanket-redirect — only 301 when the cleaned slug exists. If neither
+    # /rute/X-do-Y/ nor /rute/X-Y/ exists, it's a removed route → 410 Gone.
     resp = client.get("/rute/nepostojeci-do-takode-nepostojeci/")
-    assert resp.status_code == 404
+    assert resp.status_code == 410
 
 
 # ── b) API endpoints ─────────────────────────────────────────────────
