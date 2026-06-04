@@ -113,14 +113,19 @@ class Bookaway(Partner):
         from_country = _BOOKAWAY_COUNTRY_MAP.get(from_slug)
         to_country = _BOOKAWAY_COUNTRY_MAP.get(to_slug)
         country = to_country or from_country or 'serbia'
-        # Both endpoints in inventory → deep-link to the route page.
-        # Otherwise fall back to the country listing page.
-        if from_country and to_country:
-            path = f'/routes/{country}/{from_slug}-to-{to_slug}'
-        else:
-            path = f'/routes/{country}/'
+        # Always deep-link to the country listing page. We must NOT build a
+        # /routes/{country}/{from}-to-{to} pair URL: bookaway's pair pages use
+        # ENGLISH city slugs under the departure country (belgrade, not beograd),
+        # so our Serbian slugs 404 there. Verified Jun 2026:
+        #   /routes/serbia/beograd-to-nis   -> 404   (our slug)
+        #   /routes/serbia/belgrade-to-nis  -> 200   (bookaway's slug)
+        # Beograd is in most routes, so the old pair format 404'd at scale —
+        # users hit bookaway's error page (zero conversions despite a tracked
+        # click). The country listing always resolves (200) and lets the user
+        # search the pair. A verified sr->en city-slug map could restore
+        # pair-level deep-links later.
         dest = (
-            f'https://www.bookaway.com{path}'
+            f'https://www.bookaway.com/routes/{country}/'
             f'?utm_source=prevozni&utm_medium={utm_medium}'
         )
         # Route through the TUNE tracker. aff_sub/aff_sub2 give per-route and

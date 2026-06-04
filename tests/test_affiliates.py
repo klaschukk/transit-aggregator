@@ -66,9 +66,12 @@ def test_bookaway_url_routes_through_tune_tracker():
     # Per-route / per-surface attribution via sub IDs.
     assert 'aff_sub=beograd-nis' in url
     assert 'aff_sub2=route-detail' in url
-    # The destination deep-link is carried (encoded) in url=.
+    # The destination deep-link is carried (encoded) in url=. It points at the
+    # country listing page (NOT a /beograd-to-nis pair path — bookaway's pair
+    # URLs need English city slugs and 404 on ours).
     dest = _dest(url)
-    assert dest.startswith('https://www.bookaway.com/routes/serbia/beograd-to-nis')
+    assert dest.startswith('https://www.bookaway.com/routes/serbia/')
+    assert 'beograd-to-nis' not in dest
     assert 'utm_source=prevozni' in dest
     assert 'utm_medium=route-detail' in dest
 
@@ -96,13 +99,17 @@ def test_bookaway_falls_back_to_country_page_for_partial_match():
     assert 'mladenovac-to-beograd' not in dest
 
 
-def test_bookaway_uses_route_page_when_both_endpoints_known():
-    # Sanity: the deep-link path is still preferred when Bookaway has
-    # both endpoints in its inventory.
+def test_bookaway_never_emits_pair_path_that_404s():
+    # Even when Bookaway has both endpoints, we deep-link to the country
+    # listing — a /routes/{country}/{from}-to-{to} pair path with our Serbian
+    # slugs 404s on bookaway (their pair URLs use English slugs). Country page
+    # always resolves and keeps the tracked click landing somewhere valid.
     url = Bookaway().build_url(
         'beograd', 'budva', 'Beograd', 'Budva', 'trip-card',
     )
-    assert '/routes/montenegro/beograd-to-budva?' in _dest(url)
+    dest = _dest(url)
+    assert dest.startswith('https://www.bookaway.com/routes/montenegro/?')
+    assert 'beograd-to-budva' not in dest
 
 
 def test_flixbus_placeholder_does_not_leak_param():
