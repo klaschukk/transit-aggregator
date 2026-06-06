@@ -118,6 +118,25 @@
     {% endif %}
   </div>
 
+  <h2>Clicks by partner (last 30 days)</h2>
+  {% if by_partner_30 %}
+  <table>
+    <thead><tr><th>Partner</th><th>Clicks</th><th>Share</th></tr></thead>
+    <tbody>
+      {% set _ptotal = by_partner_30|sum(attribute='clicks') or 1 %}
+      {% for r in by_partner_30 %}
+      <tr>
+        <td><span class="surface">{{ r.partner }}</span></td>
+        <td><strong>{{ r.clicks }}</strong></td>
+        <td>{{ (r.clicks * 100 // _ptotal) }}%</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">No clicks yet.</div>
+  {% endif %}
+
   <h2>Clicks by surface (last 30 days)</h2>
   {% if by_surface_30 %}
   <table>

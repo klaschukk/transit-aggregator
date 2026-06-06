@@ -137,6 +137,14 @@ def revenue():
         ORDER BY clicks DESC
     """)
 
+    by_partner_30 = analytics_db.query("""
+        SELECT COALESCE(NULLIF(partner, ''), 'unknown') AS partner, COUNT(*) AS clicks
+        FROM ba_clicks
+        WHERE datetime(ts) >= datetime('now', '-30 days')
+        GROUP BY partner
+        ORDER BY clicks DESC
+    """)
+
     daily = analytics_db.query("""
         SELECT date(ts) AS day, COUNT(*) AS clicks
         FROM ba_clicks
@@ -165,6 +173,7 @@ def revenue():
         top_routes_7=top_routes_7,
         top_routes_30=top_routes_30,
         by_surface_30=by_surface_30,
+        by_partner_30=by_partner_30,
         daily=daily,
     )
 

@@ -96,6 +96,7 @@ CREATE TABLE IF NOT EXISTS ba_clicks (
     surface     TEXT,
     operator    TEXT,
     trip_time   TEXT,
+    partner     TEXT,
     ip_hash     TEXT,
     user_agent  TEXT,
     referrer    TEXT,
@@ -249,6 +250,13 @@ def init_schema() -> None:
     try:
         conn = _get_conn()
         conn.executescript(_SCHEMA_SQL)
+        # Migration: add ba_clicks.partner to DBs created before it existed so
+        # outbound clicks break down per affiliate. ADD COLUMN is a no-op error
+        # ("duplicate column name") once applied — swallow it.
+        try:
+            conn.execute("ALTER TABLE ba_clicks ADD COLUMN partner TEXT")
+        except sqlite3.OperationalError:
+            pass
         logger.info("analytics_db schema ready at %s", _path())
     except sqlite3.Error as exc:
         logger.error("analytics_db init failed: %s", exc)
@@ -268,16 +276,18 @@ def insert_ba_click(
     ip: str,
     user_agent: str,
     referrer: str,
+    partner: str = '',
 ) -> None:
     try:
         _get_conn().execute(
-            "INSERT INTO ba_clicks (route_slug, surface, operator, trip_time, ip_hash, user_agent, referrer) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO ba_clicks (route_slug, surface, operator, trip_time, partner, ip_hash, user_agent, referrer) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             [
                 (route_slug or '')[:200],
                 (surface or '')[:40],
                 (operator or '')[:100],
                 (trip_time or '')[:10],
+                (partner or '')[:40],
                 hash_ip(ip),
                 (user_agent or '')[:300],
                 (referrer or '')[:500],

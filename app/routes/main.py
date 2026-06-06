@@ -314,6 +314,7 @@ def api_ba_click():
     surface = str(data.get('surface', ''))[:40]
     operator = str(data.get('operator', ''))[:100]
     trip_time = str(data.get('trip_time', ''))[:10]
+    partner = str(data.get('partner', ''))[:40]
 
     # Surface allowlist — prevents cardinality bloat from bogus values.
     if surface and surface not in (
@@ -322,11 +323,17 @@ def api_ba_click():
     ):
         surface = 'other'
 
+    # Partner allowlist — same anti-cardinality guard. Unknown keys bucket to
+    # 'other' so the per-partner breakdown stays clean.
+    if partner and partner not in ('bookaway', 'busticket4', 'flixbus'):
+        partner = 'other'
+
     insert_ba_click(
         route_slug=route_slug,
         surface=surface,
         operator=operator,
         trip_time=trip_time,
+        partner=partner,
         ip=_client_ip(),
         user_agent=request.headers.get('User-Agent', '')[:300],
         referrer=request.headers.get('Referer', '')[:500],

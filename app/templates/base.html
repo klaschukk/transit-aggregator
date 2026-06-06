@@ -439,16 +439,16 @@ if ('serviceWorker' in navigator) {
     } catch(e){}
   }
 
-  /* ── Bookaway CTAs (per-trip + whole-route) ── */
+  /* Partner buy CTAs — log every outbound affiliate click (data-partner) */
   document.addEventListener('click', function(ev){
-    var el = ev.target.closest('.trip-card__buy, .buy-ticket__btn--bookaway');
+    var el = ev.target.closest('.trip-card__buy, .buy-ticket__btn, .partners-block__btn');
     if (!el) return;
-    var isPerTrip = el.classList.contains('trip-card__buy');
     var payload = {
       route_slug: el.dataset.routeSlug || document.body.dataset.routeSlug || '',
       surface:    el.dataset.surface   || document.body.dataset.surface   || '',
       operator:   el.dataset.op || '',
       trip_time:  el.dataset.time || '',
+      partner:    el.dataset.partner || '',
     };
     u('ba_click', payload);
     logBaClick(payload);
