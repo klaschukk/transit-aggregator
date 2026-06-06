@@ -5,6 +5,13 @@
 <head>
 <meta charset="UTF-8">
 <script>document.documentElement.className+=' js';</script>{# `js` flag → CSS below reveals .fade-in for no-JS visitors #}
+{# Default a NEW human visitor to English (product choice). Search crawlers are
+   skipped by user-agent, so the Serbian version stays the indexed canonical and
+   SEO is untouched — this only steers real users. The first language a visitor
+   sees is remembered in a `lang` cookie, so manually switching back to Serbian
+   (or any language) sticks and they are never redirected again. Reversible:
+   delete this block to restore Serbian-default behaviour. #}
+<script>(function(){try{var d=document,e=d.documentElement,Y=';path=/;max-age=31536000;samesite=Lax';if(/bot|crawl|spider|google|bing|yandex|baidu|slurp|duckduck|facebookexternalhit|headless|lighthouse|preview/i.test(navigator.userAgent||''))return;if(!/(?:^|;)\s*lang=/.test(d.cookie)&&(e.lang||'sr')==='sr'){d.cookie='lang=en'+Y;var p=location.pathname+location.search+location.hash;location.replace('/en'+(p==='/'?'/':p));return;}d.cookie='lang='+(e.lang||'sr')+Y;}catch(_){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0d9488">
 <meta name="robots" content="{{ meta_robots }}">
