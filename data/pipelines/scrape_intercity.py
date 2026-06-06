@@ -311,8 +311,16 @@ def main() -> None:
         f'pairs to scrape: {len(pairs)}'
     )
 
+    # Scrape a representative WEEKDAY. Bus service thins out on weekends (a
+    # Sunday snapshot found ~195 routes vs ~569 on a weekday), and the search is
+    # date-specific: a pair with no departures on the scraped date yields no
+    # trips and no busticket4 line_id, so a weekend run silently starves the
+    # exact-checkout coverage. Roll forward to the next Mon–Fri, ≥1 day out.
     travel_date = date.today() + timedelta(days=1)
-    log.info(f'Searching departures for {travel_date.isoformat()}\n')
+    while travel_date.weekday() >= 5:  # 5 = Saturday, 6 = Sunday
+        travel_date += timedelta(days=1)
+    log.info(f'Searching departures for {travel_date.isoformat()} '
+             f'({travel_date.strftime("%A")})\n')
 
     routes: list[dict] = []
     failed: list[str] = []
