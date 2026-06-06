@@ -64,13 +64,13 @@ def resolve(filter_: dict[str, Any] | None) -> list[dict]:
 
     if isinstance(f.get('min_days_old'), int) and f['min_days_old'] > 0:
         where.append(
-            "s.confirmed_at <= CURRENT_TIMESTAMP - INTERVAL "
-            f"'{int(f['min_days_old'])} days'"
+            "datetime(s.confirmed_at) <= datetime('now', "
+            f"'-{int(f['min_days_old'])} days')"
         )
     if isinstance(f.get('max_days_old'), int) and f['max_days_old'] > 0:
         where.append(
-            "s.confirmed_at >= CURRENT_TIMESTAMP - INTERVAL "
-            f"'{int(f['max_days_old'])} days'"
+            "datetime(s.confirmed_at) >= datetime('now', "
+            f"'-{int(f['max_days_old'])} days')"
         )
 
     if f.get('exclude_suppressed', True):

@@ -65,7 +65,7 @@ def _no_index(resp):
 def dashboard():
     pending_rows = analytics_db.query("SELECT COUNT(*) AS c FROM reviews WHERE status='pending'")
     total_rows   = analytics_db.query("SELECT COUNT(*) AS c FROM reviews")
-    sub_rows     = analytics_db.query("SELECT COUNT(*) AS c FROM subscribers WHERE confirmed=1")
+    sub_rows     = analytics_db.query("SELECT COUNT(*) AS c FROM subscribers WHERE confirmed_at IS NOT NULL AND unsubscribed_at IS NULL")
     clicks_7d    = _total_clicks_since(7)
     clicks_30d   = _total_clicks_since(30)
 
@@ -76,7 +76,7 @@ def dashboard():
     top_routes = analytics_db.query("""
         SELECT route_slug, COUNT(*) AS clicks
         FROM ba_clicks
-        WHERE ts >= CURRENT_TIMESTAMP - INTERVAL '7 days'
+        WHERE datetime(ts) >= datetime('now', '-7 days')
           AND route_slug != ''
         GROUP BY route_slug ORDER BY clicks DESC LIMIT 7
     """)
@@ -113,7 +113,7 @@ def revenue():
     top_routes_7 = analytics_db.query("""
         SELECT route_slug, surface, COUNT(*) AS clicks
         FROM ba_clicks
-        WHERE ts >= CURRENT_TIMESTAMP - INTERVAL '7 days'
+        WHERE datetime(ts) >= datetime('now', '-7 days')
           AND route_slug != ''
         GROUP BY route_slug, surface
         ORDER BY clicks DESC
@@ -122,7 +122,7 @@ def revenue():
     top_routes_30 = analytics_db.query("""
         SELECT route_slug, surface, COUNT(*) AS clicks
         FROM ba_clicks
-        WHERE ts >= CURRENT_TIMESTAMP - INTERVAL '30 days'
+        WHERE datetime(ts) >= datetime('now', '-30 days')
           AND route_slug != ''
         GROUP BY route_slug, surface
         ORDER BY clicks DESC
@@ -132,23 +132,31 @@ def revenue():
     by_surface_30 = analytics_db.query("""
         SELECT COALESCE(NULLIF(surface, ''), 'unknown') AS surface, COUNT(*) AS clicks
         FROM ba_clicks
-        WHERE ts >= CURRENT_TIMESTAMP - INTERVAL '30 days'
+        WHERE datetime(ts) >= datetime('now', '-30 days')
         GROUP BY surface
         ORDER BY clicks DESC
     """)
 
     daily = analytics_db.query("""
-        SELECT CAST(ts AS DATE) AS day, COUNT(*) AS clicks
+        SELECT date(ts) AS day, COUNT(*) AS clicks
         FROM ba_clicks
-        WHERE ts >= CURRENT_TIMESTAMP - INTERVAL '30 days'
+        WHERE datetime(ts) >= datetime('now', '-30 days')
         GROUP BY day
         ORDER BY day
     """)
 
-    # Normalise for the bar chart: max daily for sizing bars.
+    # Normalise for the bar chart: max daily for sizing bars. SQLite's date()
+    # returns a 'YYYY-MM-DD' string (DuckDB returned a date); parse it back so
+    # the template's day.strftime() keeps working.
+    from datetime import date as _date
     max_daily = max((r['clicks'] for r in daily), default=1) or 1
     for r in daily:
         r['pct'] = int((r['clicks'] / max_daily) * 100)
+        if isinstance(r['day'], str):
+            try:
+                r['day'] = _date.fromisoformat(r['day'][:10])
+            except ValueError:
+                pass
 
     return render_template(
         'admin/revenue.html',
@@ -162,11 +170,10 @@ def revenue():
 
 
 def _total_clicks_since(days: int) -> int:
-    # DuckDB doesn't bind INTERVAL via parameters, but `days` is an int literal
-    # we control, not user input.
+    # `days` is an int literal we control, not user input.
     days = max(1, int(days))
     rows = analytics_db.query(
-        f"SELECT COUNT(*) AS c FROM ba_clicks WHERE ts >= CURRENT_TIMESTAMP - INTERVAL '{days} days'"
+        f"SELECT COUNT(*) AS c FROM ba_clicks WHERE datetime(ts) >= datetime('now', '-{days} days')"
     )
     return rows[0]['c'] if rows else 0
 
@@ -255,9 +262,9 @@ def price_alerts():
         "FROM price_alerts_sent"
     )
     by_day = analytics_db.query(
-        "SELECT CAST(sent_at AS DATE) AS day, COUNT(*) AS c "
+        "SELECT date(sent_at) AS day, COUNT(*) AS c "
         "FROM price_alerts_sent "
-        "WHERE sent_at >= CURRENT_TIMESTAMP - INTERVAL '30 days' "
+        "WHERE datetime(sent_at) >= datetime('now', '-30 days') "
         "GROUP BY day ORDER BY day DESC"
     )
     return render_template(
