@@ -16,10 +16,15 @@
      surface — which page type the click happened on: 'search',
                'route_detail', 'city_pair' (see analytics_db allowlist).
 #}
-{% macro trip_card(trip, ba_url=None, buy_label='', route_slug='', surface='', offers=None) %}
+{% macro trip_card(trip, ba_url=None, buy_label='', route_slug='', surface='', offers=None, from_slug='', to_slug='') %}
 {% set _primary = (offers[0] if offers else None) %}
 {% set _buy_href = _primary.url if _primary else ba_url %}
 {% set _buy_partner = _primary.partner_key if _primary else ('bookaway' if ba_url else '') %}
+{# Upgrade THIS departure to BusTicket4's exact checkout when we know its line
+   id (direct seller → real trip + price + 2% attribution). Falls back to the
+   pair-level partner (Bookaway) when the line id is unknown. #}
+{% set _bt4 = bt4_checkout_url(from_slug, to_slug, trip.bt4_line_id) if (from_slug and to_slug and trip.bt4_line_id) else '' %}
+{% if _bt4 %}{% set _buy_href = _bt4 %}{% set _buy_partner = 'busticket4' %}{% endif %}
 {# A/B Exp 1: CTA copy (variant overrides buy_label when caller didn't pass one) #}
 {% set _cta_variant = ab_variant('cta_copy_v1') %}
 {# A/B Exp 2: button color tier — 'accent' (orange), 'primary' (teal), 'urgent' (red) #}

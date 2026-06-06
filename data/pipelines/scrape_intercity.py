@@ -278,6 +278,10 @@ def search_departures(
                 'price': price_rsd,
                 'operator': operator_name,
                 'type': 'bus',
+                # busticket4 line id — drives the affiliate checkout deep-link
+                # (/en/checkout?...&lineId=). Without it the checkout renders
+                # an empty 0.00 € page. May be absent for partner-resold lines.
+                'bt4_line_id': dep.get('line_id'),
             })
 
     return trips
@@ -359,6 +363,7 @@ def main() -> None:
                 'price_rsd': trip['price'],
                 'operator': trip['operator'],
                 'type': trip['type'],
+                'bt4_line_id': trip.get('bt4_line_id'),
                 'scraped_at': trip.get('scraped_at') or route.get('scraped_at'),
             })
 

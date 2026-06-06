@@ -233,6 +233,7 @@ def create_app(config_name: str | None = None) -> Flask:
 
         from datetime import datetime as _dt
         from app.affiliates import resolve_offers as _resolve_offers, ab_partner_order as _ab_order
+        from app.affiliates import bt4_checkout_url as _bt4_checkout_url
 
         def affiliate_offers(from_slug, to_slug, from_city='', to_city='', utm_medium='trip-card'):
             """Template helper — resolves the ranked offer list for a pair.
@@ -277,6 +278,7 @@ def create_app(config_name: str | None = None) -> Flask:
             'asset_version': _ASSET_VERSION,
             'current_year': _dt.utcnow().year,
             'affiliate_offers': affiliate_offers,
+            'bt4_checkout_url': _bt4_checkout_url,
             '_review_loaded_at': review_loaded_at,
         }
 
