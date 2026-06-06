@@ -137,3 +137,41 @@ def test_pretraga_renders_far_block(client, app):
     assert 'id="aiRoute"' in html
     assert 'ai-route__cta' in html          # Bookaway CTA present even pre-fetch
     assert 'go2cloud.org' in html           # CTA routed through conversion tracker
+
+
+# ── /voznja far guide (Phase 2, indexable, server-rendered) ──────────────
+
+def test_voznja_far_guide_indexable(client, app, monkeypatch):
+    from app.db import db_ready
+    with app.app_context():
+        if not db_ready():
+            pytest.skip('transit.duckdb not present in this environment')
+    from app.routes import intercity
+    fake = {
+        'feasible': True, 'summary': 'Put preko Istanbula',
+        'legs': [{'mode': 'flight', 'from': 'Beograd', 'to': 'Bangkok',
+                  'duration': '~12h', 'note': ''}],
+        'total_duration': '~13h', 'price_from_eur': 500, 'tips': ['viza'],
+    }
+    monkeypatch.setattr(intercity, '_compose_far_itinerary',
+                        lambda info, fd, td, lang: fake)
+    r = client.get('/voznja/beograd-do-bangkok/')
+    assert r.status_code == 200
+    html = r.get_data(as_text=True)
+    assert 'ai-route--static' in html       # server-rendered itinerary
+    assert 'FAQPage' in html                # rich-result schema
+    assert 'noindex' not in html.lower()    # indexable (unlike /pretraga)
+
+
+def test_voznja_thin_pair_stays_noindex(client, app, monkeypatch):
+    from app.db import db_ready
+    with app.app_context():
+        if not db_ready():
+            pytest.skip('transit.duckdb not present in this environment')
+    # A far pair whose itinerary can't be composed → no far block, stays thin.
+    from app.routes import intercity
+    monkeypatch.setattr(intercity, '_compose_far_itinerary',
+                        lambda info, fd, td, lang: None)
+    r = client.get('/voznja/beograd-do-bangkok/')
+    assert r.status_code == 200
+    assert 'noindex' in r.get_data(as_text=True).lower()

@@ -255,6 +255,34 @@ def route_detail(slug: str):
                            og_image_url=og_image_url)
 
 
+def _compose_far_itinerary(info: dict, from_disp: str, to_disp: str, lang: str):
+    """Cached AI itinerary for a far pair (e.g. Beograd→Bangkok), or None.
+    Composed via Groq once, then served from the analytics cache — so the
+    indexable /voznja far page renders the same content on every crawl (incl.
+    Googlebot) without hammering the model. Returns None when the model is
+    unavailable or the trip isn't feasible, in which case the page stays a
+    thin (noindex) empty pair."""
+    import json as _json
+    from app import analytics_db
+    cached = analytics_db.get_composed_route(info['pair_key'], lang)
+    if cached:
+        try:
+            return _json.loads(cached)
+        except ValueError:
+            return None
+    from app.ai_compose import compose_itinerary_via_groq
+    data = compose_itinerary_via_groq(
+        from_disp, to_disp, lang, current_app.config.get('GROQ_API_KEY', ''),
+    )
+    if data and data.get('feasible'):
+        analytics_db.upsert_composed_route(
+            info['pair_key'], lang, from_disp, to_disp,
+            _json.dumps(data, ensure_ascii=False),
+        )
+        return data
+    return None
+
+
 @intercity_bp.route('/voznja/<from_city>-do-<to_city>/')
 def city_pair(from_city: str, to_city: str):
     # Canonical redirect: uppercase or cyrillic URL → lowercase Latin.
@@ -354,6 +382,23 @@ def city_pair(from_city: str, to_city: str):
             LIMIT 8
         """, [route['to_city'], route['from_city']], ttl=3600)
 
+    from_disp = from_city.replace('-', ' ').title()
+    to_disp = to_city.replace('-', ' ').title()
+
+    # Far-destination guide (Phase 2): no local route, but the destination is a
+    # place Bookaway sells (Asia, Middle East, ...). Compose a real itinerary
+    # server-side (cached) so the page carries genuine content and can be
+    # indexed, instead of being a thin empty pair routed to noindex.
+    far = None
+    far_itinerary = None
+    if not route:
+        from app.ai_compose import far_pair_info
+        far = far_pair_info(from_city, to_city)
+        if far:
+            far_itinerary = _compose_far_itinerary(
+                far, from_disp, to_disp, getattr(g, 'lang', 'sr'),
+            )
+
     # Reviews aggregate across both /voznja/ and /rute/ via the canonical
     # route slug — UGC is the property of the pair, not the URL.
     from app import analytics_db
@@ -368,9 +413,14 @@ def city_pair(from_city: str, to_city: str):
     # referencing (handled as thin content separately).
     if route and route.get('slug'):
         g.canonical_path = f"/rute/{route['slug']}/"
+    elif far_itinerary:
+        # Far guide with real composed content (steps + est. time/price + FAQ)
+        # → index it, self-canonical. This is the indexable Phase-2 surface
+        # (the /pretraga fallback stays noindex).
+        g.canonical_path = f"/voznja/{from_city}-do-{to_city}/"
     else:
-        # No backing route row → empty pair page (no schedule, no owner to
-        # fold onto). Thin content: keep it reachable but out of the index.
+        # No backing route row and not a far guide → empty pair page (no
+        # schedule, no owner to fold onto). Thin content: reachable, not indexed.
         g.meta_robots = 'noindex, follow'
 
     from app.routes.info import country_hub_for_city
@@ -382,8 +432,9 @@ def city_pair(from_city: str, to_city: str):
                            related_pairs=related_pairs,
                            onward_pairs=onward_pairs,
                            destination_country=destination_country,
-                           from_city=from_city.replace('-', ' ').title(),
-                           to_city=to_city.replace('-', ' ').title(),
+                           from_city=from_disp,
+                           to_city=to_disp,
+                           far=far, far_itinerary=far_itinerary,
                            reviews=reviews_list, reviews_agg=reviews_agg,
                            review_route_slug=canonical_slug,
                            og_image_url=og_image_url)

@@ -1045,6 +1045,21 @@ def sitemap_pairs():
             pages.append(
                 url(f'/voznja/{pair_key}/', 'weekly', '0.6', mod=mod)
             )
+
+    # Far-destination guides (/voznja/<sr>-do-<far>/) that already have a
+    # composed sr itinerary cached → real indexable content (steps + est.
+    # time/price + FAQ), so they are safe to expose. The set grows as pages are
+    # composed (search fallback + scripts/pregen_far_routes.py seed). Lower
+    # priority than scheduled routes — these are estimates, not live timetables.
+    from app import analytics_db
+    seen_far: set[str] = set()
+    for row in analytics_db.query(
+            "SELECT pair_key FROM composed_routes WHERE lang = 'sr'"):
+        pk = row.get('pair_key') or ''
+        if ':' in pk and pk not in seen_far:
+            seen_far.add(pk)
+            a, b = pk.split(':', 1)
+            pages.append(url(f'/voznja/{a}-do-{b}/', 'monthly', '0.4', mod=default_mtime))
     return _urlset(pages)
 
 
