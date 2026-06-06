@@ -50,6 +50,12 @@
       {%- if _dh %}{{ _dh }}{{ _('common.h') }}{% endif %}{% if _dm %}{% if _dh %} {% endif %}{{ _dm }}{{ _('common.min') }}{% endif -%}
     </span>
     {% endif %}
+    {% if trip.is_cheapest or trip.is_fastest %}
+    <span class="trip-card__badges">
+      {% if trip.is_cheapest %}<span class="trip-badge trip-badge--cheap">{{ _('route.sort_price') }}</span>{% endif %}
+      {% if trip.is_fastest %}<span class="trip-badge trip-badge--fast">{{ _('route.sort_duration') }}</span>{% endif %}
+    </span>
+    {% endif %}
   </div>
   <div class="trip-card__time trip-card__time--arrive">
     {{ trip.arrival_time[:5] if trip.arrival_time else '' }}

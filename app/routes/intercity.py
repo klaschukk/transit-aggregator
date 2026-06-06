@@ -189,6 +189,17 @@ def route_detail(slug: str):
     price_min = min(prices) if prices else None
     price_max = max(prices) if prices else None
 
+    # Best-option badges: tag a single cheapest / fastest trip so the card
+    # can flag the best pick. Only when there's a real spread (>1 trip and
+    # min != max) so we never badge a lone trip or badge every card.
+    if len(trips) > 1:
+        if price_min is not None and price_max is not None and price_min != price_max:
+            next(t for t in trips if t.get('price_rsd') == price_min)['is_cheapest'] = True
+        durs = [t['duration_min'] for t in trips if t.get('duration_min')]
+        if len(durs) > 1 and min(durs) != max(durs):
+            d_min = min(durs)
+            next(t for t in trips if t.get('duration_min') == d_min)['is_fastest'] = True
+
     # Reverse route slug
     reverse_route = query_one("""
         SELECT slug FROM routes
