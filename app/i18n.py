@@ -1694,6 +1694,26 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'ai_route.mode_ferry': {'sr': 'Trajekt', 'en': 'Ferry', 'ru': 'Паром'},
     'ai_route.mode_taxi': {'sr': 'Taksi', 'en': 'Taxi', 'ru': 'Такси'},
     'ai_route.mode_metro': {'sr': 'Metro', 'en': 'Metro', 'ru': 'Метро'},
+    'ai_route.faq.q_how': {
+        'sr': 'Kako stići',
+        'en': 'How to get from',
+        'ru': 'Как добраться',
+    },
+    'ai_route.faq.q_time': {
+        'sr': 'Koliko traje put?',
+        'en': 'How long does the trip take?',
+        'ru': 'Сколько занимает дорога?',
+    },
+    'ai_route.faq.q_cost': {
+        'sr': 'Koliko košta put?',
+        'en': 'How much does the trip cost?',
+        'ru': 'Сколько стоит дорога?',
+    },
+    'ai_route.faq.a_varies': {
+        'sr': 'Zavisi od datuma i prevoznika — proverite kod partnera.',
+        'en': 'Depends on the date and carrier — check with the partner.',
+        'ru': 'Зависит от даты и перевозчика — проверьте у партнёра.',
+    },
     'buy.partners_heading': {
         'sr': 'Kupi kartu kod naših partnera',
         'en': 'Buy your ticket from our partners',

@@ -1061,7 +1061,11 @@ def sitemap_pairs():
     The route is kept (vs. removed) so legacy GSC submissions and any cached
     sitemap-index reference resolve to a valid, empty urlset — telling Google
     the URLs are gone from the sitemap rather than 404-ing the shard. It is no
-    longer referenced from /sitemap.xml."""
+    longer referenced from /sitemap.xml.
+
+    Far-destination guides (/voznja/<sr>-do-<far>/) do NOT belong here either —
+    they have their own shard, sitemap-far.xml, which lists only pairs with a
+    cached composed itinerary (i.e. actually indexable pages)."""
     return _urlset([])
 
 
