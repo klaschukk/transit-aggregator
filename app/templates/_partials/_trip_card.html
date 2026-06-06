@@ -44,9 +44,10 @@
       <span class="trip-card__route-dot trip-card__route-dot--end"></span>
     </div>
     {% if trip.duration_min %}
+    {% set _dh = trip.duration_min // 60 %}{% set _dm = trip.duration_min % 60 %}
     <span class="trip-card__duration">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="11" height="11" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v4l2.5 1.5"/></svg>
-      {{ trip.duration_min // 60 }}h {{ trip.duration_min % 60 }}min
+      {%- if _dh %}{{ _dh }}{{ _('common.h') }}{% endif %}{% if _dm %}{% if _dh %} {% endif %}{{ _dm }}{{ _('common.min') }}{% endif -%}
     </span>
     {% endif %}
   </div>

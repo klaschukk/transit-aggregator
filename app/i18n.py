@@ -556,6 +556,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'min',
         'ru': 'мин',
     },
+    'common.h': {
+        'sr': 'h',
+        'en': 'h',
+        'ru': 'ч',
+    },
     'common.map_on_map': {
         'sr': 'stajališta na mapi',
         'en': 'stops on map',
@@ -957,6 +962,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
     'route.all_routes': {'sr': 'Sve rute', 'en': 'All routes', 'ru': 'Все маршруты'},
     'route.filter_all': {'sr': 'Svi polasci', 'en': 'All departures', 'ru': 'Все рейсы'},
+    'route.sort_label': {'sr': 'Sortiraj', 'en': 'Sort', 'ru': 'Сортировка'},
+    'route.sort_time': {'sr': 'Po polasku', 'en': 'Departure', 'ru': 'По отправлению'},
+    'route.sort_price': {'sr': 'Najjeftinije', 'en': 'Cheapest', 'ru': 'Дешевле'},
+    'route.sort_duration': {'sr': 'Najbrže', 'en': 'Fastest', 'ru': 'Быстрее'},
+    'route.carrier_all': {'sr': 'Svi prevoznici', 'en': 'All carriers', 'ru': 'Все перевозчики'},
     'route.workday': {'sr': 'Radnim danom', 'en': 'Weekdays', 'ru': 'Будни'},
     'route.weekend': {'sr': 'Vikend', 'en': 'Weekend', 'ru': 'Выходные'},
 

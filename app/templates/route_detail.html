@@ -183,7 +183,7 @@
 
 {% if trips %}
 
-<!-- Time-of-day filter + trip count -->
+<!-- Time-of-day filter + sort + trip count -->
 <div class="sort-bar">
   <div class="sort-bar__left">
     <div class="time-chips" id="timeFilter">
@@ -194,7 +194,23 @@
       <button class="time-chip" data-from="22" data-to="6">22–06</button>
     </div>
   </div>
+  <div class="sort-bar__right">
+    <span class="sort-bar__label">{{ _('route.sort_label') }}</span>
+    <div class="time-chips" id="sortChips">
+      <button class="time-chip time-chip--active" data-sort="time">{{ _('route.sort_time') }}</button>
+      <button class="time-chip" data-sort="price">{{ _('route.sort_price') }}</button>
+      <button class="time-chip" data-sort="duration">{{ _('route.sort_duration') }}</button>
+    </div>
+  </div>
 </div>
+{% if operators_on_route|length > 1 %}
+<div class="time-chips" id="carrierFilter" aria-label="{{ _('filter.carrier') }}">
+  <button class="time-chip time-chip--active" data-carrier="">{{ _('route.carrier_all') }}</button>
+  {% for op in operators_on_route %}
+  <button class="time-chip" data-carrier="{{ op }}">{{ op }}</button>
+  {% endfor %}
+</div>
+{% endif %}
 <div class="trip-count" id="tripCount" hidden>
   {{ _('route.shown_of') }} <strong id="tripVisible">0</strong> {{ _('route.of') }} <strong>{{ trips|length }}</strong> {{ _('routes.departures') }}
 </div>
@@ -366,46 +382,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-(function() {
-  var cards = document.querySelectorAll('.trip-card');
-  if (!cards.length) return;
-
-  var total = cards.length;
-  var countEl = document.getElementById('tripCount');
-  var visibleEl = document.getElementById('tripVisible');
-
-  /* ── Time-of-day filter ── */
-  document.querySelectorAll('#timeFilter .time-chip').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      document.querySelector('#timeFilter .time-chip--active').classList.remove('time-chip--active');
-      btn.classList.add('time-chip--active');
-
-      var from = parseInt(btn.dataset.from);
-      var to = parseInt(btn.dataset.to);
-      var visible = 0;
-
-      cards.forEach(function(card) {
-        var hour = parseInt(card.dataset.hour);
-        var show;
-        if (from === 0 && to === 24) {
-          show = true;
-        } else if (from > to) {
-          /* Night wraps: 22-06 */
-          show = hour >= from || hour < to;
-        } else {
-          show = hour >= from && hour < to;
-        }
-        card.style.display = show ? '' : 'none';
-        if (show) visible++;
-      });
-
-      if (countEl && visibleEl) {
-        countEl.hidden = (visible === total);
-        visibleEl.textContent = visible;
-      }
-    });
-  });
-})();
-</script>
+<script defer src="{{ url_for('static', filename='js/route-filters.js') }}?v={{ asset_version }}"></script>
 {% endblock %}
