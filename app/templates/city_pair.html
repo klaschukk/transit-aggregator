@@ -125,7 +125,8 @@
       {% for trip in trips %}
         {{ trip_card(trip, offers=_offers_trip, buy_label=_('buy.cta'),
                      route_slug=(route.slug if route and route.slug else _from_slug ~ '-do-' ~ _to_slug),
-                     surface='city_pair') }}
+                     surface='city_pair',
+                     from_slug=_from_slug, to_slug=_to_slug) }}
       {% endfor %}
     </div>
   </div>

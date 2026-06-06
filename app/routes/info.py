@@ -533,7 +533,8 @@ def country_hub(country: str):
             t_row = cached_query_one("""
                 SELECT t.departure_time, t.arrival_time, t.duration_min,
                        t.price_rsd, o.name AS operator,
-                       r.from_city, r.to_city, r.slug AS route_slug
+                       r.from_city, r.to_city, r.slug AS route_slug,
+                       t.bt4_line_id
                 FROM trips t
                 JOIN operators o ON o.id = t.operator_id
                 JOIN routes r ON r.id = t.route_id
@@ -786,7 +787,8 @@ def operator_detail(slug: str):
             t_row = cached_query_one("""
                 SELECT t.departure_time, t.arrival_time, t.duration_min,
                        t.price_rsd, o.name AS operator,
-                       r.from_city, r.to_city, r.slug AS route_slug
+                       r.from_city, r.to_city, r.slug AS route_slug,
+                       t.bt4_line_id
                 FROM trips t
                 JOIN operators o ON o.id = t.operator_id
                 JOIN routes r ON r.id = t.route_id

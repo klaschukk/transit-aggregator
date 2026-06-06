@@ -155,7 +155,8 @@ def search():
     if from_city and to_city and db_ready():
         results = query("""
             SELECT t.departure_time, t.arrival_time, t.duration_min,
-                   t.price_rsd, o.name as operator, r.from_city, r.to_city
+                   t.price_rsd, o.name as operator, r.from_city, r.to_city,
+                   t.bt4_line_id
             FROM trips t
             JOIN routes r ON r.id = t.route_id
             JOIN operators o ON o.id = t.operator_id
