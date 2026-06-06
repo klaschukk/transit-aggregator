@@ -19,7 +19,7 @@ import pytest
 BUDGETS_GZIPPED = {
     "/": 20100,                                # raised: a11y combobox + tabs keyboard/ARIA JS
     "/rute/": 70000,
-    "/rute/beograd-novi-sad/": 23300,          # raised: a11y combobox keyboard/ARIA JS
+    "/rute/beograd-novi-sad/": 23800,          # raised: 2nd booking option (BusTicket4 + Bookaway alt block, +259B)
     "/voznja/beograd-do-budva/": 21900,        # raised: a11y combobox keyboard/ARIA JS
     "/gradski/beograd/": 46000,
     "/gradski/beograd/stajaliste/sajam/": 23000,  # raised: chat widget JS

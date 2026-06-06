@@ -3,6 +3,7 @@ import pytest
 
 from app.affiliates import (
     Bookaway,
+    BusTicket4,
     FlixBus,
     Offer,
     ab_partner_order,
@@ -130,6 +131,35 @@ def test_flixbus_placeholder_does_not_leak_param():
     assert 'flixbus.com/bus/beograd-sarajevo' in url
 
 
+# ── BusTicket4 (primary partner) ──────────────────────────────────────
+
+def test_busticket4_covers_pair_with_known_city_ids():
+    assert BusTicket4().has_route('beograd', 'nis') is True
+    assert BusTicket4().has_route('podgorica', 'budva') is True
+    # Unknown city → can't build a checkout URL → not covered.
+    assert BusTicket4().has_route('foobar', 'nis') is False
+
+
+def test_busticket4_url_is_affiliate_checkout():
+    import re
+    url = BusTicket4().build_url('beograd', 'nis', 'Beograd', 'Niš', 'route-detail')
+    assert url.startswith('https://busticket4.me/en/checkout?')
+    assert 'departureCityId=1213' in url   # Beograd
+    assert 'arrivalCityId=1243' in url     # Niš
+    assert 'affiliateId=735' in url        # prevozni.com attribution
+    assert 'tripType=one-way' in url
+    assert 'passengers=1' in url
+    assert re.search(r'departureDate=\d{2}-\d{2}-\d{4}', url)  # DD-MM-YYYY
+
+
+def test_busticket4_is_primary_for_covered_pair():
+    # Direct seller + exact-checkout deep link → leads over Bookaway/FlixBus.
+    assert resolve_offers('beograd', 'nis', 'Beograd', 'Niš')[0].partner_key \
+        == 'busticket4'
+    assert resolve_offers('beograd', 'sarajevo', 'Beograd', 'Sarajevo')[0] \
+        .partner_key == 'busticket4'
+
+
 # ── resolve_offers() ──────────────────────────────────────────────────
 
 def test_resolver_returns_empty_for_degenerate_pair():
@@ -147,11 +177,11 @@ def test_resolver_returns_empty_when_no_partner_covers():
 
 
 def test_resolver_orders_by_commission_then_ux():
-    # For a SR domestic pair only Bookaway claims it (FlixBus skips
-    # intra-SR).
+    # SR domestic pair: BusTicket4 (direct seller) + Bookaway claim it; FlixBus
+    # skips intra-SR. BusTicket4 leads on ux_rank.
     offers = resolve_offers('beograd', 'nis', 'Beograd', 'Niš')
     keys = [o.partner_key for o in offers]
-    assert keys == ['bookaway']
+    assert keys == ['busticket4', 'bookaway']
 
 
 def test_resolver_cross_border_includes_flixbus():
@@ -161,8 +191,8 @@ def test_resolver_cross_border_includes_flixbus():
     keys = [o.partner_key for o in offers]
     assert 'bookaway' in keys
     assert 'flixbus' in keys
-    # Primary is Bookaway by default ranking
-    assert keys[0] == 'bookaway'
+    # Primary is BusTicket4 (direct seller, exact-checkout deep link).
+    assert keys[0] == 'busticket4'
 
 
 def test_resolver_ab_promotes_flixbus():
@@ -176,11 +206,12 @@ def test_resolver_ab_promotes_flixbus():
 
 
 def test_resolver_ab_ignored_when_partner_ineligible():
-    # AB says flixbus, but flixbus doesn't cover intra-SR → Bookaway wins
+    # AB says flixbus, but flixbus doesn't cover intra-SR → falls to default
+    # ranking, where BusTicket4 (direct seller) leads.
     offers = resolve_offers(
         'beograd', 'nis', ab_choice='flixbus',
     )
-    assert offers[0].partner_key == 'bookaway'
+    assert offers[0].partner_key == 'busticket4'
 
 
 def test_primary_offer_helper():

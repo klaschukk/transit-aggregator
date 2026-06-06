@@ -21,6 +21,7 @@ When adding a new partner:
 """
 from __future__ import annotations
 
+from datetime import date, timedelta
 from urllib.parse import quote
 
 from app.affiliates.base import Partner
@@ -100,6 +101,16 @@ try:
 except (OSError, ValueError):
     _VERIFIED_PAIRS = frozenset()
 
+# BusTicket4 city slug -> their numeric city_id (built by
+# scripts/build_bt4_cities.py from the scraper catalog). Drives the affiliate
+# checkout deep-link. Empty dict (missing file) just disables BusTicket4 offers.
+_BT4_PATH = _os.path.join(_os.path.dirname(__file__), 'bt4_cities.json')
+try:
+    with open(_BT4_PATH, encoding='utf-8') as _fh:
+        _BT4_CITY_ID: dict = {k: int(v) for k, v in _json.load(_fh).items()}
+except (OSError, ValueError):
+    _BT4_CITY_ID = {}
+
 
 class Bookaway(Partner):
     """Primary partner. Strongest Balkans coverage, highest commission band."""
@@ -171,6 +182,54 @@ class Bookaway(Partner):
             f'&aff_sub={quote(aff_sub, safe="")}'
             f'&aff_sub2={quote(utm_medium, safe="")}'
             f'&url={quote(dest, safe="")}'
+        )
+
+
+# ── BusTicket4 — primary partner, also our intercity data source ───
+class BusTicket4(Partner):
+    """busticket4.me — the operator whose API feeds our intercity routes, and
+    now an affiliate partner (affiliateId 735 for prevozni.com, Cassiopeia doo,
+    Jun 2026). Its checkout deep-link lands the user on the EXACT departure/
+    arrival pair with the date and passenger prefilled — the strongest
+    conversion path we have, so it ranks ahead of every other partner for any
+    pair it covers. Coverage is the busticket4 city catalog (built into
+    bt4_cities.json), which is effectively all of our intercity network."""
+    key = 'busticket4'
+    name = 'BusTicket4'
+    # busticket4 brand is green; green-800 (#166534) clears WCAG AA (~6:1) for
+    # white button text, where their lighter brand green would fail.
+    brand_color = '#166534'
+    # Placeholder band until the commission rate in the Cassiopeia agreement is
+    # confirmed; ux_rank=0 already floats it above Bookaway/FlixBus on the
+    # tiebreak, so ranking does not depend on this number.
+    commission_band = (5.0, 10.0)
+    ux_rank = 0  # exact-checkout deep link beats every other partner's landing
+
+    AFFILIATE_ID = 735  # prevozni.com
+
+    def has_route(self, from_slug: str, to_slug: str) -> bool:
+        # Covered iff we know both city_ids — required to build the checkout URL.
+        return from_slug in _BT4_CITY_ID and to_slug in _BT4_CITY_ID
+
+    def build_url(
+        self,
+        from_slug: str,
+        to_slug: str,
+        from_city: str,
+        to_city: str,
+        utm_medium: str,
+    ) -> str:
+        dep = _BT4_CITY_ID[from_slug]
+        arr = _BT4_CITY_ID[to_slug]
+        # Default to tomorrow so an overnight-cached page never points at a past
+        # date (busticket4 wants DD-MM-YYYY). The user can change it on checkout.
+        depart = (date.today() + timedelta(days=1)).strftime('%d-%m-%Y')
+        # affiliateId is the attribution — no separate click-tracker hop needed.
+        return (
+            'https://busticket4.me/en/checkout'
+            f'?departureCityId={dep}&arrivalCityId={arr}'
+            f'&departureDate={depart}&passengers=1'
+            f'&tripType=one-way&affiliateId={self.AFFILIATE_ID}'
         )
 
 

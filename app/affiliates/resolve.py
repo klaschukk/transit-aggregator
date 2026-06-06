@@ -21,10 +21,13 @@ from __future__ import annotations
 import hashlib
 
 from app.affiliates.base import Offer, Partner
-from app.affiliates.partners import Bookaway, FlixBus
+from app.affiliates.partners import Bookaway, BusTicket4, FlixBus
 
 # Instantiate once — partners are stateless, single instances are fine.
+# BusTicket4 is the direct seller for our intercity network and deep-links to an
+# exact-pair checkout, so it leads (ux_rank 0) for any pair it covers.
 ACTIVE_PARTNERS: tuple[Partner, ...] = (
+    BusTicket4(),
     Bookaway(),
     FlixBus(),
 )
