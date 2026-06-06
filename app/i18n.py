@@ -380,9 +380,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Каждую ночь (в 02:00 местного времени) мы сканируем и объединяем данные из нескольких источников: busticket4.me (основная база междугородних автобусов), srbijavoz.rs (официальное расписание поездов), polazak.rs (Lasta и связанные перевозчики), bgprevoz.rs (GSP Белград), gspns.co.rs (JGSP Нови-Сад), Overpass (OpenStreetMap — координаты остановок) и официальный GTFS фид с data.gov.rs. Если данных не хватает или они устарели — сверяйтесь на сайте самого перевозчика.',
     },
     'home.hero_title': {
-        'sr': 'Red vožnje u Srbiji',
-        'en': 'Transport schedules in Serbia',
-        'ru': 'Расписание транспорта в Сербии',
+        'sr': 'Nađite autobus i kupite kartu',
+        'en': 'Find your bus, buy your ticket',
+        'ru': 'Найдите автобус и купите билет',
     },
     'home.hero_subtitle': {
         'sr': 'Pronađite autobus, voz ili gradski prevoz na jednom mestu',
