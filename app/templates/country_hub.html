@@ -144,8 +144,11 @@
   <h2 class="section__title">{{ _('country.sample_schedule') }}</h2>
   <div class="trip-list">
     {% for trip in sample_trips %}
+      {% set _fs = trip.from_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
+      {% set _ts = trip.to_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
       {{ trip_card(trip, buy_label=_('buy.cta'),
-                   route_slug=trip.route_slug, surface='country_hub') }}
+                   route_slug=trip.route_slug, surface='country_hub',
+                   from_slug=_fs, to_slug=_ts) }}
     {% endfor %}
   </div>
 </section>

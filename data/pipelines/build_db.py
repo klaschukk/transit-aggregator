@@ -280,7 +280,8 @@ def _create_schema(conn: duckdb.DuckDBPyConnection) -> None:
             duration_min INTEGER,
             price_rsd INTEGER,
             days_of_week VARCHAR DEFAULT '1234567',
-            is_active BOOLEAN DEFAULT true
+            is_active BOOLEAN DEFAULT true,
+            bt4_line_id INTEGER          -- busticket4 line id for affiliate checkout (NULL if unknown)
         )
     """)
     conn.execute("""
@@ -514,12 +515,16 @@ def _load_intercity(conn: duckdb.DuckDBPyConnection,
         op_id = op_map.get(op_name, default_op)
         price = trip.get('price_rsd') or 0
 
+        bt4_line_id = trip.get('bt4_line_id')
         conn.execute(
-            "INSERT INTO trips VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO trips (id, route_id, operator_id, departure_time, "
+            "arrival_time, duration_min, price_rsd, days_of_week, is_active, "
+            "bt4_line_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (trip_id, route_id_val, op_id,
              trip['departure_time'], trip['arrival_time'],
              trip.get('duration_min', 0), price,
-             '1234567', True)
+             '1234567', True,
+             int(bt4_line_id) if bt4_line_id else None)
         )
         trip_id += 1
 
@@ -1094,7 +1099,10 @@ def _load_sample_data(conn: duckdb.DuckDBPyConnection) -> None:
         (4, 'beograd-subotica', 'Beograd', 'Subotica', 'beograd', 'subotica', 185, 'intercity'),
         (5, 'beograd-nis-2', 'Beograd', 'Niš', 'beograd', 'nis', 250, 'intercity'),
     ])
-    conn.executemany("INSERT INTO trips VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [
+    conn.executemany(
+        "INSERT INTO trips (id, route_id, operator_id, departure_time, "
+        "arrival_time, duration_min, price_rsd, days_of_week, is_active) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [
         (1, 1, 1, '06:00', '07:30', 90, 800, '1234567', True),
         (2, 1, 1, '08:00', '09:30', 90, 800, '1234567', True),
         (3, 1, 2, '10:00', '11:30', 90, 750, '1234567', True),

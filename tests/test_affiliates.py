@@ -7,6 +7,7 @@ from app.affiliates import (
     FlixBus,
     Offer,
     ab_partner_order,
+    bt4_checkout_url,
     primary_offer,
     resolve_offers,
 )
@@ -131,7 +132,7 @@ def test_flixbus_placeholder_does_not_leak_param():
     assert 'flixbus.com/bus/beograd-sarajevo' in url
 
 
-# ── BusTicket4 (primary partner) ──────────────────────────────────────
+# ── BusTicket4 (per-trip partner, via bt4_checkout_url) ────────────────
 
 def test_busticket4_covers_pair_with_known_city_ids():
     assert BusTicket4().has_route('beograd', 'nis') is True
@@ -152,10 +153,37 @@ def test_busticket4_url_is_affiliate_checkout():
     assert re.search(r'departureDate=\d{2}-\d{2}-\d{4}', url)  # DD-MM-YYYY
 
 
-def test_busticket4_currently_disabled_in_resolver():
-    # BusTicket4 is built + unit-tested but temporarily OUT of ACTIVE_PARTNERS:
-    # /en/checkout without a lineId renders an empty 0.00 € page (no trip), so we
-    # fall back to Bookaway's working exact-pair page until trips carry line_id.
+def test_busticket4_commission_is_two_percent():
+    # Cassiopeia agreement: 2% of every ticket sold.
+    assert BusTicket4().commission_midpoint == 2.0
+
+
+def test_busticket4_build_url_appends_line_id():
+    url = BusTicket4().build_url('beograd', 'nis', 'B', 'N', 'trip-card', line_id=909)
+    assert '&lineId=909' in url
+
+
+def test_bt4_checkout_url_pins_the_exact_trip():
+    # The per-trip helper deep-links to ONE departure (lineId) so the checkout
+    # shows a real trip + price instead of the empty 0.00 € pair page.
+    url = bt4_checkout_url('beograd', 'nis', 909)
+    assert url.startswith('https://busticket4.me/en/checkout?')
+    assert 'lineId=909' in url and 'affiliateId=735' in url
+    assert 'departureCityId=1213' in url and 'arrivalCityId=1243' in url
+
+
+def test_bt4_checkout_url_empty_without_line_id_or_known_city():
+    # No line id → no usable checkout (avoid the empty 0.00 € page entirely).
+    assert bt4_checkout_url('beograd', 'nis', None) == ''
+    assert bt4_checkout_url('beograd', 'nis', 0) == ''
+    # Unknown city → can't resolve a city id.
+    assert bt4_checkout_url('foobar', 'nis', 909) == ''
+
+
+def test_busticket4_not_in_pair_level_resolver():
+    # BusTicket4 is wired per-trip (bt4_checkout_url), NOT as a pair-level
+    # partner — its pair checkout without a lineId is an empty 0.00 € page.
+    # The pair-level resolver must therefore fall back to Bookaway.
     keys = [o.partner_key for o in resolve_offers('beograd', 'nis', 'Beograd', 'Niš')]
     assert 'busticket4' not in keys
     assert keys[0] == 'bookaway'

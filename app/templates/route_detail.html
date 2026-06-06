@@ -160,20 +160,30 @@
 {% set _to_slug = route.to_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj')|replace('ș','s')|replace('ț','t') %}
 {% set _offers = affiliate_offers(_from_slug, _to_slug, route.from_city, route.to_city, 'route-detail') %}
 {% set _offers_trip = affiliate_offers(_from_slug, _to_slug, route.from_city, route.to_city, 'trip-card') %}
-{% set _primary = _offers[0] if _offers else None %}
+{% set _po = _offers[0] if _offers else None %}
+{# Prominent buy button: prefer BusTicket4's EXACT checkout (direct seller, 2%)
+   for the first departure when we know its line id — otherwise the pair-level
+   partner (Bookaway). BusTicket4's pair URL without a line id is an empty
+   0 € page, so we only use it with a line id. #}
+{% set _primary_href = _po.url if _po else '' %}
+{% set _primary_partner = _po.partner_key if _po else '' %}
+{% set _primary_name = _po.partner_name if _po else '' %}
+{% set _primary_color = _po.brand_color if _po else '' %}
+{% set _bt4_main = bt4_checkout_url(_from_slug, _to_slug, trips[0].bt4_line_id) if (trips and trips[0].bt4_line_id) else '' %}
+{% if _bt4_main %}{% set _primary_href = _bt4_main %}{% set _primary_partner = 'busticket4' %}{% set _primary_name = 'BusTicket4' %}{% set _primary_color = '#166534' %}{% endif %}
 <div class="buy-ticket fade-in">
   <div class="buy-ticket__header">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20" aria-hidden="true"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2 2 2 0 010 4 2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 00-2-2 2 2 0 010-4 2 2 0 002-2V7a2 2 0 00-2-2H5z"/></svg>
     <span>{{ _('buy.title') }}</span>
   </div>
   <div class="buy-ticket__links">
-    {% if _primary %}
-    <a href="{{ _primary.url }}" target="_blank" rel="noopener nofollow sponsored"
-       class="buy-ticket__btn buy-ticket__btn--{{ _primary.partner_key }}"
-       style="background: {{ _primary.brand_color }};"
-       data-partner="{{ _primary.partner_key }}"
+    {% if _primary_href %}
+    <a href="{{ _primary_href }}" target="_blank" rel="noopener nofollow sponsored"
+       class="buy-ticket__btn buy-ticket__btn--{{ _primary_partner }}"
+       style="background: {{ _primary_color }};"
+       data-partner="{{ _primary_partner }}"
        data-route-slug="{{ route.slug }}" data-surface="route_detail_global">
-      {{ _primary.partner_name }}
+      {{ _primary_name }}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg>
     </a>
     {% endif %}
@@ -218,7 +228,8 @@
 <div class="trip-list fade-in fade-in--d2" id="tripList">
   {% for trip in trips %}
     {{ trip_card(trip, offers=_offers_trip, buy_label=_('buy.cta'),
-                 route_slug=route.slug, surface='route_detail') }}
+                 route_slug=route.slug, surface='route_detail',
+                 from_slug=_from_slug, to_slug=_to_slug) }}
   {% endfor %}
 </div>
 

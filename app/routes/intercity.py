@@ -160,7 +160,8 @@ def route_detail(slug: str):
     trips = query("""
         SELECT t.departure_time, t.arrival_time, t.duration_min,
                t.price_rsd, COALESCE(o.name, '') as operator,
-               COALESCE(o.slug, '') as operator_slug
+               COALESCE(o.slug, '') as operator_slug,
+               t.bt4_line_id
         FROM trips t
         LEFT JOIN operators o ON o.id = t.operator_id
         WHERE t.route_id = (SELECT id FROM routes WHERE slug = ?)
@@ -280,7 +281,8 @@ def city_pair(from_city: str, to_city: str):
     if route:
         trips = query("""
             SELECT t.departure_time, t.arrival_time, t.duration_min,
-                   t.price_rsd, o.name as operator, o.slug as operator_slug
+                   t.price_rsd, o.name as operator, o.slug as operator_slug,
+                   t.bt4_line_id
             FROM trips t
             JOIN operators o ON o.id = t.operator_id
             WHERE t.route_id = ?

@@ -209,22 +209,21 @@ class Bookaway(Partner):
 # ── BusTicket4 — primary partner, also our intercity data source ───
 class BusTicket4(Partner):
     """busticket4.me — the operator whose API feeds our intercity routes, and
-    now an affiliate partner (affiliateId 735 for prevozni.com, Cassiopeia doo,
-    Jun 2026). Its checkout deep-link lands the user on the EXACT departure/
-    arrival pair with the date and passenger prefilled — the strongest
-    conversion path we have, so it ranks ahead of every other partner for any
-    pair it covers. Coverage is the busticket4 city catalog (built into
-    bt4_cities.json), which is effectively all of our intercity network."""
+    now an affiliate partner (affiliateId 735 for prevozni.com, Cassiopeia doo).
+    IMPORTANT: a busticket4 checkout needs a `line_id` (a specific departure) —
+    without one the page renders an empty 0.00 € shell. So BusTicket4 is NOT a
+    generic pair-level partner (it is kept OUT of ACTIVE_PARTNERS). It is wired
+    per-trip: the buy button upgrades to bt4_checkout_url(from, to, line_id)
+    only for departures whose busticket4 line_id we know (trips.bt4_line_id),
+    which yields the EXACT trip + price + a clean affiliateId attribution. Pair
+    surfaces with no line_id fall back to Bookaway."""
     key = 'busticket4'
     name = 'BusTicket4'
     # busticket4 brand is green; green-800 (#166534) clears WCAG AA (~6:1) for
     # white button text, where their lighter brand green would fail.
     brand_color = '#166534'
-    # Placeholder band until the commission rate in the Cassiopeia agreement is
-    # confirmed; ux_rank=0 already floats it above Bookaway/FlixBus on the
-    # tiebreak, so ranking does not depend on this number.
-    commission_band = (5.0, 10.0)
-    ux_rank = 0  # exact-checkout deep link beats every other partner's landing
+    commission_band = (2.0, 2.0)  # 2% of every ticket sold (Cassiopeia agreement)
+    ux_rank = 0
 
     AFFILIATE_ID = 735  # prevozni.com
 
@@ -239,6 +238,7 @@ class BusTicket4(Partner):
         from_city: str,
         to_city: str,
         utm_medium: str,
+        line_id: int | None = None,
     ) -> str:
         dep = _BT4_CITY_ID[from_slug]
         arr = _BT4_CITY_ID[to_slug]
@@ -246,12 +246,29 @@ class BusTicket4(Partner):
         # date (busticket4 wants DD-MM-YYYY). The user can change it on checkout.
         depart = (date.today() + timedelta(days=1)).strftime('%d-%m-%Y')
         # affiliateId is the attribution — no separate click-tracker hop needed.
-        return (
+        url = (
             'https://busticket4.me/en/checkout'
             f'?departureCityId={dep}&arrivalCityId={arr}'
             f'&departureDate={depart}&passengers=1'
             f'&tripType=one-way&affiliateId={self.AFFILIATE_ID}'
         )
+        # lineId selects the exact departure; without it the checkout is empty.
+        if line_id:
+            url += f'&lineId={int(line_id)}'
+        return url
+
+
+# Single shared instance for the per-trip Jinja helper below.
+_BT4 = BusTicket4()
+
+
+def bt4_checkout_url(from_slug: str, to_slug: str, line_id) -> str:
+    """Exact busticket4 affiliate checkout for ONE departure, or '' if we can't
+    build it (unknown city or missing line_id). Exposed as a Jinja global so the
+    per-trip buy button can deep-link straight to that trip's checkout."""
+    if not line_id or from_slug not in _BT4_CITY_ID or to_slug not in _BT4_CITY_ID:
+        return ''
+    return _BT4.build_url(from_slug, to_slug, '', '', 'trip-card', line_id=line_id)
 
 
 # ── FlixBus — cross-border corridors (owned operator) ──────────────
