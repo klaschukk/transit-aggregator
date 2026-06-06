@@ -185,25 +185,15 @@ def test_resolver_orders_by_commission_then_ux():
     assert keys == ['bookaway']
 
 
-def test_resolver_cross_border_includes_flixbus():
+def test_resolver_cross_border_excludes_flixbus():
+    # No FlixBus affiliate agreement → it must not appear in offers. Bookaway
+    # covers the cross-border pair and leads.
     offers = resolve_offers(
         'beograd', 'sarajevo', 'Beograd', 'Sarajevo', 'trip-card',
     )
     keys = [o.partner_key for o in offers]
-    assert 'bookaway' in keys
-    assert 'flixbus' in keys
-    # Primary is Bookaway by default ranking (BusTicket4 disabled).
-    assert keys[0] == 'bookaway'
-
-
-def test_resolver_ab_promotes_flixbus():
-    # With ab_choice='flixbus', FlixBus should lead even though Bookaway
-    # has a higher commission — A/B must override default ranking.
-    offers = resolve_offers(
-        'beograd', 'sarajevo', 'Beograd', 'Sarajevo',
-        ab_choice='flixbus',
-    )
-    assert offers[0].partner_key == 'flixbus'
+    assert 'flixbus' not in keys
+    assert keys and keys[0] == 'bookaway'
 
 
 def test_resolver_ab_ignored_when_partner_ineligible():
@@ -233,7 +223,12 @@ def test_offer_is_frozen_dataclass():
 # ── A/B assignment ───────────────────────────────────────────────────
 
 def test_ab_honours_existing_cookie():
-    assert ab_partner_order({'ab_partner': 'flixbus'}, seed='1.2.3.4') == 'flixbus'
+    assert ab_partner_order({'ab_partner': 'bookaway'}, seed='1.2.3.4') == 'bookaway'
+
+
+def test_ab_stale_flixbus_cookie_falls_back():
+    # FlixBus is no longer a valid variant → an old cookie must not stick.
+    assert ab_partner_order({'ab_partner': 'flixbus'}, seed='1.2.3.4') == 'bookaway'
 
 
 def test_ab_ignores_garbage_cookie_value():
@@ -252,11 +247,12 @@ def test_ab_writes_cookie_when_asked():
     ab_partner_order(
         {}, response_setter=lambda k, v: captured.update({k: v}), seed='1.1.1.1',
     )
-    assert captured.get('ab_partner') in ('bookaway', 'flixbus')
+    assert captured.get('ab_partner') == 'bookaway'
 
 
-def test_ab_splits_roughly_50_50_over_many_seeds():
-    # 200 IPs → neither variant should dominate (>70%) if hash is uniform
+def test_ab_single_arm_always_bookaway():
+    # Only Bookaway is active → every seed resolves to it (single-arm A/B).
     from collections import Counter
     c = Counter(ab_partner_order({}, seed=f'10.0.0.{i}') for i in range(200))
-    assert c['bookaway'] > 50 and c['flixbus'] > 50
+    assert c['bookaway'] == 200
+    assert 'flixbus' not in c

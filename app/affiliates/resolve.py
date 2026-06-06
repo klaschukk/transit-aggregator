@@ -29,9 +29,11 @@ from app.affiliates.partners import Bookaway, BusTicket4, FlixBus
 # checkout (no trip), which is worse than Bookaway's working exact-pair page.
 # Re-enable once trips carry the busticket4 line_id (scraper -> trips.bt4_line_id
 # -> &lineId= per trip). Until then Bookaway leads again.
+# FlixBus is NOT active — we have no affiliate agreement with them, so their
+# links earn nothing (just free traffic to FlixBus). The class stays imported
+# so it can be re-added here if/when a deal is signed.
 ACTIVE_PARTNERS: tuple[Partner, ...] = (
     Bookaway(),
-    FlixBus(),
 )
 
 
@@ -82,7 +84,9 @@ def primary_offer(offers: list[Offer]) -> Offer | None:
 # ── A/B assignment ───────────────────────────────────────────────────
 
 _AB_COOKIE = 'ab_partner'
-_AB_VARIANTS: tuple[str, ...] = ('bookaway', 'flixbus')
+# Only Bookaway is active, so the partner-order A/B has a single arm (it always
+# resolves to 'bookaway'). Add a second key here when another partner goes live.
+_AB_VARIANTS: tuple[str, ...] = ('bookaway',)
 
 
 def ab_partner_order(
