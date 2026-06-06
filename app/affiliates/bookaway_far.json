@@ -1,0 +1,86 @@
+{
+  "_comment": "Far/long-haul destinations Bookaway sells (mostly SE/South Asia + a few iconic). Seeds Bookaway coverage for the AI route composer: a Serbian user can search Beograd->Bangkok on prevozni.com, get a Groq-composed itinerary, and book the local leg via Bookaway. slug = how a user would type it (slugified, ascii). country = Bookaway's country path segment (bookaway.com/routes/{country}/). region groups them in the UI. Extend/verify with scripts/verify_bookaway_pairs.py (country pages must 200).",
+
+  "bangkok":        {"country": "thailand",     "display": "Bangkok",        "region": "asia"},
+  "phuket":         {"country": "thailand",     "display": "Phuket",         "region": "asia"},
+  "chiang-mai":     {"country": "thailand",     "display": "Chiang Mai",     "region": "asia"},
+  "krabi":          {"country": "thailand",     "display": "Krabi",          "region": "asia"},
+  "pattaya":        {"country": "thailand",     "display": "Pattaya",        "region": "asia"},
+  "koh-samui":      {"country": "thailand",     "display": "Koh Samui",      "region": "asia"},
+  "koh-phangan":    {"country": "thailand",     "display": "Koh Phangan",    "region": "asia"},
+  "koh-tao":        {"country": "thailand",     "display": "Koh Tao",        "region": "asia"},
+  "ayutthaya":      {"country": "thailand",     "display": "Ayutthaya",      "region": "asia"},
+
+  "hanoi":          {"country": "vietnam",      "display": "Hanoi",          "region": "asia"},
+  "ho-chi-minh":    {"country": "vietnam",      "display": "Ho Chi Minh",    "region": "asia"},
+  "da-nang":        {"country": "vietnam",      "display": "Da Nang",        "region": "asia"},
+  "hoi-an":         {"country": "vietnam",      "display": "Hoi An",         "region": "asia"},
+  "nha-trang":      {"country": "vietnam",      "display": "Nha Trang",      "region": "asia"},
+  "hue":            {"country": "vietnam",      "display": "Hue",            "region": "asia"},
+  "sapa":           {"country": "vietnam",      "display": "Sapa",           "region": "asia"},
+  "phu-quoc":       {"country": "vietnam",      "display": "Phu Quoc",       "region": "asia"},
+
+  "phnom-penh":     {"country": "cambodia",     "display": "Phnom Penh",     "region": "asia"},
+  "siem-reap":      {"country": "cambodia",     "display": "Siem Reap",      "region": "asia"},
+  "sihanoukville":  {"country": "cambodia",     "display": "Sihanoukville",  "region": "asia"},
+
+  "vientiane":      {"country": "laos",         "display": "Vientiane",      "region": "asia"},
+  "luang-prabang":  {"country": "laos",         "display": "Luang Prabang",  "region": "asia"},
+  "vang-vieng":     {"country": "laos",         "display": "Vang Vieng",     "region": "asia"},
+
+  "bali":           {"country": "indonesia",    "display": "Bali",           "region": "asia"},
+  "denpasar":       {"country": "indonesia",    "display": "Denpasar",       "region": "asia"},
+  "jakarta":        {"country": "indonesia",    "display": "Jakarta",        "region": "asia"},
+  "yogyakarta":     {"country": "indonesia",    "display": "Yogyakarta",     "region": "asia"},
+  "ubud":           {"country": "indonesia",    "display": "Ubud",           "region": "asia"},
+  "lombok":         {"country": "indonesia",    "display": "Lombok",         "region": "asia"},
+  "gili-trawangan": {"country": "indonesia",    "display": "Gili Trawangan", "region": "asia"},
+
+  "kuala-lumpur":   {"country": "malaysia",     "display": "Kuala Lumpur",   "region": "asia"},
+  "penang":         {"country": "malaysia",     "display": "Penang",         "region": "asia"},
+  "langkawi":       {"country": "malaysia",     "display": "Langkawi",       "region": "asia"},
+  "malacca":        {"country": "malaysia",     "display": "Malacca",        "region": "asia"},
+
+  "singapore":      {"country": "singapore",    "display": "Singapore",      "region": "asia"},
+
+  "manila":         {"country": "philippines",  "display": "Manila",         "region": "asia"},
+  "cebu":           {"country": "philippines",  "display": "Cebu",           "region": "asia"},
+  "boracay":        {"country": "philippines",  "display": "Boracay",        "region": "asia"},
+  "palawan":        {"country": "philippines",  "display": "Palawan",        "region": "asia"},
+
+  "colombo":        {"country": "sri-lanka",    "display": "Colombo",        "region": "asia"},
+  "kandy":          {"country": "sri-lanka",    "display": "Kandy",          "region": "asia"},
+  "galle":          {"country": "sri-lanka",    "display": "Galle",          "region": "asia"},
+  "ella":           {"country": "sri-lanka",    "display": "Ella",           "region": "asia"},
+
+  "delhi":          {"country": "india",        "display": "Delhi",          "region": "asia"},
+  "mumbai":         {"country": "india",        "display": "Mumbai",         "region": "asia"},
+  "goa":            {"country": "india",        "display": "Goa",            "region": "asia"},
+  "jaipur":         {"country": "india",        "display": "Jaipur",         "region": "asia"},
+  "agra":           {"country": "india",        "display": "Agra",           "region": "asia"},
+  "bangalore":      {"country": "india",        "display": "Bangalore",      "region": "asia"},
+
+  "kathmandu":      {"country": "nepal",        "display": "Kathmandu",      "region": "asia"},
+  "pokhara":        {"country": "nepal",        "display": "Pokhara",        "region": "asia"},
+
+  "tokyo":          {"country": "japan",        "display": "Tokyo",          "region": "asia"},
+  "kyoto":          {"country": "japan",        "display": "Kyoto",          "region": "asia"},
+  "osaka":          {"country": "japan",        "display": "Osaka",          "region": "asia"},
+
+  "seoul":          {"country": "south-korea",  "display": "Seoul",          "region": "asia"},
+  "busan":          {"country": "south-korea",  "display": "Busan",          "region": "asia"},
+
+  "beijing":        {"country": "china",        "display": "Beijing",        "region": "asia"},
+  "shanghai":       {"country": "china",        "display": "Shanghai",       "region": "asia"},
+
+  "dubai":          {"country": "united-arab-emirates", "display": "Dubai",     "region": "middle-east"},
+  "abu-dhabi":      {"country": "united-arab-emirates", "display": "Abu Dhabi", "region": "middle-east"},
+  "doha":           {"country": "qatar",        "display": "Doha",           "region": "middle-east"},
+  "amman":          {"country": "jordan",       "display": "Amman",          "region": "middle-east"},
+  "petra":          {"country": "jordan",       "display": "Petra",          "region": "middle-east"},
+  "cairo":          {"country": "egypt",        "display": "Cairo",          "region": "middle-east"},
+  "hurghada":       {"country": "egypt",        "display": "Hurghada",       "region": "middle-east"},
+  "sharm-el-sheikh":{"country": "egypt",        "display": "Sharm El Sheikh","region": "middle-east"},
+
+  "bali-denpasar":  {"country": "indonesia",    "display": "Bali (Denpasar)","region": "asia"}
+}

@@ -188,13 +188,71 @@ def search():
             LIMIT 6
         """)
 
+    # Far-destination AI fallback: no local trips for this pair, but the
+    # destination is somewhere Bookaway sells (Asia, Middle East, ...). Offer an
+    # AI-composed itinerary (filled client-side from /api/compose-route) plus a
+    # Bookaway CTA, so the user plans the trip here instead of bouncing to
+    # Google. /pretraga is noindex — this is the dynamic Phase-1 surface; static
+    # indexable pages for the most-searched far pairs come later (Phase 2).
+    far = None
+    bookaway_offer = None
+    if from_city and to_city and not results:
+        from app.ai_compose import far_pair_info
+        far = far_pair_info(from_city, to_city)
+        if far:
+            from app.affiliates import resolve_offers
+            offers = resolve_offers(
+                far['from_slug'], far['to_slug'], from_city, to_city, 'search',
+            )
+            bookaway_offer = next(
+                (o for o in offers if o.partner_key == 'bookaway'), None,
+            )
+
     resp = make_response(render_template('search_results.html',
                                          results=results, from_city=from_city,
                                          to_city=to_city, datum=date,
                                          min_price=min_price,
-                                         popular_routes=popular_routes))
+                                         popular_routes=popular_routes,
+                                         far=far, bookaway_offer=bookaway_offer))
     resp.headers['X-Robots-Tag'] = 'noindex, nofollow'
     return resp
+
+
+@main_bp.route('/api/compose-route')
+@limiter.limit("12 per 5 minutes", key_func=lambda: request.remote_addr or 'anon')
+def api_compose_route():
+    """JSON: an AI-composed itinerary for a far pair (Beograd->Bangkok). Cached
+    per pair+lang in analytics so Groq is hit at most once. Returns 400 for a
+    pair that isn't a known far destination, 503 when the model is unavailable
+    (the page already shows the Bookaway CTA, so the UX degrades gracefully)."""
+    from flask import g
+    from app import analytics_db
+    from app.ai_compose import far_pair_info, compose_itinerary_via_groq
+
+    from_city = request.args.get('od', '').strip()[:80]
+    to_city = request.args.get('do', '').strip()[:80]
+    # The fetch is path-prefix-less (/api/...), so g.lang defaults to sr; let the
+    # page pass its language explicitly so EN/RU users get an EN/RU itinerary.
+    lang = request.args.get('lang', '')
+    if lang not in ('sr', 'en', 'ru'):
+        lang = getattr(g, 'lang', 'sr')
+
+    info = far_pair_info(from_city, to_city)
+    if not info:
+        return jsonify(error='not_far'), 400
+
+    cached = analytics_db.get_composed_route(info['pair_key'], lang)
+    if cached:
+        return current_app.response_class(cached, content_type='application/json')
+
+    api_key = current_app.config.get('GROQ_API_KEY', '')
+    data = compose_itinerary_via_groq(from_city, to_city, lang, api_key)
+    if not data:
+        return jsonify(error='unavailable'), 503
+
+    payload = _json.dumps(data, ensure_ascii=False)
+    analytics_db.upsert_composed_route(info['pair_key'], lang, from_city, to_city, payload)
+    return current_app.response_class(payload, content_type='application/json')
 
 
 @main_bp.route('/api/review/<route_slug>', methods=['POST'])

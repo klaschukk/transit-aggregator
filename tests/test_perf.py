@@ -29,7 +29,9 @@ BUDGETS_GZIPPED = {
 # raised: colour system fully tokenised — named status/brand tokens
 # (var(--color-danger) etc.) add a little SOURCE size; prod still ships the
 # minified dist, and 0 hardcoded design hex remain outside :root.
-CSS_BUDGET_GZIPPED = 27000
+# raised: far-destination AI itinerary block (.ai-route*) — new search-fallback
+# UI that composes Asia/long-haul routes via Groq + Bookaway CTA (+~140B gzip).
+CSS_BUDGET_GZIPPED = 27500
 
 
 @pytest.mark.parametrize("url,budget", list(BUDGETS_GZIPPED.items()))

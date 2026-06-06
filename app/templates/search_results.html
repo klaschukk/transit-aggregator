@@ -86,6 +86,39 @@
 </div>
 
 {% else %}
+{% if far %}
+<!-- ═══ Far-destination AI itinerary (Phase 1, dynamic) ═══
+     No local line to e.g. Bangkok, but Bookaway sells the local leg. Groq
+     composes a realistic multi-leg plan (filled client-side from
+     /api/compose-route, cached per pair) and the Bookaway CTA monetises the
+     booking. The CTA renders even if the model is down, so the page is always
+     useful. /pretraga is noindex — the indexable version comes in Phase 2. -->
+<section class="ai-route" id="aiRoute"
+         data-od="{{ from_city }}" data-do="{{ to_city }}" data-lang="{{ g.lang }}"
+         data-err-text="{{ _('ai_route.error') }}"
+         data-modes='{"bus":"{{ _('ai_route.mode_bus') }}","train":"{{ _('ai_route.mode_train') }}","flight":"{{ _('ai_route.mode_flight') }}","ferry":"{{ _('ai_route.mode_ferry') }}","taxi":"{{ _('ai_route.mode_taxi') }}","metro":"{{ _('ai_route.mode_metro') }}"}'>
+  <div class="ai-route__head">
+    <span class="ai-route__badge">{{ _('ai_route.badge') }}</span>
+    <h2 class="ai-route__title">{{ _('ai_route.heading') }} {{ to_city }}</h2>
+    <p class="ai-route__sub">{{ _('ai_route.sub') }}</p>
+  </div>
+  <div class="ai-route__body" id="aiRouteBody" aria-live="polite">
+    <div class="ai-route__loading">
+      <span class="ai-route__spinner" aria-hidden="true"></span>
+      {{ _('ai_route.loading') }}
+    </div>
+  </div>
+  {% if bookaway_offer %}
+  <a href="{{ bookaway_offer.url }}" target="_blank" rel="noopener nofollow sponsored"
+     class="ai-route__cta" style="background: {{ bookaway_offer.brand_color }};"
+     data-partner="bookaway" data-route-slug="{{ _campaign }}" data-surface="search_far">
+    {{ _('ai_route.cta') }}
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg>
+  </a>
+  {% endif %}
+  <p class="ai-route__note">{{ _('ai_route.disclaimer') }}</p>
+</section>
+{% else %}
 <!-- No results — warm empty state with a way forward -->
 {{ empty_state(icon='search', text=_('search.no_results'), sub=from_city ~ ' → ' ~ to_city,
                action_url=lang_prefix ~ '/rute/', action_label=_('see_also.all_routes')) }}
@@ -115,6 +148,7 @@
   </div>
   <p class="buy-ticket__note">{{ _('buy.note') }}</p>
 </div>
+{% endif %}
 {% endif %}
 
 <section class="section">
@@ -256,6 +290,57 @@
       items.forEach(function(item) { list.appendChild(item); });
     });
   });
+})();
+
+/* ── Far-destination AI itinerary ── */
+(function() {
+  var box = document.getElementById('aiRoute');
+  if (!box) return;
+  var body = document.getElementById('aiRouteBody');
+  var od = box.dataset.od || '', dest = box.dataset.do || '';
+  var lang = box.dataset.lang || 'sr';
+  var errText = box.dataset.errText || '';
+  var modes = {};
+  try { modes = JSON.parse(box.dataset.modes || '{}'); } catch (e) {}
+
+  function esc(s) { var e = document.createElement('div'); e.textContent = (s == null ? '' : String(s)); return e.innerHTML; }
+  function fail(msg) { body.innerHTML = '<p class="ai-route__err">' + esc(msg || errText) + '</p>'; }
+
+  var url = '/api/compose-route?od=' + encodeURIComponent(od)
+          + '&do=' + encodeURIComponent(dest) + '&lang=' + encodeURIComponent(lang);
+  fetch(url, { headers: { 'Accept': 'application/json' } })
+    .then(function(r) { return r.ok ? r.json() : Promise.reject(r.status); })
+    .then(render)
+    .catch(function() { fail(); });
+
+  function render(d) {
+    if (!d || d.feasible === false || !d.legs || !d.legs.length) {
+      fail(d && d.summary); return;
+    }
+    var html = '';
+    if (d.summary) html += '<p class="ai-route__summary">' + esc(d.summary) + '</p>';
+    html += '<ol class="ai-route__legs">';
+    d.legs.forEach(function(l) {
+      html += '<li class="ai-route__leg ai-route__leg--' + esc(l.mode) + '">'
+        + '<span class="ai-route__mode">' + esc(modes[l.mode] || l.mode) + '</span>'
+        + '<span class="ai-route__leg-main">'
+        + '<strong>' + esc(l.from) + ' → ' + esc(l.to) + '</strong>'
+        + (l.duration ? ' <span class="ai-route__dur">' + esc(l.duration) + '</span>' : '')
+        + (l.note ? '<span class="ai-route__leg-note">' + esc(l.note) + '</span>' : '')
+        + '</span></li>';
+    });
+    html += '</ol>';
+    var meta = [];
+    if (d.total_duration) meta.push(esc(d.total_duration));
+    if (d.price_from_eur) meta.push('≈ ' + esc(d.price_from_eur) + ' €+');
+    if (meta.length) html += '<p class="ai-route__total">' + meta.join(' · ') + '</p>';
+    if (d.tips && d.tips.length) {
+      html += '<ul class="ai-route__tips">';
+      d.tips.forEach(function(t) { html += '<li>' + esc(t) + '</li>'; });
+      html += '</ul>';
+    }
+    body.innerHTML = html;
+  }
 })();
 </script>
 {% endblock %}

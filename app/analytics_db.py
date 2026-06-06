@@ -242,6 +242,22 @@ CREATE TABLE IF NOT EXISTS data_snapshots (
 );
 CREATE INDEX IF NOT EXISTS data_snapshots_kind_idx
     ON data_snapshots(kind, snapshot_date);
+
+-- AI-composed far-destination itineraries (Beograd->Bangkok etc.). Cached so
+-- each pair hits Groq at most once; `hits` ranks the most-searched pairs for
+-- the Phase-2 static SEO pages.
+CREATE TABLE IF NOT EXISTS composed_routes (
+    pair_key   TEXT NOT NULL,
+    lang       TEXT NOT NULL,
+    from_city  TEXT,
+    to_city    TEXT,
+    payload    TEXT NOT NULL,
+    hits       INTEGER DEFAULT 1,
+    created_at TEXT    DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now')),
+    PRIMARY KEY (pair_key, lang)
+);
+CREATE INDEX IF NOT EXISTS composed_routes_hits_idx
+    ON composed_routes(hits DESC);
 """
 
 
@@ -385,6 +401,55 @@ def query(sql: str, params: list | None = None) -> list[dict]:
         logger.error("analytics_db query failed: %s | %s", exc, sql)
         _local.conn = None
         return []
+
+
+# ── composed (AI) far-destination routes ────────────────────────────────
+
+
+def get_composed_route(pair_key: str, lang: str) -> str | None:
+    """Return the cached itinerary JSON for a pair+lang, or None. Bumps `hits`
+    so the most-searched far pairs surface first for Phase-2 SEO generation."""
+    rows = query(
+        "SELECT payload FROM composed_routes WHERE pair_key = ? AND lang = ?",
+        [pair_key, lang],
+    )
+    if not rows:
+        return None
+    try:
+        _get_conn().execute(
+            "UPDATE composed_routes SET hits = hits + 1 "
+            "WHERE pair_key = ? AND lang = ?",
+            [pair_key, lang],
+        )
+    except sqlite3.Error:
+        pass
+    return rows[0]['payload']
+
+
+def upsert_composed_route(
+    pair_key: str, lang: str, from_city: str, to_city: str, payload: str,
+) -> None:
+    """Store (or refresh) an AI-composed itinerary. Idempotent per pair+lang."""
+    try:
+        _get_conn().execute(
+            "INSERT INTO composed_routes (pair_key, lang, from_city, to_city, payload) "
+            "VALUES (?, ?, ?, ?, ?) "
+            "ON CONFLICT(pair_key, lang) DO UPDATE SET "
+            "payload = excluded.payload, hits = composed_routes.hits + 1",
+            [pair_key[:120], lang[:8], (from_city or '')[:120],
+             (to_city or '')[:120], payload],
+        )
+    except sqlite3.Error as exc:
+        logger.error("upsert_composed_route failed: %s", exc)
+
+
+def top_composed_routes(limit: int = 300) -> list[dict]:
+    """Most-searched composed pairs (feeds Phase-2 static SEO pages)."""
+    return query(
+        "SELECT pair_key, lang, from_city, to_city, payload, hits "
+        "FROM composed_routes ORDER BY hits DESC LIMIT ?",
+        [limit],
+    )
 
 
 # ── reviews ─────────────────────────────────────────────────────────────

@@ -1599,6 +1599,48 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Buy via',
         'ru': 'Купить через',
     },
+    # ── Far-destination AI itinerary (search fallback to Bookaway) ──
+    'ai_route.badge': {
+        'sr': 'AI maršruta',
+        'en': 'AI route',
+        'ru': 'AI-маршрут',
+    },
+    'ai_route.heading': {
+        'sr': 'Kako stići do',
+        'en': 'How to get to',
+        'ru': 'Как добраться до',
+    },
+    'ai_route.sub': {
+        'sr': 'Nemamo direktnu liniju, ali evo predloga puta korak po korak — kartu za lokalni deo puta rezervišite kod partnera.',
+        'en': 'We have no direct line, but here is a step-by-step plan — book the local leg with our partner.',
+        'ru': 'Прямого рейса нет, но вот план поездки по шагам — билет на местный участок бронируйте у партнёра.',
+    },
+    'ai_route.loading': {
+        'sr': 'Sastavljamo maršrutu…',
+        'en': 'Composing the route…',
+        'ru': 'Составляем маршрут…',
+    },
+    'ai_route.cta': {
+        'sr': 'Rezerviši preko Bookaway',
+        'en': 'Book via Bookaway',
+        'ru': 'Забронировать через Bookaway',
+    },
+    'ai_route.disclaimer': {
+        'sr': 'Orijentacioni plan koji generiše AI — vremena, cene i veze obavezno proverite kod prevoznika pre kupovine.',
+        'en': 'AI-generated estimate — always verify times, prices and connections with the carrier before buying.',
+        'ru': 'Ориентировочный план от AI — время, цены и стыковки обязательно проверяйте у перевозчика перед покупкой.',
+    },
+    'ai_route.error': {
+        'sr': 'Trenutno ne možemo da sastavimo maršrutu. Pokušajte kasnije ili rezervišite direktno kod partnera.',
+        'en': 'We could not compose a route right now. Try again later or book directly with the partner.',
+        'ru': 'Сейчас не получилось составить маршрут. Попробуйте позже или забронируйте напрямую у партнёра.',
+    },
+    'ai_route.mode_bus': {'sr': 'Autobus', 'en': 'Bus', 'ru': 'Автобус'},
+    'ai_route.mode_train': {'sr': 'Voz', 'en': 'Train', 'ru': 'Поезд'},
+    'ai_route.mode_flight': {'sr': 'Let', 'en': 'Flight', 'ru': 'Перелёт'},
+    'ai_route.mode_ferry': {'sr': 'Trajekt', 'en': 'Ferry', 'ru': 'Паром'},
+    'ai_route.mode_taxi': {'sr': 'Taksi', 'en': 'Taxi', 'ru': 'Такси'},
+    'ai_route.mode_metro': {'sr': 'Metro', 'en': 'Metro', 'ru': 'Метро'},
     'buy.partners_heading': {
         'sr': 'Kupi kartu kod naših partnera',
         'en': 'Buy your ticket from our partners',

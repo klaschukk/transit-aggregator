@@ -101,6 +101,27 @@ try:
 except (OSError, ValueError):
     _VERIFIED_PAIRS = frozenset()
 
+# Far/long-haul Bookaway inventory (SE/South Asia, Middle East, ...). Merged into
+# the country map so Bookaway.has_route()/build_url() cover a Serbia->far pair and
+# the resolver can offer Bookaway as the bookable partner for the local leg of an
+# AI-composed route (see app/routes/ai_routes.py). Kept in a data file so the list
+# can grow without code changes; richer per-city metadata (display, region) lives
+# alongside and is read by the route composer. Missing file degrades to no far
+# coverage (the search fallback simply won't trigger).
+FAR_DESTINATIONS: dict[str, dict] = {}
+_FAR_PATH = _os.path.join(_os.path.dirname(__file__), 'bookaway_far.json')
+try:
+    with open(_FAR_PATH, encoding='utf-8') as _fh:
+        FAR_DESTINATIONS = {
+            _slug: _meta for _slug, _meta in _json.load(_fh).items()
+            if not _slug.startswith('_') and isinstance(_meta, dict)
+        }
+    _BOOKAWAY_COUNTRY_MAP.update(
+        {_slug: _meta['country'] for _slug, _meta in FAR_DESTINATIONS.items()}
+    )
+except (OSError, ValueError, KeyError):
+    FAR_DESTINATIONS = {}
+
 # BusTicket4 city slug -> their numeric city_id (built by
 # scripts/build_bt4_cities.py from the scraper catalog). Drives the affiliate
 # checkout deep-link. Empty dict (missing file) just disables BusTicket4 offers.
