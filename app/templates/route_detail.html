@@ -169,7 +169,11 @@
 {% set _primary_partner = _po.partner_key if _po else '' %}
 {% set _primary_name = _po.partner_name if _po else '' %}
 {% set _primary_color = _po.brand_color if _po else '' %}
-{% set _bt4_main = bt4_checkout_url(_from_slug, _to_slug, trips[0].bt4_line_id) if (trips and trips[0].bt4_line_id) else '' %}
+{# Main CTA → BusTicket4 exact checkout when ANY departure on this route has a
+   known line_id (use the first such trip, not just trips[0] — a route can mix
+   BT4-sold and unsold departures). Falls back to the resolver (Bookaway). #}
+{% set _bt4_trip = (trips | selectattr('bt4_line_id') | list | first) if trips else None %}
+{% set _bt4_main = bt4_checkout_url(_from_slug, _to_slug, _bt4_trip.bt4_line_id) if _bt4_trip else '' %}
 {% if _bt4_main %}{% set _primary_href = _bt4_main %}{% set _primary_partner = 'busticket4' %}{% set _primary_name = 'BusTicket4' %}{% set _primary_color = '#166534' %}{% endif %}
 <div class="buy-ticket fade-in">
   <div class="buy-ticket__header">
