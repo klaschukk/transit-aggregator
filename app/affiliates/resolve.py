@@ -24,10 +24,12 @@ from app.affiliates.base import Offer, Partner
 from app.affiliates.partners import Bookaway, BusTicket4, FlixBus
 
 # Instantiate once — partners are stateless, single instances are fine.
-# BusTicket4 is the direct seller for our intercity network and deep-links to an
-# exact-pair checkout, so it leads (ux_rank 0) for any pair it covers.
+# NOTE: BusTicket4 is temporarily DISABLED. Its /en/checkout deep-link needs a
+# `lineId` to select a trip; without one the page renders an empty 0.00 €
+# checkout (no trip), which is worse than Bookaway's working exact-pair page.
+# Re-enable once trips carry the busticket4 line_id (scraper -> trips.bt4_line_id
+# -> &lineId= per trip). Until then Bookaway leads again.
 ACTIVE_PARTNERS: tuple[Partner, ...] = (
-    BusTicket4(),
     Bookaway(),
     FlixBus(),
 )
