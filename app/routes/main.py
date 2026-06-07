@@ -468,6 +468,17 @@ def api_cities():
     return jsonify([c['name'] for c in cities])
 
 
+@main_bp.route('/site.webmanifest')
+def site_webmanifest():
+    """PWA manifest rendered dynamically so icon URLs carry ?v=asset_version.
+    A static manifest cached its icons forever — Chrome/Android kept showing
+    the old launcher icon after a rebrand. The version query busts that on
+    each deploy (already-installed PWAs still need a reinstall, by design)."""
+    resp = make_response(render_template('site.webmanifest'))
+    resp.headers['Content-Type'] = 'application/manifest+json'
+    return resp
+
+
 @main_bp.route('/health')
 def health():
     """Structured health probe for cron + ops dashboards.
