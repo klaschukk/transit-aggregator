@@ -121,12 +121,14 @@
   {% set operators = trips|map(attribute='operator')|unique|list %}
   {{ filter_panel(operators=operators) }}
   <div class="results-main">
+    {% set _bt4_trip = (trips | selectattr('bt4_line_id') | list | first) if trips else None %}
     <div class="trip-list fade-in fade-in--d2" id="tripList">
       {% for trip in trips %}
         {{ trip_card(trip, offers=_offers_trip, buy_label=_('buy.cta'),
                      route_slug=(route.slug if route and route.slug else _from_slug ~ '-do-' ~ _to_slug),
                      surface='city_pair',
-                     from_slug=_from_slug, to_slug=_to_slug) }}
+                     from_slug=_from_slug, to_slug=_to_slug,
+                     bt4_fallback_line_id=(_bt4_trip.bt4_line_id if _bt4_trip else None)) }}
       {% endfor %}
     </div>
   </div>

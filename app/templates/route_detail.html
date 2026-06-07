@@ -233,7 +233,8 @@
   {% for trip in trips %}
     {{ trip_card(trip, offers=_offers_trip, buy_label=_('buy.cta'),
                  route_slug=route.slug, surface='route_detail',
-                 from_slug=_from_slug, to_slug=_to_slug) }}
+                 from_slug=_from_slug, to_slug=_to_slug,
+                 bt4_fallback_line_id=(_bt4_trip.bt4_line_id if _bt4_trip else None)) }}
   {% endfor %}
 </div>
 
