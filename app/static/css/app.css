@@ -59,6 +59,11 @@ img { display: block; max-width: 100%; }
   --color-accent-dark: #d97706;
   --color-accent-light: #fde68a;  /* amber-200 — trip badge surface */
   --color-accent-text: #78350f;   /* amber-900 — AA text on accent-light */
+  /* Transit-mode accents (design system) — colour-code modes */
+  --mode-bus: var(--color-primary);
+  --mode-train: #7c3aed;
+  --mode-tram: #d97706;
+  --mode-trolley: #2563eb;
   --color-text: #0f172a;
   --color-text-muted: #475569;
   --color-bg: #ffffff;
@@ -1421,6 +1426,11 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 /* Line group */
 .line-group { margin-bottom: var(--space-6); }
 .line-group__title { font-size: var(--text-base); font-weight: 700; margin-bottom: var(--space-2); padding-bottom: var(--space-1-5); border-bottom: 1px solid var(--color-border); }
+/* Mode-accent dot before each group title — colour-codes the transit mode. */
+.line-group__title::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: var(--radius-pill); background: var(--mode-bus); margin-right: var(--space-2); vertical-align: middle; }
+.line-group[data-group-type="tram"] .line-group__title::before { background: var(--mode-tram); }
+.line-group[data-group-type="trolleybus"] .line-group__title::before { background: var(--mode-trolley); }
+.line-group[data-group-type="bg-voz"] .line-group__title::before { background: var(--mode-train); }
 
 /* Line grid */
 .line-grid {
