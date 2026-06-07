@@ -1,11 +1,7 @@
 <header class="site-header">
   <div class="container site-header__inner">
     <a href="{{ lang_prefix }}/" class="site-logo">
-      <svg class="site-logo__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24" aria-hidden="true">
-        <circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/>
-        <path d="M4 16V8a4 4 0 014-4h8a4 4 0 014 4v8"/>
-        <path d="M2 12h20"/>
-      </svg>
+      <img class="site-logo__icon" src="{{ url_for('static', filename='img/prevozni-mark.svg') }}?v={{ asset_version }}" width="28" height="28" alt="" aria-hidden="true" loading="lazy" decoding="async">
       <span class="site-logo__text">Prevozni</span>
     </a>
     <nav class="site-nav" id="siteNav" aria-label="{{ _('nav.menu') }}">
