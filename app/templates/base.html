@@ -84,8 +84,27 @@
 })();
 </script>
 {% if config.GA_TRACKING_ID %}
-<script async src="https://www.googletagmanager.com/gtag/js?id={{ config.GA_TRACKING_ID }}"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','{{ config.GA_TRACKING_ID }}');</script>
+<script>
+/* Google Analytics (GA4) — GDPR-gated exactly like Umami above: the gtag loader
+   only runs when the visitor consented to "all". Defined on window.loadGA so the
+   cookie-consent handler can fire it on "Accept all" without a page reload. */
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+window.loadGA = function(){
+  if (window.__gaLoaded) return; window.__gaLoaded = true;
+  var s = document.createElement('script'); s.async = true;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id={{ config.GA_TRACKING_ID }}';
+  document.head.appendChild(s);
+  gtag('js', new Date());
+  gtag('config', '{{ config.GA_TRACKING_ID }}');
+};
+(function(){
+  try {
+    var m = document.cookie.match(/(?:^|; )cookie_consent=([^;]+)/);
+    if (m && m[1] === 'all') window.loadGA();
+  } catch(e){}
+})();
+</script>
 {% endif %}
 {% if config.ADSENSE_ID %}
 {# AdSense — static tag so Google's verification crawler sees it.
@@ -213,7 +232,7 @@ window.addEventListener('load', function(){
       var choice = btn.getAttribute('data-consent');
       writeConsent(choice);
       banner.setAttribute('data-visible', 'false');
-      if (choice === 'all') loadUmami();
+      if (choice === 'all') { loadUmami(); if (window.loadGA) window.loadGA(); }
     });
   }
   /* Reset button on /politika-kolacica/ */
