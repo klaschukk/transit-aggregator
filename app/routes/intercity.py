@@ -85,7 +85,7 @@ def route_index():
     routes = cached_query("""
         SELECT r.slug, r.from_city, r.to_city, r.distance_km,
                COUNT(DISTINCT t.id) as trip_count,
-               MIN(t.price_rsd) as min_price_rsd
+               MIN(t.price_rsd) FILTER (WHERE t.price_rsd > 0) as min_price_rsd
         FROM routes r
         LEFT JOIN trips t ON t.route_id = r.id
         WHERE r.type = 'intercity'
@@ -108,7 +108,7 @@ def route_detail(slug: str):
     route = query_one("""
         SELECT r.id, r.slug, r.from_city, r.to_city, r.distance_km, r.type,
                COUNT(DISTINCT t.id) as trip_count,
-               MIN(t.price_rsd) as min_price_rsd,
+               MIN(t.price_rsd) FILTER (WHERE t.price_rsd > 0) as min_price_rsd,
                MAX(t.price_rsd) as max_price_rsd
         FROM routes r
         LEFT JOIN trips t ON t.route_id = r.id
@@ -269,7 +269,7 @@ def city_pair(from_city: str, to_city: str):
     route = query_one("""
         SELECT r.id, r.slug, r.from_city, r.to_city, r.distance_km, r.type,
                COUNT(DISTINCT t.id) as trip_count,
-               MIN(t.price_rsd) as min_price_rsd
+               MIN(t.price_rsd) FILTER (WHERE t.price_rsd > 0) as min_price_rsd
         FROM routes r
         LEFT JOIN trips t ON t.route_id = r.id
         WHERE lower(r.from_city_slug) = lower(?) AND lower(r.to_city_slug) = lower(?)
