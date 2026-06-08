@@ -2,7 +2,12 @@
 {% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš'} %}
 {% set city_label = city_names.get(city, city|title) %}
 
-{% block title %}{{ _('line_detail.title') }} {{ line.number }} {{ line.name|truncate(24, True, '…') }} — {{ city_label }} {{ current_year }} | Prevozni{% endblock %}
+{# Title built from the actual top search queries (GSC): users search
+   "linija {N} stajalista" and "{N} red voznje {city}" — so the title must
+   carry BOTH "{Linija} {N}", the city, "red vožnje" AND "stajališta" to match
+   either pattern. The (often long, Cyrillic) line endpoint name added nothing
+   to query-match and is dropped from the title (kept in description/H1). #}
+{% block title %}{{ _('line_detail.line_prefix') }} {{ line.number }} {{ city_label }}: {{ _('line.schedule_title') }}, {{ _('line.stops') }} {{ current_year }} | Prevozni{% endblock %}
 {% block meta_description %}{{ _('line_detail.line_prefix') }} {{ line.number }} {{ _('line_detail.meta_in') }} {{ city_label }}: {{ stops|length if stops else 0 }} {{ _('line_detail.meta_stops') }}{% if first_dep and last_dep %} {{ _('line_detail.meta_departures') }} {{ first_dep }} {{ _('line_detail.meta_to') }} {{ last_dep }}.{% endif %} {{ _('line_detail.meta_eta') }}{% endblock %}
 
 {% block head_extra %}
