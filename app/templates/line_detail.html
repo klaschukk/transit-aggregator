@@ -8,7 +8,12 @@
    either pattern. The (often long, Cyrillic) line endpoint name added nothing
    to query-match and is dropped from the title (kept in description/H1). #}
 {% block title %}{{ _('line_detail.line_prefix') }} {{ line.number }} {{ city_label }}: {{ _('line.schedule_title') }}, {{ _('line.stops') }} {{ current_year }} | Prevozni{% endblock %}
-{% block meta_description %}{{ _('line_detail.line_prefix') }} {{ line.number }} {{ _('line_detail.meta_in') }} {{ city_label }}: {{ stops|length if stops else 0 }} {{ _('line_detail.meta_stops') }}{% if first_dep and last_dep %} {{ _('line_detail.meta_departures') }} {{ first_dep }} {{ _('line_detail.meta_to') }} {{ last_dep }}.{% endif %} {{ _('line_detail.meta_eta') }}{% endblock %}
+{# Description front-loads BOTH search intents: "red vožnje" (schedule) was
+   missing entirely before, yet half the queries are "{N} red voznje {city}".
+   Now: "{Linija} {N} {city} — red vožnje, {X} stajališta, polasci …" puts both
+   keywords in the first ~40 chars, then the differentiators Google's transit
+   widget lacks (map + live arrivals). #}
+{% block meta_description %}{{ _('line_detail.line_prefix') }} {{ line.number }} {{ city_label }} — {{ _('line.schedule_title')|lower }}, {{ stops|length if stops else 0 }} {{ _('line.stops') }}{% if first_dep and last_dep %}, {{ _('line_detail.meta_departures')|lower }} {{ first_dep }} {{ _('line_detail.meta_to') }} {{ last_dep }}{% endif %}. {{ _('line_detail.meta_eta') }}{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
