@@ -180,11 +180,24 @@ def test_bt4_checkout_url_empty_without_line_id_or_known_city():
     assert bt4_checkout_url('foobar', 'nis', 909) == ''
 
 
-def test_busticket4_not_in_pair_level_resolver():
-    # BusTicket4 is wired per-trip (bt4_checkout_url), NOT as a pair-level
-    # partner — its pair checkout without a lineId is an empty 0.00 € page.
-    # The pair-level resolver must therefore fall back to Bookaway.
-    keys = [o.partner_key for o in resolve_offers('beograd', 'nis', 'Beograd', 'Niš')]
+def test_busticket4_leads_pair_level_when_line_id_known():
+    # BusTicket4 is now a pair-level partner for pairs we hold a line_id for
+    # (bt4_lineids.json). Its checkout deep-link is then guaranteed populated,
+    # so it LEADS the buy button; Bookaway stays in the list as fallback.
+    from app.affiliates.partners import _BT4_PAIR_LINEID, _BT4_CITY_ID
+    f, t = 'beograd', 'kragujevac'
+    assert f'{f}-{t}' in _BT4_PAIR_LINEID and f in _BT4_CITY_ID and t in _BT4_CITY_ID
+    offers = resolve_offers(f, t, 'Beograd', 'Kragujevac')
+    keys = [o.partner_key for o in offers]
+    assert keys[0] == 'busticket4'          # direct exact-trip checkout leads
+    assert 'lineId=' in offers[0].url       # ...and it opens a real departure
+    assert 'bookaway' in keys               # Bookaway remains as the fallback
+
+
+def test_busticket4_absent_when_no_line_id_known():
+    # A pair with no pre-resolved line_id (international, BT4 has no inventory
+    # mapped) must NOT offer BusTicket4 — that would risk an empty checkout.
+    keys = [o.partner_key for o in resolve_offers('beograd', 'sofia', 'Beograd', 'Sofia')]
     assert 'busticket4' not in keys
     assert keys[0] == 'bookaway'
 
@@ -205,31 +218,36 @@ def test_resolver_returns_empty_when_no_partner_covers():
     assert offers == []
 
 
-def test_resolver_orders_by_commission_then_ux():
-    # SR domestic pair: only Bookaway claims it (FlixBus skips intra-SR;
-    # BusTicket4 disabled). Bookaway leads.
-    offers = resolve_offers('beograd', 'nis', 'Beograd', 'Niš')
+def test_resolver_orders_by_checkout_quality_then_commission():
+    # BT4-eligible SR pair: the exact-checkout partner (ux_rank 0) leads the
+    # listing fallback (ux_rank 1) even though its commission band is LOWER —
+    # checkout quality is the primary sort key, commission only the tiebreak.
+    offers = resolve_offers('beograd', 'kragujevac', 'Beograd', 'Kragujevac')
     keys = [o.partner_key for o in offers]
-    assert keys == ['bookaway']
+    assert keys == ['busticket4', 'bookaway']
+    assert offers[0].ux_rank < offers[1].ux_rank
+    assert offers[0].commission_pct < offers[1].commission_pct
 
 
 def test_resolver_cross_border_excludes_flixbus():
-    # No FlixBus affiliate agreement → it must not appear in offers. Bookaway
-    # covers the cross-border pair and leads.
+    # No FlixBus affiliate agreement → it must not appear in offers. BusTicket4
+    # sells this cross-border pair (line_id known) so it leads; Bookaway follows.
     offers = resolve_offers(
         'beograd', 'sarajevo', 'Beograd', 'Sarajevo', 'trip-card',
     )
     keys = [o.partner_key for o in offers]
     assert 'flixbus' not in keys
-    assert keys and keys[0] == 'bookaway'
+    assert keys and keys[0] == 'busticket4'
+    assert 'bookaway' in keys
 
 
 def test_resolver_ab_ignored_when_partner_ineligible():
-    # AB says flixbus, but flixbus doesn't cover intra-SR → Bookaway wins.
+    # AB names flixbus, which is never eligible → the default checkout-quality
+    # ordering applies and the direct-checkout partner (BT4) leads.
     offers = resolve_offers(
-        'beograd', 'nis', ab_choice='flixbus',
+        'beograd', 'kragujevac', ab_choice='flixbus',
     )
-    assert offers[0].partner_key == 'bookaway'
+    assert offers[0].partner_key == 'busticket4'
 
 
 def test_primary_offer_helper():
@@ -251,16 +269,19 @@ def test_offer_is_frozen_dataclass():
 # ── A/B assignment ───────────────────────────────────────────────────
 
 def test_ab_honours_existing_cookie():
-    assert ab_partner_order({'ab_partner': 'bookaway'}, seed='1.2.3.4') == 'bookaway'
+    # A cookie naming the current valid variant sticks across requests.
+    assert ab_partner_order({'ab_partner': 'busticket4'}, seed='1.2.3.4') == 'busticket4'
 
 
-def test_ab_stale_flixbus_cookie_falls_back():
-    # FlixBus is no longer a valid variant → an old cookie must not stick.
-    assert ab_partner_order({'ab_partner': 'flixbus'}, seed='1.2.3.4') == 'bookaway'
+def test_ab_stale_cookie_falls_back():
+    # 'bookaway'/'flixbus' are no longer the active variant → an old cookie must
+    # not stick; the user is reassigned to the current arm.
+    assert ab_partner_order({'ab_partner': 'flixbus'}, seed='1.2.3.4') == 'busticket4'
+    assert ab_partner_order({'ab_partner': 'bookaway'}, seed='1.2.3.4') == 'busticket4'
 
 
 def test_ab_ignores_garbage_cookie_value():
-    assert ab_partner_order({'ab_partner': 'hax0r'}, seed='') == 'bookaway'
+    assert ab_partner_order({'ab_partner': 'hax0r'}, seed='') == 'busticket4'
 
 
 def test_ab_deterministic_from_seed():
@@ -275,12 +296,12 @@ def test_ab_writes_cookie_when_asked():
     ab_partner_order(
         {}, response_setter=lambda k, v: captured.update({k: v}), seed='1.1.1.1',
     )
-    assert captured.get('ab_partner') == 'bookaway'
+    assert captured.get('ab_partner') == 'busticket4'
 
 
-def test_ab_single_arm_always_bookaway():
-    # Only Bookaway is active → every seed resolves to it (single-arm A/B).
+def test_ab_single_arm_always_busticket4():
+    # Single active arm: prefer the direct-checkout partner → every seed → it.
     from collections import Counter
     c = Counter(ab_partner_order({}, seed=f'10.0.0.{i}') for i in range(200))
-    assert c['bookaway'] == 200
-    assert 'flixbus' not in c
+    assert c['busticket4'] == 200
+    assert 'bookaway' not in c and 'flixbus' not in c

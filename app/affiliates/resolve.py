@@ -1,20 +1,26 @@
 """
 Pick the best affiliate offer for a route, and the full ranked list.
 
-Selection priority (spec):
+Selection priority:
   1. `has_route(from, to)` — partner must actually sell the pair
-  2. commission_pct midpoint (higher wins)
-  3. ux_rank (lower wins — 1 is best)
+  2. ux_rank (lower wins) — a partner that opens an exact, populated
+     checkout (BusTicket4 with a known line_id, ux_rank 0) outconverts one
+     that drops the user on a listing/country page (Bookaway, ux_rank 1),
+     so checkout quality leads. This deliberately ranks above commission:
+     expected revenue is conversion × commission, and a working checkout's
+     conversion edge dwarfs Bookaway's higher nominal band on a page that
+     historically converted ~0 (the "362 clicks, 0 conversions" fallback).
+  3. commission_pct midpoint (higher wins) — tiebreak within an equal ux_rank.
 
 The resolver may return an empty list when no partner covers a pair —
 templates already guard with `{% if _buy_href %}` and simply hide the
 button. Bookaway is the broadest fallback (its country-page URL covers
 any pair where at least one endpoint is in its inventory map).
 
-The A/B stub (`ab_partner_order`) is a cookie-driven pre-sort that flips
-Bookaway ↔ FlixBus for half the traffic. The resolver applies it as a
-"promote this key to the front if it's eligible" nudge — it does not
-disable partners, so the fallback chain stays intact.
+The A/B stub (`ab_partner_order`) is a cookie-driven pre-sort. With a single
+active variant it is effectively a deterministic "prefer the direct-checkout
+partner" nudge: it floats the named key to the front _if eligible_, never
+disables a partner, so the Bookaway fallback chain stays intact.
 """
 from __future__ import annotations
 
@@ -24,15 +30,18 @@ from app.affiliates.base import Offer, Partner
 from app.affiliates.partners import Bookaway, BusTicket4, FlixBus
 
 # Instantiate once — partners are stateless, single instances are fine.
-# NOTE: BusTicket4 is temporarily DISABLED. Its /en/checkout deep-link needs a
-# `lineId` to select a trip; without one the page renders an empty 0.00 €
-# checkout (no trip), which is worse than Bookaway's working exact-pair page.
-# Re-enable once trips carry the busticket4 line_id (scraper -> trips.bt4_line_id
-# -> &lineId= per trip). Until then Bookaway leads again.
+# BusTicket4 is now ACTIVE as a pair-level partner: it only reports has_route()
+# True for pairs we hold a pre-resolved line_id for (app/affiliates/bt4_lineids.json,
+# 406 pairs), so its checkout deep-link always opens a populated departure — the
+# old "empty 0.00 € shell" risk that kept it disabled is gone. Where BT4 is
+# eligible it LEADS the "Kupi" button (an exact-trip checkout converts better
+# than Bookaway's listing fallback, even at a lower commission band — see the
+# sort in resolve_offers). Pairs with no known line_id fall through to Bookaway.
 # FlixBus is NOT active — we have no affiliate agreement with them, so their
 # links earn nothing (just free traffic to FlixBus). The class stays imported
 # so it can be re-added here if/when a deal is signed.
 ACTIVE_PARTNERS: tuple[Partner, ...] = (
+    BusTicket4(),
     Bookaway(),
 )
 
@@ -60,14 +69,16 @@ def resolve_offers(
         if partner.has_route(from_slug, to_slug):
             eligible.append((partner, partner.commission_midpoint, partner.ux_rank))
 
-    # Sort: higher commission first, then lower ux_rank first.
-    eligible.sort(key=lambda t: (-t[1], t[2]))
+    # Sort: best checkout quality first (lower ux_rank), then higher commission
+    # as a tiebreak. A working exact-trip checkout (BT4 + line_id) leads a
+    # listing fallback (Bookaway) regardless of the nominal commission band.
+    eligible.sort(key=lambda t: (t[2], -t[1]))
 
     # A/B promotion: if `ab_choice` names an eligible partner, float it
-    # to position 0 (keep others in their scored order).
+    # to position 0 (keep others in their checkout-quality order).
     if ab_choice:
         eligible.sort(
-            key=lambda t: (0 if t[0].key == ab_choice else 1, -t[1], t[2])
+            key=lambda t: (0 if t[0].key == ab_choice else 1, t[2], -t[1])
         )
 
     return [
@@ -84,9 +95,12 @@ def primary_offer(offers: list[Offer]) -> Offer | None:
 # ── A/B assignment ───────────────────────────────────────────────────
 
 _AB_COOKIE = 'ab_partner'
-# Only Bookaway is active, so the partner-order A/B has a single arm (it always
-# resolves to 'bookaway'). Add a second key here when another partner goes live.
-_AB_VARIANTS: tuple[str, ...] = ('bookaway',)
+# Single arm: prefer the direct-checkout partner. 'busticket4' floats to the
+# front wherever it is eligible (pair has a known line_id); everywhere else only
+# Bookaway is eligible, so it leads anyway. A stale 'bookaway' cookie from the
+# previous arm is no longer in this tuple, so it's ignored and reassigned. Add a
+# real second key here to run an actual partner-order experiment.
+_AB_VARIANTS: tuple[str, ...] = ('busticket4',)
 
 
 def ab_partner_order(
