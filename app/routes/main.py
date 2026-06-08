@@ -1382,20 +1382,18 @@ def service_worker():
 @main_bp.route('/robots.txt')
 def robots():
     base = current_app.config['BASE_URL']
-    # Disallow AI-training crawlers. They don't send traffic back, so
-    # letting them index wastes server resources and exposes original
-    # content (scraped timetables, FAQ prose) to models that won't cite
-    # or link back. Search-engine bots (Google/Bing/Yandex) stay allowed.
+    # Block only AI *training / bulk-scrape* crawlers — they ingest content
+    # without sending traffic back. The AI *answer/search* bots are
+    # deliberately ALLOWED (they fall under "User-agent: *" below): ChatGPT-User,
+    # OAI-SearchBot, PerplexityBot and Google-Extended fetch a page live when a
+    # user asks and CITE it with a link — that's referral traffic for a
+    # route-planning site exactly like this one. Search engines stay allowed too.
     ai_bots = (
-        'GPTBot',           # OpenAI
-        'ChatGPT-User',     # OpenAI on-demand browsing
-        'OAI-SearchBot',    # OpenAI SearchGPT
-        'ClaudeBot',        # Anthropic
+        'GPTBot',           # OpenAI training crawler
+        'ClaudeBot',        # Anthropic training
         'anthropic-ai',     # legacy Anthropic name
         'Claude-Web',       # legacy Claude web crawler
-        'Google-Extended',  # Google Gemini/Bard training (NOT Googlebot)
         'CCBot',            # Common Crawl (feeds most open LLMs)
-        'PerplexityBot',    # Perplexity
         'Bytespider',       # ByteDance / TikTok
         'Amazonbot',        # Alexa / Amazon AI
         'cohere-ai',        # Cohere
@@ -1403,7 +1401,9 @@ def robots():
         'Diffbot',          # crawl-for-resale aggregator
     )
     lines = [
-        '# AI training crawlers — block (no traffic return, content reuse risk)',
+        '# AI training/bulk-scrape crawlers — blocked (ingest, no traffic back).',
+        '# AI answer bots (ChatGPT-User, OAI-SearchBot, PerplexityBot,',
+        '# Google-Extended) are allowed below — they cite + link = referral traffic.',
     ]
     for bot in ai_bots:
         lines.append(f'User-agent: {bot}')
@@ -1424,6 +1424,34 @@ def robots():
     ]
     resp = make_response('\n'.join(lines) + '\n')
     resp.headers['Content-Type'] = 'text/plain'
+    return resp
+
+
+@main_bp.route('/llms.txt')
+def llms_txt():
+    """llms.txt — concise Markdown map of the site for AI answer engines.
+    The standard is still nascent (few systems read it as of 2026), but it's
+    cheap, harmless, and a handful of tools/agents do pick it up."""
+    base = current_app.config['BASE_URL']
+    body = (
+        "# Prevozni\n"
+        "> Besplatni agregator javnog prevoza u Srbiji: međugradski autobusi i "
+        "vozovi + gradski prevoz (Beograd, Novi Sad, Niš, Kragujevac). Redovi "
+        "vožnje, cene karata, prevoznici, trajanje putovanja.\n\n"
+        "## Glavne stranice\n"
+        f"- [Sve rute]({base}/rute/): međugradske autobuske i voz linije sa cenama i polascima\n"
+        f"- [Gradski prevoz]({base}/gradski/): linije i stajališta u 4 grada\n"
+        f"- [Destinacije]({base}/destinacije/): popularna putovanja na Balkanu\n"
+        f"- [Pretraga]({base}/pretraga/): pronađi polazak između dva grada\n\n"
+        "## O sajtu\n"
+        f"- [O nama]({base}/o-nama/)\n"
+        f"- [Kontakt]({base}/kontakt/)\n\n"
+        "## Napomene\n"
+        "- Podaci se osvežavaju dnevno automatskim skraperima sa zvaničnih izvora.\n"
+        "- Prevozni ne prodaje karte — kupovina ide preko prevoznika i partnera.\n"
+    )
+    resp = make_response(body)
+    resp.headers['Content-Type'] = 'text/plain; charset=utf-8'
     return resp
 
 

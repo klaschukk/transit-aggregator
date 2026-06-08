@@ -8,6 +8,10 @@
 {% block meta_description %}{{ _('city_pair.meta_prefix') }} {{ from_city }} {{ _('city_pair.meta_mid') }} {{ to_city }} {{ current_year }}{% if route and route.trip_count %}: {{ route.trip_count }} {{ _('city_pair.departures_word') }}{% endif %}{% if route and route.min_price_rsd %}, {{ _('route_detail.meta_from')|lower }} {{ route.min_price_rsd }} RSD{% endif %}.{% if reviews_agg and reviews_agg.n and reviews_agg.n >= 5 %} {{ reviews_agg.avg }}★ ({{ reviews_agg.n }}).{% endif %} {{ _('city_pair.meta_cta') }}{% endblock %}
 
 {% block head_extra %}
+{# Freshness signal for search + AI answer engines: timetable data rebuilt nightly. #}
+{% if data_updated %}
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","url":"{{ canonical_url }}","dateModified":"{{ data_updated }}","inLanguage":"{{ lang }}","isPartOf":{"@type":"WebSite","name":"Prevozni","url":"{{ config.BASE_URL }}"}}</script>
+{% endif %}
 {% if route %}
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"TravelAction","fromLocation":{"@type":"City","name":"{{ from_city }}"},"toLocation":{"@type":"City","name":"{{ to_city }}"}}

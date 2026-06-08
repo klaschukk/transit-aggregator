@@ -256,6 +256,18 @@ def create_app(config_name: str | None = None) -> Flask:
         import time as _time
         review_loaded_at = f'{_time.time():.3f}'
 
+        # Honest "data last refreshed" date = the DuckDB file mtime (the nightly
+        # scrapers rebuild it). Used as schema.org dateModified on data pages so
+        # search engines + AI answer engines see a real freshness signal. One
+        # cheap stat per request; empty string if the DB isn't present.
+        try:
+            from pathlib import Path as _P
+            _dbp = _P(app.config.get('DUCKDB_PATH', ''))
+            data_updated = (_dt.utcfromtimestamp(_dbp.stat().st_mtime).strftime('%Y-%m-%d')
+                            if _dbp.exists() else '')
+        except OSError:
+            data_updated = ''
+
         # `ab_variant` is registered as a Jinja global in create_app
         # (search for `_ab_variant_global`). Do NOT shadow it from this
         # context_processor — context-processor returns override
@@ -263,6 +275,7 @@ def create_app(config_name: str | None = None) -> Flask:
         # stub here would silently kill exposure tracking + cookie
         # issuance for the entire site.
         return {
+            'data_updated': data_updated,
             '_': _,
             'lang': lang,
             'lang_prefix': prefix,
