@@ -132,6 +132,23 @@ try:
 except (OSError, ValueError):
     _BT4_CITY_ID = {}
 
+# Pre-resolved busticket4 line_id for a whole "{from_slug}-{to_slug}" pair —
+# the FIRST live departure busticket4's doBusesSearch returns for that pair
+# (built by bt4_discover.py, cross-checked 200/200 against trips.bt4_line_id, so
+# this id space is identical to the per-trip one). This is what lets BusTicket4
+# act as a *pair-level* partner: the resolver's "Kupi" button on a city-pair /
+# route page can deep-link straight into a populated checkout even when the
+# individual trip rows carry no line_id. A pair absent here has no known
+# bookable departure, so BusTicket4 stays ineligible for it (→ Bookaway
+# fallback) rather than risking an empty 0.00 € checkout. Refresh periodically:
+# schedules churn, so a stale line_id can 404 the checkout (see bt4_discover.py).
+_BT4_PAIR_PATH = _os.path.join(_os.path.dirname(__file__), 'bt4_lineids.json')
+try:
+    with open(_BT4_PAIR_PATH, encoding='utf-8') as _fh:
+        _BT4_PAIR_LINEID: dict = {k: int(v) for k, v in _json.load(_fh).items()}
+except (OSError, ValueError):
+    _BT4_PAIR_LINEID = {}
+
 
 class Bookaway(Partner):
     """Primary partner. Strongest Balkans coverage, highest commission band."""
@@ -228,8 +245,17 @@ class BusTicket4(Partner):
     AFFILIATE_ID = 735  # prevozni.com
 
     def has_route(self, from_slug: str, to_slug: str) -> bool:
-        # Covered iff we know both city_ids — required to build the checkout URL.
-        return from_slug in _BT4_CITY_ID and to_slug in _BT4_CITY_ID
+        # PAIR-level eligibility (what the resolver's "Kupi" button uses): we
+        # need a known line_id for the pair AND both numeric city_ids, so the
+        # checkout deep-link is guaranteed to open a populated departure rather
+        # than an empty 0.00 € shell. Pairs missing either fall through to
+        # Bookaway. (The per-trip buy button is separate — see bt4_checkout_url,
+        # which deep-links each trip's own line_id and does its own guarding.)
+        return (
+            f'{from_slug}-{to_slug}' in _BT4_PAIR_LINEID
+            and from_slug in _BT4_CITY_ID
+            and to_slug in _BT4_CITY_ID
+        )
 
     def build_url(
         self,
@@ -242,6 +268,11 @@ class BusTicket4(Partner):
     ) -> str:
         dep = _BT4_CITY_ID[from_slug]
         arr = _BT4_CITY_ID[to_slug]
+        # Pair-level callers (make_offer) pass no line_id — fall back to the
+        # pre-resolved pair line_id so the checkout still selects a real
+        # departure. Per-trip callers pass the trip's exact line_id and win.
+        if line_id is None:
+            line_id = _BT4_PAIR_LINEID.get(f'{from_slug}-{to_slug}')
         # Default to tomorrow so an overnight-cached page never points at a past
         # date (busticket4 wants DD-MM-YYYY). The user can change it on checkout.
         depart = (date.today() + timedelta(days=1)).strftime('%d-%m-%Y')
