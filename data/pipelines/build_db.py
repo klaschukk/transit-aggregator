@@ -30,6 +30,13 @@ GTFS_DIR = BASE_DIR / 'gtfs'
 DB_PATH = BASE_DIR / 'dbs' / 'transit.duckdb'
 TMP_PATH = DB_PATH.with_name('transit.duckdb.tmp')
 
+# Official Belgrade GTFS feed (data.gov.rs). _load_gtfs() auto-fetches this when
+# GTFS_DIR is empty so the schedule survives every rebuild — see _ensure_gtfs().
+GTFS_URL = (
+    'https://data.gov.rs/s/resources/gradski-javni-prevoz-u-beogradu-gtfs/'
+    '20251031-111721/bgprev-belgrade-rs-2-.zip'
+)
+
 # Approximate road distances (km) between Serbian cities
 DISTANCES: dict[tuple[str, str], int] = {
     ('Beograd', 'Novi Sad'): 90, ('Beograd', 'Niš'): 250,
@@ -777,8 +784,40 @@ def _load_stations(conn: duckdb.DuckDBPyConnection, stations_path: Path) -> None
     print(f"  Loaded {station_id - 1} stations")
 
 
+def _ensure_gtfs() -> None:
+    """Fetch the Belgrade GTFS feed into GTFS_DIR when it is missing.
+
+    Root cause of the "every line shows 4 min" bug: the nightly rebuild runs
+    build_db.py with an empty data/gtfs/, so _load_gtfs() printed "No GTFS data
+    found, skipping" and each rebuild silently wiped the Belgrade schedule —
+    leaving stop pages with no real arrivals (only the fabricated headway
+    fallback, since removed). Auto-downloading here makes the schedule survive
+    rebuilds. Non-fatal by design: any failure keeps existing files (or skips
+    GTFS) so a flaky network never breaks the DB build.
+    """
+    if (GTFS_DIR / 'trips.txt').exists() and (GTFS_DIR / 'stop_times.txt').exists():
+        return
+    try:
+        import io
+        import urllib.request
+        import zipfile
+
+        GTFS_DIR.mkdir(parents=True, exist_ok=True)
+        print("  GTFS files missing — downloading feed from data.gov.rs ...")
+        req = urllib.request.Request(
+            GTFS_URL, headers={'User-Agent': 'Mozilla/5.0 Transit-Serbia-Bot/1.0'})
+        with urllib.request.urlopen(req, timeout=180) as resp:
+            blob = resp.read()
+        with zipfile.ZipFile(io.BytesIO(blob)) as zf:
+            zf.extractall(GTFS_DIR)
+        print(f"  Downloaded + extracted GTFS ({len(blob) // 1024 // 1024} MB)")
+    except Exception as exc:  # pragma: no cover - network-dependent
+        print(f"  WARN: GTFS download failed ({exc}); proceeding without fresh GTFS")
+
+
 def _load_gtfs(conn: duckdb.DuckDBPyConnection) -> None:
     """Load GTFS schedule data (trips + stop_times) using bulk DuckDB import."""
+    _ensure_gtfs()
     trips_path = GTFS_DIR / 'trips.txt'
     stop_times_path = GTFS_DIR / 'stop_times.txt'
     routes_path = GTFS_DIR / 'routes.txt'
