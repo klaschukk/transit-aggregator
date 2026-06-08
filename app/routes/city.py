@@ -682,31 +682,26 @@ def api_stop_arrivals():
 
     result = []
     for line in lines:
+        departures = gtfs_by_line.get(line['number'])
+        if not departures:
+            # No real GTFS arrival for this line at this stop. We do NOT fabricate
+            # a headway estimate: the page promises "ETA na osnovu zvaničnog GTFS
+            # reda vožnje", and a made-up countdown is actively harmful on a transit
+            # site — when stop_order is flat it printed an identical "4 min" for
+            # every line, which is obviously fake and can make riders miss a bus.
+            # Omit the line; the client renders "—" for any line without an entry.
+            continue
+
         name = line['name'] or ''
         direction = name.split('—')[-1].strip() if '—' in name else name
 
-        departures = gtfs_by_line.get(line['number'])
-        if departures:
-            # Real GTFS times
-            mins1 = _time_to_min(departures[0]) - current_min
-            if mins1 < 0:
-                mins1 = 0
-            mins2 = _time_to_min(departures[1]) - current_min if len(departures) > 1 else mins1 + 15
-            if mins2 < mins1:
-                mins2 = mins1 + 15
-        else:
-            # Fallback: headway estimate
-            if current_min < 360 or current_min > 1380:
-                headway = 30
-            elif current_min < 540 or (900 < current_min < 1020):
-                headway = 6
-            else:
-                headway = 10
-            offset = (current_min + (line.get('stop_order') or 0) * 2) % headway
-            mins1 = headway - offset
-            if mins1 <= 0:
-                mins1 = 1
-            mins2 = mins1 + headway
+        # Real GTFS times
+        mins1 = _time_to_min(departures[0]) - current_min
+        if mins1 < 0:
+            mins1 = 0
+        mins2 = _time_to_min(departures[1]) - current_min if len(departures) > 1 else mins1 + 15
+        if mins2 < mins1:
+            mins2 = mins1 + 15
 
         result.append({
             'line': line['number'],

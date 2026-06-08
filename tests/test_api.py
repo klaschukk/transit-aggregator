@@ -99,9 +99,51 @@ def test_city_stops_empty_bbox(client):
 
 
 def test_stop_arrivals_sajam(client):
+    # Honest contract: arrivals are REAL GTFS times only — the endpoint never
+    # fabricates a headway estimate (which used to print an identical "X min" for
+    # every line). Sajam (Beograd) has no mapped GTFS in the test DB, so it
+    # returns an empty list. The real-data path is asserted in
+    # test_stop_arrivals_real_gtfs below.
     data = json.loads(client.get("/api/stop-arrivals?slug=sajam").data)
     assert isinstance(data, list)
-    assert len(data) > 0, "No arrivals at Sajam"
+
+
+def _live_gtfs_stop_slug():
+    """Slug of a stop that has >=1 real GTFS departure from now on, else None."""
+    from datetime import datetime
+
+    from app.db import query
+    from app.routes.city import _today_service
+
+    now = f"{datetime.now().hour:02d}:{datetime.now().minute:02d}:00"
+    rows = query(
+        """
+        SELECT cs.slug
+        FROM gtfs_stop_times st
+        JOIN city_stops cs ON cs.id = st.city_stop_id
+        JOIN gtfs_trips gt ON gt.trip_id = st.trip_id
+        WHERE gt.service_id = ? AND st.departure_time >= ?
+        GROUP BY cs.slug
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+        """,
+        [_today_service(), now],
+    )
+    return rows[0]["slug"] if rows else None
+
+
+def test_stop_arrivals_real_gtfs(client):
+    """Real-data path: a stop with current GTFS departures returns arrivals with
+    valid structure and genuine (non-fabricated) minute values."""
+    slug = _live_gtfs_stop_slug()
+    if not slug:
+        pytest.skip("no GTFS departures from now in test DB (e.g. overnight run)")
+    data = json.loads(client.get(f"/api/stop-arrivals?slug={slug}").data)
+    assert len(data) > 0, f"expected real arrivals at {slug}"
+    for item in data:
+        for key in ("line", "mins", "direction", "color", "slug"):
+            assert key in item, f"missing {key} in {item}"
+        assert isinstance(item["mins"], int) and item["mins"] >= 0
 
 
 def test_stop_arrivals_fields(client):
