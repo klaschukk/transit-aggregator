@@ -83,7 +83,7 @@ def index():
     popular_routes = cached_query("""
         SELECT r.slug, r.from_city, r.to_city, r.distance_km,
                COUNT(t.id) as trip_count,
-               MIN(t.price_rsd) as min_price_rsd
+               MIN(t.price_rsd) FILTER (WHERE t.price_rsd > 0) as min_price_rsd
         FROM routes r
         LEFT JOIN trips t ON t.route_id = r.id
         WHERE r.type = 'intercity'
@@ -180,7 +180,7 @@ def search():
     if not from_city and not to_city and db_ready():
         popular_routes = query("""
             SELECT r.slug, r.from_city, r.to_city, COUNT(t.id) as trip_count,
-                   MIN(t.price_rsd) as min_price_rsd
+                   MIN(t.price_rsd) FILTER (WHERE t.price_rsd > 0) as min_price_rsd
             FROM routes r
             LEFT JOIN trips t ON t.route_id = r.id
             WHERE r.type = 'intercity'
@@ -1186,7 +1186,7 @@ def og_route(slug: str):
     row = cached_query_one("""
         SELECT r.from_city, r.to_city, r.distance_km,
                COUNT(DISTINCT t.id) AS trip_count,
-               MIN(t.price_rsd) AS min_price
+               MIN(t.price_rsd) FILTER (WHERE t.price_rsd > 0) AS min_price
         FROM routes r LEFT JOIN trips t ON t.route_id = r.id
         WHERE r.slug = ? AND r.type = 'intercity'
         GROUP BY r.from_city, r.to_city, r.distance_km
@@ -1214,7 +1214,7 @@ def og_voznja(from_city: str, to_city: str):
     row = cached_query_one("""
         SELECT r.from_city, r.to_city, r.distance_km,
                COUNT(DISTINCT t.id) AS trip_count,
-               MIN(t.price_rsd) AS min_price
+               MIN(t.price_rsd) FILTER (WHERE t.price_rsd > 0) AS min_price
         FROM routes r LEFT JOIN trips t ON t.route_id = r.id
         WHERE lower(r.from_city_slug) = lower(?)
           AND lower(r.to_city_slug) = lower(?)

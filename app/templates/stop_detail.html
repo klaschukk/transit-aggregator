@@ -34,7 +34,7 @@
 {% from '_partials/_stats_strip.html' import stats_strip %}
 {% from '_partials/_empty_state.html' import empty_state %}
 
-<!-- Mobile back button — same chrome as /rute/<slug>/ -->
+{# Mobile back button — same chrome as /rute/<slug>/ #}
 <div class="mobile-back">
   <a href="{{ lang_prefix }}/gradski/{{ city }}/" class="mobile-back__btn">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>
@@ -118,7 +118,7 @@
   <p class="buy-ticket__note">{{ _('stop.action_note') }}</p>
 </div>
 
-<!-- Lines & arrivals -->
+{# Lines & arrivals #}
 {% if lines_at_stop %}
 <div class="stop-lines fade-in fade-in--d1">
   <h2 class="stop-lines__title">
@@ -168,7 +168,7 @@
   {{ empty_state(icon='stop', text=_('stop.no_lines')) }}
 {% endif %}
 
-<!-- Nearby stops -->
+{# Nearby stops #}
 {% if nearby_stops %}
 <section class="see-also">
   <h2 class="see-also__title">
@@ -186,7 +186,7 @@
 </section>
 {% endif %}
 
-<!-- E-E-A-T prose (unique 150–300 words per stop, rules-based from live data) -->
+{# E-E-A-T prose (unique 150–300 words per stop, rules-based from live data) #}
 {% if prose and prose.intro %}
 <div class="seo-block stop-prose fade-in fade-in--d3">
   <div class="seo-block__icon">

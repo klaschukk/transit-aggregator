@@ -43,7 +43,7 @@
 
 {% block content %}
 
-<!-- ═══════ HERO ═══════ -->
+{# ═══════ HERO ═══════ #}
 <section class="hero">
   <div class="hero__bg"></div>
   <div class="hero__inner container">
@@ -117,7 +117,7 @@
   {{ ad_slot('home_top', format='leaderboard', lazy=False) }}
 </div>
 
-<!-- ═══════ STATS ═══════ -->
+{# ═══════ STATS ═══════ #}
 <section class="home-stats container fade-in" aria-label="{{ _('home.valueprop_aria') }}">
   <div class="home-stats__item">
     <svg class="home-stats__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -149,7 +149,7 @@
   </div>
 </section>
 
-<!-- ═══════ FEATURE HIGHLIGHT STRIP ═══════ -->
+{# ═══════ FEATURE HIGHLIGHT STRIP ═══════ #}
 <section class="home-features container fade-in">
   <a href="{{ lang_prefix }}/gradski/beograd/" class="home-feat-card">
     <div class="home-feat-card__icon">
@@ -190,7 +190,7 @@
   </a>
 </section>
 
-<!-- ═══════ TWO COLUMNS: Routes + City ═══════ -->
+{# ═══════ TWO COLUMNS: Routes + City ═══════ #}
 <section class="home-section container">
   <div class="home-duo">
 
@@ -262,7 +262,7 @@
   {{ ad_slot('home_mid', format='large-rectangle') }}
 </div>
 
-<!-- ═══════ FAQ ═══════ -->
+{# ═══════ FAQ ═══════ #}
 <section class="home-section container">
   <h2 class="home-section__title">{{ _('home.faq_heading') }}</h2>
   <div class="faq-list">

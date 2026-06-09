@@ -201,7 +201,7 @@ def destinations():
             placeholders = ', '.join(['?'] * len(info['cities']))
             row = cached_query_one(f"""
                 SELECT COUNT(DISTINCT r.id) AS rc,
-                       MIN(t.price_rsd) AS min_price
+                       MIN(t.price_rsd) FILTER (WHERE t.price_rsd > 0) AS min_price
                 FROM routes r
                 JOIN trips t ON t.route_id = r.id
                 WHERE r.type = 'intercity' AND t.price_rsd > 0
@@ -336,7 +336,7 @@ def _guide_context_more() -> dict:
     sea_routes: list = []
     if db_ready():
         rows = cached_query("""
-            SELECT r.to_city, MIN(t.price_rsd) AS min_price_rsd, COUNT(*) AS trip_count,
+            SELECT r.to_city, MIN(t.price_rsd) FILTER (WHERE t.price_rsd > 0) AS min_price_rsd, COUNT(*) AS trip_count,
                    r.from_city_slug, r.to_city_slug
             FROM trips t
             JOIN routes r ON r.id = t.route_id
@@ -465,7 +465,7 @@ def country_hub(country: str):
         SELECT r.slug, r.from_city, r.to_city, r.distance_km,
                r.from_city_slug, r.to_city_slug,
                COUNT(DISTINCT t.id) AS trip_count,
-               MIN(t.price_rsd) AS min_price_rsd
+               MIN(t.price_rsd) FILTER (WHERE t.price_rsd > 0) AS min_price_rsd
         FROM routes r
         JOIN trips t ON t.route_id = r.id
         WHERE r.type = 'intercity' AND t.price_rsd > 0
@@ -649,7 +649,7 @@ def carriers():
     op_countries = {}
     if db_ready():
         price_rows = cached_query("""
-            SELECT t.operator_id, MIN(t.price_rsd) AS min_price
+            SELECT t.operator_id, MIN(t.price_rsd) FILTER (WHERE t.price_rsd > 0) AS min_price
             FROM trips t JOIN routes r ON r.id = t.route_id
             WHERE r.type = 'intercity' AND t.price_rsd > 0
             GROUP BY t.operator_id
@@ -725,7 +725,7 @@ def operator_detail(slug: str):
     routes = cached_query("""
         SELECT r.slug, r.from_city, r.to_city, r.distance_km,
                COUNT(DISTINCT t.id) AS trip_count,
-               MIN(t.price_rsd) AS min_price_rsd,
+               MIN(t.price_rsd) FILTER (WHERE t.price_rsd > 0) AS min_price_rsd,
                MAX(t.price_rsd) AS max_price_rsd
         FROM routes r
         JOIN trips t ON t.route_id = r.id
@@ -812,7 +812,7 @@ def operator_detail(slug: str):
             competitor_routes = cached_query(f"""
                 SELECT DISTINCT r.slug, r.from_city, r.to_city, r.distance_km,
                        COUNT(DISTINCT t.id) AS trip_count,
-                       MIN(t.price_rsd) AS min_price_rsd
+                       MIN(t.price_rsd) FILTER (WHERE t.price_rsd > 0) AS min_price_rsd
                 FROM routes r
                 JOIN trips t ON t.route_id = r.id
                 WHERE r.from_city IN ({origins_ph})

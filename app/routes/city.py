@@ -132,7 +132,7 @@ def city_hub(city: str):
     popular_intercity = cached_query("""
         SELECT r.slug, r.from_city, r.to_city, r.distance_km,
                COUNT(DISTINCT t.id) as trip_count,
-               MIN(t.price_rsd) as min_price_rsd,
+               MIN(t.price_rsd) FILTER (WHERE t.price_rsd > 0) as min_price_rsd,
                r.from_city_slug, r.to_city_slug
         FROM routes r
         LEFT JOIN trips t ON t.route_id = r.id
