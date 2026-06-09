@@ -1425,12 +1425,13 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 
 /* Line group */
 .line-group { margin-bottom: var(--space-6); }
-.line-group__title { font-size: var(--text-base); font-weight: 700; margin-bottom: var(--space-2); padding-bottom: var(--space-1-5); border-bottom: 1px solid var(--color-border); }
-/* Mode-accent dot before each group title — colour-codes the transit mode. */
-.line-group__title::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: var(--radius-pill); background: var(--mode-bus); margin-right: var(--space-2); vertical-align: middle; }
-.line-group[data-group-type="tram"] .line-group__title::before { background: var(--mode-tram); }
-.line-group[data-group-type="trolleybus"] .line-group__title::before { background: var(--mode-trolley); }
-.line-group[data-group-type="bg-voz"] .line-group__title::before { background: var(--mode-train); }
+.line-group__title { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-base); font-weight: 700; margin-bottom: var(--space-2); padding-bottom: var(--space-1-5); border-bottom: 1px solid var(--color-border); }
+/* Mode SVG icon before each group title — colour-codes the transit mode
+   (replaces the old accent dot, same --mode-* palette). */
+.line-group__title .vehicle-icon { flex: none; color: var(--mode-bus); }
+.line-group[data-group-type="tram"] .line-group__title .vehicle-icon { color: var(--mode-tram); }
+.line-group[data-group-type="trolleybus"] .line-group__title .vehicle-icon { color: var(--mode-trolley); }
+.line-group[data-group-type="bg-voz"] .line-group__title .vehicle-icon { color: var(--mode-train); }
 
 /* Line grid */
 .line-grid {
