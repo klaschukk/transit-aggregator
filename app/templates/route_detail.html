@@ -158,9 +158,9 @@
   {% endfor %}
 </div>
 
-<!-- Buy ticket — always visible. Offers come from app.affiliates; the
-     first is the primary CTA (priority: availability → commission → UX),
-     the rest render in the partners block below the trip list. -->
+{# Buy ticket — always visible. Offers come from app.affiliates; the
+   first is the primary CTA (priority: availability → commission → UX),
+   the rest render in the partners block below the trip list. #}
 {% set _from_slug = route.from_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj')|replace('ș','s')|replace('ț','t') %}
 {% set _to_slug = route.to_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj')|replace('ș','s')|replace('ț','t') %}
 {% set _offers = affiliate_offers(_from_slug, _to_slug, route.from_city, route.to_city, 'route-detail') %}
@@ -258,9 +258,9 @@
 </section>
 
 {% if _offers|length > 1 %}
-<!-- Multi-partner block — secondary CTAs for users who prefer a different
-     booking site UX. Different partners get different CTRs, so exposing
-     the full set also functions as a CTR split test. -->
+{# Multi-partner block — secondary CTAs for users who prefer a different
+   booking site UX. Different partners get different CTRs, so exposing
+   the full set also functions as a CTR split test. #}
 <div class="partners-block fade-in fade-in--d3">
   <h2 class="partners-block__heading">{{ _('buy.partners_heading') }}</h2>
   <div class="partners-block__grid">
