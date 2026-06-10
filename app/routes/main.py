@@ -931,7 +931,7 @@ def _build_url_fn(base: str, lastmod: str):
 
 @main_bp.route('/sitemap.xml')
 def sitemap_index():
-    """Sitemap-index pointing at the five content-type shards.
+    """Sitemap-index pointing at the content-type shards.
 
     Kept at the canonical /sitemap.xml location so existing GSC submissions
     and the robots.txt `Sitemap:` line keep working; Google treats an index
@@ -939,7 +939,13 @@ def sitemap_index():
     """
     base = current_app.config['BASE_URL']
     lastmod = _sitemap_lastmod()
-    shards = ['core', 'routes', 'pairs', 'lines', 'stops']
+    # 'pairs' is intentionally NOT listed: every indexable /voznja/ pair
+    # canonicalises onto its /rute/ owner (already in sitemap-routes), and
+    # pairs with no owner are noindex — so the shard only ever held
+    # non-canonical/noindex URLs (a mixed signal Google should not be fed
+    # via the sitemap). /rute/ pages cover the same content. The
+    # /sitemap-pairs.xml route is kept (empty urlset) for legacy submissions.
+    shards = ['core', 'routes', 'lines', 'stops']
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for shard in shards:
@@ -1035,28 +1041,21 @@ def sitemap_routes():
 
 @main_bp.route('/sitemap-pairs.xml')
 def sitemap_pairs():
-    """SEO city-pair pages (/voznja/<from>-do-<to>/). Same trips filter.
+    """Deprecated shard — intentionally empty.
 
-    Per-URL lastmod: same MAX over operator-source mtimes as the
-    matching /rute/<slug>/ entry — pairs are an alternate URL shape
-    over the same row."""
-    base = current_app.config['BASE_URL']
-    default_mtime = _sitemap_lastmod()
-    url = _build_url_fn(base, default_mtime)
-    pages: list[str] = []
-    if db_ready():
-        pairs = cached_query("""
-            SELECT r.from_city_slug, r.to_city_slug FROM routes r
-            WHERE r.type = 'intercity'
-              AND EXISTS (SELECT 1 FROM trips t WHERE t.route_id = r.id AND t.price_rsd > 0)
-        """, ttl=3600)
-        for r in pairs:
-            pair_key = f'{r["from_city_slug"]}-do-{r["to_city_slug"]}'
-            mod = _lastmod_for('route', pair_key, default_mtime)
-            pages.append(
-                url(f'/voznja/{pair_key}/', 'weekly', '0.6', mod=mod)
-            )
-    return _urlset(pages)
+    /voznja/<from>-do-<to>/ city-pair pages are an alternate URL shape over
+    the same route row as /rute/<slug>/. Every pair that has a backing route
+    canonicalises (canonical + hreflang) onto its /rute/ owner; pairs with no
+    owner are noindex. So this shard could only ever list non-canonical or
+    noindex URLs — a mixed signal that contradicts the canonical we declare on
+    the pages themselves. The canonical /rute/ URLs already live in
+    sitemap-routes.xml, and Google discovers /voznja/ via internal links.
+
+    The route is kept (vs. removed) so legacy GSC submissions and any cached
+    sitemap-index reference resolve to a valid, empty urlset — telling Google
+    the URLs are gone from the sitemap rather than 404-ing the shard. It is no
+    longer referenced from /sitemap.xml."""
+    return _urlset([])
 
 
 @main_bp.route('/sitemap-lines.xml')

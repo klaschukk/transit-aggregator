@@ -123,12 +123,14 @@ def test_no_none_in_content(client, url):
 # ── Sitemap ──
 
 
-# /sitemap.xml is now a sitemap-index pointing at five content-type shards.
+# /sitemap.xml is a sitemap-index pointing at the content-type shards.
 # Tests load each shard explicitly instead of expecting one monolithic urlset.
+# 'pairs' is deprecated: every indexable /voznja/ pair canonicalises onto its
+# /rute/ owner (already in sitemap-routes), so the pairs shard is intentionally
+# empty and dropped from the index — see test_pairs_shard_deprecated_and_empty.
 _SHARDS = [
     "/sitemap-core.xml",
     "/sitemap-routes.xml",
-    "/sitemap-pairs.xml",
     "/sitemap-lines.xml",
     "/sitemap-stops.xml",
 ]
@@ -146,6 +148,19 @@ def test_sitemap_index_references_all_shards(client):
     assert "<sitemapindex" in xml
     for shard in _SHARDS:
         assert shard in xml, f"sitemap-index is missing shard {shard}"
+
+
+def test_pairs_shard_deprecated_and_empty(client):
+    """The /voznja/ pairs shard must NOT be advertised in the index (its URLs
+    all canonicalise to /rute/), and the route itself must return a valid but
+    empty urlset so legacy GSC submissions don't 404."""
+    index = client.get("/sitemap.xml").data.decode()
+    assert "/sitemap-pairs.xml" not in index, "deprecated pairs shard is still in the index"
+    resp = client.get("/sitemap-pairs.xml")
+    assert resp.status_code == 200
+    body = resp.data.decode()
+    assert "<urlset" in body and "</urlset>" in body
+    assert "<url>" not in body and "/voznja/" not in body
 
 
 def test_sitemap_url_count(client, app):

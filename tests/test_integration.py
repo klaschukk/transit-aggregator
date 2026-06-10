@@ -138,9 +138,12 @@ def test_sitemap_has_stop_urls(client):
     assert "/stajaliste/" in xml
 
 
-def test_sitemap_has_city_pair_urls(client):
-    xml = client.get("/sitemap-pairs.xml").data.decode()
-    assert "/voznja/" in xml
+def test_city_pair_content_covered_by_rute_shard(client):
+    # /voznja/ pairs canonicalise to their /rute/ owner, so the pairs shard is
+    # deprecated/empty and the city-pair content is discoverable via the
+    # canonical /rute/ URLs in sitemap-routes.
+    assert "/voznja/" not in client.get("/sitemap-pairs.xml").data.decode()
+    assert "/rute/" in client.get("/sitemap-routes.xml").data.decode()
 
 
 def test_404_page_structure(client):
