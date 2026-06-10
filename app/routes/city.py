@@ -458,6 +458,42 @@ def stop_detail(city: str, stop_slug: str):
         ORDER BY CAST(REGEXP_REPLACE(cl.number, '[^0-9]', '', 'g') || '0' AS INTEGER)
     """, [stop['id']])
 
+    # Per-line GTFS schedule window AT THIS STOP (first/last departure + count)
+    # for today's service. Rendered server-side so every stop shows its
+    # timetable at a glance — visible without JS and crawlable for "{stop} red
+    # vožnje" queries. Static for the day → cached. Lines with no GTFS schedule
+    # (e.g. tourist/charter lines absent from the feed) simply get no window;
+    # we never fabricate one (same honesty rule as /api/stop-arrivals). The live
+    # "za N min" countdown (JS, /api/stop-arrivals) still enhances on top.
+    if lines_at_stop and db_ready():
+        _svc = _today_service()
+        _sched_rows = cached_query("""
+            SELECT cl.number,
+                   MIN(st.departure_time) AS first_dep,
+                   MAX(st.departure_time) AS last_dep,
+                   COUNT(*) AS freq
+            FROM gtfs_stop_times st
+            JOIN gtfs_trips gt ON gt.trip_id = st.trip_id
+            JOIN city_lines cl ON cl.id = gt.line_id
+            WHERE st.city_stop_id = ? AND gt.service_id = ?
+            GROUP BY cl.number
+        """, [stop['id'], _svc], ttl=600)
+        _sched = {r['number']: r for r in (_sched_rows or [])}
+
+        def _hhmm(t: str | None) -> str | None:
+            # GTFS times can exceed 24:00 (after-midnight service); fold for display.
+            if not t:
+                return None
+            h = int(t[:2])
+            return f'{h - 24:02d}{t[2:5]}' if h >= 24 else t[:5]
+
+        for _ln in lines_at_stop:
+            _s = _sched.get(_ln['number'])
+            if _s and _s.get('first_dep'):
+                _ln['sched_first'] = _hhmm(_s['first_dep'])
+                _ln['sched_last'] = _hhmm(_s['last_dep'])
+                _ln['sched_freq'] = _s['freq']
+
     departures = []
 
     # Nearby stops by coordinates. Lifted 5 → 10 and widened the box

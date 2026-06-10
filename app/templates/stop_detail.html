@@ -127,10 +127,11 @@
   </h2>
   <div class="stop-lines__list" id="arrivalsList">
     {% for line in lines_at_stop %}
-    <a href="{{ lang_prefix }}/gradski/{{ city }}/linija/{{ line.slug }}/" class="stop-line-row fade-in fade-in--d{{ loop.index0 % 5 }}">
+    <a href="{{ lang_prefix }}/gradski/{{ city }}/linija/{{ line.slug }}/" class="stop-line-row fade-in">
       <span class="line-badge"{% if line.color %} style="background:{{ line.color }}"{% endif %}>{{ line.number }}</span>
       <div class="stop-line-row__info">
         <div class="stop-line-row__name">{{ line.name }}</div>
+        {% if line.sched_first %}<div class="stop-line-row__sched">{{ line.sched_first }}–{{ line.sched_last }}</div>{% endif %}
       </div>
       <span class="stop-line-row__eta" data-line="{{ line.number }}">
         <span class="eta-skeleton"></span>
@@ -204,14 +205,14 @@
 
 {% include '_partials/_browse_hubs.html' %}
 
-<!-- Reviews section — same partial /rute/<slug>/ uses. Stop slug is
-     namespaced ("stop-<city>-<slug>") so ratings don't collide with
-     intercity rute slugs. Form renders even with 0 reviews. -->
+{# Reviews section — same partial /rute/<slug>/ uses. Stop slug is
+   namespaced ("stop-<city>-<slug>") so ratings don't collide with
+   intercity rute slugs. Form renders even with 0 reviews. #}
 {% from '_partials/_reviews.html' import reviews_section with context %}
 {{ reviews_section(review_slug, reviews, reviews_agg) }}
 
-<!-- City-alerts newsletter — different `source` for analytics so a
-     stop signup is distinguishable from a footer signup. -->
+{# City-alerts newsletter — different `source` for analytics so a
+   stop signup is distinguishable from a footer signup. #}
 <section class="route-price-alert fade-in fade-in--d3">
   {% from '_partials/_newsletter_form.html' import newsletter_form with context %}
   {{ newsletter_form(source='stop_detail') }}
