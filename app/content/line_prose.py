@@ -438,11 +438,14 @@ def _compute_slots(
     avg_gap_m = int(round((length_km_raw / segments) * 1000)) if segments > 0 else 0
     density_label = _density_bucket(avg_gap_m, lang) if avg_gap_m else _DENSITY_LABELS[lang]['medium']
 
-    # Schedule window.
+    # Schedule window — night-aware (see service_window): a line that sleeps
+    # overnight has both 00:xx and 24:xx departures, so naive [0]/[-1] would
+    # claim a false 24-hour window. service_window reports the real service arc.
     workday = [t for t in (schedule_rd or []) if t]
     workday_count = len(workday)
-    first_dep = workday[0] if workday else ''
-    last_dep = workday[-1] if workday else ''
+    first_dep, last_dep = service_window(workday)
+    first_dep = first_dep or ''
+    last_dep = last_dep or ''
     has_gtfs = workday_count >= 2
 
     # Headway: peak window 07-09 + 16-18 averaged together; off-peak 10-15.
@@ -510,6 +513,32 @@ def _compute_slots(
 
 
 # ── Public API ──────────────────────────────────────────────────────────
+
+
+_SERVICE_DAY_CUTOVER = 180  # 03:00 — the deep-night dead zone
+
+
+def service_window(times: list[str]) -> tuple[str | None, str | None]:
+    """First/last of the daily service window, honest for lines that sleep overnight.
+
+    Naive min/max misleads night lines: a line running 04:10→00:45 (with a
+    ~3 h dead gap 00:45→04:10) has departures at both 00:xx and 24:xx, so
+    sorted()[0]/[-1] yields "00:00–24:20" — a false 24-hour window. We anchor on
+    the service-day cutover (03:00, the deep-night dead zone): a departure before
+    03:00 is the late-night TAIL of the same service day, not a new morning
+    start, so we shift it past midnight (+24 h) before taking min/max. Then a
+    night line reads honestly as 04:10–00:45 and a daytime line as the plain
+    05:00–23:00. 24:xx is normalised to 00:xx for display. (None, None) if empty."""
+    norm = []
+    for t in times:
+        if not t:
+            continue
+        m = (int(t[:2]) * 60 + int(t[3:5])) % 1440
+        norm.append(m + 1440 if m < _SERVICE_DAY_CUTOVER else m)
+    if not norm:
+        return None, None
+    fmt = lambda m: f'{(m // 60) % 24:02d}:{m % 60:02d}'
+    return fmt(min(norm)), fmt(max(norm))
 
 
 def build_prose(

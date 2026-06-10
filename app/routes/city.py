@@ -284,10 +284,13 @@ def line_detail(city: str, line_slug: str):
             """, [line['id'], sid], ttl=3600)
             schedule[sid] = [d['departure_time'][:5] for d in deps]
 
-        # First/last service from workday schedule
+        # First/last service from workday schedule. Night-aware: a line that
+        # sleeps overnight has both 00:xx and 24:xx departures, so naive
+        # [0]/[-1] would show a false 24-hour window ("00:00–24:20") instead of
+        # the real arc (e.g. 04:10–00:45). service_window also normalises 24:xx.
         if schedule['RD']:
-            first_dep = schedule['RD'][0]
-            last_dep = schedule['RD'][-1]
+            from app.content.line_prose import service_window
+            first_dep, last_dep = service_window(schedule['RD'])
 
         # Typical headway = median gap between consecutive workday departures.
         # Answers "na koliko minuta ide linija N" (a top GSC query). Median is
