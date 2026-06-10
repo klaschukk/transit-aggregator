@@ -5,26 +5,22 @@
                price_rsd, operator, type)
      offers  — list of app.affiliates.Offer (primary first). When non-empty,
                offers[0] drives the "Kupi" button and `data-partner` records
-               which partner got the click for analytics. If absent, falls
-               back to ba_url (legacy path — pre-affiliate-refactor callers).
-     ba_url  — legacy: raw Bookaway affiliate URL for this origin→dest pair.
-               Kept for callers that still compute URLs inline; ignored
-               when `offers` is set.
+               which partner got the click for analytics. When empty and no
+               BusTicket4 line id is known, no buy button renders.
      buy_label — label for the buy button (i18n'd by caller, e.g. _('buy.cta'))
      route_slug — route slug of the origin→dest pair, used as the analytics
                key for click attribution (data-route-slug attribute).
      surface — which page type the click happened on: 'search',
                'route_detail', 'city_pair' (see analytics_db allowlist).
 #}
-{% macro trip_card(trip, ba_url=None, buy_label='', route_slug='', surface='', offers=None, from_slug='', to_slug='', bt4_fallback_line_id=None) %}
+{% macro trip_card(trip, buy_label='', route_slug='', surface='', offers=None, from_slug='', to_slug='', bt4_fallback_line_id=None) %}
 {% set _primary = (offers[0] if offers else None) %}
-{% set _buy_href = _primary.url if _primary else ba_url %}
-{% set _buy_partner = _primary.partner_key if _primary else ('bookaway' if ba_url else '') %}
+{% set _buy_href = _primary.url if _primary else '' %}
+{% set _buy_partner = _primary.partner_key if _primary else '' %}
 {# BusTicket4 checkout: prefer THIS departure's exact line id; otherwise, on a
    route BusTicket4 sells (bt4_fallback_line_id set), use the route's
-   representative departure so the whole BT4 route stays on BusTicket4 (no
-   Bookaway). Only routes BusTicket4 doesn't sell at all (no fallback) keep
-   the pair-level partner (Bookaway). #}
+   representative departure so the whole BT4 route stays on BusTicket4. Routes
+   BusTicket4 doesn't sell at all (no fallback) render no buy button. #}
 {% set _bt4_lid = trip.bt4_line_id or bt4_fallback_line_id %}
 {% set _bt4 = bt4_checkout_url(from_slug, to_slug, _bt4_lid) if (from_slug and to_slug and _bt4_lid) else '' %}
 {% if _bt4 %}{% set _buy_href = _bt4 %}{% set _buy_partner = 'busticket4' %}{% endif %}

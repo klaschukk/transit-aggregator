@@ -283,9 +283,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Prevozni — это <strong>бесплатный агрегатор</strong> данных об общественном транспорте Сербии и региона: междугородние автобусные маршруты, поезда Srbija Voz, городской транспорт в Белграде, Нови-Саде, Нише и Крагуеваце, а также отдельные рейсы в Черногорию, Боснию, Хорватию и другие страны Балкан. Наша цель — показать когда и откуда можно уехать, по какой цене и с каким перевозчиком — без рекламных стен, без регистрации, на сербском, английском и русском.',
     },
     'about.what_p2': {
-        'sr': 'Mi ne prodajemo karte i ne naplaćujemo pretragu. Kupovina se obavlja direktno na sajtovima prevoznika ili preko partnera kao što je Bookaway. Kada kliknete na dugme "Kupi" pored polaska, bićete prebačeni na sajt partnera — on prodaje kartu, a Prevozni može da dobije malu proviziju koja pokriva troškove održavanja sajta. Pregled raspored, poređenje prevoznika i cena ostaju besplatni.',
-        'en': 'We don\'t sell tickets and we don\'t charge for search. Purchase happens directly on the carrier\'s site or via a partner like Bookaway. When you click "Buy" next to a departure you are taken to the partner\'s site — they sell the ticket, and Prevozni may receive a small commission that covers the cost of running this site. Browsing schedules, comparing carriers and prices stays free.',
-        'ru': 'Мы не продаём билеты и не берём деньги за поиск. Покупка происходит напрямую на сайте перевозчика или через партнёра типа Bookaway. При клике на кнопку "Купить" рядом с рейсом вы попадаете на сайт партнёра — он продаёт билет, а Prevozni может получить небольшую комиссию, которая покрывает расходы на работу сайта. Просмотр расписаний, сравнение перевозчиков и цен остаются бесплатными.',
+        'sr': 'Mi ne prodajemo karte i ne naplaćujemo pretragu. Kupovina se obavlja direktno na sajtovima prevoznika ili preko partnera BusTicket4.me. Kada kliknete na dugme "Kupi" pored polaska, bićete prebačeni na sajt partnera — on prodaje kartu, a Prevozni može da dobije malu proviziju koja pokriva troškove održavanja sajta. Pregled raspored, poređenje prevoznika i cena ostaju besplatni.',
+        'en': 'We don\'t sell tickets and we don\'t charge for search. Purchase happens directly on the carrier\'s site or via a partner (BusTicket4.me). When you click "Buy" next to a departure you are taken to the partner\'s site — they sell the ticket, and Prevozni may receive a small commission that covers the cost of running this site. Browsing schedules, comparing carriers and prices stays free.',
+        'ru': 'Мы не продаём билеты и не берём деньги за поиск. Покупка происходит напрямую на сайте перевозчика или через партнёра BusTicket4.me. При клике на кнопку "Купить" рядом с рейсом вы попадаете на сайт партнёра — он продаёт билет, а Prevozni может получить небольшую комиссию, которая покрывает расходы на работу сайта. Просмотр расписаний, сравнение перевозчиков и цен остаются бесплатными.',
     },
     'about.sources_h': {
         'sr': 'Odakle dolaze podaci',
@@ -318,14 +318,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Ссылки третьих сторон',
     },
     'privacy.third_party_body': {
-        'sr': 'Prevozni sadrži linkove ka sajtovima prevoznika i partnera (Bookaway, BusTicket4.me i drugi). Kada kliknete na takav link, napuštate naš sajt i ulazite u politiku privatnosti tog partnera. Nismo odgovorni za njihove prakse — pročitajte njihovu politiku pre nego što unesete lične podatke ili kupite kartu. Mi možemo da dobijemo proviziju od partnera ako kupite preko linka sa našeg sajta; to nikad ne utiče na cenu koju vi plaćate.',
-        'en': 'Prevozni contains links to carriers and partners (Bookaway, BusTicket4.me and others). When you click such a link you leave our site and enter that partner\'s privacy policy. We are not responsible for their practices — read their policy before entering personal data or buying a ticket. We may receive a commission from partners if you buy via a link on our site; this never affects the price you pay.',
-        'ru': 'Prevozni содержит ссылки на сайты перевозчиков и партнёров (Bookaway, BusTicket4.me и другие). При клике на такую ссылку вы покидаете наш сайт и попадаете под политику конфиденциальности этого партнёра. Мы не отвечаем за их практики — прочитайте их политику перед вводом личных данных или покупкой билета. Мы можем получать комиссию от партнёров при покупке через нашу ссылку; это никак не влияет на цену которую вы платите.',
+        'sr': 'Prevozni sadrži linkove ka sajtovima prevoznika i partnera (BusTicket4.me i drugi). Kada kliknete na takav link, napuštate naš sajt i ulazite u politiku privatnosti tog partnera. Nismo odgovorni za njihove prakse — pročitajte njihovu politiku pre nego što unesete lične podatke ili kupite kartu. Mi možemo da dobijemo proviziju od partnera ako kupite preko linka sa našeg sajta; to nikad ne utiče na cenu koju vi plaćate.',
+        'en': 'Prevozni contains links to carriers and partners (BusTicket4.me and others). When you click such a link you leave our site and enter that partner\'s privacy policy. We are not responsible for their practices — read their policy before entering personal data or buying a ticket. We may receive a commission from partners if you buy via a link on our site; this never affects the price you pay.',
+        'ru': 'Prevozni содержит ссылки на сайты перевозчиков и партнёров (BusTicket4.me и другие). При клике на такую ссылку вы покидаете наш сайт и попадаете под политику конфиденциальности этого партнёра. Мы не отвечаем за их практики — прочитайте их политику перед вводом личных данных или покупкой билета. Мы можем получать комиссию от партнёров при покупке через нашу ссылку; это никак не влияет на цену которую вы платите.',
     },
     'privacy.affiliate_h': {
-        'sr': 'Praćenje klikova na "Kupi" (Bookaway)',
-        'en': 'Tracking of "Buy" (Bookaway) clicks',
-        'ru': 'Отслеживание кликов по кнопке «Купить» (Bookaway)',
+        'sr': 'Praćenje klikova na "Kupi" (BusTicket4.me)',
+        'en': 'Tracking of "Buy" (BusTicket4.me) clicks',
+        'ru': 'Отслеживание кликов по кнопке «Купить» (BusTicket4.me)',
     },
     'privacy.adsense_h': {
         'sr': 'Google AdSense (reklame)',
@@ -348,9 +348,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Если вы оставите отзыв о маршруте (через форму «Оставить отзыв»), мы храним оценку, текст комментария и указанное имя — они публикуются после модерации. Email в открытом виде не храним: вычисляем sha256-хэш с солью, чтобы позже проверить авторство (при запросе удаления) и опознать «проверенных» авторов, у которых уже опубликовано 3+ одобренных отзыва. Также храним язык отправки (sr/en/ru), хэш IP и время отправки — только для защиты от спама и аудита. В любой момент можно запросить удаление кнопкой «Запросить удаление» под каждым отзывом; вы подтверждаете владение, указав тот же email, а модератор мягко удалит запись в течение 7 дней согласно GDPR.',
     },
     'privacy.affiliate_body': {
-        'sr': 'Kad kliknete na dugme "Kupi" koje vodi na Bookaway, beležimo minimalni zapis o kliku na sopstvenom serveru: identifikator rute (npr. beograd-budva), tip stranice sa koje ste kliknuli (katalog, detalj rute, pretraga), prevoznika, vreme polaska, anonimizovani hash vaše IP adrese (sha256 sa sol-tajnom koja se redovno menja) i osnovne tehničke podatke pretraživača. Ne beležimo sirovu IP adresu, ime, email niti bilo šta što može direktno da vas identifikuje. Ove zapise čuvamo maksimalno 90 dana u interne svrhe — da znamo koji delovi sajta ljudima stvarno pomažu da nađu kartu i da pravilno pripišemo proviziju od Bookaway-a. Isti zapisi se šalju i u našu analitiku (Umami) kao anonimni event "ba_click". Ako želite da vaši klikovi ne budu zabeleženi, uključite ad-blocker ili privatni mod u pretraživaču — naš sajt nastavlja da radi bez ovih zapisa.',
-        'en': 'When you click a "Buy" button that goes to Bookaway, we keep a minimal click record on our own server: the route identifier (e.g. beograd-budva), the page type the click came from (catalog, route detail, search), the carrier, departure time, a salted sha256 hash of your IP (salt rotates regularly) and basic browser technical data. We do not store raw IPs, names, emails or anything directly identifying you. These records are kept for at most 90 days and used internally to understand which parts of the site actually help people find a ticket and to correctly attribute Bookaway commissions. The same events are mirrored to our analytics (Umami) as an anonymous "ba_click" event. If you prefer your clicks not to be recorded, use an ad-blocker or private browsing — the site works without these records.',
-        'ru': 'Когда вы нажимаете кнопку «Купить», ведущую на Bookaway, мы сохраняем на нашем сервере минимальную запись: идентификатор маршрута (например beograd-budva), тип страницы с которой был клик (каталог, детали маршрута, поиск), перевозчика, время рейса, анонимизированный sha256-хэш вашего IP с регулярно меняющейся солью и базовые технические данные браузера. Мы не храним сырой IP, имя, email или что-либо прямо вас идентифицирующее. Эти записи хранятся не более 90 дней и используются внутренне — чтобы понимать какие части сайта реально помогают людям найти билет и корректно атрибутировать комиссии Bookaway. Эти же события отправляются в нашу аналитику (Umami) как анонимный event «ba_click». Если вы не хотите чтобы клики записывались — включите ad-blocker или приватный режим, сайт работает и без этих записей.',
+        'sr': 'Kad kliknete na dugme "Kupi" koje vodi na BusTicket4.me, beležimo minimalni zapis o kliku na sopstvenom serveru: identifikator rute (npr. beograd-budva), tip stranice sa koje ste kliknuli (katalog, detalj rute, pretraga), prevoznika, vreme polaska, anonimizovani hash vaše IP adrese (sha256 sa sol-tajnom koja se redovno menja) i osnovne tehničke podatke pretraživača. Ne beležimo sirovu IP adresu, ime, email niti bilo šta što može direktno da vas identifikuje. Ove zapise čuvamo maksimalno 90 dana u interne svrhe — da znamo koji delovi sajta ljudima stvarno pomažu da nađu kartu i da pravilno pripišemo proviziju od BusTicket4.me-a. Isti zapisi se šalju i u našu analitiku (Umami) kao anonimni event "ba_click". Ako želite da vaši klikovi ne budu zabeleženi, uključite ad-blocker ili privatni mod u pretraživaču — naš sajt nastavlja da radi bez ovih zapisa.',
+        'en': 'When you click a "Buy" button that goes to BusTicket4.me, we keep a minimal click record on our own server: the route identifier (e.g. beograd-budva), the page type the click came from (catalog, route detail, search), the carrier, departure time, a salted sha256 hash of your IP (salt rotates regularly) and basic browser technical data. We do not store raw IPs, names, emails or anything directly identifying you. These records are kept for at most 90 days and used internally to understand which parts of the site actually help people find a ticket and to correctly attribute BusTicket4.me commissions. The same events are mirrored to our analytics (Umami) as an anonymous "ba_click" event. If you prefer your clicks not to be recorded, use an ad-blocker or private browsing — the site works without these records.',
+        'ru': 'Когда вы нажимаете кнопку «Купить», ведущую на BusTicket4.me, мы сохраняем на нашем сервере минимальную запись: идентификатор маршрута (например beograd-budva), тип страницы с которой был клик (каталог, детали маршрута, поиск), перевозчика, время рейса, анонимизированный sha256-хэш вашего IP с регулярно меняющейся солью и базовые технические данные браузера. Мы не храним сырой IP, имя, email или что-либо прямо вас идентифицирующее. Эти записи хранятся не более 90 дней и используются внутренне — чтобы понимать какие части сайта реально помогают людям найти билет и корректно атрибутировать комиссии BusTicket4.me. Эти же события отправляются в нашу аналитику (Umami) как анонимный event «ba_click». Если вы не хотите чтобы клики записывались — включите ad-blocker или приватный режим, сайт работает и без этих записей.',
     },
     'privacy.rights_body2': {
         'sr': 'Ako želite da zatražite izvoz, izmenu ili brisanje podataka (na primer vaše kontakt poruke), pošaljite zahtev na info@prevozni.com. Obradićemo ga u roku od 30 dana u skladu sa GDPR-om i srpskim Zakonom o zaštiti podataka o ličnosti. Nije potrebno da navodite razlog.',
@@ -1343,9 +1343,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
     'guides.cheap_tickets.h2_where': {'sr': 'Gde tražiti', 'en': 'Where to look', 'ru': 'Где искать'},
     'guides.cheap_tickets.p3': {
-        'sr': 'Većina prevoznika prodaje online preko partnera <strong>Bookaway</strong> ili <strong>BusTicket4.me</strong>. Direktno na šalteru autobuske stanice ponekad je i jeftinije — posebno kod manjih lokalnih prevoznika (Niš-Ekspres, Severtrans, Autoprevoz).',
-        'en': 'Most carriers sell online via partners <strong>Bookaway</strong> or <strong>BusTicket4.me</strong>. Buying directly at the bus-station counter is sometimes cheaper — especially with smaller local carriers (Niš-Ekspres, Severtrans, Autoprevoz).',
-        'ru': 'Большинство перевозчиков продают онлайн через партнёров <strong>Bookaway</strong> или <strong>BusTicket4.me</strong>. Прямо на кассе автовокзала иногда дешевле — особенно у небольших местных перевозчиков (Niš-Ekspres, Severtrans, Autoprevoz).',
+        'sr': 'Većina prevoznika prodaje online preko partnera <strong>BusTicket4.me</strong>. Direktno na šalteru autobuske stanice ponekad je i jeftinije — posebno kod manjih lokalnih prevoznika (Niš-Ekspres, Severtrans, Autoprevoz).',
+        'en': 'Most carriers sell online via partners <strong>BusTicket4.me</strong>. Buying directly at the bus-station counter is sometimes cheaper — especially with smaller local carriers (Niš-Ekspres, Severtrans, Autoprevoz).',
+        'ru': 'Большинство перевозчиков продают онлайн через партнёров <strong>BusTicket4.me</strong>. Прямо на кассе автовокзала иногда дешевле — особенно у небольших местных перевозчиков (Niš-Ekspres, Severtrans, Autoprevoz).',
     },
     'guides.cheap_tickets.h2_tips': {'sr': 'Praktični saveti', 'en': 'Practical tips', 'ru': 'Практические советы'},
     'guides.cheap_tickets.p4': {
@@ -1599,7 +1599,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Buy via',
         'ru': 'Купить через',
     },
-    # ── Far-destination AI itinerary (search fallback to Bookaway) ──
+    # ── Far-destination AI itinerary (search fallback to BusTicket4.me) ──
     'ai_route.badge': {
         'sr': 'AI maršruta',
         'en': 'AI route',
@@ -1621,9 +1621,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Составляем маршрут…',
     },
     'ai_route.cta': {
-        'sr': 'Rezerviši preko Bookaway',
-        'en': 'Book via Bookaway',
-        'ru': 'Забронировать через Bookaway',
+        'sr': 'Rezerviši preko BusTicket4.me',
+        'en': 'Book via BusTicket4.me',
+        'ru': 'Забронировать через BusTicket4.me',
     },
     'ai_route.disclaimer': {
         'sr': 'Orijentacioni plan koji generiše AI — vremena, cene i veze obavezno proverite kod prevoznika pre kupovine.',
@@ -2379,9 +2379,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Автобусные рейсы между {from_city} и {to_city} работают круглый год. На этой странице показано полное расписание по дням недели, с фильтрами по времени отправления, длительности поездки и цене. Данные обновляются каждую ночь из нескольких источников (busticket4.me, polazak.rs, srbijavoz.rs), а показанные цены ориентировочные — финальную цену и наличие мест подтверждает партнёр, у которого вы покупаете билет.',
     },
     'route.prose_buy': {
-        'sr': 'Kartu za rutu {from_city} — {to_city} možete kupiti direktno kod prevoznika na autobuskoj stanici ili online preko partnera (Bookaway, BusTicket4.me). Online kupovina obično nudi nekoliko različitih polazaka po istoj ceni, pa vredi uporediti vremena. Za grupe preko 5 putnika ili studentske popuste kontaktirajte prevoznika direktno — Prevozni ne prodaje karte i nije posrednik u kupovini.',
-        'en': 'You can buy a ticket for {from_city} — {to_city} directly from the carrier at the bus station or online via partners (Bookaway, BusTicket4.me). Online purchase usually offers several departures at the same price, so it is worth comparing times. For groups of 5+ or student discounts contact the carrier directly — Prevozni does not sell tickets and is not a purchase intermediary.',
-        'ru': 'Билет на маршрут {from_city} — {to_city} можно купить напрямую у перевозчика на автовокзале или онлайн через партнёров (Bookaway, BusTicket4.me). Онлайн-покупка обычно предлагает несколько отправлений по одной цене — стоит сравнить время. Для групп от 5 человек или студенческих скидок обращайтесь напрямую к перевозчику — Prevozni не продаёт билеты и не является посредником.',
+        'sr': 'Kartu za rutu {from_city} — {to_city} možete kupiti direktno kod prevoznika na autobuskoj stanici ili online preko partnera (BusTicket4.me). Online kupovina obično nudi nekoliko različitih polazaka po istoj ceni, pa vredi uporediti vremena. Za grupe preko 5 putnika ili studentske popuste kontaktirajte prevoznika direktno — Prevozni ne prodaje karte i nije posrednik u kupovini.',
+        'en': 'You can buy a ticket for {from_city} — {to_city} directly from the carrier at the bus station or online via partners (BusTicket4.me). Online purchase usually offers several departures at the same price, so it is worth comparing times. For groups of 5+ or student discounts contact the carrier directly — Prevozni does not sell tickets and is not a purchase intermediary.',
+        'ru': 'Билет на маршрут {from_city} — {to_city} можно купить напрямую у перевозчика на автовокзале или онлайн через партнёров (BusTicket4.me). Онлайн-покупка обычно предлагает несколько отправлений по одной цене — стоит сравнить время. Для групп от 5 человек или студенческих скидок обращайтесь напрямую к перевозчику — Prevozni не продаёт билеты и не является посредником.',
     },
     'city_pair.title_travel': {
         'sr': 'autobus, voz, cene',
@@ -2952,13 +2952,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
     'route_index.faq_a3': {
         'sr': 'Prevozni.com je informativni servis — red vožnje je besplatan i bez registracije. '
-              'Na svakoj stranici rute nalazi se dugme „Kupi kartu" koje vodi na partnerski sistem (Bookaway) gde se kupovina obavlja online. '
+              'Na svakoj stranici rute nalazi se dugme „Kupi kartu" koje vodi na partnerski sistem (BusTicket4.me) gde se kupovina obavlja online. '
               'Karte se takođe kupuju na blagajni autobuske stanice ili kod vozača u autobusu.',
         'en': 'Prevozni.com is an information service — timetables are free and require no registration. '
-              'Each route page has a "Buy ticket" button that opens our partner (Bookaway) for online booking. '
+              'Each route page has a "Buy ticket" button that opens our partner (BusTicket4.me) for online booking. '
               'Tickets are also sold at the bus station counter or on-board from the driver.',
         'ru': 'Prevozni.com — информационный сервис: расписание бесплатно и без регистрации. '
-              'На каждой странице маршрута есть кнопка «Купить билет», которая ведёт к партнёру (Bookaway) для онлайн-покупки. '
+              'На каждой странице маршрута есть кнопка «Купить билет», которая ведёт к партнёру (BusTicket4.me) для онлайн-покупки. '
               'Билеты также продаются в кассе автовокзала или у водителя.',
     },
     'route_index.faq_q4': {
@@ -3989,9 +3989,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Политика cookies',
     },
     'footer.partners': {
-        'sr': 'Partnerske provizije: Bookaway, FlixBus. Klikom na "Kupi" možete napustiti naš sajt.',
-        'en': 'Partner commissions: Bookaway, FlixBus. Clicking "Buy" may take you off-site.',
-        'ru': 'Партнёрские комиссии: Bookaway, FlixBus. Нажатие «Купить» может увести с сайта.',
+        'sr': 'Partnerske provizije: BusTicket4.me. Klikom na "Kupi" možete napustiti naš sajt.',
+        'en': 'Partner commissions: BusTicket4.me. Clicking "Buy" may take you off-site.',
+        'ru': 'Партнёрские комиссии: BusTicket4.me. Нажатие «Купить» может увести с сайта.',
     },
 
     # ── Cookie consent banner ──
@@ -4113,9 +4113,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Запоминает выбранную валюту отображения (RSD или EUR).',
     },
     'cookies.page.purpose_ab': {
-        'sr': 'Dodeljuje stabilan A/B redosled partnerskih ponuda (Bookaway / FlixBus) po posetiocu.',
-        'en': 'Assigns a stable A/B ordering of partner offers (Bookaway / FlixBus) per visitor.',
-        'ru': 'Назначает стабильный A/B порядок партнёрских предложений (Bookaway / FlixBus) для посетителя.',
+        'sr': 'Dodeljuje stabilan A/B redosled partnerskih ponuda (BusTicket4.me) po posetiocu.',
+        'en': 'Assigns a stable A/B ordering of partner offers (BusTicket4.me) per visitor.',
+        'ru': 'Назначает стабильный A/B порядок партнёрских предложений (BusTicket4.me) для посетителя.',
     },
     'cookies.page.purpose_saved': {
         'sr': 'Čuva vaše označene rute (lokalno u pretraživaču, ne šalje se na server).',
@@ -4133,9 +4133,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Третьи стороны',
     },
     'cookies.page.third_party_body': {
-        'sr': '<strong>Umami</strong> (analytics.farmako.ro) prikuplja anonimnu agregatnu statistiku poseta <strong>bez kolačića</strong> i bez ličnih identifikatora. Ako prihvatite sve kolačiće, učitavamo Umami skriptu; ako izaberete samo neophodne, skripta se ne učitava. <strong>Bookaway i FlixBus</strong> su partnerski sajtovi — kada kliknete "Kupi", napuštate naš sajt i ulazite pod njihovu politiku kolačića.',
-        'en': '<strong>Umami</strong> (analytics.farmako.ro) collects anonymous aggregate visit statistics <strong>without cookies</strong> and without personal identifiers. If you accept all cookies, we load the Umami script; if you choose essentials only, the script is not loaded. <strong>Bookaway and FlixBus</strong> are partner sites — when you click "Buy" you leave our site and fall under their cookie policy.',
-        'ru': '<strong>Umami</strong> (analytics.farmako.ro) собирает анонимную агрегированную статистику посещений <strong>без cookies</strong> и без персональных идентификаторов. Если вы принимаете все cookies, мы загружаем скрипт Umami; если выбираете только необходимые — скрипт не загружается. <strong>Bookaway и FlixBus</strong> — партнёрские сайты, при нажатии «Купить» вы покидаете наш сайт и попадаете под их политику cookies.',
+        'sr': '<strong>Umami</strong> (analytics.farmako.ro) prikuplja anonimnu agregatnu statistiku poseta <strong>bez kolačića</strong> i bez ličnih identifikatora. Ako prihvatite sve kolačiće, učitavamo Umami skriptu; ako izaberete samo neophodne, skripta se ne učitava. <strong>BusTicket4.me</strong> su partnerski sajtovi — kada kliknete "Kupi", napuštate naš sajt i ulazite pod njihovu politiku kolačića.',
+        'en': '<strong>Umami</strong> (analytics.farmako.ro) collects anonymous aggregate visit statistics <strong>without cookies</strong> and without personal identifiers. If you accept all cookies, we load the Umami script; if you choose essentials only, the script is not loaded. <strong>BusTicket4.me</strong> are partner sites — when you click "Buy" you leave our site and fall under their cookie policy.',
+        'ru': '<strong>Umami</strong> (analytics.farmako.ro) собирает анонимную агрегированную статистику посещений <strong>без cookies</strong> и без персональных идентификаторов. Если вы принимаете все cookies, мы загружаем скрипт Umami; если выбираете только необходимые — скрипт не загружается. <strong>BusTicket4.me</strong> — партнёрские сайты, при нажатии «Купить» вы покидаете наш сайт и попадаете под их политику cookies.',
     },
     'cookies.page.disable_h': {
         'sr': 'Kako da onemogućite kolačiće',
@@ -4230,9 +4230,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': '4. Партнёрские ссылки (disclosure)',
     },
     'tos.s4_body': {
-        'sr': 'Neki linkovi za kupovinu karte (dugme "Kupi" pored polaska) vode na partnerske platforme <strong>Bookaway</strong> ili <strong>FlixBus</strong>. Ako kupite kartu preko takvog linka, Prevozni može da dobije malu proviziju koja pokriva troškove održavanja sajta. <strong>Cena koju vi plaćate se ne menja.</strong> Partnerski linkovi su jasno obeleženi kao "Kupi" a u naš sistem se beleži samo anonimni agregirani zapis klika (bez ličnih podataka) — detalji u <a href="/privatnost/">Politici privatnosti</a>.',
-        'en': 'Some ticket-purchase links (the "Buy" button next to a departure) go to partner platforms <strong>Bookaway</strong> or <strong>FlixBus</strong>. If you buy a ticket via such a link, Prevozni may receive a small commission that helps cover hosting and maintenance. <strong>The price you pay is not affected.</strong> Affiliate links are clearly labelled "Buy" and only an anonymous aggregate click record (no personal data) is stored on our side — details in the <a href="/privatnost/">Privacy Policy</a>.',
-        'ru': 'Некоторые ссылки покупки билета (кнопка «Купить» рядом с рейсом) ведут на партнёрские платформы <strong>Bookaway</strong> или <strong>FlixBus</strong>. Если вы покупаете билет по такой ссылке, Prevozni может получить небольшую комиссию, которая покрывает расходы на хостинг и поддержку. <strong>Цена для вас не меняется.</strong> Партнёрские ссылки явно помечены как «Купить», а у нас сохраняется только анонимная агрегированная запись клика (без персональных данных) — подробности в <a href="/privatnost/">Политике конфиденциальности</a>.',
+        'sr': 'Neki linkovi za kupovinu karte (dugme "Kupi" pored polaska) vode na partnerske platforme <strong>BusTicket4.me</strong> ili <strong>FlixBus</strong>. Ako kupite kartu preko takvog linka, Prevozni može da dobije malu proviziju koja pokriva troškove održavanja sajta. <strong>Cena koju vi plaćate se ne menja.</strong> Partnerski linkovi su jasno obeleženi kao "Kupi" a u naš sistem se beleži samo anonimni agregirani zapis klika (bez ličnih podataka) — detalji u <a href="/privatnost/">Politici privatnosti</a>.',
+        'en': 'Some ticket-purchase links (the "Buy" button next to a departure) go to partner platforms <strong>BusTicket4.me</strong> or <strong>FlixBus</strong>. If you buy a ticket via such a link, Prevozni may receive a small commission that helps cover hosting and maintenance. <strong>The price you pay is not affected.</strong> Affiliate links are clearly labelled "Buy" and only an anonymous aggregate click record (no personal data) is stored on our side — details in the <a href="/privatnost/">Privacy Policy</a>.',
+        'ru': 'Некоторые ссылки покупки билета (кнопка «Купить» рядом с рейсом) ведут на партнёрские платформы <strong>BusTicket4.me</strong> или <strong>FlixBus</strong>. Если вы покупаете билет по такой ссылке, Prevozni может получить небольшую комиссию, которая покрывает расходы на хостинг и поддержку. <strong>Цена для вас не меняется.</strong> Партнёрские ссылки явно помечены как «Купить», а у нас сохраняется только анонимная агрегированная запись клика (без персональных данных) — подробности в <a href="/privatnost/">Политике конфиденциальности</a>.',
     },
     'tos.s5_h': {
         'sr': '5. Korisnički sadržaj (recenzije)',

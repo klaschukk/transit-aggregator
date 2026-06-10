@@ -16,7 +16,6 @@
 <meta name="theme-color" content="#0d9488">
 <meta name="robots" content="{{ meta_robots }}">
 {% if config.YANDEX_VERIFICATION %}<meta name="yandex-verification" content="{{ config.YANDEX_VERIFICATION }}">{% endif %}
-<link rel="dns-prefetch" href="https://www.bookaway.com">
 {# Preload the critical self-hosted faces (body + display) so they fetch in
    parallel with the render-blocking CSS — kills the flash of fallback text.
    No ?v= query so the URL matches the @font-face src and the browser dedupes
@@ -389,11 +388,11 @@ if ('serviceWorker' in navigator) {
    Fires two sinks in parallel:
      1. Umami custom events  — umami.track(name, props).  Blocked by most
         ad-blockers, so we don't depend on it for revenue attribution.
-     2. POST /api/ba-click    — server-side log for Bookaway clicks only.
+     2. POST /api/ba-click    — server-side log for partner buy clicks.
         Uses navigator.sendBeacon when available (survives tab close).
    Selectors used:
-     .trip-card__buy              per-trip Bookaway CTA
-     .buy-ticket__btn--bookaway   whole-route Bookaway CTA
+     .trip-card__buy              per-trip partner CTA
+     .buy-ticket__btn             whole-route partner CTA
      .js-ccy-btn                  currency switcher
      .js-fav-btn                  save-route star
      form.search-form             homepage/search departure picker
