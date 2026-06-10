@@ -13,7 +13,7 @@
    Now: "{Linija} {N} {city} — red vožnje, {X} stajališta, polasci …" puts both
    keywords in the first ~40 chars, then the differentiators Google's transit
    widget lacks (map + live arrivals). #}
-{% block meta_description %}{{ _('line_detail.line_prefix') }} {{ line.number }} {{ city_label }} — {{ _('line.schedule_title')|lower }}, {{ stops|length if stops else 0 }} {{ _('line.stops') }}{% if first_dep and last_dep %}, {{ _('line_detail.meta_departures')|lower }} {{ first_dep }} {{ _('line_detail.meta_to') }} {{ last_dep }}{% endif %}. {{ _('line_detail.meta_eta') }}{% endblock %}
+{% block meta_description %}{{ _('line_detail.line_prefix') }} {{ line.number }} {{ city_label }} — {{ _('line.schedule_title')|lower }}, {{ stops|length if stops else 0 }} {{ _('line.stops') }}{% if first_dep and last_dep %}, {{ _('line_detail.meta_departures')|lower }} {{ first_dep }} {{ _('line_detail.meta_to') }} {{ last_dep }}{% endif %}{% if headway %}, {{ _('line.frequency_label') }} ~{{ headway }} {{ _('common.min') }}{% endif %}. {{ _('line_detail.meta_eta') }}{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
