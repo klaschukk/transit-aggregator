@@ -61,8 +61,11 @@
    net cost on desktop is one ~5KB gzipped GET that doesn't affect FCP. #}
 {% if not config.DEBUG %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dist/app.mobile.css') }}?v={{ asset_version }}" media="(max-width: 767px)">{% else %}<link rel="stylesheet" href="{{ url_for('static', filename='css/app.mobile.css') }}?v={{ asset_version }}" media="(max-width: 767px)">{% endif %}
 <style>html:not(.js) .fade-in{opacity:1;transform:none}</style>
-{% if config.ADSENSE_ID %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ads.css') }}?v={{ asset_version }}">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config.ADSENSE_ID }}" crossorigin="anonymous"></script>{% endif %}
+{% if config.ADSENSE_ID %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ads.css') }}?v={{ asset_version }}">{% endif %}
+{# adsbygoogle.js is loaded ONCE, below — after the NPA/consent flag is set.
+   Do not re-add the loader here: a second <script> tag fetches+executes the
+   ad library twice on every page (wasted main-thread time + "ins already has
+   ad" errors). #}
 <script>
 /* Umami loader — GDPR-gated. Only loads analytics when the user
    explicitly consented to "all" cookies. `essential` (or no cookie at all
