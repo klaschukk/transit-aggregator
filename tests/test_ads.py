@@ -209,3 +209,62 @@ def test_ad_slot_wrappers_appear_when_adsense_enabled(client, app):
     finally:
         app.config['ADSENSE_ID'] = original_id
         app.config['ADSENSE_SLOTS'] = original_slots
+
+
+# ── 6. Lazy-ad activation (the IntersectionObserver loader) ─────────────
+
+
+def test_lazy_ad_slot_has_activation_loader(client, app):
+    """Below-the-fold slots render as `.js-ad-lazy` placeholders with NO
+    <ins> at parse time. Without the loader script those placeholders are
+    dead reserved boxes that never fetch an ad (zero revenue). The loader
+    in base.html must be emitted alongside the placeholder so the <ins>
+    gets injected on scroll. Regression guard: the loader was missing for
+    every default (lazy=True) slot — 17 of 18 slots earned nothing."""
+    original_id = app.config.get('ADSENSE_ID', '')
+    original_slots = dict(app.config.get('ADSENSE_SLOTS', {}))
+    try:
+        app.config['ADSENSE_ID'] = 'ca-pub-1234567890'
+        app.config['ADSENSE_SLOTS'] = {**original_slots, 'route_bottom': '999'}
+        resp = client.get('/rute/beograd-novi-sad/')
+        if resp.status_code == 404:
+            pytest.skip('route not in test DB')
+        assert resp.status_code == 200
+        body = resp.data
+        # Placeholder with the data the loader needs.
+        assert b'js-ad-lazy' in body, 'lazy placeholder missing'
+        assert b'data-ad-slot-id="999"' in body
+        assert b'data-ad-format=' in body
+        # The activation loader itself must be present.
+        assert b"querySelectorAll('.js-ad-lazy')" in body, \
+            'lazy-ad loader script missing — placeholders would never load'
+        assert b'adsbygoogle' in body and b'IntersectionObserver' in body
+    finally:
+        app.config['ADSENSE_ID'] = original_id
+        app.config['ADSENSE_SLOTS'] = original_slots
+
+
+def test_lazy_ad_npa_flag_follows_consent(client, app):
+    """The lazy placeholder must carry the GDPR NPA flag so the loader
+    pushes non-personalized ads for unconsented EU visitors. Any consent
+    state other than 'all' → npa true; consent=all → npa false."""
+    original_id = app.config.get('ADSENSE_ID', '')
+    original_slots = dict(app.config.get('ADSENSE_SLOTS', {}))
+    try:
+        app.config['ADSENSE_ID'] = 'ca-pub-1234567890'
+        app.config['ADSENSE_SLOTS'] = {**original_slots, 'route_bottom': '999'}
+        # Essential-only consent (≠ 'all') → non-personalized.
+        client.set_cookie(key='cookie_consent', value='essential',
+                          path='/', domain='localhost')
+        resp = client.get('/rute/beograd-novi-sad/')
+        if resp.status_code == 404:
+            pytest.skip('route not in test DB')
+        assert b'data-ad-npa="true"' in resp.data, 'NPA not set for unconsented'
+        # Explicit full consent → personalized.
+        client.set_cookie(key='cookie_consent', value='all',
+                          path='/', domain='localhost')
+        resp = client.get('/rute/beograd-novi-sad/')
+        assert b'data-ad-npa="false"' in resp.data, 'NPA should clear on consent=all'
+    finally:
+        app.config['ADSENSE_ID'] = original_id
+        app.config['ADSENSE_SLOTS'] = original_slots

@@ -122,6 +122,49 @@ window.addEventListener('load', function(){
   }, 5000);
 });
 </script>
+{# Lazy ad activation — the _ad_slot macro renders `.js-ad-lazy` placeholders
+   (no <ins>) for below-the-fold slots so AdSense doesn't fetch ad markup until
+   the slot nears the viewport (protects LCP, keeps CLS=0 via reserved height).
+   When a placeholder scrolls within 200px we inject the real <ins> and push().
+   No IntersectionObserver → fill every slot immediately. NPA is read per-slot
+   from data-ad-npa, matching the immediate path's push({npa:1}); the page-level
+   requestNonPersonalizedAds flag above is the actual GDPR gate. #}
+<script>
+(function(){
+  function fill(el){
+    if (el.dataset.adFilled) return;
+    el.dataset.adFilled = '1';
+    var ins = document.createElement('ins');
+    ins.className = 'adsbygoogle ad-slot__ins';
+    ins.style.display = 'block';
+    ins.setAttribute('data-ad-client', el.dataset.adClient || '');
+    if (el.dataset.adSlotId) ins.setAttribute('data-ad-slot', el.dataset.adSlotId);
+    ins.setAttribute('data-ad-format', el.dataset.adFormat || 'auto');
+    ins.setAttribute('data-full-width-responsive', el.dataset.adResponsive || 'false');
+    el.appendChild(ins);
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push(
+        el.dataset.adNpa === 'true' ? {npa:1} : {});
+    } catch(e){}
+  }
+  function init(){
+    var slots = document.querySelectorAll('.js-ad-lazy');
+    if (!slots.length) return;
+    if (!('IntersectionObserver' in window)) { slots.forEach(fill); return; }
+    var obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (!e.isIntersecting) return;
+        obs.unobserve(e.target);
+        fill(e.target);
+      });
+    }, { rootMargin: '200px 0px' });
+    slots.forEach(function(el){ obs.observe(el); });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else { init(); }
+})();
+</script>
 {% endif %}
 {# A/B Exp 4: currency_default_v1 — for non-Serbo-Croatian visitors only.
    When the variant is 'eur' AND the user has not picked a currency yet,
