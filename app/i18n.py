@@ -1599,7 +1599,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Buy via',
         'ru': 'Купить через',
     },
-    # ── Far-destination AI itinerary (search fallback to BusTicket4.me) ──
+    # ── Far-destination AI itinerary (search fallback to Bookaway) ──
     'ai_route.badge': {
         'sr': 'AI maršruta',
         'en': 'AI route',
@@ -1621,9 +1621,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Составляем маршрут…',
     },
     'ai_route.cta': {
-        'sr': 'Rezerviši preko BusTicket4.me',
-        'en': 'Book via BusTicket4.me',
-        'ru': 'Забронировать через BusTicket4.me',
+        'sr': 'Rezerviši preko Bookaway',
+        'en': 'Book via Bookaway',
+        'ru': 'Забронировать через Bookaway',
     },
     'ai_route.disclaimer': {
         'sr': 'Orijentacioni plan koji generiše AI — vremena, cene i veze obavezno proverite kod prevoznika pre kupovine.',

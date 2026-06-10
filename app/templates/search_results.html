@@ -89,10 +89,11 @@
 {% else %}
 {% if far %}
 <!-- ═══ Far-destination AI itinerary (Phase 1, dynamic) ═══
-     No local line to e.g. Bangkok. Groq composes a realistic multi-leg plan
-     (filled client-side from /api/compose-route, cached per pair). No partner
-     booking CTA — the booking partner that monetised this was removed.
-     /pretraga is noindex — the indexable version comes in Phase 2. -->
+     No local line to e.g. Bangkok, but Bookaway sells the local leg. Groq
+     composes a realistic multi-leg plan (filled client-side from
+     /api/compose-route, cached per pair) and the Bookaway CTA monetises the
+     booking. Bookaway is kept ONLY for these far destinations — every regular
+     route uses BusTicket4. /pretraga is noindex — Phase 2 adds static pages. -->
 <section class="ai-route" id="aiRoute"
          data-od="{{ from_city }}" data-do="{{ to_city }}" data-lang="{{ g.lang }}"
          data-err-text="{{ _('ai_route.error') }}"

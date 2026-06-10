@@ -15,17 +15,24 @@ from app.affiliates import (
 
 # ── Partner.has_route() ───────────────────────────────────────────────
 
-def test_bookaway_covers_serbian_domestic():
-    assert Bookaway().has_route('beograd', 'nis') is True
+def test_bookaway_active_only_for_far_destinations():
+    # Bookaway is FAR-ONLY now (owner decision): it covers a pair only when an
+    # endpoint is a far/long-haul destination (Asia etc.) from bookaway_far.json.
+    from app.affiliates.partners import FAR_DESTINATIONS
+    far = next(iter(FAR_DESTINATIONS))
+    assert Bookaway().has_route('beograd', far) is True
+    assert Bookaway().has_route(far, 'beograd') is True
 
 
-def test_bookaway_covers_balkan_cross_border():
-    assert Bookaway().has_route('beograd', 'sarajevo') is True
-    assert Bookaway().has_route('podgorica', 'dubrovnik') is True
+def test_bookaway_not_used_for_balkan_routes():
+    # Regular Balkan routes go to BusTicket4 — Bookaway must NOT cover them.
+    assert Bookaway().has_route('beograd', 'nis') is False
+    assert Bookaway().has_route('beograd', 'sarajevo') is False
+    assert Bookaway().has_route('podgorica', 'dubrovnik') is False
 
 
 def test_bookaway_skips_fully_unknown_pair():
-    # Neither endpoint is in the country map → no deep link could be built
+    # Neither endpoint is a far destination → not eligible
     assert Bookaway().has_route('foobar', 'bazqux') is False
 
 

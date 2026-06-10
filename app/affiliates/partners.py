@@ -174,11 +174,14 @@ class Bookaway(Partner):
     TRACKING_HOST = 'bookaway2.go2cloud.org'
 
     def has_route(self, from_slug: str, to_slug: str) -> bool:
-        # Bookaway covers a pair if *either* endpoint is in its inventory.
-        # When only one endpoint matches, build_url falls back to the
-        # country listing page (a URL that always exists) so the tracked
-        # click still lands somewhere valid.
-        return from_slug in _BOOKAWAY_COUNTRY_MAP or to_slug in _BOOKAWAY_COUNTRY_MAP
+        # FAR-ONLY (owner decision 2026-06-10): Bookaway is used ONLY for
+        # far/long-haul destinations (Asia, Middle East, …) we have no local
+        # data for — the AI-itinerary search fallback. Every regular Balkan
+        # route goes to BusTicket4; Bookaway must never surface there. So a pair
+        # is Bookaway-eligible only when one endpoint is a far destination.
+        # build_url still resolves the country via the (far-augmented)
+        # _BOOKAWAY_COUNTRY_MAP, so the Asia listing URL stays correct.
+        return from_slug in FAR_DESTINATIONS or to_slug in FAR_DESTINATIONS
 
     def build_url(
         self,

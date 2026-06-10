@@ -36,14 +36,16 @@ from app.affiliates.partners import Bookaway, BusTicket4, FlixBus
 # template also derives the main CTA straight from each trip's bt4_line_id, so a
 # pair missing from the json still buys through BusTicket4 when the DB knows the
 # line.
-# Bookaway and FlixBus are NOT active (removed by owner decision 2026-06-10:
-# Bookaway converted ~0 and the owner wants it off the site entirely). Their
-# classes stay imported so a partner can be re-added here if a deal is signed.
-# Pairs with no BusTicket4 coverage simply show no "Kupi" button — templates
-# guard with `{% if _buy_href %}` and hide it rather than fall back to a
-# zero-converting listing page.
+# Bookaway is active ONLY for far/long-haul destinations (Asia, Middle East):
+# its has_route() now returns True only when an endpoint is in FAR_DESTINATIONS,
+# so it powers the AI-itinerary booking CTA on far searches and NEVER appears on
+# regular Balkan routes (owner decision 2026-06-10: keep Asia on Bookaway, the
+# rest on BusTicket4). FlixBus is NOT active (no affiliate deal). Regular pairs
+# with no BusTicket4 coverage show no "Kupi" button — templates guard with
+# `{% if _buy_href %}` and hide it.
 ACTIVE_PARTNERS: tuple[Partner, ...] = (
     BusTicket4(),
+    Bookaway(),
 )
 
 
