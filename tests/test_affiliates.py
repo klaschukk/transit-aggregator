@@ -189,17 +189,16 @@ def test_busticket4_leads_pair_level_when_line_id_known():
     assert f'{f}-{t}' in _BT4_PAIR_LINEID and f in _BT4_CITY_ID and t in _BT4_CITY_ID
     offers = resolve_offers(f, t, 'Beograd', 'Kragujevac')
     keys = [o.partner_key for o in offers]
-    assert keys[0] == 'busticket4'          # direct exact-trip checkout leads
+    assert keys == ['busticket4']           # only active partner; exact checkout
     assert 'lineId=' in offers[0].url       # ...and it opens a real departure
-    assert 'bookaway' in keys               # Bookaway remains as the fallback
 
 
 def test_busticket4_absent_when_no_line_id_known():
     # A pair with no pre-resolved line_id (international, BT4 has no inventory
-    # mapped) must NOT offer BusTicket4 — that would risk an empty checkout.
-    keys = [o.partner_key for o in resolve_offers('beograd', 'sofia', 'Beograd', 'Sofia')]
-    assert 'busticket4' not in keys
-    assert keys[0] == 'bookaway'
+    # mapped) now yields NO offer at all — Bookaway was removed, so there is no
+    # fallback; the template hides the buy button.
+    offers = resolve_offers('beograd', 'sofia', 'Beograd', 'Sofia')
+    assert offers == []
 
 
 # ── resolve_offers() ──────────────────────────────────────────────────
@@ -219,26 +218,24 @@ def test_resolver_returns_empty_when_no_partner_covers():
 
 
 def test_resolver_orders_by_checkout_quality_then_commission():
-    # BT4-eligible SR pair: the exact-checkout partner (ux_rank 0) leads the
-    # listing fallback (ux_rank 1) even though its commission band is LOWER —
-    # checkout quality is the primary sort key, commission only the tiebreak.
+    # With Bookaway removed, BusTicket4 is the sole offer for a BT4-eligible SR
+    # pair (exact checkout, ux_rank 0). The old two-partner ordering is moot.
     offers = resolve_offers('beograd', 'kragujevac', 'Beograd', 'Kragujevac')
     keys = [o.partner_key for o in offers]
-    assert keys == ['busticket4', 'bookaway']
-    assert offers[0].ux_rank < offers[1].ux_rank
-    assert offers[0].commission_pct < offers[1].commission_pct
+    assert keys == ['busticket4']
+    assert offers[0].ux_rank == 0
 
 
 def test_resolver_cross_border_excludes_flixbus():
-    # No FlixBus affiliate agreement → it must not appear in offers. BusTicket4
-    # sells this cross-border pair (line_id known) so it leads; Bookaway follows.
+    # No FlixBus agreement and Bookaway removed → only BusTicket4 may appear. It
+    # sells this cross-border pair (line_id known) so it is the sole offer.
     offers = resolve_offers(
         'beograd', 'sarajevo', 'Beograd', 'Sarajevo', 'trip-card',
     )
     keys = [o.partner_key for o in offers]
     assert 'flixbus' not in keys
-    assert keys and keys[0] == 'busticket4'
-    assert 'bookaway' in keys
+    assert 'bookaway' not in keys
+    assert keys == ['busticket4']
 
 
 def test_resolver_ab_ignored_when_partner_ineligible():

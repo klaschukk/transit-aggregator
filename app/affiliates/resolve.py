@@ -30,19 +30,20 @@ from app.affiliates.base import Offer, Partner
 from app.affiliates.partners import Bookaway, BusTicket4, FlixBus
 
 # Instantiate once — partners are stateless, single instances are fine.
-# BusTicket4 is now ACTIVE as a pair-level partner: it only reports has_route()
-# True for pairs we hold a pre-resolved line_id for (app/affiliates/bt4_lineids.json,
-# 406 pairs), so its checkout deep-link always opens a populated departure — the
-# old "empty 0.00 € shell" risk that kept it disabled is gone. Where BT4 is
-# eligible it LEADS the "Kupi" button (an exact-trip checkout converts better
-# than Bookaway's listing fallback, even at a lower commission band — see the
-# sort in resolve_offers). Pairs with no known line_id fall through to Bookaway.
-# FlixBus is NOT active — we have no affiliate agreement with them, so their
-# links earn nothing (just free traffic to FlixBus). The class stays imported
-# so it can be re-added here if/when a deal is signed.
+# BusTicket4 is the ONLY active partner: it reports has_route() True for pairs we
+# hold a pre-resolved line_id for (app/affiliates/bt4_lineids.json), so its
+# checkout deep-link always opens a populated departure. On route pages the
+# template also derives the main CTA straight from each trip's bt4_line_id, so a
+# pair missing from the json still buys through BusTicket4 when the DB knows the
+# line.
+# Bookaway and FlixBus are NOT active (removed by owner decision 2026-06-10:
+# Bookaway converted ~0 and the owner wants it off the site entirely). Their
+# classes stay imported so a partner can be re-added here if a deal is signed.
+# Pairs with no BusTicket4 coverage simply show no "Kupi" button — templates
+# guard with `{% if _buy_href %}` and hide it rather than fall back to a
+# zero-converting listing page.
 ACTIVE_PARTNERS: tuple[Partner, ...] = (
     BusTicket4(),
-    Bookaway(),
 )
 
 

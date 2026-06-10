@@ -135,5 +135,7 @@ def test_pretraga_renders_far_block(client, app):
     assert r.status_code == 200
     html = r.get_data(as_text=True)
     assert 'id="aiRoute"' in html
-    assert 'ai-route__cta' in html          # Bookaway CTA present even pre-fetch
-    assert 'go2cloud.org' in html           # CTA routed through conversion tracker
+    # Bookaway was removed from the site (owner decision) — the far block now
+    # renders the AI itinerary only, with no partner booking CTA.
+    assert 'ai-route__cta' not in html
+    assert 'go2cloud.org' not in html
