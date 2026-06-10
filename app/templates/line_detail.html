@@ -89,6 +89,7 @@
   {'value': stops|length if stops else 0, 'label': _('line.stop_count_label'), 'icon': 'distance'},
   {'value': line_type_label, 'label': _('line.type_label')},
 ] + ([{'value': first_dep ~ ' – ' ~ last_dep, 'label': _('line.service_label'), 'icon': 'schedule'}] if first_dep and last_dep else [])
+  + ([{'value': '~' ~ headway ~ ' ' ~ _('common.min'), 'label': _('line.frequency_label'), 'icon': 'schedule'}] if headway else [])
 ) }}
 
 <!-- Buy-ticket-style CTA card — two actions to satisfy the "I'm here

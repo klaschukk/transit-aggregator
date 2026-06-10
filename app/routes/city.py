@@ -264,6 +264,7 @@ def line_detail(city: str, line_slug: str):
     schedule: dict[str, list[str]] = {'RD': [], 'S': [], 'N': []}
     first_dep = None
     last_dep = None
+    headway = None
 
     gtfs_count = cached_query_one(
         "SELECT COUNT(*) as c FROM gtfs_trips WHERE line_id = ?",
@@ -287,6 +288,16 @@ def line_detail(city: str, line_slug: str):
         if schedule['RD']:
             first_dep = schedule['RD'][0]
             last_dep = schedule['RD'][-1]
+
+        # Typical headway = median gap between consecutive workday departures.
+        # Answers "na koliko minuta ide linija N" (a top GSC query). Median is
+        # robust to the overnight gap and sparse early/late service; cap a gap
+        # at 120 min so a depot layover never skews it. Needs enough departures.
+        if len(schedule['RD']) >= 5:
+            _mins = [int(t[:2]) * 60 + int(t[3:5]) for t in schedule['RD']]
+            _gaps = sorted(b - a for a, b in zip(_mins, _mins[1:]) if 0 < b - a <= 120)
+            if _gaps:
+                headway = _gaps[len(_gaps) // 2]
 
     # Line type label
     type_labels = {
@@ -378,7 +389,7 @@ def line_detail(city: str, line_slug: str):
     }, ensure_ascii=False)
     return render_template('line_detail.html', city=city, line=line, stops=stops,
                            schedule=schedule, has_gtfs=has_gtfs,
-                           first_dep=first_dep, last_dep=last_dep,
+                           first_dep=first_dep, last_dep=last_dep, headway=headway,
                            line_type_label=line_type_label,
                            geometry=geometry,
                            related_lines=related_lines,

@@ -1072,6 +1072,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'line.service_label': {
         'sr': 'polasci', 'en': 'service', 'ru': 'рейсы',
     },
+    'line.frequency_label': {
+        'sr': 'interval', 'en': 'every', 'ru': 'интервал',
+    },
     'line.filter_all': {
         'sr': 'Svi polasci', 'en': 'All departures', 'ru': 'Все рейсы',
     },
