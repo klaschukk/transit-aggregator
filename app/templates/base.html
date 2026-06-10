@@ -449,6 +449,12 @@ if ('serviceWorker' in navigator) {
   document.addEventListener('click', function(ev){
     var el = ev.target.closest('.trip-card__buy, .buy-ticket__btn, .partners-block__btn');
     if (!el) return;
+    /* Only real affiliate CTAs carry data-partner. City line/stop pages reuse
+       the .buy-ticket__btn style for non-affiliate buttons (e.g. "show on map"),
+       which fired blank ba_click rows (~80% of logged "clicks", no partner/
+       route/surface). Skip anything without a partner so affiliate-click stats
+       reflect actual outbound clicks to a partner checkout. */
+    if (!el.dataset.partner) return;
     var payload = {
       route_slug: el.dataset.routeSlug || document.body.dataset.routeSlug || '',
       surface:    el.dataset.surface   || document.body.dataset.surface   || '',
