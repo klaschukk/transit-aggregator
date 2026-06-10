@@ -22,7 +22,7 @@ import contextlib
 # (app/slug.py). All pipelines must go through this — otherwise drift
 # between transliteration maps leaks non-ASCII slugs into the DB.
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from app.slug import normalize_slug  # noqa: E402
+from app.slug import normalize_slug, transliterate_cyrillic_serbian  # noqa: E402
 
 BASE_DIR = Path(__file__).parent.parent
 RAW_DIR = BASE_DIR / 'raw'
@@ -826,17 +826,42 @@ def _load_gtfs(conn: duckdb.DuckDBPyConnection) -> None:
         print("  No GTFS data found, skipping")
         return
 
-    # Step 1: Build route_id → line_id mapping via routes.txt route_short_name
+    # Step 1: Build route_id → line_id mapping via routes.txt route_short_name.
+    # city_lines.number is often Cyrillic ("27Н" night, "102п") while the GTFS feed
+    # is Latin ("27N", "102P"); transliterate so they link. Resolve in priority order:
+    # exact raw → exact transliterated → case-insensitive transliterated (only when
+    # unambiguous). Recovers ~33 Belgrade lines / ~4k trips that exact-match drops.
     route_to_line: dict[str, int] = {}
     if routes_path.exists():
         line_map: dict[str, int] = {}
+        translit_map: dict[str, int] = {}
+        ci_map: dict[str, int] = {}
+        ci_ambiguous: set[str] = set()
         for row in conn.execute("SELECT id, number FROM city_lines WHERE city = 'beograd'").fetchall():
-            line_map[row[1]] = row[0]
+            lid, number = row[0], row[1]
+            line_map[number] = lid
+            tl = transliterate_cyrillic_serbian(number)
+            translit_map.setdefault(tl, lid)
+            up = tl.upper()
+            if up in ci_map and ci_map[up] != lid:
+                ci_ambiguous.add(up)
+            else:
+                ci_map.setdefault(up, lid)
+
+        def _resolve_line(short: str) -> int | None:
+            if short in line_map:
+                return line_map[short]
+            if short in translit_map:
+                return translit_map[short]
+            up = short.upper()
+            if up not in ci_ambiguous:
+                return ci_map.get(up)
+            return None
 
         import csv
         with open(routes_path, encoding='utf-8') as f:
             for row in csv.DictReader(f):
-                line_id = line_map.get(row.get('route_short_name', ''))
+                line_id = _resolve_line(row.get('route_short_name', '') or '')
                 if line_id:
                     route_to_line[row['route_id']] = line_id
         print(f"  GTFS route→line mapping: {len(route_to_line)} matched")
