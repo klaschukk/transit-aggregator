@@ -281,6 +281,7 @@ class BusTicket4(Partner):
         to_city: str,
         utm_medium: str,
         line_id: int | None = None,
+        depart_date: str | None = None,
     ) -> str:
         dep = _BT4_CITY_ID[from_slug]
         arr = _BT4_CITY_ID[to_slug]
@@ -289,9 +290,21 @@ class BusTicket4(Partner):
         # departure. Per-trip callers pass the trip's exact line_id and win.
         if line_id is None:
             line_id = _BT4_PAIR_LINEID.get(f'{from_slug}-{to_slug}')
-        # Default to tomorrow so an overnight-cached page never points at a past
-        # date (busticket4 wants DD-MM-YYYY). The user can change it on checkout.
-        depart = (date.today() + timedelta(days=1)).strftime('%d-%m-%Y')
+        # Prefer the date the user actually searched for (search form's
+        # YYYY-MM-DD `datum`) so the checkout opens on their travel day instead
+        # of making them re-pick it. Fall back to tomorrow so an
+        # overnight-cached page never points at a past date (busticket4 wants
+        # DD-MM-YYYY). The user can still change it on checkout.
+        depart = ''
+        if depart_date:
+            try:
+                _d = date.fromisoformat(str(depart_date)[:10])
+                if _d >= date.today():
+                    depart = _d.strftime('%d-%m-%Y')
+            except ValueError:
+                pass
+        if not depart:
+            depart = (date.today() + timedelta(days=1)).strftime('%d-%m-%Y')
         # affiliateId is the attribution — no separate click-tracker hop needed.
         url = (
             'https://busticket4.me/en/checkout'
@@ -309,13 +322,17 @@ class BusTicket4(Partner):
 _BT4 = BusTicket4()
 
 
-def bt4_checkout_url(from_slug: str, to_slug: str, line_id) -> str:
+def bt4_checkout_url(from_slug: str, to_slug: str, line_id, depart_date=None) -> str:
     """Exact busticket4 affiliate checkout for ONE departure, or '' if we can't
     build it (unknown city or missing line_id). Exposed as a Jinja global so the
-    per-trip buy button can deep-link straight to that trip's checkout."""
+    per-trip buy button can deep-link straight to that trip's checkout.
+    depart_date (YYYY-MM-DD, e.g. the search form's `datum`) presets the
+    checkout to the user's travel day; omitted/past dates fall back to
+    tomorrow."""
     if not line_id or from_slug not in _BT4_CITY_ID or to_slug not in _BT4_CITY_ID:
         return ''
-    return _BT4.build_url(from_slug, to_slug, '', '', 'trip-card', line_id=line_id)
+    return _BT4.build_url(from_slug, to_slug, '', '', 'trip-card',
+                          line_id=line_id, depart_date=depart_date)
 
 
 # ── FlixBus — cross-border corridors (owned operator) ──────────────

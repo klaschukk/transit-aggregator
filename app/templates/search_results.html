@@ -80,7 +80,7 @@
       {% for trip in results %}
         {{ trip_card(trip, offers=_offers_trip, buy_label=_('buy.cta'),
                      route_slug=_campaign, surface='search',
-                     from_slug=_from_slug, to_slug=_to_slug) }}
+                     from_slug=_from_slug, to_slug=_to_slug, datum=datum) }}
       {% endfor %}
     </div>
   </div>

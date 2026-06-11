@@ -13,7 +13,7 @@
      surface — which page type the click happened on: 'search',
                'route_detail', 'city_pair' (see analytics_db allowlist).
 #}
-{% macro trip_card(trip, buy_label='', route_slug='', surface='', offers=None, from_slug='', to_slug='', bt4_fallback_line_id=None) %}
+{% macro trip_card(trip, buy_label='', route_slug='', surface='', offers=None, from_slug='', to_slug='', bt4_fallback_line_id=None, datum='') %}
 {% set _primary = (offers[0] if offers else None) %}
 {% set _buy_href = _primary.url if _primary else '' %}
 {% set _buy_partner = _primary.partner_key if _primary else '' %}
@@ -22,7 +22,7 @@
    representative departure so the whole BT4 route stays on BusTicket4. Routes
    BusTicket4 doesn't sell at all (no fallback) render no buy button. #}
 {% set _bt4_lid = trip.bt4_line_id or bt4_fallback_line_id %}
-{% set _bt4 = bt4_checkout_url(from_slug, to_slug, _bt4_lid) if (from_slug and to_slug and _bt4_lid) else '' %}
+{% set _bt4 = bt4_checkout_url(from_slug, to_slug, _bt4_lid, datum) if (from_slug and to_slug and _bt4_lid) else '' %}
 {% if _bt4 %}{% set _buy_href = _bt4 %}{% set _buy_partner = 'busticket4' %}{% endif %}
 {# A/B Exp 1: CTA copy (variant overrides buy_label when caller didn't pass one) #}
 {% set _cta_variant = ab_variant('cta_copy_v1') %}

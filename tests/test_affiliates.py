@@ -207,6 +207,25 @@ def test_bt4_checkout_url_pins_the_exact_trip():
     assert 'departureCityId=1213' in url and 'arrivalCityId=1243' in url
 
 
+def test_bt4_checkout_url_uses_searched_date():
+    # The search form's `datum` (YYYY-MM-DD) presets the checkout to the
+    # user's travel day so they don't have to re-pick it on busticket4.
+    from datetime import date, timedelta
+    day = date.today() + timedelta(days=5)
+    url = bt4_checkout_url('beograd', 'nis', 909, day.isoformat())
+    assert f"departureDate={day.strftime('%d-%m-%Y')}" in url
+
+
+def test_bt4_checkout_url_rejects_past_or_garbage_date():
+    # A past or malformed date must fall back to tomorrow, never point the
+    # checkout at an unbookable day.
+    from datetime import date, timedelta
+    tomorrow = (date.today() + timedelta(days=1)).strftime('%d-%m-%Y')
+    for bad in ('2020-01-01', 'not-a-date', '', None):
+        url = bt4_checkout_url('beograd', 'nis', 909, bad)
+        assert f'departureDate={tomorrow}' in url
+
+
 def test_bt4_checkout_url_empty_without_line_id_or_known_city():
     # No line id → no usable checkout (avoid the empty 0.00 € page entirely).
     assert bt4_checkout_url('beograd', 'nis', None) == ''
