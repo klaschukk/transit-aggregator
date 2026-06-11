@@ -27,7 +27,7 @@
 {# A/B Exp 1: CTA copy (variant overrides buy_label when caller didn't pass one) #}
 {% set _cta_variant = ab_variant('cta_copy_v1') %}
 {# A/B Exp 2: button color tier — 'accent' (orange), 'primary' (teal), 'urgent' (red) #}
-{% set _color_variant = ab_variant('cta_color_v1') %}
+{% set _color_variant = ab_variant('cta_color_v2') %}
 <div class="trip-card"
      data-type="{{ trip.type|default('bus') }}"
      data-operator="{{ trip.operator|default('') }}"

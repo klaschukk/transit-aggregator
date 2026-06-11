@@ -19,7 +19,7 @@ from app.ab import ExperimentSpec
 # as a variant so admin metrics still aggregate correctly.
 DEFAULTS: dict[str, str] = {
     'cta_copy_v1': 'Kupi',
-    'cta_color_v1': 'accent',
+    'cta_color_v2': 'accent',
     'hero_sub_v1': 'feature_list',
     'currency_default_v1': 'rsd',
     'review_cta_v1': 'after-trips',
@@ -40,12 +40,15 @@ EXPERIMENTS: dict[str, ExperimentSpec] = {
 
     # 2. Bookaway buy-button color. accent = current orange, primary = teal
     #    brand, urgent = high-contrast red. Tests CTR vs brand consistency.
-    'cta_color_v1': ExperimentSpec(
-        key='cta_color_v1',
+    'cta_color_v2': ExperimentSpec(
+        key='cta_color_v2',
         variants=('accent', 'primary', 'urgent'),
         weights=(1.0, 1.0, 1.0),
         surface='trip_card',
-        started_at='2026-04-24',
+        # v1 (2026-04-24) is void: variants were assigned + logged but the
+        # CSS for 'primary'/'urgent' never existed, so every cohort saw the
+        # same orange button. Restarted as v2 the day the CSS shipped.
+        started_at='2026-06-11',
         min_runtime_days=7,
     ),
 

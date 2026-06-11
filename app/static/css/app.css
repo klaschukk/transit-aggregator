@@ -705,6 +705,11 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 }
 .trip-card__buy:hover { background: var(--color-accent-dark); color: var(--color-text); transform: translateY(-1px); }
 .trip-card__buy svg { flex-shrink: 0; }
+/* A/B cta_color_v2 (v1 had no css — all cohorts saw orange). AA-safe. */
+.trip-card__buy[data-ab-color="primary"] { background: var(--color-primary-dark); color: #fff; }
+.trip-card__buy[data-ab-color="primary"]:hover { background: var(--color-primary-darker); color: #fff; }
+.trip-card__buy[data-ab-color="urgent"] { background: var(--color-danger); color: #fff; }
+.trip-card__buy[data-ab-color="urgent"]:hover { background: var(--color-danger-strong); color: #fff; }
 /* Route line (dot — segment — carrier — segment — dot) */
 .trip-card__route-line {
   display: flex;
