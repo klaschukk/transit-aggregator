@@ -2412,9 +2412,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Карта линии, все остановки и прибытия онлайн.',
     },
     'stop_detail.title_stop_city': {
-        'sr': 'linije i polasci',
-        'en': 'lines and departures',
-        'ru': 'линии и отправления',
+        'sr': 'red vožnje i linije',
+        'en': 'schedule and lines',
+        'ru': 'расписание и линии',
     },
     'stop_detail.meta_eta': {
         'sr': 'Sve linije, prvi i poslednji polazak, uživo ETA na karti.',
