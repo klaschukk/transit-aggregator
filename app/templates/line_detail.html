@@ -5,6 +5,11 @@
    "{city_label}u" hack gave correct "Beogradu"/"Nišu" but wrong "Novi Sadu"/
    "Kragujevacu" — должно быть "Novom Sadu"/"Kragujevcu". #}
 {% set city_loc = {'beograd': 'Beogradu', 'novi-sad': 'Novom Sadu', 'nis': 'Nišu', 'kragujevac': 'Kragujevcu'}.get(city, city_label) %}
+{# Real city-transit operator for the schema provider — "GSP" is Belgrade-only;
+   Novi Sad = JGSP, Niš = JGP Niš-Ekspres (confirmed in i18n source data).
+   Kragujevac's operator is unnamed in our data → neutral generic, never a
+   fabricated acronym. Also feeds entity match for "jgsp novi sad" / "jgp niš". #}
+{% set city_operator = {'beograd': 'GSP Beograd', 'novi-sad': 'JGSP Novi Sad', 'nis': 'JGP Niš-Ekspres'}.get(city, 'Gradski prevoz ' ~ city_label) %}
 
 {# Title built from the actual top search queries (GSC): users search
    "linija {N} stajalista" and "{N} red voznje {city}" — so the title must
@@ -28,12 +33,12 @@
    ItemList of stops above. #}
 {% if stops %}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BusTrip","name":"{{ _('city.line') }} {{ line.number }} — {{ city_label }}","description":"{{ line.name }}","provider":{"@type":"Organization","name":"GSP {{ city_label }}"},"departureBusStop":{"@type":"BusStop","name":"{{ stops[0].name }}"{% if stops[0].lat and stops[0].lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stops[0].lat }},"longitude":{{ stops[0].lon }}}{% endif %}},"arrivalBusStop":{"@type":"BusStop","name":"{{ stops[-1].name }}"{% if stops[-1].lat and stops[-1].lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stops[-1].lat }},"longitude":{{ stops[-1].lon }}}{% endif %}}{% if first_dep %},"departureTime":"{{ first_dep }}"{% endif %}{% if last_dep %},"arrivalTime":"{{ last_dep }}"{% endif %}{% if reviews_agg and reviews_agg.n %},"aggregateRating":{"@type":"AggregateRating","ratingValue":{{ reviews_agg.avg }},"reviewCount":{{ reviews_agg.n }},"bestRating":5,"worstRating":1}{% endif %}}
+{"@context":"https://schema.org","@type":"BusTrip","name":"{{ _('city.line') }} {{ line.number }} — {{ city_label }}","description":"{{ line.name }}","provider":{"@type":"Organization","name":"{{ city_operator }}"},"departureBusStop":{"@type":"BusStop","name":"{{ stops[0].name }}"{% if stops[0].lat and stops[0].lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stops[0].lat }},"longitude":{{ stops[0].lon }}}{% endif %}},"arrivalBusStop":{"@type":"BusStop","name":"{{ stops[-1].name }}"{% if stops[-1].lat and stops[-1].lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stops[-1].lat }},"longitude":{{ stops[-1].lon }}}{% endif %}}{% if first_dep %},"departureTime":"{{ first_dep }}"{% endif %}{% if last_dep %},"arrivalTime":"{{ last_dep }}"{% endif %}{% if reviews_agg and reviews_agg.n %},"aggregateRating":{"@type":"AggregateRating","ratingValue":{{ reviews_agg.avg }},"reviewCount":{{ reviews_agg.n }},"bestRating":5,"worstRating":1}{% endif %}}
 </script>
 {# Service + Provider — surfaces the city operator (GSP / JGSP / JGP)
    so SERP can show the operator badge alongside the line schedule. #}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Service","serviceType":"Public bus transportation","name":"{{ _('city.line') }} {{ line.number }} {{ city_label }}","areaServed":{"@type":"City","name":"{{ city_label }}"},"provider":{"@type":"Organization","name":"GSP {{ city_label }}"}}
+{"@context":"https://schema.org","@type":"Service","serviceType":"Public bus transportation","name":"{{ _('city.line') }} {{ line.number }} {{ city_label }}","areaServed":{"@type":"City","name":"{{ city_label }}"},"provider":{"@type":"Organization","name":"{{ city_operator }}"}}
 </script>
 {% endif %}
 <script type="application/ld+json">
