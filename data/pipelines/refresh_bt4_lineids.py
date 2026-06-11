@@ -96,24 +96,29 @@ def route_pairs() -> list[tuple[str, str]]:
     return [(f, t) for f, t in rows]
 
 
-def lookup(pair: tuple[str, str], cities: dict, depart: str) -> tuple[str, int | None]:
+def lookup(pair: tuple[str, str], cities: dict, departs: list[str]) -> tuple[str, int | None]:
     f, t = pair
     A, B = cities.get(f), cities.get(t)
     if not A or not B:
         return f"{f}-{t}", None
-    try:
-        raw = _post("doBusesSearch", {
-            "pocetno_mjesto_id": A[0], "drzava_id_pocetnog_mjesta": A[1],
-            "krajnje_mjesto_id": B[0], "drzava_id_krajnjeg_mjesta": B[1],
-            "datum_polaska": depart, "povratna": "NE", "datum_povratka": "",
-        })
-        j = json.loads(raw)
-        if isinstance(j, list) and j and isinstance(j[0], dict):
-            sr = j[0].get("search_res")
-            if sr and isinstance(sr, list) and sr and sr[0].get("route_id"):
-                return f"{f}-{t}", int(sr[0]["route_id"])
-    except Exception as e:  # noqa: BLE001 — one bad pair must not abort the run
-        log.debug("lookup failed %s-%s: %s", f, t, e)
+    # Probe several dates: a pair that runs e.g. Mon/Wed/Fri must NOT be dropped
+    # just because the single probe date is a no-service day. Take the first
+    # date in the window that has a live departure (its route_id == lineId).
+    # Only a pair with no departure across the WHOLE window is treated as dead.
+    for depart in departs:
+        try:
+            raw = _post("doBusesSearch", {
+                "pocetno_mjesto_id": A[0], "drzava_id_pocetnog_mjesta": A[1],
+                "krajnje_mjesto_id": B[0], "drzava_id_krajnjeg_mjesta": B[1],
+                "datum_polaska": depart, "povratna": "NE", "datum_povratka": "",
+            })
+            j = json.loads(raw)
+            if isinstance(j, list) and j and isinstance(j[0], dict):
+                sr = j[0].get("search_res")
+                if sr and isinstance(sr, list) and sr and sr[0].get("route_id"):
+                    return f"{f}-{t}", int(sr[0]["route_id"])
+        except Exception as e:  # noqa: BLE001 — one bad pair must not abort the run
+            log.debug("lookup failed %s-%s on %s: %s", f, t, depart, e)
     return f"{f}-{t}", None
 
 
@@ -127,12 +132,14 @@ def main() -> None:
     pairs = route_pairs()
     log.info("bt4 cities=%d  route pairs=%d", len(cities), len(pairs))
 
-    # Probe a couple of days out so an overnight-cached run still sees departures.
-    depart = (date.today() + timedelta(days=2)).strftime("%d.%m.%Y")
+    # Probe the next 7 days (tomorrow … +7) so every weekly service pattern is
+    # seen. Start at +1 so the soonest bookable departure wins.
+    departs = [(date.today() + timedelta(days=d)).strftime("%d.%m.%Y")
+               for d in range(1, 8)]
 
     out: dict[str, int] = {}
     with cf.ThreadPoolExecutor(max_workers=args.workers) as ex:
-        futs = [ex.submit(lookup, p, cities, depart) for p in pairs]
+        futs = [ex.submit(lookup, p, cities, departs) for p in pairs]
         for i, fut in enumerate(cf.as_completed(futs), 1):
             key, line_id = fut.result()
             if line_id:
@@ -140,8 +147,23 @@ def main() -> None:
             if i % 50 == 0:
                 log.info("…%d/%d  covered=%d", i, len(pairs), len(out))
 
+    # Safety: never clobber a healthy map with a crippled one. If this run
+    # covers far fewer pairs than the file on disk, a network/API blip is the
+    # likely cause (not 24 routes dying overnight) — abort and keep the old map
+    # so we don't silently drop working "Kupi" buttons. Stale-link cleanup is
+    # cheap to redo; lost coverage costs sales.
+    try:
+        prev = json.loads(OUT.read_text())
+    except (OSError, ValueError):
+        prev = {}
+    if prev and len(out) < 0.85 * len(prev):
+        log.error("ABORT: covered %d < 85%% of existing %d — keeping old map "
+                  "(suspected API blip, not real churn)", len(out), len(prev))
+        return
     OUT.write_text(json.dumps(dict(sorted(out.items())), ensure_ascii=False))
-    log.info("wrote %s  (covered %d/%d pairs)", OUT, len(out), len(pairs))
+    added = len(set(out) - set(prev)); removed = len(set(prev) - set(out))
+    log.info("wrote %s  (covered %d/%d pairs; +%d -%d vs previous)",
+             OUT, len(out), len(pairs), added, removed)
 
 
 if __name__ == "__main__":
