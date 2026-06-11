@@ -148,6 +148,34 @@ def test_busticket4_covers_pair_with_known_city_ids():
     assert BusTicket4().has_route('foobar', 'nis') is False
 
 
+def test_busticket4_resolves_dj_cities_in_db_slug_form():
+    # bt4_cities.json keys đ-cities đ→"dj" (Aranđelovac="arandjelovac"), but our
+    # routes/DB slugify đ→"d" ("arandelovac"). The loader registers the đ→d form
+    # as an alias so these 13 bookable pairs don't silently fall to Bookaway.
+    from app.affiliates.partners import _BT4_CITY_ID
+    assert _BT4_CITY_ID.get('arandelovac') == _BT4_CITY_ID.get('arandjelovac') == 1326
+    assert _BT4_CITY_ID.get('indija') == _BT4_CITY_ID.get('indjija') == 1365
+    # Pairs in the DB's đ→d slug form are now BT4-eligible with a real lineId.
+    assert BusTicket4().has_route('beograd', 'arandelovac') is True
+    assert BusTicket4().has_route('indija', 'beograd') is True
+    url = BusTicket4().build_url('beograd', 'arandelovac', '', '', 'route-detail')
+    assert 'arrivalCityId=1326' in url and 'affiliateId=735' in url
+    assert '&lineId=' in url  # populated checkout, never an empty 0.00 € shell
+
+
+def test_busticket4_dj_alias_never_clobbers_real_city():
+    # "durdevac" is a real distinct city; aliasing "djurdjevac"→"durdevac" must
+    # NOT overwrite it (setdefault + original-keys snapshot keep it additive).
+    import json
+    import os
+    from app.affiliates.partners import _BT4_CITY_ID
+    raw = json.load(open(os.path.join(
+        os.path.dirname(__file__), '..', 'app', 'affiliates', 'bt4_cities.json'),
+        encoding='utf-8'))
+    assert _BT4_CITY_ID['durdevac'] == raw['durdevac']
+    assert _BT4_CITY_ID['durdevac'] != _BT4_CITY_ID['djurdjevac']
+
+
 def test_busticket4_url_is_affiliate_checkout():
     import re
     url = BusTicket4().build_url('beograd', 'nis', 'Beograd', 'Niš', 'route-detail')

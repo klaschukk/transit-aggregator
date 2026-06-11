@@ -132,6 +132,19 @@ try:
 except (OSError, ValueError):
     _BT4_CITY_ID = {}
 
+# bt4_cities.json was slugified with đ→"dj" (busticket4's own catalog), but our
+# routes/DB slugify đ→"d" (app.slug.normalize_slug). So đ-cities like Aranđelovac
+# ("arandjelovac" here, "arandelovac" at runtime) and Inđija never resolved,
+# silently dropping 13 bookable BT4 pairs to the lower-commission Bookaway
+# fallback. Register the đ→d form as an alias for every "dj" key — but never
+# clobber a real existing key ("durdevac" exists distinct from "djurdjevac"),
+# so setdefault + an original-keys snapshot keep this purely additive. The
+# original "dj" keys stay, so any per-trip caller passing the "dj" form is
+# unaffected.
+for _k, _v in list(_BT4_CITY_ID.items()):
+    if 'dj' in _k:
+        _BT4_CITY_ID.setdefault(_k.replace('dj', 'd'), _v)
+
 # Pre-resolved busticket4 line_id for a whole "{from_slug}-{to_slug}" pair —
 # the FIRST live departure busticket4's doBusesSearch returns for that pair
 # (built by bt4_discover.py, cross-checked 200/200 against trips.bt4_line_id, so
