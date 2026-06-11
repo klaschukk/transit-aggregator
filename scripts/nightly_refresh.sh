@@ -125,6 +125,14 @@ $VENV -u scripts/price_alert_scan.py >> "$LOG" 2>&1 || echo "WARN: price_alert_s
 # Enrich stop coordinates (non-blocking, limit to 50 per night)
 $VENV -u data/pipelines/enrich_stops_coords.py enrich --limit 50 >> "$LOG" 2>&1 || true
 
+# Refresh the BT4 pair→line_id affiliate map (reads route pairs from the
+# just-rebuilt DB; partners.py loads the JSON at import, so running this
+# before the service start below is what actually ships the fresh map).
+# A stale line_id 404s the checkout and silently costs sales. Non-fatal:
+# the script keeps the old map if API coverage drops below 85%.
+$VENV -u data/pipelines/refresh_bt4_lineids.py >> "$LOG" 2>&1 \
+  || echo "WARN: refresh_bt4_lineids failed ($?)" >> "$LOG"
+
 # Start service
 sudo systemctl start transit
 sleep 3

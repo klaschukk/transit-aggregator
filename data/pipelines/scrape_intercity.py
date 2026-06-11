@@ -279,9 +279,14 @@ def search_departures(
                 'operator': operator_name,
                 'type': 'bus',
                 # busticket4 line id — drives the affiliate checkout deep-link
-                # (/en/checkout?...&lineId=). Without it the checkout renders
-                # an empty 0.00 € page. May be absent for partner-resold lines.
-                'bt4_line_id': dep.get('line_id'),
+                # (/en/checkout?...&lineId=). Only kept when the departure is
+                # actually sold online: with purchase_allowed=false the checkout
+                # renders the trip at 0.00 + a 100 Din fee and nothing can be
+                # bought (verified live 2026-06-11 — ALL Serbia-domestic
+                # departures are purchase_allowed=false, which is why every
+                # "Kupi" deep-link on those routes was a dead end).
+                'bt4_line_id': (dep.get('line_id')
+                                if booking.get('purchase_allowed') else None),
             })
 
     return trips

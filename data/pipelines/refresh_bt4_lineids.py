@@ -103,8 +103,13 @@ def lookup(pair: tuple[str, str], cities: dict, departs: list[str]) -> tuple[str
         return f"{f}-{t}", None
     # Probe several dates: a pair that runs e.g. Mon/Wed/Fri must NOT be dropped
     # just because the single probe date is a no-service day. Take the first
-    # date in the window that has a live departure (its route_id == lineId).
-    # Only a pair with no departure across the WHOLE window is treated as dead.
+    # PURCHASABLE departure in the window (its route_id == lineId). The API
+    # lists plenty of departures with purchase_allowed=false — busticket4
+    # doesn't sell those online (ALL Serbia-domestic ones, verified live
+    # 2026-06-11: their checkout renders 0.00 + fee and can't complete), so a
+    # lineId pointing at one is a dead "Kupi" button, worse than no button.
+    # Only a pair with no purchasable departure across the WHOLE window is
+    # treated as dead.
     for depart in departs:
         try:
             raw = _post("doBusesSearch", {
@@ -115,8 +120,11 @@ def lookup(pair: tuple[str, str], cities: dict, departs: list[str]) -> tuple[str
             j = json.loads(raw)
             if isinstance(j, list) and j and isinstance(j[0], dict):
                 sr = j[0].get("search_res")
-                if sr and isinstance(sr, list) and sr and sr[0].get("route_id"):
-                    return f"{f}-{t}", int(sr[0]["route_id"])
+                if sr and isinstance(sr, list):
+                    for d in sr:
+                        if (d.get("route_id")
+                                and str(d.get("purchase_allowed")).lower() == "true"):
+                            return f"{f}-{t}", int(d["route_id"])
         except Exception as e:  # noqa: BLE001 — one bad pair must not abort the run
             log.debug("lookup failed %s-%s on %s: %s", f, t, depart, e)
     return f"{f}-{t}", None
@@ -125,6 +133,11 @@ def lookup(pair: tuple[str, str], cities: dict, departs: list[str]) -> tuple[str
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--workers", type=int, default=8)
+    ap.add_argument("--min-coverage", type=float, default=0.85,
+                    help="abort if this run covers less than this fraction of "
+                         "the existing map (API-blip guard). Pass 0 for a "
+                         "one-off run after a behavior change that is "
+                         "expected to legitimately shrink the map.")
     args = ap.parse_args()
 
     log.info("fetching busticket4 city catalog…")
@@ -156,9 +169,10 @@ def main() -> None:
         prev = json.loads(OUT.read_text())
     except (OSError, ValueError):
         prev = {}
-    if prev and len(out) < 0.85 * len(prev):
-        log.error("ABORT: covered %d < 85%% of existing %d — keeping old map "
-                  "(suspected API blip, not real churn)", len(out), len(prev))
+    if prev and len(out) < args.min_coverage * len(prev):
+        log.error("ABORT: covered %d < %d%% of existing %d — keeping old map "
+                  "(suspected API blip, not real churn)",
+                  len(out), int(args.min_coverage * 100), len(prev))
         return
     OUT.write_text(json.dumps(dict(sorted(out.items())), ensure_ascii=False))
     added = len(set(out) - set(prev)); removed = len(set(prev) - set(out))
