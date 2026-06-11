@@ -481,10 +481,10 @@ def stop_detail(city: str, stop_slug: str):
     # "za N min" countdown (JS, /api/stop-arrivals) still enhances on top.
     if lines_at_stop and db_ready():
         _svc = _today_service()
+        from app.content.line_prose import service_window
         _sched_rows = cached_query("""
             SELECT cl.number,
-                   MIN(st.departure_time) AS first_dep,
-                   MAX(st.departure_time) AS last_dep,
+                   array_agg(st.departure_time) AS times,
                    COUNT(*) AS freq
             FROM gtfs_stop_times st
             JOIN gtfs_trips gt ON gt.trip_id = st.trip_id
@@ -494,18 +494,14 @@ def stop_detail(city: str, stop_slug: str):
         """, [stop['id'], _svc], ttl=600)
         _sched = {r['number']: r for r in (_sched_rows or [])}
 
-        def _hhmm(t: str | None) -> str | None:
-            # GTFS times can exceed 24:00 (after-midnight service); fold for display.
-            if not t:
-                return None
-            h = int(t[:2])
-            return f'{h - 24:02d}{t[2:5]}' if h >= 24 else t[:5]
-
         for _ln in lines_at_stop:
             _s = _sched.get(_ln['number'])
-            if _s and _s.get('first_dep'):
-                _ln['sched_first'] = _hhmm(_s['first_dep'])
-                _ln['sched_last'] = _hhmm(_s['last_dep'])
+            if _s and _s.get('times'):
+                # Night-aware window (service_window): a line passing this stop
+                # only after midnight (00:xx + 24:xx) would otherwise show a
+                # false 24h "00:00–24:20" instead of e.g. 04:10–00:45. Also
+                # normalises 24:xx → 00:xx.
+                _ln['sched_first'], _ln['sched_last'] = service_window(_s['times'])
                 _ln['sched_freq'] = _s['freq']
 
     departures = []
@@ -543,24 +539,19 @@ def stop_detail(city: str, stop_slug: str):
 
     # GTFS: first/last departure and busiest lines (cached, heavy queries)
     gtfs_stats = cached_query_one("""
-        SELECT MIN(st.departure_time) AS first_dep,
-               MAX(st.departure_time) AS last_dep
+        SELECT array_agg(st.departure_time) AS times
         FROM gtfs_stop_times st
         JOIN gtfs_trips gt ON gt.trip_id = st.trip_id
         WHERE st.city_stop_id = ? AND gt.service_id = 'RD'
     """, [stop_id], ttl=600)
 
-    if gtfs_stats and gtfs_stats.get('first_dep'):
+    if gtfs_stats and gtfs_stats.get('times'):
+        from app.content.line_prose import service_window
         stop_info['has_gtfs'] = True
-        fd = gtfs_stats['first_dep']
-        ld = gtfs_stats['last_dep']
-        stop_info['first_departure'] = fd[:5] if fd else None
-        # Normalize times > 24:00 for display
-        if ld and int(ld[:2]) >= 24:
-            h = int(ld[:2]) - 24
-            stop_info['last_departure'] = f'{h:02d}{ld[2:5]}'
-        else:
-            stop_info['last_departure'] = ld[:5] if ld else None
+        # Night-aware window (service_window): a stop served only after midnight
+        # would otherwise read as a false 24h span; also normalises 24:xx.
+        stop_info['first_departure'], stop_info['last_departure'] = \
+            service_window(gtfs_stats['times'])
 
         busiest = cached_query("""
             SELECT cl.number, cl.name, COUNT(*) AS freq
