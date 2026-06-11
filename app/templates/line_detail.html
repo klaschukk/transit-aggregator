@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš'} %}
 {% set city_label = city_names.get(city, city|title) %}
+{# Serbian locative for the (always-Serbian) JSON-LD description: the old
+   "{city_label}u" hack gave correct "Beogradu"/"Nišu" but wrong "Novi Sadu"/
+   "Kragujevacu" — должно быть "Novom Sadu"/"Kragujevcu". #}
+{% set city_loc = {'beograd': 'Beogradu', 'novi-sad': 'Novom Sadu', 'nis': 'Nišu', 'kragujevac': 'Kragujevcu'}.get(city, city_label) %}
 
 {# Title built from the actual top search queries (GSC): users search
    "linija {N} stajalista" and "{N} red voznje {city}" — so the title must
@@ -17,7 +21,7 @@
 
 {% block head_extra %}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"ItemList","name":"Linija {{ line.number }}: {{ line.name }}","description":"Red vožnje linije {{ line.number }} u {{ city_label }}u","numberOfItems":{{ stops|length if stops else 0 }},"itemListElement":[{% for s in stops[:20] %}{"@type":"ListItem","position":{{ loop.index }},"item":{"@type":"BusStop","name":"{{ s.name }}"{% if s.lat and s.lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ s.lat }},"longitude":{{ s.lon }}}{% endif %}}}{% if not loop.last %},{% endif %}{% endfor %}]}
+{"@context":"https://schema.org","@type":"ItemList","name":"Linija {{ line.number }}: {{ line.name }}","description":"Red vožnje linije {{ line.number }} u {{ city_loc }}","numberOfItems":{{ stops|length if stops else 0 }},"itemListElement":[{% for s in stops[:20] %}{"@type":"ListItem","position":{{ loop.index }},"item":{"@type":"BusStop","name":"{{ s.name }}"{% if s.lat and s.lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ s.lat }},"longitude":{{ s.lon }}}{% endif %}}}{% if not loop.last %},{% endif %}{% endfor %}]}
 </script>
 {# BusTrip with itinerary endpoints — gives Google a single trip entity
    the line page can map to in SERP rich results, complementing the
