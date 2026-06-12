@@ -193,6 +193,29 @@ _SCHEDULE_WEEKEND: dict[str, list[str]] = {
     ],
 }
 
+# Weekend line for routes that keep ~full service on weekends (Saturday volume
+# ≈ weekday) — so we must NOT claim "reduced". Picked instead of _SCHEDULE_WEEKEND
+# when _weekend_full is set.
+_SCHEDULE_WEEKEND_FULL: dict[str, list[str]] = {
+    'sr': [
+        ' Vikendom linija saobraća gotovo punim režimom — {weekend_count} polazaka i subotom, '
+        'sa sličnim intervalima kao radnim danom.',
+        ' I subotom je red vožnje skoro isti kao radnim danom ({weekend_count} polazaka), '
+        'pa nema velikih pauza.',
+    ],
+    'en': [
+        ' Weekend service stays near full — {weekend_count} departures on Saturday, '
+        'with intervals close to weekdays.',
+        ' Saturday keeps almost the same schedule as weekdays ({weekend_count} departures), '
+        'so there are no long gaps.',
+    ],
+    'ru': [
+        ' По выходным линия работает почти в полном режиме — {weekend_count} рейсов и в субботу, '
+        'с интервалами близкими к будням.',
+        ' В субботу расписание почти как в будни ({weekend_count} рейсов), без больших пауз.',
+    ],
+}
+
 
 _TRANSFERS: dict[str, list[str]] = {
     'sr': [
@@ -463,6 +486,9 @@ def _compute_slots(
 
     weekend_count = len([t for t in (schedule_sat or []) if t])
     has_weekend = weekend_count >= 2
+    # Saturday running at ~weekday volume means the line is NOT reduced on
+    # weekends — claiming "reduced" then is false (e.g. line 2A: 158/158).
+    weekend_full = bool(has_weekend and workday_count and weekend_count >= 0.85 * workday_count)
 
     # Interchange list: drop terminals (already named) and self-references,
     # cap at 3 names. Each entry is "Name (N linija)".
@@ -508,6 +534,7 @@ def _compute_slots(
         '_has_gtfs': has_gtfs,
         '_has_headway': has_headway,
         '_has_weekend': has_weekend,
+        '_weekend_full': weekend_full,
         '_has_transfers': has_transfers,
     }
 
@@ -583,7 +610,8 @@ def build_prose(
         if slots['_has_headway']:
             schedule += _pick(_SCHEDULE_HEADWAY[lang], slug, 'sched_headway').format(**slots)
         if slots['_has_weekend']:
-            schedule += _pick(_SCHEDULE_WEEKEND[lang], slug, 'sched_weekend').format(**slots)
+            _wpool = _SCHEDULE_WEEKEND_FULL if slots['_weekend_full'] else _SCHEDULE_WEEKEND
+            schedule += _pick(_wpool[lang], slug, 'sched_weekend').format(**slots)
 
     # Transfers paragraph — gated by interchange data; for lines that
     # share no multi-line stops, we skip this paragraph (template will
