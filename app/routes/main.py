@@ -468,6 +468,13 @@ def api_cities():
     return jsonify([c['name'] for c in cities])
 
 
+@main_bp.route('/favicon.ico')
+def favicon():
+    """Browsers and Googlebot request /favicon.ico at the root; serve the
+    static .ico so the request is a 200, not a 404."""
+    return current_app.send_static_file('favicon/favicon.ico')
+
+
 @main_bp.route('/site.webmanifest')
 def site_webmanifest():
     """PWA manifest rendered dynamically so icon URLs carry ?v=asset_version.
@@ -1493,7 +1500,14 @@ def ads_txt():
 
     Ref: https://iabtechlab.com/ads-txt/
     """
-    ads_id = current_app.config.get('ADSENSE_ID', '').strip()
+    # ads.txt uses the bare "pub-XXXX" publisher id, NOT the "ca-pub-XXXX" form
+    # used by the AdSense JS client tag. Prefer ADSENSE_PUB_ID; strip a leading
+    # "ca-" so it works whichever form is configured. A mismatched id (ca-pub-)
+    # makes Google's ads.txt verification fail.
+    ads_id = (current_app.config.get('ADSENSE_PUB_ID')
+              or current_app.config.get('ADSENSE_ID') or '').strip()
+    if ads_id.startswith('ca-'):
+        ads_id = ads_id[3:]
     if ads_id:
         # pub-1234567890 → google.com, pub-1234567890, DIRECT, f08c47fec0942fa0
         body = f'google.com, {ads_id}, DIRECT, f08c47fec0942fa0\n'

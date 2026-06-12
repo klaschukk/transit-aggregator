@@ -77,10 +77,16 @@
   {{ filter_panel(operators=operators) }}
   <div class="results-main">
     <div class="trip-list" id="tripList">
+      {# Consolidate to BusTicket4: on a route BT4 sells (any departure has a
+         line id), trips without their own line id reuse the route's
+         representative one so the whole search stays on BusTicket4 — no Bookaway
+         on a BT4-sold pair. Matches the route_detail / city_pair behaviour. #}
+      {% set _bt4_trip = (results | selectattr('bt4_line_id') | list | first) if results else None %}
       {% for trip in results %}
         {{ trip_card(trip, offers=_offers_trip, buy_label=_('buy.cta'),
                      route_slug=_campaign, surface='search',
-                     from_slug=_from_slug, to_slug=_to_slug, datum=datum) }}
+                     from_slug=_from_slug, to_slug=_to_slug, datum=datum,
+                     bt4_fallback_line_id=(_bt4_trip.bt4_line_id if _bt4_trip else None)) }}
       {% endfor %}
     </div>
   </div>

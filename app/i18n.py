@@ -1121,6 +1121,56 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'routes and schedules',
         'ru': 'маршруты и расписание',
     },
+    'operator.faq.q_routes': {
+        'sr': 'Koliko ruta opslužuje {name}?',
+        'en': 'How many routes does {name} operate?',
+        'ru': 'Сколько маршрутов обслуживает {name}?',
+    },
+    'operator.faq.a_routes': {
+        'sr': '{name} saobraća na {routes} ruta sa ukupno {trips} polazaka dnevno.',
+        'en': '{name} operates {routes} routes with {trips} departures daily.',
+        'ru': '{name} обслуживает {routes} маршрутов, всего {trips} рейсов в день.',
+    },
+    'operator.faq.q_price': {
+        'sr': 'Koliko košta karta kod {name}?',
+        'en': 'How much does a ticket with {name} cost?',
+        'ru': 'Сколько стоит билет у {name}?',
+    },
+    'operator.faq.a_price': {
+        'sr': 'Cene karata kod {name} kreću se od {min} do {max} RSD.',
+        'en': 'Tickets with {name} cost from {min} to {max} RSD.',
+        'ru': 'Билеты у {name} стоят от {min} до {max} RSD.',
+    },
+    'operator.faq.q_countries': {
+        'sr': 'Koje zemlje pokriva {name}?',
+        'en': 'Which countries does {name} serve?',
+        'ru': 'Какие страны обслуживает {name}?',
+    },
+    'operator.faq.a_countries': {
+        'sr': '{name} saobraća u: {countries}.',
+        'en': '{name} operates to: {countries}.',
+        'ru': '{name} обслуживает направления: {countries}.',
+    },
+    'country.faq.q_travel': {
+        'sr': 'Kako doći do {country} iz Srbije?',
+        'en': 'How to get to {country} from Serbia?',
+        'ru': 'Как добраться до {country} из Сербии?',
+    },
+    'country.faq.a_travel': {
+        'sr': 'Iz Srbije do {country} saobraća {routes} autobuskih linija. Red vožnje, cene i prevoznici na jednom mestu.',
+        'en': '{routes} bus routes run from Serbia to {country}. Schedules, prices and carriers in one place.',
+        'ru': 'Из Сербии в {country} ходит {routes} автобусных маршрутов. Расписание, цены и перевозчики в одном месте.',
+    },
+    'country.faq.q_price': {
+        'sr': 'Koliko košta karta za {country}?',
+        'en': 'How much is a ticket to {country}?',
+        'ru': 'Сколько стоит билет в {country}?',
+    },
+    'country.faq.a_price': {
+        'sr': 'Karte za {country} počinju od {min} RSD, u zavisnosti od grada i prevoznika.',
+        'en': 'Tickets to {country} start from {min} RSD, depending on the city and carrier.',
+        'ru': 'Билеты в {country} — от {min} RSD, в зависимости от города и перевозчика.',
+    },
     'operator.meta_routes': {
         'sr': 'međugradskih ruta',
         'en': 'intercity routes',

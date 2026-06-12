@@ -81,17 +81,20 @@ def test_ads_txt_format_when_pub_id_set(client, app):
     format. Not a real env var test — we toggle via app.config so other
     tests in the session aren't affected."""
     original = app.config.get('ADSENSE_ID', '')
+    original_pub = app.config.get('ADSENSE_PUB_ID', '')
     try:
         app.config['ADSENSE_ID'] = 'ca-pub-1234567890'
+        app.config['ADSENSE_PUB_ID'] = 'ca-pub-1234567890'
         resp = client.get('/ads.txt')
         assert resp.status_code == 200
         body = resp.data.decode('utf-8').strip()
-        assert 'google.com' in body
-        assert 'ca-pub-1234567890' in body
-        assert 'DIRECT' in body
-        assert 'f08c47fec0942fa0' in body
+        # ads.txt MUST use the bare pub- form, never the JS ca-pub- form, or
+        # Google's ads.txt verification fails (real bug found 2026-06).
+        assert body == 'google.com, pub-1234567890, DIRECT, f08c47fec0942fa0'
+        assert 'ca-pub-' not in body
     finally:
         app.config['ADSENSE_ID'] = original
+        app.config['ADSENSE_PUB_ID'] = original_pub
 
 
 # ── 3. Mobile anchor partial ────────────────────────────────────────────
