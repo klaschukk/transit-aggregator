@@ -118,7 +118,7 @@ def ab_partner_order(
       2. Deterministic hash of `seed` (user IP or session id) — keeps
          the same user on the same variant without needing cookies for
          privacy reasons.
-      3. Default → 'bookaway'.
+      3. Default → first variant (`_AB_VARIANTS[0]`, currently 'busticket4').
 
     `response_setter`, if provided, is called with (key, value) to write
     the chosen variant back as a cookie so the next request skips the
