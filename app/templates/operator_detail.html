@@ -40,6 +40,11 @@
 }
 </script>
 {% endif %}
+{% if routes %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"{{ _('operator.faq.q_routes').format(name=operator.name) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('operator.faq.a_routes').format(name=operator.name, routes=total_routes, trips=total_trips) }}"}}{% if price_min and price_max %},{"@type":"Question","name":"{{ _('operator.faq.q_price').format(name=operator.name) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('operator.faq.a_price').format(name=operator.name, min=price_min, max=price_max) }}"}}{% endif %}{% if countries_served %},{"@type":"Question","name":"{{ _('operator.faq.q_countries').format(name=operator.name) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('operator.faq.a_countries').format(name=operator.name, countries=(['Srbija'] + countries_served)|join(', ')) }}"}}{% endif %}]}
+</script>
+{% endif %}
 {% endblock %}
 
 {% block content %}

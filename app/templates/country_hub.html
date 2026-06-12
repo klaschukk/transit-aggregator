@@ -28,6 +28,11 @@
 </script>
 {% endif %}
 {% endif %}
+{% if routes %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"{{ _('country.faq.q_travel').format(country=country_name) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('country.faq.a_travel').format(country=country_name, routes=total_routes) }}"}}{% if min_price_rsd %},{"@type":"Question","name":"{{ _('country.faq.q_price').format(country=country_name) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('country.faq.a_price').format(country=country_name, min=min_price_rsd) }}"}}{% endif %}]}
+</script>
+{% endif %}
 {% endblock %}
 
 {% block content %}
