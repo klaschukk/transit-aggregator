@@ -1,11 +1,15 @@
 #!/bin/bash
 # Nightly data refresh pipeline for Transit Serbia.
-# Runs all scrapers, rebuilds DB, restarts service.
-# Cron: 0 2 * * * /home/klaschuk/transit/scripts/nightly_refresh.sh
+# Runs ALL scrapers (city + intercity + trains), rebuilds DB, restarts.
+# This is the FULL manual pipeline (~30-60 min, service stopped while
+# scraping). The light nightly cron is scripts/run_enrich_night.sh.
 
 set -o pipefail
 
-PROJECT=/home/klaschuk/transit
+# Resolve the project root from the script location so the same file
+# works on any box (the old hardcoded /home/klaschuk/transit silently
+# broke the box where the checkout lives in /root/klaschuk/...).
+PROJECT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 VENV=$PROJECT/venv/bin/python3
 LOG=$PROJECT/logs/nightly_$(date +%Y%m%d).log
 STARTED_TS=$(date +%s)
@@ -65,7 +69,7 @@ sentry_ping() {
 }
 
 # Stop service to release DB lock
-sudo systemctl stop transit
+systemctl stop transit
 sleep 2
 
 cd "$PROJECT" || exit 1
@@ -91,7 +95,7 @@ BUILD_STATUS=$?
 
 if [ $BUILD_STATUS -ne 0 ]; then
   echo "FATAL: build_db failed (exit $BUILD_STATUS)" >> "$LOG"
-  sudo systemctl start transit
+  systemctl start transit
   echo "FAIL $(date)" > "$PROJECT/logs/last_refresh.txt"
   write_marker "fail"
   sentry_ping "nightly_refresh: build_db failed exit=$BUILD_STATUS" fatal
@@ -134,18 +138,18 @@ $VENV -u data/pipelines/refresh_bt4_lineids.py >> "$LOG" 2>&1 \
   || echo "WARN: refresh_bt4_lineids failed ($?)" >> "$LOG"
 
 # Start service
-sudo systemctl start transit
+systemctl start transit
 sleep 3
 
 # Health check
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 http://127.0.0.1:5000/health)
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 http://127.0.0.1:8000/health)
 echo "Health check: $STATUS" >> "$LOG"
 
 if [ "$STATUS" != "200" ]; then
   echo "WARN: Service not healthy after restart" >> "$LOG"
-  sudo systemctl restart transit
+  systemctl restart transit
   sleep 3
-  STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 http://127.0.0.1:5000/health)
+  STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 http://127.0.0.1:8000/health)
   echo "Retry health check: $STATUS" >> "$LOG"
   if [ "$STATUS" != "200" ]; then
     sentry_ping "nightly_refresh: /health still not 200 after restart (got $STATUS)" error

@@ -61,7 +61,7 @@ deploy:
          venv/bin/python scripts/minify_css.py && \
          systemctl restart transit && \
          sleep 3 && \
-         curl -sf http://127.0.0.1:8000/health | python3 -c \"import sys,json; d=json.load(sys.stdin); print('Deploy OK, status:', d['transit']['status'])\""
+         curl -sf http://127.0.0.1:8000/health | python3 -c \"import sys,json; d=json.load(sys.stdin); print('Deploy OK, status:', d['status'], 'version:', d.get('version'))\""
   environment:
     name: production
     url: https://prevozni.com
