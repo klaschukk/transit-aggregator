@@ -202,6 +202,22 @@
 
 </div>
 
+{# Far-destination guides (Phase 2) — the indexable internal-link path to
+   /voznja/<hub>-do-<far>/ pages (sitemap-far.xml is the other). Handler
+   passes only pairs with a cached composed itinerary, i.e. pages that are
+   actually indexable; nothing renders while the cache is empty. #}
+{% if far_guides %}
+<section class="see-also" id="farGuides">
+  <h2 class="see-also__title">{{ _('dest.far_heading') }}</h2>
+  <p class="page-subtitle">{{ _('dest.far_sub') }}</p>
+  <div class="see-also__list">
+    {% for fg in far_guides %}
+    <a href="{{ lang_prefix }}/voznja/{{ fg.slug }}/" class="see-also__link">{{ fg.from }} → {{ fg.to }}</a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
 <!-- See-also: catalogue + domestic shortcuts -->
 <section class="see-also">
   <h2 class="see-also__title">{{ _('see_also.title') }}</h2>

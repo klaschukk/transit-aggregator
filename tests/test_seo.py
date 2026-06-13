@@ -128,11 +128,14 @@ def test_no_none_in_content(client, url):
 # 'pairs' is deprecated: every indexable /voznja/ pair canonicalises onto its
 # /rute/ owner (already in sitemap-routes), so the pairs shard is intentionally
 # empty and dropped from the index — see test_pairs_shard_deprecated_and_empty.
+# 'far' holds far-destination /voznja guides with a cached composed itinerary
+# (the only /voznja URLs that are self-canonical) — see test_far_routes.py.
 _SHARDS = [
     "/sitemap-core.xml",
     "/sitemap-routes.xml",
     "/sitemap-lines.xml",
     "/sitemap-stops.xml",
+    "/sitemap-far.xml",
 ]
 
 

@@ -156,7 +156,7 @@ def test_voznja_far_guide_indexable(client, app, monkeypatch):
         'total_duration': '~13h', 'price_from_eur': 500, 'tips': ['viza'],
     }
     monkeypatch.setattr(intercity, '_compose_far_itinerary',
-                        lambda info, fd, td, lang: fake)
+                        lambda info, lang: fake)
     r = client.get('/voznja/beograd-do-bangkok/')
     assert r.status_code == 200
     html = r.get_data(as_text=True)
@@ -170,10 +170,103 @@ def test_voznja_thin_pair_stays_noindex(client, app, monkeypatch):
     with app.app_context():
         if not db_ready():
             pytest.skip('transit.duckdb not present in this environment')
-    # A far pair whose itinerary can't be composed → no far block, stays thin.
+    # A far pair with no CACHED itinerary → no far block, stays thin. The
+    # request path is cache-only (never calls Groq), so "uncached" is the
+    # only way a far pair renders thin.
     from app.routes import intercity
     monkeypatch.setattr(intercity, '_compose_far_itinerary',
-                        lambda info, fd, td, lang: None)
+                        lambda info, lang: None)
     r = client.get('/voznja/beograd-do-bangkok/')
     assert r.status_code == 200
     assert 'noindex' in r.get_data(as_text=True).lower()
+
+
+def test_compose_far_itinerary_is_cache_only(app, monkeypatch):
+    """The request path must NEVER hit Groq: uncached pair → None, no model
+    call — indexability stays stable across crawls and Googlebot never waits
+    out the model timeout."""
+    from app import ai_compose, analytics_db
+    from app.routes.intercity import _compose_far_itinerary
+
+    def _boom(*a, **k):
+        raise AssertionError('request path called Groq')
+
+    monkeypatch.setattr(ai_compose, 'compose_itinerary_via_groq', _boom)
+    monkeypatch.setattr(analytics_db, 'get_composed_route', lambda pk, lang: None)
+    with app.app_context():
+        assert _compose_far_itinerary({'pair_key': 'beograd:bangkok'}, 'sr') is None
+
+
+# ── sitemap-far.xml (Phase 2 discovery path) ─────────────────────────────
+
+def _fake_far_rows(rows):
+    """analytics_db.query stub: serve `rows` for the composed_routes SELECT,
+    empty for anything else — exercises the real feasibility filter in
+    analytics_db.composed_far_pairs instead of stubbing it out."""
+    def _q(sql, params=None):
+        return rows if 'composed_routes' in sql else []
+    return _q
+
+
+def test_sitemap_far_lists_cached_pair_with_cache_date(client, monkeypatch):
+    from app import analytics_db
+    rows = [
+        {'pair_key': 'beograd:bangkok', 'from_city': 'Beograd',
+         'to_city': 'Bangkok',
+         'payload': json.dumps({'feasible': True, 'legs': [{'mode': 'flight'}]}),
+         'created_at': '2026-06-10T12:00:00Z'},
+        # Cached but INFEASIBLE (model said "impossible"; cached so Groq isn't
+        # re-asked) → page renders noindex → must stay out of the sitemap.
+        {'pair_key': 'beograd:pjongjang', 'from_city': 'Beograd',
+         'to_city': 'Pjongjang',
+         'payload': json.dumps({'feasible': False, 'legs': []}),
+         'created_at': '2026-06-11T12:00:00Z'},
+    ]
+    monkeypatch.setattr(analytics_db, 'query', _fake_far_rows(rows))
+    r = client.get('/sitemap-far.xml')
+    assert r.status_code == 200
+    xml = r.get_data(as_text=True)
+    # cached + feasible → listed, lastmod = cache date (not DB mtime)
+    assert '/voznja/beograd-do-bangkok/' in xml
+    assert '<lastmod>2026-06-10</lastmod>' in xml
+    # cached + infeasible → not listed
+    assert 'pjongjang' not in xml
+    # never cached at all → not listed
+    assert 'phuket' not in xml
+
+
+def test_sitemap_far_empty_without_cache(client, monkeypatch):
+    from app import analytics_db
+    monkeypatch.setattr(analytics_db, 'query', _fake_far_rows([]))
+    r = client.get('/sitemap-far.xml')
+    assert r.status_code == 200
+    body = r.get_data(as_text=True)
+    assert '<urlset' in body
+    assert '/voznja/' not in body
+
+
+def test_sitemap_index_advertises_far_shard(client):
+    xml = client.get('/sitemap.xml').get_data(as_text=True)
+    assert '/sitemap-far.xml' in xml
+
+
+def test_destinations_links_cached_far_guides(client, app, monkeypatch):
+    """Internal-link discovery path: /destinacije/ must link far guides that
+    have a cached itinerary (Google needs a crawl path besides the sitemap)."""
+    from app.db import db_ready
+    with app.app_context():
+        if not db_ready():
+            pytest.skip('transit.duckdb not present in this environment')
+    from app import analytics_db
+    rows = [
+        {'pair_key': 'beograd:bangkok', 'from_city': 'Beograd',
+         'to_city': 'Bangkok',
+         'payload': json.dumps({'feasible': True, 'legs': [{'mode': 'flight'}]}),
+         'created_at': '2026-06-10T12:00:00Z'},
+    ]
+    monkeypatch.setattr(analytics_db, 'query', _fake_far_rows(rows))
+    r = client.get('/destinacije/')
+    assert r.status_code == 200
+    html = r.get_data(as_text=True)
+    assert '/voznja/beograd-do-bangkok/' in html
+    assert 'Beograd → Bangkok' in html

@@ -3,10 +3,25 @@
 Composes a curated seed of (SR hub) × (far destination) pairs via Groq and
 stores them in the analytics `composed_routes` cache, so the indexable
 `/voznja/<sr>-do-<far>/` guide pages render instantly and show up in
-`sitemap-pairs.xml`. Idempotent — already-cached pairs are skipped, so it is
+`sitemap-far.xml`. Idempotent — already-cached pairs are skipped, so it is
 safe to re-run (e.g. after adding cities to bookaway_far.json).
 
-Run AFTER deploy (the route/template that render these pages must be live):
+This script is the ONLY Groq warm-up path for these pages: the city_pair
+request handler is cache-only by design (Googlebot must never wait ~20s for
+a model call, and indexability must not flip with model availability).
+
+WHY ALL THREE LANGUAGES (hreflang consistency):
+    base.html unconditionally emits <link rel="alternate" hreflang="sr|en|ru">
+    on every page — it has no per-page notion of "this variant exists". A far
+    guide whose itinerary is cached only for sr would therefore advertise
+    /en/ + /ru/ alternates that render as noindex thin pages — an
+    inconsistent hreflang cluster in Google's eyes. Rather than making
+    base.html's hreflang conditional (invasive, affects every template), we
+    pre-generate ALL of SUPPORTED_LANGS here so every advertised alternate
+    really is an indexable page. If a language is ever dropped from the seed,
+    base.html must learn per-page hreflang first.
+
+Run AFTER deploy, on the prod box (the cache lives in the analytics DB there):
 
     GROQ_API_KEY=... ./venv/bin/python scripts/pregen_far_routes.py
 """
@@ -20,9 +35,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import analytics_db, create_app  # noqa: E402
 from app.affiliates.partners import FAR_DESTINATIONS  # noqa: E402
 from app.ai_compose import compose_itinerary_via_groq  # noqa: E402
+from app.i18n import SUPPORTED_LANGS  # noqa: E402
 from app.slug import slugify_serbian as _sl  # noqa: E402
-
-LANG = 'sr'  # canonical /voznja language
 
 # Top origins (where most of our users start) × marquee far destinations
 # (highest search intent). Re-run with a longer list to widen coverage.
@@ -51,22 +65,25 @@ def main() -> None:
                 if not meta:
                     continue
                 pair_key = f'{hub_slug}:{far_slug}'
-                if analytics_db.get_composed_route(pair_key, LANG):
-                    skipped += 1
-                    continue
                 disp = meta.get('display', far_slug.replace('-', ' ').title())
-                data = compose_itinerary_via_groq(hub, disp, LANG, key, timeout=25)
-                if data and data.get('feasible'):
-                    analytics_db.upsert_composed_route(
-                        pair_key, LANG, hub, disp,
-                        json.dumps(data, ensure_ascii=False),
-                    )
-                    ok += 1
-                    print(f'OK   {pair_key}')
-                else:
-                    failed += 1
-                    print(f'FAIL {pair_key}')
-                time.sleep(0.4)  # be gentle on the Groq endpoint
+                # All langs per pair: base.html advertises hreflang sr/en/ru
+                # unconditionally, so every variant must be a real page.
+                for lang in SUPPORTED_LANGS:
+                    if analytics_db.get_composed_route(pair_key, lang):
+                        skipped += 1
+                        continue
+                    data = compose_itinerary_via_groq(hub, disp, lang, key, timeout=25)
+                    if data and data.get('feasible'):
+                        analytics_db.upsert_composed_route(
+                            pair_key, lang, hub, disp,
+                            json.dumps(data, ensure_ascii=False),
+                        )
+                        ok += 1
+                        print(f'OK   {pair_key} [{lang}]')
+                    else:
+                        failed += 1
+                        print(f'FAIL {pair_key} [{lang}]')
+                    time.sleep(0.4)  # be gentle on the Groq endpoint
         print(f'\nDone: {ok} composed, {skipped} cached, {failed} failed')
 
 

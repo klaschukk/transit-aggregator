@@ -485,6 +485,30 @@ def get_composed_route(pair_key: str, lang: str) -> str | None:
     return rows[0]['payload']
 
 
+def composed_far_pairs(lang: str) -> list[dict]:
+    """Far pairs with a FEASIBLE cached itinerary for `lang`, sorted by
+    pair_key. Shape: [{'pair_key','from_city','to_city','created_at'}].
+
+    Infeasible rows are cached too (so Groq isn't re-asked about impossible
+    trips) but are filtered out here: their /voznja pages render no itinerary
+    and stay noindex, so the sitemap and internal links must skip them."""
+    import json as _json
+    out = []
+    for row in query(
+        "SELECT pair_key, from_city, to_city, payload, created_at "
+        "FROM composed_routes WHERE lang = ? ORDER BY pair_key", [lang],
+    ):
+        try:
+            data = _json.loads(row.get('payload') or '')
+        except ValueError:
+            continue
+        if not (isinstance(data, dict) and data.get('feasible')):
+            continue
+        out.append({k: row.get(k)
+                    for k in ('pair_key', 'from_city', 'to_city', 'created_at')})
+    return out
+
+
 def upsert_composed_route(
     pair_key: str, lang: str, from_city: str, to_city: str, payload: str,
 ) -> None:

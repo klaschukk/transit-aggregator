@@ -233,12 +233,33 @@ def destinations():
                 )
             """, ttl=3600)
             total_cities = cities_row['n'] if cities_row else 0
+
+    # Far-destination guides (Phase 2): the ONLY indexable internal links to
+    # /voznja/<hub>-do-<far>/ pages. Listed only when the composed itinerary
+    # is already cached — uncached pairs render noindex, and linking those
+    # from a hub page would just leak crawl budget into thin pages. The same
+    # cached-only set feeds /sitemap-far.xml, so links and sitemap agree.
+    from app import analytics_db
+    from app.i18n import DEFAULT_LANG
+    far_guides = []
+    for row in analytics_db.composed_far_pairs(DEFAULT_LANG):
+        pk = row.get('pair_key') or ''
+        if ':' not in pk:
+            continue
+        a, b = pk.split(':', 1)
+        far_guides.append({
+            'slug': f'{a}-do-{b}',
+            'from': row.get('from_city') or a.replace('-', ' ').title(),
+            'to': row.get('to_city') or b.replace('-', ' ').title(),
+        })
+
     return render_template(
         'destinations.html',
         countries_meta=countries_meta,
         total_intercity_routes=total_intercity_routes,
         total_cities=total_cities,
         countries_count=len(_COUNTRY_HUBS),
+        far_guides=far_guides,
     )
 
 

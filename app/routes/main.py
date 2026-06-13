@@ -664,8 +664,8 @@ def health():
 
 # ── Sitemap helpers ───────────────────────────────────────────────────
 #
-# Sitemap is split into one index + five shards (core / routes / pairs /
-# lines / stops). Google reports indexation per-sitemap, so separate shards
+# Sitemap is split into one index + five shards (core / routes / lines /
+# stops / far). Google reports indexation per-sitemap, so separate shards
 # let us see which content type is stuck in "Discovered not indexed"
 # instead of staring at one aggregate number. Each shard is also smaller
 # and refetched independently when its content changes — nightly data
@@ -952,7 +952,7 @@ def sitemap_index():
     # non-canonical/noindex URLs (a mixed signal Google should not be fed
     # via the sitemap). /rute/ pages cover the same content. The
     # /sitemap-pairs.xml route is kept (empty urlset) for legacy submissions.
-    shards = ['core', 'routes', 'lines', 'stops']
+    shards = ['core', 'routes', 'lines', 'stops', 'far']
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for shard in shards:
@@ -1067,6 +1067,40 @@ def sitemap_pairs():
     they have their own shard, sitemap-far.xml, which lists only pairs with a
     cached composed itinerary (i.e. actually indexable pages)."""
     return _urlset([])
+
+
+@main_bp.route('/sitemap-far.xml')
+def sitemap_far():
+    """Far-destination guides (/voznja/<hub>-do-<far>/, Phase 2).
+
+    Lists ONLY pairs whose composed itinerary is already cached in the
+    analytics `composed_routes` table (default lang — that's the language of
+    the un-prefixed <loc> URL). A cached itinerary is exactly what makes the
+    page render real content and go self-canonical/indexable; uncached pairs
+    render noindex, and submitting noindex URLs via the sitemap is a mixed
+    signal Google punishes with "Excluded by noindex" noise.
+
+    The cache is warmed by scripts/pregen_far_routes.py (seed) and grows
+    organically via /api/compose-route (the /pretraga fallback). The request
+    handler itself never composes (cache-only), so membership in this shard
+    is stable across crawls.
+
+    Per-URL lastmod = the cache row's created_at — the page content changes
+    only when the cached itinerary does."""
+    from app import analytics_db
+    from app.i18n import DEFAULT_LANG
+    base = current_app.config['BASE_URL']
+    default_mtime = _sitemap_lastmod()
+    url = _build_url_fn(base, default_mtime)
+    pages: list[str] = []
+    for row in analytics_db.composed_far_pairs(DEFAULT_LANG):
+        pk = row.get('pair_key') or ''
+        if ':' not in pk:
+            continue
+        a, b = pk.split(':', 1)
+        mod = (row.get('created_at') or '')[:10] or default_mtime
+        pages.append(url(f'/voznja/{a}-do-{b}/', 'monthly', '0.5', mod=mod))
+    return _urlset(pages)
 
 
 @main_bp.route('/sitemap-lines.xml')

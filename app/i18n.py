@@ -1694,10 +1694,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'ai_route.mode_ferry': {'sr': 'Trajekt', 'en': 'Ferry', 'ru': 'Паром'},
     'ai_route.mode_taxi': {'sr': 'Taksi', 'en': 'Taxi', 'ru': 'Такси'},
     'ai_route.mode_metro': {'sr': 'Metro', 'en': 'Metro', 'ru': 'Метро'},
+    # Neutral "{from} → {to}: …?" shape — gluing "Kako stići" + city names
+    # produced ungrammatical sr (no preposition/case: "Kako stići Beograd →
+    # Bangkok?"); the colon form needs no declension in any language.
     'ai_route.faq.q_how': {
-        'sr': 'Kako stići',
-        'en': 'How to get from',
-        'ru': 'Как добраться',
+        'sr': '{from_city} → {to_city}: kako stići?',
+        'en': '{from_city} → {to_city}: how to get there?',
+        'ru': '{from_city} → {to_city}: как добраться?',
     },
     'ai_route.faq.q_time': {
         'sr': 'Koliko traje put?',
@@ -3653,6 +3656,17 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Ближние направления — от ~10€: Нови-Сад, Ниш, Суботица, Крагуевац. '
               'Из региональных выгоднее всего Сараево, Скопье и Баня-Лука (20–30€). '
               'Летние рейсы на побережье Черногории дороже (30–45€) из-за спроса — ранняя бронь снижает цену.',
+    },
+    # ── far-destination guide links (Phase 2) ──
+    'dest.far_heading': {
+        'sr': 'Daleke destinacije',
+        'en': 'Far destinations',
+        'ru': 'Дальние направления',
+    },
+    'dest.far_sub': {
+        'sr': 'Vodiči korak po korak za putovanja van Evrope — prevoz do aerodroma, let i lokalni transfer na cilju.',
+        'en': 'Step-by-step guides for trips beyond Europe — transport to the airport, the flight and a local transfer at the destination.',
+        'ru': 'Пошаговые гайды для поездок за пределы Европы — транспорт до аэропорта, перелёт и местный трансфер на месте.',
     },
 
     # ── home FAQ (only) ──

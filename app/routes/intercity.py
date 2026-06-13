@@ -266,32 +266,33 @@ def route_detail(slug: str):
                            page_context_json=page_context_json)
 
 
-def _compose_far_itinerary(info: dict, from_disp: str, to_disp: str, lang: str):
+def _compose_far_itinerary(info: dict, lang: str):
     """Cached AI itinerary for a far pair (e.g. Beograd→Bangkok), or None.
-    Composed via Groq once, then served from the analytics cache — so the
-    indexable /voznja far page renders the same content on every crawl (incl.
-    Googlebot) without hammering the model. Returns None when the model is
-    unavailable or the trip isn't feasible, in which case the page stays a
-    thin (noindex) empty pair."""
+
+    CACHE-ONLY by design: the request path never calls Groq. A synchronous
+    compose here would (a) make Googlebot wait up to the model timeout (~20s)
+    and (b) flip the page between indexable and noindex depending on whether
+    Groq was up at crawl time. Serving strictly from the cache keeps the
+    response instant and the indexability stable across crawls.
+
+    The cache is warmed by scripts/pregen_far_routes.py (curated seed) and
+    grows via /api/compose-route (the async /pretraga fallback, where a user
+    is actually waiting and a spinner is acceptable).
+
+    Returns None when no FEASIBLE itinerary is cached — the page then stays
+    a thin (noindex) empty pair with the plain Bookaway CTA."""
     import json as _json
     from app import analytics_db
     cached = analytics_db.get_composed_route(info['pair_key'], lang)
-    if cached:
-        try:
-            return _json.loads(cached)
-        except ValueError:
-            return None
-    from app.ai_compose import compose_itinerary_via_groq
-    data = compose_itinerary_via_groq(
-        from_disp, to_disp, lang, current_app.config.get('GROQ_API_KEY', ''),
-    )
-    if data and data.get('feasible'):
-        analytics_db.upsert_composed_route(
-            info['pair_key'], lang, from_disp, to_disp,
-            _json.dumps(data, ensure_ascii=False),
-        )
-        return data
-    return None
+    if not cached:
+        return None
+    try:
+        data = _json.loads(cached)
+    except ValueError:
+        return None
+    if not (isinstance(data, dict) and data.get('feasible')):
+        return None
+    return data
 
 
 @intercity_bp.route('/voznja/<from_city>-do-<to_city>/')
@@ -393,12 +394,9 @@ def city_pair(from_city: str, to_city: str):
             LIMIT 8
         """, [route['to_city'], route['from_city']], ttl=3600)
 
-    from_disp = from_city.replace('-', ' ').title()
-    to_disp = to_city.replace('-', ' ').title()
-
     # Far-destination guide (Phase 2): no local route, but the destination is a
-    # place Bookaway sells (Asia, Middle East, ...). Compose a real itinerary
-    # server-side (cached) so the page carries genuine content and can be
+    # place Bookaway sells (Asia, Middle East, ...). Serve the pre-composed
+    # itinerary from the cache so the page carries genuine content and can be
     # indexed, instead of being a thin empty pair routed to noindex.
     far = None
     far_itinerary = None
@@ -406,9 +404,7 @@ def city_pair(from_city: str, to_city: str):
         from app.ai_compose import far_pair_info
         far = far_pair_info(from_city, to_city)
         if far:
-            far_itinerary = _compose_far_itinerary(
-                far, from_disp, to_disp, getattr(g, 'lang', 'sr'),
-            )
+            far_itinerary = _compose_far_itinerary(far, getattr(g, 'lang', 'sr'))
 
     # Reviews aggregate across both /voznja/ and /rute/ via the canonical
     # route slug — UGC is the property of the pair, not the URL.

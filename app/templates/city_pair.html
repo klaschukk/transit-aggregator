@@ -26,7 +26,7 @@
    results: how to get there, how long, rough cost — from the composed plan. #}
 <script type="application/ld+json">{{ {
   '@context':'https://schema.org','@type':'FAQPage','mainEntity':[
-    {'@type':'Question','name': (_('ai_route.faq.q_how') ~ ' ' ~ from_city ~ ' → ' ~ to_city ~ '?'),
+    {'@type':'Question','name': _('ai_route.faq.q_how').format(from_city=from_city, to_city=to_city),
      'acceptedAnswer':{'@type':'Answer','text': far_itinerary.summary or (_('ai_route.sub'))}},
     {'@type':'Question','name': _('ai_route.faq.q_time'),
      'acceptedAnswer':{'@type':'Answer','text': (far_itinerary.total_duration or _('ai_route.faq.a_varies'))}},
