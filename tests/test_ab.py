@@ -443,3 +443,25 @@ def test_admin_ab_csv_export_headers(admin_client):
     body = r.data.decode()
     # Header row at minimum; data rows are 0 since no events fired in this app.
     assert body.startswith('ts,experiment,variant,event_type,surface,user_seed,value')
+
+
+# ── trip-card conversion polish (added 2026-06-13) ──
+
+
+def test_trip_card_buy_has_aria_label_and_keeps_ab_hooks(client):
+    """The buy CTA carries an aria-label with the price (so screen-reader users
+    hear what they're buying), and the conversion-polish markup must not drop
+    the A/B hooks the experiments depend on."""
+    import re
+    r = client.get('/rute/beograd-novi-sad/')
+    assert r.status_code == 200
+    html = r.get_data(as_text=True)
+    assert 'trip-card__buy' in html
+    # A/B regression guard: cta_copy_v1 + cta_color_v2 hooks survive.
+    assert 'data-ab-cta=' in html
+    assert 'data-ab-color=' in html
+    # Every buy link is labelled; at least one ties the price into the label.
+    labels = re.findall(r'<a class="trip-card__buy[^>]*?aria-label="([^"]*)"', html)
+    assert labels, 'buy buttons must carry an aria-label'
+    assert any('RSD' in lbl for lbl in labels), \
+        'at least one buy CTA aria-label should include the price'

@@ -74,9 +74,14 @@
     </span>
     {% endif %}
     {% if _buy_href %}
+    {# Visible label is the A/B cta_copy_v1 variant; aria-label adds the price so
+       screen-reader users hear what the CTA actually buys (e.g. "Kupi — 1600 RSD").
+       Canonical RSD here regardless of the currency_default_v1 visual toggle. #}
+    {% set _cta_label = buy_label or _cta_variant or 'Kupi' %}
     <a class="trip-card__buy trip-card__buy--{{ _color_variant }}"
        href="{{ _buy_href }}" target="_blank"
        rel="noopener nofollow sponsored"
+       aria-label="{{ _cta_label }}{% if trip.price_rsd %} — {{ trip.price_rsd }} RSD{% endif %}"
        data-partner="{{ _buy_partner }}"
        data-op="{{ trip.operator|default('') }}"
        data-time="{{ trip.departure_time[:5] if trip.departure_time else '' }}"
@@ -84,7 +89,7 @@
        data-surface="{{ surface }}"
        data-ab-cta="{{ _cta_variant }}"
        data-ab-color="{{ _color_variant }}">
-      {{ buy_label or _cta_variant or 'Kupi' }}
+      {{ _cta_label }}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
     </a>
     {% endif %}
