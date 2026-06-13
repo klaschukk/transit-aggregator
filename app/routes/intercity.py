@@ -1,5 +1,5 @@
 import json as _json
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 from flask import Blueprint, render_template, abort, request, redirect, url_for, current_app, g
 from app.db import query, query_one, cached_query, db_ready
@@ -121,6 +121,21 @@ _CITY_TRANSPORT_BY_SLUG: dict[str, str] = {
 }
 
 
+def _belgrade_now_hhmm() -> str:
+    """Current wall-clock time in Serbia as 'HH:MM'. Wrapped so tests can
+    monkeypatch a fixed time (the urgency signal is time-of-day dependent)."""
+    from zoneinfo import ZoneInfo
+    return datetime.now(ZoneInfo('Europe/Belgrade')).strftime('%H:%M')
+
+
+def _departures_left_today(trips: list[dict], now_hhmm: str) -> int:
+    """How many of today's departures are still ahead of `now_hhmm`. 'HH:MM'
+    strings sort lexicographically, so a plain comparison needs no parsing.
+    Honest scarcity — counts real upcoming departures, never invents any."""
+    return sum(1 for t in trips
+               if (t.get('departure_time') or '')[:5] > now_hhmm)
+
+
 @intercity_bp.route('/rute/<slug>/')
 def route_detail(slug: str):
     route = query_one("""
@@ -208,6 +223,12 @@ def route_detail(slug: str):
     price_min = min(prices) if prices else None
     price_max = max(prices) if prices else None
 
+    # Honest "still catchable today" scarcity: count departures left after the
+    # current Serbia time. Only meaningful on the today tab; the template hides
+    # it once it hits zero so we never show a stale "0 left" or a past time.
+    departures_left = (_departures_left_today(trips, _belgrade_now_hhmm())
+                       if selected_day == 0 else 0)
+
     # Best-option badges: tag a single cheapest / fastest trip so the card
     # can flag the best pick. Only when there's a real spread (>1 trip and
     # min != max) so we never badge a lone trip or badge every card.
@@ -287,6 +308,7 @@ def route_detail(slug: str):
                            operators_on_route=operators_on_route,
                            operator_slugs=operator_slugs,
                            price_min=price_min, price_max=price_max,
+                           departures_left=departures_left,
                            reverse_slug=reverse_slug,
                            reviews=reviews_list, reviews_agg=reviews_agg,
                            city_transport_links=city_transport_links,

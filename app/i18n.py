@@ -1748,6 +1748,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     # ── Day labels ──
     'day.today': {'sr': 'Danas', 'en': 'Today', 'ru': 'Сегодня'},
     'day.tomorrow': {'sr': 'Sutra', 'en': 'Tomorrow', 'ru': 'Завтра'},
+    'route.departures_left': {'sr': 'Još danas', 'en': 'Left today', 'ru': 'Ещё сегодня'},
     'day.day_after': {'sr': 'Prekosutra', 'en': 'Day after', 'ru': 'Послезавтра'},
 
     'route.similar': {'sr': 'Slične rute iz', 'en': 'Similar routes from', 'ru': 'Похожие маршруты из'},

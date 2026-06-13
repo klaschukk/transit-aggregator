@@ -288,3 +288,41 @@ def test_json_ld_valid(client, url):
     for s in schemas:
         parsed = json.loads(s)
         assert "@context" in parsed
+
+
+# ── g) "Departures left today" honest urgency signal ──────────────────
+
+
+def test_departures_left_today_counts_only_upcoming():
+    """Pure helper: counts real departures still ahead of now (HH:MM compare),
+    ignoring blanks. No invented scarcity."""
+    from app.routes.intercity import _departures_left_today
+    trips = [{'departure_time': '06:00'}, {'departure_time': '12:30:00'},
+             {'departure_time': '21:00'}, {'departure_time': ''}, {}]
+    assert _departures_left_today(trips, '10:00') == 2   # 12:30 + 21:00
+    assert _departures_left_today(trips, '23:00') == 0   # all gone
+    assert _departures_left_today(trips, '00:00') == 3   # all ahead, blanks skipped
+
+
+def test_route_detail_shows_departures_left_today(client, monkeypatch):
+    """The today tab shows an honest "Left today" count; switching to tomorrow
+    hides it (the signal is today-only)."""
+    from app.routes import intercity
+    monkeypatch.setattr(intercity, '_belgrade_now_hhmm', lambda: '00:01')
+    r = client.get('/en/rute/beograd-novi-sad/')
+    if r.status_code != 200:
+        pytest.skip('route page unavailable (no transit.duckdb in this env)')
+    assert 'Left today' in r.data.decode()
+    tomorrow = client.get('/en/rute/beograd-novi-sad/?dan=1').data.decode()
+    assert 'Left today' not in tomorrow
+
+
+def test_route_detail_hides_departures_left_when_day_over(client, monkeypatch):
+    """Late at night (after the last bus) the chip disappears — never a stale
+    "0 left" or a past departure time."""
+    from app.routes import intercity
+    monkeypatch.setattr(intercity, '_belgrade_now_hhmm', lambda: '23:59')
+    r = client.get('/en/rute/beograd-novi-sad/')
+    if r.status_code != 200:
+        pytest.skip('route page unavailable (no transit.duckdb in this env)')
+    assert 'Left today' not in r.data.decode()
