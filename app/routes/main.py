@@ -209,6 +209,12 @@ def search():
                 (o for o in offers if o.partner_key == 'bookaway'), None,
             )
 
+    # Search results are noindex (header below). Mirror it into g.meta_robots so
+    # the in-page <meta robots> agrees AND the ad_slot macro suppresses ads here:
+    # an empty-results page carrying an ad is an AdSense policy risk, and Google
+    # discourages ads on search-results pages regardless.
+    from flask import g
+    g.meta_robots = 'noindex, nofollow'
     resp = make_response(render_template('search_results.html',
                                          results=results, from_city=from_city,
                                          to_city=to_city, datum=date,

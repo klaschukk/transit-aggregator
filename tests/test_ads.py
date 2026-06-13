@@ -289,3 +289,52 @@ def test_ads_css_collapses_unfilled_slots(client):
     # Both the empty <ins> and the wrapper/label collapse must be present.
     assert 'ins.adsbygoogle[data-ad-status="unfilled"]{display:none' in css
     assert '.ad-slot__label{display:none' in css
+
+
+# ── 7. No ads on noindex / thin pages (added 2026-06-13) ────────────────
+
+# The real slot container — distinct from the JS string 'ad-slot__ins' and the
+# mobile-anchor '.ad-slot__label' that appear on every page regardless.
+_AD_SLOT_DIV = '<div class="ad-slot ad-slot--'
+
+
+def test_ad_slot_macro_respects_noindex(app):
+    """The macro renders an ad on an indexable page but suppresses it when the
+    page is marked noindex — AdSense forbids ads on thin/no-content pages."""
+    from flask import g, render_template_string
+    tpl = ("{% from '_partials/_ad_slot.html' import ad_slot with context %}"
+           "{{ ad_slot('home_top') }}")
+    orig_id = app.config.get('ADSENSE_ID', '')
+    orig_slots = dict(app.config.get('ADSENSE_SLOTS', {}))
+    try:
+        app.config['ADSENSE_ID'] = 'ca-pub-1234567890'
+        app.config['ADSENSE_SLOTS'] = {'home_top': '999'}
+        with app.test_request_context('/'):
+            g.meta_robots = 'index, follow'
+            assert 'ad-slot' in render_template_string(tpl)
+        with app.test_request_context('/'):
+            g.meta_robots = 'noindex, follow'
+            assert 'ad-slot' not in render_template_string(tpl)
+    finally:
+        app.config['ADSENSE_ID'] = orig_id
+        app.config['ADSENSE_SLOTS'] = orig_slots
+
+
+def test_no_ads_on_search_results_page(client, app):
+    """/pretraga is noindex (search results) → no ad unit, even with AdSense on
+    and full consent. Google discourages ads on search-results pages."""
+    orig_id = app.config.get('ADSENSE_ID', '')
+    orig_slots = dict(app.config.get('ADSENSE_SLOTS', {}))
+    try:
+        app.config['ADSENSE_ID'] = 'ca-pub-1234567890'
+        app.config['ADSENSE_SLOTS'] = {**orig_slots, 'search_mid': '999'}
+        client.set_cookie(key='cookie_consent', value='all',
+                          path='/', domain='localhost')
+        r = client.get('/pretraga/?od=Beograd&do=Beograd')
+        assert r.status_code == 200
+        body = r.data.decode()
+        assert _AD_SLOT_DIV not in body, 'ad unit must not render on noindex search page'
+        assert 'noindex' in body.split('</head>')[0]  # meta robots is noindex
+    finally:
+        app.config['ADSENSE_ID'] = orig_id
+        app.config['ADSENSE_SLOTS'] = orig_slots

@@ -17,7 +17,11 @@
 #}
 
 {%- macro ad_slot(slot_key, format='responsive', desktop_only=False, label=True, lazy=True) -%}
-{%- if config.ADSENSE_ID -%}
+{# Never serve ads on a page we tell Google not to index: those are the thin /
+   low-content surfaces (route with no priced trips, empty search results, …),
+   exactly where AdSense policy forbids ads. Suppressing here protects the whole
+   account. meta_robots comes from the context processor (g.meta_robots). #}
+{%- if config.ADSENSE_ID and 'noindex' not in (meta_robots|default('')) -%}
 {%- set slot_id = config.get('ADSENSE_SLOTS', {}).get(slot_key, '') -%}
 {%- set _consent = request.cookies.get('cookie_consent', '') -%}
 {%- set _npa = (_consent != 'all') -%}
