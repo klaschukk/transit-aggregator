@@ -1,7 +1,7 @@
 #!/bin/bash
 # Performance regression gate — runs in nightly cron.
 # Measures gzipped transfer size of key pages and fails (exit 1 + Telegram alert)
-# if any exceeds its budget. Budgets are set from perf-baseline.md with +30%
+# if any exceeds its budget. Budgets are set from docs/90_archive/06_tech/perf-baseline.md with +30%
 # headroom so normal content growth doesn't page us.
 #
 # Note: budgets are GZIPPED bytes (what the client actually downloads), not the

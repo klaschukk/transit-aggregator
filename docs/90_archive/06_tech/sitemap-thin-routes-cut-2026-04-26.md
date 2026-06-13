@@ -1,5 +1,10 @@
 # Sitemap thin-routes cut — 2026-04-26 — **STOPPED, no cut shipped**
 
+> **Decision record, still in force (as of 2026-06):** do NOT cut routes
+> from the sitemap by trip-count — verification showed they are not thin.
+> (The pairs shard was later removed in June 2026 for a different reason:
+> duplicate content vs `/rute/`.)
+
 The plan was to drop 273 routes with <4 priced trips from
 `/sitemap-routes.xml` (and its pair counterpart) on the assumption
 that they'd be thin and therefore index-poison. The prompt's own

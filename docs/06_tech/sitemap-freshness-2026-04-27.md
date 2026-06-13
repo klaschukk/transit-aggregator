@@ -173,3 +173,34 @@ $ for u in routes pairs lines stops; do
   drop the source-key from `_source_mtimes()` when its last run
   failed, so a partial failure shows up as "URL stayed at last-good
   date" instead of "URL bumped despite no real change".
+
+## Follow-up status (folded in from the 2026-04-27 follow-up doc)
+
+All three follow-ups above **shipped** the same week (details archived in
+`docs/90_archive/06_tech/sitemap-freshness-followup-2026-04-27.md`):
+
+1. **Per-row `scraped_at` stamps** in scraper JSON for the three
+   highest-volume scrapers (`scrape_intercity`, `scrape_lasta`,
+   `scrape_srbvoz`) — commit `dee76c7`. Stamps land in JSON only; no DB
+   consumer yet.
+2. **Per-scraper success/failure tracking** — `scripts/nightly_refresh.sh`
+   records each scraper's exit code into `last_refresh.json` under
+   `scrapers`; `/health` surfaces failures as `nightly.failed_scrapers`
+   and flips status to `degraded` — commit `fa3a7e2`.
+3. **Snapshot-based data-change detection** — `scripts/data_snapshot.py`
+   writes nightly `data_snapshots` rows (operator_routes, route_trips,
+   city_lines, city_stops) into `analytics.duckdb`;
+   `analytics_db.diff_snapshots(kind)` diffs the latest two dates —
+   commit `685a530`.
+
+Still deferred (carried over from the follow-up doc, valid as of 2026-06):
+
+- **`updated_at` column on `trips`** — would let `_source_mtimes()` switch
+  from file mtime to `max(updated_at)` per row; blocked on `build_db.py`
+  schema changes.
+- **`_source_mtimes()` consults the `scrapers` field** — drop a source-key
+  when its scraper failed; current self-healing (stale mtime → stale
+  lastmod) is good enough until a real partial-failure incident.
+- **`/health` surface for snapshot deltas** — once enough days of data
+  exist, surface "today's biggest mover" so mass data loss is visible
+  without running `diff_snapshots` by hand.

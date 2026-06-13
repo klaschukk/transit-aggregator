@@ -77,7 +77,7 @@ def test_no_eager_map_script_on_map_pages(client):
 
 
 # ── Mobile regression gates ────────────────────────────────────────────────
-# Lock in the mobile-pass fixes from docs/06_tech/perf-baseline-mobile.md.
+# Lock in the mobile-pass fixes from docs/90_archive/06_tech/perf-baseline-mobile.md.
 # Each test protects a common regression that the byte-size budget would not
 # catch but that would still break real mobile UX.
 

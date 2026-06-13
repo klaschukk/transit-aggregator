@@ -195,15 +195,18 @@ in a Lighthouse perf score. Where Lighthouse did have headroom
 
 ## Screenshots (mobile emulator, 390×844)
 
-- **Before:** `docs/06_tech/perf-mobile-rute-before.jpg`
-- **After:** `docs/06_tech/perf-mobile-rute-after.jpg`
+- **Before:** `perf-mobile-rute-before.jpg` (same directory)
+- **After:** lost — the committed "after" file turned out to be a
+  byte-identical copy of the before shot (same md5), so no real
+  before/after visual diff exists; the duplicate was removed in the
+  2026-06 docs cleanup.
 
 Extracted from Lighthouse `final-screenshot` on
-`/rute/beograd-novi-sad/`. The visual is virtually identical — the
-fixes are properties you can't see in a still (font-size on focus,
-tap-zone expansion, touch-action) — but the pair serves as a
-no-regression visual baseline for the design system (teal/white Theme C,
-pill search, `.trip-card` layout).
+`/rute/beograd-novi-sad/`. The visual was virtually identical anyway —
+the fixes are properties you can't see in a still (font-size on focus,
+tap-zone expansion, touch-action). The design has since changed
+(Manrope/Golos fonts, bottom-nav v2), so the remaining screenshot no
+longer works as a visual baseline.
 
 ## Files changed
 
@@ -213,7 +216,7 @@ pill search, `.trip-card` layout).
 | `tests/test_perf.py` | Five mobile regression tests: `test_mobile_inputs_avoid_ios_zoom`, `test_form_inputs_have_mobile_keyboard_hints`, `test_map_containers_reserve_height`, `test_ios_safe_area_insets_in_layout`, `test_autocomplete_js_has_early_return`. |
 | `scripts/lighthouse_ci.sh` | New: mobile-Lighthouse wrapper for the 6 canonical pages. Emits a markdown table (score/LCP/CLS/TBT/KB/reqs) and stores per-page JSON in `$OUTDIR` for diff review. `BASE_URL` override for prod runs. |
 | `docs/06_tech/perf-baseline-mobile.md` | This document. |
-| `docs/06_tech/perf-mobile-rute-{before,after}.jpg` | Emulator screenshots extracted from Lighthouse `final-screenshot` for visual diff. |
+| `docs/06_tech/perf-mobile-rute-{before,after}.jpg` | Emulator screenshots extracted from Lighthouse `final-screenshot` for visual diff. ("After" was a byte-identical duplicate of "before" and was deleted in 2026-06; only the before shot survives next to this doc.) |
 | `docs/06_tech/lh-baseline/{before,after}/*.json` | Raw Lighthouse reports for per-audit drill-down. |
 
 ## Deliberately not done
