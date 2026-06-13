@@ -1,6 +1,30 @@
-"""Data quality tests — verify DB has sufficient and valid data."""
+"""Data quality tests — verify DB has sufficient and valid data.
+
+These assert production-scale thresholds (hundreds of routes, thousands of
+stops), so they only make sense against the FULL DuckDB. Run against the tiny
+tests/seed.duckdb (a few rows, used by CI) every threshold would fail — which
+is why CI used to ``--ignore`` this whole file. Instead of hiding the file, the
+autouse guard below SKIPS it when the DB is clearly a seed: the tests stay
+collected and visible, run for real whenever a full DB is present (local dev,
+the prod box), and quietly skip on the seed.
+"""
 
 import pytest
+
+# Below this many city_stops the DB is a seed/fixture, not the real dataset.
+_SEED_STOPS_CEILING = 500
+
+
+@pytest.fixture(autouse=True)
+def _require_full_db(db):
+    """Skip every data-quality test when the DB looks like a seed fixture."""
+    row = db.one("SELECT COUNT(*) AS c FROM city_stops")
+    count = row['c'] if row else 0
+    if count < _SEED_STOPS_CEILING:
+        pytest.skip(
+            f"seed DB ({count} stops < {_SEED_STOPS_CEILING}) "
+            "— data-quality thresholds need the full dataset"
+        )
 
 
 def test_routes_count(db):
