@@ -333,6 +333,10 @@ def create_app(config_name: str | None = None) -> Flask:
                 seed_drafts.seed()
             except Exception as exc:  # nosec — boot must not crash on drafts
                 logger.warning('newsletter draft seed skipped: %s', exc)
+                # A broken analytics-DB migration would otherwise be just one
+                # WARNING while the app boots "healthy" — surface it in Sentry.
+                observability.capture_exception(exc, subsystem='boot',
+                                                phase='seed_drafts')
         # Drop the boot-thread connection so gunicorn's pre-fork workers
         # don't inherit a file descriptor pointing at analytics.duckdb.
         # Without this, every fork() leaves an open R/W lock owned by a
