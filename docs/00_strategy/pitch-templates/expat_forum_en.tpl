@@ -10,8 +10,8 @@ https://prevozni.com (or the specific route page,
 https://prevozni.com/rute/ ).
 
 It aggregates bus and train schedules across Serbia and the Balkans
-(335 routes, 70 operators) with prices in EUR or RSD, departure times,
-and links to buy direct. No registration, no ads, the data refreshes
+(569 routes, 69 operators) with prices in EUR or RSD, departure times,
+and links to buy direct. Free, no registration, the data refreshes
 nightly. It's in English, Serbian and Russian.
 
 For your specific question, the page that matches best is:

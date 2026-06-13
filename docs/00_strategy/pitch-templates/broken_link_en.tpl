@@ -12,8 +12,8 @@ redirects to a squatter page now.
 
 If you're looking for a replacement that covers the same ground, I run
 Prevozni (https://prevozni.com), a free, non-commercial aggregator of
-bus and train schedules for Serbia and the Balkans. 335 intercity
-routes, 70 operators, EN/SR/RU, nightly refresh. The page that maps
+bus and train schedules for Serbia and the Balkans. 569 intercity
+routes, 69 operators, EN/SR/RU, nightly refresh. The page that maps
 closest to the dead link is:
 
   {our_hook}

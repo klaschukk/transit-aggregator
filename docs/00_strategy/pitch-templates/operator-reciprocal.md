@@ -23,7 +23,7 @@ lands, sits on their homepage for years.
 > Ja sam [YOUR_NAME], autor sajta **Prevozni** (prevozni.com) —
 > besplatnog agregatora reda vožnje autobusa i vozova za Srbiju.
 >
-> Red vožnje [OPERATOR_NAME] je već godinu dana deo našeg pretraživača,
+> Red vožnje [OPERATOR_NAME] je deo našeg pretraživača,
 > i zahvaljujući tome korisnici koji traže "[primer pretrage, npr.
 > 'autobus Beograd — Kraljevo']" dolaze na stranicu gde je Vaš
 > prevoznik naveden sa imenom, cenom i vremenom polaska. Primer:

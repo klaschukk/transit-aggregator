@@ -17,9 +17,9 @@ a traveller has to click through four or five carrier websites to
 compare options.
 
 A single aggregator page would let your audience compare in seconds.
-We cover 335 intercity routes, 70 operators, and the data is rendered
-in Serbian, English and Russian. Nightly rescrape, no registration, no
-paywall, no ads.
+We cover 569 intercity routes, 69 operators, and the data is rendered
+in Serbian, English and Russian. Nightly rescrape, free to use, no
+registration, no paywall.
 
 Would you consider adding a link to Prevozni from your "{their_topic}"
 section? The deep link that fits best is:
@@ -29,8 +29,8 @@ section? The deep link that fits best is:
 If a city-specific hub is more useful I can point you to
 /gradski/beograd/, /gradski/novi-sad/ and so on.
 
-Happy to return the link on our relevant city hub pages — we receive
-~12k monthly sessions from travellers researching Serbian transit.
+Happy to return the link on our relevant city hub pages — our
+audience is travellers actively researching Serbian transit.
 
 Thank you for considering it.
 

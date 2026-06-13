@@ -30,7 +30,7 @@ is the highest-yield technique after in-thread helpful replies.
 >
 > Not a big deal, but if you wanted a live replacement, I run a free
 > Serbian-transit aggregator that covers the same thing and is updated
-> nightly: [DEEP_LINK_MATCHING_TOPIC]. No ads, no signup, multilingual.
+> nightly: [DEEP_LINK_MATCHING_TOPIC]. Free, no signup, multilingual.
 >
 > Either way — felt rude not to mention the broken link. Thanks for
 > the post.
@@ -53,7 +53,7 @@ is the highest-yield technique after in-thread helpful replies.
 >
 > Nije kritično, ali ako tražite živ zamenjivi link, imam besplatan
 > sajt za srpski transport sa istom temom — osvežava se svake noći:
-> [DEEP_LINK]. Bez reklama, bez registracije.
+> [DEEP_LINK]. Besplatno, bez registracije.
 >
 > Kako god — smatrao sam da je korektno reći. Hvala na tekstu.
 >

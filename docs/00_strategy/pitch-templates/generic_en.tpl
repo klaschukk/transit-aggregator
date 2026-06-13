@@ -12,9 +12,9 @@ the Balkans, with city transport for Belgrade, Novi Sad, Niš, and
 Kragujevac.
 
 If your readers at {site_title} ever need "how do I get from X to Y in
-Serbia" data, Prevozni aggregates 335 routes across 70 operators, in
-Serbian, English, and Russian. Refreshes nightly, no registration, no
-ads.
+Serbia" data, Prevozni aggregates 569 routes across 69 operators, in
+Serbian, English, and Russian. Refreshes nightly, free, no
+registration.
 
 Relevant deep link: {our_hook}
 

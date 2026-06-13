@@ -28,7 +28,7 @@ are traps.
 > from Belgrade to Sarajevo by bus"] could use a real-time schedule
 > link, since the individual carrier sites you linked are often out of
 > date by a season or two. I run a free aggregator that pulls current
-> schedules + prices for Serbia — no ads, no signup, multilingual
+> schedules + prices for Serbia — no signup, multilingual
 > (SR/EN/RU). If you want to drop in a single link, the exact route
 > page is:
 >

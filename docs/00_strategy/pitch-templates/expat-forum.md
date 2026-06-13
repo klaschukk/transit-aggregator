@@ -24,7 +24,7 @@ singular. No "we" pluralis majestatis.
 >
 > I made a free site that aggregates this: [DEEP_LINK], no signup,
 > shows all departures side-by-side with current prices. Full
-> disclosure — it's my side project, no ads yet.
+> disclosure — it's my side project.
 >
 > A couple of gotchas for Serbian buses specifically:
 > 1. [niche tip 1 — e.g. Niš-Ekspres sometimes sells paper tickets only
@@ -41,7 +41,7 @@ singular. No "we" pluralis majestatis.
 > [price_eur] €.
 >
 > Imam besplatan sajt koji skuplja sve polaske na jedno mesto:
-> [DEEP_LINK]. Bez registracije, bez reklama.
+> [DEEP_LINK]. Besplatno, bez registracije.
 >
 > Par stvari koje možda ne znaš:
 > 1. [nisa_tip_1]

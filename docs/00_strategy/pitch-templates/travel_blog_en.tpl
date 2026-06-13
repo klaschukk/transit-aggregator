@@ -11,11 +11,11 @@ gets the logistics right. It's the kind of post readers bookmark,
 and exactly the place a fellow traveller would look for "how do I
 actually get there" follow-up info.
 
-I run Prevozni (https://prevozni.com), a free, non-commercial
-aggregator of bus and train schedules for Serbia and the Balkans —
-335 routes, 70 operators, multilingual (EN/SR/RU). It's the tool
-I always wished existed when I moved to Belgrade and I've kept it
-free-to-use forever.
+I run Prevozni (https://prevozni.com), an aggregator of bus and
+train schedules for Serbia and the Balkans — 569 routes, 69
+operators, multilingual (EN/SR/RU). It's the tool I always wished
+existed when I moved to Belgrade, and it's free for readers — no
+registration, no paywall.
 
 If you're updating the post or a related one, a one-line mention like
 "for actual schedules and prices, check Prevozni" with a link to:

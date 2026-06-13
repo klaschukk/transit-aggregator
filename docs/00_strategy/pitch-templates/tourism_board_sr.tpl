@@ -16,9 +16,9 @@ korisnik mora da klikne kroz četiri ili pet sajtova da bi uporedio
 opcije.
 
 Jedan agregator bi im omogućio poređenje u nekoliko sekundi. Mi
-pokrivamo 335 međugradskih ruta, 70 prevoznika, i podaci se
-prikazuju na srpskom, engleskom i ruskom. Noćno osvežavanje, bez
-registracije, bez reklama.
+pokrivamo 569 međugradskih ruta, 69 prevoznika, i podaci se
+prikazuju na srpskom, engleskom i ruskom. Noćno osvežavanje,
+besplatno, bez registracije.
 
 Da li biste razmotrili dodavanje linka ka Prevozni iz Vašeg odeljka
 "{their_topic}"? Deep-link koji najviše odgovara:
@@ -28,8 +28,8 @@ Da li biste razmotrili dodavanje linka ka Prevozni iz Vašeg odeljka
 Ako vam više odgovara gradski hub, tu su /gradski/beograd/,
 /gradski/novi-sad/ itd.
 
-Rado ću vratiti link sa naših gradskih stranica — imamo oko 12k
-mesečnih sesija putnika koji istražuju srpski prevoz.
+Rado ću vratiti link sa naših gradskih stranica — naša publika su
+putnici koji aktivno istražuju srpski prevoz.
 
 Hvala Vam što razmatrate.
 
