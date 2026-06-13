@@ -1,0 +1,18 @@
+{% extends "guides/_guide_base.html" %}
+
+{% block guide_body %}
+<p>{{ _('guides.tramvaj_bg.p1').format(count=tram_count) }}</p>
+
+<h2>{{ _('guides.tramvaj_bg.h2_lines') }}</h2>
+<p>{{ _('guides.tramvaj_bg.p_lines') }}</p>
+{% if tram_lines %}
+<div class="see-also__list">
+  {% for tl in tram_lines %}
+  <a href="{{ lang_prefix }}/gradski/beograd/linija/{{ tl.slug }}/" class="see-also__link">{{ _('guides.tramvaj_bg.line_prefix') }} {{ tl.num }}</a>
+  {% endfor %}
+</div>
+{% endif %}
+
+<h2>{{ _('guides.tramvaj_bg.h2_tips') }}</h2>
+<p>{{ _('guides.tramvaj_bg.p_tips') }}</p>
+{% endblock %}

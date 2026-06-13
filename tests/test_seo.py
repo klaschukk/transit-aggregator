@@ -322,6 +322,20 @@ def test_airport_guide_indexable_and_links_real_lines(client):
     assert "/vodici/kako-doci-do-aerodroma-beograd/" in client.get("/sitemap-core.xml").data.decode()
 
 
+def test_tram_guide_indexable_links_deduped_lines(client):
+    """Belgrade tram guide must be indexable, link real tram lines, dedupe by
+    slug (9Л/9л → one linija-9l), and be in the sitemap. DB-grounded."""
+    import re
+    resp = client.get("/vodici/tramvaj-beograd/")
+    assert resp.status_code == 200
+    html = resp.data.decode()
+    assert "noindex" not in html.lower(), "tram guide must stay indexable"
+    links = re.findall(r"/gradski/beograd/linija/(linija-[0-9a-z]+)/", html)
+    assert len(links) >= 8, f"too few tram-line links: {len(links)}"
+    assert len(links) == len(set(links)), f"tram links not deduped: {links}"
+    assert "/vodici/tramvaj-beograd/" in client.get("/sitemap-core.xml").data.decode()
+
+
 def test_line_faq_adds_frequency_question_when_headway(client):
     # "Na koliko minuta ide linija N" is a top GSC query: when a line has a
     # GTFS-derived headway, its FAQPage must carry a frequency Q&A. Novi Sad

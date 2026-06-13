@@ -319,6 +319,12 @@ _GUIDES: dict[str, dict] = {
         'date': '2026-06-13',
         'category_key': 'guides.cat_travel',
     },
+    'tramvaj-beograd': {
+        'title_key': 'guides.tramvaj_bg.title',
+        'meta_key': 'guides.tramvaj_bg.meta',
+        'date': '2026-06-13',
+        'category_key': 'guides.cat_travel',
+    },
 }
 
 
@@ -427,11 +433,32 @@ def _guide_context_aerodrom_bg() -> dict:
     return {'airport_lines': airport_lines, 'airport_count': len(airport_lines)}
 
 
+def _guide_context_tramvaj_bg() -> dict:
+    """Belgrade tram lines (city_lines.type='tram') for the tram guide.
+    Grounded in the DB. Deduplicate by slug (the catalog stores Cyrillic/Latin
+    case variants — 9Л and 9л both map to linija-9l) and transliterate the
+    Cyrillic 'Л' to Latin 'L' for display. Links to each line for the schedule."""
+    tram_lines: list = []
+    if db_ready():
+        rows = cached_query("""
+            SELECT slug, MIN(number) AS number
+            FROM city_lines
+            WHERE city = 'beograd' AND type = 'tram'
+            GROUP BY slug
+            ORDER BY TRY_CAST(REGEXP_REPLACE(MIN(number), '[^0-9]', '', 'g') AS INTEGER) NULLS LAST
+        """, ttl=3600)
+        for r in (rows or []):
+            num = (r['number'] or '').replace('Л', 'L').replace('л', 'l')
+            tram_lines.append({'num': num, 'slug': r['slug']})
+    return {'tram_lines': tram_lines, 'tram_count': len(tram_lines)}
+
+
 _GUIDE_EXTRA_CONTEXT: dict[str, object] = {
     'beograd-novi-sad': _guide_context_beograd_ns,
     'prevoz-do-mora': _guide_context_more,
     'nocni-autobus-beograd': _guide_context_nocni_bg,
     'kako-doci-do-aerodroma-beograd': _guide_context_aerodrom_bg,
+    'tramvaj-beograd': _guide_context_tramvaj_bg,
 }
 
 

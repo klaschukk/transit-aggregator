@@ -4586,6 +4586,44 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
 
     # ── Guide: FlixBus Srbija ──
+    'guides.tramvaj_bg.title': {
+        'sr': 'Tramvaj Beograd {year}: sve tramvajske linije i red vožnje',
+        'en': 'Belgrade tram {year}: all tram lines and schedule',
+        'ru': 'Трамвай Белград {year}: все трамвайные линии и расписание',
+    },
+    'guides.tramvaj_bg.meta': {
+        'sr': 'Sve tramvajske linije u Beogradu — kompletna lista tramvaja sa redom vožnje, stajalištima i mapom trase. Tramvajska mreža grada na jednom mestu.',
+        'en': 'All tram lines in Belgrade — the complete list of trams with schedules, stops and route maps. The city tram network in one place.',
+        'ru': 'Все трамвайные линии Белграда — полный список трамваев с расписанием, остановками и картой маршрута. Трамвайная сеть города в одном месте.',
+    },
+    'guides.tramvaj_bg.p1': {
+        'sr': 'U Beogradu tramvaji saobraćaju na {count} linija koje povezuju centar grada i druge delove. Ispod su sve tramvajske linije sa direktnim linkom na red vožnje i stajališta.',
+        'en': 'Belgrade has {count} tram lines connecting the city centre with other parts of town. Below are all the tram lines with a direct link to their schedule and stops.',
+        'ru': 'В Белграде трамваи ходят по {count} линиям, связывая центр города с другими районами. Ниже все трамвайные линии со ссылкой на расписание и остановки.',
+    },
+    'guides.tramvaj_bg.h2_lines': {
+        'sr': 'Sve tramvajske linije u Beogradu',
+        'en': 'All Belgrade tram lines',
+        'ru': 'Все трамвайные линии Белграда',
+    },
+    'guides.tramvaj_bg.p_lines': {
+        'sr': 'Kliknite na liniju za tačan red vožnje, stajališta i mapu trase:',
+        'en': 'Tap a line for its exact schedule, stops and route map:',
+        'ru': 'Нажмите на линию для точного расписания, остановок и карты маршрута:',
+    },
+    'guides.tramvaj_bg.line_prefix': {
+        'sr': 'Linija', 'en': 'Line', 'ru': 'Линия',
+    },
+    'guides.tramvaj_bg.h2_tips': {
+        'sr': 'Korisni saveti',
+        'en': 'Useful tips',
+        'ru': 'Полезные советы',
+    },
+    'guides.tramvaj_bg.p_tips': {
+        'sr': 'Tačan red vožnje i učestalost tramvaja proverite na stranici svake linije — raspored se razlikuje radnim danom i vikendom. Noću mrežu preuzimaju noćne autobuske linije.',
+        'en': 'Check each tram\'s exact schedule and frequency on its line page — the timetable differs on weekdays and weekends. At night the network is covered by night bus lines.',
+        'ru': 'Точное расписание и частоту трамваев смотрите на странице каждой линии — расписание отличается в будни и выходные. Ночью сеть обслуживают ночные автобусные линии.',
+    },
     'guides.aerodrom_bg.title': {
         'sr': 'Kako doći do aerodroma Beograd {year}: autobus i prevoz',
         'en': 'How to get to Belgrade airport {year}: bus and transport',
