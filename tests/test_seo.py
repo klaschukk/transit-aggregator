@@ -296,6 +296,20 @@ def test_voznja_links_to_city_transport_hub_for_covered_endpoint(client):
     assert '/gradski/budva/"' not in html2, "linked a city we don't cover locally"
 
 
+def test_nocni_bus_guide_indexable_and_links_night_lines(client):
+    """The Belgrade night-bus guide must be indexable, list real night lines
+    (links to /gradski/beograd/linija/linija-Nn/), and be in the sitemap.
+    Content is DB-grounded — the page must carry several night-line links."""
+    import re
+    resp = client.get("/vodici/nocni-autobus-beograd/")
+    assert resp.status_code == 200
+    html = resp.data.decode()
+    assert "noindex" not in html.lower(), "night-bus guide must stay indexable"
+    night_links = re.findall(r"/gradski/beograd/linija/linija-\d+n/", html)
+    assert len(night_links) >= 10, f"too few night-line links: {len(night_links)}"
+    assert "/vodici/nocni-autobus-beograd/" in client.get("/sitemap-core.xml").data.decode()
+
+
 def test_line_faq_adds_frequency_question_when_headway(client):
     # "Na koliko minuta ide linija N" is a top GSC query: when a line has a
     # GTFS-derived headway, its FAQPage must carry a frequency Q&A. Novi Sad

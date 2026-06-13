@@ -307,6 +307,12 @@ _GUIDES: dict[str, dict] = {
         'date': '2026-05-29',
         'category_key': 'guides.cat_tips',
     },
+    'nocni-autobus-beograd': {
+        'title_key': 'guides.nocni_bg.title',
+        'meta_key': 'guides.nocni_bg.meta',
+        'date': '2026-06-13',
+        'category_key': 'guides.cat_travel',
+    },
 }
 
 
@@ -376,9 +382,30 @@ def _guide_context_more() -> dict:
     return {'sea_routes': sea_routes}
 
 
+def _guide_context_nocni_bg() -> dict:
+    """Belgrade night lines (city_lines.type='night') for the night-bus guide.
+    Grounded strictly in the DB — no invented schedules. Stored numbers are
+    Cyrillic (15Н); transliterate the Cyrillic 'Н' to Latin 'N' for display
+    (slugs are already ASCII, e.g. linija-15n). Exact times live on each line
+    page, which we link to — the guide never fabricates a timetable."""
+    night_lines: list = []
+    if db_ready():
+        rows = cached_query("""
+            SELECT number, slug
+            FROM city_lines
+            WHERE city = 'beograd' AND type = 'night'
+            ORDER BY TRY_CAST(REGEXP_REPLACE(number, '[^0-9]', '', 'g') AS INTEGER) NULLS LAST
+        """, ttl=3600)
+        for r in (rows or []):
+            num = (r['number'] or '').replace('Н', 'N').replace('н', 'n')
+            night_lines.append({'num': num, 'slug': r['slug']})
+    return {'night_lines': night_lines, 'night_count': len(night_lines)}
+
+
 _GUIDE_EXTRA_CONTEXT: dict[str, object] = {
     'beograd-novi-sad': _guide_context_beograd_ns,
     'prevoz-do-mora': _guide_context_more,
+    'nocni-autobus-beograd': _guide_context_nocni_bg,
 }
 
 

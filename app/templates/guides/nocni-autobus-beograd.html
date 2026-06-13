@@ -1,0 +1,25 @@
+{% extends "guides/_guide_base.html" %}
+
+{% block guide_body %}
+<p>{{ _('guides.nocni_bg.p1').format(count=night_count) }}</p>
+
+<h2>{{ _('guides.nocni_bg.h2_lines') }}</h2>
+<p>{{ _('guides.nocni_bg.p_lines') }}</p>
+{% if night_lines %}
+<div class="see-also__list">
+  {% for nl in night_lines %}
+  <a href="{{ lang_prefix }}/gradski/beograd/linija/{{ nl.slug }}/" class="see-also__link">{{ _('guides.nocni_bg.line_prefix') }} {{ nl.num }}</a>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% set _airport = night_lines | selectattr('num', 'equalto', '72N') | list %}
+{% if _airport %}
+<h2>{{ _('guides.nocni_bg.h2_airport') }}</h2>
+<p>{{ _('guides.nocni_bg.p_airport') }}
+  <a href="{{ lang_prefix }}/gradski/beograd/linija/{{ _airport[0].slug }}/">{{ _('guides.nocni_bg.line_prefix') }} 72N</a>.</p>
+{% endif %}
+
+<h2>{{ _('guides.nocni_bg.h2_tips') }}</h2>
+<p>{{ _('guides.nocni_bg.p_tips') }}</p>
+{% endblock %}

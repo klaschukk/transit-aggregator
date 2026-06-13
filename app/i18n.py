@@ -4574,6 +4574,54 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
 
     # ── Guide: FlixBus Srbija ──
+    'guides.nocni_bg.title': {
+        'sr': 'Noćni autobus Beograd {year}: noćne linije i red vožnje',
+        'en': 'Belgrade night bus {year}: all night lines and schedule',
+        'ru': 'Ночной автобус Белград {year}: ночные линии и расписание',
+    },
+    'guides.nocni_bg.meta': {
+        'sr': 'Sve noćne linije gradskog prevoza u Beogradu — kompletna lista noćnih autobusa, red vožnje i stajališta. Uključujući noćni prevoz do aerodroma.',
+        'en': 'All Belgrade night-bus lines — the complete list of night buses with schedules and stops, including night transport to the airport.',
+        'ru': 'Все ночные линии городского транспорта Белграда — полный список ночных автобусов, расписание и остановки, включая ночной транспорт до аэропорта.',
+    },
+    'guides.nocni_bg.p1': {
+        'sr': 'U Beogradu noću saobraća {count} noćnih linija gradskog prevoza, koje preuzimaju mrežu kada dnevni autobusi, tramvaji i trolejbusi prestanu da voze. Polasci kreću sa centralnih čvorišta u gradu i pokrivaju sve delove Beograda i prigradska naselja.',
+        'en': 'Belgrade has {count} night public-transport lines that take over the network once the daytime buses, trams and trolleybuses stop running. They depart from the central hubs in the city and reach every part of Belgrade and the suburbs.',
+        'ru': 'В Белграде ночью работает {count} ночных линий городского транспорта, которые берут на себя сеть, когда дневные автобусы, трамваи и троллейбусы прекращают ходить. Рейсы отправляются с центральных узлов города и охватывают все районы Белграда и пригороды.',
+    },
+    'guides.nocni_bg.h2_lines': {
+        'sr': 'Spisak noćnih linija u Beogradu',
+        'en': 'List of Belgrade night lines',
+        'ru': 'Список ночных линий Белграда',
+    },
+    'guides.nocni_bg.p_lines': {
+        'sr': 'Kliknite na liniju za tačan red vožnje, stajališta i mapu trase:',
+        'en': 'Tap a line for its exact schedule, stops and route map:',
+        'ru': 'Нажмите на линию для точного расписания, остановок и карты маршрута:',
+    },
+    'guides.nocni_bg.line_prefix': {
+        'sr': 'Linija', 'en': 'Line', 'ru': 'Линия',
+    },
+    'guides.nocni_bg.h2_airport': {
+        'sr': 'Noćni prevoz do aerodroma',
+        'en': 'Night transport to the airport',
+        'ru': 'Ночной транспорт до аэропорта',
+    },
+    'guides.nocni_bg.p_airport': {
+        'sr': 'Do aerodroma „Nikola Tesla“ noću saobraća i noćna linija',
+        'en': 'The „Nikola Tesla“ airport is also served at night by night line',
+        'ru': 'До аэропорта «Никола Тесла» ночью ходит и ночная линия',
+    },
+    'guides.nocni_bg.h2_tips': {
+        'sr': 'Korisni saveti',
+        'en': 'Useful tips',
+        'ru': 'Полезные советы',
+    },
+    'guides.nocni_bg.p_tips': {
+        'sr': 'Noćne linije obično voze ređe od dnevnih, pa unapred proverite vreme polaska na stranici izabrane linije. Glavna polazna mesta u centru su Trg republike, Studentski trg i Trg Slavija. Za putovanja van Beograda uporedite i međugradske polaske u našem pretraživaču.',
+        'en': 'Night lines usually run less frequently than daytime ones, so check the departure time on the line\'s page in advance. The main central departure points are Trg republike, Studentski trg and Trg Slavija. For trips outside Belgrade, compare intercity departures in our search too.',
+        'ru': 'Ночные линии обычно ходят реже дневных, поэтому заранее проверьте время отправления на странице нужной линии. Главные точки отправления в центре — Trg republike, Studentski trg и Trg Slavija. Для поездок за пределы Белграда сравните и междугородние рейсы в нашем поиске.',
+    },
     'guides.flixbus.title': {
         'sr': 'FlixBus Srbija {year} — Linije, Cene i Poređenje',
         'en': 'FlixBus Serbia {year} — Routes, Prices and Comparison',
