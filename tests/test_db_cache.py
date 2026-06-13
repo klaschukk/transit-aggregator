@@ -58,6 +58,36 @@ def test_cache_is_bounded(app, monkeypatch):
     assert len(db._cache) <= db._CACHE_MAX
 
 
+def test_db_ready_false_when_file_present_but_query_fails(app, monkeypatch):
+    """After an atomic swap the file exists but a query can fail mid-window —
+    db_ready() must report not-ready so the 503 guard fires (no empty 200s)."""
+    import duckdb
+
+    class BrokenConn:
+        def execute(self, sql, p=None):
+            raise duckdb.IOException("mid-swap")
+
+    with app.app_context():
+        db._ready_cache.clear()
+        monkeypatch.setattr("app.db.Path.exists", lambda self: True)
+        monkeypatch.setattr(db, "_get_conn", lambda: BrokenConn())
+        assert db.db_ready() is False
+    db._ready_cache.clear()
+
+
+def test_db_ready_true_when_query_binds(app, monkeypatch):
+    class OkConn:
+        def execute(self, sql, p=None):
+            return None
+
+    with app.app_context():
+        db._ready_cache.clear()
+        monkeypatch.setattr("app.db.Path.exists", lambda self: True)
+        monkeypatch.setattr(db, "_get_conn", lambda: OkConn())
+        assert db.db_ready() is True
+    db._ready_cache.clear()
+
+
 def test_query_reconnects_once_on_catalog_error(app, monkeypatch):
     """A non-IO DuckDB error (stale catalog after rebuild) reconnects + retries."""
     state = {"first": True}

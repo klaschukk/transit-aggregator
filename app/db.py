@@ -37,9 +37,35 @@ def _get_conn() -> duckdb.DuckDBPyConnection:
     return conn
 
 
+# Short-lived readiness probe cache (per worker). build_db.py swaps the DB with
+# an atomic os.replace, so the file is ALWAYS present — Path.exists() alone can't
+# tell "ready" from "mid-swap, queries failing". A cheap cached SELECT 1 makes
+# db_ready() reflect actual queryability, so the 503-during-rebuild guard fires
+# on a real outage instead of serving empty 200s (soft-404 to Googlebot).
+_ready_cache: dict[str, tuple[float, bool]] = {}
+_READY_TTL = 5.0
+
+
 def db_ready() -> bool:
-    """Check if database file exists."""
-    return Path(_db_path()).exists()
+    """True only if the DB file exists AND a trivial query binds. The probe is
+    cached for a few seconds so calling this many times per request stays cheap.
+    A transient swap blip is absorbed by query()'s reconnect-retry; only a
+    persistent failure flips this to False (→ 503 guard)."""
+    path = _db_path()
+    if not Path(path).exists():
+        return False
+    now = time.time()
+    cached = _ready_cache.get(path)
+    if cached and now < cached[0]:
+        return cached[1]
+    try:
+        _get_conn().execute("SELECT 1")
+        ok = True
+    except duckdb.Error:
+        _local.conn = None
+        ok = False
+    _ready_cache[path] = (now + _READY_TTL, ok)
+    return ok
 
 
 def query(sql: str, params: list[Any] | None = None) -> list[dict]:
