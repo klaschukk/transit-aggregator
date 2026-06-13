@@ -48,11 +48,11 @@ def _append_dev_log(recipient: str, subject: str, body: str) -> None:
         root = Path(current_app.root_path).parent
         log_dir = root / 'logs'
         log_dir.mkdir(parents=True, exist_ok=True)
-        from datetime import datetime
+        from datetime import datetime, timezone
         with (log_dir / _DEV_LOG_FILENAME).open('a', encoding='utf-8') as f:
             f.write(
                 f"\n{'=' * 60}\n"
-                f"{datetime.utcnow().isoformat()}Z  to={recipient}\n"
+                f"{datetime.now(timezone.utc).replace(tzinfo=None).isoformat()}Z  to={recipient}\n"
                 f"subject: {subject}\n"
                 f"{body}\n"
             )

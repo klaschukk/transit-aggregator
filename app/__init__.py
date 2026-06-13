@@ -120,12 +120,12 @@ def create_app(config_name: str | None = None) -> Flask:
     # the configured DEFAULT outside an app context (e.g. background-thread
     # renders) or when the experiment isn't live yet. ──
     def _ab_variant_global(key: str) -> str:
-        from datetime import datetime as _dt
+        from datetime import datetime as _dt, timezone as _tz
         from app import ab as _ab
         from app import ab_config as _ab_config
         spec = _ab_config.get_spec(key)
         default = _ab_config.DEFAULTS.get(key, '')
-        if spec is None or not spec.is_live(_dt.utcnow().date().isoformat()):
+        if spec is None or not spec.is_live(_dt.now(_tz.utc).date().isoformat()):
             return default
         try:
             if not getattr(g, 'ab_id', None):
@@ -231,7 +231,7 @@ def create_app(config_name: str | None = None) -> Flask:
                 hreflang_urls[l] = f"{base_url}/{l}{canon_path}"
         hreflang_urls['x-default'] = base_url + canon_path
 
-        from datetime import datetime as _dt
+        from datetime import datetime as _dt, timezone as _tz
         from app.affiliates import resolve_offers as _resolve_offers, ab_partner_order as _ab_order
         from app.affiliates import bt4_checkout_url as _bt4_checkout_url
 
@@ -276,7 +276,7 @@ def create_app(config_name: str | None = None) -> Flask:
             # while still passing link equity. Everything else is indexable.
             'meta_robots': getattr(g, 'meta_robots', 'index, follow, max-image-preview:large'),
             'asset_version': _ASSET_VERSION,
-            'current_year': _dt.utcnow().year,
+            'current_year': _dt.now(_tz.utc).year,
             'affiliate_offers': affiliate_offers,
             'bt4_checkout_url': _bt4_checkout_url,
             '_review_loaded_at': review_loaded_at,

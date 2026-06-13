@@ -116,11 +116,11 @@ def _append_dev_log(to: str, subject: str, text: str,
         root = Path(current_app.root_path).parent
         log_dir = root / 'logs'
         log_dir.mkdir(parents=True, exist_ok=True)
-        from datetime import datetime
+        from datetime import datetime, timezone
         with (log_dir / _DEV_LOG_FILENAME).open('a', encoding='utf-8') as f:
             f.write(
                 f"\n{'=' * 60}\n"
-                f"{datetime.utcnow().isoformat()}Z  to={to}\n"
+                f"{datetime.now(timezone.utc).replace(tzinfo=None).isoformat()}Z  to={to}\n"
                 f"subject: {subject}\n"
             )
             if list_unsubscribe:
