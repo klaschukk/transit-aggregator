@@ -4586,6 +4586,54 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
 
     # ── Guide: FlixBus Srbija ──
+    'guides.aerodrom_bg.title': {
+        'sr': 'Kako doći do aerodroma Beograd {year}: autobus i prevoz',
+        'en': 'How to get to Belgrade airport {year}: bus and transport',
+        'ru': 'Как добраться до аэропорта Белграда {year}: автобус и транспорт',
+    },
+    'guides.aerodrom_bg.meta': {
+        'sr': 'Gradski autobus do aerodroma „Nikola Tesla“ iz Beograda — linije 72, A1 (ekspres), 600, 607 i noćna 72N, sa redom vožnje i stajalištima.',
+        'en': 'City bus to „Nikola Tesla“ airport from Belgrade — lines 72, A1 (express), 600, 607 and night line 72N, with schedules and stops.',
+        'ru': 'Городской автобус до аэропорта «Никола Тесла» из Белграда — линии 72, A1 (экспресс), 600, 607 и ночная 72N, с расписанием и остановками.',
+    },
+    'guides.aerodrom_bg.p1': {
+        'sr': 'Do beogradskog aerodroma „Nikola Tesla“ iz grada vodi {count} linija gradskog prevoza, pa ne morate na taksi. Ispod su sve linije sa direktnim linkom na red vožnje i stajališta.',
+        'en': 'There are {count} city-transport lines from Belgrade to „Nikola Tesla“ airport, so you don\'t need a taxi. Below are all the lines with a direct link to their schedule and stops.',
+        'ru': 'До белградского аэропорта «Никола Тесла» из города идёт {count} линий городского транспорта, так что такси не обязательно. Ниже все линии со ссылкой на расписание и остановки.',
+    },
+    'guides.aerodrom_bg.h2_lines': {
+        'sr': 'Linije do aerodroma „Nikola Tesla“',
+        'en': 'Lines to „Nikola Tesla“ airport',
+        'ru': 'Линии до аэропорта «Никола Тесла»',
+    },
+    'guides.aerodrom_bg.p_lines': {
+        'sr': 'Kliknite na liniju za tačan red vožnje, stajališta i mapu trase:',
+        'en': 'Tap a line for its exact schedule, stops and route map:',
+        'ru': 'Нажмите на линию для точного расписания, остановок и карты маршрута:',
+    },
+    'guides.aerodrom_bg.line_prefix': {
+        'sr': 'Linija', 'en': 'Line', 'ru': 'Линия',
+    },
+    'guides.aerodrom_bg.h2_which': {
+        'sr': 'Koju liniju izabrati',
+        'en': 'Which line to choose',
+        'ru': 'Какую линию выбрать',
+    },
+    'guides.aerodrom_bg.p_which': {
+        'sr': 'Linija 72 polazi sa Zelenog venca, a ekspres e-bus A1 sa Trga Slavija — obe idu pravo do aerodroma. Linije 600 (od Železničke stanice) i 607 (Banovo Brdo) povezuju druge delove grada. Noću do aerodroma saobraća linija 72N.',
+        'en': 'Line 72 departs from Zeleni venac, and the express e-bus A1 from Trg Slavija — both go straight to the airport. Lines 600 (from the railway station) and 607 (Banovo Brdo) connect other parts of the city. At night, line 72N serves the airport.',
+        'ru': 'Линия 72 отправляется с Zeleni venac, а экспресс e-bus A1 — с Trg Slavija; обе идут прямо в аэропорт. Линии 600 (от ж/д вокзала) и 607 (Banovo Brdo) связывают другие районы. Ночью в аэропорт ходит линия 72N.',
+    },
+    'guides.aerodrom_bg.h2_tips': {
+        'sr': 'Korisni saveti',
+        'en': 'Useful tips',
+        'ru': 'Полезные советы',
+    },
+    'guides.aerodrom_bg.p_tips': {
+        'sr': 'Tačno vreme polaska i učestalost proverite na stranici svake linije — red vožnje se razlikuje radnim danom i vikendom. Ako putujete iz drugog grada u Srbiji, međugradske polaske ka Beogradu uporedite u našem pretraživaču.',
+        'en': 'Check the exact departure time and frequency on each line\'s page — the schedule differs on weekdays and weekends. If you are travelling from another city in Serbia, compare intercity departures to Belgrade in our search.',
+        'ru': 'Точное время отправления и частоту смотрите на странице каждой линии — расписание отличается в будни и выходные. Если вы едете из другого города Сербии, сравните междугородние рейсы до Белграда в нашем поиске.',
+    },
     'guides.nocni_bg.title': {
         'sr': 'Noćni autobus Beograd {year}: noćne linije i red vožnje',
         'en': 'Belgrade night bus {year}: all night lines and schedule',

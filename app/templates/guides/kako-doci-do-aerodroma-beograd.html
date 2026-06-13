@@ -1,0 +1,21 @@
+{% extends "guides/_guide_base.html" %}
+
+{% block guide_body %}
+<p>{{ _('guides.aerodrom_bg.p1').format(count=airport_count) }}</p>
+
+<h2>{{ _('guides.aerodrom_bg.h2_lines') }}</h2>
+<p>{{ _('guides.aerodrom_bg.p_lines') }}</p>
+{% if airport_lines %}
+<div class="see-also__list">
+  {% for al in airport_lines %}
+  <a href="{{ lang_prefix }}/gradski/beograd/linija/{{ al.slug }}/" class="see-also__link">{{ _('guides.aerodrom_bg.line_prefix') }} {{ al.num }}</a>
+  {% endfor %}
+</div>
+{% endif %}
+
+<h2>{{ _('guides.aerodrom_bg.h2_which') }}</h2>
+<p>{{ _('guides.aerodrom_bg.p_which') }}</p>
+
+<h2>{{ _('guides.aerodrom_bg.h2_tips') }}</h2>
+<p>{{ _('guides.aerodrom_bg.p_tips') }}</p>
+{% endblock %}

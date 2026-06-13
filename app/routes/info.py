@@ -313,6 +313,12 @@ _GUIDES: dict[str, dict] = {
         'date': '2026-06-13',
         'category_key': 'guides.cat_travel',
     },
+    'kako-doci-do-aerodroma-beograd': {
+        'title_key': 'guides.aerodrom_bg.title',
+        'meta_key': 'guides.aerodrom_bg.meta',
+        'date': '2026-06-13',
+        'category_key': 'guides.cat_travel',
+    },
 }
 
 
@@ -402,10 +408,30 @@ def _guide_context_nocni_bg() -> dict:
     return {'night_lines': night_lines, 'night_count': len(night_lines)}
 
 
+def _guide_context_aerodrom_bg() -> dict:
+    """Belgrade city lines serving Nikola Tesla airport, for the airport guide.
+    Grounded in the DB (line name mentions „Никола Тесла“) — links to each line
+    page for the exact schedule, never fabricated. Excludes the Batajnica
+    airport line. Cyrillic 'Н' in night-line numbers → Latin 'N' for display."""
+    airport_lines: list = []
+    if db_ready():
+        rows = cached_query("""
+            SELECT number, slug
+            FROM city_lines
+            WHERE city = 'beograd' AND lower(name) LIKE '%никола тесла%'
+            ORDER BY TRY_CAST(REGEXP_REPLACE(number, '[^0-9]', '', 'g') AS INTEGER) NULLS LAST
+        """, ttl=3600)
+        for r in (rows or []):
+            num = (r['number'] or '').replace('Н', 'N').replace('н', 'n')
+            airport_lines.append({'num': num, 'slug': r['slug']})
+    return {'airport_lines': airport_lines, 'airport_count': len(airport_lines)}
+
+
 _GUIDE_EXTRA_CONTEXT: dict[str, object] = {
     'beograd-novi-sad': _guide_context_beograd_ns,
     'prevoz-do-mora': _guide_context_more,
     'nocni-autobus-beograd': _guide_context_nocni_bg,
+    'kako-doci-do-aerodroma-beograd': _guide_context_aerodrom_bg,
 }
 
 

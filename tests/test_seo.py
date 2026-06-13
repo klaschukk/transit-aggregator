@@ -310,6 +310,18 @@ def test_nocni_bus_guide_indexable_and_links_night_lines(client):
     assert "/vodici/nocni-autobus-beograd/" in client.get("/sitemap-core.xml").data.decode()
 
 
+def test_airport_guide_indexable_and_links_real_lines(client):
+    """Belgrade airport guide must be indexable, link the real Nikola Tesla
+    lines (72, A1, 600, 607, 72N), and be in the sitemap. DB-grounded."""
+    resp = client.get("/vodici/kako-doci-do-aerodroma-beograd/")
+    assert resp.status_code == 200
+    html = resp.data.decode()
+    assert "noindex" not in html.lower(), "airport guide must stay indexable"
+    assert "/gradski/beograd/linija/linija-72/" in html, "no link to line 72"
+    assert "/gradski/beograd/linija/linija-a1/" in html, "no link to line A1"
+    assert "/vodici/kako-doci-do-aerodroma-beograd/" in client.get("/sitemap-core.xml").data.decode()
+
+
 def test_line_faq_adds_frequency_question_when_headway(client):
     # "Na koliko minuta ide linija N" is a top GSC query: when a line has a
     # GTFS-derived headway, its FAQPage must carry a frequency Q&A. Novi Sad
