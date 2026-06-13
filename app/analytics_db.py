@@ -258,6 +258,16 @@ CREATE TABLE IF NOT EXISTS composed_routes (
 );
 CREATE INDEX IF NOT EXISTS composed_routes_hits_idx
     ON composed_routes(hits DESC);
+
+-- BusTicket4 affiliate SALES (conversions), mirrored hourly from their flaky
+-- panel by scripts/bt4_sales_fetch.py so we can read them in our own admin.
+-- One row per calendar day; upserted each fetch (last run wins).
+CREATE TABLE IF NOT EXISTS bt4_sales (
+    ymd        TEXT PRIMARY KEY,   -- '2026-06-13'
+    tickets    INTEGER NOT NULL,
+    value      REAL    NOT NULL,
+    fetched_at TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
+);
 """
 
 
@@ -316,6 +326,55 @@ def insert_ba_click(
             route_slug=route_slug, surface=surface,
         )
         _local.conn = None
+
+
+def upsert_bt4_sales(rows: list[dict]) -> int:
+    """Insert/refresh daily BusTicket4 sales. Each row: {ymd, tickets, value}.
+
+    Mirrored from BusTicket4's affiliate panel by scripts/bt4_sales_fetch.py.
+    Upserts per day (last fetch wins). Returns rows written; autocommit."""
+    if not rows:
+        return 0
+    try:
+        _get_conn().executemany(
+            "INSERT INTO bt4_sales (ymd, tickets, value) VALUES (?, ?, ?) "
+            "ON CONFLICT(ymd) DO UPDATE SET tickets=excluded.tickets, "
+            "value=excluded.value, "
+            "fetched_at=strftime('%Y-%m-%dT%H:%M:%SZ','now')",
+            [(r['ymd'], int(r.get('tickets') or 0), float(r.get('value') or 0)) for r in rows],
+        )
+        return len(rows)
+    except (sqlite3.Error, KeyError, ValueError, TypeError) as exc:
+        logger.error("upsert_bt4_sales failed: %s", exc)
+        observability.capture_exception(exc, subsystem='analytics_db', op='upsert_bt4_sales')
+        _local.conn = None
+        return 0
+
+
+def bt4_sales_summary(days: int = 30) -> dict:
+    """All-time totals + recent non-zero daily rows for the admin. Empty-safe."""
+    try:
+        agg = query(
+            "SELECT COALESCE(SUM(tickets),0) AS t, COALESCE(SUM(value),0) AS v, "
+            "MAX(fetched_at) AS f, COUNT(*) AS n FROM bt4_sales"
+        )
+        recent = query(
+            "SELECT ymd, tickets, value FROM bt4_sales "
+            "WHERE date(ymd) >= date('now', ?) AND tickets > 0 ORDER BY ymd DESC",
+            [f'-{int(days)} days'],
+        )
+        row = agg[0] if agg else {}
+        return {
+            'total_tickets': row.get('t') or 0,
+            'total_value': row.get('v') or 0,
+            'last_fetched': row.get('f'),
+            'days_with_data': row.get('n') or 0,
+            'recent': recent,
+        }
+    except sqlite3.Error as exc:
+        logger.error("bt4_sales_summary failed: %s", exc)
+        return {'total_tickets': 0, 'total_value': 0, 'last_fetched': None,
+                'days_with_data': 0, 'recent': []}
 
 
 def insert_ab_event(

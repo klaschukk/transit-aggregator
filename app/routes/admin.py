@@ -175,6 +175,7 @@ def revenue():
         by_surface_30=by_surface_30,
         by_partner_30=by_partner_30,
         daily=daily,
+        bt4=analytics_db.bt4_sales_summary(),
     )
 
 

@@ -56,6 +56,42 @@
     </div>
   </div>
 
+  {# BusTicket4 SALES (conversions) — mirrored hourly from their panel by
+     scripts/bt4_sales_fetch.py, so we don't depend on their flaky admin. #}
+  {% if bt4 %}
+  <h2>BusTicket4 — sales (affiliate 735)</h2>
+  <div class="kpis">
+    <div class="kpi">
+      <div class="kpi__v">{{ bt4.total_tickets }}</div>
+      <div class="kpi__l">Tickets sold (total)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__v">{{ bt4.total_value|round|int }}</div>
+      <div class="kpi__l">Value (total)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__v">{{ bt4.recent|length }}</div>
+      <div class="kpi__l">Days with sales (30d)</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi__v" style="font-size:14px;">{{ bt4.last_fetched or '—' }}</div>
+      <div class="kpi__l">Last synced (UTC)</div>
+    </div>
+  </div>
+  {% if bt4.recent %}
+  <table>
+    <thead><tr><th>Date</th><th>Tickets</th><th>Value</th></tr></thead>
+    <tbody>
+      {% for r in bt4.recent %}
+      <tr><td>{{ r.ymd }}</td><td>{{ r.tickets }}</td><td>{{ r.value|round|int }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">Пока 0 продаж по данным панели BusTicket4. Синхронизируется ежечасно (bt4_sales_fetch.py).</p>
+  {% endif %}
+  {% endif %}
+
   <h2>Daily clicks (last 30 days)</h2>
   {% if daily %}
   <div class="chart" aria-label="Daily bookaway clicks">
