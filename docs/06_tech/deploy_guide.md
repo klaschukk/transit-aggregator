@@ -1,243 +1,118 @@
-# Deploy Guide — Prevozni
+# Деплой-гайд — Prevozni
 
-## Current Setup
+> **Обновлено 2026-06-12, проверено на живом сервере.**
+> Прод = деплой-бокс = **178.105.76.3** (root@, hostname `prevozni`). С 2026-06-04 деплой **только ручной** — autodeploy-cron отключён (коммит 136890a). Описание железа/nginx/systemd — в [infrastructure.md](infrastructure.md).
 
-| Component | Value |
-|-----------|-------|
-| Server | 81.28.248.71 (Montiko, Podgorica) |
-| App | Flask + Gunicorn (4 workers) |
-| DB | DuckDB (file-based, read-only at runtime) |
-| Service | systemd `transit.service` |
-| Port | 5000 (proxied via nginx) |
+## 1. Деплой кода через GitLab CI (основной путь)
 
-## 1. Domain Setup
+Файл: `.gitlab-ci.yml`. Origin: `git@gitlab.com:klaschukk/transit-aggregator.git` (SSH).
 
-### DNS Records
+### Stage `test` — автоматически
 
-```
-A     prevozni.com      → 81.28.248.71
-A     www.prevozni.com  → 81.28.248.71
-```
+Запускается на каждый push в `main` и на каждый MR:
 
-Wait for propagation (check with `dig prevozni.com`).
+- образ `python:3.12-slim`, `FLASK_ENV=testing`, seed-БД `tests/seed.duckdb`;
+- `pytest -x` (исключены test_data_quality / test_integration / test_privacy); всего в проекте ~870 тестов;
+- `allow_failure: false` — это **гейт**: пока тесты красные, деплоить нельзя.
 
-### nginx Configuration
+### Stage `deploy` — РУЧНАЯ кнопка ▶ (`when: manual`, только main)
 
-```bash
-sudo nano /etc/nginx/sites-available/transit
-```
+Что делает джоба по шагам (по SSH на `root@178.105.76.3`, ключ — CI-переменная `DEPLOY_SSH_KEY`, base64):
 
-```nginx
-server {
-    listen 80;
-    server_name prevozni.com www.prevozni.com;
+1. `git fetch && git reset --hard origin/main` — в основном чекауте `/root/klaschuk/transit-aggregator`.
+2. `pip install -r requirements.txt` (venv).
+3. `python scripts/minify_css.py` — пересборка `app/static/css/dist/` (app.css, app.mobile.css, ads.css, admin.css). **dist/ в gitignore и деплоем НЕ приезжает из репо — он собирается именно на этом шаге.**
+4. `systemctl restart transit`.
+5. `curl /health` и печать `status` + `version` (фикс a4a31b0: раньше джоба парсила несуществующий ключ и всегда падала).
 
-    # Redirect www → non-www
-    if ($host = www.prevozni.com) {
-        return 301 https://prevozni.com$request_uri;
-    }
+Порядок работы: изолированный worktree → ветка → MR → merge в `main` → дождаться зелёного `test` → нажать ▶ на джобе `deploy`.
 
-    location / {
-        proxy_pass http://127.0.0.1:5000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
+## 2. Локальная альтернатива — scripts/deploy.sh
 
-    location /static/ {
-        alias /home/klaschuk/transit/app/static/;
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
-}
-```
+На самом боксе:
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/transit /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl reload nginx
+bash scripts/deploy.sh          # деплой main
+bash scripts/deploy.sh <branch> # деплой другой ветки (редко нужно)
 ```
 
-## 2. SSL Certificate
+Делает то же, что CI-джоба: `git reset --hard origin/<branch>` → `pip install` → `minify_css.py` (с warn-fallback) → `systemctl restart transit` → проверка `/health == 200`, при провале `exit 1`.
+
+## 3. Почему деплой ресетит main и зачем worktree
+
+Оба пути деплоя делают `git reset --hard origin/main` в основном чекауте. Любые незакоммиченные правки и локальные ветки в `/root/klaschuk/transit-aggregator` **будут стёрты**.
+
+Поэтому железное правило: **вся работа — в изолированных worktree** (`/root/klaschuk/.wt/*`, `/root/klaschuk-*-wt` и т.д.), а в main попадаем через rebase + merge/push. Основной чекаут — только для прод-сервиса и деплоя.
+
+## 4. Пайплайны данных
+
+### 4.1 Лёгкий ночной — `scripts/run_enrich_night.sh` (cron 03:00 UTC)
+
+Состав (актуализирован коммитом a4a31b0):
+
+1. `minify_css.py`;
+2. чистка OG-кэша (старше 7 дней);
+3. `scrape_nis_stops` → `enrich_stops_coords`;
+4. `discover_cities` → `scrape_intercity` → `scrape_international`;
+5. `build_db.py` (сервис стопится только на время сборки);
+6. `refresh_bt4_lineids.py` — карта «пара городов → lineId» для партнёрки BusTicket4 (affiliateId=735, все обычные маршруты);
+7. restart transit + проверка `/health` с ретраем;
+8. маркер `logs/last_refresh.json`.
+
+⚠️ На момент аудита cron вызывал **протухшую копию** `/usr/local/bin/transit-enrich-night.sh` (от 15 мая, без intercity/international/BT4-шагов). Фикс готов: `/root/infra-backup-2026-06-12/apply-cron-fix.sh` переключает crontab на репо-скрипты — применить и забыть. Подробнее: [infrastructure.md §6](infrastructure.md).
+
+### 4.2 Полный ручной — `scripts/nightly_refresh.sh` (~30–60 мин, сервис остановлен на всё время)
+
+Запускать руками при больших обновлениях данных:
 
 ```bash
-sudo apt install certbot python3-certbot-nginx
-sudo certbot --nginx -d prevozni.com -d www.prevozni.com
+bash scripts/nightly_refresh.sh
 ```
 
-Certbot auto-renews via systemd timer. Verify:
-```bash
-sudo certbot renew --dry-run
-```
+Состав:
 
-## 3. Update Application Config
+1. `systemctl stop transit`;
+2. 9 скрейперов с пер-скрейперным статусом, падение любого не фатально: `discover_cities` (первым — каталог городов BT4), `scrape_gsp`, `scrape_intercity`, `scrape_srbvoz`, `scrape_lasta`, `scrape_gspns`, `scrape_gspns_schedule`, `scrape_naissus`, `scrape_international`;
+3. `build_db.py` — **критичный шаг**: собирает в `transit.duckdb.tmp` и атомарно `os.replace` → `transit.duckdb`; при провале — старт сервиса на старой БД, маркер fail, exit 1. build_db **сам качает GTFS** (фикс a0f2f48 — раньше ребилд стирал расписание Белграда); `import_gtfs.py` руками НЕ запускать;
+4. `enrich_post_build.py` (Нови-Сад OSM);
+5. `scrape_route_geometries.py` — полилинии линий; `/health` считает `line_geometries` критической таблицей (урок инцидента 25.04);
+6. `data_snapshot.py` (срез row-counts), `price_snapshot.py` + `price_alert_scan.py`;
+7. `enrich_stops_coords.py --limit 50`;
+8. `refresh_bt4_lineids.py` — не фатален: держит старую карту при покрытии <85%;
+9. `systemctl start transit` → healthcheck с одним ретраем;
+10. маркеры `logs/last_refresh.json` (status/finished_at/duration/scrapers — читается `/health`) и `last_refresh.txt`; чистка `nightly_*.log` старше 14 дней.
 
-Edit systemd service to set production environment:
+Sentry-пинги в пайплайне — no-op, пока SENTRY_DSN не задан.
 
-```bash
-sudo nano /etc/systemd/system/transit.service
-```
-
-Add/update the `Environment` lines:
-
-```ini
-[Service]
-Environment=FLASK_ENV=production
-Environment=BASE_URL=https://prevozni.com
-Environment=SECRET_KEY=<generate-a-random-key>
-Environment=GA_TRACKING_ID=G-XXXXXXXXXX
-Environment=ADSENSE_ID=ca-pub-XXXXXXXXXX
-```
+## 5. Как проверить успешность деплоя
 
 ```bash
-sudo systemctl daemon-reload
-sudo systemctl restart transit
+curl -s https://prevozni.com/health | python3 -m json.tool
 ```
 
-### Verify
+- `status` должен быть ok, HTTP 200;
+- **`version` = git SHA** — сверить с SHA задеплоенного коммита (`git rev-parse --short origin/main`). Если version отстаёт — код смержен, но кнопку ▶ не нажимали (это норма при manual-деплое, прод может отставать от main);
+- после дата-пайплайнов: в `/health` смотреть возраст `last_refresh.json` и статусы скрейперов;
+- быстрые smoke-проверки: `curl -s https://prevozni.com/sitemap.xml | head -5`, главная, любой `/rute/{slug}/`.
 
-```bash
-curl -s https://prevozni.com/health
-curl -s https://prevozni.com/sitemap.xml | head -5
-curl -s https://prevozni.com/robots.txt
-```
+Ориентиры по данным (июнь 2026): 569 маршрутов, 3931 рейс, 69 операторов, 661 городская линия, 4 города. Резкое падение цифр после ребилда — повод откатиться/разбираться.
 
-## 4. Google Analytics
+## 6. Troubleshooting
 
-1. Go to https://analytics.google.com
-2. Create property for `prevozni.com`
-3. Get Measurement ID (format: `G-XXXXXXXXXX`)
-4. Set `GA_TRACKING_ID=G-XXXXXXXXXX` in systemd Environment
-5. Restart: `sudo systemctl restart transit`
-6. Verify: view source of homepage should contain `gtag.js`
+| Симптом | Что делать |
+|---------|-----------|
+| **503 во время ребилда БД** | Это штатно: `/health` и сайт отдают 503 + `Retry-After`, пока идёт build_db (фикс 9886c0b — раньше были фантомные 404 в GSC). Дождаться конца ребилда, ничего не рестартить. |
+| Сервис не стартует | `journalctl -u transit -n 50`; ошибки gunicorn — в `logs/error.log` (внутри репо). |
+| Нужны access-логи | `logs/nginx_access.log` и `logs/nginx_error.log` **в репо** (не `/var/log/nginx/` — site-логи туда не пишутся). `logs/access.log` пуст — gunicorn access-log не включён. |
+| «DB locked» | Больше **не проблема**: build_db собирает в `.tmp` и делает атомарный `os.replace`, приложение читает БД read-only. Если что-то держит файл — `fuser data/dbs/transit.duckdb`. |
+| Прод отстаёт от main | Норма при manual-деплое — нажать ▶ в GitLab или `bash scripts/deploy.sh`. |
+| CSS «сломался» после деплоя | Проверить, что шаг `minify_css.py` прошёл: `dist/` gitignored и собирается только при деплое. Ловушка: minify ломает `+` в `clamp()`/`calc()` — проверять локально до пуша. |
+| Сайт лежит, /health не отвечает | cron-healthcheck (*/5 мин) сам рестартит сервис; вручную — `systemctl restart transit`, лог `/var/log/transit-healthcheck.log`. |
+| Высокая память | `systemctl restart transit` (workers и так перезапускаются по `--max-requests 2000`). |
 
-GA code in `base.html` is conditional — only loads when `GA_TRACKING_ID` is set.
+## 7. Чего в этом гайде больше нет (и почему)
 
-## 5. Google Search Console
-
-1. Go to https://search.google.com/search-console/
-2. Add property: `https://prevozni.com`
-3. Verify ownership via DNS TXT record:
-   ```
-   TXT  prevozni.com  "google-site-verification=XXXX"
-   ```
-4. Submit sitemap: `https://prevozni.com/sitemap.xml`
-5. Request indexing for homepage
-6. Monitor Coverage report — fix any errors within 48h
-
-## 6. Google AdSense
-
-**Prerequisites** (apply after 2-4 weeks of indexed content):
-- 2500+ indexed pages
-- Original content on every page
-- Privacy policy page (add to /o-nama/ or create separate)
-- No thin/empty pages in index
-
-**Steps:**
-1. Apply at https://adsense.google.com
-2. Get Publisher ID (format: `ca-pub-XXXXXXXXXX`)
-3. Set `ADSENSE_ID=ca-pub-XXXXXXXXXX` in systemd Environment
-4. Restart: `sudo systemctl restart transit`
-5. AdSense JS loads automatically via `base.html`
-6. Configure ad units in AdSense dashboard
-
-**Recommended ad placements** (add manually later):
-- After search results header
-- Between trip card groups
-- Sidebar on desktop (filter panel area)
-- Before footer on content pages
-
-## 7. Data Pipeline
-
-### Nightly Refresh (cron 2:00 AM)
-
-```
-scripts/nightly_refresh.sh
-├── scrape_gsp.py        — Belgrade city transit (bgprevoz API)
-├── scrape_intercity.py  — Intercity buses (busticket4.me + polazak.rs)
-├── scrape_srbvoz.py     — Trains (srbijavoz.rs)
-├── scrape_lasta.py      — Lasta bus operator
-├── scrape_gspns.py      — Novi Sad city transit (gspns.co.rs)
-├── scrape_naissus.py    — Niš city transit
-├── build_db.py          — Rebuild transit.duckdb from raw data
-└── enrich_stops_coords.py — Geocode 50 stops/night (Overpass + Nominatim)
-```
-
-### Crontab
-
-```
-0 2 * * *   /home/klaschuk/transit/scripts/nightly_refresh.sh
-*/5 * * * * /home/klaschuk/transit/scripts/healthcheck.sh
-```
-
-### Manual Commands
-
-```bash
-# Full refresh
-sudo bash scripts/nightly_refresh.sh
-
-# Single scraper
-venv/bin/python3 -u data/pipelines/scrape_gsp.py
-
-# Rebuild DB (stop service first)
-sudo systemctl stop transit
-venv/bin/python3 -u data/pipelines/build_db.py
-sudo systemctl start transit
-
-# Last refresh status
-cat logs/last_refresh.txt
-```
-
-## 8. Monitoring
-
-| What | How | Frequency |
-|------|-----|-----------|
-| Service health | `scripts/healthcheck.sh` | cron */5 min |
-| Data refresh | `scripts/nightly_refresh.sh` | cron 2:00 AM |
-| Access logs | `logs/access.log` | continuous |
-| Error logs | `logs/error.log` | continuous |
-| Refresh logs | `logs/nightly_YYYYMMDD.log` | daily |
-| Google Analytics | analytics.google.com | real-time |
-| Search Console | search.google.com/search-console | weekly |
-| Core Web Vitals | PageSpeed Insights | monthly |
-
-## 9. Troubleshooting
-
-```bash
-# Service won't start
-sudo journalctl -u transit -n 50
-
-# DB locked error
-fuser data/dbs/transit.duckdb
-sudo systemctl stop transit  # release lock
-
-# High memory
-sudo systemctl restart transit
-
-# Check gunicorn workers
-ps aux | grep gunicorn
-
-# Check nginx errors
-sudo tail -50 /var/log/nginx/error.log
-
-# SSL certificate issues
-sudo certbot certificates
-sudo certbot renew --dry-run
-```
-
-## 10. Post-Launch Checklist
-
-- [ ] Domain resolves correctly
-- [ ] HTTPS works (no mixed content)
-- [ ] HTTP redirects to HTTPS
-- [ ] www redirects to non-www
-- [ ] `config.py` BASE_URL updated to domain
-- [ ] sitemap.xml shows domain URLs
-- [ ] robots.txt shows domain sitemap
-- [ ] Google Search Console property verified
-- [ ] Sitemap submitted to GSC
-- [ ] Google Analytics tracking live
-- [ ] Healthcheck cron active
-- [ ] Nightly refresh cron active
-- [ ] All 11 page types return 200
+- **Certbot/SSL на origin** — не используется: TLS терминирует Cloudflare, origin слушает только :80 (CF Flexible).
+- **Autodeploy по cron** — отключён 2026-06-04, скрипт лежит как `transit-autodeploy.sh.disabled`.
+- **Настройка GA/AdSense с нуля** — давно сделано и live: GA4 `G-0XPYJTVSSZ`, AdSense `ca-pub-9538841764038287` (в `.env`).
+- **Bookaway на обычных маршрутах** — убран; Bookaway (offer_id=34, aff_id=4033, TUNE-трекер) только для дальних направлений (Азия). На обычных маршрутах — BusTicket4 (affiliateId=735, комиссия 2%). FlixBus убран совсем.

@@ -1,135 +1,167 @@
 # Инфраструктура
 
-## Сервер
+> **Обновлено 2026-06-12, проверено на живом сервере.**
+> Прод — это **178.105.76.3** (hostname `prevozni`), а не montiko. Деплой-бокс и прод — один и тот же сервер.
+
+## 1. Сервер
 
 | Параметр | Значение |
 |----------|----------|
 | Домен | prevozni.com |
-| IP | 81.28.248.71 |
-| Хост | montiko (Подгорица) |
-| OS | Linux 6.8.0 |
-| RAM | 32 GB |
-| Disk | 157 GB |
+| IP | 178.105.76.3 (eth0, /32) |
+| Hostname | `prevozni` |
+| ОС | Ubuntu 24.04.3 LTS, kernel 6.8.0, TZ = UTC |
+| Железо | 2 vCPU, 3.7 GiB RAM, диск 75 GB (занято ~15 GB / 20%) |
+| Рабочая директория | `/root/klaschuk/transit-aggregator` (чекаут main; venv внутри) |
+| Python | 3.12.3 (системный и venv) |
 
-## Стек деплоя
+Также на боксе крутятся: `proslushka-bot.service` (посторонний TG-бот, root) и два процесса code-server (remote-сессии).
+
+Montiko (81.28.248.71) в обслуживании prevozni.com **не участвует** — фигурировал только в устаревших доках; его текущая роль с прод-бокса не видна.
+
+## 2. Цепочка запроса
 
 ```
-Client (browser)
-    ↓
-Cloudflare (DNS, CDN, SSL, WAF)
-    ↓
-nginx (reverse proxy, static files, security headers)
-    ↓
-Gunicorn (2 workers, port 5000, localhost only)
-    ↓
-Flask app (run.py)
-    ↓
-DuckDB (read-only, file-based)
+Браузер
+  → Cloudflare (DNS proxied, CDN, SSL-терминация, WAF)
+  → nginx :80 (origin принимает ТОЛЬКО HTTP — фактически режим CF Flexible;
+                на 443 никто не слушает, certbot не установлен)
+  → gunicorn 127.0.0.1:8000 (2 workers)
+  → Flask app:create_app() (ProxyFix x_for/x_proto/x_host=1)
+  → DuckDB read-only (data/dbs/transit.duckdb, ~292 MB)
+    + analytics.sqlite (~77 MB)
 ```
 
-## nginx
+Масштаб данных (июнь 2026): 569 маршрутов, 3931 рейс, 69 операторов, 661 городская линия, 4 города.
 
-```nginx
-# /etc/nginx/conf.d/transit.conf
-server {
-    listen 80;
-    server_name prevozni.com;
+## 3. nginx
 
-    # Security headers
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+Конфиг: `/etc/nginx/sites-available/prevozni` → симлинк в `sites-enabled/prevozni`.
 
-    # Gzip
-    gzip on;
-    gzip_types text/plain text/css application/json application/javascript text/xml;
-    gzip_min_length 256;
+- `listen 80;` `server_name prevozni.com www.prevozni.com;` — www-редиректа в конфиге **нет** (www отдаёт 200 тем же контентом).
+- Запрос с `Host=178.105.76.3` (прямой IP) → `return 444`.
+- Allowlist всех Cloudflare IPv4+IPv6 диапазонов + `127.0.0.1`, затем `deny all` — на весь server-блок.
+- `/static/` → `alias /root/klaschuk/transit-aggregator/app/static/`, `expires 30d`, `Cache-Control "public, max-age=86400"` (без `immutable`).
+- `proxy_pass http://127.0.0.1:8000`, заголовки `X-Forwarded-*`, `proxy_read_timeout 30s`.
+- Логи nginx пишутся **внутрь репо**: `logs/nginx_access.log`, `logs/nginx_error.log`.
 
-    # Static files (nginx serves directly, 7d cache)
-    location /static/ {
-        alias /home/klaschuk/transit/app/static/;
-        expires 7d;
-        add_header Cache-Control "public, immutable";
-    }
+Security-заголовки (HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy) ставит **не nginx, а Flask** в `after_request` (`app/__init__.py`). gzip: `gzip on` в `/etc/nginx/nginx.conf` (http-уровень) + flask-compress в приложении.
 
-    location / {
-        # Cloudflare-only access
-        allow 103.21.244.0/22;
-        allow 103.22.200.0/22;
-        # ... (full Cloudflare IP list)
-        allow 127.0.0.1;
-        deny all;
+## 4. systemd — transit.service
 
-        proxy_pass http://127.0.0.1:5000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_read_timeout 30;
-    }
-}
-```
-
-## Cloudflare
-
-- **DNS:** A record → 81.28.248.71 (proxied)
-- **SSL:** Full mode (Cloudflare terminates SSL)
-- **Cache:** Standard (static assets)
-- **WAF:** Managed rules enabled
-
-## systemd service
+`/etc/systemd/system/transit.service`:
 
 ```ini
-# /etc/systemd/system/transit.service
 [Service]
-User=klaschuk
-WorkingDirectory=/home/klaschuk/transit
-Environment=PATH=/home/klaschuk/transit/venv/bin
-Environment=FLASK_ENV=production
-Environment=BASE_URL=https://prevozni.com
-ExecStart=gunicorn -w 2 --max-requests 500 --max-requests-jitter 50 --timeout 30
-  -b 127.0.0.1:5000
-  --access-logfile logs/access.log
-  --error-logfile logs/error.log
-  run:app
+User=root                      # hardening-TODO: до сих пор root
+WorkingDirectory=/root/klaschuk/transit-aggregator
+EnvironmentFile=/root/klaschuk/transit-aggregator/.env
+ExecStart=.../venv/bin/gunicorn -w 2 --max-requests 2000 --max-requests-jitter 200 \
+          --timeout 30 --bind 127.0.0.1:8000 "app:create_app()"
 Restart=always
 RestartSec=5
+StandardOutput=append:.../logs/access.log   # фактически пуст: gunicorn access-log не включён
+StandardError=append:.../logs/error.log
 ```
 
-## Мониторинг
+Drop-in `transit.service.d/adsense.conf` содержит закомментированный устаревший `ADSENSE_ID=pub-1417138799653355` — актуальный pub-id живёт в `.env`.
 
-| Что | Как | Когда |
-|-----|-----|-------|
-| Healthcheck | scripts/healthcheck.sh | cron */5 min |
-| Auto-restart | systemd Restart=always | при падении |
-| Enrich coords | scripts/run_enrich_night.sh | cron 3:00 AM |
-| Access log | logs/access.log | каждый запрос |
-| Error log | logs/error.log | ошибки gunicorn |
-| Analytics | Umami | real-time |
+Версии: gunicorn 25.2.0, Flask 3.1.3, duckdb 1.2.1, flask-compress 1.17, flask-wtf 1.2.2, flask-limiter 4.1.1, sentry-sdk[flask] 2.17.0.
 
-## Обновление данных
+## 5. Переменные окружения
 
-```bash
-# Full pipeline
-sudo systemctl stop transit
+Файл: `/root/klaschuk/transit-aggregator/.env` (права 0600, root). Значения секретов здесь не приводим.
 
-python3 -u data/pipelines/scrape_gsp.py          # Belgrade GSP
-python3 -u data/pipelines/scrape_gspns.py         # Novi Sad JGSP
-python3 -u data/pipelines/scrape_intercity.py     # busticket4.me (48 cities)
-python3 -u data/pipelines/scrape_srbvoz.py        # Srbija Voz trains
-python3 -u data/pipelines/scrape_lasta.py         # polazak.rs (302 routes)
-python3 -u data/pipelines/build_db.py             # Build DuckDB
-python3 -u data/pipelines/enrich_stops_coords.py enrich --limit 500
+**Заданы:**
 
-sudo systemctl start transit
+| Переменная | Значение / назначение |
+|------------|----------------------|
+| `FLASK_ENV` | `production` |
+| `SECRET_KEY` | задан (обязателен — без него RuntimeError на старте) |
+| `DUCKDB_PATH` | `/root/klaschuk/transit-aggregator/data/dbs/transit.duckdb` |
+| `GA_TRACKING_ID` | `G-0XPYJTVSSZ` |
+| `ADSENSE_ID`, `ADSENSE_PUB_ID` | `ca-pub-9538841764038287` (live; PUB_ID — для `/ads.txt`) |
+| `ADMIN_USER` / `ADMIN_PASS` | basic-auth на `/admin/*` |
+| `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` | контакт-форма → Telegram |
+| `BOOKAWAY_AFF_ID` | `4033` (Bookaway, offer_id=34, TUNE-трекер — ТОЛЬКО дальние направления/Азия) |
+| `BOOKAWAY_NETWORK_ID` | `bookaway2` |
+| `BOOKAWAY_API_KEY` | задан |
+| `GROQ_API_KEY` | AI-маршруты дальних направлений |
+| `MAPBOX_TOKEN` | задан |
+| `ASSET_VERSION` | `hero1` — судя по всему legacy: версия ассетов в рантайме берётся из git SHA |
+
+Партнёрка на обычных маршрутах — **BusTicket4, affiliateId=735** (комиссия 2%); она задаётся не env-переменной, а данными (`refresh_bt4_lineids.py`, см. деплой-гайд). FlixBus убран.
+
+**Поддерживаются кодом, но НЕ заданы (фича выключена / работает дефолт):**
+
+- `SENTRY_DSN` / `SENTRY_ENV` / `SENTRY_TRACES_SAMPLE_RATE` → **Sentry в проде не активен**;
+- `SMTP_*` / `MAIL_FROM` → mailer пишет в `logs/mail_dev.log`; `MAILGUN_*`;
+- `BASE_URL` (дефолт ProductionConfig = `https://prevozni.com`);
+- `IP_HASH_SALT`; `ADSENSE_SLOT_*` (11 слотов); `EUR_RSD_RATE` (дефолт 117);
+- `GSC_CREDENTIALS_PATH` / `GSC_SITE_URL`; `YANDEX_VERIFICATION`; `CONTACT_EMAIL`;
+- `ANALYTICS_DB_PATH` (дефолт `data/dbs/analytics.sqlite`); `REVIEWS_AUTO_APPROVE_TRUSTED`; `MAIL_PHYSICAL_ADDRESS`.
+
+## 6. Cron (root, время UTC)
+
+Фактический crontab:
+
+```
+*/5 * * * * /usr/local/bin/transit-healthcheck.sh
+0 3 * * *   /usr/local/bin/transit-enrich-night.sh
 ```
 
-## Производительность
+⚠️ **Обе записи указывают на КОПИИ в /usr/local/bin, а не на скрипты из репо:**
 
-| Страница | Req/sec | p95 (ms) |
-|----------|---------|----------|
-| `/` (главная) | 1,007 | 21 |
-| `/rute/` (335 маршрутов) | 122 | 96 |
-| `/gradski/beograd/` (514 линий) | 151 | 80 |
-| `/rute/beograd-novi-sad/` | 153 | 66 |
-| `/gradski/beograd/stajaliste/sajam/` | 113 | 143 |
+- `transit-healthcheck.sh` — байт-в-байт копия `scripts/healthcheck.sh` (curl `127.0.0.1:8000/health`; не-200 → `systemctl restart transit`; лог `/var/log/transit-healthcheck.log`). Безвредно, но дублирует репо.
+- `transit-enrich-night.sh` — **протухшая копия от 15 мая**: делает только scrape_nis_stops → enrich_stops_coords → stop transit → build_db → start → `logs/last_refresh.json`. НЕ скрейпит intercity/international, НЕ обновляет BT4 line_ids, НЕ минифицирует CSS.
+- Актуальная репо-версия лёгкого ночного пайплайна — `scripts/run_enrich_night.sh` (состав — в деплой-гайде).
+- **Готовый фикс:** `/root/infra-backup-2026-06-12/apply-cron-fix.sh` переключает crontab на репо-скрипты (`scripts/healthcheck.sh`, `scripts/run_enrich_night.sh`) и удаляет копии. На момент аудита **не применён** (бэкапы старого crontab лежат там же).
+
+Чего в кроне **нет**: `nightly_refresh.sh` (это ручной полный пайплайн), `weekly_seo.sh` и `sunday_content_refresh.sh` (хардкодят несуществующий `/home/klaschuk/transit` — на этом боксе нерабочие), `ping_indexnow.sh`, backlinks_*, newsletter_send. Autodeploy-cron (каждые 2 мин) **отключён 2026-06-04** (коммит 136890a; скрипт переименован в `transit-autodeploy.sh.disabled`).
+
+## 7. Мониторинг
+
+| Что | Как |
+|-----|-----|
+| `/health` (Flask) | всегда JSON; 200 только когда все критические проверки зелёные, иначе **503 + Retry-After** (фикс 9886c0b). Проверяет: transit_db (наличие, возраст, COUNT(*) по критическим таблицам routes/trips/city_lines/city_stops/city_line_stops/operators/line_geometries…), analytics_db (degraded, не 503), logs_writable, disk_free_pct, маркер ночного прогона (`last_refresh.json`), uptime_seconds, `version` = git SHA |
+| Cron-healthcheck | */5 мин: авто-restart при не-200, лог `/var/log/transit-healthcheck.log` |
+| systemd | `Restart=always` / `RestartSec=5` |
+| Аналитика | Umami (cloud.umami.is) + GA4 (`G-0XPYJTVSSZ`) в base.html; собственная `analytics.sqlite` (клики и пр., видна в /health) |
+| Sentry | код полностью готов (observability.init_sentry, `scripts/sentry_notify.py`, `docs/06_tech/sentry-setup.md`), но **выключен** — SENTRY_DSN не задан |
+| Telegram | уведомления контакт-формы (работает) |
+| Админка | `/admin/*` за basic-auth |
+
+Внешнего uptime-мониторинга (UptimeRobot и т.п.) следов на боксе нет.
+
+## 8. Логи и ротация
+
+- logrotate `/etc/logrotate.d/transit`: daily, rotate 14, copytruncate, dateext — для `error.log`, `access.log`, `nginx_access.log`, `nginx_error.log`, `autodeploy.log`, `enrich.log`.
+- Намеренно **исключены** из ротации state-логи (читаются обратно как состояние): `backlinks_sent.log`, `price_alerts.log`, `contact_messages.log`.
+- `logs/access.log` пуст с 4 мая (gunicorn access-log не включён) — **реальные access-логи смотреть в `logs/nginx_access.log`**.
+- `nightly_*.log` чистит сам `nightly_refresh.sh` (старше 14 дней).
+
+## 9. Безопасность
+
+**Сделано (hardening 2026-06-04):**
+
+- ufw active: deny incoming; allow 22, 80, 443 (на 443 никто не слушает — правило «мёртвое»);
+- SSH key-only (`/etc/ssh/sshd_config.d/99-hardening.conf`: `PasswordAuthentication no`, `PermitRootLogin prohibit-password`);
+- logrotate; ротация GitLab PAT (последняя 2026-06-11);
+- nginx CF-only allowlist + `return 444` на прямой IP;
+- security headers + CSP на уровне приложения; `.env` 0600.
+
+**НЕ сделано:**
+
+- gunicorn до сих пор работает под **root** (`User=root` в юните);
+- CF Authenticated Origin Pulls / Full (strict) — origin вообще без TLS (только :80, фактически Flexible);
+- fail2ban установлен, но **inactive**;
+- `/root/.git-credentials` — plaintext GitLab PAT (хотя origin уже переведён на SSH).
+
+## 10. Бэкапы
+
+🚩 **Бэкапов нет.** Ни БД, ни offsite-копий.
+
+- `transit.duckdb` (~292 MB) воспроизводим ночной пересборкой из `data/raw` — потеря неприятна, но не фатальна.
+- **`analytics.sqlite` (~77 MB, накопленные клики/аналитика) и state-логи невоспроизводимы и ничем не бэкапятся.** Потеря диска = потеря всей собственной аналитики.
+- На боксе есть только точечные ручные копии: `/root/infra-backup-2026-06-12` (старый crontab + копии cron-скриптов) и `/root/bt4_lineids.backup.json`.
+- Есть ли провайдерские снапшоты VPS — с бокса не видно, не подтверждено.
