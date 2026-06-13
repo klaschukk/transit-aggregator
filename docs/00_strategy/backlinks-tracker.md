@@ -1,5 +1,10 @@
 # Backlinks tracker
 
+> **Status: campaign PAUSED since 2026-04-20.** No outreach has run and no
+> weekly snapshot has been filled for 7+ weeks. Before resuming, run
+> `python scripts/backlinks_digest.py` and refresh the pitch templates
+> (stale route/operator counts, "no ads" claims — AdSense is live now).
+
 Updated weekly after `python scripts/backlinks_digest.py`. Keep this
 file short — this is the *scoreboard*, the raw target list lives in
 `backlinks-targets.csv` and the per-target state is tracked there.
@@ -9,7 +14,7 @@ file short — this is the *scoreboard*, the raw target list lives in
 | Horizon | Target | Why |
 |---|---|---|
 | 3 months | 20 backlinks | Crosses Google's "noticeable" threshold — at this point ranking movement becomes measurable in Search Console. |
-| 6 months | 50 backlinks | Equal-ish to current busticket4.me top competitor tier within Balkan transit niche. |
+| 6 months | 50 backlinks | Equal-ish to busticket4.me tier within Balkan transit niche (top competitor for SEO purposes — and, since June 2026, also our affiliate partner, id 735). |
 | 12 months | 100 backlinks | Diminishing returns after this — shift budget from outreach to content. |
 
 DA-weighted score matters more than raw count: one DA-80 tourism-board

@@ -7,6 +7,30 @@
 
 ---
 
+## ⚠️ Ревизия: июнь 2026 (2026-06-12)
+
+Майская ревизия не делалась. Ключевые изменения относительно апрельской версии:
+
+1. **Партнёрка перевёрнута.** Основной affiliate-канал теперь **BusTicket4**
+   (affiliateId=735, комиссия 2%) на ВСЕХ обычных маршрутах. Bookaway
+   (offer_id=34, aff_id=4033, TUNE-трекер) с 2026-06-10 оставлен ТОЛЬКО для
+   дальних направлений (Азия). FlixBus убран. Вся финмодель §1 построена на
+   Bookaway 8% — **требует рекалибровки под BT4 2%**; дашборд BT4 показывает
+   **0 продаж за апрель–июнь**, реальный EPC пока неизвестен.
+2. **AdSense уже live** (ca-pub-9538841764038287, слоты активированы) —
+   Приоритет 1 Фазы 2 выполнен раньше плана.
+3. **Инсайт GSC (2026-06-08):** фактический трафик — городские линии, а не
+   межгород. Приоритеты Фазы 1 (city-pair контент) надо пересмотреть в пользу
+   городских страниц; генерик «red vožnje autobusa i vozova» — high-CTR
+   возможность.
+4. **Риск 5.3** («busticket4 блокирует скрапер») смягчён: теперь официальное
+   affiliate-партнёрство.
+
+Конкурентный анализ §2 остаётся каноническим (в §2.8 влит ранний
+`competitor_analysis.md`).
+
+---
+
 ## 0. Тезис документа
 
 Prevozni — programmatic SEO play на транспортном нишевом рынке Сербии/Балкан, где конкуренты либо государственные сайты с ужасным UX (gsp.rs, srbvoz.rs), либо платные билетные агрегаторы (busticket4.me, getbybus.com). Окно возможностей: 12-18 месяцев пока Google ещё индексирует programmatic-контент, пока AI Overviews не съели search intent для "расписание автобусов". Один выиграшный канал дохода — affiliate + AdSense в пропорции ~60/40. Данные — главный moat.
@@ -22,6 +46,10 @@ Prevozni — programmatic SEO play на транспортном нишевом 
 - Prevozni без A/B тестинга CTA — принимаем **2%** как базу
 
 **EPC (earnings per click) Bookaway / 12Go-style:**
+
+> _Ревизия июнь 2026: расчёт ниже относится к Bookaway, который теперь
+> работает только на дальних направлениях. Для основного канала (BusTicket4,
+> комиссия 2%) EPC надо мерить заново — пока 0 подтверждённых продаж._
 - Bookaway public affiliate rate: 8% commission от ticket price (source: bookaway.com/affiliate-program-partners landing page)
 - Avg Serbia bus ticket: €8-20 (busticket4.me pricing check, апрель 2026)
 - Conversion rate click → booking: **1-3%** (source: Awin 2024 Travel Benchmarks Report — "Search & Aggregator" category)
@@ -211,7 +239,11 @@ Prevozni — programmatic SEO play на транспортном нишевом 
 
 ### Фаза 2 (месяцы 4-6): Scale → 2000 visits/day
 
-**Priority 1: AdSense approval**
+**Priority 1: AdSense approval — ✅ СДЕЛАНО (июнь 2026, раньше плана)**
+
+AdSense подключён и крутится: ca-pub-9538841764038287, слоты активированы.
+Дальше — следить за RPM (см. `docs/05_monetization/adsense-strategy.md`).
+Исходные требования оставлены для истории:
 
 AdSense требования (точно из support.google.com/adsense/answer/9724):
 - Unique quality content (у нас есть — programmatic + guides)
@@ -340,6 +372,10 @@ Ranked by ROI (impact/effort). Каждый — исполнимо за 1 нед
   - Ежемесячно проверять dashboard Bookaway. При изменениях — iterate quickly.
 
 ### 5.3 busticket4.me блокирует scraper
+
+> _Ревизия июнь 2026: риск резко снижен — с busticket4.me заключено
+> официальное affiliate-партнёрство (affiliateId=735), мы им приводим
+> покупателей. Fallback-опция из mitigation фактически реализована._
 
 - **Risk:** Cloudflare challenge, IP ban, legal letter. Потеря 40-50% data coverage (intercity routes).
 - **Mitigation:**
@@ -502,4 +538,4 @@ Ranked by ROI (impact/effort). Каждый — исполнимо за 1 нед
 
 ---
 
-*Документ living, пересматривать каждый месяц после monthly review (раздел 6). Следующая ревизия: май 2026.*
+*Документ living, пересматривать каждый месяц после monthly review (раздел 6). Последняя ревизия: июнь 2026 (блок «⚠️ Ревизия» в начале). Следующая: июль 2026.*

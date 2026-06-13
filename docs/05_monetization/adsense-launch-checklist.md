@@ -1,23 +1,32 @@
 # AdSense launch checklist (15-minute runbook)
 
+> **DONE — AdSense is live** (approved, `ca-pub-9538841764038287`, slots
+> activated, June 2026). Keep this runbook for re-setup or enabling new
+> slots. Prod facts updated: the box is **178.105.76.3** (not montiko),
+> `transit.service` runs as root, env lives in
+> `/root/klaschuk/transit-aggregator/.env` (`EnvironmentFile=`), not in
+> `Environment=` lines of the unit.
+
 > Run this top-to-bottom the day AdSense approval lands. Every step is
 > a hard gate — don't skip the verification line under each one.
 
 ## 0 · Pre-conditions (verify before starting)
 
-- [ ] AdSense application status = **Approved** in
+- [x] AdSense application status = **Approved** in
       <https://www.google.com/adsense/>
-- [ ] `ADSENSE_PUB_ID` from approval email captured (`pub-1234567890`)
-- [ ] You have ssh access to the prod box (`81.28.248.71`)
-- [ ] You have systemd unit edit rights (`sudo systemctl edit transit.service`)
+- [x] `ADSENSE_PUB_ID` from approval email captured
+      (live: `ca-pub-9538841764038287`)
+- [x] You have ssh access to the prod box (`178.105.76.3`)
+- [x] You can edit `/root/klaschuk/transit-aggregator/.env` (root)
 
 ## 1 · Set the publisher ID + bootstrap (3 min)
 
-In the systemd unit:
+In `/root/klaschuk/transit-aggregator/.env` (loaded by transit.service
+via `EnvironmentFile=`):
 
 ```ini
-Environment=ADSENSE_ID=ca-pub-1234567890
-Environment=ADSENSE_PUB_ID=pub-1234567890
+ADSENSE_ID=ca-pub-1234567890
+ADSENSE_PUB_ID=pub-1234567890
 ```
 
 Reload + verify:
@@ -48,15 +57,18 @@ name verbatim, copy the slot ID, paste into the env var.
 | `city_transport_mid` | City transport — mid | Horizontal | `ADSENSE_SLOT_CITY_TRANSPORT_MID` |
 | `catalog_in_feed` | Catalog — bottom | Horizontal | `ADSENSE_SLOT_CATALOG_IN_FEED` |
 | `guide_sidebar` | Guide sidebar | Vertical | `ADSENSE_SLOT_GUIDE_SIDEBAR` |
+| `search_mid` | Search results — mid | Horizontal | `ADSENSE_SLOT_SEARCH_MID` |
+| `stop_bottom` | Stop detail — bottom | Horizontal | `ADSENSE_SLOT_STOP_BOTTOM` |
+| `line_bottom` | Line detail — bottom | Horizontal | `ADSENSE_SLOT_LINE_BOTTOM` |
 | `mobile_anchor` | Mobile anchor | Anchor (in-page) | `ADSENSE_SLOT_MOBILE_ANCHOR` |
 
-Add to systemd unit:
+Add to `.env`:
 
 ```ini
-Environment=ADSENSE_SLOT_HOME_TOP=1234567890
-Environment=ADSENSE_SLOT_ROUTE_BOTTOM=2345678901
-Environment=ADSENSE_SLOT_MOBILE_ANCHOR=3456789012
-# (start with these three only — see strategy.md "Iteration plan")
+ADSENSE_SLOT_HOME_TOP=1234567890
+ADSENSE_SLOT_ROUTE_BOTTOM=2345678901
+ADSENSE_SLOT_MOBILE_ANCHOR=3456789012
+# (start with these three only — see adsense-strategy.md "Iteration plan")
 ```
 
 ## 3 · Verify on staging or single page (3 min)
@@ -100,8 +112,8 @@ ADSENSE_ID_TEST=ca-pub-1234567890 scripts/ad_perf_check.sh
 Add to systemd timer / cron:
 
 ```cron
-0 3 * * * /home/klaschuk/transit/venv/bin/python \
-          /home/klaschuk/transit/scripts/adsense_fetch.py
+0 3 * * * /root/klaschuk/transit-aggregator/venv/bin/python \
+          /root/klaschuk/transit-aggregator/scripts/adsense_fetch.py
 ```
 
 Set `ADSENSE_CREDENTIALS_PATH` (service account JSON, mode `0600`)

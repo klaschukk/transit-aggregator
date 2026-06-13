@@ -2,7 +2,7 @@
 
 _Template for weekly review. Copy to `price-alerts-YYYY-WW.md` on Monday,
 fill from `python scripts/price_alert_scan.py --dry-run` + queries against
-analytics.duckdb, commit._
+analytics.sqlite (SQLite — analytics migrated off DuckDB), commit._
 
 ## Scoreboard
 
@@ -34,10 +34,12 @@ analytics.duckdb, commit._
 
 ## Queries for the above
 
+SQLite syntax (`sqlite3 analytics.sqlite`):
+
 ```sql
 -- Snapshots taken this week
 SELECT COUNT(*) FROM price_snapshots
-WHERE snapshot_ts >= CURRENT_TIMESTAMP - INTERVAL '7 days';
+WHERE snapshot_ts >= datetime('now', '-7 days');
 
 -- Routes qualified + emails sent
 SELECT COUNT(DISTINCT route_slug) AS routes,
@@ -45,22 +47,22 @@ SELECT COUNT(DISTINCT route_slug) AS routes,
        COUNT(*) FILTER (WHERE delivered_ok) AS delivered,
        COUNT(DISTINCT subscriber_id) AS recipients
 FROM price_alerts_sent
-WHERE sent_at >= CURRENT_TIMESTAMP - INTERVAL '7 days';
+WHERE sent_at >= datetime('now', '-7 days');
 
 -- Unsub post-alert (health signal)
 SELECT COUNT(*)
 FROM price_alerts_sent pa
 JOIN subscribers s ON s.id = pa.subscriber_id
-WHERE pa.sent_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'
+WHERE pa.sent_at >= datetime('now', '-7 days')
   AND s.unsubscribed_at IS NOT NULL
   AND s.unsubscribed_at > pa.sent_at
-  AND s.unsubscribed_at < pa.sent_at + INTERVAL '24 hours';
+  AND s.unsubscribed_at < datetime(pa.sent_at, '+24 hours');
 
--- Clicks from price-alert emails (if Bookaway logging is enabled)
+-- Clicks from price-alert emails (affiliate click logging)
 SELECT route_slug, COUNT(*) AS clicks
 FROM ba_clicks
 WHERE referrer LIKE '%utm_medium=price-alert%'
-  AND ts >= CURRENT_TIMESTAMP - INTERVAL '7 days'
+  AND ts >= datetime('now', '-7 days')
 GROUP BY route_slug ORDER BY clicks DESC;
 ```
 

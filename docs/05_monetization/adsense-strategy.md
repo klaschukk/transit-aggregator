@@ -1,13 +1,18 @@
 # AdSense placement strategy
 
 > Internal reference. Updated when slot inventory changes.
+> Last update: 2026-06-12 — AdSense is **live** (`ca-pub-9538841764038287`);
+> added `search_mid` / `stop_bottom` / `line_bottom` slots (in config since
+> 2026-05-15); partner names refreshed (BusTicket4 primary, Bookaway
+> far-only, FlixBus removed).
 
 ## Goals
 
 1. Maximise RPM without policy risk (Google ad-density / placement / UX).
 2. Protect Core Web Vitals — LCP regression budget **≤ 500ms**, CLS = 0.
-3. Never compete with Bookaway/FlixBus CTAs (those drive higher
-   per-visitor revenue than ad clicks at our traffic volume).
+3. Never compete with affiliate CTAs — BusTicket4 (primary partner) and
+   Bookaway (far destinations only) drive higher per-visitor revenue
+   than ad clicks at our traffic volume.
 4. Coexist cleanly with the GDPR cookie banner — no ads load until
    `cookie_consent=all` OR `essential` (latter triggers Google's
    `requestNonPersonalizedAds=1`).
@@ -40,6 +45,9 @@ breaking semantic structure. Wire only after manual baseline is stable.
 | `city_transport_mid` | `/gradski/{city}/` | After line-grid, before see-also | leaderboard | 90px / 100px |
 | `catalog_in_feed` | `/rute/` | After full route grid | leaderboard | 90px / 100px |
 | `guide_sidebar` | `/vodici/{slug}/` | Right rail (≥1100px only) | skyscraper | 600px / hidden |
+| `search_mid` | `/pretraga/` | Mid results list | responsive | auto |
+| `stop_bottom` | `/gradski/{city}/stajaliste/{slug}/` | Bottom, after ETA/lines | responsive | auto |
+| `line_bottom` | `/gradski/{city}/linija/{slug}/` | Bottom, after stops list | responsive | auto |
 | `mobile_anchor` | global | Sticky bottom, ≤640px only | fluid anchor | hidden / 80px |
 
 Total ad density per page: **1** (except `/` which has 2). Below
@@ -49,13 +57,15 @@ Google's policy threshold and well below "junk site" feel.
 
 | Page | Why no ad |
 |---|---|
-| `/pretraga/` | `noindex`, low organic traffic, ad would spook bots |
 | `/admin/*` | Private |
 | `/api/*` | Non-HTML |
 | `/omiljeno/`, `/kontakt/` | Utility, thin |
 | `/uslovi/`, `/privatnost/`, `/politika-kolacica/` | Legal — Google penalty risk if we monetise compliance pages |
 | `/vodici/{slug}/` body | Long-form — ads in middle of prose flag automatically |
 | `/sitemap.xml`, `/robots.txt`, `/ads.txt` | Plaintext |
+
+(`/pretraga/` used to be on this list — since 2026-05-15 it renders
+`search_mid`.)
 
 ## House-ad fallback
 
@@ -69,7 +79,7 @@ house-ad variants chosen deterministically by path-length modulo:
 
 These are real product surfaces, not filler — 0.5–2% click-through from
 house ads converts into our existing tracking surfaces (newsletter
-signup → email list, route CTA → Bookaway).
+signup → email list, route CTA → BusTicket4 buy button).
 
 ## CWV protection
 
@@ -115,4 +125,5 @@ as Google learns our audience.
    the per-slot RPM table; kill any slot below $0.50.
 4. Month 2: enable Auto-Ads on `/rute/` and `/prevoznici/` index pages.
 5. Month 3: A/B per-slot variants — different formats per same key,
-   pick by reported RPM in `analytics.duckdb.adsense_daily`.
+   pick by reported RPM in `adsense_daily` (analytics.sqlite,
+   filled by `scripts/adsense_fetch.py`).

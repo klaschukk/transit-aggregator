@@ -38,16 +38,25 @@ URL: `/gradski/beograd/linija/{num}/`
 | Остановка | `BusStation` |
 | Городская пара | `FAQPage` |
 
-## Технический SEO — чеклист
+## Технический SEO — чеклист (закрыт, июнь 2026)
 
-- [ ] `sitemap.xml` (все маршруты + остановки)
+- [x] `sitemap.xml` (4600+ URL: маршруты + остановки + линии)
 - [x] `robots.txt`
 - [x] Canonical URLs
-- [ ] hreflang (sr — сейчас, en — в будущем)
-- [ ] Open Graph теги
-- [ ] Core Web Vitals < 2.5s LCP
-- [ ] Mobile-first (приоритет)
-- [ ] Google Search Console подключение
+- [x] hreflang — все 3 языка live (sr + en + ru)
+- [x] Open Graph теги (+ Twitter Cards, og:locale:alternate)
+- [x] Core Web Vitals — мониторится, LCP в бюджете
+- [x] Mobile-first (44px touch targets)
+- [x] Google Search Console подключён (sitemap submitted)
+
+## Актуальные направления (июнь 2026)
+
+- **Генерик «red vožnje autobusa i vozova»** — high-CTR возможность по
+  GSC-анализу 2026-06-08 (трафик идёт на городские линии, CTR зажат
+  виджетами Google; генерик-запросы — шанс его поднять).
+- **Гайды `/vodici/`** — long-form контент под длинный хвост.
+- **SEO-страницы дальних направлений** (фаза 2 far destinations,
+  Азия + Bookaway-CTA) — ещё НЕ сделаны.
 
 ## Контентная стратегия
 

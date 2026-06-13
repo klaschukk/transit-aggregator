@@ -3,7 +3,8 @@
 ## Цель
 
 Бесплатный агрегатор общественного транспорта Сербии и Балкан с реальными данными,
-3 языка, монетизация через Bookaway affiliate.
+3 языка, монетизация через BusTicket4 affiliate (основной партнёр) + AdSense;
+Bookaway — только дальние направления (Азия).
 
 **URL:** https://prevozni.com
 **Статус:** В продакшне, автономный
@@ -55,7 +56,7 @@
 ## ✅ Фаза 4: Деплой (готово)
 
 - [x] Домен prevozni.com + Cloudflare (Full SSL)
-- [x] systemd transit.service + gunicorn 4 workers
+- [x] systemd transit.service + gunicorn 2 workers
 - [x] nginx reverse proxy (Cloudflare-only IPs, security headers)
 - [x] Healthcheck cron (*/5 min, auto-restart)
 - [x] Nightly refresh cron (02:00) — full data pipeline
@@ -69,27 +70,41 @@
 
 ## ✅ Фаза 5: Монетизация (готово)
 
-- [x] Bookaway affiliate registered (offer_id=34, aff_id=4033)
-- [x] Buy ticket button на каждом маршруте (Bookaway)
+- [x] BusTicket4 affiliate (affiliateId=735, комиссия 2%) — ОСНОВНОЙ партнёр,
+      buy кнопка на всех обычных маршрутах (lineId-чекаут per-trip +
+      bt4_fallback_line_id, ночной refresh_bt4_lineids.py)
+- [x] Bookaway affiliate (offer_id=34, aff_id=4033, через TUNE-трекер) —
+      с 2026-06-10 ТОЛЬКО дальние направления (Азия)
 - [x] Country mapping для правильных URL (Montenegro, Bosnia, Croatia...)
-- [x] AdSense placeholder в config (готов к подключению)
+- [x] AdSense live (ca-pub-9538841764038287), слоты активированы
+- [x] FlixBus убран (партнёрка так и не была одобрена)
+
+---
+
+## ✅ Фаза 6: Рост (готово)
+
+- [x] Newsletter + price alerts (double-opt-in, `scripts/price_alert_scan.py`)
+- [x] /vodici/ — long-form guides
+- [x] Far destinations AI: поиск без рейсов → Groq составляет маршрут
+      (`/api/compose-route`) + Bookaway-CTA для Азии
+- [x] Backlinks-автоматизация (`backlinks_research.py` / `digest` / `check`)
 
 ---
 
 ## 📊 Текущая статистика
 
+_Обновлено: 2026-06-12._
+
 | Метрика | Значение |
 |---------|----------|
-| Маршрутов | 517 (271 domestic + 246 international/info) |
-| С реальными данными | 336 |
-| Городских линий | 610 (Beograd 514, Novi Sad 61, Niš 12, Kragujevac 23) |
-| Городских остановок | 3770 (97% GPS) |
-| Trips (intercity) | 2777 |
-| GTFS trips | 93,991 |
+| Маршрутов | 569 |
+| Рейсов (intercity) | 3931 |
+| Операторов | 69 |
+| Городских линий | 661 (4 города: Beograd, Novi Sad, Niš, Kragujevac) |
 | GTFS stop_times | 2.3M (94% mapped) |
-| Sitemap URLs | 3600+ |
+| Sitemap URLs | 4600+ |
 | Языков | 3 (sr, en, ru) |
-| Тестов | 325 passing |
+| Тестов | 870 passing |
 | Response time | 0.02-0.10s |
 | SEO score | 100% clean |
 
@@ -97,7 +112,7 @@
 
 ## 🔮 Будущее (опционально)
 
-- [ ] AdSense заявка (после 1000+ визитов/месяц)
+- [ ] SEO-страницы дальних направлений (фаза 2 far destinations)
 - [ ] Real-time vehicle tracking (если найдём API)
 - [ ] Push notifications для задержек
 - [ ] iOS/Android приложение (PWA уже работает)
@@ -111,7 +126,7 @@
 
 | Сайт | Что хорошо | Что плохо |
 |------|-----------|-----------|
-| busticket4.me | Покупка билетов | Нет городского транспорта |
+| busticket4.me | Покупка билетов; с июня 2026 наш affiliate-партнёр (id 735) | Нет городского транспорта |
 | srbvoz.rs | Официальный | Ужасный UX, нет SEO |
 | bgprevoz.rs | Официальный | Только Белград |
 | polazak.rs | Широкий охват | Только сербские |

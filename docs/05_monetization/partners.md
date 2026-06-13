@@ -1,44 +1,72 @@
 # Affiliate partners — comparison
 
 Single-source-of-truth for the partner economics behind `app/affiliates/`.
-Pick the list from the "Integrated" column; the others are documented so we
+Pick the list from the "Status" column; the others are documented so we
 don't re-research when revisiting the stack.
 
-| Partner        | Commission            | Cookie | Balkans coverage                | Deep link                                                  | Status         |
+**Current state (since 2026-06-10):** BusTicket4 is the PRIMARY partner on
+all regular routes; Bookaway serves far destinations (Asia) ONLY; FlixBus
+was never activated and is removed from the chain.
+
+| Partner        | Commission            | Cookie | Coverage                        | Deep link                                                  | Status         |
 |----------------|-----------------------|--------|---------------------------------|------------------------------------------------------------|----------------|
-| **Bookaway**   | ~5–10% per sale       | 30 d   | Strong — SR/ME/BA/HR/MK, IL hubs | `bookaway.com/routes/{country}/{from}-to-{to}?offer_id=34&aff_id=4033` (deep link); falls back to `routes/{country}/?…` when one endpoint isn't in inventory — preserves attribution since Bookaway's own redirect strips query params on a missing route page | **Integrated** |
-| **FlixBus**    | 3–5% (EU) / ~$6 (US)  | 30 d   | BG↔SR/HR/BA/MK/HU/BG/SI corridors; **no intra-SR** | Via Awin tracking redirect → `flixbus.com/bus/{from}-{to}` | **Integrated** |
+| **BusTicket4** | **2% per sale** (Cassiopeia doo agreement, `affiliateId=735`) | n/a — attribution via `affiliateId` in URL | All regular SR + ex-YU intercity/international routes (our own data source) | Per-trip checkout deep-link with pre-resolved `lineId` (`bt4_lineids.json` + per-trip `bt4_line_id` + `bt4_fallback_line_id`), refreshed nightly by `refresh_bt4_lineids.py` | **PRIMARY (Integrated)** |
+| **Bookaway**   | ~5–10% per sale       | 30 d   | **Far destinations (Asia) only** since 2026-06-10; pairs verified via `bookaway_pairs.json` / `bookaway_far.json` | TUNE tracker `/aff_c?offer_id=34&aff_id=4033&aff_sub={from}-{to}&aff_sub2={utm_medium}` — the tracker hop mints the transaction_id | **Integrated (far-only)** |
+| ~~FlixBus~~    | 3–5% (EU) / ~$6 (US)  | 30 d   | Cross-border corridors; no intra-SR | Awin redirect (placeholder ID, never approved)             | **Removed 2026-06** — affiliate deal never landed, code kept but NOT in `ACTIVE_PARTNERS` |
 | ~~Omio~~       | 2–8%                  | 30 d   | Multi-modal; SR↔DE/AT, fair Balkans | —                                                       | **Dropped 2026-04-26** — never approved, zero attribution, removed to declutter trip cards |
 | GetByBus       | ~5–10% (now owned by Bookaway — same inventory) | 30 d | SR/HR/BA core                   | Redundant with Bookaway                                     | Skip (duplicate) |
 | Busbud         | 2% (CJ)               | 7 d    | Thin Balkans                    | Via CJ link generator                                       | Skip (low ROI) |
 | 12Go           | 50% of booking fee (~$3 avg) | 30 d | Asia-centric, thin EU       | `12go.asia/en/travel/{from}/{to}?utm_medium=affiliate`     | Skip (wrong geography) |
 
-Commission/cookie numbers come from each partner's public affiliate page or
-their Awin/CJ merchant profile; they are subject to change and should be
-re-checked annually. The point of this doc is to capture the _relative_
-economics so a future re-evaluation takes minutes, not hours.
+Commission/cookie numbers come from each partner's agreement, public
+affiliate page or their Awin/CJ merchant profile; they are subject to
+change and should be re-checked annually. The point of this doc is to
+capture the _relative_ economics so a future re-evaluation takes minutes,
+not hours.
 
 ## Rationale
 
-### Why add FlixBus
-Our Bookaway coverage is strongest on SR↔ME/HR and Istanbul; weaker on
-SR↔HU/BG/RO and on mid-size intra-Balkan corridors. FlixBus runs its own
-buses on exactly those weak links (Belgrade ↔ Sofia, Skopje, Zagreb,
-Sarajevo, Budapest, Ljubljana) so it plugs the gap where Bookaway shows
-thin inventory. The trade-off is no intra-SR coverage — FlixBus does not
-sell Niš ↔ Kraljevo, so Bookaway stays primary for domestic trips.
+### Why BusTicket4 is primary (2026-06)
+BusTicket4 sells the exact routes we already aggregate, and its checkout
+deep-link opens a **populated departure** (known `lineId`), not a search
+page. Expected revenue is conversion × commission, and a working checkout's
+conversion edge dwarfs Bookaway's higher nominal band on pages that
+historically converted ~0 (the "362 clicks, 0 conversions" Bookaway
+fallback). Hence `ux_rank = 0` for BT4 vs `1` for Bookaway — checkout
+quality deliberately ranks above commission percentage.
+
+**Known issue:** the BT4 dashboard (busticket4.me partner login) shows
+**0 sales for Apr–Jun 2026**. Either traffic genuinely doesn't convert yet
+or attribution is broken — this is the main attribution question now (see
+`bookaway_postback.md` for the Bookaway side, which is only the Asia
+funnel these days).
+
+### Why Bookaway was demoted to far-only (2026-06-10)
+On regular Balkan routes Bookaway's inventory match was poor: clicks
+landed on country-listing pages and converted ~0 (362 clicks, 0
+conversions over the measured period). The fix was two-fold: (a) only
+link Bookaway where the pair is verified in `bookaway_pairs.json`, and
+(b) restrict Bookaway to far destinations (Asia, `FAR_DESTINATIONS` in
+`partners.py`) where BT4 sells nothing and Bookaway's inventory is real.
+Links go through the TUNE tracker (`/aff_c`) with `aff_sub={from}-{to}`
+and `aff_sub2={utm_medium}` for per-route attribution.
+
+### Why FlixBus was removed
+Originally added to plug cross-border gaps, but the Awin affiliate deal
+never landed — the ID stayed a placeholder, so every URL was
+non-tracking. With BT4 covering regular routes (including cross-border)
+there is no gap left worth an unapproved partner. The `FlixBus` class is
+kept in `partners.py` for a possible future deal but is NOT in
+`ACTIVE_PARTNERS` (`resolve.py`).
 
 ### Why we dropped Omio (2026-04-26)
 Omio was originally added as a multi-modal universal-fallback partner —
 the safety net that let every trip card show a "Kupi" button even when
-Bookaway / FlixBus had no inventory. In practice the partner account was
+other partners had no inventory. In practice the partner account was
 never approved (PARTNER_ID stayed `'PLACEHOLDER'`), so the URLs were
 non-tracking from day one. Zero commissions over the live period meant
 the only thing it produced was a third button color and extra trip-card
-chrome. Removed in favour of a tighter Bookaway URL builder that falls
-back to the country-listing page (preserves attribution) and a `{% if
-_buy_href %}` guard on the template (cards without coverage simply hide
-the buy button).
+chrome.
 
 ### Why skip the others
 * **GetByBus** was acquired by Bookaway. Their tickets flow through the same
@@ -49,49 +77,42 @@ the buy button).
   booking is below €1 — not worth the integration surface.
 * **12Go** is Asia-centric (Thailand, Vietnam, Indonesia). Their Balkan
   inventory is thin and their payout minimum (€900 bank / €8 PayPal)
-  doesn't match our traffic profile.
+  doesn't match our traffic profile. (For our own Asia far-destinations
+  funnel we use Bookaway, which we already integrate.)
 
-## Fallback chain
+## Selection chain
 
-Codified in `app/affiliates/resolve.py`:
+Codified in `app/affiliates/resolve.py` (`ACTIVE_PARTNERS`):
 
-1. `Bookaway.has_route(from, to)` → use it (highest commission × best
-   Balkans coverage). When only one endpoint is in Bookaway's inventory
-   the URL falls back to the country listing page so attribution still
-   sticks.
-2. Else `FlixBus.has_route(...)` → use it (covers the cross-border
-   corridors where Bookaway is thin).
-3. Else no partner — the trip card hides its "Kupi" button. Acceptable
-   since pairs without either partner are rare (mostly tiny domestic
-   commuter routes; users still see schedule + price).
+1. `has_route(from, to)` — partner must actually sell the pair.
+   BusTicket4 answers True for pairs with a pre-resolved `lineId`;
+   Bookaway answers True ONLY when an endpoint is in `FAR_DESTINATIONS`.
+2. `ux_rank` (lower wins): BusTicket4 = 0 (exact populated checkout),
+   Bookaway = 1 (listing page). Checkout quality leads.
+3. `commission_pct` midpoint (higher wins) — tiebreak within equal ux_rank.
 
-A/B stub (`app/affiliates/ab.py`) can flip step 1 ↔ step 2 for 50% of
-traffic via cookie `ab_partner=bookaway|flixbus`, so we can measure CTR
-and CVR before committing to a primary partner long-term.
+When no partner covers a pair the resolver returns an empty list and the
+trip card hides its "Kupi" button (`{% if _buy_href %}` guard). On route
+pages the template also derives the main CTA straight from each trip's
+`bt4_line_id`, so a pair missing from the json still buys through
+BusTicket4 when the DB knows the line.
 
-## Expected revenue lift
+The A/B stub (`ab_partner_order`) is a cookie-driven pre-sort; it floats
+a named partner to the front if eligible but never disables one.
 
-Baseline: Bookaway-only, ~1 click → ~0.05–0.1 confirmed booking × €2.5
-avg commission = €0.15/click effective EPC.
+## Measuring reality
 
-With FlixBus filling cross-border coverage gaps:
-* Cross-border corridors (Beograd ↔ Sofia/Skopje/Zagreb/Sarajevo/Budapest)
-  get a second buy button next to the Bookaway one — A/B chooses which
-  shows first per visitor.
-* FlixBus EPC on cross-border corridors is comparable to Bookaway.
-* Net ballpark: **+15–25% affiliate revenue** once FlixBus approval lands,
-  assuming current traffic stays flat.
+All buy-button clicks are logged to `ba_clicks` (analytics.sqlite) with a
+`partner` column — compare CTR/EPC per partner there, then reconcile
+against the BT4 dashboard and the Bookaway/TUNE dashboard. Numbers in
+this doc are assumptions until those dashboards show confirmed sales
+(BT4: still 0 for Apr–Jun 2026).
 
-Numbers are assumptions, not commitments. Validate against Umami
-`ba_clicks` + equivalent counters after 2–4 weeks of real traffic.
+## Application / signup status
 
-## Application / signup TODOs
-
-Real affiliate IDs need to be obtained manually. The code ships with
-placeholder IDs that produce non-tracking URLs (safe to deploy, no
-revenue until replaced):
-
-* [ ] FlixBus — apply via Awin (`affiliatepartner@flixbus.com`). Replace
-  `FLIXBUS_AWIN_ID` in `config.py` once approved.
-* [x] Bookaway — already approved, IDs live in templates (`offer_id=34`,
-  `aff_id=4033`).
+* [x] BusTicket4 — agreement live, `affiliateId=735` (prevozni.com,
+  Cassiopeia doo). Primary.
+* [x] Bookaway — approved, `offer_id=34`, `aff_id=4033`, TUNE tracker.
+  Far destinations only.
+* [ ] FlixBus — removed; re-apply via Awin only if a corridor gap
+  re-appears that BT4 can't cover.

@@ -1,5 +1,12 @@
 # Bookaway commission attribution — status
 
+> **Context (2026-06-10): Bookaway = только дальние направления.** Bookaway
+> is now used ONLY for far destinations (Asia); the primary partner on all
+> regular routes is BusTicket4 (`affiliateId=735`). The TUNE mechanics below
+> stay relevant for the Asia funnel, but the main attribution question today
+> is the **BusTicket4 dashboard (0 sales Apr–Jun 2026)** — see
+> `partners.md` for the BT4 attribution status.
+
 **Status: blocked on Bookaway side.** No server-to-server postback available.
 
 ## What we verified
@@ -24,13 +31,15 @@ They do **not** publish:
 
 We cannot close the attribution loop automatically. The flow is:
 
-1. We log every click in our own `ba_clicks` DuckDB table (implemented,
-   `/api/ba-click`). This gives us CTR per route, per surface, per UTM.
+1. We log every click in our own `ba_clicks` table (analytics.sqlite,
+   `/api/ba-click`; the table now has a `partner` column). This gives us
+   CTR per route, per surface, per UTM, per partner.
 2. To see commission revenue we must log into the Bookaway partner
    dashboard manually and reconcile against our click log by:
    - The date range.
-   - SubIDs we embedded — we stamp `subid1` with our `route_slug`
-     (partners.py, `Bookaway.build_url`) so each conversion has a key
+   - SubIDs we embedded — links now route through the TUNE tracker
+     (`/aff_c`) with `aff_sub={from}-{to}` and `aff_sub2={utm_medium}`
+     (partners.py, `Bookaway.build_url`), so each conversion has a key
      that joins back to `ba_clicks.route_slug`.
 
 ## What to do when we get commissions
