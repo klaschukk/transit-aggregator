@@ -463,17 +463,22 @@ def api_ab_convert():
 @limiter.limit("30 per minute")
 def api_cities():
     """Return city list for autocomplete."""
-    q = request.args.get('q', '').strip().lower()
+    # City names are short — cap q so a multi-KB query can't force a wide LIKE
+    # scan on every keystroke (30/min/IP).
+    q = request.args.get('q', '').strip().lower()[:40]
     if len(q) < 1 or not db_ready():
         return jsonify([])
 
-    cities = query("""
+    # The city list only changes on the nightly rebuild, but this fires on every
+    # keystroke — cache per prefix so popular letters stay warm (the params are
+    # part of the cache key).
+    cities = cached_query("""
         SELECT DISTINCT from_city as name FROM routes WHERE type = 'intercity' AND lower(from_city) LIKE ?
         UNION
         SELECT DISTINCT to_city FROM routes WHERE type = 'intercity' AND lower(to_city) LIKE ?
         ORDER BY name
         LIMIT 8
-    """, [f'{q}%', f'{q}%'])
+    """, [f'{q}%', f'{q}%'], ttl=3600)
 
     return jsonify([c['name'] for c in cities])
 
