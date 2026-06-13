@@ -43,6 +43,14 @@ class Config:
     GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
     MAPBOX_TOKEN = os.environ.get('MAPBOX_TOKEN', '')
 
+    # Bookaway / TUNE (HasOffers) affiliate API — server-side only. Used by
+    # the admin revenue dashboard to pull real clicks/conversions/payout.
+    # Without a key the dashboard simply hides the API section. Bookaway is
+    # far-destinations-only (Asia) since 2026-06-10, so low numbers here are
+    # expected — regular Balkan routes go to BusTicket4.
+    BOOKAWAY_API_KEY = os.environ.get('BOOKAWAY_API_KEY', '')
+    BOOKAWAY_NETWORK_ID = os.environ.get('BOOKAWAY_NETWORK_ID', 'bookaway2')
+
     # Analytics / monetization. IP_HASH_SALT fed into sha256 so stored hashes
     # aren't trivially reversible; rotate it to invalidate historical series.
     IP_HASH_SALT = os.environ.get('IP_HASH_SALT', '')

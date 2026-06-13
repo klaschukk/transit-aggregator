@@ -166,6 +166,14 @@ def revenue():
             except ValueError:
                 pass
 
+    # Real Bookaway numbers (clicks/conversions/payout) from the affiliate API.
+    # None when no key is configured or the API is unreachable — the template
+    # then shows a "not configured" hint instead of failing. Bookaway is
+    # far-destinations-only (Asia) since 2026-06-10, so small numbers here are
+    # expected; regular routes are BusTicket4.
+    from app.affiliates import bookaway_api
+    ba_api = bookaway_api.get_dashboard(30)
+
     return render_template(
         'admin/revenue.html',
         totals_7=totals_7,
@@ -176,6 +184,7 @@ def revenue():
         by_partner_30=by_partner_30,
         daily=daily,
         bt4=analytics_db.bt4_sales_summary(),
+        ba_api=ba_api,
     )
 
 
