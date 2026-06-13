@@ -266,8 +266,14 @@ def test_line_faq_adds_frequency_question_when_headway(client):
     # GTFS-derived headway, its FAQPage must carry a frequency Q&A. Novi Sad
     # line 6 is a core frequent line that reliably has a headway. Every line's
     # FAQPage must always be valid JSON with no trailing-comma breakage.
+    # This is fundamentally a GTFS-headway test: the seed DB carries no GTFS
+    # stop_times (and no NS line 6), so it is meaningless there — skip cleanly.
     import json
     import re
+    from app.db import query_one
+    gtfs = query_one("SELECT COUNT(*) AS c FROM gtfs_stop_times")
+    if not gtfs or gtfs["c"] == 0:
+        pytest.skip("seed DB has no GTFS headway data — frequency Q&A absent")
     html = client.get("/gradski/novi-sad/linija/linija-6/").data.decode()
     faq = None
     for block in re.findall(r'type="application/ld\+json">(.*?)</script>',
