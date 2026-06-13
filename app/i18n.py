@@ -2898,6 +2898,18 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Line {number} is a {type} in the {city} city transport system.',
         'ru': 'Линия {number} — это {type} в системе городского транспорта города {city}.',
     },
+    # "Na koliko minuta ide linija N" is a top GSC query pattern; surfaced only
+    # when we have a real GTFS-derived headway (gated in the template).
+    'line_detail.faq.q_freq': {
+        'sr': 'Na koliko minuta ide linija {number}?',
+        'en': 'How often does line {number} run?',
+        'ru': 'Как часто ходит линия {number}?',
+    },
+    'line_detail.faq.a_freq': {
+        'sr': 'Linija {number} radnim danom ima polazak u proseku na svakih ~{headway} minuta.',
+        'en': 'On weekdays line {number} departs on average about every ~{headway} minutes.',
+        'ru': 'По будням линия {number} отправляется в среднем примерно каждые ~{headway} минут.',
+    },
 
     # ── stop_detail FAQ JSON-LD ──
     'stop_detail.faq.q_lines': {

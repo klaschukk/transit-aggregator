@@ -259,3 +259,29 @@ def test_json_ld_breadcrumb_on_subpages(client):
     for url in ["/rute/", "/gradski/beograd/", "/prevoznici/"]:
         html = client.get(url).data.decode()
         assert "BreadcrumbList" in html, f"No BreadcrumbList on {url}"
+
+
+def test_line_faq_adds_frequency_question_when_headway(client):
+    # "Na koliko minuta ide linija N" is a top GSC query: when a line has a
+    # GTFS-derived headway, its FAQPage must carry a frequency Q&A. Novi Sad
+    # line 6 is a core frequent line that reliably has a headway. Every line's
+    # FAQPage must always be valid JSON with no trailing-comma breakage.
+    import json
+    import re
+    html = client.get("/gradski/novi-sad/linija/linija-6/").data.decode()
+    faq = None
+    for block in re.findall(r'type="application/ld\+json">(.*?)</script>',
+                            html, re.DOTALL):
+        parsed = json.loads(block)  # raises on the trailing-comma bug
+        if parsed.get("@type") == "FAQPage":
+            faq = parsed
+    assert faq is not None, "no FAQPage JSON-LD on line page"
+    questions = [m["name"] for m in faq["mainEntity"]]
+    assert any("koliko minuta" in q for q in questions), \
+        f"no frequency question in line FAQ: {questions}"
+
+    # A line without a headway keeps a clean 3-question FAQ (no broken JSON).
+    html2 = client.get("/gradski/kragujevac/linija/linija-1/").data.decode()
+    for block in re.findall(r'type="application/ld\+json">(.*?)</script>',
+                            html2, re.DOTALL):
+        json.loads(block)
