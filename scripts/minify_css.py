@@ -10,7 +10,13 @@ ROOT = Path(__file__).parent.parent
 def minify(css: str) -> str:
     css = re.sub(r'/\*.*?\*/', '', css, flags=re.DOTALL)  # strip comments
     css = re.sub(r'\s+', ' ', css)                         # collapse whitespace
-    css = re.sub(r'\s*([{};:,>~+])\s*', r'\1', css)       # strip around punctuation
+    # Strip whitespace around structural punctuation only — NOT around + or ~,
+    # which double as calc() arithmetic operators. `calc(80px + env(...))` must
+    # keep its spaces; `calc(80px+env(...))` is invalid CSS and the browser drops
+    # the whole declaration (this silently killed safe-area insets for the anchor
+    # ad and bottom nav on notched phones). As selector combinators `.a + .b`
+    # stays valid with spaces, so keeping them costs a few bytes and breaks nothing.
+    css = re.sub(r'\s*([{};:,>])\s*', r'\1', css)         # strip around punctuation
     css = re.sub(r';}', '}', css)                          # trailing semicolons
     return css.strip()
 
