@@ -10,6 +10,15 @@
 .ad-slot--skyscraper{min-height:600px;width:300px;}
 .ad-slot--responsive{min-height:100px;}
 .ad-slot--in-feed{min-height:90px;}
+/* Collapse an unfilled unit. AdSense stamps data-ad-status="unfilled" on the
+   <ins> when no ad serves; without this the slot keeps its reserved height and
+   shows a "Reklama" label over an empty gap — bad UX and risks an AdSense
+   policy flag (a disclosure label next to no ad). Hide the empty <ins>, then
+   collapse the wrapper + its label via :has() (already used in app.mobile.css;
+   browsers without :has() simply keep the harmless reserved box). */
+.ad-slot ins.adsbygoogle[data-ad-status="unfilled"]{display:none;}
+.ad-slot:has(ins.adsbygoogle[data-ad-status="unfilled"]){min-height:0;}
+.ad-slot:has(ins.adsbygoogle[data-ad-status="unfilled"]) .ad-slot__label{display:none;}
 @media(max-width:640px){
   .ad-slot--desktop-only,.ad-slot--skyscraper{display:none;}
   .ad-slot--large-rectangle{min-height:250px;}

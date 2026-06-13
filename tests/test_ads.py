@@ -271,3 +271,21 @@ def test_lazy_ad_npa_flag_follows_consent(client, app):
     finally:
         app.config['ADSENSE_ID'] = original_id
         app.config['ADSENSE_SLOTS'] = original_slots
+
+
+# ── 6. Unfilled-slot collapse (added 2026-06-13) ────────────────────────
+
+
+def test_ads_css_collapses_unfilled_slots(client):
+    """An ad unit that doesn't fill must not leave an empty reserved box with
+    a "Reklama" label. AdSense stamps data-ad-status="unfilled" on the <ins>;
+    ads.css hides it and collapses the wrapper + label via :has(). Guards the
+    served stylesheet so the rules can't silently vanish."""
+    resp = client.get('/static/css/ads.css')
+    assert resp.status_code == 200
+    css = resp.get_data(as_text=True)
+    assert 'data-ad-status="unfilled"' in css
+    assert ':has(' in css
+    # Both the empty <ins> and the wrapper/label collapse must be present.
+    assert 'ins.adsbygoogle[data-ad-status="unfilled"]{display:none' in css
+    assert '.ad-slot__label{display:none' in css
