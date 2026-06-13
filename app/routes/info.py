@@ -130,13 +130,17 @@ def contact():
             return render_template('contact.html', sent=False, error=error), 400
 
         import datetime
+        # Neutralise CR/LF in user fields so a crafted message can't inject fake
+        # "Date:"/"Name:"/separator lines and forge entries in the log.
+        def _one_line(s: str) -> str:
+            return s.replace('\r', ' ').replace('\n', ' ')
         log_path = current_app.root_path + '/../logs/contact_messages.log'
         try:
             with open(log_path, 'a', encoding='utf-8') as f:
                 f.write(f"\n{'='*50}\n")
                 f.write(f"Date: {datetime.datetime.now().isoformat()}\n")
-                f.write(f"Name: {name}\nEmail: {email}\n")
-                f.write(f"Message: {message}\n")
+                f.write(f"Name: {_one_line(name)}\nEmail: {_one_line(email)}\n")
+                f.write(f"Message: {_one_line(message)}\n")
         except OSError:
             log.exception("Failed to write contact log")
 
