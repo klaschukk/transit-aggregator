@@ -23,7 +23,6 @@ carry only what actually goes over the wire.
 """
 from __future__ import annotations
 
-from collections import defaultdict
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parent.parent.parent

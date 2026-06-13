@@ -13,15 +13,13 @@ import hmac
 import time
 from collections import Counter
 from functools import wraps
-from pathlib import Path
 
 from flask import (
-    Blueprint, Response, current_app, jsonify, render_template, request,
+    Blueprint, Response, current_app, render_template, request,
 )
 
 from app import outreach
 from app.extensions import csrf
-from app.outreach.csv_io import find_row
 
 growth_bp = Blueprint('growth', __name__)
 

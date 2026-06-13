@@ -510,7 +510,6 @@ def health():
     probes belong in /admin/* dashboards, not on a cron-polled endpoint.
     """
     import json
-    import os
     import shutil
     import tempfile
     from pathlib import Path
@@ -539,10 +538,6 @@ def health():
         'city_lines', 'city_stops', 'city_line_stops',
         'operators',
     )
-    # Populated by scrape_route_geometries.py (runs separately, 30-60 min).
-    # Empty on fresh deploys — warn but don't 503.
-    _WARN_TABLES = ('line_geometries',)
-
     db_path_str = current_app.config['DUCKDB_PATH']
     db_path = Path(db_path_str)
     transit: dict = {'ok': False, 'age_hours': None, 'routes': None,

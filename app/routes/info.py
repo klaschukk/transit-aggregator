@@ -796,7 +796,6 @@ def operator_detail(slug: str):
     # one departure each from the operator's 3 most-popular routes.
     sample_trips = []
     if routes and db_ready():
-        from app.db import query as _q
         top_3_route_ids_rows = cached_query("""
             SELECT r.id FROM routes r
             JOIN trips t ON t.route_id = r.id
