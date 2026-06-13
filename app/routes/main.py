@@ -1601,6 +1601,40 @@ def _chat_session_key() -> str:
     return sid if (sid and len(sid) == 36) else 'anon'
 
 
+# Keys the server-built page context actually uses (intercity.py / city.py).
+# Anything else the client POSTs is dropped — the context rides into the Groq
+# system prompt, so an un-whitelisted blob is a prompt-injection + token-cost
+# amplification vector.
+_CHAT_CTX_KEYS = frozenset({
+    'type', 'from', 'to', 'trips', 'price_min', 'operators', 'distance_km',
+    'city', 'line_count', 'line_number', 'line_name', 'stop_count', 'stop_name',
+})
+
+
+def _sanitize_page_context(ctx) -> str:
+    """Whitelist + truncate the client page context, return a compact JSON
+    string (or '' if nothing usable). Bounds prompt-injection surface and the
+    tokens we pay Groq for."""
+    if not isinstance(ctx, dict):
+        return ''
+    clean: dict = {}
+    for key in _CHAT_CTX_KEYS:
+        if key not in ctx:
+            continue
+        val = ctx[key]
+        if isinstance(val, bool):
+            continue
+        if isinstance(val, (int, float)):
+            clean[key] = val
+        elif isinstance(val, str):
+            clean[key] = val[:120]
+        elif isinstance(val, list):
+            clean[key] = [str(x)[:60] for x in val[:3]]
+    if not clean:
+        return ''
+    return _json.dumps(clean, ensure_ascii=False)[:600]
+
+
 @main_bp.route('/api/chat', methods=['POST'])
 @csrf.exempt
 @limiter.limit("20 per 5 minutes", key_func=_chat_session_key)
@@ -1626,8 +1660,9 @@ def api_chat():
         return jsonify(error='unavailable'), 503
 
     system = _CHAT_SYSTEM
-    if isinstance(page_ctx, dict) and page_ctx:
-        system += '\n\nKontekst trenutne stranice:\n' + _json.dumps(page_ctx, ensure_ascii=False)
+    clean_ctx = _sanitize_page_context(page_ctx)
+    if clean_ctx:
+        system += '\n\nKontekst trenutne stranice:\n' + clean_ctx
 
     import urllib.request as _ur
     payload = _json.dumps({

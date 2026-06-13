@@ -6,6 +6,10 @@ BASE_DIR = Path(__file__).parent
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-insecure-key-do-not-use-in-prod')
+    # Reject oversized request bodies before parsing (werkzeug → 413). The site
+    # has no uploads; the largest legitimate POST is the chat widget's message
+    # list. 64 KB bounds memory and the /api/chat abuse surface.
+    MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH', 64 * 1024))
     DUCKDB_PATH = os.environ.get('DUCKDB_PATH', str(BASE_DIR / 'data' / 'dbs' / 'transit.duckdb'))
     ANALYTICS_DB_PATH = os.environ.get(
         'ANALYTICS_DB_PATH', str(BASE_DIR / 'data' / 'dbs' / 'analytics.sqlite')
