@@ -216,6 +216,14 @@ _SCHEDULE_WEEKEND_FULL: dict[str, list[str]] = {
     ],
 }
 
+# Appended after the weekend sentence ONLY when we have a real Saturday midday
+# interval — answers "na koliko minuta subotom" with a concrete number.
+_SCHEDULE_WEEKEND_HEADWAY: dict[str, str] = {
+    'sr': ' Subotom je interval u proseku oko {weekend_headway} min.',
+    'en': ' Saturday headway averages about {weekend_headway} min.',
+    'ru': ' В субботу интервал в среднем около {weekend_headway} мин.',
+}
+
 
 _TRANSFERS: dict[str, list[str]] = {
     'sr': [
@@ -489,6 +497,9 @@ def _compute_slots(
     # Saturday running at ~weekday volume means the line is NOT reduced on
     # weekends — claiming "reduced" then is false (e.g. line 2A: 158/158).
     weekend_full = bool(has_weekend and workday_count and weekend_count >= 0.85 * workday_count)
+    # Typical Saturday midday interval — answers "na koliko minuta subotom".
+    weekend_headway = (_headway_minutes([t for t in (schedule_sat or []) if t], 10, 15)
+                       if has_weekend else None)
 
     # Interchange list: drop terminals (already named) and self-references,
     # cap at 3 names. Each entry is "Name (N linija)".
@@ -528,6 +539,7 @@ def _compute_slots(
         'peak_headway_min': peak_headway or 0,
         'offpeak_headway_min': offpeak_headway or 0,
         'weekend_count': weekend_count,
+        'weekend_headway': weekend_headway or 0,
         'transfers_list': transfers_list,
         'prefix': lang_prefix,
         '_has_density': avg_gap_m > 0,
@@ -612,6 +624,8 @@ def build_prose(
         if slots['_has_weekend']:
             _wpool = _SCHEDULE_WEEKEND_FULL if slots['_weekend_full'] else _SCHEDULE_WEEKEND
             schedule += _pick(_wpool[lang], slug, 'sched_weekend').format(**slots)
+            if slots['weekend_headway']:
+                schedule += _SCHEDULE_WEEKEND_HEADWAY[lang].format(**slots)
 
     # Transfers paragraph — gated by interchange data; for lines that
     # share no multi-line stops, we skip this paragraph (template will
