@@ -1,7 +1,9 @@
 <header class="site-header">
   <div class="container site-header__inner">
     <a href="{{ lang_prefix }}/" class="site-logo">
-      <img class="site-logo__icon" src="{{ url_for('static', filename='img/prevozni-mark.svg') }}?v={{ asset_version }}" width="28" height="28" alt="" aria-hidden="true" loading="lazy" decoding="async">
+      {# Above the fold on every page → must load eagerly. Lazy-loading an
+         above-fold image is a Lighthouse anti-pattern (delays first paint/LCP). #}
+      <img class="site-logo__icon" src="{{ url_for('static', filename='img/prevozni-mark.svg') }}?v={{ asset_version }}" width="28" height="28" alt="" aria-hidden="true" loading="eager" decoding="async">
       <span class="site-logo__text">Prevozni</span>
     </a>
     <nav class="site-nav" id="siteNav" aria-label="{{ _('nav.menu') }}">

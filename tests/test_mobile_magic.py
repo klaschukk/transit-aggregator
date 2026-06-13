@@ -234,8 +234,9 @@ def test_toast_loads_before_mobile_js(client):
 
 def test_no_unannotated_img_tags_in_templates():
     """The site uses inline SVG everywhere — no <img> in body templates.
-    If one ever lands, either add loading=\"lazy\" or remove. Lighthouse
-    mobile penalises eager images below the fold."""
+    If one ever lands, add loading=\"lazy\" (below the fold) or, for an
+    above-the-fold image, loading=\"eager\". Lighthouse penalises BOTH eager
+    below-fold images AND lazy above-fold ones, so loading must be explicit."""
     import pathlib
     root = pathlib.Path(__file__).resolve().parents[1] / 'app' / 'templates'
     offenders = []
@@ -246,10 +247,16 @@ def test_no_unannotated_img_tags_in_templates():
                 continue
             if '<meta' in stripped:                   # OG image meta — fine
                 continue
-            if 'loading="lazy"' in stripped:          # already audited
+            if 'loading="lazy"' in stripped:          # below-fold default — fine
+                continue
+            # Header logo is above the fold on every page — lazy there is a
+            # Lighthouse anti-pattern, so eager is the audited, correct choice
+            # (kept narrow to this one known element).
+            if 'site-logo__icon' in stripped and 'loading="eager"' in stripped:
                 continue
             offenders.append(f'{p.relative_to(root)}:{line_no}: {stripped[:80]}')
     assert not offenders, (
-        'Eager <img> tag(s) — add loading="lazy" or audit:\n'
+        'Unannotated <img> — add loading="lazy" (below fold) or '
+        'loading="eager" (above fold), or audit:\n'
         + '\n'.join(offenders)
     )

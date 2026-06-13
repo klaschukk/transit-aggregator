@@ -150,3 +150,16 @@ def test_autocomplete_js_has_early_return(client):
     html = client.get("/o-nama/").data.decode()
     assert ".js-city-input" in html
     assert "_cityInputs.length" in html  # guarded NodeList length check
+
+
+def test_header_logo_is_eager_not_lazy(client):
+    """The site logo sits in the header — above the fold on every page. Lazy-
+    loading an above-the-fold image is a Lighthouse anti-pattern that delays
+    first paint / LCP, so the logo must load eagerly."""
+    import re
+    html = client.get("/").data.decode()
+    m = re.search(r'<img[^>]*class="site-logo__icon"[^>]*>', html)
+    assert m, "site logo <img> not found in header"
+    tag = m.group(0)
+    assert 'loading="lazy"' not in tag, "above-the-fold logo must not be lazy-loaded"
+    assert 'loading="eager"' in tag
