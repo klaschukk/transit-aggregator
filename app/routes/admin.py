@@ -185,7 +185,60 @@ def revenue():
         daily=daily,
         bt4=analytics_db.bt4_sales_summary(),
         ba_api=ba_api,
+        ab_overview=_ab_overview(),
     )
+
+
+def _ab_overview() -> list[dict]:
+    """Compact A/B results for the revenue dashboard: per-variant exposures,
+    conversions and CTR for every live experiment, plus the leader once the
+    test has run its min_runtime_days. Read-only; reuses ab_event_summary.
+    The full per-day breakdown lives at /admin/ab — this is the money-page
+    glance so the owner sees which variants convert without leaving revenue."""
+    from datetime import date as _date
+    from app.ab_config import EXPERIMENTS
+
+    today = _date.today()
+    out: list[dict] = []
+    for key, spec in EXPERIMENTS.items():
+        per = {v: {'exposures': 0, 'conversions': 0, 'ctr': 0.0} for v in spec.variants}
+        for r in analytics_db.ab_event_summary(key):
+            v = r['variant']
+            if v not in per:
+                continue
+            if r['event_type'] == 'exposure':
+                per[v]['exposures'] += int(r['count'] or 0)
+            elif (r['event_type'] or '').startswith('conv:'):
+                per[v]['conversions'] += int(r['count'] or 0)
+        for d in per.values():
+            d['ctr'] = (d['conversions'] / d['exposures'] * 100.0) if d['exposures'] else 0.0
+
+        total_exp = sum(d['exposures'] for d in per.values())
+        try:
+            runtime_days = (today - _date.fromisoformat(spec.started_at)).days
+        except (ValueError, TypeError):
+            runtime_days = 0
+        ready = runtime_days >= spec.min_runtime_days and total_exp > 0
+        # Leader = highest-CTR variant among those with exposures, only once the
+        # experiment has matured. Before that we show "rano" rather than a number
+        # that could swing on noise.
+        leader = None
+        if ready:
+            seen = [(v, d) for v, d in per.items() if d['exposures'] > 0]
+            if seen:
+                leader = max(seen, key=lambda kv: kv[1]['ctr'])[0]
+        out.append({
+            'key': key,
+            'surface': spec.surface,
+            'variants': list(spec.variants),
+            'per': per,
+            'total_exposures': total_exp,
+            'runtime_days': runtime_days,
+            'min_runtime_days': spec.min_runtime_days,
+            'ready': ready,
+            'leader': leader,
+        })
+    return out
 
 
 def _total_clicks_since(days: int) -> int:

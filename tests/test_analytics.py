@@ -230,3 +230,56 @@ def test_data_snapshot_diff_no_history(analytics_app):
         # operator_routes / route_trips, but city_lines is untouched —
         # 0 dates → empty diff.
         assert diff == []
+
+
+# ── A/B overview on revenue dashboard (added 2026-06-13) ──────────────
+
+
+def test_ab_overview_computes_ctr_and_leader(analytics_app):
+    """_ab_overview: per-variant CTR (conv/exposure) and a leader picked once
+    the experiment passes min_runtime_days. cta_copy_v1 started 2026-04-24 so
+    it's long mature — leader must be the higher-CTR variant."""
+    from app import analytics_db
+    from app.routes.admin import _ab_overview
+    with analytics_app.app_context():
+        for _ in range(100):
+            analytics_db.insert_ab_event('cta_copy_v1', 'Kupi', 'exposure')
+            analytics_db.insert_ab_event('cta_copy_v1', 'Rezerviši', 'exposure')
+        for _ in range(5):
+            analytics_db.insert_ab_event('cta_copy_v1', 'Kupi', 'conv:buy')
+        for _ in range(15):
+            analytics_db.insert_ab_event('cta_copy_v1', 'Rezerviši', 'conv:buy')
+        overview = {e['key']: e for e in _ab_overview()}
+
+    e = overview['cta_copy_v1']
+    assert e['per']['Kupi']['exposures'] == 100
+    assert e['per']['Kupi']['conversions'] == 5
+    assert abs(e['per']['Kupi']['ctr'] - 5.0) < 0.01
+    assert abs(e['per']['Rezerviši']['ctr'] - 15.0) < 0.01
+    assert e['ready'] is True
+    assert e['leader'] == 'Rezerviši'  # 15% beats 5%
+
+
+def test_ab_overview_no_leader_without_data(analytics_app):
+    """An experiment with zero exposures must not be assigned a leader —
+    no premature call on noise."""
+    from app.routes.admin import _ab_overview
+    with analytics_app.app_context():
+        overview = {e['key']: e for e in _ab_overview()}
+    # review_cta_v1 is a live experiment but unseeded in the test DB.
+    e = overview['review_cta_v1']
+    assert e['total_exposures'] == 0
+    assert e['leader'] is None
+
+
+def test_revenue_page_renders_ab_block(ana_client, analytics_app):
+    """The revenue dashboard shows the A/B block with seeded experiment data."""
+    from app import analytics_db
+    with analytics_app.app_context():
+        analytics_db.insert_ab_event('cta_copy_v1', 'Kupi', 'exposure')
+    good = base64.b64encode(b'admin:secret').decode()
+    r = ana_client.get('/admin/revenue', headers={'Authorization': 'Basic ' + good})
+    assert r.status_code == 200
+    body = r.data.decode()
+    assert 'A/B' in body
+    assert 'cta_copy_v1' in body

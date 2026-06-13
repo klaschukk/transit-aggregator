@@ -163,6 +163,40 @@
   <div class="empty">API key not configured — set <code>BOOKAWAY_API_KEY</code> to show live conversions &amp; payout.</div>
   {% endif %}
 
+  {# A/B-эксперименты — компактный срез: показы/клики/CTR на вариант + лидер
+     после min_runtime_days. Полная разбивка по дням — на /admin/ab. #}
+  {% if ab_overview %}
+  <h2>A/B эксперименты — конверсия по вариантам</h2>
+  {% for e in ab_overview %}
+  <h3 style="font-size:14px;margin:18px 0 6px;">
+    {{ e.key }}
+    <span class="surface">{{ e.surface }}</span>
+    <span style="font-weight:400;color:var(--color-text-muted);font-size:12px;">
+      {{ e.runtime_days }}/{{ e.min_runtime_days }} дн ·
+      {% if e.leader %}лидер: <strong>{{ e.leader }}</strong>{% elif not e.ready %}рано{% else %}нет данных{% endif %}
+    </span>
+  </h3>
+  <table>
+    <thead><tr><th>Вариант</th><th>Показы</th><th>Клики</th><th>CTR</th></tr></thead>
+    <tbody>
+      {% for v in e.variants %}
+      <tr{% if v == e.leader %} style="background:var(--admin-info-bg);font-weight:600;"{% endif %}>
+        <td>{{ v }}{% if v == e.leader %} <span class="surface">лидер</span>{% endif %}</td>
+        <td>{{ e.per[v].exposures }}</td>
+        <td>{{ e.per[v].conversions }}</td>
+        <td>{{ '%.1f'|format(e.per[v].ctr) }}%</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endfor %}
+  <p class="adm-note" style="margin:-8px 0 16px;color:var(--color-text-muted);font-size:12px;">
+    Лидер — вариант с наибольшим CTR (клики/показы), показывается только после
+    {{ ab_overview[0].min_runtime_days if ab_overview else 7 }}+ дней набора данных.
+    Детали по дням — <a href="{{ url_for('admin.ab_index') }}">/admin/ab</a>.
+  </p>
+  {% endif %}
+
   <h2>Daily clicks (last 30 days)</h2>
   {% if daily %}
   <div class="chart" aria-label="Daily bookaway clicks">
