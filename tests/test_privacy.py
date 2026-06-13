@@ -34,8 +34,14 @@ def test_privacy_link_in_footer(client):
 
 
 def test_production_requires_secret_key(monkeypatch):
+    import config as cfg
     from app import create_app
+    # ProductionConfig.SECRET_KEY is read from the env at import time, so under
+    # CI (which sets SECRET_KEY=ci-test-secret) the class attr is already frozen
+    # to a value — delenv alone can't undo that. Clear the frozen attr directly;
+    # monkeypatch restores it afterwards.
     monkeypatch.delenv("SECRET_KEY", raising=False)
+    monkeypatch.setattr(cfg.ProductionConfig, "SECRET_KEY", "", raising=False)
     with pytest.raises(RuntimeError, match="SECRET_KEY"):
         create_app("production")
 

@@ -24,13 +24,12 @@ test:
   before_script:
     - pip install -r requirements.txt -q
   script:
-    # test_data_quality now self-skips on the seed DB (autouse guard), so it is
-    # collected and visible instead of hidden. test_integration/test_privacy
-    # still need a full DB / live services — left ignored until they get the
-    # same graceful-skip treatment.
+    # test_data_quality and test_privacy now run in CI: the former self-skips on
+    # the seed DB (autouse guard), the latter no longer depends on import-time
+    # env. test_integration still needs full-DB data — left ignored until it
+    # gets the same graceful-skip treatment.
     - python -m pytest tests/ -x -q --tb=short
         --ignore=tests/test_integration.py
-        --ignore=tests/test_privacy.py
         2>&1 | tail -40
   allow_failure: false
 
