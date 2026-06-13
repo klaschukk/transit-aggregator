@@ -161,7 +161,7 @@
 <section class="section schedule-section">
   <h2 class="section__title">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-    {{ _('line_detail.schedule_heading') }} — {{ _('line.schedule_from_first') }}
+    {{ _('line_detail.schedule_heading') }} — {% if stops %}{{ _('line.schedule_from') }} {{ stops[0].name }}{% else %}{{ _('line.schedule_from_first') }}{% endif %}
   </h2>
 
   {% set day_labels = {'RD': _('line.day_workday'), 'S': _('line.day_saturday'), 'N': _('line.day_sunday')} %}

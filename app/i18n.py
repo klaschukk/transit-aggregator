@@ -1098,6 +1098,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'from first stop',
         'ru': 'от первой остановки',
     },
+    'line.schedule_from': {
+        'sr': 'polasci sa',
+        'en': 'departures from',
+        'ru': 'отправления с',
+    },
 
     # ── City index ──
     'city_index.title': {
