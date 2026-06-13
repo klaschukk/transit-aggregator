@@ -372,6 +372,40 @@ def test_scan_skips_routes_with_insufficient_history(alerts_app, ana, monkeypatc
     assert stats['routes_qualified'] == 0
 
 
+def test_scan_email_carries_list_unsubscribe(alerts_app, ana, monkeypatch):
+    """Price-alert mail is bulk marketing — it must hand the mailer a one-click
+    List-Unsubscribe URL (Gmail/Yahoo bulk rules; without it the return channel
+    risks the spam folder)."""
+    slug = 'unsub-route'
+    from scripts import price_alert_scan
+    today = date.today()
+    with alerts_app.app_context():
+        row = ana.insert_or_refresh_subscriber(
+            email='alerthdr@example.com', lang='sr', source='price_alert',
+            referrer='', ip='1.1.1.21', route_slug=slug,
+        )
+        ana.confirm_subscriber(row['confirm_token'])
+        for d in range(1, 8):
+            ana.insert_or_refresh_price_snapshot(
+                slug, snapshot_date=today - timedelta(days=d),
+                min_price=1000, max_price=1200, avg_price=1100.0, trip_count=5,
+            )
+        ana.insert_or_refresh_price_snapshot(
+            slug, snapshot_date=today,
+            min_price=700, max_price=1200, avg_price=900.0, trip_count=5,
+        )
+    captured = []
+    monkeypatch.setattr(price_alert_scan, 'send_mail',
+                        lambda **kw: captured.append(kw) or True)
+    monkeypatch.setattr(price_alert_scan, 'create_app', lambda: alerts_app)
+    _seed_monkeypatched_transit_route(monkeypatch, slug, 'A', 'B')
+    stats = price_alert_scan.scan(today=today, dry_run=False)
+    assert stats['emails_sent'] == 1
+    assert captured, 'no email was sent'
+    assert captured[-1].get('list_unsubscribe'), 'price alert missing List-Unsubscribe'
+    assert '/api/unsubscribe/' in captured[-1]['list_unsubscribe']
+
+
 def test_scan_fires_single_email_on_qualifying_drop(alerts_app, ana, monkeypatch):
     slug = 'drop-route'
     from scripts import price_alert_scan

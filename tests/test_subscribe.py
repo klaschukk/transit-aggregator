@@ -235,6 +235,24 @@ def test_confirm_writes_welcome_mail_to_dev_log(sub_app, sub_client, tmp_path):
     assert welcome_markers, "welcome letter subject missing from dev log"
 
 
+def test_welcome_mail_carries_list_unsubscribe(sub_app, sub_client, monkeypatch):
+    """The welcome mail (first post-opt-in touch) must pass the one-click
+    List-Unsubscribe URL to the mailer — Gmail/Yahoo bulk rules, spam safety."""
+    captured = []
+    from app.routes import subscribe as sub_mod
+    monkeypatch.setattr(sub_mod, 'send_mail',
+                        lambda **kw: captured.append(kw) or True)
+    email = 'unsubhdr@example.com'
+    _post(sub_client, email=email)
+    confirm_tok, unsub_tok = _last_token(sub_app, email)
+    assert sub_client.get(f'/api/subscribe/confirm/{confirm_tok}').status_code == 200
+    # The confirm send carries no header; the welcome send must.
+    with_hdr = [c for c in captured if c.get('list_unsubscribe')]
+    assert with_hdr, 'welcome mail missing List-Unsubscribe'
+    assert unsub_tok in with_hdr[-1]['list_unsubscribe']
+    assert '/api/unsubscribe/' in with_hdr[-1]['list_unsubscribe']
+
+
 def test_subscriber_stats_counts_by_state(sub_app, sub_client):
     """subscriber_stats() reports total/confirmed/pending/unsubscribed."""
     from app import analytics_db

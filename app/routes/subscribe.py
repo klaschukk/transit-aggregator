@@ -200,11 +200,12 @@ def api_subscribe_confirm(token: str):
     status_code = 200 if result in ('ok', 'already') else 410
 
     if result == 'ok' and row:
-        subject, text, html = _welcome_email_body(
-            _unsubscribe_url(row['unsubscribe_token']),
-            row.get('lang') or 'sr',
-        )
-        send_mail(to=row['email'], subject=subject, text=text, html=html)
+        unsub_url = _unsubscribe_url(row['unsubscribe_token'])
+        subject, text, html = _welcome_email_body(unsub_url, row.get('lang') or 'sr')
+        # One-click List-Unsubscribe (RFC 8058) on this first post-opt-in mail —
+        # Gmail/Yahoo bulk rules want it and it keeps the welcome out of spam.
+        send_mail(to=row['email'], subject=subject, text=text, html=html,
+                  list_unsubscribe=unsub_url)
 
     return render_template(
         'subscribe_confirmed.html', result=result,

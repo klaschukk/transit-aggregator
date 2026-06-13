@@ -34,6 +34,7 @@ from app.mailer import send_mail  # noqa: E402
 from app.price_alerts import (  # noqa: E402
     COOLDOWN_DAYS,
     MAX_EMAILS_PER_RUN,
+    _unsubscribe_url,
     build_price_alert_email,
     evaluate_snapshots,
 )
@@ -149,8 +150,13 @@ def scan(
                 if dry_run:
                     logger.info('  sub=%d DRY-RUN subject=%r', sub['id'], subject)
                     continue
+                # Price alerts are bulk marketing mail — attach the one-click
+                # List-Unsubscribe header (RFC 8058) Gmail/Yahoo require, or the
+                # whole return channel risks the spam folder.
+                _unsub_tok = sub['unsubscribe_token'] or ''
                 ok = send_mail(
                     to=sub['email'], subject=subject, text=text, html=html,
+                    list_unsubscribe=_unsubscribe_url(_unsub_tok) if _unsub_tok else None,
                 )
                 if ok:
                     stats['emails_sent'] += 1
