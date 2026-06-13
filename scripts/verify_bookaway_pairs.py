@@ -57,10 +57,55 @@ def check(pair: tuple[str, str]) -> tuple[str, str, int]:
         return f, t, 0
 
 
+FAR = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                   "app", "affiliates", "bookaway_far.json")
+# Real browser UA: Bookaway's country pages 200 for it; the terse verify UA can
+# be treated differently, and a false 404 here would wrongly flag a live CTA.
+_FAR_UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+           "(KHTML, like Gecko) Chrome/124 Safari/537.36")
+
+
+def verify_far() -> int:
+    """Probe the far-destination country pages (/routes/{country}/) that the
+    Asia/long-haul CTA deep-links to. A dead one means a tracked click lands on
+    an error -> zero conversions, silently. Returns the count of broken
+    countries (0 = all healthy) so a nightly run can gate on it."""
+    with open(FAR, encoding="utf-8") as fh:
+        far = {k: v for k, v in json.load(fh).items() if not k.startswith("_")}
+    countries = sorted({v["country"] for v in far.values()})
+    print(f"probing {len(countries)} far country pages...", flush=True)
+    broken: list[str] = []
+    for c in countries:
+        try:
+            r = requests.get(f"https://www.bookaway.com/routes/{c}/",
+                             allow_redirects=True, timeout=20,
+                             headers={"User-Agent": _FAR_UA})
+            code = r.status_code
+        except requests.RequestException:
+            code = 0
+        print(f"  {c:<22} {code}{'' if code == 200 else '  <-- BROKEN'}",
+              flush=True)
+        if code != 200:
+            broken.append(c)
+    if broken:
+        hit = len([d for d in far.values() if d["country"] in broken])
+        print(f"\nBROKEN far country pages: {broken} "
+              f"(breaks Bookaway CTA for {hit} destinations)", flush=True)
+    else:
+        print(f"\nAll {len(countries)} far country pages OK.", flush=True)
+    return len(broken)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--workers", type=int, default=8)
+    ap.add_argument("--far", action="store_true",
+                    help="verify far-destination country pages (bookaway_far."
+                         "json) instead of Balkan pairs; exit 1 if any broken")
     args = ap.parse_args()
+
+    if args.far:
+        sys.exit(1 if verify_far() else 0)
 
     pairs = eligible_pairs()
     print(f"probing {len(pairs)} eligible pairs with {args.workers} workers...",
