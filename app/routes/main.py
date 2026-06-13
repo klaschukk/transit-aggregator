@@ -375,6 +375,16 @@ def api_ba_click():
     trip_time = str(data.get('trip_time', ''))[:10]
     partner = str(data.get('partner', ''))[:40]
 
+    # Server-side backstop for blank-partner junk. A real affiliate CTA always
+    # carries a partner (busticket4/bookaway/flixbus); a click with no partner is
+    # either a non-affiliate element (e.g. a city-map ".buy-ticket__btn") that
+    # slipped past the base.html guard, or a bot POSTing the endpoint directly.
+    # Accept the request (204, no error) but DON'T store it — keeps ba_clicks to
+    # genuine affiliate clicks only (pre-2026-06-11 noise was exactly this:
+    # blank-partner rows outnumbered real ones ~6:1).
+    if not partner:
+        return '', 204
+
     # Surface allowlist — prevents cardinality bloat from bogus values.
     if surface and surface not in (
         'search', 'route_detail', 'city_pair', 'route_detail_global',

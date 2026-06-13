@@ -59,7 +59,7 @@ def test_ba_click_handles_empty_body(ana_client):
 def test_ba_click_clamps_surface_to_allowlist(ana_client, analytics_app):
     r = ana_client.post(
         '/api/ba-click',
-        json={'route_slug': 'x', 'surface': 'attacker-injected-value'},
+        json={'route_slug': 'x', 'surface': 'attacker-injected-value', 'partner': 'busticket4'},
     )
     assert r.status_code == 204
     with analytics_app.app_context():
@@ -71,7 +71,8 @@ def test_ba_click_clamps_surface_to_allowlist(ana_client, analytics_app):
 
 
 def test_ba_click_writes_to_db(ana_client, analytics_app):
-    ana_client.post('/api/ba-click', json={'route_slug': 'nis-skopje', 'surface': 'search'})
+    ana_client.post('/api/ba-click',
+                    json={'route_slug': 'nis-skopje', 'surface': 'search', 'partner': 'busticket4'})
     with analytics_app.app_context():
         from app import analytics_db
         rows = analytics_db.query(
@@ -80,11 +81,26 @@ def test_ba_click_writes_to_db(ana_client, analytics_app):
     assert rows and rows[0]['surface'] == 'search'
 
 
+def test_ba_click_drops_blank_partner(ana_client, analytics_app):
+    """Blank-partner clicks (non-affiliate elements, bots) must NOT be stored —
+    server backstop mirroring the base.html data-partner guard. Real affiliate
+    clicks always carry a partner."""
+    ana_client.post('/api/ba-click', json={'route_slug': 'blank-partner-junk', 'surface': 'search'})
+    r = ana_client.post('/api/ba-click', json={'route_slug': 'blank-partner-junk'})
+    assert r.status_code == 204  # accepted, no error
+    with analytics_app.app_context():
+        from app import analytics_db
+        rows = analytics_db.query(
+            "SELECT COUNT(*) AS c FROM ba_clicks WHERE route_slug = 'blank-partner-junk'"
+        )
+    assert rows[0]['c'] == 0  # nothing stored
+
+
 def test_ba_click_ip_is_hashed_not_raw(ana_client, analytics_app):
     """Raw IPs must never land in ba_clicks — only sha256 prefixes."""
     ana_client.post(
         '/api/ba-click',
-        json={'route_slug': 'leak-check', 'surface': 'route_detail'},
+        json={'route_slug': 'leak-check', 'surface': 'route_detail', 'partner': 'busticket4'},
         headers={'X-Forwarded-For': '203.0.113.42'},
     )
     with analytics_app.app_context():
