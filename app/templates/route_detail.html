@@ -385,6 +385,24 @@
 </section>
 {% endif %}
 
+{# City-transport cross-link — fires when a trip endpoint is one of the 4
+   cities we cover with local lines/stops. Funnels crawl budget + internal
+   authority into the high-traffic /gradski/ pages and lets a traveller jump
+   to local transport at either end. Keyword-rich anchor (linije, stajališta). #}
+{% if city_transport_links %}
+<section class="see-also">
+  <h2 class="see-also__title">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+    {{ _('route.city_transport_heading') }}
+  </h2>
+  <div class="see-also__list">
+    {% for c in city_transport_links %}
+    <a href="{{ lang_prefix }}/gradski/{{ c.slug }}/" class="see-also__link">{{ _('route.city_transport_link').format(city=c.label) }}</a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
 <!-- Similar routes — skipped when <2 siblings to avoid one-card sections -->
 {% if similar_routes and similar_routes|length >= 2 %}
 <section class="see-also">

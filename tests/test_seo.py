@@ -273,6 +273,19 @@ def test_json_ld_breadcrumb_on_subpages(client):
         assert "BreadcrumbList" in html, f"No BreadcrumbList on {url}"
 
 
+def test_route_links_to_city_transport_hub_for_covered_endpoint(client):
+    """An intercity route whose endpoint is one of the 4 cities we cover
+    locally must link to that city's /gradski/ hub — funnels crawl/authority
+    to the high-traffic city pages. Beograd–Novi Sad covers both ends."""
+    html = client.get("/rute/beograd-novi-sad/").data.decode()
+    assert '/gradski/beograd/"' in html, "no city-transport link to Beograd hub"
+    assert '/gradski/novi-sad/"' in html, "no city-transport link to Novi Sad hub"
+    # A route to a non-covered city links only the covered endpoint.
+    html2 = client.get("/rute/beograd-budva/").data.decode()
+    assert '/gradski/beograd/"' in html2
+    assert '/gradski/budva/"' not in html2, "linked a city we don't cover locally"
+
+
 def test_line_faq_adds_frequency_question_when_headway(client):
     # "Na koliko minuta ide linija N" is a top GSC query: when a line has a
     # GTFS-derived headway, its FAQPage must carry a frequency Q&A. Novi Sad

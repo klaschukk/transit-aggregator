@@ -104,6 +104,19 @@ def route_index():
                            popular_routes=popular_routes)
 
 
+# City name → (city-transport hub slug, label) for the 4 cities we cover with
+# local lines/stops. An intercity route page (e.g. Beograd–Novi Sad) links to
+# the endpoint's city-transport hub so crawl budget and internal authority flow
+# toward the high-traffic /gradski/ pages (GSC: city lines are where the traffic
+# is), and a traveller can jump straight to local transport at either end.
+_CITY_TRANSPORT_HUBS: dict[str, tuple[str, str]] = {
+    'Beograd': ('beograd', 'Beograd'),
+    'Novi Sad': ('novi-sad', 'Novi Sad'),
+    'Niš': ('nis', 'Niš'),
+    'Kragujevac': ('kragujevac', 'Kragujevac'),
+}
+
+
 @intercity_bp.route('/rute/<slug>/')
 def route_detail(slug: str):
     route = query_one("""
@@ -243,6 +256,16 @@ def route_detail(slug: str):
     if (route.get('max_price_rsd') or 0) <= 0:
         g.meta_robots = 'noindex, follow'
 
+    # City-transport hub links for endpoints we cover locally (funnels link
+    # equity to the high-traffic /gradski/ pages; deduped, origin first).
+    city_transport_links = []
+    _seen_hub = set()
+    for _cname in (route['from_city'], route['to_city']):
+        _hub = _CITY_TRANSPORT_HUBS.get(_cname)
+        if _hub and _hub[0] not in _seen_hub:
+            _seen_hub.add(_hub[0])
+            city_transport_links.append({'slug': _hub[0], 'label': _hub[1]})
+
     og_image_url = f"{current_app.config['BASE_URL']}/og/route/{slug}.png"
     page_context_json = _json.dumps({
         'type': 'route',
@@ -262,6 +285,7 @@ def route_detail(slug: str):
                            price_min=price_min, price_max=price_max,
                            reverse_slug=reverse_slug,
                            reviews=reviews_list, reviews_agg=reviews_agg,
+                           city_transport_links=city_transport_links,
                            og_image_url=og_image_url,
                            page_context_json=page_context_json)
 

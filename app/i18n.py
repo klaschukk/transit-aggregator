@@ -1740,6 +1740,16 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     'route.similar': {'sr': 'Slične rute iz', 'en': 'Similar routes from', 'ru': 'Похожие маршруты из'},
     'route.other_from': {'sr': 'Drugi pravci iz', 'en': 'Other routes from', 'ru': 'Другие направления из'},
+    'route.city_transport_heading': {
+        'sr': 'Gradski prevoz',
+        'en': 'City transport',
+        'ru': 'Городской транспорт',
+    },
+    'route.city_transport_link': {
+        'sr': '{city}: linije i stajališta',
+        'en': '{city}: lines and stops',
+        'ru': '{city}: линии и остановки',
+    },
     'route.carriers_on_route': {
         'sr': 'Prevoznici na ovoj ruti',
         'en': 'Carriers on this route',
