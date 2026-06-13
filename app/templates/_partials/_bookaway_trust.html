@@ -1,0 +1,11 @@
+{# Bookaway trust chips — shown right above the far-destination booking CTA to
+   reduce last-step hesitation (secure / instant / supported). Pure copy, no
+   per-page data and no tracker, so it's safe to include wherever the Bookaway
+   far-CTA renders (/pretraga + /voznja far guide). Reuses the existing badge
+   classes on purpose: app.css gzip budget (27.5KB) is tight, so no new CSS.
+   .ai-route__trust is a styling/test hook with no rule of its own. #}
+<div class="trip-card__badges ai-route__trust">
+  <span class="trip-badge trip-badge--cheap">{{ _('ai_route.trust_secure') }}</span>
+  <span class="trip-badge trip-badge--cheap">{{ _('ai_route.trust_instant') }}</span>
+  <span class="trip-badge trip-badge--cheap">{{ _('ai_route.trust_support') }}</span>
+</div>

@@ -1693,6 +1693,18 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'We could not compose a route right now. Try again later or book directly with the partner.',
         'ru': 'Сейчас не получилось составить маршрут. Попробуйте позже или забронируйте напрямую у партнёра.',
     },
+    # Trust chips next to the Bookaway far-CTA — concrete reassurances that
+    # nudge the click (Bookaway is a real booking platform: SSL checkout,
+    # instant e-ticket, multilingual support).
+    'ai_route.trust_secure': {
+        'sr': 'Sigurna rezervacija', 'en': 'Secure booking', 'ru': 'Безопасное бронирование',
+    },
+    'ai_route.trust_instant': {
+        'sr': 'Trenutna potvrda', 'en': 'Instant confirmation', 'ru': 'Мгновенное подтверждение',
+    },
+    'ai_route.trust_support': {
+        'sr': 'Podrška 24/7', 'en': '24/7 support', 'ru': 'Поддержка 24/7',
+    },
     'ai_route.mode_bus': {'sr': 'Autobus', 'en': 'Bus', 'ru': 'Автобус'},
     'ai_route.mode_train': {'sr': 'Voz', 'en': 'Train', 'ru': 'Поезд'},
     'ai_route.mode_flight': {'sr': 'Let', 'en': 'Flight', 'ru': 'Перелёт'},

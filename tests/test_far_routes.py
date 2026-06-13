@@ -141,6 +141,24 @@ def test_pretraga_renders_far_block(client, app):
     assert 'go2cloud.org' in html           # CTA routed through conversion tracker
 
 
+def test_pretraga_far_cta_has_trust_chips(client, app):
+    """The far CTA carries trust chips (offer reassurance) placed before the
+    button, and the Bookaway conversion tracker stays intact."""
+    from app.db import db_ready
+    with app.app_context():
+        if not db_ready():
+            pytest.skip('transit.duckdb not present in this environment')
+    r = client.get('/en/pretraga/?od=Beograd&do=Bangkok')
+    assert r.status_code == 200
+    html = r.get_data(as_text=True)
+    assert 'ai-route__trust' in html          # trust chips rendered
+    assert 'Secure booking' in html
+    assert 'ai-route__cta' in html            # CTA still present
+    assert 'go2cloud.org' in html             # tracker not broken
+    # Reassurance sits before the click target.
+    assert html.index('ai-route__trust') < html.index('ai-route__cta')
+
+
 # ── /voznja far guide (Phase 2, indexable, server-rendered) ──────────────
 
 def test_voznja_far_guide_indexable(client, app, monkeypatch):

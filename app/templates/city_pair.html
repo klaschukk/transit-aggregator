@@ -248,6 +248,7 @@
       {% endif %}
     </div>
     {% if _ba %}
+    {% include '_partials/_bookaway_trust.html' %}
     <a href="{{ _ba.url }}" target="_blank" rel="noopener nofollow sponsored"
        class="ai-route__cta" style="background: {{ _ba.brand_color }};"
        data-partner="{{ _ba.partner_key }}"

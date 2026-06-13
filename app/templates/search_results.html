@@ -116,6 +116,7 @@
     </div>
   </div>
   {% if bookaway_offer %}
+  {% include '_partials/_bookaway_trust.html' %}
   <a href="{{ bookaway_offer.url }}" target="_blank" rel="noopener nofollow sponsored"
      class="ai-route__cta" style="background: {{ bookaway_offer.brand_color }};"
      data-partner="bookaway" data-route-slug="{{ _campaign }}" data-surface="search_far">
