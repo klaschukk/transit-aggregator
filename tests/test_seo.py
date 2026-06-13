@@ -201,6 +201,18 @@ def test_sitemap_has_stops(client):
     assert "/stajaliste/" in xml
 
 
+def test_sitemap_core_lists_every_guide_and_country_hub(client):
+    """sitemap-core derives guide and country-hub URLs from their registries
+    in app.routes.info, so a new entry there is always discoverable. Guards
+    against the old hand-synced list silently orphaning a fresh guide."""
+    from app.routes.info import _COUNTRY_HUBS, _GUIDES
+    xml = client.get("/sitemap-core.xml").data.decode()
+    for slug in _COUNTRY_HUBS:
+        assert f"/destinacije/{slug}/" in xml, f"country hub {slug} missing from sitemap"
+    for slug in _GUIDES:
+        assert f"/vodici/{slug}/" in xml, f"guide {slug} missing from sitemap"
+
+
 def test_sitemap_sample_urls_valid(client):
     """Pick 5 URLs from the combined sitemap shards and verify they 200."""
     xml = _all_sitemap_xml(client)

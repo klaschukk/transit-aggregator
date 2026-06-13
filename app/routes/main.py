@@ -993,27 +993,21 @@ def sitemap_core():
         url('/prevoznici/', 'monthly', '0.5'),
         url('/autobuske-stanice/', 'monthly', '0.5'),
         url('/destinacije/', 'weekly', '0.7'),
-        url('/destinacije/crna-gora/', 'weekly', '0.7'),
-        url('/destinacije/bosna/', 'weekly', '0.7'),
-        url('/destinacije/hrvatska/', 'weekly', '0.7'),
-        url('/destinacije/makedonija/', 'weekly', '0.7'),
-        url('/destinacije/slovenija/', 'weekly', '0.7'),
-        url('/destinacije/albanija/', 'weekly', '0.7'),
-        url('/destinacije/grcka/', 'weekly', '0.7'),
-        url('/destinacije/bugarska/', 'weekly', '0.7'),
         url('/vodici/', 'weekly', '0.6'),
-        url('/vodici/kako-doci-beograd-budva/', 'monthly', '0.5'),
-        url('/vodici/najjeftinije-autobus-karte-srbija/', 'monthly', '0.5'),
-        url('/vodici/autobus-ili-voz-srbija/', 'monthly', '0.5'),
-        url('/vodici/beograd-novi-sad/', 'monthly', '0.7'),
-        url('/vodici/prevoz-do-mora/', 'monthly', '0.7'),
-        url('/vodici/flixbus-srbija/', 'monthly', '0.6'),
         url('/o-nama/', 'monthly', '0.3'),
         url('/kontakt/', 'monthly', '0.3'),
         url('/privatnost/', 'monthly', '0.2'),
         url('/uslovi/', 'monthly', '0.2'),
         url('/politika-kolacica/', 'monthly', '0.2'),
     ]
+    # Country hubs (/destinacije/<country>/) and guides (/vodici/<slug>/) are
+    # derived from their registries in app.routes.info so a new entry there is
+    # listed in the sitemap automatically — no more hand-syncing this list (a
+    # guide added but forgotten here used to be orphaned from discovery).
+    # Local import avoids a circular import at module load.
+    from app.routes.info import _COUNTRY_HUBS, _GUIDES
+    pages += [url(f'/destinacije/{slug}/', 'weekly', '0.7') for slug in _COUNTRY_HUBS]
+    pages += [url(f'/vodici/{slug}/', 'monthly', '0.6') for slug in _GUIDES]
     return _urlset(pages)
 
 
