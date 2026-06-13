@@ -19,7 +19,7 @@
 
 Что делает джоба по шагам (по SSH на `root@178.105.76.3`, ключ — CI-переменная `DEPLOY_SSH_KEY`, base64):
 
-1. `git fetch && git reset --hard origin/main` — в основном чекауте `/root/klaschuk/transit-aggregator`.
+1. `git fetch && git reset --hard origin/main` — в прод-чекауте `/opt/prevozni` (с 2026-06-13, ad7f68f).
 2. `pip install -r requirements.txt` (venv).
 3. `python scripts/minify_css.py` — пересборка `app/static/css/dist/` (app.css, app.mobile.css, ads.css, admin.css). **dist/ в gitignore и деплоем НЕ приезжает из репо — он собирается именно на этом шаге.**
 4. `systemctl restart transit`.
@@ -40,7 +40,10 @@ bash scripts/deploy.sh <branch> # деплой другой ветки (редк
 
 ## 3. Почему деплой ресетит main и зачем worktree
 
-Оба пути деплоя делают `git reset --hard origin/main` в основном чекауте. Любые незакоммиченные правки и локальные ветки в `/root/klaschuk/transit-aggregator` **будут стёрты**.
+Оба пути деплоя делают `git reset --hard origin/main` в прод-чекауте `/opt/prevozni`.
+Дев-чекаут `/root/klaschuk/transit-aggregator` деплоем больше не трогается (с ad7f68f), но
+правило прежнее: работать в изолированных worktree и пушить в main сразу — ночной пайплайн
+и сборка БД живут именно в дев-чекауте.
 
 Поэтому железное правило: **вся работа — в изолированных worktree** (`/root/klaschuk/.wt/*`, `/root/klaschuk-*-wt` и т.д.), а в main попадаем через rebase + merge/push. Основной чекаут — только для прод-сервиса и деплоя.
 

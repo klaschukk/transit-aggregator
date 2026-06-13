@@ -12,7 +12,8 @@
 | Hostname | `prevozni` |
 | ОС | Ubuntu 24.04.3 LTS, kernel 6.8.0, TZ = UTC |
 | Железо | 2 vCPU, 3.7 GiB RAM, диск 75 GB (занято ~15 GB / 20%) |
-| Рабочая директория | `/root/klaschuk/transit-aggregator` (чекаут main; venv внутри) |
+| Прод-чекаут сервиса | `/opt/prevozni` (user `prevozni`, не root — с 2026-06-13, ad7f68f) |
+| Дев/данные-чекаут | `/root/klaschuk/transit-aggregator` (тут ночной пайплайн собирает БД; сессии работают в worktree) |
 | Python | 3.12.3 (системный и venv) |
 
 Также на боксе крутятся: `proslushka-bot.service` (посторонний TG-бот, root) и два процесса code-server (remote-сессии).
@@ -42,6 +43,7 @@ Montiko (81.28.248.71) в обслуживании prevozni.com **не учас�
 - Запрос с `Host=178.105.76.3` (прямой IP) → `return 444`.
 - Allowlist всех Cloudflare IPv4+IPv6 диапазонов + `127.0.0.1`, затем `deny all` — на весь server-блок.
 - `/static/` → `alias /root/klaschuk/transit-aggregator/app/static/`, `expires 30d`, `Cache-Control "public, max-age=86400"` (без `immutable`).
+  ⚠️ **Split-brain:** статика раздаётся из ДЕВ-чекаута, а приложение работает из `/opt/prevozni` — если чекауты разъедутся по коммитам, CSS/JS перестанут соответствовать шаблонам. Надо перевести alias на `/opt/prevozni/app/static/` (правка nginx-конфига + reload).
 - `proxy_pass http://127.0.0.1:8000`, заголовки `X-Forwarded-*`, `proxy_read_timeout 30s`.
 - Логи nginx пишутся **внутрь репо**: `logs/nginx_access.log`, `logs/nginx_error.log`.
 
@@ -53,9 +55,9 @@ Security-заголовки (HSTS, CSP, X-Frame-Options, X-Content-Type-Options,
 
 ```ini
 [Service]
-User=root                      # hardening-TODO: до сих пор root
-WorkingDirectory=/root/klaschuk/transit-aggregator
-EnvironmentFile=/root/klaschuk/transit-aggregator/.env
+User=prevozni                  # не-root с 2026-06-13 (ad7f68f) — hardening-долг закрыт
+WorkingDirectory=/opt/prevozni
+EnvironmentFile=/opt/prevozni/.env
 ExecStart=.../venv/bin/gunicorn -w 2 --max-requests 2000 --max-requests-jitter 200 \
           --timeout 30 --bind 127.0.0.1:8000 "app:create_app()"
 Restart=always
@@ -70,7 +72,7 @@ Drop-in `transit.service.d/adsense.conf` содержит закомментир
 
 ## 5. Переменные окружения
 
-Файл: `/root/klaschuk/transit-aggregator/.env` (права 0600, root). Значения секретов здесь не приводим.
+Файл: `/opt/prevozni/.env` (права 0600). Значения секретов здесь не приводим.
 
 **Заданы:**
 
@@ -78,7 +80,7 @@ Drop-in `transit.service.d/adsense.conf` содержит закомментир
 |------------|----------------------|
 | `FLASK_ENV` | `production` |
 | `SECRET_KEY` | задан (обязателен — без него RuntimeError на старте) |
-| `DUCKDB_PATH` | `/root/klaschuk/transit-aggregator/data/dbs/transit.duckdb` |
+| `DUCKDB_PATH` | `/root/klaschuk/transit-aggregator/data/dbs/transit.duckdb` — БД живёт в дев-чекауте, её собирает ночной пайплайн |
 | `GA_TRACKING_ID` | `G-0XPYJTVSSZ` |
 | `ADSENSE_ID`, `ADSENSE_PUB_ID` | `ca-pub-9538841764038287` (live; PUB_ID — для `/ads.txt`) |
 | `ADMIN_USER` / `ADMIN_PASS` | basic-auth на `/admin/*` |
@@ -152,7 +154,7 @@ Drop-in `transit.service.d/adsense.conf` содержит закомментир
 
 **НЕ сделано:**
 
-- gunicorn до сих пор работает под **root** (`User=root` в юните);
+- ~~gunicorn под root~~ — закрыто 2026-06-13: сервис в `/opt/prevozni` под юзером `prevozni` (ad7f68f);
 - CF Authenticated Origin Pulls / Full (strict) — origin вообще без TLS (только :80, фактически Flexible);
 - fail2ban установлен, но **inactive**;
 - `/root/.git-credentials` — plaintext GitLab PAT (хотя origin уже переведён на SSH).
