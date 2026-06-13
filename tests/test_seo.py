@@ -286,6 +286,16 @@ def test_route_links_to_city_transport_hub_for_covered_endpoint(client):
     assert '/gradski/budva/"' not in html2, "linked a city we don't cover locally"
 
 
+def test_voznja_links_to_city_transport_hub_for_covered_endpoint(client):
+    """Same city-transport cross-link on the /voznja/ city-pair page."""
+    html = client.get("/voznja/beograd-do-novi-sad/").data.decode()
+    assert '/gradski/beograd/"' in html, "no city-transport link to Beograd hub"
+    assert '/gradski/novi-sad/"' in html, "no city-transport link to Novi Sad hub"
+    html2 = client.get("/voznja/beograd-do-budva/").data.decode()
+    assert '/gradski/beograd/"' in html2
+    assert '/gradski/budva/"' not in html2, "linked a city we don't cover locally"
+
+
 def test_line_faq_adds_frequency_question_when_headway(client):
     # "Na koliko minuta ide linija N" is a top GSC query: when a line has a
     # GTFS-derived headway, its FAQPage must carry a frequency Q&A. Novi Sad

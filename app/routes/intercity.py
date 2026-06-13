@@ -115,6 +115,10 @@ _CITY_TRANSPORT_HUBS: dict[str, tuple[str, str]] = {
     'Niš': ('nis', 'Niš'),
     'Kragujevac': ('kragujevac', 'Kragujevac'),
 }
+# Same hubs keyed by slug — /voznja/<from>-do-<to>/ receives endpoints as slugs.
+_CITY_TRANSPORT_BY_SLUG: dict[str, str] = {
+    slug: label for slug, label in _CITY_TRANSPORT_HUBS.values()
+}
 
 
 @intercity_bp.route('/rute/<slug>/')
@@ -457,6 +461,17 @@ def city_pair(from_city: str, to_city: str):
     from app.routes.info import country_hub_for_city
     destination_country = country_hub_for_city(route['to_city']) if route else None
 
+    # City-transport hub links for endpoints we cover locally (same idea as
+    # route_detail): funnels link equity to the high-traffic /gradski/ pages.
+    # from_city/to_city are URL slugs here, so match by slug.
+    city_transport_links = []
+    _seen_hub = set()
+    for _slug in (from_city, to_city):
+        _label = _CITY_TRANSPORT_BY_SLUG.get(_slug)
+        if _label and _slug not in _seen_hub:
+            _seen_hub.add(_slug)
+            city_transport_links.append({'slug': _slug, 'label': _label})
+
     og_image_url = f"{current_app.config['BASE_URL']}/og/voznja/{from_city}-do-{to_city}.png"
     _fc = from_city.replace('-', ' ').title()
     _tc = to_city.replace('-', ' ').title()
@@ -476,6 +491,7 @@ def city_pair(from_city: str, to_city: str):
                            destination_country=destination_country,
                            from_city=_fc,
                            to_city=_tc,
+                           city_transport_links=city_transport_links,
                            far=far, far_itinerary=far_itinerary,
                            reviews=reviews_list, reviews_agg=reviews_agg,
                            review_route_slug=canonical_slug,
