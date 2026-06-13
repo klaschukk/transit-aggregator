@@ -9,7 +9,7 @@
 # Usage:  scripts/deploy.sh [branch]      (default: main)
 set -euo pipefail
 
-DIR=/root/klaschuk/transit-aggregator
+DIR=/opt/prevozni
 BRANCH="${1:-main}"
 cd "$DIR"
 

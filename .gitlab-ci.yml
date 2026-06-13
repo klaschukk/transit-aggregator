@@ -5,7 +5,7 @@ stages:
 variables:
   DEPLOY_HOST: "178.105.76.3"
   DEPLOY_USER: "root"
-  DEPLOY_DIR: "/root/klaschuk/transit-aggregator"
+  DEPLOY_DIR: "/opt/prevozni"
 
 # ──────────────────────────────────────────────
 # TEST (CI) — runs on every push to main and on merge requests.
