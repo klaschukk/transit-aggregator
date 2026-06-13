@@ -43,13 +43,44 @@ LOGIN_URL = f'{BASE}/pocetna.php'
 DATA_URL = f'{BASE}/izvjestaji/podaci_o_kartama.php'
 UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Prevozni-Affiliate/1.0'
 
+# Their panel is flaky, so every HTTP hit gets a few backoff retries before we
+# give up and bail (exit 3) — a transient blip shouldn't lose an hourly run.
+RETRY_ATTEMPTS = 3
+RETRY_BASE_DELAY = 2.0  # seconds; exponential: 2s, 4s, ...
+
+
+def _request(session: requests.Session, method: str, url: str, **kw):
+    """One HTTP call with exponential-backoff retries on transient failures.
+
+    Retries network errors (timeouts, connection resets) and 5xx server
+    responses; a 4xx is returned as-is so the caller decides (our request is
+    wrong, retrying won't help). Re-raises the last RequestException once all
+    attempts are spent so main() can map it to exit code 3."""
+    last_exc: Exception | None = None
+    for attempt in range(1, RETRY_ATTEMPTS + 1):
+        try:
+            resp = session.request(method, url, **kw)
+            if resp.status_code >= 500:
+                raise requests.HTTPError(
+                    f'{resp.status_code} server error', response=resp)
+            return resp
+        except requests.RequestException as exc:
+            last_exc = exc
+            if attempt < RETRY_ATTEMPTS:
+                delay = RETRY_BASE_DELAY * (2 ** (attempt - 1))
+                log.warning('%s %s failed (attempt %d/%d): %s — retry in %.0fs',
+                            method, url, attempt, RETRY_ATTEMPTS, exc, delay)
+                time.sleep(delay)
+    assert last_exc is not None
+    raise last_exc
+
 
 def _login(session: requests.Session, user: str, pw: str) -> bool:
     """Authenticate the session. Returns True if the affiliate landing loaded."""
     session.headers['User-Agent'] = UA
-    session.get(f'{BASE}/index.php?s=2', timeout=30)  # seed PHPSESSID
-    resp = session.post(
-        LOGIN_URL,
+    _request(session, 'GET', f'{BASE}/index.php?s=2', timeout=30)  # seed PHPSESSID
+    resp = _request(
+        session, 'POST', LOGIN_URL,
         data={'username': user, 'password': pw, 'submit': 'Prijavi se'},
         headers={'Referer': f'{BASE}/index.php?s=2'},
         timeout=30,
@@ -68,9 +99,9 @@ def _fetch_month(session: requests.Session, aff_id: str, year: int, month: int) 
         'datumpretrage': '', 'preduzeceProdaje': '', 'godina': year,
         'mjesec': month, 'valutaProdaje': '',
     }
-    r = session.get(DATA_URL, params=params,
-                    headers={'Referer': f'{BASE}/izvjestaji/prodaja_karata_po_danima.php'},
-                    timeout=30)
+    r = _request(session, 'GET', DATA_URL, params=params,
+                 headers={'Referer': f'{BASE}/izvjestaji/prodaja_karata_po_danima.php'},
+                 timeout=30)
     r.raise_for_status()
     series = r.json()
     if not isinstance(series, list) or len(series) < 3:
