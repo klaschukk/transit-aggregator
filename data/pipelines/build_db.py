@@ -255,6 +255,34 @@ def _verify_slug_invariant(conn: duckdb.DuckDBPyConnection) -> None:
     print("slug invariant: all URL slugs are ASCII ✓")
 
 
+_DEFAULT_DAYS = '1234567'  # runs every day — the placeholder mask (see below)
+
+
+def _normalize_days_of_week(raw) -> str:
+    """Coerce a source-provided days-of-week mask to the canonical form.
+
+    The mask is a string of distinct weekday digits 1–7 (1=Mon … 7=Sun),
+    sorted, e.g. '12345' for weekdays-only or '67' for weekends.
+
+    DATA GAP: as of 2026-06 no scraper populates this. busticket4's bus-search
+    API returns per-date departures (departure/arrival time, duration) with no
+    weekly recurrence field, and we scrape one representative weekday — so we
+    have no honest way to know which days a given trip actually runs. Until a
+    source provides it, every trip falls back to '1234567' (runs every day),
+    which means the route_detail day filter shows all trips on any day and must
+    be treated as informational, not authoritative.
+
+    This helper is the forward-compatible seam: the moment a scraper emits a
+    real mask on a trip, build_db persists it instead of the placeholder — no
+    further schema or insert change needed. Garbage in (non-1–7 chars, empties)
+    collapses safely to the default rather than shipping a broken mask.
+    """
+    if not raw:
+        return _DEFAULT_DAYS
+    digits = ''.join(sorted({c for c in str(raw) if c in '1234567'}))
+    return digits or _DEFAULT_DAYS
+
+
 def _create_schema(conn: duckdb.DuckDBPyConnection) -> None:
     conn.execute("""
         CREATE TABLE operators (
@@ -286,6 +314,12 @@ def _create_schema(conn: duckdb.DuckDBPyConnection) -> None:
             arrival_time VARCHAR NOT NULL,
             duration_min INTEGER,
             price_rsd INTEGER,
+            -- PLACEHOLDER: no source exposes a weekly recurrence pattern and we
+            -- scrape a single representative weekday, so every trip currently
+            -- carries the '1234567' (runs-every-day) default. The route_detail
+            -- day filter is therefore informational-only. See
+            -- _normalize_days_of_week() — build_db already persists a real mask
+            -- the day a scraper starts providing one.
             days_of_week VARCHAR DEFAULT '1234567',
             is_active BOOLEAN DEFAULT true,
             bt4_line_id INTEGER          -- busticket4 line id for affiliate checkout (NULL if unknown)
@@ -530,7 +564,7 @@ def _load_intercity(conn: duckdb.DuckDBPyConnection,
             (trip_id, route_id_val, op_id,
              trip['departure_time'], trip['arrival_time'],
              trip.get('duration_min', 0), price,
-             '1234567', True,
+             _normalize_days_of_week(trip.get('days_of_week')), True,
              int(bt4_line_id) if bt4_line_id else None)
         )
         trip_id += 1
