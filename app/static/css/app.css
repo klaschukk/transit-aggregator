@@ -1517,7 +1517,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   text-decoration: none; transition: all 0.15s; color: #fff;
 }
 .buy-ticket__btn svg { opacity: 0.7; }
-.buy-ticket__btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.buy-ticket__btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
 /* Bookaway green: #059669 + white = 3.76:1 (AA fail at 13.6px normal).
    #047857 clears 4.65:1 and matches the old :hover — no visual jump. */
 .buy-ticket__btn--bookaway { background: var(--color-bookaway); }
@@ -1585,7 +1585,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   transition: transform 0.15s, box-shadow 0.15s;
 }
 .ai-route__cta svg { opacity: 0.8; }
-.ai-route__cta:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.ai-route__cta:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
 .ai-route__note { margin: var(--space-3) 0 0; font-size: var(--text-xs); color: var(--color-text-muted); }
 @media (prefers-reduced-motion: reduce) { .ai-route__spinner { animation: none; } }
 
@@ -1610,7 +1610,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 }
 .partners-block__btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  box-shadow: var(--shadow-md);
   filter: brightness(0.95);
 }
 .partners-block__btn svg { opacity: 0.7; }
@@ -1635,7 +1635,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   padding: var(--space-6); border-radius: 12px; border: 1px solid var(--color-border);
   background: #fff; transition: box-shadow 0.2s, transform 0.2s;
 }
-.dest-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); transform: translateY(-2px); }
+.dest-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
 .dest-card__header { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
 .dest-card__icon {
   display: flex; align-items: center; justify-content: center;
@@ -2753,7 +2753,7 @@ a[class*="card"], a[class*="route"], a[class*="link"],
 }
 .dest-card:hover, .see-also__card:hover, .home-city-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  box-shadow: var(--shadow-md);
 }
 
 /* Reduced motion — respect user preference */
@@ -3211,7 +3211,7 @@ select:focus-visible, textarea:focus-visible {
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, .14);
+  box-shadow: var(--shadow-lg);
   max-width: 460px;
   font-size: var(--text-sm);
   transition: opacity .25s ease, transform .25s ease;
@@ -3686,7 +3686,7 @@ select:focus-visible, textarea:focus-visible {
 /* Stronger trip-card hover + buy button glow */
 @media (hover: hover) {
   .trip-list .trip-card:hover {
-    box-shadow: 0 6px 24px rgba(0,0,0,.1);
+    box-shadow: var(--shadow-lg);
     transform: translateY(-2px);
   }
   .trip-card:hover .trip-card__buy {
@@ -3795,7 +3795,7 @@ select:focus-visible, textarea:focus-visible {
 @media (hover: hover) {
   .dest-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    box-shadow: var(--shadow-lg);
   }
 }
 
