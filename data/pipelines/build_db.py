@@ -169,6 +169,7 @@ def build() -> None:
         _load_sample_data(conn)
 
     _verify_slug_invariant(conn)
+    _audit_data_quality(conn)
     _restore_line_geometries(conn, preserved_geom)
 
     conn.close()
@@ -312,6 +313,75 @@ def _normalize_days_of_week(raw) -> str:
         return _DEFAULT_DAYS
     digits = ''.join(sorted({c for c in str(raw) if c in '1234567'}))
     return digits or _DEFAULT_DAYS
+
+
+DATA_QUALITY_FILE = RAW_DIR / 'data_quality.json'
+
+# Generous Serbia bbox (s, w, n, e). Stops far outside it are usually intercity
+# endpoints abroad mis-tagged to a city — informational, not a hard error.
+_SERBIA_BBOX = (42.0, 18.0, 47.0, 23.0)
+
+
+def _find_slug_collisions(rows) -> dict:
+    """Map (city, slug) -> [labels...] for any slug shared by >1 row.
+
+    `rows` is an iterable of (city, label, slug). The schema enforces
+    UNIQUE(city, number) on city_lines but NOT (city, slug), so two numbers
+    that transliterate to the same slug (9Л/9л → linija-9l, 860с/860ш →
+    linija-860s) collapse to ONE public URL and one line shadows the other.
+    Returns only the colliding groups so the app team can decide merge vs
+    disambiguate (cf. app/routes/city.py::_LINE_SLUG_REDIRECTS).
+    """
+    by_slug: dict = {}
+    for city, label, slug in rows:
+        by_slug.setdefault((city, slug), []).append(label)
+    return {k: v for k, v in by_slug.items() if len(v) > 1}
+
+
+def _audit_data_quality(conn: duckdb.DuckDBPyConnection) -> dict:
+    """Non-fatal end-of-build data-quality sweep.
+
+    The schema already guarantees FK integrity, NOT NULL and UNIQUE(city,
+    number). This catches what it can't: duplicate (city, slug) line URLs,
+    half-coordinates (a pin that can't render), and stops geolocated far
+    outside Serbia (intercity endpoints mis-tagged to a city). Logs anomalies
+    and persists a report so a bad scrape/merge is visible without a re-query.
+    """
+    report: dict = {}
+
+    line_collisions = _find_slug_collisions(
+        conn.execute("SELECT city, number, slug FROM city_lines").fetchall())
+    report['dup_line_slugs'] = len(line_collisions)
+    for (city, slug), numbers in sorted(line_collisions.items()):
+        print(f"  WARN: data-quality — {city}/{slug} shared by lines {numbers}")
+
+    report['half_coord_stops'] = conn.execute(
+        "SELECT COUNT(*) FROM city_stops WHERE (lat IS NULL) != (lon IS NULL)"
+    ).fetchone()[0]
+
+    s, w, n, e = _SERBIA_BBOX
+    report['stops_outside_serbia'] = conn.execute(
+        "SELECT COUNT(*) FROM city_stops WHERE lat IS NOT NULL "
+        "AND (lat < ? OR lat > ? OR lon < ? OR lon > ?)",
+        [s, n, w, e]).fetchone()[0]
+
+    report['trips_blank_time'] = conn.execute(
+        "SELECT COUNT(*) FROM trips WHERE departure_time = '' OR arrival_time = ''"
+    ).fetchone()[0]
+
+    for key in ('half_coord_stops', 'stops_outside_serbia', 'trips_blank_time'):
+        if report[key]:
+            print(f"  WARN: data-quality — {key}={report[key]}")
+
+    try:
+        DATA_QUALITY_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(DATA_QUALITY_FILE, 'w', encoding='utf-8') as f:
+            json.dump(report, f, ensure_ascii=False, indent=2)
+        print(f"  Data-quality report → {DATA_QUALITY_FILE.name} ({report})")
+    except OSError as exc:  # pragma: no cover - disk-dependent
+        print(f"  WARN: could not write data-quality report: {exc}")
+
+    return report
 
 
 def _create_schema(conn: duckdb.DuckDBPyConnection) -> None:
