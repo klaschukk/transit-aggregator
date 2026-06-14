@@ -59,22 +59,19 @@ img { display: block; max-width: 100%; }
   --color-accent-dark: #d97706;
   --color-accent-light: #fde68a;  /* amber-200 — trip badge surface */
   --color-accent-text: #78350f;   /* amber-900 — AA text on accent-light */
-  /* Transit-mode accents (design system) — colour-code modes */
+  /* Transit-mode palette — one source for badges, icons, trip-card accents. */
   --mode-bus: var(--color-primary);
-  --mode-train: #7c3aed;
-  --mode-tram: #d97706;
-  --mode-trolley: #2563eb;
+  --mode-tram: #e53e3e;
+  --mode-trolley: #d69e2e;
+  --mode-train: #7c336e;
+  --mode-ebus: #38a169;
+  --mode-night: #2b2d87;
   --color-text: #0f172a;
   --color-text-muted: #475569;
   --color-bg: #ffffff;
   --color-bg-alt: #f8fafc;
   --color-border: #e2e8f0;
   --color-success: #16a34a;
-  --color-bus: #1a73e8;
-  --color-train: #7c3aed;
-  --color-tram: #e53935;
-  --color-trolley: #fb8c00;
-  --color-night: #1e1b4b;
   --color-primary-300: #5eead4;
   --color-primary-darker: #115e59;   /* primary button :hover */
   /* Status / feedback — de-facto tokens, now named. Contrast ratios are
@@ -1316,7 +1313,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 
 /* ETA badges */
 .eta { font-weight: 700; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
-.eta--now { color: var(--color-tram); }
+.eta--now { color: var(--mode-tram); }
 .eta--soon { color: var(--color-primary); }
 .eta--later { color: var(--color-text-muted); }
 
@@ -1326,7 +1323,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   min-width: 38px; height: 28px;
   padding: 0 var(--space-2);
   border-radius: var(--radius-pill);
-  background: var(--color-bus);
+  background: var(--mode-bus);
   color: var(--color-bg);
   display: inline-flex; align-items: center; justify-content: center;
   font-size: 13px; font-weight: 800;
@@ -1437,6 +1434,8 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .line-group[data-group-type="tram"] .line-group__title .vehicle-icon { color: var(--mode-tram); }
 .line-group[data-group-type="trolleybus"] .line-group__title .vehicle-icon { color: var(--mode-trolley); }
 .line-group[data-group-type="bg-voz"] .line-group__title .vehicle-icon { color: var(--mode-train); }
+.line-group[data-group-type="e-bus"] .line-group__title .vehicle-icon { color: var(--mode-ebus); }
+.line-group[data-group-type="night"] .line-group__title .vehicle-icon { color: var(--mode-night); }
 
 /* Line grid */
 .line-grid {
@@ -3679,10 +3678,10 @@ select:focus-visible, textarea:focus-visible {
    ═══════════════════════════════════════════════════ */
 
 /* Transport-type left accent on trip cards */
-.trip-card[data-type="train"]   { border-left: 3px solid var(--color-train);   padding-left: 17px /* off-scale */; }
-.trip-card[data-type="tram"]    { border-left: 3px solid var(--color-tram);    padding-left: 17px /* off-scale */; }
-.trip-card[data-type="trolley"] { border-left: 3px solid var(--color-trolley); padding-left: 17px /* off-scale */; }
-.trip-card[data-type="bus"]     { border-left: 3px solid var(--color-bus);     padding-left: 17px /* off-scale */; }
+.trip-card[data-type="train"]   { border-left: 3px solid var(--mode-train);   padding-left: 17px /* off-scale */; }
+.trip-card[data-type="tram"]    { border-left: 3px solid var(--mode-tram);    padding-left: 17px /* off-scale */; }
+.trip-card[data-type="trolley"] { border-left: 3px solid var(--mode-trolley); padding-left: 17px /* off-scale */; }
+.trip-card[data-type="bus"]     { border-left: 3px solid var(--mode-bus);     padding-left: 17px /* off-scale */; }
 
 /* Stronger trip-card hover + buy button glow */
 @media (hover: hover) {
