@@ -26,6 +26,7 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from app.slug import normalize_slug  # noqa: E402
+from data.pipelines.http_util import post_with_retry  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s %(message)s')
 log = logging.getLogger(__name__)
@@ -243,8 +244,7 @@ def search_departures(
     }
 
     try:
-        resp = session.post(url, json=body, headers=HEADERS, timeout=30)
-        resp.raise_for_status()
+        resp = post_with_retry(session, url, json=body, headers=HEADERS, timeout=30)
         body_resp = resp.json()
         data = body_resp.get('data', []) if isinstance(body_resp, dict) else body_resp
     except Exception as e:

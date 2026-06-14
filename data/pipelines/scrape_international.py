@@ -28,6 +28,7 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from app.slug import normalize_slug  # noqa: E402 — import for future use / parity
+from data.pipelines.http_util import post_with_retry  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s %(message)s')
 log = logging.getLogger(__name__)
@@ -132,11 +133,10 @@ def search(session, from_name, from_code, from_country,
         'carrier_id': 0, 'carrier_parent_company_id': 0,
     }
     try:
-        r = session.post(
-            f'{BASE_URL}/api/proxy/bus-search',
+        r = post_with_retry(
+            session, f'{BASE_URL}/api/proxy/bus-search',
             json=body, headers=HEADERS, timeout=30,
         )
-        r.raise_for_status()
         data = r.json()
         return data.get('data', []) if isinstance(data, dict) else []
     except Exception:
