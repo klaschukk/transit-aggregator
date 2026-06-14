@@ -27,13 +27,20 @@ from pathlib import Path
 
 import duckdb
 
-# Bootstrap Flask app context so analytics_db helpers can resolve config.
-os.environ.setdefault("FLASK_ENV", "production")
-os.environ.setdefault("SECRET_KEY", "snapshot-tool")
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app import create_app  # noqa: E402
 from app import analytics_db  # noqa: E402
+
+
+def _bootstrap_env() -> None:
+    """Set the Flask env the script needs — only when actually RUN, never at
+    import. Doing this at module level set FLASK_ENV=production globally, which
+    pytest's collection import leaked into the whole suite (other tests then
+    built production apps and failed on SECRET_KEY). Keep import side effects out.
+    """
+    os.environ.setdefault("FLASK_ENV", "production")
+    os.environ.setdefault("SECRET_KEY", "snapshot-tool")
 
 # Anomaly thresholds. A nightly scrape that breaks (source down, format change,
 # auth expired) shows up as a sharp drop in a kind's total, or an entity that
@@ -106,6 +113,7 @@ def _read_counts(transit_db_path: str) -> dict[str, list[tuple[str, int]]]:
 
 
 def main() -> int:
+    _bootstrap_env()
     app = create_app()
     today = date_cls.today().isoformat()
 
