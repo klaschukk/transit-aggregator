@@ -13,6 +13,7 @@ import json
 import os
 import re
 import sys
+import time
 from pathlib import Path
 
 import duckdb
@@ -897,6 +898,75 @@ def _ensure_gtfs() -> None:
         print(f"  WARN: GTFS download failed ({exc}); proceeding without fresh GTFS")
 
 
+# Coverage below these floors means the feed or the matching logic regressed —
+# the build still ships (stale schedule beats none) but the warning is loud.
+_GTFS_MIN_STOP_TIMES_PCT = 85   # % of stop_times linked to a city_stop
+_GTFS_MIN_ROUTES_MATCHED = 200  # route_short_name → city_line matches
+_GTFS_MAX_FEED_AGE_DAYS = 45    # data.gov.rs publishes a dated feed; stale → warn
+
+GTFS_COVERAGE_FILE = RAW_DIR / 'gtfs_coverage.json'
+
+
+def _build_line_resolver(line_rows):
+    """Build a GTFS route_short_name → city_line_id resolver.
+
+    GTFS route_short_name is Latin ("27N", "102P") while city_lines.number is
+    often Cyrillic ("27Н", "102п"). Resolve in priority order:
+      1. exact raw match (number as stored),
+      2. exact transliterated match (Cyrillic→Latin),
+      3. case-insensitive transliterated match, but ONLY when that upper-cased
+         key maps to a single line — ambiguous keys are skipped so a route is
+         never linked to the wrong line.
+    `line_rows` is an iterable of (city_line_id, number). Returns resolve(short).
+    """
+    line_map: dict[str, int] = {}
+    translit_map: dict[str, int] = {}
+    ci_map: dict[str, int] = {}
+    ci_ambiguous: set[str] = set()
+    for lid, number in line_rows:
+        line_map[number] = lid
+        tl = transliterate_cyrillic_serbian(number)
+        translit_map.setdefault(tl, lid)
+        up = tl.upper()
+        if up in ci_map and ci_map[up] != lid:
+            ci_ambiguous.add(up)
+        else:
+            ci_map.setdefault(up, lid)
+
+    def resolve(short: str) -> int | None:
+        if short in line_map:
+            return line_map[short]
+        if short in translit_map:
+            return translit_map[short]
+        up = short.upper()
+        if up not in ci_ambiguous:
+            return ci_map.get(up)
+        return None
+
+    return resolve
+
+
+def _gtfs_coverage_warnings(stop_times_pct: int, routes_matched: int,
+                            feed_age_days: float | None) -> list[str]:
+    """Flag GTFS coverage/freshness anomalies (pure — easy to test).
+
+    A sudden drop in mapped-stop_times %, in matched routes, or a feed that
+    stopped refreshing all mean the schedule users see is silently degrading.
+    """
+    warnings: list[str] = []
+    if stop_times_pct < _GTFS_MIN_STOP_TIMES_PCT:
+        warnings.append(
+            f"stop_times coverage {stop_times_pct}% < {_GTFS_MIN_STOP_TIMES_PCT}% floor")
+    if routes_matched < _GTFS_MIN_ROUTES_MATCHED:
+        warnings.append(
+            f"only {routes_matched} routes matched < {_GTFS_MIN_ROUTES_MATCHED} floor")
+    if feed_age_days is not None and feed_age_days > _GTFS_MAX_FEED_AGE_DAYS:
+        warnings.append(
+            f"GTFS feed is {feed_age_days:.0f} days old "
+            f"(> {_GTFS_MAX_FEED_AGE_DAYS}d) — refresh may have stalled")
+    return warnings
+
+
 def _load_gtfs(conn: duckdb.DuckDBPyConnection) -> None:
     """Load GTFS schedule data (trips + stop_times) using bulk DuckDB import."""
     _ensure_gtfs()
@@ -915,35 +985,14 @@ def _load_gtfs(conn: duckdb.DuckDBPyConnection) -> None:
     # unambiguous). Recovers ~33 Belgrade lines / ~4k trips that exact-match drops.
     route_to_line: dict[str, int] = {}
     if routes_path.exists():
-        line_map: dict[str, int] = {}
-        translit_map: dict[str, int] = {}
-        ci_map: dict[str, int] = {}
-        ci_ambiguous: set[str] = set()
-        for row in conn.execute("SELECT id, number FROM city_lines WHERE city = 'beograd'").fetchall():
-            lid, number = row[0], row[1]
-            line_map[number] = lid
-            tl = transliterate_cyrillic_serbian(number)
-            translit_map.setdefault(tl, lid)
-            up = tl.upper()
-            if up in ci_map and ci_map[up] != lid:
-                ci_ambiguous.add(up)
-            else:
-                ci_map.setdefault(up, lid)
-
-        def _resolve_line(short: str) -> int | None:
-            if short in line_map:
-                return line_map[short]
-            if short in translit_map:
-                return translit_map[short]
-            up = short.upper()
-            if up not in ci_ambiguous:
-                return ci_map.get(up)
-            return None
+        line_rows = conn.execute(
+            "SELECT id, number FROM city_lines WHERE city = 'beograd'").fetchall()
+        resolve_line = _build_line_resolver(line_rows)
 
         import csv
         with open(routes_path, encoding='utf-8') as f:
             for row in csv.DictReader(f):
-                line_id = _resolve_line(row.get('route_short_name', '') or '')
+                line_id = resolve_line(row.get('route_short_name', '') or '')
                 if line_id:
                     route_to_line[row['route_id']] = line_id
         print(f"  GTFS route→line mapping: {len(route_to_line)} matched")
@@ -1068,6 +1117,59 @@ def _load_gtfs(conn: duckdb.DuckDBPyConnection) -> None:
     mapped = conn.execute("SELECT COUNT(*) FROM gtfs_stop_times WHERE city_stop_id IS NOT NULL").fetchone()[0]
     unique_stops = conn.execute("SELECT COUNT(DISTINCT city_stop_id) FROM gtfs_stop_times WHERE city_stop_id IS NOT NULL").fetchone()[0]
     print(f"  Loaded {st_count} stop_times ({mapped} mapped [{mapped*100//st_count}%], {unique_stops} unique stops)")
+
+    _report_gtfs_coverage(conn, trip_count, linked, len(route_to_line),
+                          st_count, mapped, unique_stops, stop_times_path)
+
+
+def _report_gtfs_coverage(conn, trip_count, linked, routes_matched,
+                          st_count, mapped, unique_stops, stop_times_path) -> None:
+    """Persist a GTFS coverage/freshness snapshot + warn on anomalies.
+
+    The mapping percentages were only ever printed and lost. This writes them to
+    GTFS_COVERAGE_FILE so a monitor/data_snapshot can read freshness without a
+    rebuild, samples WHICH stops fail to map (the unmapped ~6% — usually GTFS
+    stops we carry no city_stop for, or coordinate gaps beyond the 200m match),
+    and prints loud warnings if coverage or feed age regress.
+    """
+    st_pct = mapped * 100 // st_count if st_count else 0
+
+    # The unmapped tail: distinct GTFS stop_ids with no city_stop link. Sampling
+    # names tells you what the 6% actually are instead of just a percentage.
+    unmapped_total = conn.execute(
+        "SELECT COUNT(DISTINCT stop_id) FROM gtfs_stop_times "
+        "WHERE city_stop_id IS NULL").fetchone()[0]
+    unmapped_sample = [r[0] for r in conn.execute(
+        "SELECT DISTINCT stop_id FROM gtfs_stop_times "
+        "WHERE city_stop_id IS NULL ORDER BY stop_id LIMIT 20").fetchall()]
+
+    feed_age_days = None
+    if stop_times_path.exists():
+        feed_age_days = (time.time() - os.path.getmtime(stop_times_path)) / 86400
+
+    coverage = {
+        'gtfs_trips': trip_count,
+        'gtfs_trips_linked': linked,
+        'routes_matched': routes_matched,
+        'stop_times': st_count,
+        'stop_times_mapped': mapped,
+        'stop_times_mapped_pct': st_pct,
+        'unique_city_stops': unique_stops,
+        'unmapped_gtfs_stops': unmapped_total,
+        'unmapped_sample': unmapped_sample,
+        'feed_age_days': round(feed_age_days, 1) if feed_age_days is not None else None,
+    }
+    try:
+        GTFS_COVERAGE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(GTFS_COVERAGE_FILE, 'w', encoding='utf-8') as f:
+            json.dump(coverage, f, ensure_ascii=False, indent=2)
+        print(f"  GTFS coverage snapshot → {GTFS_COVERAGE_FILE.name} "
+              f"({unmapped_total} GTFS stops unmapped)")
+    except OSError as exc:  # pragma: no cover - disk-dependent
+        print(f"  WARN: could not write GTFS coverage snapshot: {exc}")
+
+    for w in _gtfs_coverage_warnings(st_pct, routes_matched, feed_age_days):
+        print(f"  WARN: GTFS — {w}")
 
 
 def _load_balkan(conn: duckdb.DuckDBPyConnection) -> None:
