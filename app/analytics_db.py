@@ -613,6 +613,18 @@ def aggregate_rating(route_slug: str) -> dict:
     return {'n': int(rows[0]['n']), 'avg': round(float(rows[0]['avg_rating']), 1)}
 
 
+def review_block(route_slug: str) -> tuple[list[dict], dict | None]:
+    """(approved reviews, aggregate rating) for a slug. Degrades to ([], None)
+    on any analytics-DB failure but REPORTS it — the route-level callers used to
+    swallow this silently, so a locked/corrupt analytics DB just made reviews
+    vanish site-wide with nothing in monitoring."""
+    try:
+        return approved_reviews(route_slug), aggregate_rating(route_slug)
+    except Exception as exc:  # noqa: BLE001 — page must render without reviews
+        observability.capture_exception(exc, subsystem='reviews', slug=route_slug)
+        return [], None
+
+
 def pending_reviews(limit: int = 100) -> list[dict]:
     return query(
         "SELECT id, route_slug, rating, comment, author_name, lang, ts, "

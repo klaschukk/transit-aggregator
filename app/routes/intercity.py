@@ -270,8 +270,7 @@ def route_detail(slug: str):
     destination_country = country_hub_for_city(route['to_city'])
 
     from app import analytics_db
-    reviews_list = analytics_db.approved_reviews(slug)
-    reviews_agg = analytics_db.aggregate_rating(slug)
+    reviews_list, reviews_agg = analytics_db.review_block(slug)
 
     # Thin-content guard: a route with no PRICED trips renders an empty
     # schedule (trips may exist with price 0, so check the max). It is already

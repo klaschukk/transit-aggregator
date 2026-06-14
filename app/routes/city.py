@@ -163,12 +163,8 @@ def city_hub(city: str):
     review_slug = f'city-{city}'
     reviews_data: list = []
     reviews_aggregate = None
-    try:
-        from app import analytics_db
-        reviews_data = analytics_db.approved_reviews(review_slug)
-        reviews_aggregate = analytics_db.aggregate_rating(review_slug)
-    except Exception:
-        pass
+    from app import analytics_db
+    reviews_data, reviews_aggregate = analytics_db.review_block(review_slug)
 
     page_context_json = _json.dumps({
         'type': 'city_transport',
@@ -374,12 +370,8 @@ def line_detail(city: str, line_slug: str):
     review_slug = f'line-{city}-{line_slug}'
     reviews_data = []
     reviews_aggregate = None
-    try:
-        from app import analytics_db
-        reviews_data = analytics_db.approved_reviews(review_slug)
-        reviews_aggregate = analytics_db.aggregate_rating(review_slug)
-    except Exception:
-        pass
+    from app import analytics_db
+    reviews_data, reviews_aggregate = analytics_db.review_block(review_slug)
 
     og_image_url = f"{current_app.config['BASE_URL']}/og/line/{city}/{line_slug}.png"
     city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš', 'kragujevac': 'Kragujevac'}
@@ -584,12 +576,8 @@ def stop_detail(city: str, stop_slug: str):
     review_slug = f'stop-{city}-{stop_slug}'
     reviews_data = []
     reviews_aggregate = None
-    try:
-        from app import analytics_db
-        reviews_data = analytics_db.approved_reviews(review_slug)
-        reviews_aggregate = analytics_db.aggregate_rating(review_slug)
-    except Exception:
-        pass
+    from app import analytics_db
+    reviews_data, reviews_aggregate = analytics_db.review_block(review_slug)
 
     og_image_url = f"{current_app.config['BASE_URL']}/og/stop/{city}/{stop_slug}.png"
     city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš', 'kragujevac': 'Kragujevac'}

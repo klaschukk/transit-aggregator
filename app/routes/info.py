@@ -94,12 +94,8 @@ def about():
     review_slug = 'page-about'
     reviews_data: list = []
     reviews_aggregate = None
-    try:
-        from app import analytics_db
-        reviews_data = analytics_db.approved_reviews(review_slug)
-        reviews_aggregate = analytics_db.aggregate_rating(review_slug)
-    except Exception:
-        pass
+    from app import analytics_db
+    reviews_data, reviews_aggregate = analytics_db.review_block(review_slug)
 
     return render_template(
         'about.html',
@@ -655,14 +651,8 @@ def country_hub(country: str):
     # AggregateRating attaches to the country entity directly. Wrapped
     # in try/except so a locked analytics_db never breaks render.
     review_slug = f'country-{country}'
-    country_reviews: list = []
-    country_reviews_agg = None
-    try:
-        from app import analytics_db
-        country_reviews = analytics_db.approved_reviews(review_slug)
-        country_reviews_agg = analytics_db.aggregate_rating(review_slug)
-    except Exception:
-        pass
+    from app import analytics_db
+    country_reviews, country_reviews_agg = analytics_db.review_block(review_slug)
 
     from flask import current_app
     og_image_url = f"{current_app.config['BASE_URL']}/og/country/{country}.png"
@@ -934,14 +924,8 @@ def operator_detail(slug: str):
     # the same bucket. Wrapped in try/except so a locked analytics_db
     # never breaks the page render.
     review_slug = f'op-{op["slug"]}'
-    op_reviews: list = []
-    op_reviews_agg = None
-    try:
-        from app import analytics_db
-        op_reviews = analytics_db.approved_reviews(review_slug)
-        op_reviews_agg = analytics_db.aggregate_rating(review_slug)
-    except Exception:
-        pass
+    from app import analytics_db
+    op_reviews, op_reviews_agg = analytics_db.review_block(review_slug)
 
     from flask import current_app
     og_image_url = f"{current_app.config['BASE_URL']}/og/operator/{slug}.png"
