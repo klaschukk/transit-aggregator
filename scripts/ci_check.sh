@@ -26,9 +26,9 @@ if ! "$PY" -c 'import pytest' 2>/dev/null; then
 fi
 
 echo "==> CI parity check: pytest against tests/seed.duckdb"
-DUCKDB_PATH=tests/seed.duckdb "$PY" -m pytest tests/ -x -q --tb=short \
-  --ignore=tests/test_integration.py \
-  --ignore=tests/test_privacy.py
+# Mirror .gitlab-ci.yml exactly: the whole suite, no --ignore (data-heavy tests
+# self-skip on the seed). Keep this command in sync with the CI `test` job.
+DUCKDB_PATH=tests/seed.duckdb "$PY" -m pytest tests/ -x -q --tb=short
 rc=$?
 
 if [ $rc -eq 0 ]; then

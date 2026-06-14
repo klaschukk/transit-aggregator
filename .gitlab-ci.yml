@@ -24,13 +24,11 @@ test:
   before_script:
     - pip install -r requirements.txt -q
   script:
-    # test_data_quality and test_privacy now run in CI: the former self-skips on
-    # the seed DB (autouse guard), the latter no longer depends on import-time
-    # env. test_integration still needs full-DB data — left ignored until it
-    # gets the same graceful-skip treatment.
-    - python -m pytest tests/ -x -q --tb=short
-        --ignore=tests/test_integration.py
-        2>&1 | tail -40
+    # The whole suite now runs against the seed DB — no --ignore. Tests needing
+    # production-scale or GTFS data self-skip on the seed (autouse guards in
+    # test_data_quality, per-test guards elsewhere), so the gate stays honest.
+    # Reproduce locally before pushing with scripts/ci_check.sh.
+    - python -m pytest tests/ -x -q --tb=short 2>&1 | tail -40
   allow_failure: false
 
 # ──────────────────────────────────────────────
