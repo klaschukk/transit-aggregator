@@ -255,6 +255,36 @@ def _verify_slug_invariant(conn: duckdb.DuckDBPyConnection) -> None:
     print("slug invariant: all URL slugs are ASCII ✓")
 
 
+# HH:MM, 00:00–23:59. Scrapers all emit this (they slice times to [:5]); a row
+# that doesn't is a format regression, not real data.
+_TIME_RE = re.compile(r'^([01]\d|2[0-3]):[0-5]\d$')
+
+
+def _validate_intercity_trip(trip: dict) -> str:
+    """Return '' if a scraped intercity trip is usable, else a short drop reason.
+
+    build_db merges four feeds (busticket4, srbvoz, polazak, international). A
+    single malformed row used to either crash the NOT NULL trips insert (a
+    missing departure_time key) or silently plant an unusable value (empty /
+    '25:99' time, negative price). Validating up front and tallying the reasons
+    turns a scraper-format regression into a visible build-log line instead of
+    a corrupt or short DB. price_rsd == 0 is allowed — it's the existing
+    "price unknown" convention (~40% of trips), not a broken row.
+    """
+    if not trip.get('from_city') or not trip.get('to_city'):
+        return 'missing_city'
+    if not _TIME_RE.match(str(trip.get('departure_time') or '').strip()):
+        return 'bad_departure_time'
+    if not _TIME_RE.match(str(trip.get('arrival_time') or '').strip()):
+        return 'bad_arrival_time'
+    try:
+        if int(trip.get('price_rsd') or 0) < 0:
+            return 'negative_price'
+    except (TypeError, ValueError):
+        return 'bad_price'
+    return ''
+
+
 _DEFAULT_DAYS = '1234567'  # runs every day — the placeholder mask (see below)
 
 
@@ -493,12 +523,30 @@ def _load_intercity(conn: duckdb.DuckDBPyConnection,
     if not all_trips:
         return
 
-    # Deduplicate: same from_city + to_city + departure_time → keep first
-    seen: set[tuple[str, str, str]] = set()
+    # Validate every row up front; drop and tally the broken ones so a scraper
+    # format regression shows up in the build log instead of corrupting the DB.
+    valid_trips: list[dict] = []
+    dropped: dict[str, int] = {}
+    for trip in all_trips:
+        reason = _validate_intercity_trip(trip)
+        if reason:
+            dropped[reason] = dropped.get(reason, 0) + 1
+            continue
+        valid_trips.append(trip)
+    if dropped:
+        summary = ', '.join(f'{k}={v}' for k, v in sorted(dropped.items()))
+        print(f"  Dropped {sum(dropped.values())} invalid trips ({summary})")
+
+    # Deduplicate: same from_city + to_city + departure_time + TYPE → keep first.
+    # type matters: without it a bus and a train leaving the same city pair at
+    # the same minute collapse to one row (the first feed — busticket4 bus —
+    # wins, the train is silently lost). Keeping type distinct recovers those.
+    seen: set[tuple[str, str, str, str]] = set()
     unique_trips: list[dict] = []
     dupes = 0
-    for trip in all_trips:
-        key = (trip['from_city'], trip['to_city'], trip['departure_time'])
+    for trip in valid_trips:
+        key = (trip['from_city'], trip['to_city'],
+               trip['departure_time'], trip.get('type', 'bus'))
         if key in seen:
             dupes += 1
             continue
