@@ -27,9 +27,21 @@ DB_PATH = BASE_DIR / 'dbs' / 'transit.duckdb'
 PROGRESS_FILE = BASE_DIR / 'raw' / 'enrich_stops_progress.json'
 SUSPICIOUS_FILE = BASE_DIR / 'raw' / 'suspicious_stops.json'
 
-# Belgrade bounding box (south, west, north, east)
+# Belgrade bounding box (south, west, north, east). Kept as the default for the
+# Belgrade-scoped audit; per-city boxes for enrichment live in CITY_REGIONS.
 BELGRADE_BBOX = (44.6, 20.2, 44.95, 20.7)
 BBOX_STR = ','.join(str(x) for x in BELGRADE_BBOX)
+
+# Per-city geocoding regions: (bbox south,west,north,east), Nominatim query tail.
+# Enrichment was Belgrade-only, so ALL of Novi Sad's stops (and any future city)
+# could never be backfilled — their coords would even be rejected by the
+# Belgrade bbox guard. Keying the OSM lookup on the stop's own city fixes that.
+CITY_REGIONS: dict[str, tuple[tuple[float, float, float, float], str]] = {
+    'beograd':    (BELGRADE_BBOX,             'Belgrade, Serbia'),
+    'novi-sad':   ((45.18, 19.72, 45.35, 19.98), 'Novi Sad, Serbia'),
+    'nis':        ((43.25, 21.80, 43.40, 22.00), 'Niš, Serbia'),
+    'kragujevac': ((43.95, 20.85, 44.08, 21.02), 'Kragujevac, Serbia'),
+}
 
 OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
 NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search'
@@ -63,8 +75,25 @@ def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 
 def in_belgrade_bbox(lat: float, lon: float) -> bool:
-    s, w, n, e = BELGRADE_BBOX
+    return in_bbox(lat, lon, BELGRADE_BBOX)
+
+
+def in_bbox(lat: float, lon: float, bbox: tuple[float, float, float, float]) -> bool:
+    s, w, n, e = bbox
     return s <= lat <= n and w <= lon <= e
+
+
+def bbox_str(bbox: tuple[float, float, float, float]) -> str:
+    return ','.join(str(x) for x in bbox)
+
+
+def region_for(city: str) -> tuple[tuple[float, float, float, float], str] | None:
+    """(bbox, nominatim_region) for a city slug, or None if we have no region.
+
+    Unknown cities return None so the caller skips them rather than geocoding
+    against the wrong bounding box (a Novi Sad name matched inside Belgrade's
+    box would silently plant a stop in the wrong city)."""
+    return CITY_REGIONS.get(city)
 
 
 def clean_name(name: str) -> str:
@@ -143,18 +172,19 @@ def _api_request_with_retry(make_request, desc: str = '') -> requests.Response |
     return None
 
 
-def query_overpass(name: str) -> tuple[float, float] | None:
-    """Query Overpass API for a bus stop by name in Belgrade area."""
+def query_overpass(name: str, bbox: tuple[float, float, float, float] = BELGRADE_BBOX) -> tuple[float, float] | None:
+    """Query Overpass API for a bus stop by name within a city bbox."""
     cleaned = clean_name(name)
     variants = [name]
     if cleaned != name:
         variants.append(cleaned)
 
+    box = bbox_str(bbox)
     for variant in variants:
         safe = variant.replace('\\', '\\\\').replace('"', '\\"')
         query = (
             f'[out:json][timeout:10];'
-            f'node["highway"="bus_stop"]["name"~"{safe}",i]({BBOX_STR});'
+            f'node["highway"="bus_stop"]["name"~"{safe}",i]({box});'
             f'out 1;'
         )
 
@@ -171,15 +201,16 @@ def query_overpass(name: str) -> tuple[float, float] | None:
     return None
 
 
-def query_overpass_public_transport(name: str) -> tuple[float, float] | None:
+def query_overpass_public_transport(name: str, bbox: tuple[float, float, float, float] = BELGRADE_BBOX) -> tuple[float, float] | None:
     """Broader Overpass query: public_transport=platform OR public_transport=stop_position."""
     cleaned = clean_name(name)
     safe = cleaned.replace('\\', '\\\\').replace('"', '\\"')
+    box = bbox_str(bbox)
     query = (
         f'[out:json][timeout:10];'
         f'('
-        f'node["public_transport"="platform"]["name"~"{safe}",i]({BBOX_STR});'
-        f'node["public_transport"="stop_position"]["name"~"{safe}",i]({BBOX_STR});'
+        f'node["public_transport"="platform"]["name"~"{safe}",i]({box});'
+        f'node["public_transport"="stop_position"]["name"~"{safe}",i]({box});'
         f');'
         f'out 1;'
     )
@@ -196,14 +227,17 @@ def query_overpass_public_transport(name: str) -> tuple[float, float] | None:
     return None
 
 
-def query_nominatim(name: str) -> tuple[float, float] | None:
-    """Geocode a bus stop name via Nominatim, bounded to Belgrade."""
+def query_nominatim(name: str, region: str = 'Belgrade, Serbia',
+                    bbox: tuple[float, float, float, float] = BELGRADE_BBOX) -> tuple[float, float] | None:
+    """Geocode a bus stop name via Nominatim, bounded to the city's region."""
     cleaned = clean_name(name)
+    s, w, n, e = bbox
     params = {
-        'q': f'{cleaned}, Belgrade, Serbia',
+        'q': f'{cleaned}, {region}',
         'format': 'json',
         'limit': 1,
-        'viewbox': '20.2,44.95,20.7,44.6',
+        # Nominatim viewbox is left,top,right,bottom = west,north,east,south.
+        'viewbox': f'{w},{n},{e},{s}',
         'bounded': 1,
     }
     headers = {'User-Agent': 'TransitSerbia/1.0 (transit aggregator)'}
@@ -217,24 +251,34 @@ def query_nominatim(name: str) -> tuple[float, float] | None:
         if results:
             lat = float(results[0]['lat'])
             lon = float(results[0]['lon'])
-            if in_belgrade_bbox(lat, lon):
+            if in_bbox(lat, lon, bbox):
                 return lat, lon
     return None
 
 
-def fetch_coords(name: str) -> tuple[float, float] | None:
-    """Try all sources in order: Overpass bus_stop → Overpass public_transport → Nominatim."""
-    coords = query_overpass(name)
-    if coords and in_belgrade_bbox(*coords):
+def fetch_coords(name: str, city: str = 'beograd') -> tuple[float, float] | None:
+    """Resolve coords for a stop name within its city.
+
+    Sources in order: Overpass bus_stop → Overpass public_transport →
+    Nominatim, each bounded to the city's bbox so a name common to several
+    cities resolves to the right one. Returns None for a city we have no
+    region for (rather than guessing against Belgrade)."""
+    region = region_for(city)
+    if region is None:
+        return None
+    bbox, nominatim_region = region
+
+    coords = query_overpass(name, bbox)
+    if coords and in_bbox(*coords, bbox):
         return coords
 
     time.sleep(REQUEST_DELAY)
-    coords = query_overpass_public_transport(name)
-    if coords and in_belgrade_bbox(*coords):
+    coords = query_overpass_public_transport(name, bbox)
+    if coords and in_bbox(*coords, bbox):
         return coords
 
     time.sleep(REQUEST_DELAY)
-    coords = query_nominatim(name)
+    coords = query_nominatim(name, nominatim_region, bbox)
     if coords:
         return coords
 
@@ -382,15 +426,26 @@ def enrich(conn: duckdb.DuckDBPyConnection, limit: int = 0) -> None:
     progress = load_progress()
     all_processed = set(progress['found'] + progress['not_found'])
 
+    total_stops = conn.execute("SELECT count(*) FROM city_stops").fetchone()[0]
+    with_coords = conn.execute(
+        "SELECT count(*) FROM city_stops WHERE lat IS NOT NULL").fetchone()[0]
+
+    # city drives which OSM bbox/region we geocode against (was Belgrade-only).
     rows = conn.execute(
-        "SELECT id, name FROM city_stops WHERE lat IS NULL ORDER BY id"
+        "SELECT id, name, city FROM city_stops WHERE lat IS NULL ORDER BY id"
     ).fetchall()
 
     if not rows:
         print(f"  {GREEN}All stops already have coordinates!{RESET}")
         return
 
-    todo = [(sid, name) for sid, name in rows if sid not in all_processed]
+    # Skip cities we have no geocoding region for — they can't be resolved and
+    # would just churn the progress file as "not found".
+    todo = [(sid, name, city) for sid, name, city in rows
+            if sid not in all_processed and region_for(city) is not None]
+    skipped_no_region = sum(
+        1 for sid, _, city in rows
+        if sid not in all_processed and region_for(city) is None)
     if limit:
         todo = todo[:limit]
 
@@ -406,6 +461,8 @@ def enrich(conn: duckdb.DuckDBPyConnection, limit: int = 0) -> None:
     print(f"  Already with GPS:  {GREEN}{with_coords}{RESET}")
     print(f"  Without coords:    {YELLOW}{len(rows)}{RESET}")
     print(f"  Previously done:   {DIM}{len(all_processed)}{RESET}")
+    if skipped_no_region:
+        print(f"  No region (skip):  {DIM}{skipped_no_region}{RESET}")
     print(f"  To process now:    {BOLD}{total_todo}{RESET}")
     print(f"  Source:            Overpass → public_transport → Nominatim")
     print(f"  {'=' * 55}")
@@ -415,9 +472,9 @@ def enrich(conn: duckdb.DuckDBPyConnection, limit: int = 0) -> None:
     not_found = 0
     start_time = time.time()
 
-    for i, (stop_id, name) in enumerate(todo):
+    for i, (stop_id, name, city) in enumerate(todo):
         n = i + 1
-        coords = fetch_coords(name)
+        coords = fetch_coords(name, city)
 
         sys.stdout.write('\r\033[K')
 
@@ -494,7 +551,10 @@ def fix(conn: duckdb.DuckDBPyConnection, limit: int = 0) -> None:
         name = entry['name']
         old_lat, old_lon = entry['lat'], entry['lon']
 
-        coords = fetch_coords(name)
+        city_row = conn.execute(
+            "SELECT city FROM city_stops WHERE id = ?", [stop_id]).fetchone()
+        city = city_row[0] if city_row else 'beograd'
+        coords = fetch_coords(name, city)
         sys.stdout.write('\r\033[K')
 
         if coords:
