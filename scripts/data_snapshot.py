@@ -35,6 +35,40 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from app import create_app  # noqa: E402
 from app import analytics_db  # noqa: E402
 
+# Anomaly thresholds. A nightly scrape that breaks (source down, format change,
+# auth expired) shows up as a sharp drop in a kind's total, or an entity that
+# had real data yesterday going to zero today. Both are alert-worthy.
+ANOMALY_DROP_PCT = 0.30      # net fall >= 30% of the kind's previous total
+ANOMALY_ZEROED_MIN = 5       # an entity that had >= this many and is now 0
+
+
+def detect_anomalies(kind: str, diffs: list[dict], today_total: int) -> list[str]:
+    """Flag suspicious day-over-day movements for one snapshot kind (pure).
+
+    `diffs` is analytics_db.diff_snapshots(kind) output — only the keys whose
+    value changed, each {key, value_a (yesterday), value_b (today), delta}.
+    `today_total` is the sum of today's values across ALL keys for the kind.
+
+    Returns human-readable alert strings (empty when healthy). Returns nothing
+    on the first-ever snapshot (diffs empty) so a cold start never false-alarms.
+    """
+    alerts: list[str] = []
+    net_delta = sum(d['delta'] for d in diffs)
+    prev_total = today_total - net_delta
+    if prev_total > 0 and net_delta < 0:
+        drop = -net_delta
+        if drop / prev_total >= ANOMALY_DROP_PCT:
+            pct = round(drop * 100 / prev_total)
+            alerts.append(
+                f"{kind}: total fell {pct}% ({prev_total}->{today_total}) "
+                f"— a scraper may be broken")
+    for d in diffs:
+        if d['value_b'] == 0 and d['value_a'] >= ANOMALY_ZEROED_MIN:
+            alerts.append(
+                f"{kind}: '{d['key']}' dropped to 0 (was {d['value_a']}) "
+                f"— source feed likely broken")
+    return alerts
+
 
 def _read_counts(transit_db_path: str) -> dict[str, list[tuple[str, int]]]:
     """Return per-kind list of (key, value) tuples from the read-only transit DB."""
@@ -90,6 +124,24 @@ def main() -> int:
                 total += 1
             print(f'{kind}: {len(rows)} rows')
         print(f'snapshot_date={today} rows={total}')
+
+        # Anomaly check: compare each kind to the previous snapshot and alert on
+        # a sharp drop / an entity zeroing out (= a scraper likely broke).
+        anomalies: list[str] = []
+        for kind, rows in counts.items():
+            today_total = sum(int(v) for _, v in rows)
+            anomalies += detect_anomalies(kind, analytics_db.diff_snapshots(kind),
+                                          today_total)
+        if anomalies:
+            print('\nANOMALIES DETECTED:')
+            for a in anomalies:
+                print(f'  ! {a}')
+            try:
+                from app.notifier import notify_admin
+                notify_admin('Prevozni: data snapshot anomalies',
+                             '\n'.join(anomalies))
+            except Exception as exc:  # alerting must never crash the snapshot
+                print(f'  (admin notify failed: {exc})')
 
         # Print today-vs-yesterday diff for the operator_routes kind so the
         # nightly log shows the headline delta. The other kinds are still
