@@ -25,13 +25,15 @@ BUDGETS_GZIPPED = {
     "/gradski/beograd/stajaliste/sajam/": 23400,  # raised: default-English first-visit redirect JS (in <head>, every page)
 }
 
-# raised: chat widget CSS + visual polish
-# raised: colour system fully tokenised — named status/brand tokens
-# (var(--color-danger) etc.) add a little SOURCE size; prod still ships the
-# minified dist, and 0 hardcoded design hex remain outside :root.
-# raised: far-destination AI itinerary block (.ai-route*) — new search-fallback
-# UI that composes Asia/long-haul routes via Groq + Bookaway CTA (+~140B gzip).
-CSS_BUDGET_GZIPPED = 27500
+# Budgets for the MINIFIED CSS — that's what prod ships (base.html serves
+# dist/*.css when not DEBUG). The old budget measured the raw source app.css
+# (~27 KB gzip), but the client actually downloads the minified dist (~16 KB),
+# so the source budget guarded the wrong artifact and would false-trip on
+# source growth that minifies away. Headroom ~+25% over current minified size.
+CSS_BUDGETS_MIN_GZIPPED = {
+    "app.css": 20000,         # currently ~16.1 KB minified+gzipped
+    "app.mobile.css": 6000,   # currently ~4.3 KB minified+gzipped
+}
 
 
 @pytest.mark.parametrize("url,budget", list(BUDGETS_GZIPPED.items()))
@@ -50,15 +52,24 @@ def test_bundle_size_limits(client, url, budget):
     )
 
 
-def test_app_css_size_limit(client):
-    resp = client.get("/static/css/app.css", headers={"Accept-Encoding": "gzip"})
-    assert resp.status_code == 200
-    body = resp.data
-    if resp.headers.get("Content-Encoding") != "gzip":
-        body = gzip.compress(body)
-    size = len(body)
-    assert size <= CSS_BUDGET_GZIPPED, (
-        f"app.css gzipped size {size} exceeds budget {CSS_BUDGET_GZIPPED}"
+@pytest.mark.parametrize("name,budget", CSS_BUDGETS_MIN_GZIPPED.items())
+def test_css_minified_size_limit(name, budget):
+    """Measure the MINIFIED + gzipped CSS — the actual prod payload — instead
+    of the raw source the client never downloads."""
+    import importlib.util
+    from pathlib import Path
+
+    spec = importlib.util.spec_from_file_location(
+        "minify_css", Path(__file__).resolve().parent.parent / "scripts" / "minify_css.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    raw = (Path(__file__).resolve().parent.parent / "app" / "static" / "css" / name).read_text()
+    size = len(gzip.compress(mod.minify(raw).encode()))
+    assert size <= budget, (
+        f"{name} minified+gzipped {size} exceeds budget {budget} "
+        f"(diff +{size - budget}) — tighten the source or raise the budget knowingly"
     )
 
 
