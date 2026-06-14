@@ -437,7 +437,21 @@ def _audit_data_quality(conn: duckdb.DuckDBPyConnection) -> dict:
         "SELECT COUNT(*) FROM trips WHERE departure_time = '' OR arrival_time = ''"
     ).fetchone()[0]
 
-    for key in ('half_coord_stops', 'stops_outside_serbia', 'trips_blank_time'):
+    # City lines with no stops linked render as thin, mappless line pages
+    # (Niš/Kragujevac coverage gap: line numbers known, OSM stop data missing).
+    report['stopless_lines'] = conn.execute(
+        "SELECT COUNT(*) FROM city_lines cl WHERE NOT EXISTS "
+        "(SELECT 1 FROM city_line_stops cls WHERE cls.line_id = cl.id)"
+    ).fetchone()[0]
+
+    # Train stations carry no GPS — the srbvoz autocomplete API returns only
+    # name + code. Informational; would need a geocoder to fill.
+    report['stations_no_coords'] = conn.execute(
+        "SELECT COUNT(*) FROM stations WHERE lat IS NULL OR lon IS NULL"
+    ).fetchone()[0]
+
+    for key in ('half_coord_stops', 'stops_outside_serbia', 'trips_blank_time',
+                'stopless_lines'):
         if report[key]:
             print(f"  WARN: data-quality — {key}={report[key]}")
 

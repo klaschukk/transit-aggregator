@@ -62,6 +62,9 @@ def test_audit_flags_dup_line_slug_half_coord_and_foreign_stop(tmp_path, monkeyp
     assert report['half_coord_stops'] == 1
     assert report['stops_outside_serbia'] == 1
     assert report['trips_blank_time'] == 0
+    # both seeded lines have no stop links → both stopless
+    assert report['stopless_lines'] == 2
+    assert report['stations_no_coords'] == 0   # no stations seeded
 
     out = capsys.readouterr().out
     assert "beograd/linija-9l shared by lines ['9Л', '9л']" in out
@@ -76,6 +79,8 @@ def test_audit_clean_db_reports_zeroes(tmp_path, monkeypatch):
                  "(1,'beograd','7','Sedmica','linija-7','bus','#000',NULL)")
     conn.execute("INSERT INTO city_stops VALUES "
                  "(1,'beograd','Trg','trg',44.8,20.4,NULL)")
+    conn.execute("INSERT INTO city_line_stops VALUES (1,1,1)")  # line has a stop
     report = _audit_data_quality(conn)
     assert report == {'dup_line_slugs': 0, 'half_coord_stops': 0,
-                      'stops_outside_serbia': 0, 'trips_blank_time': 0}
+                      'stops_outside_serbia': 0, 'trips_blank_time': 0,
+                      'stopless_lines': 0, 'stations_no_coords': 0}
