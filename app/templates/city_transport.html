@@ -144,12 +144,20 @@
 </div>
 
 <!-- Lines grouped by type -->
+{# Pagination: hubs like Beograd carry 500+ lines — the heaviest payload on
+   the site. Render only the first N chips visible; the rest ship in the HTML
+   (links stay crawlable, search/filter still finds them) but with `hidden`,
+   so the browser skips their layout/paint on first load and CLS drops.
+   "Prikaži još" + the type filters reveal them (handled in JS below). #}
 {% if lines %}
+{% set _vis_limit = 60 %}
+{% set _paginate = lines|length > _vis_limit %}
+{% set ns = namespace(idx=0) %}
 <div id="linesList">
   {% for t in type_order %}
     {% set group = lines|selectattr('type', 'equalto', t)|list %}
     {% if group %}
-    <div class="line-group" data-group-type="{{ t }}">
+    <div class="line-group" data-group-type="{{ t }}"{% if _paginate and ns.idx >= _vis_limit %} hidden{% endif %}>
       <h2 class="line-group__title">{{ vehicle_icon(t) }}<span>{{ type_labels[t] }}</span></h2>
       <div class="line-grid">
         {% for line in group %}
@@ -157,16 +165,22 @@
            class="line-chip"
            data-num="{{ line.number }}"
            data-name="{{ line.name }}"
-           data-type="{{ line.type }}">
+           data-type="{{ line.type }}"{% if _paginate and ns.idx >= _vis_limit %} hidden{% endif %}>
           <span class="line-badge line-badge--sm"{% if line.color %} style="background:{{ line.color }}"{% endif %}>{{ line.number }}</span>
           <span class="line-chip__name">{{ line.name }}</span>
         </a>
+        {% set ns.idx = ns.idx + 1 %}
         {% endfor %}
       </div>
     </div>
     {% endif %}
   {% endfor %}
 </div>
+{% if _paginate %}
+<div id="showMoreWrap">
+  <button class="btn btn--outline" id="showMoreBtn" type="button">{{ _('common.show_more') }} {{ lines|length - _vis_limit }} {{ _('city.lines_count') }}</button>
+</div>
+{% endif %}
 {% else %}
   {{ empty_state(icon='bus', text=_('city.loading')) }}
 {% endif %}
@@ -412,25 +426,39 @@
 </script>
 
 <script>
-/* Line search + type filter — runs regardless of map load. */
+/* Line search + type filter + "show more" pagination — runs regardless of
+   map load. The first N chips render visible from the server; the rest ship
+   hidden. Searching or picking a type reveals all matches (pagination only
+   applies to the default all-lines view); "Prikaži još" reveals everything.
+   VIS must match _vis_limit in the template above. */
 (function() {
   var input = document.getElementById('lineSearch');
+  var chips = Array.prototype.slice.call(document.querySelectorAll('[data-num]'));
+  var moreWrap = document.getElementById('showMoreWrap');
+  var moreBtn = document.getElementById('showMoreBtn');
+  var VIS = 60;
   var activeType = 'all';
+  var expanded = false;
 
   function applyFilters() {
-    var q = (input ? input.value : '').toLowerCase();
-    document.querySelectorAll('[data-num]').forEach(function(el) {
+    var q = (input ? input.value : '').toLowerCase().trim();
+    var paginate = activeType === 'all' && !q && !expanded;
+    var count = 0;
+    chips.forEach(function(el) {
       var typeOk = activeType === 'all' || el.dataset.type === activeType;
-      var searchOk = !q || el.dataset.num.toLowerCase().includes(q) || el.dataset.name.toLowerCase().includes(q);
-      el.hidden = !(typeOk && searchOk);
+      var searchOk = !q || el.dataset.num.toLowerCase().indexOf(q) !== -1 || el.dataset.name.toLowerCase().indexOf(q) !== -1;
+      var match = typeOk && searchOk;
+      el.hidden = !(match && (!paginate || count < VIS));
+      if (match) count++;
     });
     document.querySelectorAll('.line-group').forEach(function(g) {
-      var hasVisible = g.querySelectorAll('[data-num]:not([hidden])').length > 0;
-      g.hidden = !hasVisible;
+      g.hidden = g.querySelectorAll('[data-num]:not([hidden])').length === 0;
     });
+    if (moreWrap) moreWrap.hidden = !(paginate && chips.length > VIS);
   }
 
   if (input) input.addEventListener('input', applyFilters);
+  if (moreBtn) moreBtn.addEventListener('click', function() { expanded = true; applyFilters(); });
 
   document.querySelectorAll('#typeFilter .filter-chip').forEach(function(btn) {
     btn.addEventListener('click', function() {
