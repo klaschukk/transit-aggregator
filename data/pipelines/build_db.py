@@ -338,6 +338,52 @@ def _find_slug_collisions(rows) -> dict:
     return {k: v for k, v in by_slug.items() if len(v) > 1}
 
 
+def _drop_foreign_coach_lines(conn: duckdb.DuckDBPyConnection,
+                              bbox: tuple = _SERBIA_BBOX) -> int:
+    """Remove 'city lines' that are actually international coach routes.
+
+    FlixBus-style intercity routes (e.g. 'Flixbus N981: München ZOB => Sofia')
+    get mis-ingested as city lines for whichever city the scraper ran — their
+    stops are in München/Wien/Zagreb, not the city. They pollute
+    /gradski/<city>/ line lists and generate thin, wrongly-indexed line pages.
+
+    A real city line has its stops inside Serbia; flag a line as foreign when
+    MORE THAN HALF of its geolocated stops fall outside the Serbia bbox. Drops
+    the line, its stop links, and any now-orphaned foreign stops. Lines whose
+    stops have no coordinates are left alone (can't judge → keep).
+    """
+    s, w, n, e = bbox
+    bogus = [r[0] for r in conn.execute(
+        """SELECT cl.id FROM city_lines cl
+           JOIN city_line_stops cls ON cls.line_id = cl.id
+           JOIN city_stops cs ON cs.id = cls.stop_id
+           WHERE cs.lat IS NOT NULL
+           GROUP BY cl.id
+           HAVING SUM(CASE WHEN cs.lat < ? OR cs.lat > ? OR cs.lon < ? OR cs.lon > ?
+                           THEN 1 ELSE 0 END) > 0.5 * COUNT(*)""",
+        [s, n, w, e]).fetchall()]
+    if not bogus:
+        return 0
+
+    named = conn.execute(
+        f"SELECT city, number, name FROM city_lines "
+        f"WHERE id IN ({','.join('?' * len(bogus))})", bogus).fetchall()
+    ph = ','.join('?' * len(bogus))
+    # NULL the GTFS FK first so the city_lines delete can't trip the constraint.
+    conn.execute(f"UPDATE gtfs_trips SET line_id = NULL WHERE line_id IN ({ph})", bogus)
+    conn.execute(f"DELETE FROM city_line_stops WHERE line_id IN ({ph})", bogus)
+    conn.execute(f"DELETE FROM city_lines WHERE id IN ({ph})", bogus)
+    # Sweep foreign stops that no line references anymore.
+    conn.execute(
+        "DELETE FROM city_stops WHERE lat IS NOT NULL "
+        "AND (lat < ? OR lat > ? OR lon < ? OR lon > ?) "
+        "AND id NOT IN (SELECT stop_id FROM city_line_stops)",
+        [s, n, w, e])
+    for city, number, name in named:
+        print(f"  Dropped foreign coach line {city}/{number}: {str(name)[:50]}")
+    return len(bogus)
+
+
 def _audit_data_quality(conn: duckdb.DuckDBPyConnection) -> dict:
     """Non-fatal end-of-build data-quality sweep.
 
@@ -1400,7 +1446,11 @@ def _cleanup(conn: duckdb.DuckDBPyConnection) -> None:
         WHERE id NOT IN (SELECT DISTINCT operator_id FROM trips WHERE operator_id IS NOT NULL)
     """).fetchone()[0]
 
-    print(f"  Cleanup: -{r1} empty routes, -{r2} duplicate routes, -{r3} null trips, -{r4} orphan operators")
+    # Remove international coach routes mis-ingested as city lines.
+    r5 = _drop_foreign_coach_lines(conn)
+
+    print(f"  Cleanup: -{r1} empty routes, -{r2} duplicate routes, -{r3} null trips, "
+          f"-{r4} orphan operators, -{r5} foreign coach lines")
 
 
 def _load_sample_data(conn: duckdb.DuckDBPyConnection) -> None:
