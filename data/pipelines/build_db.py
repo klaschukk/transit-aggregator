@@ -287,6 +287,28 @@ def _validate_intercity_trip(trip: dict) -> str:
     return ''
 
 
+# ~€425. No real Balkan bus/train fare approaches this; the live data has a
+# clean empty gap from 15k–50k RSD then a cluster of ~100k outliers, which are
+# a scrape_international currency bug (North Macedonia fares arrive in MKD denars
+# but get multiplied by EUR_TO_RSD → €870 'Skopje–Ohrid' prices).
+_MAX_SANE_PRICE_RSD = 50000
+
+
+def _sane_price_rsd(raw) -> int:
+    """Coerce a trip price to a sane non-negative RSD integer, else 0 (unknown).
+
+    Absurd (> _MAX_SANE_PRICE_RSD), negative or non-numeric prices collapse to 0,
+    which the UI already renders as "price unknown" — far better than showing a
+    wrong, misleading number. The root currency bug lives in scrape_international;
+    this is the defensive net so a bad fare never reaches a user.
+    """
+    try:
+        price = int(raw or 0)
+    except (TypeError, ValueError):
+        return 0
+    return price if 0 <= price <= _MAX_SANE_PRICE_RSD else 0
+
+
 _DEFAULT_DAYS = '1234567'  # runs every day — the placeholder mask (see below)
 
 
@@ -713,13 +735,17 @@ def _load_intercity(conn: duckdb.DuckDBPyConnection,
     default_op = op_map.get('BusTicket4.me', 4)
 
     trip_id = 1
+    zeroed_prices = 0
     for trip in unique_trips:
         route_id_val = route_registry.get((trip['from_city'], trip['to_city']))
         if not route_id_val:
             continue
         op_name = trip.get('operator', '')
         op_id = op_map.get(op_name, default_op)
-        price = trip.get('price_rsd') or 0
+        raw_price = trip.get('price_rsd') or 0
+        price = _sane_price_rsd(raw_price)
+        if price == 0 and raw_price:
+            zeroed_prices += 1
 
         bt4_line_id = trip.get('bt4_line_id')
         conn.execute(
@@ -734,6 +760,8 @@ def _load_intercity(conn: duckdb.DuckDBPyConnection,
         )
         trip_id += 1
 
+    if zeroed_prices:
+        print(f"  Zeroed {zeroed_prices} absurd prices (> {_MAX_SANE_PRICE_RSD} RSD)")
     print(f"  Loaded {route_id - 1} routes, {trip_id - 1} trips")
 
 

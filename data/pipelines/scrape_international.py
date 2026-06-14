@@ -159,7 +159,12 @@ def parse_trips(raw_trips, from_city, to_city):
         arr_time = sched.get('arrival_time') or ''
         duration = sched.get('duration_minutes') or 0
 
-        # API returns EUR for intl; convert for display consistency
+        # API returns EUR for intl; convert for display consistency.
+        # KNOWN BUG: North Macedonia fares arrive in MKD denars, not EUR, so
+        # this multiply inflates them ~117× (870 MKD → ~101k RSD 'Skopje–Ohrid',
+        # €870 for a 3h bus). build_db._sane_price_rsd caps the damage by zeroing
+        # prices above _MAX_SANE_PRICE_RSD; the real fix is reading the API's
+        # currency field here and converting per-currency.
         price_eur = pricing.get('display_price', 0) or pricing.get('ticket_price', 0)
         price_rsd = int(float(price_eur) * EUR_TO_RSD) if price_eur else 0
         carrier_name = carrier.get('name', '')
