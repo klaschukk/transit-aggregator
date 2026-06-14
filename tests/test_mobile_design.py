@@ -124,89 +124,6 @@ def _render(app, template_str):
         return app.jinja_env.from_string(template_str).render()
 
 
-def test_bottom_sheet_macro_renders(app):
-    out = _render(app, """
-        {% from '_partials/_bottom_sheet.html' import bottom_sheet %}
-        {% call bottom_sheet('testSheet', 'Hello', 'Close') %}
-          <p>BODY</p>
-        {% endcall %}
-    """)
-    assert 'id="testSheet"' in out
-    assert 'role="dialog"' in out
-    assert 'aria-modal="true"' in out
-    assert 'aria-labelledby="testSheet-title"' in out
-    assert 'm-sheet__handle' in out
-    assert '>BODY<' in out
-    # Sheet should start hidden so it cannot trap focus / clicks at boot.
-    assert ' hidden' in out
-
-
-def test_bottom_sheet_close_button_aria(app):
-    """The macro's close button must carry an aria-label — i18n string
-    is passed through, and the data-sheet-close attribute matches the
-    sheet id so mobile.js can resolve the close target."""
-    out = _render(app, """
-        {% from '_partials/_bottom_sheet.html' import bottom_sheet %}
-        {% call bottom_sheet('xyz', 'T', 'Zatvori') %}{% endcall %}
-    """)
-    assert 'data-sheet-close="xyz"' in out
-    assert 'aria-label="Zatvori"' in out
-
-
-def test_fab_macro_renders_search_intent(app):
-    out = _render(app, """
-        {% from '_partials/_fab.html' import fab %}
-        {{ fab('search', aria_label='Find') }}
-    """)
-    assert 'class="m-fab"' in out
-    assert 'data-action="search-sheet"' in out
-    assert 'aria-label="Find"' in out
-    # Search SVG should include a circle (magnifier head).
-    assert '<circle cx="11" cy="11" r="8"/>' in out
-
-
-def test_fab_macro_filters_intent_carries_target(app):
-    out = _render(app, """
-        {% from '_partials/_fab.html' import fab %}
-        {{ fab('filters', target='filterSheet', aria_label='Filters') }}
-    """)
-    assert 'data-action="open-sheet"' in out
-    assert 'data-sheet-id="filterSheet"' in out
-
-
-def test_fab_macro_scrolltop_intent(app):
-    out = _render(app, """
-        {% from '_partials/_fab.html' import fab %}
-        {{ fab('scrolltop', aria_label='Top') }}
-    """)
-    assert 'data-action="scroll-top"' in out
-    # An up-arrow path. Spec icon is `M12 19V5m-7 7l7-7 7 7`.
-    assert 'M12 19V5' in out
-
-
-def test_skeleton_text_macro_carries_aria_hidden(app):
-    out = _render(app, """
-        {% from '_partials/_skeleton.html' import skeleton_text %}
-        {{ skeleton_text('60%') }}
-    """)
-    assert 'm-skeleton--text' in out
-    assert 'width: 60%' in out
-    # Skeletons are decorative — must hide from assistive tech.
-    assert 'aria-hidden="true"' in out
-
-
-def test_skeleton_card_list_announces_loading(app):
-    out = _render(app, """
-        {% from '_partials/_skeleton.html' import skeleton_card_list %}
-        {{ skeleton_card_list(3, 'Učitavanje') }}
-    """)
-    # 3 card placeholders + the wrapper with role=status.
-    assert out.count('m-skeleton--card') == 3
-    assert 'role="status"' in out
-    assert 'aria-busy="true"' in out
-    assert 'aria-label="Učitavanje"' in out
-
-
 def test_sticky_cta_macro_renders_hidden(app):
     """Initial markup must be hidden so the bar doesn't flash before
     mobile.js evaluates the scroll position."""
@@ -280,16 +197,7 @@ def test_mobile_css_has_no_auto_dark_mode():
     assert '@media (prefers-color-scheme: dark)' not in css
 
 
-# ── 6. Tap target compliance for new components ───────────────────────
-
-
-def test_fab_size_matches_spec():
-    """Spec says 56×56 for the FAB. The CSS rule is the source of
-    truth — we read it directly to guard against accidental shrinkage."""
-    css = MOBILE_CSS.read_text()
-    chunk = css.split('.m-fab {', 1)[1].split('}', 1)[0]
-    assert 'width: 56px' in chunk
-    assert 'height: 56px' in chunk
+# ── 6. Tap target compliance ──────────────────────────────────────────
 
 
 def test_search_form_input_font_size_avoids_ios_zoom():

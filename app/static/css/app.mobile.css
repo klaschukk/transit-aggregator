@@ -9,7 +9,7 @@
    Architecture
      1. Typography refinements
      2. Tactile interaction primitives
-     3. Reusable components (.m-sheet, .m-fab, .m-skeleton, .m-sticky-cta)
+     3. Reusable components (.m-sticky-cta)
      4. Card + list-item polish (.trip-card, .route-card, .see-also__card)
      5. Header — frosted scroll + off-canvas drawer
      6. Search form expand pattern
@@ -84,101 +84,6 @@ a.btn:active,
 @keyframes m-fade-rise {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
-}
-
-
-/* ── 3a. Bottom-sheet component ──────────────────────────────────── */
-.m-sheet {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  background: #fff;
-  border-radius: var(--mradius-lg) var(--mradius-lg) 0 0;
-  box-shadow: var(--melev-pop);
-  transform: translateY(100%);
-  transition: transform .25s var(--mease-out);
-  padding: var(--mspace-2) var(--mspace-4) var(--mspace-6);
-  padding-bottom: max(var(--mspace-6), env(safe-area-inset-bottom));
-  z-index: 200;
-  max-height: 85vh;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.m-sheet--open { transform: translateY(0); }
-.m-sheet__handle {
-  width: 40px; height: 4px;
-  background: #cbd5e1;
-  border-radius: var(--mradius-pill);
-  margin: 0 auto var(--mspace-3);
-}
-.m-sheet__title {
-  font-size: var(--mtext-lg); font-weight: 700;
-  margin: 0 0 var(--mspace-3); color: var(--color-text);
-}
-.m-sheet__close {
-  position: absolute; top: var(--mspace-3); right: var(--mspace-3);
-  width: 36px; height: 36px;
-  border-radius: var(--mradius-pill);
-  background: var(--mtint-surface); color: var(--color-text);
-  border: 0; font-size: 18px; line-height: 1; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-.m-sheet-backdrop {
-  position: fixed; inset: 0;
-  background: rgba(15,23,42,0);
-  pointer-events: none;
-  transition: background .25s var(--mease-out);
-  z-index: 199;
-}
-.m-sheet-backdrop--open {
-  background: rgba(15,23,42,.4);
-  pointer-events: auto;
-}
-body.m-sheet-locked { overflow: hidden; }
-
-
-/* ── 3b. FAB ─────────────────────────────────────────────────────── */
-.m-fab {
-  position: fixed;
-  right: var(--mspace-4);
-  bottom: calc(var(--mspace-6) + env(safe-area-inset-bottom));
-  width: 56px; height: 56px;
-  border-radius: var(--mradius-pill);
-  background: var(--color-primary); color: #fff;
-  border: 0;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: var(--melev-pop);
-  cursor: pointer;
-  z-index: 50;
-  transform: translateY(0);
-  transition: transform .25s var(--mease-out), opacity .2s ease;
-}
-.m-fab:hover, .m-fab:focus { background: var(--color-primary-dark); }
-.m-fab--hidden {
-  transform: translateY(120%);
-  opacity: 0;
-  pointer-events: none;
-}
-.m-fab svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; }
-
-
-/* ── 3c. Skeleton loader ─────────────────────────────────────────── */
-.m-skeleton {
-  display: block;
-  background: linear-gradient(90deg, #e2e8f0 0%, #f1f5f9 50%, #e2e8f0 100%);
-  background-size: 200% 100%;
-  border-radius: var(--mradius-sm);
-  animation: m-shimmer 1.5s linear infinite;
-}
-.m-skeleton--text { height: 14px; margin: 0 0 var(--mspace-2); }
-.m-skeleton--title { height: 22px; width: 70%; margin: 0 0 var(--mspace-3); }
-.m-skeleton--card {
-  height: 96px; border-radius: var(--mradius-md);
-  margin: 0 0 var(--mspace-2);
-}
-.m-skeleton--row { height: 44px; margin: 0 0 var(--mspace-2); }
-@keyframes m-shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
 }
 
 
@@ -355,7 +260,7 @@ body.m-nav-open .site-nav#siteNav {
   pointer-events: none;
   z-index: 215;
 }
-.m-nav-backdrop.m-sheet-backdrop--open { pointer-events: auto; }
+.m-nav-backdrop--open { pointer-events: auto; }
 
 /* Each link is a full-width row inside the dropdown. The chained
    `.site-nav#siteNav .site-nav__link` beats the same-specificity
@@ -489,8 +394,7 @@ body.m-nav-open .site-nav#siteNav {
 /* Resting state — single pill card on the page. When .search-form is
    inside the home hero we don't need extra polish, but on dense pages
    like /pretraga/ the existing form-stack is too tall; mobile.js can
-   toggle `.search-form--collapsed` to switch into the pill mode and
-   open a bottom-sheet with the full inputs on tap. */
+   toggle `.search-form--collapsed` to switch into the pill mode. */
 .search-form--collapsed {
   display: flex; align-items: center;
   gap: var(--mspace-2);
@@ -955,10 +859,9 @@ body:has(.mobile-anchor-ad:not(.mobile-anchor-ad--hidden)) {
 
 /* ── Focus-visible on colored mobile surfaces ──────────────────────
    The global teal :focus-visible outline (app.css) disappears against
-   the primary-coloured FAB, sticky CTA and active language pill. Use a
+   the primary-coloured sticky CTA and active language pill. Use a
    high-contrast white ring there so keyboard focus stays visible on
    touch devices paired with a keyboard. */
-.m-fab:focus-visible,
 .m-sticky-cta__btn:focus-visible,
 .m-sticky-cta__close:focus-visible,
 .lang-pill__item--active:focus-visible {
