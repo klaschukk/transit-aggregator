@@ -15,6 +15,30 @@ def _route_count() -> int:
         return 0
 
 
+def _beograd_line_count() -> int:
+    """Belgrade city_lines in the active DB.
+
+    The night-bus / airport / tram guides are DB-grounded: they render their
+    line links from the full Belgrade line set (~521 lines). The tiny CI seed
+    carries only a handful of regular lines (no night/tram/airport lines at
+    all), so those guides legitimately render zero matching links there. Tests
+    use this to skip cleanly on the seed — same contract as the GTFS-headway
+    skips — and run for real against the full DB.
+    """
+    try:
+        from app.db import query
+        # query() returns a list of dicts — alias the count so we read it by
+        # name (result[0][0] would KeyError on a dict and silently skip away).
+        result = query("SELECT COUNT(*) AS c FROM city_lines WHERE city = 'beograd'")
+        return result[0]["c"] if result else 0
+    except Exception:
+        return 0
+
+
+# Below this many Belgrade lines the DB is the seed fixture, not the real set.
+_SEED_BG_LINES_CEILING = 50
+
+
 _ALL_PAGES = [
     "/", "/rute/", "/gradski/", "/gradski/beograd/", "/gradski/novi-sad/",
     "/prevoznici/", "/autobuske-stanice/", "/o-nama/", "/kontakt/",
@@ -301,6 +325,8 @@ def test_nocni_bus_guide_indexable_and_links_night_lines(client):
     (links to /gradski/beograd/linija/linija-Nn/), and be in the sitemap.
     Content is DB-grounded — the page must carry several night-line links."""
     import re
+    if _beograd_line_count() < _SEED_BG_LINES_CEILING:
+        pytest.skip("seed DB has no Belgrade night lines — guide is DB-grounded")
     resp = client.get("/vodici/nocni-autobus-beograd/")
     assert resp.status_code == 200
     html = resp.data.decode()
@@ -320,6 +346,8 @@ def test_nocni_bus_guide_indexable_and_links_night_lines(client):
 def test_airport_guide_indexable_and_links_real_lines(client):
     """Belgrade airport guide must be indexable, link the real Nikola Tesla
     lines (72, A1, 600, 607, 72N), and be in the sitemap. DB-grounded."""
+    if _beograd_line_count() < _SEED_BG_LINES_CEILING:
+        pytest.skip("seed DB lacks Belgrade airport lines — guide is DB-grounded")
     resp = client.get("/vodici/kako-doci-do-aerodroma-beograd/")
     assert resp.status_code == 200
     html = resp.data.decode()
@@ -339,6 +367,8 @@ def test_tram_guide_indexable_links_deduped_lines(client):
     """Belgrade tram guide must be indexable, link real tram lines, dedupe by
     slug (9Л/9л → one linija-9l), and be in the sitemap. DB-grounded."""
     import re
+    if _beograd_line_count() < _SEED_BG_LINES_CEILING:
+        pytest.skip("seed DB has no Belgrade tram lines — guide is DB-grounded")
     resp = client.get("/vodici/tramvaj-beograd/")
     assert resp.status_code == 200
     html = resp.data.decode()
