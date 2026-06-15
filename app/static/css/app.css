@@ -3519,7 +3519,12 @@ select:focus-visible, textarea:focus-visible {
    the creative in muted text to satisfy Google's labelling requirement.
    desktop-only slots collapse on mobile so no empty space is reserved. */
 .ad-slot {
-  margin: var(--space-6) 0;
+  /* Centered, width-capped block: a responsive unit would otherwise stretch
+     full-bleed across a wide laptop column and read as a raw banner. Capped +
+     auto-centered it sits as a tidy module on desktop and still fills the
+     column on mobile (the cap is wider than a phone screen). */
+  margin: var(--space-8) auto;
+  max-width: 728px;
   text-align: center;
 }
 .ad-slot__label {
@@ -3527,11 +3532,15 @@ select:focus-visible, textarea:focus-visible {
   font-size: var(--text-xs);
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: .05em;
-  margin-bottom: var(--space-1);
+  letter-spacing: .06em;
+  margin-bottom: var(--space-1-5);
 }
 .ad-slot__ins { min-height: 90px; }
+/* The responsive creative must never exceed the capped, centered wrapper. */
+.ad-slot--responsive { max-width: 728px; margin-inline: auto; }
+.ad-slot ins.adsbygoogle { max-width: 100%; }
 @media (max-width: 640px) {
+  .ad-slot { margin: var(--space-6) auto; }
   .ad-slot--desktop-only { display: none; }
 }
 
