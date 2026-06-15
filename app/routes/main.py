@@ -1472,7 +1472,15 @@ def robots():
         'Disallow: /api/',
         'Disallow: /admin/',
         'Disallow: /health',
-        'Disallow: /pretraga/?*',
+        # NOTE: /pretraga/ (search results) is intentionally NOT disallowed.
+        # Every search page already sends noindex (in-page <meta robots> AND
+        # X-Robots-Tag header). A robots.txt block would PREVENT Google from
+        # reading that noindex, so query URLs already in the index froze as
+        # "Indexed, though blocked by robots.txt" (69 in GSC) — undeindexable,
+        # snippet-less, CTR-damaging. Leaving them crawlable lets Google read
+        # the noindex and drop them. New query URLs are not discovered because
+        # every internal /pretraga/?<query> link is rel="nofollow" and search
+        # pages are absent from the sitemap.
         '',
         f'Sitemap: {base}/sitemap.xml',
     ]
