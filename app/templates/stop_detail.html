@@ -33,6 +33,7 @@
 {% from '_partials/_breadcrumb.html' import breadcrumb with context %}
 {% from '_partials/_stats_strip.html' import stats_strip %}
 {% from '_partials/_empty_state.html' import empty_state %}
+{% from '_partials/_ad_slot.html' import ad_slot with context %}
 
 {# Mobile back button — same chrome as /rute/<slug>/ #}
 <div class="mobile-back">
@@ -168,6 +169,11 @@
 {% else %}
   {{ empty_state(icon='stop', text=_('stop.no_lines')) }}
 {% endif %}
+
+{# Mid-content ad slot — sits between the lines/ETA block and the
+   "nearby stops" / prose / reviews tail. Section-level so it never
+   lands inside the arrivals list or a flex row. #}
+{{ ad_slot('stop_mid', format='responsive') }}
 
 {# Nearby stops #}
 {% if nearby_stops %}

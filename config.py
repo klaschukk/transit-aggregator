@@ -39,6 +39,15 @@ class Config:
         'stop_bottom':        os.environ.get('ADSENSE_SLOT_STOP_BOTTOM', ''),
         'line_bottom':        os.environ.get('ADSENSE_SLOT_LINE_BOTTOM', ''),
         'mobile_anchor':      os.environ.get('ADSENSE_SLOT_MOBILE_ANCHOR', ''),
+        # Second, mid-content slot on the highest-traffic page types (city
+        # lines + stops carry the bulk of organic traffic; routes carry the
+        # commercial intent). A mid-content unit lifts impressions on the long
+        # SEO pages without breaking ad-density policy — the slot still self-
+        # suppresses on noindex/thin pages via the ad_slot macro guard.
+        'route_mid':          os.environ.get('ADSENSE_SLOT_ROUTE_MID', ''),
+        'line_mid':           os.environ.get('ADSENSE_SLOT_LINE_MID', ''),
+        'stop_mid':           os.environ.get('ADSENSE_SLOT_STOP_MID', ''),
+        'city_pair_mid':      os.environ.get('ADSENSE_SLOT_CITY_PAIR_MID', ''),
     }
     CONTACT_EMAIL = os.environ.get('CONTACT_EMAIL', '')
     TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')

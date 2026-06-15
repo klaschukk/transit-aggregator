@@ -70,6 +70,7 @@
 {% from '_partials/_filter_panel.html' import filter_panel with context %}
 {% from '_partials/_empty_state.html' import empty_state %}
 {% from '_partials/_newsletter_form.html' import newsletter_form with context %}
+{% from '_partials/_ad_slot.html' import ad_slot with context %}
 
 <!-- Mobile back button — chrome parity with route_detail. Without
      this, /voznja/ pages were the only intercity-pair surface
@@ -264,6 +265,13 @@
   {% endif %}
 {% endif %}
 
+{# Mid-content ad — between the core route content (schedule / info cards /
+   far-destination AI itinerary) and the discovery blocks (browse hubs,
+   reviews, related pairs, FAQ). Responsive so it adapts to the section width
+   without breaking the layout. The macro self-suppresses on noindex / thin
+   pages, so no manual guard is needed here. #}
+{{ ad_slot('city_pair_mid', format='responsive') }}
+
 {% include '_partials/_browse_hubs.html' %}
 
 {% if route %}
@@ -271,10 +279,10 @@
 {{ reviews_section(review_route_slug, reviews, reviews_agg) }}
 {% endif %}
 
-{# Mid-page ad — between reviews and related-pairs grid. Same pattern
-   as route_detail (single slot, post-content, pre-discovery), so
-   ad-density across these two sister page types is identical. #}
-{% from '_partials/_ad_slot.html' import ad_slot with context %}
+{# Bottom ad — between reviews and related-pairs grid. Same pattern
+   as route_detail (post-content, pre-discovery), so ad-density across
+   these two sister page types is identical. ad_slot is imported at the
+   top of this block. #}
 {{ ad_slot('city_pair_bottom', format='leaderboard') }}
 
 {# Carriers on this route — links to /prevoznici/{slug}/ pages.

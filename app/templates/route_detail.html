@@ -104,6 +104,7 @@
 {% from '_partials/_trip_card.html' import trip_card with context %}
 {% from '_partials/_stats_strip.html' import stats_strip %}
 {% from '_partials/_empty_state.html' import empty_state %}
+{% from '_partials/_ad_slot.html' import ad_slot with context %}
 
 <!-- Mobile back button -->
 <div class="mobile-back">
@@ -251,6 +252,13 @@
   {{ empty_state(icon='search', text=_('search.no_results'), sub=_('buy.note')) }}
 {% endif %}
 
+{# Mid-content ad — section-level slot AFTER the schedule/trip list and BEFORE
+   the price-alert / partner grid / prose / reviews. Sits between content
+   sections so it is visible without breaking the trip-card flow. Distinct
+   position from 'route_bottom' (which renders after the prose, before
+   reviews). The macro self-suppresses on noindex/thin routes. #}
+{{ ad_slot('route_mid', format='responsive') }}
+
 <!-- Price alert — inline newsletter variant scoped to this pair. Sits
      between the trip list and the partner grid where intent is highest:
      the user has already seen today's prices. -->
@@ -317,8 +325,8 @@
 {# Bottom-of-content ad — single slot AFTER the prose block, BEFORE
    reviews. Avoids competing with Bookaway/partner CTAs above and stays
    out of the long-form prose body (Google penalty risk). Reviews come
-   right after so readers reaching this scroll depth are still engaged. #}
-{% from '_partials/_ad_slot.html' import ad_slot with context %}
+   right after so readers reaching this scroll depth are still engaged.
+   The ad_slot macro is imported once at the top of {% block content %}. #}
 {{ ad_slot('route_bottom', format='leaderboard') }}
 
 <!-- Reviews (UGC) — below the prose block, above similar routes -->

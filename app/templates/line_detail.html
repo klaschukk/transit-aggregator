@@ -53,6 +53,7 @@
 {% from '_partials/_breadcrumb.html' import breadcrumb with context %}
 {% from '_partials/_stats_strip.html' import stats_strip %}
 {% from '_partials/_empty_state.html' import empty_state %}
+{% from '_partials/_ad_slot.html' import ad_slot with context %}
 
 <!-- Mobile back button — matches /rute/<slug>/ chrome -->
 <div class="mobile-back">
@@ -208,6 +209,11 @@
 </section>
 {% endif %}
 
+<!-- Mid-content ad — between the line's schedule/map/stops and the
+     related-lines / see-also internal-linking blocks. Macro self-hides on
+     noindex / thin pages, so no extra gating needed here. -->
+{{ ad_slot('line_mid', format='responsive') }}
+
 <!-- Related lines of the same type in this city — internal linking for SEO -->
 {% if related_lines %}
 <section class="see-also">
@@ -298,7 +304,6 @@
   {{ newsletter_form(source='line_detail') }}
 </section>
 
-{% from '_partials/_ad_slot.html' import ad_slot with context %}
 {{ ad_slot('line_bottom', format='responsive') }}
 
 {% endblock %}
