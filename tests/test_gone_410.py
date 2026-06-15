@@ -34,6 +34,21 @@ def test_missing_pair_route_is_410(client):
     assert client.get("/rute/sofia-thessaloniki/").status_code == 410
 
 
+def test_missing_operator_is_410(client):
+    # Operators dropped/renamed in a re-scrape (e.g. eurocompass, busticket4-me)
+    # were once indexed under /prevoznici/<slug>/ → 410, same as routes/lines.
+    assert client.get("/prevoznici/this-operator-was-removed-xyz/").status_code == 410
+    assert client.get("/prevoznici/eurocompass/").status_code == 410
+
+
+def test_existing_operator_still_resolves(client, db):
+    # The 410 change must only hit genuine misses — a real operator still 200s.
+    row = db.one("SELECT slug FROM operators LIMIT 1")
+    if row:
+        slug = row["slug"] if isinstance(row, dict) else row[0]
+        assert client.get(f"/prevoznici/{slug}/").status_code == 200
+
+
 def test_valid_pages_still_200(client, db):
     assert client.get("/rute/beograd-novi-sad/").status_code == 200
     row = db.one("SELECT city, slug FROM city_stops LIMIT 1")

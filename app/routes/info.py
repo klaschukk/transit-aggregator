@@ -815,7 +815,13 @@ def operator_detail(slug: str):
                 )
         if not slug.isascii():
             abort(410)
-        abort(404)
+        # Genuine miss with the DB up = the operator was dropped or renamed
+        # in a re-scrape (e.g. eurocompass, nis-ekspres, busticket4-me — all
+        # once indexed under /prevoznici/<slug>/). 410 deindexes them fast,
+        # matching route_detail / line_detail / stop_detail; a 404 would sit
+        # in GSC "Not found (404)" for months. A re-added operator is served
+        # again the moment it is scraped and re-found via the sitemap.
+        abort(410)
 
     routes = cached_query("""
         SELECT r.slug, r.from_city, r.to_city, r.distance_km,
