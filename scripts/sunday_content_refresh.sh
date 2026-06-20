@@ -17,7 +17,7 @@
 
 set -o pipefail
 
-PROJECT=/home/klaschuk/transit
+PROJECT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 VENV=$PROJECT/venv/bin/python3
 TODAY=$(date -u +%Y-%m-%d)
 LOG=$PROJECT/logs/sunday_refresh_${TODAY}.log
