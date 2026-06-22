@@ -59,66 +59,72 @@ def _no_sleep(monkeypatch):
     monkeypatch.setattr(bsf.time, 'sleep', lambda *_a, **_k: None)
 
 
-def _series(days, tickets, values):
-    return [
-        {'name': 'Dani', 'data': days},
-        {'name': 'Broj karata', 'data': tickets},
-        {'name': 'Vrijednost', 'data': values},
-    ]
+def _row(tx, ticket, price, pct, dt):
+    """Build one affiliate-sales transaction row matching the live panel."""
+    n = abs(hash((tx, ticket))) % 10**8
+    return (
+        f'<tr id="tr_{n}"> '
+        f'<td id="id_{n}">{n}</td> '
+        f'<td id="broj_tansakcije_{n}">{tx}</td> '
+        f'<td id="broj_{n}">{ticket}</td> '
+        f'<td id="cijena_{n}">{price}</td> '
+        f'<td id="valuta_id_naziv_{n}">Dinar</td> '
+        f'<td id="affiliate_procenat_{n}">{pct}</td> '
+        f'<td id="dazur_{n}">{dt}</td> </tr>'
+    )
 
 
-# ── _to_ymd parser ──────────────────────────────────────────────────
+def _report(*rows):
+    return '<table>' + ''.join(rows) + '</table>'
+
+
+# ── _to_float parser ────────────────────────────────────────────────
 
 
 @pytest.mark.parametrize('raw,expected', [
-    (13, '2026-06-13'),
-    ('13', '2026-06-13'),
-    ('13.06', '2026-06-13'),
-    ('13.06.2026', '2026-06-13'),
-    ('2026-06-13', '2026-06-13'),
-    ('2026-06-13T00:00:00', '2026-06-13'),
+    ('1000.00', 1000.0),
+    ('1.000,00', 1000.0),    # European thousands + decimal comma
+    ('1000,00', 1000.0),
+    ('2.00', 2.0),
+    ('  500.50  ', 500.5),
+    ('garbage', 0.0),
+    ('', 0.0),
 ])
-def test_to_ymd_accepts_known_formats(raw, expected):
-    assert bsf._to_ymd(raw, 2026, 6) == expected
+def test_to_float(raw, expected):
+    assert bsf._to_float(raw) == expected
 
 
-@pytest.mark.parametrize('raw', ['', '   ', 'garbage', 0, 99])
-def test_to_ymd_rejects_junk(raw):
-    assert bsf._to_ymd(raw, 2026, 6) is None
+# ── _fetch_period report parsing ────────────────────────────────────
 
 
-# ── _fetch_month report parsing ─────────────────────────────────────
+def test_fetch_period_aggregates_by_day_and_commission():
+    html = _report(
+        _row('TX1', '111', '1000.00', '2.00', '16.06.2026 09:47:58'),
+        _row('TX2', '222', '1500.00', '2.00', '16.06.2026 14:00:00'),
+        _row('TX3', '333', '800.00', '2.00', '17.06.2026 08:00:00'),
+    )
+    rows, commission = bsf._fetch_period(
+        FakeSession(FakeResp(text=html)), '735', '01.06.2026', '30.06.2026')
+    by_day = {r['ymd']: r for r in rows}
+    assert by_day['2026-06-16'] == {'ymd': '2026-06-16', 'tickets': 2, 'value': 2500.0}
+    assert by_day['2026-06-17'] == {'ymd': '2026-06-17', 'tickets': 1, 'value': 800.0}
+    assert commission == pytest.approx((1000 + 1500 + 800) * 0.02)
 
 
-def test_fetch_month_parses_rows():
-    resp = FakeResp(json_data=_series(
-        ['01.06.2026', '02.06.2026'], [2, 5], [1600.0, 4000.0]))
-    rows = bsf._fetch_month(FakeSession(resp), '735', 2026, 6)
-    assert rows == [
-        {'ymd': '2026-06-01', 'tickets': 2, 'value': 1600.0},
-        {'ymd': '2026-06-02', 'tickets': 5, 'value': 4000.0},
-    ]
+def test_fetch_period_empty_report_returns_no_rows():
+    rows, commission = bsf._fetch_period(
+        FakeSession(FakeResp(text='<table></table>')), '735',
+        '01.06.2026', '30.06.2026')
+    assert rows == [] and commission == 0.0
 
 
-def test_fetch_month_empty_report_returns_no_rows():
-    # The panel emits the 3 series but omits "data" keys when there are no sales.
-    resp = FakeResp(json_data=[{'name': 'Dani'}, {'name': 'Broj karata'},
-                               {'name': 'Vrijednost'}])
-    assert bsf._fetch_month(FakeSession(resp), '735', 2026, 6) == []
-
-
-@pytest.mark.parametrize('payload', [None, [], [{'name': 'Dani'}], {'x': 1}])
-def test_fetch_month_malformed_payload_returns_no_rows(payload):
-    resp = FakeResp(json_data=payload)
-    assert bsf._fetch_month(FakeSession(resp), '735', 2026, 6) == []
-
-
-def test_fetch_month_tolerates_short_value_series():
-    # tickets/values shorter than days -> missing entries default to 0.
-    resp = FakeResp(json_data=_series(['01.06.2026', '02.06.2026'], [3], []))
-    rows = bsf._fetch_month(FakeSession(resp), '735', 2026, 6)
-    assert rows[0] == {'ymd': '2026-06-01', 'tickets': 3, 'value': 0.0}
-    assert rows[1] == {'ymd': '2026-06-02', 'tickets': 0, 'value': 0.0}
+def test_fetch_period_skips_malformed_rows():
+    # A row missing its price or date must be skipped, not crash the run.
+    bad = '<tr id="tr_9"><td id="broj_9">x</td></tr>'
+    html = _report(bad, _row('TX', '1', '600.00', '2.00', '10.06.2026 10:00:00'))
+    rows, _ = bsf._fetch_period(
+        FakeSession(FakeResp(text=html)), '735', '01.06.2026', '30.06.2026')
+    assert rows == [{'ymd': '2026-06-10', 'tickets': 1, 'value': 600.0}]
 
 
 # ── _request retry / backoff ────────────────────────────────────────

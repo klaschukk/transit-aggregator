@@ -8,9 +8,16 @@ change rarely, and logging into their panel 24×/day is already plenty (every
 
 Login + report endpoints were reverse-engineered from the panel:
     POST  /bus/pocetna.php           username, password, submit
-    GET   /bus/izvjestaji/podaci_o_kartama.php?preduzece=735&godina=Y&mjesec=M
-          -> JSON [{name:Dani,data:[...]},{name:Broj karata,data:[...]},
-                   {name:Vrijednost,data:[...]}]  (no "data" keys when empty)
+    POST  /bus/karte/prod_karata_period_affiliate.php
+          data: affiliate=735, datum_od=DD.MM.YYYY, datum_do=DD.MM.YYYY
+          -> HTML table, one <tr id="tr_NNN"> per sold ticket, with
+             cijena_NNN (price), affiliate_procenat_NNN (%), dazur_NNN (datetime).
+
+NOTE (2026-06-22): the old endpoint izvjestaji/podaci_o_kartama.php (a daily
+chart) returned EMPTY even when sales existed — the real per-affiliate sales
+report is karte/prod_karata_period_affiliate.php. That bug is why the mirror
+showed 0 while the panel had a confirmed sale (16.06.2026, 1000 RSD, 20 RSD
+commission). This script now reads the correct report.
 
 Env:
     BT4_PANEL_USER, BT4_PANEL_PASS  — panel login (no default; required).
@@ -26,6 +33,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import sys
 import time
 from datetime import date
@@ -40,7 +48,27 @@ log = logging.getLogger('bt4_sales_fetch')
 
 BASE = 'https://busticket4.me/bus'
 LOGIN_URL = f'{BASE}/pocetna.php'
-DATA_URL = f'{BASE}/izvjestaji/podaci_o_kartama.php'
+SALES_URL = f'{BASE}/karte/prod_karata_period_affiliate.php'
+
+# One transaction row in the affiliate sales table; we pull price, % and date.
+_ROW_RE = re.compile(r'<tr[^>]*id="tr_\d+".*?</tr>', re.S)
+_CIJENA_RE = re.compile(r'id="cijena_\d+"[^>]*>\s*([\d.,]+)', re.S)
+_PCT_RE = re.compile(r'id="affiliate_procenat_\d+"[^>]*>\s*([\d.,]+)', re.S)
+_DATE_RE = re.compile(r'id="dazur_\d+"[^>]*>\s*(\d{2})\.(\d{2})\.(\d{4})', re.S)
+
+
+def _to_float(raw: str) -> float:
+    """Parse a price/percent that may be plain (1000.00) or European
+    (1.000,00). Returns 0.0 on garbage rather than raising."""
+    s = raw.strip()
+    if ',' in s and '.' in s:          # 1.000,00 -> 1000.00
+        s = s.replace('.', '').replace(',', '.')
+    elif ',' in s:                     # 1000,00 -> 1000.00
+        s = s.replace(',', '.')
+    try:
+        return float(s)
+    except ValueError:
+        return 0.0
 UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Prevozni-Affiliate/1.0'
 
 # Their panel is flaky, so every HTTP hit gets a few backoff retries before we
@@ -92,59 +120,32 @@ def _login(session: requests.Session, user: str, pw: str) -> bool:
     return ok
 
 
-def _fetch_month(session: requests.Session, aff_id: str, year: int, month: int) -> list[dict]:
-    """Return [{ymd, tickets, value}] for one month (empty if no sales)."""
-    params = {
-        'preduzece': aff_id, 'prevoznik': '', 'linija': '', 'vrstakarte': '',
-        'datumpretrage': '', 'preduzeceProdaje': '', 'godina': year,
-        'mjesec': month, 'valutaProdaje': '',
-    }
-    r = _request(session, 'GET', DATA_URL, params=params,
-                 headers={'Referer': f'{BASE}/izvjestaji/prodaja_karata_po_danima.php'},
-                 timeout=30)
+def _fetch_period(session: requests.Session, aff_id: str,
+                  datum_od: str, datum_do: str) -> tuple[list[dict], float]:
+    """POST the affiliate sales report for a date range and aggregate the
+    per-ticket rows by day. Returns ([{ymd, tickets, value}], total_commission).
+    Empty list when there were no sales (that's a valid result, not an error)."""
+    r = _request(session, 'POST', SALES_URL,
+                 data={'affiliate': aff_id, 'datum_od': datum_od, 'datum_do': datum_do},
+                 headers={'Referer': SALES_URL}, timeout=60)
     r.raise_for_status()
-    series = r.json()
-    if not isinstance(series, list) or len(series) < 3:
-        return []
-    days = series[0].get('data') or []
-    tickets = series[1].get('data') or []
-    values = series[2].get('data') or []
-    rows: list[dict] = []
-    for i, raw_day in enumerate(days):
-        ymd = _to_ymd(raw_day, year, month)
-        if not ymd:
+    html = r.text
+    by_day: dict[str, dict] = {}
+    total_commission = 0.0
+    for tr in _ROW_RE.findall(html):
+        m_price = _CIJENA_RE.search(tr)
+        m_date = _DATE_RE.search(tr)
+        if not m_price or not m_date:
             continue
-        rows.append({
-            'ymd': ymd,
-            'tickets': int(tickets[i]) if i < len(tickets) and tickets[i] is not None else 0,
-            'value': float(values[i]) if i < len(values) and values[i] is not None else 0.0,
-        })
-    return rows
-
-
-def _to_ymd(raw_day, year: int, month: int) -> str | None:
-    """Normalise a 'Dani' label to 'YYYY-MM-DD'. Accepts a day number, a
-    'DD.MM.YYYY'/'DD.MM' string, or an ISO date — whatever the panel emits."""
-    s = str(raw_day).strip()
-    if not s:
-        return None
-    if '-' in s and len(s) >= 8:          # already ISO-ish
-        return s[:10]
-    if '.' in s:                          # DD.MM(.YYYY)
-        parts = [p for p in s.replace(' ', '').split('.') if p]
-        try:
-            d = int(parts[0]); m = int(parts[1]) if len(parts) > 1 else month
-            y = int(parts[2]) if len(parts) > 2 and len(parts[2]) == 4 else year
-            return f'{y:04d}-{m:02d}-{d:02d}'
-        except (ValueError, IndexError):
-            return None
-    try:                                  # bare day-of-month
-        d = int(float(s))
-        if 1 <= d <= 31:
-            return f'{year:04d}-{month:02d}-{d:02d}'
-    except ValueError:
-        pass
-    return None
+        price = _to_float(m_price.group(1))
+        pct = _to_float(m_pct.group(1)) if (m_pct := _PCT_RE.search(tr)) else 0.0
+        dd, mm, yyyy = m_date.groups()
+        ymd = f'{yyyy}-{mm}-{dd}'
+        slot = by_day.setdefault(ymd, {'ymd': ymd, 'tickets': 0, 'value': 0.0})
+        slot['tickets'] += 1
+        slot['value'] += price
+        total_commission += price * pct / 100.0
+    return list(by_day.values()), total_commission
 
 
 def main() -> int:
@@ -155,21 +156,20 @@ def main() -> int:
         log.warning('BT4_PANEL_USER/BT4_PANEL_PASS not set — skipping (cron-safe).')
         return 2
 
+    # Cover this month + the previous one (first day of last month → today), so
+    # a sale near a month boundary is never missed. The panel wants DD.MM.YYYY.
     today = date.today()
-    months = {(today.year, today.month)}
-    # Also refresh the previous month for the first days of a new month.
-    prev = (today.replace(day=1))
-    prev_month = 12 if prev.month == 1 else prev.month - 1
-    prev_year = prev.year - 1 if prev.month == 1 else prev.year
-    months.add((prev_year, prev_month))
+    first_of_this = today.replace(day=1)
+    last_month = 12 if first_of_this.month == 1 else first_of_this.month - 1
+    last_year = first_of_this.year - 1 if first_of_this.month == 1 else first_of_this.year
+    datum_od = f'01.{last_month:02d}.{last_year}'
+    datum_do = today.strftime('%d.%m.%Y')
 
     session = requests.Session()
     try:
         if not _login(session, user, pw):
             return 3
-        rows: list[dict] = []
-        for y, m in sorted(months):
-            rows.extend(_fetch_month(session, aff_id, y, m))
+        rows, commission = _fetch_period(session, aff_id, datum_od, datum_do)
     except (requests.RequestException, ValueError) as exc:
         log.error('fetch failed: %s', exc)
         return 3
@@ -181,8 +181,10 @@ def main() -> int:
         analytics_db.init_schema()
         n = analytics_db.upsert_bt4_sales(rows)
     total_t = sum(r['tickets'] for r in rows)
-    log.info('bt4_sales: upserted %d day-rows, %d tickets total across %d month(s)',
-             n, total_t, len(months))
+    total_v = sum(r['value'] for r in rows)
+    log.info('bt4_sales: %d day-rows upserted | %d tickets, %.2f value, '
+             '%.2f commission (%s..%s)',
+             n, total_t, total_v, commission, datum_od, datum_do)
     return 0
 
 
