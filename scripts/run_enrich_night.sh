@@ -18,6 +18,12 @@ find data/cache/og -name "*.png" -mtime +7 -delete 2>/dev/null || true
 log "Scraping Niš stops (Overpass OSM)..."
 python -u data/pipelines/scrape_nis_stops.py 2>&1 | tee -a "$LOG" || log "WARN: scrape_nis_stops failed"
 
+# Montenegro city transport (OSM). Self-healing: writes each city's lines.json
+# only on a successful fetch, so an Overpass 504 keeps yesterday's data; build_db
+# skips any city whose file is absent. Non-fatal.
+log "Scraping Montenegro city lines (Overpass OSM)..."
+python -u data/pipelines/scrape_montenegro.py 2>&1 | tee -a "$LOG" || log "WARN: scrape_montenegro failed"
+
 log "Enriching stop coordinates..."
 python -u data/pipelines/enrich_stops_coords.py 2>&1 | tee -a "$LOG" || log "WARN: enrich_stops_coords failed"
 

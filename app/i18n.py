@@ -90,9 +90,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Городской транспорт',
     },
     'browse.cities_meta': {
-        'sr': 'Beograd, Novi Sad, Niš, Kragujevac',
-        'en': 'Beograd, Novi Sad, Niš, Kragujevac',
-        'ru': 'Белград, Нови-Сад, Ниш, Крагуевац',
+        'sr': 'Beograd, Novi Sad, Niš, Kragujevac, Podgorica, Budva, Herceg Novi',
+        'en': 'Beograd, Novi Sad, Niš, Kragujevac, Podgorica, Budva, Herceg Novi',
+        'ru': 'Белград, Нови-Сад, Ниш, Крагуевац, Подгорица, Будва, Херцег-Нови',
     },
     'browse.carriers': {
         'sr': 'Prevoznici',
@@ -3349,6 +3349,31 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               'Крагуевац хорошо связан с Белградом (20+ рейсов в день) и Кралево; '
               'ищите <a href="{prefix}/rute/">все междугородние маршруты</a> для подбора оптимального рейса. '
               'Автовокзал в центре города, рядом с ж/д станцией, которая связана с Белградом и Лапово.',
+    },
+    # Generic city-transport intro — fallback for cities without a hand-written
+    # block (Montenegro: Podgorica, Herceg Novi, Budva). Honest about the data:
+    # lines + stops + map from OpenStreetMap, no per-departure timetable.
+    'city_transport.intro_generic_p1': {
+        'sr': 'Gradski prevoz u {city} — sve autobuske linije, stajališta i trase na jednom mestu. '
+              'Za svaku liniju prikazujemo redosled stajališta i trasu na mapi, pa lako vidiš kuda ide i gde da uđeš. '
+              'Izaberi liniju ili stajalište ispod.',
+        'en': 'City transport in {city} — all bus lines, stops and routes in one place. '
+              'For each line we show the stop sequence and the route on the map, so you can see where it goes and where to board. '
+              'Pick a line or stop below.',
+        'ru': 'Городской транспорт в {city} — все автобусные линии, остановки и трассы в одном месте. '
+              'Для каждой линии показываем последовательность остановок и трассу на карте — видно, куда идёт и где сесть. '
+              'Выбери линию или остановку ниже.',
+    },
+    'city_transport.intro_generic_p2': {
+        'sr': 'Podaci o linijama i stajalištima dolaze iz OpenStreetMap zajednice i redovno se osvežavaju. '
+              'Otvori stajalište da vidiš koje linije tu staju. '
+              'Za međugradski prevoz pogledaj <a href="{prefix}/rute/">sve rute</a>.',
+        'en': 'Line and stop data comes from the OpenStreetMap community and is refreshed regularly. '
+              'Open a stop to see which lines call there. '
+              'For intercity travel, browse <a href="{prefix}/rute/">all routes</a>.',
+        'ru': 'Данные о линиях и остановках берутся из сообщества OpenStreetMap и регулярно обновляются. '
+              'Открой остановку, чтобы увидеть, какие линии там останавливаются. '
+              'Для междугородних поездок смотри <a href="{prefix}/rute/">все маршруты</a>.',
     },
     'city_transport.faq_heading': {
         'sr': 'Često postavljana pitanja',

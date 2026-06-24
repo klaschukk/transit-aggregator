@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš'} %}
+{% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš', 'kragujevac': 'Kragujevac', 'podgorica': 'Podgorica', 'herceg-novi': 'Herceg Novi', 'budva': 'Budva'} %}
 {% set city_label = city_names.get(city, city|title) %}
 
 {% block title %}{{ _('stop_detail.stop_prefix') }} {{ stop.name }} ({{ city_label }}): {{ _('stop_detail.title_stop_city') }} {{ current_year }} | Prevozni{% endblock %}

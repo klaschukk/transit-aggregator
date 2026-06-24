@@ -203,6 +203,10 @@ def build() -> None:
     novi_sad_path = RAW_DIR / 'novi-sad' / 'lines.json'
     nis_path = RAW_DIR / 'nis' / 'lines.json'
     kragujevac_path = RAW_DIR / 'kragujevac' / 'lines.json'
+    # Montenegro city transport (OSM Overpass, no timetables — stops + map only,
+    # like the Niš/Kragujevac OSM cities). Each is skipped gracefully if its
+    # raw lines.json is absent, so a missing scrape never breaks the build.
+    MONTENEGRO_CITIES = ('podgorica', 'herceg-novi', 'budva')
 
     if has_real_data:
         print("Loading real scraped data...")
@@ -212,6 +216,8 @@ def build() -> None:
         _load_city_lines(conn, 'novi-sad', novi_sad_path)
         _load_city_lines(conn, 'nis', nis_path)
         _load_city_lines(conn, 'kragujevac', kragujevac_path)
+        for _mne_city in MONTENEGRO_CITIES:
+            _load_city_lines(conn, _mne_city, RAW_DIR / _mne_city / 'lines.json')
         _load_stations(conn, stations_path)
         _load_balkan(conn)
         _load_gtfs(conn)

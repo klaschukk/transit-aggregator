@@ -91,6 +91,9 @@ CITY_LINES = [
     # build_db's id-as-PRIMARY-KEY schema accepts it (the old hand-built seed
     # left it NULL, which a strict rebuild would reject).
     (4, 'beograd', '15', 'Linija 15', 'linija-15', 'bus', '#e63946', None),
+    # Montenegro city transport — backs test_montenegro_city.py (a non-Serbian
+    # city behaves like the rest: hub + line + stop pages render and index).
+    (5, 'budva', '1', 'Budva — Sveti Stefan', 'linija-1', 'bus', '#0d9488', None),
 ]
 
 CITY_STOPS = [
@@ -100,6 +103,8 @@ CITY_STOPS = [
     (3, 'novi-sad', 'Trg Slobode', 'trg-slobode', 45.254, 19.842, None),
     # sava-centar backs the Cyrillic /stajaliste/ redirect test (id was NULL).
     (4, 'beograd', 'Sava Centar', 'sava-centar', 44.8032, 20.4629, None),
+    (5, 'budva', 'Budva (centar)', 'budva-centar', 42.2864, 18.8388, None),
+    (6, 'budva', 'Sveti Stefan', 'sveti-stefan', 42.2553, 18.8917, None),
 ]
 
 CITY_LINE_STOPS = [
@@ -107,6 +112,8 @@ CITY_LINE_STOPS = [
     (1, 1, 1),
     (1, 2, 2),
     (2, 1, 1),
+    (5, 5, 1),
+    (5, 6, 2),
 ]
 
 STATIONS = [

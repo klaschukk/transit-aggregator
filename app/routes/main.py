@@ -9,6 +9,7 @@ from flask import Blueprint, render_template, request, make_response, jsonify, c
 
 from app.db import query, cached_query, cached_query_one, db_ready
 from app.extensions import limiter, csrf
+from app.routes.city import CITY_LABELS
 
 main_bp = Blueprint('main', __name__)
 
@@ -122,9 +123,8 @@ def index():
         ORDER BY COUNT(DISTINCT cl.id) DESC
     """) if db_ready() else []
 
-    city_labels = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš'}
     for c in cities_data:
-        c['label'] = city_labels.get(c['city'], c['city'].title())
+        c['label'] = CITY_LABELS.get(c['city'], c['city'].title())
 
     # Popular city lines (by number of stops)
     popular_lines = cached_query("""
@@ -996,6 +996,9 @@ def sitemap_core():
         url('/gradski/novi-sad/', 'weekly', '0.7'),
         url('/gradski/nis/', 'weekly', '0.7'),
         url('/gradski/kragujevac/', 'weekly', '0.7'),
+        url('/gradski/podgorica/', 'weekly', '0.7'),
+        url('/gradski/herceg-novi/', 'weekly', '0.7'),
+        url('/gradski/budva/', 'weekly', '0.7'),
         url('/prevoznici/', 'monthly', '0.5'),
         url('/autobuske-stanice/', 'monthly', '0.5'),
         url('/red-voznje/', 'weekly', '0.8'),

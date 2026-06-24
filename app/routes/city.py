@@ -19,20 +19,38 @@ def _today_service() -> str:
 @city_bp.route('/gradski/')
 def city_index():
     """Landing page listing all cities with public transit."""
-    cities = [
-        {'slug': 'beograd', 'name': 'Beograd', 'desc': 'GSP — autobus, tramvaj, trolejbus', 'lines': 0},
-    ]
+    # Auto-discover every city that has lines (Serbian + Montenegro + any future
+    # city), ordered by line count — Beograd leads naturally and gets its richer
+    # desc; the rest show their line count. No hardcoded city list to drift.
+    cities = []
     if db_ready():
-        row = cached_query_one("SELECT COUNT(*) as c FROM city_lines WHERE city = 'beograd'", ttl=3600)
-        cities[0]['lines'] = row['c'] if row else 0
-        for slug, name in [('novi-sad', 'Novi Sad'), ('nis', 'Niš'), ('kragujevac', 'Kragujevac')]:
-            row = cached_query_one("SELECT COUNT(*) as c FROM city_lines WHERE city = ?", [slug], ttl=3600)
-            if row and row['c'] > 0:
-                cities.append({'slug': slug, 'name': name, 'desc': f'{row["c"]} linija', 'lines': row['c']})
+        rows = cached_query("""
+            SELECT city, COUNT(*) AS c FROM city_lines
+            GROUP BY city ORDER BY c DESC
+        """, ttl=3600)
+        for r in rows:
+            slug = r['city']
+            desc = ('GSP — autobus, tramvaj, trolejbus' if slug == 'beograd'
+                    else f'{r["c"]} linija')
+            cities.append({'slug': slug, 'name': CITY_LABELS.get(slug, slug.title()),
+                           'desc': desc, 'lines': r['c']})
+    if not cities:  # DB down — minimal static fallback so the page still renders
+        cities = [{'slug': 'beograd', 'name': 'Beograd',
+                   'desc': 'GSP — autobus, tramvaj, trolejbus', 'lines': 0}]
     return render_template('city_index.html', cities=cities)
 
 
-_SUPPORTED_CITIES = ('beograd', 'novi-sad', 'nis', 'kragujevac')
+_SUPPORTED_CITIES = ('beograd', 'novi-sad', 'nis', 'kragujevac',
+                     'podgorica', 'herceg-novi', 'budva')
+
+# Single source of truth for city slug → display label. Most slugs title-case
+# cleanly, but hyphenated ones ('herceg-novi') must be spelled out. Imported by
+# main.py / info.py so every surface agrees. Use CITY_LABELS.get(slug, slug.title()).
+CITY_LABELS = {
+    'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš',
+    'kragujevac': 'Kragujevac', 'podgorica': 'Podgorica',
+    'herceg-novi': 'Herceg Novi', 'budva': 'Budva',
+}
 
 # Slug renames after a data re-crawl — 301 so Google transfers PageRank
 # to the successor and drops the old URL. Keyed by city → old_slug → new_slug.
@@ -128,7 +146,7 @@ def city_hub(city: str):
 
     # Popular intercity routes departing from this city — for SEO interlinking.
     # Match against from_city name (city_slug → Title case) since routes.from_city is display name.
-    city_display = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš', 'kragujevac': 'Kragujevac'}.get(city, city.title())
+    city_display = CITY_LABELS.get(city, city.title())
     popular_intercity = cached_query("""
         SELECT r.slug, r.from_city, r.to_city, r.distance_km,
                COUNT(DISTINCT t.id) as trip_count,
@@ -374,7 +392,7 @@ def line_detail(city: str, line_slug: str):
     reviews_data, reviews_aggregate = analytics_db.review_block(review_slug)
 
     og_image_url = f"{current_app.config['BASE_URL']}/og/line/{city}/{line_slug}.png"
-    city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš', 'kragujevac': 'Kragujevac'}
+    city_names = CITY_LABELS
     page_context_json = _json.dumps({
         'type': 'line',
         'city': city_names.get(city, city),
@@ -580,7 +598,7 @@ def stop_detail(city: str, stop_slug: str):
     reviews_data, reviews_aggregate = analytics_db.review_block(review_slug)
 
     og_image_url = f"{current_app.config['BASE_URL']}/og/stop/{city}/{stop_slug}.png"
-    city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš', 'kragujevac': 'Kragujevac'}
+    city_names = CITY_LABELS
     page_context_json = _json.dumps({
         'type': 'stop',
         'city': city_names.get(city, city),

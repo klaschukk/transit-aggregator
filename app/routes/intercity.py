@@ -114,6 +114,10 @@ _CITY_TRANSPORT_HUBS: dict[str, tuple[str, str]] = {
     'Novi Sad': ('novi-sad', 'Novi Sad'),
     'Niš': ('nis', 'Niš'),
     'Kragujevac': ('kragujevac', 'Kragujevac'),
+    # Montenegro — intercity routes into these now reach a real /gradski/ hub.
+    'Podgorica': ('podgorica', 'Podgorica'),
+    'Budva': ('budva', 'Budva'),
+    'Herceg Novi': ('herceg-novi', 'Herceg Novi'),
 }
 # Same hubs keyed by slug — /voznja/<from>-do-<to>/ receives endpoints as slugs.
 _CITY_TRANSPORT_BY_SLUG: dict[str, str] = {

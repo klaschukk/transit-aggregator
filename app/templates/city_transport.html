@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš', 'kragujevac': 'Kragujevac'} %}
+{% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš', 'kragujevac': 'Kragujevac', 'podgorica': 'Podgorica', 'herceg-novi': 'Herceg Novi', 'budva': 'Budva'} %}
 {% set city_label = city_names.get(city, city|title) %}
 {# Serbian locative ("u Beogradu", not "u Beograd") for the meta description —
    sr only; en/ru keep the plain name after their own "in"/"в". #}
-{% set city_loc = ({'beograd': 'Beogradu', 'novi-sad': 'Novom Sadu', 'nis': 'Nišu', 'kragujevac': 'Kragujevcu'}.get(city, city_label)) if lang == 'sr' else city_label %}
+{% set city_loc = ({'beograd': 'Beogradu', 'novi-sad': 'Novom Sadu', 'nis': 'Nišu', 'kragujevac': 'Kragujevcu', 'podgorica': 'Podgorici', 'herceg-novi': 'Herceg Novom', 'budva': 'Budvi'}.get(city, city_label)) if lang == 'sr' else city_label %}
 {# City-transit operator brand for the SERP snippet — matches branded queries
    ("gsp beograd", "jgsp novi sad", "jgp niš"). Real operators only; Kragujevac
    is unnamed in our data, so no parenthetical there (never fabricate). #}
@@ -21,7 +21,7 @@
 </script>
 {% set _stops_total = stops_with_coords if stops_with_coords else 0 %}
 {% set _faq_entities = [
-  {'@type':'Question','name':_('city_transport.faq_q1').format(city=city_label),'acceptedAnswer':{'@type':'Answer','text':(_('city_transport.intro_beograd_p2') if city == 'beograd' else _('city_transport.intro_novi_sad_p2') if city == 'novi-sad' else _('city_transport.intro_nis_p2') if city == 'nis' else _('city_transport.intro_kragujevac_p2')).format(prefix=lang_prefix)|striptags}},
+  {'@type':'Question','name':_('city_transport.faq_q1').format(city=city_label),'acceptedAnswer':{'@type':'Answer','text':(_('city_transport.intro_beograd_p2') if city == 'beograd' else _('city_transport.intro_novi_sad_p2') if city == 'novi-sad' else _('city_transport.intro_nis_p2') if city == 'nis' else _('city_transport.intro_kragujevac_p2') if city == 'kragujevac' else _('city_transport.intro_generic_p2')).format(prefix=lang_prefix, city=city_label)|striptags}},
   {'@type':'Question','name':_('city_transport.faq_q2').format(city=city_label),'acceptedAnswer':{'@type':'Answer','text':_('city_transport.faq_a2').format(n=lines|length, stops=_stops_total)}},
   {'@type':'Question','name':_('city_transport.faq_q3').format(city=city_label),'acceptedAnswer':{'@type':'Answer','text':_('city_transport.faq_a3')}},
   {'@type':'Question','name':_('city_transport.faq_q4').format(city=city_label),'acceptedAnswer':{'@type':'Answer','text':_('city_transport.faq_a4').format(prefix=lang_prefix, city=city_label)|striptags}}
@@ -103,6 +103,9 @@
     {% elif city == 'kragujevac' %}
       <p>{{ _('city_transport.intro_kragujevac_p1').format(prefix=lang_prefix)|safe }}</p>
       <p>{{ _('city_transport.intro_kragujevac_p2').format(prefix=lang_prefix)|safe }}</p>
+    {% else %}
+      <p>{{ _('city_transport.intro_generic_p1').format(prefix=lang_prefix, city=city_label)|safe }}</p>
+      <p>{{ _('city_transport.intro_generic_p2').format(prefix=lang_prefix, city=city_label)|safe }}</p>
     {% endif %}
   </div>
   <button type="button" class="seo-block__more" data-collapse-toggle
@@ -285,7 +288,8 @@
         {% if city == 'beograd' %}{{ _('city_transport.intro_beograd_p2').format(prefix=lang_prefix)|safe }}
         {% elif city == 'novi-sad' %}{{ _('city_transport.intro_novi_sad_p2').format(prefix=lang_prefix)|safe }}
         {% elif city == 'nis' %}{{ _('city_transport.intro_nis_p2').format(prefix=lang_prefix)|safe }}
-        {% elif city == 'kragujevac' %}{{ _('city_transport.intro_kragujevac_p2').format(prefix=lang_prefix)|safe }}{% endif %}
+        {% elif city == 'kragujevac' %}{{ _('city_transport.intro_kragujevac_p2').format(prefix=lang_prefix)|safe }}
+        {% else %}{{ _('city_transport.intro_generic_p2').format(prefix=lang_prefix, city=city_label)|safe }}{% endif %}
       </div>
     </details>
     <details class="faq-item">

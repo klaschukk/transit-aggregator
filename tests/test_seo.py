@@ -298,16 +298,17 @@ def test_json_ld_breadcrumb_on_subpages(client):
 
 
 def test_route_links_to_city_transport_hub_for_covered_endpoint(client):
-    """An intercity route whose endpoint is one of the 4 cities we cover
-    locally must link to that city's /gradski/ hub — funnels crawl/authority
-    to the high-traffic city pages. Beograd–Novi Sad covers both ends."""
+    """An intercity route whose endpoint is a city we cover locally must link to
+    that city's /gradski/ hub — funnels crawl/authority to the city pages.
+    Montenegro coastal cities (Budva etc.) are covered now too."""
     html = client.get("/rute/beograd-novi-sad/").data.decode()
     assert '/gradski/beograd/"' in html, "no city-transport link to Beograd hub"
     assert '/gradski/novi-sad/"' in html, "no city-transport link to Novi Sad hub"
-    # A route to a non-covered city links only the covered endpoint.
     html2 = client.get("/rute/beograd-budva/").data.decode()
-    assert '/gradski/beograd/"' in html2
-    assert '/gradski/budva/"' not in html2, "linked a city we don't cover locally"
+    assert '/gradski/budva/"' in html2, "no city-transport link to Budva hub"
+    # A city we do NOT cover locally is never linked as a /gradski/ hub.
+    html3 = client.get("/rute/beograd-subotica/").data.decode()
+    assert '/gradski/subotica/"' not in html3, "linked a city we don't cover locally"
 
 
 def test_voznja_links_to_city_transport_hub_for_covered_endpoint(client):
@@ -316,8 +317,9 @@ def test_voznja_links_to_city_transport_hub_for_covered_endpoint(client):
     assert '/gradski/beograd/"' in html, "no city-transport link to Beograd hub"
     assert '/gradski/novi-sad/"' in html, "no city-transport link to Novi Sad hub"
     html2 = client.get("/voznja/beograd-do-budva/").data.decode()
-    assert '/gradski/beograd/"' in html2
-    assert '/gradski/budva/"' not in html2, "linked a city we don't cover locally"
+    assert '/gradski/budva/"' in html2, "no city-transport link to Budva hub"
+    html3 = client.get("/voznja/beograd-do-subotica/").data.decode()
+    assert '/gradski/subotica/"' not in html3, "linked a city we don't cover locally"
 
 
 def test_nocni_bus_guide_indexable_and_links_night_lines(client):

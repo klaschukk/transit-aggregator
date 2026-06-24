@@ -7,6 +7,7 @@ from flask import Blueprint, abort, redirect, render_template, url_for, g
 from app.db import cached_query, cached_query_one, db_ready
 from app.extensions import limiter
 from app.slug import normalize_slug
+from app.routes.city import CITY_LABELS
 
 info_bp = Blueprint('info', __name__)
 
@@ -47,11 +48,11 @@ def about():
               (SELECT COUNT(*) FROM routes WHERE type = 'intercity') as routes,
               (SELECT COUNT(*) FROM city_lines) as lines,
               (SELECT COUNT(*) FROM city_stops) as stops,
-              (SELECT COUNT(*) FROM operators) as operators
+              (SELECT COUNT(*) FROM operators) as operators,
+              (SELECT COUNT(DISTINCT city) FROM city_lines) as cities
         """, ttl=3600)
         if row:
             stats = dict(row)
-            stats['cities'] = 4
 
         # Popular routes — same SELECT shape the home uses, but capped
         # at 6 (less competing visual weight on this page).
@@ -76,10 +77,8 @@ def about():
             GROUP BY cl.city
             ORDER BY line_count DESC
         """, ttl=3600)
-        _city_labels = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad',
-                        'nis': 'Niš', 'kragujevac': 'Kragujevac'}
         for c in cities_data:
-            c['label'] = _city_labels.get(c['city'], c['city'].title())
+            c['label'] = CITY_LABELS.get(c['city'], c['city'].title())
 
     # 3 most recent guides — _GUIDES dict is defined further down in
     # this module; sort by date desc, slice 3.
@@ -263,8 +262,7 @@ def destinations():
     )
 
 
-_RV_CITY_LABELS = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad',
-                   'nis': 'Niš', 'kragujevac': 'Kragujevac'}
+_RV_CITY_LABELS = CITY_LABELS
 
 
 @info_bp.route('/red-voznje/')

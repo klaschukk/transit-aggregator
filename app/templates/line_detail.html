@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš'} %}
+{% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš', 'kragujevac': 'Kragujevac', 'podgorica': 'Podgorica', 'herceg-novi': 'Herceg Novi', 'budva': 'Budva'} %}
 {% set city_label = city_names.get(city, city|title) %}
 {# Serbian locative for the (always-Serbian) JSON-LD description: the old
    "{city_label}u" hack gave correct "Beogradu"/"Nišu" but wrong "Novi Sadu"/
