@@ -263,6 +263,56 @@ def destinations():
     )
 
 
+_RV_CITY_LABELS = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad',
+                   'nis': 'Niš', 'kragujevac': 'Kragujevac'}
+
+
+@info_bp.route('/red-voznje/')
+def red_voznje():
+    """Head-term hub for "red vožnje autobusa i vozova" — Serbia's generic
+    timetable query. Aggregates intercity routes + city transport + carriers
+    into one indexable landing that funnels link equity to the programmatic
+    pages (and gives Google a clear answer to the broad query, which — unlike
+    per-line queries — doesn't trigger the transit widget, so CTR is higher)."""
+    stats = {'routes': 0, 'lines': 0, 'stops': 0, 'operators': 0}
+    popular_routes: list = []
+    cities_data: list = []
+    operators: list = []
+    if db_ready():
+        row = cached_query_one("""
+            SELECT (SELECT COUNT(*) FROM routes WHERE type='intercity') AS routes,
+                   (SELECT COUNT(*) FROM city_lines) AS lines,
+                   (SELECT COUNT(*) FROM city_stops) AS stops,
+                   (SELECT COUNT(*) FROM operators) AS operators
+        """, ttl=3600)
+        if row:
+            stats = dict(row)
+        popular_routes = cached_query("""
+            SELECT r.slug, r.from_city, r.to_city,
+                   COUNT(t.id) AS trip_count,
+                   MIN(t.price_rsd) FILTER (WHERE t.price_rsd > 0) AS min_price
+            FROM routes r LEFT JOIN trips t ON t.route_id = r.id
+            WHERE r.type='intercity'
+            GROUP BY r.id, r.slug, r.from_city, r.to_city
+            ORDER BY trip_count DESC LIMIT 24
+        """, ttl=3600)
+        cities_data = cached_query("""
+            SELECT cl.city, COUNT(DISTINCT cl.id) AS line_count,
+                   (SELECT COUNT(*) FROM city_stops cs WHERE cs.city=cl.city) AS stop_count
+            FROM city_lines cl GROUP BY cl.city ORDER BY line_count DESC
+        """, ttl=3600)
+        for c in cities_data:
+            c['label'] = _RV_CITY_LABELS.get(c['city'], c['city'].title())
+        operators = cached_query("""
+            SELECT o.slug, o.name, COUNT(t.id) AS trip_count
+            FROM operators o JOIN trips t ON t.operator_id = o.id
+            GROUP BY o.id, o.slug, o.name ORDER BY trip_count DESC LIMIT 15
+        """, ttl=3600)
+    return render_template('red_voznje.html', stats=stats,
+                           popular_routes=popular_routes,
+                           cities_data=cities_data, operators=operators)
+
+
 # Country slug → (display name, list of member cities as they appear in
 # routes.from_city / routes.to_city, SEO intro key). The "cities" list is
 # what we filter the routes table on, so names must match exactly.

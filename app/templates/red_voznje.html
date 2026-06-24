@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}{{ _('red_voznje.title') }} {{ current_year }} | Prevozni{% endblock %}
+{% block meta_description %}{{ _('red_voznje.meta') }}{% endblock %}
+
+{% block head_extra %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"CollectionPage","name":"{{ _('red_voznje.h1') }}","url":"{{ config.BASE_URL }}{{ lang_prefix }}/red-voznje/","description":"{{ _('red_voznje.meta') }}","about":{"@type":"Service","serviceType":"Public transport timetables","areaServed":{"@type":"Country","name":"Serbia"}},"isPartOf":{"@type":"WebSite","name":"Prevozni","url":"{{ config.BASE_URL }}/"}}
+</script>
+{% endblock %}
+
+{% block content %}
+
+{% from '_partials/_breadcrumb.html' import breadcrumb with context %}
+{% from '_partials/_search_form.html' import search_form with context %}
+{% from '_partials/_ad_slot.html' import ad_slot with context %}
+
+<div class="mobile-back">
+  <a href="{{ lang_prefix }}/" class="mobile-back__btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>
+    <span>{{ _('breadcrumb.home') }}</span>
+  </a>
+</div>
+
+{{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': _('red_voznje.h1') }]) }}
+
+<div class="page-title fade-in">
+  <h1>{{ _('red_voznje.h1') }}</h1>
+  <p class="page-subtitle">{{ _('red_voznje.sub') }}</p>
+</div>
+
+<!-- Search — answer the query immediately -->
+<section class="home-section">
+  <div class="hero__form">
+    {{ search_form(t={'from': _('home.search_from'), 'to': _('home.search_to'), 'btn': _('home.search_btn')}, prefix=lang_prefix) }}
+  </div>
+</section>
+
+<!-- Intercity timetables -->
+{% if popular_routes %}
+<section class="home-section">
+  <h2 class="home-section__title">{{ _('red_voznje.intercity_h') }}</h2>
+  <div class="home-routes">
+    {% for route in popular_routes %}
+    <a href="{{ lang_prefix }}/rute/{{ route.slug }}/" class="home-route">
+      <div class="home-route__cities">
+        <span class="home-route__from">{{ route.from_city }}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+        <span class="home-route__to">{{ route.to_city }}</span>
+      </div>
+      {% if route.trip_count %}
+      <span class="home-route__meta">{{ route.trip_count }} {{ _('routes.departures') }}{% if route.min_price %} · {{ _('route_index.from_price') }} {{ (route.min_price / (config.EUR_RSD_RATE or 117))|round|int }}€{% endif %}</span>
+      {% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  <a href="{{ lang_prefix }}/rute/" class="btn btn--outline">{{ _('home.all_routes') }} →</a>
+</section>
+{% endif %}
+
+{{ ad_slot('search_mid', format='responsive') }}
+
+<!-- City transport timetables -->
+{% if cities_data %}
+<section class="home-section">
+  <h2 class="home-section__title">{{ _('red_voznje.city_h') }}</h2>
+  <div class="home-cities-grid">
+    {% for c in cities_data %}
+    <a href="{{ lang_prefix }}/gradski/{{ c.city }}/" class="home-city-card">
+      <div class="home-city-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
+          <rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/>
+          <circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/>
+        </svg>
+      </div>
+      <div class="home-city-card__info">
+        <div class="home-city-card__name">{{ c.label }}</div>
+        <div class="home-city-card__desc">{{ c.line_count }} {{ _('city.lines_count') }}{% if c.stop_count %} · {{ c.stop_count }} {{ _('common.stops') }}{% endif %}</div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Carriers — seeds /prevoznici/<slug>/ with inbound links -->
+{% if operators %}
+<section class="home-section">
+  <h2 class="home-section__title">{{ _('red_voznje.carriers_h') }}</h2>
+  <div class="filter-chips">
+    {% for op in operators %}
+    <a href="{{ lang_prefix }}/prevoznici/{{ op.slug }}/" class="filter-chip">{{ op.name }}</a>
+    {% endfor %}
+    <a href="{{ lang_prefix }}/prevoznici/" class="filter-chip filter-chip--active">{{ _('carriers.title') }} →</a>
+  </div>
+</section>
+{% endif %}
+
+<!-- SEO prose: the broad answer Google wants for the head term -->
+<div class="seo-block fade-in">
+  <p>{{ _('red_voznje.prose') }}</p>
+</div>
+
+{% endblock %}

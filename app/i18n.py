@@ -850,6 +850,36 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     # ── About page ──
     'about.title': {'sr': 'O nama', 'en': 'About us', 'ru': 'О нас'},
+    # /red-voznje/ — head-term hub for "red vožnje autobusa i vozova"
+    'nav.timetables': {'sr': 'Red vožnje', 'en': 'Timetables', 'ru': 'Расписание'},
+    'red_voznje.title': {
+        'sr': 'Red vožnje autobusa i vozova — Srbija',
+        'en': 'Bus and train timetables — Serbia',
+        'ru': 'Расписание автобусов и поездов — Сербия'},
+    'red_voznje.meta': {
+        'sr': 'Red vožnje autobusa, vozova i gradskog prevoza u Srbiji na jednom mestu — polasci, cene i linije za međugradske rute i 4 grada.',
+        'en': 'Bus, train and city transport timetables across Serbia in one place — departures, prices and lines for intercity routes and 4 cities.',
+        'ru': 'Расписание автобусов, поездов и городского транспорта Сербии в одном месте — отправления, цены и линии для междугородних маршрутов и 4 городов.'},
+    'red_voznje.h1': {
+        'sr': 'Red vožnje autobusa, vozova i gradskog prevoza',
+        'en': 'Bus, train and city transport timetables',
+        'ru': 'Расписание автобусов, поездов и городского транспорта'},
+    'red_voznje.sub': {
+        'sr': 'Srbija i region — polasci, cene i linije na jednom mestu',
+        'en': 'Serbia and the region — departures, prices and lines in one place',
+        'ru': 'Сербия и регион — отправления, цены и линии в одном месте'},
+    'red_voznje.intercity_h': {
+        'sr': 'Međugradski red vožnje', 'en': 'Intercity timetables',
+        'ru': 'Междугородние расписания'},
+    'red_voznje.city_h': {
+        'sr': 'Gradski red vožnje', 'en': 'City transport timetables',
+        'ru': 'Городской транспорт'},
+    'red_voznje.carriers_h': {
+        'sr': 'Prevoznici', 'en': 'Carriers', 'ru': 'Перевозчики'},
+    'red_voznje.prose': {
+        'sr': 'Prevozni objedinjuje red vožnje autobusa, vozova i gradskog prevoza širom Srbije. Na jednom mestu pronađite polaske, cene i trajanje za međugradske rute, kao i linije, stajališta i vreme dolaska za gradski prevoz u Beogradu, Novom Sadu, Nišu i Kragujevcu. Podaci se osvežavaju svakodnevno iz zvaničnih izvora.',
+        'en': 'Prevozni brings together bus, train and city transport timetables across Serbia. Find departures, prices and durations for intercity routes, plus lines, stops and arrival times for city transport in Belgrade, Novi Sad, Niš and Kragujevac — all in one place, refreshed daily from official sources.',
+        'ru': 'Prevozni собирает расписание автобусов, поездов и городского транспорта по всей Сербии. Отправления, цены и время в пути для междугородних маршрутов, а также линии, остановки и время прибытия городского транспорта Белграда, Нови-Сада, Ниша и Крагуеваца — в одном месте, обновляется ежедневно.'},
     'about.meta_short': {
         'sr': 'Prevozni — besplatni red vožnje autobusa, vozova i gradskog prevoza u Srbiji. Bez registracije, na 3 jezika.',
         'en': 'Prevozni — free bus, train and city transport schedules across Serbia. No registration, in 3 languages.',

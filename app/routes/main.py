@@ -998,6 +998,7 @@ def sitemap_core():
         url('/gradski/kragujevac/', 'weekly', '0.7'),
         url('/prevoznici/', 'monthly', '0.5'),
         url('/autobuske-stanice/', 'monthly', '0.5'),
+        url('/red-voznje/', 'weekly', '0.8'),
         url('/destinacije/', 'weekly', '0.7'),
         url('/vodici/', 'weekly', '0.6'),
         url('/o-nama/', 'monthly', '0.3'),
