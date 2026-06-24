@@ -1032,10 +1032,15 @@ def sitemap_routes():
     url = _build_url_fn(base, default_mtime)
     pages: list[str] = []
     if db_ready():
+        # Include every route that has a real schedule (≥1 trip with a departure
+        # time), not just priced ones — the route page now renders + indexes the
+        # timetable even without fares, so the sitemap must agree. Matches the
+        # route_detail noindex guard (schedule-present, not price-present).
         routes = cached_query("""
             SELECT r.slug FROM routes r
             WHERE r.type = 'intercity'
-              AND EXISTS (SELECT 1 FROM trips t WHERE t.route_id = r.id AND t.price_rsd > 0)
+              AND EXISTS (SELECT 1 FROM trips t WHERE t.route_id = r.id
+                          AND t.departure_time IS NOT NULL AND t.departure_time != '')
         """, ttl=3600)
         for r in routes:
             mod = _lastmod_for('route', r['slug'], default_mtime)

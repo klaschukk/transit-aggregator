@@ -190,6 +190,13 @@ def route_detail(slug: str):
         # transient-wrong window is negligible.
         abort(410)
 
+    # Show the FULL timetable: every trip that carries a departure time, with
+    # price where we have it (the trip-card macro renders priceless rows cleanly
+    # — time + operator, no "0 RSD"). Was filtered to `price_rsd > 0`, which hid
+    # the schedule on 111 real routes that have times but no scraped fare and
+    # got them noindexed — exactly the "X red vožnje" timetable intent we rank
+    # for. Price stats (min/max below) keep their own price>0 filter, so the
+    # "od N RSD" snippet/title are unaffected.
     trips = query("""
         SELECT t.departure_time, t.arrival_time, t.duration_min,
                t.price_rsd, COALESCE(o.name, '') as operator,
@@ -198,9 +205,10 @@ def route_detail(slug: str):
         FROM trips t
         LEFT JOIN operators o ON o.id = t.operator_id
         WHERE t.route_id = (SELECT id FROM routes WHERE slug = ?)
-          AND t.price_rsd > 0
+          AND t.departure_time IS NOT NULL AND t.departure_time != ''
         ORDER BY t.departure_time
     """, [slug]) if db_ready() else []
+    _has_schedule = bool(trips)
 
     today = date.today()
     days = [today + timedelta(days=i) for i in range(3)]
@@ -272,12 +280,11 @@ def route_detail(slug: str):
     from app import analytics_db
     reviews_list, reviews_agg = analytics_db.review_block(slug)
 
-    # Thin-content guard: a route with no PRICED trips renders an empty
-    # schedule (trips may exist with price 0, so check the max). It is already
-    # excluded from the sitemap (same priced-trip filter); noindex it too so
-    # Google stops logging it under "crawled, currently not indexed".
-    # Re-indexes on its own once priced trips return.
-    if (route.get('max_price_rsd') or 0) <= 0:
+    # Thin-content guard: noindex ONLY a route with no schedule at all (no trip
+    # carries a departure time). A real timetable without prices is still useful
+    # for "X red vožnje" queries and now renders + indexes — price is not
+    # required. Genuinely empty routes (no times) re-index once data returns.
+    if not _has_schedule:
         g.meta_robots = 'noindex, follow'
 
     # City-transport hub links for endpoints we cover locally (funnels link

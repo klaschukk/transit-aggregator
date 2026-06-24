@@ -65,6 +65,10 @@ ROUTES = [
     (1, 'beograd-novi-sad', 'Beograd', 'Novi Sad', 'beograd', 'novi-sad', 90, 'intercity'),
     (2, 'beograd-nis', 'Beograd', 'Niš', 'beograd', 'nis', 250, 'intercity'),
     (3, 'beograd-kragujevac', 'Beograd', 'Kragujevac', 'beograd', 'kragujevac', 140, 'intercity'),
+    # Schedule-but-no-price route: backs test_timetable_route_indexable — a real
+    # timetable (departure times) with no scraped fare must still render +
+    # index for "X red vožnje" intent (not noindexed just for lacking a price).
+    (4, 'cacak-kragujevac', 'Čačak', 'Kragujevac', 'cacak', 'kragujevac', 50, 'intercity'),
 ]
 
 TRIPS = [
@@ -73,6 +77,9 @@ TRIPS = [
     (1, 1, 1, '06:00', '07:30', 90, 600, '1234567', True, 909),
     (2, 1, 1, '08:00', '09:30', 90, 600, '1234567', True, None),
     (3, 2, 2, '07:00', '10:30', 210, 1200, '1234567', True, None),
+    # Timed but price 0 — the schedule-no-price case (route 4).
+    (4, 4, 1, '07:15', '08:05', 50, 0, '1234567', True, None),
+    (5, 4, 1, '14:30', '15:20', 50, 0, '1234567', True, None),
 ]
 
 CITY_LINES = [

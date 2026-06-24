@@ -1,7 +1,10 @@
 """Thin pages ("crawled, currently not indexed") must noindex so Google stops
-re-fetching them, while staying reachable (follow). Targets: intercity routes
-with no priced trips, /voznja/ pairs with no route row, operators with no
-priced routes. Healthy pages stay indexable.
+re-fetching them, while staying reachable (follow). Targets: /voznja/ pairs with
+no route row, operators with no priced routes. Healthy pages stay indexable.
+
+NOTE: a route with a real timetable but no price is NOT thin — it renders its
+schedule and stays indexable (the "X red vožnje" intent). Only a route with no
+schedule at all is noindexed.
 
 Examples are looked up at runtime so the test holds on both the full DB and the
 trimmed CI seed.
@@ -24,15 +27,20 @@ def _slug(row):
     return row["slug"] if isinstance(row, dict) else row[0]
 
 
-def test_route_without_priced_trips_is_noindex(client, db):
+def test_route_with_schedule_but_no_price_is_indexable(client, db):
+    # New policy: a timetable without a scraped fare is still useful for
+    # "X red vožnje" intent → it renders + indexes. (Was noindexed for lacking
+    # a price, which buried 111 real routes.)
     slug = _slug(db.one(
         "SELECT r.slug FROM routes r WHERE r.type='intercity' "
         "AND NOT EXISTS (SELECT 1 FROM trips t WHERE t.route_id=r.id AND t.price_rsd>0) "
+        "AND EXISTS (SELECT 1 FROM trips t WHERE t.route_id=r.id "
+        "            AND t.departure_time IS NOT NULL AND t.departure_time<>'') "
         "LIMIT 1"
     ))
     if not slug:
-        pytest.skip("no trip-less route in this DB")
-    assert _robots(client, f"/rute/{slug}/").startswith("noindex")
+        pytest.skip("no schedule-without-price route in this DB")
+    assert _robots(client, f"/rute/{slug}/").startswith("index")
 
 
 def test_route_with_priced_trips_is_indexable(client, db):
