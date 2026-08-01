@@ -16,6 +16,12 @@ log "Starting nightly enrich..."
 cd "$DIR"
 source venv/bin/activate
 
+# Secrets for the pipelines. cron does not inherit the systemd unit's
+# Environment=, so GROQ_API_KEY (far-route pregeneration) has to come from here.
+if [ -f "$DIR/.env" ]; then
+  set -a; . "$DIR/.env"; set +a
+fi
+
 log "Minifying CSS..."
 python -u scripts/minify_css.py 2>&1 | tee -a "$LOG" || log "WARN: minify_css failed"
 
@@ -91,6 +97,18 @@ if [ "$HSTATUS" != "200" ]; then
   sleep 3
   HSTATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --unix-socket /run/prevozni/prevozni.sock http://localhost/health || echo "000")
   log "Health after retry: $HSTATUS"
+fi
+
+# Far-destination guides only become indexable once their itinerary is cached,
+# and only this script warms that cache (the request handler is cache-only by
+# design). Groq's free tier is token-limited, so a single run fills a slice;
+# the script is idempotent and skips what is already cached, so successive
+# nights converge. Runs with the service up — it touches only the analytics DB.
+log "Pre-generating far-destination itineraries..."
+if [ -n "${GROQ_API_KEY:-}" ]; then
+  python -u scripts/pregen_far_routes.py 2>&1 | tail -5 | tee -a "$LOG" || log "WARN: pregen_far_routes failed"
+else
+  log "SKIP: GROQ_API_KEY not set (see .env) — far guides stay unindexable"
 fi
 
 log "Done!"

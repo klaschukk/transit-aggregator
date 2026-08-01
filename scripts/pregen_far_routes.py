@@ -50,10 +50,17 @@ TOP_FAR = [
 ]
 
 
-# Groq's 70B tier allows ~30 requests/minute; stay just under it.
-REQUEST_GAP = 2.2
-MAX_ATTEMPTS = 3
-RETRY_BACKOFF = 5.0
+# The binding Groq limit here is tokens, not requests: the free 70B tier
+# reports x-ratelimit-limit-tokens 12000/min against ~1000 tokens per call
+# (long system prompt + 700 max_tokens), so ~12 calls/min is the ceiling.
+# A 2.2s gap asked for ~27/min and stalled on 429s that
+# compose_itinerary_via_groq reports as plain failures.
+REQUEST_GAP = 8.0
+MAX_ATTEMPTS = 2
+RETRY_BACKOFF = 45.0
+# A 429 means the token bucket is empty, so the next call must not follow at
+# the normal gap — back off hard before continuing the sweep.
+FAILURE_COOLDOWN = 30.0
 
 
 def main() -> None:
@@ -99,10 +106,11 @@ def main() -> None:
                         )
                         ok += 1
                         print(f'OK   {pair_key} [{lang}]')
+                        time.sleep(REQUEST_GAP)
                     else:
                         failed += 1
-                        print(f'FAIL {pair_key} [{lang}]')
-                    time.sleep(REQUEST_GAP)
+                        print(f'FAIL {pair_key} [{lang}]', flush=True)
+                        time.sleep(FAILURE_COOLDOWN)
         print(f'\nDone: {ok} composed, {skipped} cached, {failed} failed')
 
 
