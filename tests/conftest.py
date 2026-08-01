@@ -22,12 +22,16 @@ def _isolate_flask_env(monkeypatch):
 
 
 @pytest.fixture(scope="session")
-def app():
+def app(tmp_path_factory):
     """Create application for testing."""
     application = create_app("development")
     application.config["TESTING"] = True
     application.config["WTF_CSRF_ENABLED"] = False
     application.config["RATELIMIT_ENABLED"] = False
+    # With Telegram unconfigured, logs/contact_messages.log IS the contact
+    # inbox — keep the suite's fixture enquiries out of it.
+    application.config["CONTACT_LOG_PATH"] = str(
+        tmp_path_factory.mktemp("contact") / "contact_messages.log")
     yield application
 
 

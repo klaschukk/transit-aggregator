@@ -129,7 +129,11 @@ def contact():
         # "Date:"/"Name:"/separator lines and forge entries in the log.
         def _one_line(s: str) -> str:
             return s.replace('\r', ' ').replace('\n', ' ')
-        log_path = current_app.root_path + '/../logs/contact_messages.log'
+        # Configurable so the test suite does not append a fake "Ana" enquiry
+        # to the real inbox on every run — with Telegram unset this file IS
+        # the inbox, and the noise buried a genuine enquiry among 8 fixtures.
+        log_path = (current_app.config.get('CONTACT_LOG_PATH')
+                    or current_app.root_path + '/../logs/contact_messages.log')
         try:
             with open(log_path, 'a', encoding='utf-8') as f:
                 f.write(f"\n{'='*50}\n")
