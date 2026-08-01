@@ -18,7 +18,22 @@ def test_missing_stop_is_410(client):
 
 def test_missing_line_is_410(client):
     assert client.get("/gradski/beograd/linija/linija-removed-xyz/").status_code == 410
-    assert client.get("/gradski/beograd/linija/linija-604/").status_code == 410
+    # A real gap in the live 600-series (600-607 exist, 608 does not).
+    assert client.get("/gradski/beograd/linija/linija-608/").status_code == 410
+
+
+def test_returned_line_is_not_gone(client, db):
+    """A line that comes back in a re-scrape must stop being 410.
+
+    Line 604 was listed here as permanently gone, but a later scrape returned
+    it as a live Belgrade suburban line with a full stop list. Serving 410 for
+    a line we actually have deindexes a real page, so the 410 rule must key off
+    the current data, never off a hardcoded slug.
+    """
+    row = db.one("SELECT slug FROM city_lines WHERE city = 'beograd' AND slug = 'linija-604'")
+    if not row:
+        pytest.skip("line 604 absent from this DB — nothing to guard")
+    assert client.get("/gradski/beograd/linija/linija-604/").status_code == 200
 
 
 def test_single_token_route_is_410(client):
