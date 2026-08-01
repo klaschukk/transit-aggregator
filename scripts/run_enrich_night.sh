@@ -6,6 +6,7 @@ set -euo pipefail
 # the current host, so `cd` aborted the whole nightly run under `set -e`).
 DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 LOG=$DIR/logs/enrich.log
+MAINT_FLAG=$DIR/logs/.maintenance
 
 mkdir -p "$DIR/logs"
 
@@ -21,6 +22,8 @@ python -u scripts/minify_css.py 2>&1 | tee -a "$LOG" || log "WARN: minify_css fa
 log "Cleaning OG image cache (>7 days)..."
 find data/cache/og -name "*.png" -mtime +7 -delete 2>/dev/null || true
 
+# ── Scrapers: no DB access, so the site stays up for this whole phase ────────
+
 log "Scraping Niš stops (Overpass OSM)..."
 python -u data/pipelines/scrape_nis_stops.py 2>&1 | tee -a "$LOG" || log "WARN: scrape_nis_stops failed"
 
@@ -30,8 +33,11 @@ python -u data/pipelines/scrape_nis_stops.py 2>&1 | tee -a "$LOG" || log "WARN: 
 log "Scraping Montenegro city lines (Overpass OSM)..."
 python -u data/pipelines/scrape_montenegro.py 2>&1 | tee -a "$LOG" || log "WARN: scrape_montenegro failed"
 
-log "Enriching stop coordinates..."
-python -u data/pipelines/enrich_stops_coords.py 2>&1 | tee -a "$LOG" || log "WARN: enrich_stops_coords failed"
+log "Scraping Kragujevac city lines (Overpass OSM)..."
+python -u data/pipelines/scrape_kragujevac.py 2>&1 | tee -a "$LOG" || log "WARN: scrape_kragujevac failed"
+
+log "Scraping Novi Sad lines (JGSP)..."
+python -u data/pipelines/scrape_gspns.py 2>&1 | tee -a "$LOG" || log "WARN: scrape_gspns failed"
 
 # Affiliate freshness: trips.bt4_line_id goes stale as busticket4 schedules
 # churn, and a stale id deep-links the Kupi button into a dead 0.00 checkout.
@@ -46,23 +52,45 @@ python -u data/pipelines/scrape_intercity.py 2>&1 | tee -a "$LOG" || log "WARN: 
 log "Scraping international trips..."
 python -u data/pipelines/scrape_international.py 2>&1 | tee -a "$LOG" || log "WARN: scrape_international failed"
 
+# ── DB phase: needs the write lock, so the service must be down ─────────────
+# gunicorn holds a read lock on transit.duckdb; DuckDB allows either one writer
+# or many readers, so build_db/enrich fail with "Conflicting lock is held" while
+# the service runs. The flag stops the */5 healthcheck from restarting it
+# underneath us (see scripts/healthcheck.sh).
+
+log "Entering maintenance window (stopping service for DB rebuild)..."
+touch "$MAINT_FLAG"
+trap 'rm -f "$MAINT_FLAG"' EXIT
+sudo systemctl stop prevozni
+sleep 2
+
 log "Rebuilding transit.duckdb..."
 python -u data/pipelines/build_db.py 2>&1 | tee -a "$LOG"
 
+# Must run AFTER build_db: build_db recreates city_stops from the raw JSON, so
+# enriching first threw away every coordinate it had just fetched.
+log "Enriching stop coordinates..."
+python -u data/pipelines/enrich_stops_coords.py enrich --limit 200 2>&1 | tee -a "$LOG" || log "WARN: enrich_stops_coords failed"
+
 # Pair-level affiliate map (app/affiliates/bt4_lineids.json): only departures
 # busticket4 actually sells online (purchase_allowed) get a lineId. partners.py
-# loads the JSON at import, so the restart below is what ships it.
+# loads the JSON at import, so the start below is what ships it.
 log "Refreshing BT4 affiliate line ids..."
 python -u data/pipelines/refresh_bt4_lineids.py 2>&1 | tee -a "$LOG" || log "WARN: refresh_bt4_lineids failed"
 
-log "Restarting transit (fresh DB + affiliate map)..."
-sudo systemctl restart prevozni
+log "Starting transit (fresh DB + affiliate map)..."
+sudo systemctl start prevozni
+rm -f "$MAINT_FLAG"
+trap - EXIT
 sleep 3
 HSTATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --unix-socket /run/prevozni/prevozni.sock http://localhost/health || echo "000")
-log "Health after restart: $HSTATUS"
+log "Health after start: $HSTATUS"
 if [ "$HSTATUS" != "200" ]; then
-  log "WARN: not healthy after restart, retrying..."
+  log "WARN: not healthy after start, retrying..."
   sudo systemctl restart prevozni
+  sleep 3
+  HSTATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --unix-socket /run/prevozni/prevozni.sock http://localhost/health || echo "000")
+  log "Health after retry: $HSTATUS"
 fi
 
 log "Done!"
@@ -70,6 +98,8 @@ log "Done!"
 # Write last_refresh.json so /health shows nightly status
 python3 -c "
 import json, time
+status = 'ok' if '$HSTATUS' == '200' else 'degraded'
 with open('$DIR/logs/last_refresh.json', 'w') as f:
-    json.dump({'finished_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'finished_ts': time.time(), 'status': 'ok'}, f)
+    json.dump({'finished_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+               'finished_ts': time.time(), 'status': status, 'health_http': '$HSTATUS'}, f)
 "

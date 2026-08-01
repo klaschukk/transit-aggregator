@@ -68,7 +68,14 @@ sentry_ping() {
     >> "$LOG" 2>&1 || true
 }
 
-# Stop service to release DB lock
+# Stop service to release DB lock. The maintenance flag tells the */5 cron
+# healthcheck this downtime is deliberate — otherwise it restarts the service
+# underneath us and the fresh gunicorn re-takes the DuckDB read lock, killing
+# build_db/enrich with "Conflicting lock is held". Cleared on every exit path.
+MAINT_FLAG=$PROJECT/logs/.maintenance
+touch "$MAINT_FLAG"
+trap 'rm -f "$MAINT_FLAG"' EXIT
+
 sudo systemctl stop prevozni
 sleep 2
 
