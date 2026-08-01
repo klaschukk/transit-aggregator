@@ -4,6 +4,10 @@ Scrape JGSP Novi Sad (gspns.co.rs) — city and suburban bus lines.
 Uses the schedule API (/red-voznje/lista-linija) for the line list
 and the network page (/mreza) for stop-to-line mappings.
 
+The line list API only returns data for a schedule-validity date ("vaziod")
+that JGSP currently publishes; a stale date yields an empty <select>. The
+current date is therefore discovered from the schedule page on every run.
+
 Output: data/raw/novi-sad/lines.json
 
 Usage:
@@ -24,6 +28,11 @@ OUT_DIR = BASE_DIR / 'raw' / 'novi-sad'
 BASE_URL = 'https://www.gspns.co.rs'
 LINES_API = f'{BASE_URL}/red-voznje/lista-linija'
 NETWORK_URL = f'{BASE_URL}/mreza'
+SCHEDULE_PAGE = f'{BASE_URL}/red-voznje/gradski'
+
+# Used only if the schedule page cannot be parsed; JGSP rotates this date
+# whenever a new timetable takes effect, so it goes stale on its own.
+FALLBACK_VAZIOD = '2026-06-22'
 
 HEADERS = {'User-Agent': 'TransitSerbia/1.0 (transit aggregator)'}
 REQUEST_DELAY = 1.5
@@ -51,6 +60,30 @@ def fetch(url: str, params: dict | None = None) -> str | None:
                 print(f'{RED}  Failed: {url} — {e}{RESET}', file=sys.stderr)
                 return None
     return None
+
+
+def parse_vaziod(text: str) -> str | None:
+    """Extract the current schedule-validity date from the <select id='vaziod'>.
+
+    Prefers the option marked ``selected``; otherwise takes the first one.
+    Returns None when the select is absent or holds no date-shaped value.
+    """
+    select = re.search(r"<select[^>]*id=['\"]?vaziod['\"]?[^>]*>(.*?)</select>",
+                       text, re.DOTALL | re.IGNORECASE)
+    if not select:
+        return None
+
+    options = re.findall(r'<option([^>]*)>', select.group(1), re.IGNORECASE)
+    dates: list[str] = []
+    for attrs in options:
+        value = re.search(r"value=['\"]?(\d{4}-\d{2}-\d{2})['\"]?", attrs)
+        if not value:
+            continue
+        if re.search(r'\bselected\b', attrs, re.IGNORECASE):
+            return value.group(1)
+        dates.append(value.group(1))
+
+    return dates[0] if dates else None
 
 
 def parse_line_list(text: str) -> list[dict]:
@@ -98,13 +131,24 @@ def main() -> None:
     print(f'  {BOLD}SCRAPE JGSP NOVI SAD{RESET}')
     print(f'  {"=" * 50}')
 
-    # 1. Fetch city + suburban line lists from schedule API
+    # 1. Discover the schedule-validity date the API currently serves
+    schedule_html = fetch(SCHEDULE_PAGE)
+    vaziod = parse_vaziod(schedule_html) if schedule_html else None
+    if vaziod:
+        print(f'  Schedule valid from {GREEN}{vaziod}{RESET}')
+    else:
+        vaziod = FALLBACK_VAZIOD
+        print(f'{RED}  Could not read vaziod — falling back to {vaziod}{RESET}',
+              file=sys.stderr)
+    time.sleep(REQUEST_DELAY)
+
+    # 2. Fetch city + suburban line lists from schedule API
     all_lines: list[dict] = []
 
     for rv, label, line_type in [('rvg', 'Gradski', 'bus'),
                                   ('rvp', 'Prigradski', 'suburban')]:
         print(f'  Fetching {label} lines...')
-        text = fetch(LINES_API, params={'rv': rv, 'vaziod': '2026-04-01', 'dan': 'R'})
+        text = fetch(LINES_API, params={'rv': rv, 'vaziod': vaziod, 'dan': 'R'})
         if not text:
             continue
         lines = parse_line_list(text)
@@ -118,7 +162,7 @@ def main() -> None:
         print(f'{RED}  No lines found — aborting{RESET}')
         sys.exit(1)
 
-    # 2. Fetch stop lists from /mreza
+    # 3. Fetch stop lists from /mreza
     print(f'  Fetching network map (stops)...')
     mreza_html = fetch(NETWORK_URL)
     if mreza_html:
@@ -133,7 +177,7 @@ def main() -> None:
         for line in all_lines:
             line['stops'] = []
 
-    # 3. Save — strip internal 'code' field
+    # 4. Save — strip internal 'code' field
     for line in all_lines:
         line.pop('code', None)
 
