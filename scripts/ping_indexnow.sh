@@ -43,7 +43,11 @@ echo "=== $(date -u +%FT%TZ) IndexNow ping start ===" >> "$LOG"
 TMP=$(mktemp -t indexnow.XXXXXX.txt)
 trap 'rm -f "$TMP" "${TMP}.json"' EXIT
 
-for shard in core routes pairs lines stops; do
+# Keep in sync with the shards listed in /sitemap.xml. 'pairs' was retired
+# (every indexable /voznja/ pair canonicalises onto its /rute/ owner) and
+# fetching it just logged a warning every run; 'far' replaced it and was
+# never submitted.
+for shard in core routes lines stops far; do
   curl -sf "https://${HOST}/sitemap-${shard}.xml" --max-time 30 \
     | grep -oE '<loc>[^<]+</loc>' \
     | sed -E 's#</?loc>##g' \
