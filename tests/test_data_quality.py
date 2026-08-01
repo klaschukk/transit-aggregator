@@ -205,3 +205,36 @@ def test_no_duplicate_city_line_slugs(db):
     """)
     # Some duplicates are expected (direction variants sharing a slug)
     assert len(rows) <= 20, f"Too many duplicate line slugs ({len(rows)}): {[(r['city'], r['slug']) for r in rows[:5]]}"
+
+
+# ── Display names are Serbian Latin ──
+
+
+def test_display_names_have_no_cyrillic(db):
+    """Stop and line names must render in Latin.
+
+    The Belgrade/Niš/Kragujevac sources are Cyrillic, which produced titles
+    like 'Stajalište Сајам (Beograd)' — a Latin page with a Cyrillic subject,
+    matching Latin search queries poorly. build_db romanises the display name
+    (never the slug), so no Cyrillic should survive into the DB.
+    """
+    import re
+    cyrillic = re.compile(r'[Ѐ-ӿ]')
+    for table in ('city_stops', 'city_lines'):
+        rows = db.q(f"SELECT city, name FROM {table} WHERE name IS NOT NULL")
+        if not rows:
+            pytest.skip(f"{table} empty in this DB")
+        bad = [r['name'] for r in rows if cyrillic.search(r['name'] or '')]
+        assert not bad, f"{len(bad)} Cyrillic {table} names, e.g. {bad[:5]}"
+
+
+def test_slugs_stay_ascii_and_latin_dj(db):
+    """Slugs must remain ASCII and keep the pre-romanisation spelling.
+
+    normalize_slug folds 'Ђ' to 'd' while romanised 'Dj' slugs to 'dj', so
+    recomputing slugs from the Latin name would rename ~95 stop URLs and lose
+    whatever index they hold. Slugs stay derived from the Cyrillic original.
+    """
+    rows = db.q("SELECT city, slug FROM city_stops WHERE slug IS NOT NULL")
+    non_ascii = [r['slug'] for r in rows if not r['slug'].isascii()]
+    assert not non_ascii, f"non-ASCII slugs: {non_ascii[:5]}"

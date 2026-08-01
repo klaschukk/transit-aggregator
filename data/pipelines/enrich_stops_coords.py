@@ -28,6 +28,10 @@ PROGRESS_FILE = BASE_DIR / 'raw' / 'enrich_stops_progress.json'
 SUSPICIOUS_FILE = BASE_DIR / 'raw' / 'suspicious_stops.json'
 # Survives build_db rebuilds, which recreate city_stops from the raw JSON.
 COORDS_CACHE_FILE = BASE_DIR / 'raw' / 'stop_coords_cache.json'
+# Cache file for a given DB. Tests run enrich() against a tiny seed DB, and a
+# fixed path let that 3-stop run overwrite the real 3202-entry production
+# cache, so the cache follows whichever DB is actually open.
+_CACHE_BY_DB: dict[str, Path] = {}
 
 # Belgrade bounding box (south, west, north, east). Kept as the default for the
 # Belgrade-scoped audit; per-city boxes for enrichment live in CITY_REGIONS.
@@ -431,6 +435,10 @@ def write_coords_cache(conn: duckdb.DuckDBPyConnection) -> None:
     coordinates written only into the DB were lost on the next rebuild and had
     to be re-fetched from Overpass/Nominatim — hours of rate-limited requests
     repeated nightly. build_db reads this file back and refills the gaps.
+
+    Called from main() rather than from enrich()/fix(): the tests drive those
+    directly against the tiny seed DB, and doing the write inside them replaced
+    the real 3202-entry cache with the seed's 3 stops.
     """
     rows = conn.execute(
         "SELECT city, slug, lat, lon FROM city_stops "
@@ -527,7 +535,6 @@ def enrich(conn: duckdb.DuckDBPyConnection, limit: int = 0) -> None:
         time.sleep(REQUEST_DELAY)
 
     save_progress(progress)
-    write_coords_cache(conn)
 
     _print_final(start_time, with_coords, found, not_found, total_stops)
 
@@ -695,8 +702,10 @@ def main() -> None:
             audit(conn)
         elif args.command == 'enrich':
             enrich(conn, args.limit)
+            write_coords_cache(conn)
         elif args.command == 'fix':
             fix(conn, args.limit)
+            write_coords_cache(conn)
     finally:
         conn.close()
 

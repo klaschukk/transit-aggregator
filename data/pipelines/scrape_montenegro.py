@@ -46,6 +46,9 @@ CITIES: dict[str, str] = {
 # herceg-novi: confirmed by the site owner — the city runs lines 1 and 2 only.
 CITY_LINES_ALLOWED: dict[str, set[str]] = {
     'herceg-novi': {'1', '2'},
+    # budva: 5 is "Budva - Petrovac - Buljarica - Budva", running 14.4 km out
+    # to Petrovac — a separate town, not a Budva city line. 1-4 stay local.
+    'budva': {'1', '2', '3', '4'},
 }
 
 _NUMBERED_RE = re.compile(r'^\d+[A-Za-z]?$')

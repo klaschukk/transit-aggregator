@@ -460,15 +460,21 @@ def _guide_context_nocni_bg() -> dict:
 
 def _guide_context_aerodrom_bg() -> dict:
     """Belgrade city lines serving Nikola Tesla airport, for the airport guide.
-    Grounded in the DB (line name mentions „Никола Тесла“) — links to each line
+    Grounded in the DB (line name mentions "Nikola Tesla") — links to each line
     page for the exact schedule, never fabricated. Excludes the Batajnica
-    airport line. Cyrillic 'Н' in night-line numbers → Latin 'N' for display."""
+    airport line. Cyrillic 'Н' in night-line numbers → Latin 'N' for display.
+
+    Matches both scripts: build_db romanises stored names, but the GSP source
+    is Cyrillic, so a Latin-only match would silently empty this guide if that
+    step ever changes — as a Cyrillic-only match did when it was introduced."""
     airport_lines: list = []
     if db_ready():
         rows = cached_query("""
             SELECT number, slug
             FROM city_lines
-            WHERE city = 'beograd' AND lower(name) LIKE '%никола тесла%'
+            WHERE city = 'beograd'
+              AND (lower(name) LIKE '%nikola tesla%'
+                   OR lower(name) LIKE '%никола тесла%')
             ORDER BY TRY_CAST(REGEXP_REPLACE(number, '[^0-9]', '', 'g') AS INTEGER) NULLS LAST
         """, ttl=3600)
         for r in (rows or []):

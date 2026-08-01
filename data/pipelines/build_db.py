@@ -223,6 +223,7 @@ def build() -> None:
         _load_balkan(conn)
         _load_gtfs(conn)
         _load_city_schedule(conn, 'novi-sad')
+        _latinise_display_names(conn)
         _cleanup(conn)
     else:
         print("No scraped data found — loading sample data...")
@@ -1060,6 +1061,34 @@ def _load_city_lines(conn: duckdb.DuckDBPyConnection, city: str, lines_path: Pat
                     pass
 
     print(f"  Loaded {count} {city} lines, {stop_count}+{extra_stops} stops, {link_count} line-stop links")
+
+
+def _latinise_display_names(conn: duckdb.DuckDBPyConnection) -> None:
+    """Romanise Cyrillic stop/line names for display (Serbian Latin).
+
+    The Belgrade, Niš and Kragujevac sources ship Cyrillic names, so 93% of
+    stops and 89% of lines rendered titles like
+    'Stajalište Сајам (Beograd): red vožnje' — a Latin page with a Cyrillic
+    subject. Serbian is digraphic, but the web (and the queries this site
+    ranks for) is overwhelmingly Latin, so the Cyrillic form both reads as
+    broken and matches user queries poorly.
+
+    Only the display name is rewritten. `slug` is left exactly as built from
+    the Cyrillic original: normalize_slug folds Ђ to 'd' while the romanised
+    'Dj' slugs to 'dj', so recomputing slugs here would silently change the
+    URL of 95 stops and 29 lines and drop whatever index they still hold.
+    Runs after _load_gtfs, whose line matching keys on the raw `number`.
+    """
+    for table in ('city_stops', 'city_lines'):
+        rows = conn.execute(
+            f"SELECT id, name FROM {table} WHERE name IS NOT NULL").fetchall()
+        updates = [(transliterate_cyrillic_serbian(name), rid)
+                   for rid, name in rows
+                   if name and transliterate_cyrillic_serbian(name) != name]
+        if updates:
+            conn.executemany(
+                f"UPDATE {table} SET name = ? WHERE id = ?", updates)
+        print(f"  Latinised {len(updates)} {table} names")
 
 
 STOP_COORDS_CACHE = RAW_DIR / 'stop_coords_cache.json'
