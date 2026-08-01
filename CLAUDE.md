@@ -139,6 +139,12 @@ Production environment requires these env vars:
   подставляется `mapboxgl.accessToken = ''` и карта на `/gradski/…`
   (город, линия, остановка) остаётся пустой. Проверка токена:
   `curl -o /dev/null -w '%{http_code}' "https://api.mapbox.com/styles/v1/mapbox/light-v11?access_token=$MAPBOX_TOKEN"` → 200.
+- `GROQ_API_KEY` — **обязателен для AI-чата и дальних направлений** (`gsk_…`).
+  Без него `/api/chat` отдаёт 503, а `sitemap-far.xml` пуст: страницы
+  `/voznja/<hub>-do-<far>/` индексируются только при наличии готового
+  маршрута в кэше `composed_routes`, а наполняет кэш исключительно
+  `scripts/pregen_far_routes.py` (обработчик запроса намеренно
+  cache-only — Googlebot не должен ждать модель).
 - `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` — уведомления контакт-формы
   + weekly SEO digest (переиспользуется).
 - `DUCKDB_PATH` — путь к `transit.duckdb` (по умолчанию `data/dbs/transit.duckdb`).

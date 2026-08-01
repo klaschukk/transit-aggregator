@@ -50,6 +50,12 @@ TOP_FAR = [
 ]
 
 
+# Groq's 70B tier allows ~30 requests/minute; stay just under it.
+REQUEST_GAP = 2.2
+MAX_ATTEMPTS = 3
+RETRY_BACKOFF = 5.0
+
+
 def main() -> None:
     app = create_app(os.environ.get('FLASK_ENV', 'development'))
     with app.app_context():
@@ -72,7 +78,20 @@ def main() -> None:
                     if analytics_db.get_composed_route(pair_key, lang):
                         skipped += 1
                         continue
-                    data = compose_itinerary_via_groq(hub, disp, lang, key, timeout=25)
+                    # Groq rate-limits the 70B model to roughly 30 requests a
+                    # minute; the old 0.4s gap asked for ~150/min, so most
+                    # calls came back 429 and compose_itinerary_via_groq —
+                    # which swallows every error — reported them as plain
+                    # failures (272 of 348 on the first full run). Pace the
+                    # calls and retry with a widening backoff.
+                    data = None
+                    for attempt in range(MAX_ATTEMPTS):
+                        data = compose_itinerary_via_groq(
+                            hub, disp, lang, key, timeout=25)
+                        if data and data.get('feasible'):
+                            break
+                        if attempt < MAX_ATTEMPTS - 1:
+                            time.sleep(RETRY_BACKOFF * (attempt + 1))
                     if data and data.get('feasible'):
                         analytics_db.upsert_composed_route(
                             pair_key, lang, hub, disp,
@@ -83,7 +102,7 @@ def main() -> None:
                     else:
                         failed += 1
                         print(f'FAIL {pair_key} [{lang}]')
-                    time.sleep(0.4)  # be gentle on the Groq endpoint
+                    time.sleep(REQUEST_GAP)
         print(f'\nDone: {ok} composed, {skipped} cached, {failed} failed')
 
 
