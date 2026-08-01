@@ -69,7 +69,7 @@ sentry_ping() {
 }
 
 # Stop service to release DB lock
-systemctl stop transit
+sudo systemctl stop prevozni
 sleep 2
 
 cd "$PROJECT" || exit 1
@@ -95,7 +95,7 @@ BUILD_STATUS=$?
 
 if [ $BUILD_STATUS -ne 0 ]; then
   echo "FATAL: build_db failed (exit $BUILD_STATUS)" >> "$LOG"
-  systemctl start transit
+  sudo systemctl start prevozni
   echo "FAIL $(date)" > "$PROJECT/logs/last_refresh.txt"
   write_marker "fail"
   sentry_ping "nightly_refresh: build_db failed exit=$BUILD_STATUS" fatal
@@ -138,18 +138,18 @@ $VENV -u data/pipelines/refresh_bt4_lineids.py >> "$LOG" 2>&1 \
   || echo "WARN: refresh_bt4_lineids failed ($?)" >> "$LOG"
 
 # Start service
-systemctl start transit
+sudo systemctl start prevozni
 sleep 3
 
 # Health check
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 http://127.0.0.1:8000/health)
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --unix-socket /run/prevozni/prevozni.sock http://localhost/health)
 echo "Health check: $STATUS" >> "$LOG"
 
 if [ "$STATUS" != "200" ]; then
   echo "WARN: Service not healthy after restart" >> "$LOG"
-  systemctl restart transit
+  sudo systemctl restart prevozni
   sleep 3
-  STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 http://127.0.0.1:8000/health)
+  STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --unix-socket /run/prevozni/prevozni.sock http://localhost/health)
   echo "Retry health check: $STATUS" >> "$LOG"
   if [ "$STATUS" != "200" ]; then
     sentry_ping "nightly_refresh: /health still not 200 after restart (got $STATUS)" error

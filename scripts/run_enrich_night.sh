@@ -50,13 +50,13 @@ log "Refreshing BT4 affiliate line ids..."
 python -u data/pipelines/refresh_bt4_lineids.py 2>&1 | tee -a "$LOG" || log "WARN: refresh_bt4_lineids failed"
 
 log "Restarting transit (fresh DB + affiliate map)..."
-systemctl restart transit
+sudo systemctl restart prevozni
 sleep 3
-HSTATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 http://127.0.0.1:8000/health || echo "000")
+HSTATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --unix-socket /run/prevozni/prevozni.sock http://localhost/health || echo "000")
 log "Health after restart: $HSTATUS"
 if [ "$HSTATUS" != "200" ]; then
   log "WARN: not healthy after restart, retrying..."
-  systemctl restart transit
+  sudo systemctl restart prevozni
 fi
 
 log "Done!"
