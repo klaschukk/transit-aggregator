@@ -1,7 +1,13 @@
 #!/bin/bash
 set -euo pipefail
-DIR=/root/klaschuk/transit-aggregator
+
+# Resolve the project root from the script location so the same file works on
+# any box (the hardcoded /root/klaschuk/transit-aggregator does not exist on
+# the current host, so `cd` aborted the whole nightly run under `set -e`).
+DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 LOG=$DIR/logs/enrich.log
+
+mkdir -p "$DIR/logs"
 
 log() { echo "$(date '+%Y-%m-%d %H:%M:%S') $*" | tee -a "$LOG"; }
 
