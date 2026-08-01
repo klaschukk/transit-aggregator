@@ -131,6 +131,14 @@ Production environment requires these env vars:
 - `SECRET_KEY` — **обязателен** (при отсутствии app бросает RuntimeError на старте).
   Сгенерировать: `python -c "import secrets; print(secrets.token_hex(32))"`.
   Хранить в systemd unit (`Environment=`) или `.env` (не коммитить).
+- `ADSENSE_ID` — **обязателен для монетизации** (`ca-pub-9538841764038287`).
+  Без него `{% if config.ADSENSE_ID %}` ложно → adsbygoogle.js вообще не
+  грузится, ни один слот не рендерится, а `/ads.txt` отдаёт заглушку вместо
+  `google.com, pub-…, DIRECT, f08c47fec0942fa0`. Реклама молча не работает.
+- `MAPBOX_TOKEN` — **обязателен для карт** (`pk.…`). Без него в шаблон
+  подставляется `mapboxgl.accessToken = ''` и карта на `/gradski/…`
+  (город, линия, остановка) остаётся пустой. Проверка токена:
+  `curl -o /dev/null -w '%{http_code}' "https://api.mapbox.com/styles/v1/mapbox/light-v11?access_token=$MAPBOX_TOKEN"` → 200.
 - `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` — уведомления контакт-формы
   + weekly SEO digest (переиспользуется).
 - `DUCKDB_PATH` — путь к `transit.duckdb` (по умолчанию `data/dbs/transit.duckdb`).
@@ -148,13 +156,38 @@ Production environment requires these env vars:
 
 ## Инфраструктура
 
+> Актуально на 2026-08-01. Всё ниже — текущий бокс; описание старого сервера
+> (178.105.76.3, `/opt/prevozni`, `transit.service`, TCP :8000) устарело.
+
 ```
 Домен: prevozni.com (Cloudflare DNS + proxy)
-Прод-сервер: 178.105.76.3 (hostname prevozni) — НЕ montiko
-Reverse proxy: nginx, только :80, доступ только с IP Cloudflare (прямой заход по IP → 403)
-SSL: Cloudflare Flexible — origin TLS НЕТ (CF→origin ходит по HTTP)
-Service: systemd transit.service (FLASK_ENV=production)
-Workers: gunicorn -w 2 --max-requests 2000 --max-requests-jitter 200 --timeout 30 --bind 127.0.0.1:8000
+Чекаут (он же прод): /home/deploy/transit-aggregator, владелец — юзер deploy
+Service: systemd prevozni.service (User=deploy)
+Workers: gunicorn -w 2 --bind unix:/run/prevozni/prevozni.sock
+Reverse proxy: nginx → unix-сокет; 502/504 переписываются в 503 + Retry-After
+SSL: Cloudflare Flexible — X-Forwarded-Proto в nginx, НЕ ТРОГАТЬ эту логику
+На боксе также живут popaj и valocheck — их не трогать
+```
+
+Проверка после любого изменения работающего кода:
+
+```bash
+sudo systemctl restart prevozni && sleep 3
+systemctl is-active prevozni
+curl -s -o /dev/null -w '%{http_code}' --unix-socket /run/prevozni/prevozni.sock http://localhost/
+```
+
+**Окно обслуживания.** Пайплайнам нужен write-lock DuckDB, поэтому они
+останавливают сервис. Хелсчек (cron `*/5`) поднимал его обратно прямо посреди
+прогона, новый gunicorn снова забирал read-lock и `build_db`/`enrich` падали с
+`Conflicting lock is held`. Теперь на время работ ставится флаг
+`logs/.maintenance` — хелсчек его уважает (и игнорирует, если флагу > 2 ч,
+чтобы упавший пайплайн не отключил хелсчек навсегда):
+
+```bash
+touch logs/.maintenance && sudo systemctl stop prevozni
+# … build_db / enrich …
+sudo systemctl start prevozni && rm -f logs/.maintenance
 ```
 
 **Прод и рабочий чекаут — один и тот же бокс.** На 178.105.76.3 лежит
