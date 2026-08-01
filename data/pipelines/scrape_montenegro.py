@@ -35,6 +35,19 @@ CITIES: dict[str, str] = {
     'budva':       '42.26,18.80,42.31,18.88',
 }
 
+# Published city lines per city, curated. OSM tags suburban and intercity
+# services as route=bus exactly like urban ones, so an Overpass bbox query also
+# returns coaches that leave the city — we were publishing "Herceg Novi -
+# Kruševice" (a village 10 km inland, up in the hills) as Herceg Novi city
+# transport. Distance from the centre does not separate them: HN line 1 runs
+# 11.4 km along the coast to Kamenari and IS urban, while the Kruševice line is
+# only 9.7 km out and is not. So the set is curated per city rather than
+# guessed. A city absent from this map publishes every line found.
+# herceg-novi: confirmed by the site owner — the city runs lines 1 and 2 only.
+CITY_LINES_ALLOWED: dict[str, set[str]] = {
+    'herceg-novi': {'1', '2'},
+}
+
 _NUMBERED_RE = re.compile(r'^\d+[A-Za-z]?$')
 
 
@@ -169,6 +182,12 @@ def scrape_city(city: str, bbox: str) -> list[dict]:
     routes = _fetch_routes(bbox)
     nodes = _fetch_stop_nodes(routes)
     lines = _build_lines(routes, nodes)
+    allowed = CITY_LINES_ALLOWED.get(city)
+    if allowed:
+        dropped = [l['number'] for l in lines if l['number'] not in allowed]
+        lines = [l for l in lines if l['number'] in allowed]
+        if dropped:
+            print(f'  {city}: dropped non-urban lines {sorted(dropped)}')
     out_dir = BASE_DIR / 'raw' / city
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / 'lines.json'

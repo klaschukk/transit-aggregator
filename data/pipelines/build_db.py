@@ -219,6 +219,7 @@ def build() -> None:
         for _mne_city in MONTENEGRO_CITIES:
             _load_city_lines(conn, _mne_city, RAW_DIR / _mne_city / 'lines.json')
         _load_stations(conn, stations_path)
+        _apply_stop_coords_cache(conn)
         _load_balkan(conn)
         _load_gtfs(conn)
         _load_city_schedule(conn, 'novi-sad')
@@ -1059,6 +1060,54 @@ def _load_city_lines(conn: duckdb.DuckDBPyConnection, city: str, lines_path: Pat
                     pass
 
     print(f"  Loaded {count} {city} lines, {stop_count}+{extra_stops} stops, {link_count} line-stop links")
+
+
+STOP_COORDS_CACHE = RAW_DIR / 'stop_coords_cache.json'
+
+
+def _apply_stop_coords_cache(conn: duckdb.DuckDBPyConnection) -> None:
+    """Backfill stop coordinates from the geocoding cache.
+
+    enrich_stops_coords.py geocodes stops that the scrapers ship without
+    coordinates (Novi Sad's /mreza gives names only), but it writes straight
+    into the DB — and this script recreates city_stops from the raw JSON on
+    every run, so each rebuild threw that work away and the next enrich had to
+    re-fetch it from Overpass/Nominatim (~2h of rate-limited requests). The
+    cache is keyed on (city, slug), the stable identity of a stop, so the
+    coordinates survive rebuilds and only genuinely new stops need geocoding.
+    """
+    if not STOP_COORDS_CACHE.exists():
+        return
+    try:
+        with open(STOP_COORDS_CACHE, encoding='utf-8') as f:
+            cache: dict[str, dict[str, list[float]]] = json.load(f)
+    except (OSError, ValueError) as exc:
+        print(f"  WARN: unreadable stop-coords cache ({exc}) — skipping")
+        return
+
+    rows = [(city, slug, coords[0], coords[1])
+            for city, stops in cache.items()
+            for slug, coords in stops.items()
+            if isinstance(coords, list) and len(coords) == 2]
+    if not rows:
+        return
+
+    before = conn.execute(
+        "SELECT COUNT(*) FROM city_stops WHERE lat IS NULL").fetchone()[0]
+    conn.execute("CREATE OR REPLACE TEMP TABLE _coord_cache "
+                 "(city VARCHAR, slug VARCHAR, lat DOUBLE, lon DOUBLE)")
+    conn.executemany("INSERT INTO _coord_cache VALUES (?, ?, ?, ?)", rows)
+    conn.execute("""
+        UPDATE city_stops SET lat = c.lat, lon = c.lon
+        FROM _coord_cache c
+        WHERE city_stops.city = c.city AND city_stops.slug = c.slug
+          AND city_stops.lat IS NULL
+    """)
+    conn.execute("DROP TABLE _coord_cache")
+    after = conn.execute(
+        "SELECT COUNT(*) FROM city_stops WHERE lat IS NULL").fetchone()[0]
+    print(f"  Stop-coords cache: filled {before - after} missing coordinates "
+          f"({len(rows)} cached)")
 
 
 def _load_stations(conn: duckdb.DuckDBPyConnection, stations_path: Path) -> None:

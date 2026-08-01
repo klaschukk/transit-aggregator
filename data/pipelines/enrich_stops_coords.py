@@ -26,6 +26,8 @@ BASE_DIR = Path(__file__).parent.parent
 DB_PATH = BASE_DIR / 'dbs' / 'transit.duckdb'
 PROGRESS_FILE = BASE_DIR / 'raw' / 'enrich_stops_progress.json'
 SUSPICIOUS_FILE = BASE_DIR / 'raw' / 'suspicious_stops.json'
+# Survives build_db rebuilds, which recreate city_stops from the raw JSON.
+COORDS_CACHE_FILE = BASE_DIR / 'raw' / 'stop_coords_cache.json'
 
 # Belgrade bounding box (south, west, north, east). Kept as the default for the
 # Belgrade-scoped audit; per-city boxes for enrichment live in CITY_REGIONS.
@@ -422,6 +424,27 @@ def audit(conn: duckdb.DuckDBPyConnection) -> list[dict]:
 # ENRICH: fill missing coordinates
 # ---------------------------------------------------------------------------
 
+def write_coords_cache(conn: duckdb.DuckDBPyConnection) -> None:
+    """Persist every known stop coordinate to the geocoding cache.
+
+    build_db.py recreates city_stops from the raw scraper JSON on every run, so
+    coordinates written only into the DB were lost on the next rebuild and had
+    to be re-fetched from Overpass/Nominatim — hours of rate-limited requests
+    repeated nightly. build_db reads this file back and refills the gaps.
+    """
+    rows = conn.execute(
+        "SELECT city, slug, lat, lon FROM city_stops "
+        "WHERE lat IS NOT NULL AND lon IS NOT NULL"
+    ).fetchall()
+    cache: dict[str, dict[str, list[float]]] = {}
+    for city, slug, lat, lon in rows:
+        cache.setdefault(city, {})[slug] = [round(lat, 7), round(lon, 7)]
+    COORDS_CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(COORDS_CACHE_FILE, 'w', encoding='utf-8') as f:
+        json.dump(cache, f, ensure_ascii=False, indent=1, sort_keys=True)
+    print(f"  Coords cache → {COORDS_CACHE_FILE.name} ({len(rows)} stops)")
+
+
 def enrich(conn: duckdb.DuckDBPyConnection, limit: int = 0) -> None:
     progress = load_progress()
     all_processed = set(progress['found'] + progress['not_found'])
@@ -504,6 +527,7 @@ def enrich(conn: duckdb.DuckDBPyConnection, limit: int = 0) -> None:
         time.sleep(REQUEST_DELAY)
 
     save_progress(progress)
+    write_coords_cache(conn)
 
     _print_final(start_time, with_coords, found, not_found, total_stops)
 
