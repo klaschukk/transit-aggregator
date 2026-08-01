@@ -203,31 +203,39 @@ def test_static_map_cta_styling_present(client):
 # ── Toast wired into existing handlers ─────────────────────────────────
 
 def test_currency_switch_announces_via_toast(client):
-    html = client.get('/').data.decode()
-    assert 'window.toast' in html
-    assert 'Switched to EUR' in html
-    assert 'Switched to RSD' in html
+    # The handler moved out of base.html into the cached ui-behavior.js bundle;
+    # assert where the code lives now, plus that the page still loads it.
+    body = _js(client, 'ui-behavior.js')
+    assert 'window.toast' in body
+    assert 'Switched to EUR' in body
+    assert 'Switched to RSD' in body
+    assert 'ui-behavior.js' in client.get('/').data.decode()
 
 
 def test_fav_toggle_announces_via_toast_and_haptic(client):
     """Star button: toast confirmation + 8ms haptic on Android."""
-    html = client.get('/rute/beograd-novi-sad/').data.decode()
-    assert 'Added to saved' in html
-    assert 'Removed from saved' in html
-    assert 'window.prevozniHaptic' in html
+    body = _js(client, 'ui-behavior.js')
+    assert 'Added to saved' in body
+    assert 'Removed from saved' in body
+    assert 'window.prevozniHaptic' in body
+    assert 'ui-behavior.js' in client.get('/rute/beograd-novi-sad/').data.decode()
 
 
 # ── Bundle ordering ────────────────────────────────────────────────────
 
 def test_toast_loads_before_mobile_js(client):
     """mobile.js calls window.toast.show during boot — the script tags
-    in base.html must order toast.js first or there's a load-order race."""
+    in base.html must order toast.js first or there's a load-order race.
+
+    Match the <script src> tags, not any mention of the filename: comments
+    referencing 'toast.js'/'mobile.js' used to decide this comparison, so the
+    test tracked prose position rather than actual load order.
+    """
     html = client.get('/').data.decode()
-    toast_idx = html.find('toast.js')
-    mobile_idx = html.find('mobile.js')
-    assert toast_idx != -1
-    assert mobile_idx != -1
-    assert toast_idx < mobile_idx
+    srcs = re.findall(r'<script[^>]+src="[^"]*/js/([a-z-]+\.js)', html)
+    assert 'toast.js' in srcs, srcs
+    assert 'mobile.js' in srcs, srcs
+    assert srcs.index('toast.js') < srcs.index('mobile.js'), srcs
 
 
 # ── Lazy-image audit (deliberate enforcement) ──────────────────────────

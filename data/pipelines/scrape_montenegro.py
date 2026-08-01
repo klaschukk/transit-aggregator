@@ -153,6 +153,15 @@ def _build_lines(routes: list[dict], nodes: dict[int, dict]) -> list[dict]:
         nr['number'] = str(next_n)
         next_n += 1
         numbered.append(nr)
+
+    # Some OSM route relations carry a ref but no name tag (Herceg Novi line 1).
+    # An empty name renders an empty <title>/<h1> on the line page, so fall back
+    # to the terminus pair — the same "A — B" shape the named routes already use.
+    # Done after the merge so it reflects the full, combined stop list.
+    for line in numbered:
+        if not line['name'] and len(line['stops']) >= 2:
+            line['name'] = f"{line['stops'][0]['name']} — {line['stops'][-1]['name']}"
+
     return numbered
 
 
