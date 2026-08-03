@@ -133,12 +133,6 @@
 {% from '_partials/_reviews.html' import reviews_section with context %}
 {{ reviews_section(review_slug, reviews, reviews_agg) }}
 
-<!-- Newsletter form, source='about' for analytics separation. -->
-<section class="route-price-alert fade-in">
-  {% from '_partials/_newsletter_form.html' import newsletter_form with context %}
-  {{ newsletter_form(source='about') }}
-</section>
-
 {% from '_partials/_ad_slot.html' import ad_slot with context %}
 {{ ad_slot('about_bottom', format='leaderboard') }}
 

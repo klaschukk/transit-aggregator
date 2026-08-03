@@ -9,8 +9,7 @@
    Architecture
      1. Typography refinements
      2. Tactile interaction primitives
-     3. Reusable components (.m-sticky-cta)
-     4. Card + list-item polish (.trip-card, .route-card, .see-also__card)
+     3. Card + list-item polish (.trip-card, .route-card, .see-also__card)
      5. Header — frosted scroll + off-canvas drawer
      6. Search form expand pattern
      7. Empty states
@@ -87,48 +86,6 @@ a.btn:active,
 }
 
 
-/* ── 3d. Sticky CTA bar ──────────────────────────────────────────── */
-.m-sticky-cta {
-  position: fixed;
-  left: 0; right: 0;
-  bottom: 0;
-  padding: var(--mspace-3) var(--mspace-4);
-  padding-bottom: max(var(--mspace-3), env(safe-area-inset-bottom));
-  background: var(--color-primary); color: #fff;
-  display: flex; align-items: center; gap: var(--mspace-3);
-  box-shadow: 0 -4px 16px rgba(15,23,42,.18);
-  z-index: 40;
-  transform: translateY(0);
-  transition: transform .25s var(--mease-out);
-}
-.m-sticky-cta--hidden { transform: translateY(120%); }
-.m-sticky-cta__label {
-  flex: 1;
-  font-size: var(--mtext-sm); font-weight: 600;
-  line-height: 1.3;
-}
-.m-sticky-cta__price {
-  font-size: var(--mtext-lg); font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-.m-sticky-cta__btn {
-  background: #fff; color: var(--color-primary);
-  padding: var(--mspace-2) var(--mspace-4);
-  border-radius: var(--mradius-pill);
-  font-weight: 700; text-decoration: none;
-  display: inline-flex; align-items: center; gap: var(--mspace-2);
-  white-space: nowrap;
-  min-height: 40px;
-}
-.m-sticky-cta__close {
-  background: transparent; border: 0; color: rgba(255,255,255,.85);
-  width: 28px; height: 28px; border-radius: var(--mradius-pill);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 18px; line-height: 1;
-}
-.m-sticky-cta__close:hover { background: rgba(255,255,255,.12); color: #fff; }
-
-
 /* ── 4. Card polish ──────────────────────────────────────────────── */
 .trip-card {
   background: linear-gradient(180deg, #fff 0%, var(--mtint-surface) 100%);
@@ -174,13 +131,13 @@ a.btn:active,
   transition: background .2s ease, box-shadow .2s ease, backdrop-filter .2s ease;
 }
 /* When the dropdown is open, lift the whole header above the backdrop.
-   The header is a stacking context (`position: sticky; z-index: 100`
-   from app.css) so the dropdown's `z-index: 220` is bounded by the
+   The header is a stacking context (`position: sticky; --z-header`
+   from app.css) so the dropdown's `--z-drawer` is bounded by the
    header's root-level z-index, NOT compared to the backdrop directly.
-   Without this, the backdrop (z-index 215, sibling of header in body)
-   visually covers the dropdown and intercepts every tap on a menu
+   Without this, the backdrop (--z-drawer-backdrop, sibling of header in
+   body) visually covers the dropdown and intercepts every tap on a menu
    item — closing the menu instead of navigating. */
-body.m-nav-open .site-header { z-index: 230; }
+body.m-nav-open .site-header { z-index: var(--z-drawer-header); }
 .site-header.is-scrolled {
   background: rgba(255,255,255,0.78);
   backdrop-filter: blur(16px) saturate(180%);
@@ -241,7 +198,7 @@ body.m-nav-open .site-nav-toggle svg { transform: rotate(90deg); }
   transition: opacity .15s ease, transform .15s ease;
   pointer-events: none;
   visibility: hidden;
-  z-index: 220;
+  z-index: var(--z-drawer);
   max-height: calc(100dvh - var(--header-h) - var(--mspace-4));
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -253,12 +210,12 @@ body.m-nav-open .site-nav#siteNav {
   visibility: visible;
 }
 /* Invisible click-catcher behind the dropdown. Sits below the dropdown
-   (220) and above the page so a tap outside closes the menu. */
+   (--z-drawer) and above the page so a tap outside closes the menu. */
 .m-nav-backdrop {
   position: fixed; inset: 0;
   background: transparent;
   pointer-events: none;
-  z-index: 215;
+  z-index: var(--z-drawer-backdrop);
 }
 .m-nav-backdrop--open { pointer-events: auto; }
 
@@ -484,24 +441,6 @@ body.m-nav-open .site-nav#siteNav {
 /* ── 9. Page polish — home (P28) ────────────────────────────────────
    Goal: every section feels app-quality, not a stretched desktop. Layout
    wraps in @media so desktop is untouched. */
-
-/* 9a. Hero — value-prop strip below the search form. .hero__valueprop is
-   appended in index.html and shows only on mobile (display:none on desktop
-   via .hero overrides further up in app.css). */
-.hero__valueprop {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--mspace-2) var(--mspace-3);
-  margin: var(--mspace-3) auto 0;
-  font-size: var(--mtext-sm);
-  color: rgba(255,255,255,.92);
-  font-weight: 500;
-  max-width: 320px;
-  text-align: center;
-}
-.hero__valueprop b { font-weight: 700; }
-.hero__valueprop span { white-space: nowrap; }
 
 /* 9b. Stats — 2x2 grid on mobile. The previous horizontal scroll-rail
    forced the user to swipe to see the last two of four numbers, which
@@ -797,7 +736,7 @@ body.m-nav-open .site-nav#siteNav {
 .m-bnav {
   position: fixed;
   left: 0; right: 0; bottom: 0;
-  z-index: 50;
+  z-index: var(--z-sticky);
   display: flex;
   height: var(--m-bnav-h);
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -833,20 +772,56 @@ body[data-bnav-hidden] .m-bnav { transform: translateY(120%); }
 /* Reserve trailing space so site footer + cookie banner stay visible. */
 body { padding-bottom: var(--m-bnav-h); }
 
-/* Stack other fixed-bottom UI above the bnav so they don't overlap. */
-.cookie-banner { bottom: var(--m-bnav-h); }
-.m-sticky-cta { bottom: var(--m-bnav-h); padding-bottom: var(--mspace-3); }
-.review-prompt { bottom: calc(var(--m-bnav-h) + 8px); }
+/* ── Bottom-stack arbiter ──────────────────────────────────────────
+   Everything fixed to the bottom edge shares ONE band directly above
+   the bnav. Previously four things claimed that band independently —
+   cookie banner, anchor ad, review prompt, install banner — with
+   z-indexes assigned ad hoc, so the anchor ad (then z-index 200) drew
+   straight over the consent banner (then 100) and the install banner
+   sat on top of the bnav itself.
 
-/* AdSense bottom anchor was pinned to bottom:0 z-index 200 in app.css and
-   sat *on top of* the bnav, hiding the navigation. Lift it above the bar
-   like the rest of the fixed-bottom UI, and reserve its 60px band (+8 pad)
-   so trailing content isn't hidden either. :has() collapses the reservation
-   the instant the user dismisses the ad (and no-ops where unsupported —
-   the lift above the bnav still applies). */
-.mobile-anchor-ad { bottom: var(--m-bnav-h); }
+   The rule now: at most ONE promo is on screen, and consent outranks
+   every promo. Priority, high → low:
+
+     1. cookie banner   legal; nothing may cover it
+     2. anchor ad       revenue; only renders once consent is answered
+                        (gated server-side in _mobile_anchor_ad.html,
+                        so no impression is ever logged behind a banner)
+     3. review prompt   asks a real customer for a review
+     4. install banner  PWA nag, the most dispensable
+
+   Enforced by :has() below rather than by each component guessing. On
+   the rare engine without :has() support the fallback is today's
+   behaviour minus the z-index inversion, which is already an
+   improvement. */
+.cookie-banner   { bottom: var(--m-bnav-h); }
+.mobile-anchor-ad{ bottom: var(--m-bnav-h); }
+.review-prompt   { bottom: calc(var(--m-bnav-h) + var(--mspace-2)); }
+.install-banner  { bottom: calc(var(--m-bnav-h) + var(--mspace-2)); }
+
+/* Consent unanswered → suppress every promo. */
+body:has(.cookie-banner[data-visible="true"]) .review-prompt,
+body:has(.cookie-banner[data-visible="true"]) .install-banner {
+  display: none;
+}
+/* Anchor ad live → it owns the band; the two nags wait their turn. */
+body:has(.mobile-anchor-ad:not(.mobile-anchor-ad--hidden)) .review-prompt,
+body:has(.mobile-anchor-ad:not(.mobile-anchor-ad--hidden)) .install-banner {
+  display: none;
+}
+/* Review prompt live → the install nag yields. */
+body:has(.review-prompt:not([hidden]):not(.review-prompt--hidden)) .install-banner {
+  display: none;
+}
+
+/* Reserve trailing space only for whatever actually occupies the band,
+   so the footer never hides behind it and we never reserve a strip we
+   won't fill. */
 body:has(.mobile-anchor-ad:not(.mobile-anchor-ad--hidden)) {
   padding-bottom: calc(var(--m-bnav-h) + 68px);
+}
+body:has(.cookie-banner[data-visible="true"]) {
+  padding-bottom: calc(var(--m-bnav-h) + 96px);
 }
 
 /* When the off-canvas drawer is open, hide the bnav so it doesn't sit
@@ -859,11 +834,9 @@ body:has(.mobile-anchor-ad:not(.mobile-anchor-ad--hidden)) {
 
 /* ── Focus-visible on colored mobile surfaces ──────────────────────
    The global teal :focus-visible outline (app.css) disappears against
-   the primary-coloured sticky CTA and active language pill. Use a
-   high-contrast white ring there so keyboard focus stays visible on
-   touch devices paired with a keyboard. */
-.m-sticky-cta__btn:focus-visible,
-.m-sticky-cta__close:focus-visible,
+   the primary-coloured active language pill. Use a high-contrast white
+   ring there so keyboard focus stays visible on touch devices paired
+   with a keyboard. */
 .lang-pill__item--active:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 2px;

@@ -14,7 +14,13 @@
 {%- set _dismissed = request.cookies.get('ads_anchor_dismissed', '') == '1' -%}
 {%- set _slot_id = config.get('ADSENSE_SLOTS', {}).get('mobile_anchor', '') -%}
 {%- set _npa = (_consent != 'all') -%}
-{%- if config.ADSENSE_ID and _slot_id and not _dismissed -%}
+{#- Hold the anchor back until the visitor has answered the cookie banner.
+    Both live in the same fixed band above the bnav, and this slot used to
+    win on z-index — an ad painted over the consent UI. Gating server-side
+    (rather than hiding it with CSS) means no impression is ever logged for
+    an ad the user could not see, which is what keeps the account clean.
+    'essential' still shows it, non-personalised via npa:1. -#}
+{%- if config.ADSENSE_ID and _slot_id and not _dismissed and _consent -%}
 <div class="mobile-anchor-ad" id="mobileAnchorAd" data-slot="mobile_anchor">
   <button type="button" class="mobile-anchor-ad__close"
           aria-label="{{ _('ads.dismiss_aria') }}">×</button>

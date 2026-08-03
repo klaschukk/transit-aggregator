@@ -124,33 +124,15 @@ def _render(app, template_str):
         return app.jinja_env.from_string(template_str).render()
 
 
-def test_sticky_cta_macro_renders_hidden(app):
-    """Initial markup must be hidden so the bar doesn't flash before
-    mobile.js evaluates the scroll position."""
-    out = _render(app, """
-        {% from '_partials/_sticky_cta.html' import sticky_cta %}
-        {{ sticky_cta('https://example.com', 'From', '12€', 'Buy', '', '', 'Close') }}
-    """)
-    assert 'data-sticky-cta' in out
-    assert 'm-sticky-cta--hidden' in out
-    assert ' hidden' in out
-    assert 'href="https://example.com"' in out
-    assert 'rel="noopener nofollow sponsored"' in out
-    assert 'data-sticky-cta-dismiss' in out
-
-
-def test_sticky_cta_carries_ab_attribution(app):
-    """When the caller passes A/B experiment + variant, the data-attrs
-    are emitted so the buy-click handler in base.html records the
-    conversion with correct attribution."""
-    out = _render(app, """
-        {% from '_partials/_sticky_cta.html' import sticky_cta %}
-        {{ sticky_cta('https://x.com', 'L', '€10', 'Buy',
-                       'cta_copy_v1', 'Kupi', 'Close') }}
-    """)
-    assert 'data-ab-experiment="cta_copy_v1"' in out
-    assert 'data-ab-variant="Kupi"' in out
-    assert 'data-ab-event="sticky_click"' in out
+def test_no_sticky_cta_leftovers():
+    """The sticky-CTA bar was removed: the macro was defined but never
+    imported by any template, so it shipped ~40 lines of CSS and ~45 of
+    JS that could never run. Guard against it creeping back in as dead
+    weight — if a real buy-bar is wanted, wire it into a template."""
+    root = Path(__file__).resolve().parent.parent
+    assert not (root / 'app/templates/_partials/_sticky_cta.html').exists()
+    for rel in ('app/static/css/app.mobile.css', 'app/static/js/mobile.js'):
+        assert 'sticky-cta' not in (root / rel).read_text(), rel
 
 
 # ── 4. Header drawer markup ────────────────────────────────────────────

@@ -23,8 +23,10 @@
 </script>
 {% endif %}
 {% if stop.lat and stop.lon %}
-<link rel="preconnect" href="https://unpkg.com" crossorigin>
-<link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
+{# Maps render with Mapbox GL; unpkg/tile.openstreetmap were Leaflet
+   leftovers, so these hints warmed hosts the page never calls while
+   the host it does call went unhinted. #}
+<link rel="preconnect" href="https://api.mapbox.com" crossorigin>
 {% endif %}
 {% endblock %}
 
@@ -209,20 +211,12 @@
 </div>
 {% endif %}
 
-{% include '_partials/_browse_hubs.html' %}
 
 {# Reviews section — same partial /rute/<slug>/ uses. Stop slug is
    namespaced ("stop-<city>-<slug>") so ratings don't collide with
    intercity rute slugs. Form renders even with 0 reviews. #}
 {% from '_partials/_reviews.html' import reviews_section with context %}
 {{ reviews_section(review_slug, reviews, reviews_agg) }}
-
-{# City-alerts newsletter — different `source` for analytics so a
-   stop signup is distinguishable from a footer signup. #}
-<section class="route-price-alert fade-in fade-in--d3">
-  {% from '_partials/_newsletter_form.html' import newsletter_form with context %}
-  {{ newsletter_form(source='stop_detail') }}
-</section>
 
 {% from '_partials/_ad_slot.html' import ad_slot with context %}
 {{ ad_slot('stop_bottom', format='responsive') }}
@@ -273,7 +267,7 @@
     return { txt: h + 'h ' + (m > 0 ? m + 'min' : ''), cls: 'eta--later' };
   }
 
-  fetch('/api/stop-arrivals?slug={{ stop.slug }}')
+  fetch('/api/stop-arrivals?slug={{ stop.slug }}&city={{ stop.city }}')
     .then(function(r) { return r.json(); })
     .then(function(arrivals) {
       arrivals.forEach(function(a) {

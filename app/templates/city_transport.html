@@ -27,7 +27,8 @@
   {'@type':'Question','name':_('city_transport.faq_q4').format(city=city_label),'acceptedAnswer':{'@type':'Answer','text':_('city_transport.faq_a4').format(prefix=lang_prefix, city=city_label)|striptags}}
 ] %}
 <script type="application/ld+json">{{ {'@context':'https://schema.org','@type':'FAQPage','mainEntity':_faq_entities}|tojson }}</script>
-<link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
+{# Mapbox GL, not Leaflet/OSM tiles — hint the host actually used. #}
+<link rel="preconnect" href="https://api.mapbox.com" crossorigin>
 {% endblock %}
 
 {% block content %}
@@ -193,91 +194,89 @@
 {% from '_partials/_ad_slot.html' import ad_slot with context %}
 {{ ad_slot('city_transport_mid', format='leaderboard') }}
 
-<!-- Interlinking: top stops + intercity -->
-{% if top_stops %}
-<section class="see-also">
-  <h2 class="see-also__title">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-    {{ _('city.popular_stops') }}
-  </h2>
-  <div class="see-also__list">
-    {% for s in top_stops %}
-    <a href="{{ lang_prefix }}/gradski/{{ city }}/stajaliste/{{ s.slug }}/" class="see-also__link">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      {{ s.name }}
-      <small>{{ s.line_count }} {{ _('city.lines_count') }}</small>
-    </a>
-    {% endfor %}
-  </div>
-</section>
-{% endif %}
+{# Interlinking — ONE panel, four labelled parts.
 
-<section class="see-also">
+   These used to be four consecutive <section class="see-also"> blocks,
+   each with its own H2 and 32px of top margin, so the tail of the page
+   read as four competing "and also…" pitches stacked on end. Same links,
+   same order, one heading: the H2 names the panel, each part gets an H3.
+   Anything that wants to interlink from here adds a part, not a section. #}
+<section class="see-also see-also--multi">
   <h2 class="see-also__title">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
-    {{ _('city.intercity') }}
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18" aria-hidden="true">
+      <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+      <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+    </svg>
+    {{ _('browse.title') }}
   </h2>
-  <div class="see-also__grid">
-    <a href="{{ lang_prefix }}/rute/" class="see-also__card">
-      <span class="see-also__card-title">{{ _('city.all_intercity') }}</span>
-      <span class="see-also__card-meta">{{ _('city.bus_train_from') }} {{ city_label }}</span>
-    </a>
-    <a rel="nofollow" href="{{ lang_prefix }}/pretraga/?od={{ city_label }}" class="see-also__card">
-      <span class="see-also__card-title">{{ _('city.departures_from') }} {{ city_label }}</span>
-      <span class="see-also__card-meta">{{ _('city.search_dest') }}</span>
-    </a>
-  </div>
-</section>
 
-{% if popular_intercity %}
-<section class="see-also">
-  <h2 class="see-also__title">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
-    {{ _('city_transport.popular_routes_h').format(city=city_label) }}
-  </h2>
-  <div class="see-also__grid">
-    {% for r in popular_intercity %}
-    <a href="{{ lang_prefix }}/voznja/{{ r.from_city_slug }}-do-{{ r.to_city_slug }}/" class="see-also__card">
-      <span class="see-also__card-title">{{ r.from_city }} → {{ r.to_city }}</span>
-      <span class="see-also__card-meta">{{ r.trip_count }} {{ _('routes.departures') }}{% if r.distance_km %} · {{ r.distance_km }} km{% endif %}</span>
-    </a>
-    {% endfor %}
+  {% if top_stops %}
+  <div class="see-also__part">
+    <h3 class="see-also__subtitle">{{ _('city.popular_stops') }}</h3>
+    <div class="see-also__list">
+      {% for s in top_stops %}
+      <a href="{{ lang_prefix }}/gradski/{{ city }}/stajaliste/{{ s.slug }}/" class="see-also__link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        {{ s.name }}
+        <small>{{ s.line_count }} {{ _('city.lines_count') }}</small>
+      </a>
+      {% endfor %}
+    </div>
   </div>
-</section>
-{% endif %}
+  {% endif %}
 
-{# Operators serving intercity from this city — feeds /prevoznici/{slug}/
-   pages, which were running median 2 inbound links in the audit. Each
-   city hub now adds 6 directly. #}
-{% if top_operators %}
-<section class="see-also">
-  <h2 class="see-also__title">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></svg>
-    {{ _('city.carriers_from').format(city=city_label) }}
-  </h2>
-  <div class="see-also__list">
-    {% for op in top_operators %}
-    <a href="{{ lang_prefix }}/prevoznici/{{ op.slug }}/" class="see-also__link">
-      {{ op.name }}
-      <small>{{ op.route_count }} {{ _('routes.routes_label') }}</small>
-    </a>
-    {% endfor %}
+  <div class="see-also__part">
+    <h3 class="see-also__subtitle">{{ _('city.intercity') }}</h3>
+    <div class="see-also__grid">
+      <a href="{{ lang_prefix }}/rute/" class="see-also__card">
+        <span class="see-also__card-title">{{ _('city.all_intercity') }}</span>
+        <span class="see-also__card-meta">{{ _('city.bus_train_from') }} {{ city_label }}</span>
+      </a>
+      <a rel="nofollow" href="{{ lang_prefix }}/pretraga/?od={{ city_label }}" class="see-also__card">
+        <span class="see-also__card-title">{{ _('city.departures_from') }} {{ city_label }}</span>
+        <span class="see-also__card-meta">{{ _('city.search_dest') }}</span>
+      </a>
+    </div>
   </div>
+
+  {% if popular_intercity %}
+  <div class="see-also__part">
+    <h3 class="see-also__subtitle">{{ _('city_transport.popular_routes_h').format(city=city_label) }}</h3>
+    <div class="see-also__grid">
+      {% for r in popular_intercity %}
+      <a href="{{ lang_prefix }}/voznja/{{ r.from_city_slug }}-do-{{ r.to_city_slug }}/" class="see-also__card">
+        <span class="see-also__card-title">{{ r.from_city }} → {{ r.to_city }}</span>
+        <span class="see-also__card-meta">{{ r.trip_count }} {{ _('routes.departures') }}{% if r.distance_km %} · {{ r.distance_km }} km{% endif %}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# Operators serving intercity from this city — feeds /prevoznici/{slug}/
+     pages, which were running median 2 inbound links in the audit. Each
+     city hub adds 6 directly; that limit is a deliberate SEO call, left
+     alone here — this change is about presentation, not link budget. #}
+  {% if top_operators %}
+  <div class="see-also__part">
+    <h3 class="see-also__subtitle">{{ _('city.carriers_from').format(city=city_label) }}</h3>
+    <div class="see-also__list">
+      {% for op in top_operators %}
+      <a href="{{ lang_prefix }}/prevoznici/{{ op.slug }}/" class="see-also__link">
+        {{ op.name }}
+        <small>{{ op.route_count }} {{ _('routes.routes_label') }}</small>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 </section>
-{% endif %}
 
 <!-- Reviews section — same partial /rute/<slug>/ uses. Slug is
      namespaced ("city-<city>") so reviews don't collide with route or
      line buckets and aggregate per-city. -->
 {% from '_partials/_reviews.html' import reviews_section with context %}
 {{ reviews_section(review_slug, reviews, reviews_agg) }}
-
-<!-- Newsletter form, source='city_transport' — distinguishes city-hub
-     signups from footer / route_detail / line_detail in analytics. -->
-<section class="route-price-alert fade-in fade-in--d3">
-  {% from '_partials/_newsletter_form.html' import newsletter_form with context %}
-  {{ newsletter_form(source='city_transport') }}
-</section>
 
 <section class="faq-section">
   <h2 class="section__title">{{ _('city_transport.faq_heading') }}</h2>

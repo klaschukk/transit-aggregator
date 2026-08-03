@@ -44,8 +44,10 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"{{ _('line_detail.faq.q_stops').format(number=line.number) }}","acceptedAnswer":{"@type":"Answer","text":"{% if stops %}{{ _('line_detail.faq.a_stops').format(number=line.number, name=line.name, city=city_label, count=stops|length, first=stops[0].name, last=stops[-1].name) }}{% else %}{{ _('line_detail.faq.a_stops_no_endpoints').format(number=line.number, name=line.name, city=city_label, count=0) }}{% endif %}"}},{"@type":"Question","name":"{{ _('line_detail.faq.q_when').format(number=line.number) }}","acceptedAnswer":{"@type":"Answer","text":"{% if first_dep and last_dep %}{{ _('line_detail.faq.a_when_range').format(number=line.number, first=first_dep, last=last_dep) }}{% else %}{{ _('line_detail.faq.a_when_unknown').format(number=line.number) }}{% endif %}"}},{"@type":"Question","name":"{{ _('line_detail.faq.q_type').format(number=line.number) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('line_detail.faq.a_type').format(number=line.number, type=line_type_label|lower, city=city_label) }}"}}{% if headway %},{"@type":"Question","name":"{{ _('line_detail.faq.q_freq').format(number=line.number) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('line_detail.faq.a_freq').format(number=line.number, headway=headway) }}"}}{% endif %}]}
 </script>
-<link rel="preconnect" href="https://unpkg.com" crossorigin>
-<link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
+{# Maps render with Mapbox GL; unpkg/tile.openstreetmap were Leaflet
+   leftovers, so these hints warmed hosts the page never calls while
+   the host it does call went unhinted. #}
+<link rel="preconnect" href="https://api.mapbox.com" crossorigin>
 {% endblock %}
 
 {% block content %}
@@ -289,20 +291,12 @@
 </div>
 {% endif %}
 
-{% include '_partials/_browse_hubs.html' %}
 
 <!-- Reviews section — same partial /rute/<slug>/ uses. Slug is
      namespaced ("line-<city>-<slug>") so a Beograd L7 review and
      a Niš L7 review don't aggregate into the same bucket. -->
 {% from '_partials/_reviews.html' import reviews_section with context %}
 {{ reviews_section(review_slug, reviews, reviews_agg) }}
-
-<!-- Newsletter form, source='line_detail' so analytics distinguishes
-     line-driven signups from footer / route_detail / stop_detail. -->
-<section class="route-price-alert fade-in fade-in--d3">
-  {% from '_partials/_newsletter_form.html' import newsletter_form with context %}
-  {{ newsletter_form(source='line_detail') }}
-</section>
 
 {{ ad_slot('line_bottom', format='responsive') }}
 

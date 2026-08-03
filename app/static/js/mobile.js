@@ -105,15 +105,6 @@
     } else if (y < lastScrollY) {
       body.removeAttribute('data-bnav-hidden');
     }
-    var sticky = document.querySelector('[data-sticky-cta]');
-    if (sticky && !sticky.dataset.dismissed) {
-      // Show after user has scrolled past one trip (~600 px) and only
-      // when the page is scrolling DOWN-or-paused — slide it back when
-      // scrolling up so it's not a constant attention sink.
-      var shouldShow = y > 600 && !goingDown;
-      sticky.classList.toggle('m-sticky-cta--hidden', !shouldShow);
-      if (shouldShow) sticky.removeAttribute('hidden');
-    }
     lastScrollY = y;
     ticking = false;
   }
@@ -123,34 +114,6 @@
       ticking = true;
     }
   }, { passive: true });
-
-
-  /* ── Sticky CTA dismiss + persistence ───────────────────────────── */
-  // Per-session dismissal — cookie ttl 1 day so a return user the next
-  // day sees it again (otherwise we'd permanently hide the strongest
-  // CTA after one accidental tap).
-  var STICKY_DISMISS_COOKIE = 'sticky_cta_dismissed';
-  function readCookie(name) {
-    var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]+)'));
-    return m ? decodeURIComponent(m[1]) : '';
-  }
-  if (readCookie(STICKY_DISMISS_COOKIE) === '1') {
-    document.querySelectorAll('[data-sticky-cta]').forEach(function (el) {
-      el.dataset.dismissed = '1';
-      el.setAttribute('hidden', '');
-    });
-  }
-  document.addEventListener('click', function (ev) {
-    var btn = ev.target.closest('[data-sticky-cta-dismiss]');
-    if (!btn) return;
-    var sticky = btn.closest('[data-sticky-cta]');
-    if (!sticky) return;
-    sticky.dataset.dismissed = '1';
-    sticky.classList.add('m-sticky-cta--hidden');
-    setTimeout(function () { sticky.setAttribute('hidden', ''); }, 250);
-    document.cookie = STICKY_DISMISS_COOKIE +
-      '=1; Path=/; Max-Age=86400; SameSite=Lax';
-  });
 
 
   /* ── Web Share API ──────────────────────────────────────────────── */

@@ -2,7 +2,7 @@
 city_pair + city_transport.
 
 We can't assert visual layout from pytest, but we CAN assert the markup
-hooks are in place: data-collapse, data-collapse-toggle, value-prop
+hooks are in place: data-collapse, data-collapse-toggle, the home stats
 strip, and that desktop hide-rules are present in app.css. This catches
 regressions where a future linter pass strips a hook silently.
 """
@@ -11,43 +11,41 @@ from __future__ import annotations
 import pytest
 
 
-# ── Home: hero value-prop strip ────────────────────────────────────────
+# ── Home: one credibility strip, not two ──────────────────────────────
 
 
-def test_home_renders_valueprop_strip(client):
-    """The mobile-only value-prop strip ships in the markup; CSS hides
-    it on desktop. Test asserts presence of the wrapper class."""
+def test_home_has_a_single_stats_strip(client):
+    """The hero used to carry a mobile-only .hero__valueprop strip
+    (routes / carriers / countries / free) directly above .home-stats
+    (routes / lines / stops / cities) — two rows of numbers, back to
+    back, saying the same thing on the only viewport where space is
+    scarce. .home-stats renders on both breakpoints and is the one that
+    survived."""
     resp = client.get('/')
     assert resp.status_code == 200
-    assert b'class="hero__valueprop"' in resp.data, \
-        'home hero is missing the value-prop strip — P28 polish hook'
-
-
-def test_home_valueprop_includes_carriers_count(client):
-    """Strip must contain "70+" + the i18n word for carriers in the
-    rendered language. Validates i18n keys + the b/span structure
-    survive a future template tweak."""
-    resp = client.get('/')
-    assert b'70+' in resp.data
-    # SR is default locale → "prevoznika"
-    assert b'prevoznika' in resp.data
-
-
-def test_home_valueprop_en_locale(client):
-    resp = client.get('/en/')
-    assert resp.status_code == 200
-    assert b'carriers' in resp.data
-    assert b'free' in resp.data
-
-
-def test_home_valueprop_ru_locale(client):
-    resp = client.get('/ru/')
-    assert resp.status_code == 200
-    # b'\xd0\xbf\xd0\xb5\xd1\x80\xd0\xb5\xd0\xb2\xd0\xbe\xd0\xb7\xd1\x87\xd0\xb8\xd0\xba\xd0\xbe\xd0\xb2'
-    # = 'перевозчиков' encoded as utf-8.
     body = resp.data.decode('utf-8')
-    assert 'перевозчиков' in body
-    assert 'бесплатно' in body
+    assert 'hero__valueprop' not in body, \
+        'duplicate hero stats strip is back — one credibility row is enough'
+    # The section wrapper, not its __item / __num children.
+    assert body.count('class="home-stats container') == 1
+
+
+def test_home_stats_strip_localised(client):
+    """The surviving strip still renders real numbers with localised
+    labels on every locale."""
+    for path, word in (('/', 'stajali'), ('/en/', 'stops'), ('/ru/', 'останов')):
+        body = client.get(path).data.decode('utf-8')
+        assert 'home-stats__num' in body, path
+        assert word in body, path
+
+
+def test_home_drops_duplicate_feature_cards(client):
+    """The three .home-feat-card links (city transport / destinations /
+    routes) pointed at pages already reachable from the header nav, the
+    hero tabs AND the two-column section right below them. Third copy
+    removed."""
+    body = client.get('/').data.decode('utf-8')
+    assert 'home-feat-card' not in body
 
 
 # ── Prose-collapse hook on long-form pages ─────────────────────────────
@@ -108,17 +106,13 @@ def test_prose_collapse_button_localised(client):
 # ── Desktop guard rails ────────────────────────────────────────────────
 
 
-def test_desktop_css_hides_valueprop_strip(client):
-    """app.css must contain the rule that hides .hero__valueprop on
-    desktop — otherwise the mobile strip leaks into desktop hero."""
-    resp = client.get('/static/css/app.css')
-    assert resp.status_code == 200
-    body = resp.data.decode('utf-8')
-    # The mobile-only strip is hidden by default; app.mobile.css un-hides
-    # only at ≤767px viewports.
-    assert '.hero__valueprop { display: none; }' in body \
-        or '.hero__valueprop{display:none' in body \
-        or '.hero__valueprop' in body and 'display: none' in body
+def test_no_valueprop_css_left_behind(client):
+    """The strip's rules went with its markup — in both stylesheets, so
+    the dead selectors don't sit in the CSS budget forever."""
+    for name in ('app.css', 'app.mobile.css'):
+        resp = client.get(f'/static/css/{name}')
+        assert resp.status_code == 200
+        assert 'hero__valueprop' not in resp.data.decode('utf-8'), name
 
 
 def test_desktop_css_hides_seo_more_button(client):
@@ -142,6 +136,5 @@ def test_app_mobile_css_contains_p28_sections(client):
     body = resp.data.decode('utf-8')
     assert 'Page polish — home' in body, 'home polish section missing'
     assert 'Page polish — route_detail' in body, 'route_detail polish section missing'
-    assert '.hero__valueprop' in body
     assert '.faq-item__q' in body
     assert '.seo-block__content[data-collapse=' in body

@@ -339,7 +339,6 @@
    Variant value is exposed both as a body data-attr (for CSS) and as a
    `data-ab-variant` on the form so the conversion JS can include the
    correct variant when posting /api/ab-convert. #}
-{% include '_partials/_browse_hubs.html' %}
 
 {% set _review_cta_variant = ab_variant('review_cta_v1') %}
 <div data-ab-review-cta="{{ _review_cta_variant }}">
@@ -357,31 +356,47 @@
 </div>
 {% endif %}
 
-{# Carriers on this route — one of the load-bearing inbound link
-   sources for /prevoznici/{slug}/ pages, which scored 100% below the
-   5-inbound floor in the link audit. Capped at 8 to stay under the
-   per-page 12-link ceiling (most routes only have 1-3 anyway). #}
-{% if operator_slugs %}
-<section class="see-also">
+{# Interlinking — ONE panel, up to four labelled parts. These were four
+   consecutive <section class="see-also"> blocks, each with its own H2
+   and --space-8 of air, so the page tail read as four separate pitches.
+   Same links, same order, one heading. Link caps below are deliberate
+   SEO calls and are left exactly as they were. #}
+{% set _has_see_also = operator_slugs or destination_country
+                       or city_transport_links
+                       or (similar_routes and similar_routes|length >= 2) %}
+{% if _has_see_also %}
+<section class="see-also see-also--multi">
   <h2 class="see-also__title">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></svg>
-    {{ _('route.carriers_on_route') }}
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18" aria-hidden="true">
+      <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+      <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+    </svg>
+    {{ _('browse.title') }}
   </h2>
-  <div class="see-also__list">
-    {% for name, opslug in operator_slugs.items() %}{% if loop.index <= 8 %}
-    <a href="{{ lang_prefix }}/prevoznici/{{ opslug }}/" class="see-also__link">{{ name }}</a>
-    {% endif %}{% endfor %}
+
+  {# Carriers on this route — one of the load-bearing inbound link
+     sources for /prevoznici/{slug}/ pages, which scored 100% below the
+     5-inbound floor in the link audit. Capped at 8 to stay under the
+     per-page 12-link ceiling (most routes only have 1-3 anyway). #}
+  {% if operator_slugs %}
+  <div class="see-also__part">
+    <h3 class="see-also__subtitle">
+{{ _('route.carriers_on_route') }}</h3>
+    <div class="see-also__list">
+      {% for name, opslug in operator_slugs.items() %}{% if loop.index <= 8 %}
+      <a href="{{ lang_prefix }}/prevoznici/{{ opslug }}/" class="see-also__link">{{ name }}</a>
+      {% endif %}{% endfor %}
+    </div>
   </div>
-</section>
-{% endif %}
+  {% endif %}
 
 {# Country hub cross-link — fires only when the destination is a member
    of one of the international hubs (Crna Gora, Bosna, Hrvatska, …).
    Surfaces a wide-net page Google can pick up as a category landing,
    and routes PageRank from this leaf back into the hub. #}
-{% if destination_country %}
-<section class="see-also see-also--country">
-  <a href="{{ lang_prefix }}/destinacije/{{ destination_country.slug }}/" class="country-card">
+  {% if destination_country %}
+  <div class="see-also__part see-also--country">
+    <a href="{{ lang_prefix }}/destinacije/{{ destination_country.slug }}/" class="country-card">
     <div class="country-card__icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
     </div>
@@ -389,44 +404,40 @@
       <span class="country-card__title">{{ _('country.routes_heading') }} {{ destination_country.name }}</span>
       <span class="country-card__hint">{{ _('see_also.country_hint') }}</span>
     </div>
-    <svg class="country-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
-  </a>
-</section>
-{% endif %}
+      <svg class="country-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+    </a>
+  </div>
+  {% endif %}
 
 {# City-transport cross-link — fires when a trip endpoint is one of the 4
    cities we cover with local lines/stops. Funnels crawl budget + internal
    authority into the high-traffic /gradski/ pages and lets a traveller jump
    to local transport at either end. Keyword-rich anchor (linije, stajališta). #}
-{% if city_transport_links %}
-<section class="see-also">
-  <h2 class="see-also__title">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
-    {{ _('route.city_transport_heading') }}
-  </h2>
-  <div class="see-also__list">
-    {% for c in city_transport_links %}
-    <a href="{{ lang_prefix }}/gradski/{{ c.slug }}/" class="see-also__link">{{ _('route.city_transport_link').format(city=c.label) }}</a>
-    {% endfor %}
+  {% if city_transport_links %}
+  <div class="see-also__part">
+    <h3 class="see-also__subtitle">{{ _('route.city_transport_heading') }}</h3>
+    <div class="see-also__list">
+      {% for c in city_transport_links %}
+      <a href="{{ lang_prefix }}/gradski/{{ c.slug }}/" class="see-also__link">{{ _('route.city_transport_link').format(city=c.label) }}</a>
+      {% endfor %}
+    </div>
   </div>
-</section>
-{% endif %}
+  {% endif %}
 
-<!-- Similar routes — skipped when <2 siblings to avoid one-card sections -->
-{% if similar_routes and similar_routes|length >= 2 %}
-<section class="see-also">
-  <h2 class="see-also__title">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
-    {{ _('route.other_from') }} {{ route.from_city }}
-  </h2>
-  <div class="see-also__grid">
-    {% for r in similar_routes %}
-    <a href="{{ lang_prefix }}/rute/{{ r.slug }}/" class="see-also__card">
-      <span class="see-also__card-title">{{ r.from_city }} → {{ r.to_city }}</span>
-      {% if r.distance_km %}<span class="see-also__card-meta">{{ r.distance_km }} km</span>{% endif %}
-    </a>
-    {% endfor %}
+  {# Similar routes — skipped when <2 siblings to avoid a one-card part. #}
+  {% if similar_routes and similar_routes|length >= 2 %}
+  <div class="see-also__part">
+    <h3 class="see-also__subtitle">{{ _('route.other_from') }} {{ route.from_city }}</h3>
+    <div class="see-also__grid">
+      {% for r in similar_routes %}
+      <a href="{{ lang_prefix }}/rute/{{ r.slug }}/" class="see-also__card">
+        <span class="see-also__card-title">{{ r.from_city }} → {{ r.to_city }}</span>
+        {% if r.distance_km %}<span class="see-also__card-meta">{{ r.distance_km }} km</span>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
   </div>
+  {% endif %}
 </section>
 {% endif %}
 
