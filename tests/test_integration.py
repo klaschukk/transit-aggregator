@@ -54,15 +54,20 @@ def test_line_detail_has_map(client):
     assert "lineMap" in html
 
 
-def test_carriers_has_sections(client):
+def test_carriers_has_cards(client):
     html = client.get("/prevoznici/").data.decode()
-    count = html.count("carrier-section")
-    assert count > 0, "No carrier-section on /prevoznici/"
+    assert html.count("carrier-card ") > 0, "No carrier cards on /prevoznici/"
 
 
-def test_carriers_has_route_links(client):
+def test_carriers_link_to_operator_pages(client):
+    """The directory's job is to get you to a carrier, so every card is a
+    link to /prevoznici/<slug>/. It used to also inline up to 6 route
+    links per carrier — a partial copy of the page the card already
+    points at, repeated 50 times down a 23,780px phone column."""
     html = client.get("/prevoznici/").data.decode()
-    assert "carrier-route-link" in html
+    assert html.count('class="carrier-card') >= 5
+    assert "/prevoznici/lasta/" in html
+    assert "carrier-route-link" not in html
 
 
 def test_stations_has_cards(client):

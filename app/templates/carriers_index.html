@@ -77,66 +77,54 @@
 </div>
 {% endif %}
 
-<!-- Anchor nav — only when everything fits on one page, otherwise labels are misleading -->
-{% if operators and (not total_pages or total_pages <= 1) %}
-<nav class="anchor-nav fade-in fade-in--d1">
-  {% for op in operators %}
-  <a href="#{{ op.slug }}" class="anchor-nav__link">{{ op.name }}</a>
-  {% endfor %}
-</nav>
-{% endif %}
+{# The in-page anchor nav that used to sit here jumped to a #slug on this
+   same page. With the directory as a card grid there is nothing to jump
+   past — every carrier is visible at a glance — so it was 65 links to
+   nowhere useful. It also only ever rendered at total_pages <= 1, which
+   65 carriers at 50/page never satisfies, so it was dead markup too. #}
+{# Carrier directory as a card grid.
 
+   Each carrier used to get a fully expanded section — header, up to 8
+   city tags and up to 6 route links — so 50 carriers on page 1 stacked
+   into a 23,780px column on a 390px phone. A directory was behaving
+   like fifty detail pages glued end to end, and nobody scrolls
+   twenty-three metres to find a bus company.
+
+   The card carries what you pick a carrier by (name, mode, how many
+   routes, cheapest fare, which countries) and links to
+   /prevoznici/<slug>/, where the cities and the full route list already
+   live — those 6 links per carrier were a partial copy of that page,
+   one click away and duplicated 50 times. The external website link
+   went with them for the same reason. #}
 {% if operators %}
-<div class="carrier-list" id="carrierList">
+<div class="carrier-grid" id="carrierList">
   {% for op in operators %}
-  <section class="carrier-section fade-in fade-in--d{{ loop.index0 % 5 }}" id="{{ op.slug }}"
-           data-region="{{ op.region|default('domestic') }}">
-    <div class="carrier-section__header">
-      <div class="carrier-section__icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
-          {% if op.type == 'train' %}
-          <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
-          {% else %}
-          <rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/>
-          <circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/>
-          {% endif %}
-        </svg>
-      </div>
-      <div class="carrier-section__info">
-        <h2 class="carrier-section__name">
-          <a href="{{ lang_prefix }}/prevoznici/{{ op.slug }}/">{{ op.name }}</a>
-        </h2>
-        <div class="carrier-section__meta">
-          {% if op.type == 'train' %}{{ _('carriers.train') }}{% else %}{{ _('carriers.bus') }}{% endif %} · {{ op.route_count|default(0) }} {{ _('carriers.routes_count') }}
-          {% if op.min_price %} · {{ _('route.from_price') }} {{ (op.min_price / config.EUR_RSD_RATE)|round|int }}€{% endif %}
-          {% if op.countries %} · {{ op.countries|join(', ') }}{% endif %}
-          {% if op.website %} · <a href="{{ op.website }}" target="_blank" rel="noopener nofollow">{{ _('carriers.website') }}</a>{% endif %}
-        </div>
-      </div>
-    </div>
-
-    {% if op.cities %}
-    <div class="carrier-section__cities">
-      <span class="carrier-section__label">{{ _('carriers.cities_label') }}</span>
-      {% for c in op.cities %}
-      <span class="carrier-city-tag">{{ c.city }}</span>
-      {% endfor %}
-    </div>
-    {% endif %}
-
-    {% if op.routes %}
-    <div class="carrier-section__routes">
-      {% for r in op.routes %}
-      <a href="{{ lang_prefix }}/rute/{{ r.slug }}/" class="carrier-route-link">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
-        {{ r.from_city }} — {{ r.to_city }}
-      </a>
-      {% endfor %}
-    </div>
-    {% elif op.route_count == 0 %}
-    <p class="carrier-section__empty">{{ _('carriers.no_routes') }}</p>
-    {% endif %}
-  </section>
+  <a href="{{ lang_prefix }}/prevoznici/{{ op.slug }}/"
+     class="carrier-card fade-in fade-in--d{{ loop.index0 % 5 }}" id="{{ op.slug }}"
+     data-region="{{ op.region|default('domestic') }}">
+    <span class="carrier-card__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="24" height="24">
+        {% if op.type == 'train' %}
+        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
+        {% else %}
+        <rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/>
+        <circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/>
+        {% endif %}
+      </svg>
+    </span>
+    <span class="carrier-card__body">
+      <h2 class="carrier-card__name">{{ op.name }}</h2>
+      <span class="carrier-card__meta">
+        {% if op.type == 'train' %}{{ _('carriers.train') }}{% else %}{{ _('carriers.bus') }}{% endif %}
+        · {{ op.route_count|default(0) }} {{ _('carriers.routes_count') }}
+        {%- if op.min_price %} · {{ _('route.from_price') }} {{ (op.min_price / config.EUR_RSD_RATE)|round|int }}€{% endif %}
+      </span>
+      {% if op.countries %}
+      <span class="carrier-card__countries">{{ op.countries|join(' · ') }}</span>
+      {% endif %}
+    </span>
+    <svg class="carrier-card__arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M3 8h10m-4-4l4 4-4 4"/></svg>
+  </a>
   {% endfor %}
 </div>
 {% else %}
@@ -213,7 +201,7 @@
       bar.querySelector('.filter-chip--active').classList.remove('filter-chip--active');
       btn.classList.add('filter-chip--active');
       var region = btn.dataset.region;
-      list.querySelectorAll('.carrier-section').forEach(function(card) {
+      list.querySelectorAll('.carrier-card').forEach(function(card) {
         card.style.display = (region === 'all' || card.dataset.region === region) ? '' : 'none';
       });
     });

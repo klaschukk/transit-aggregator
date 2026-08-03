@@ -208,7 +208,7 @@ def test_rute_has_routes(client, app):
 
 def test_prevoznici_has_operators(client):
     html = client.get("/prevoznici/").data.decode()
-    assert html.count("carrier-section") >= 5, "Expected at least 5 operators"
+    assert html.count("carrier-card ") >= 5, "Expected at least 5 operators"
 
 
 def test_gradski_beograd_has_lines(client, app):
