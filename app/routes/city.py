@@ -296,6 +296,16 @@ def line_detail(city: str, line_slug: str):
         ORDER BY cls.stop_order
     """, [line['id']])
 
+    # Thin-content guard, same rule /rute/ already applies to a route with no
+    # schedule. A line with no stops has nothing to show: the page rendered an
+    # empty ItemList (numberOfItems: 0) and an FAQ literally answering "linija
+    # 21 ima 0 stajališta" — 41 such pages (39 in Niš) were in the sitemap as
+    # index,follow. Reachable and crawlable, but not indexed, and dropped from
+    # the sitemap; they re-index by themselves once the stop scrape returns.
+    if not stops:
+        from flask import g as _g_thin
+        _g_thin.meta_robots = 'noindex, follow'
+
     # GTFS schedule: departure times from first stop, grouped by service day
     schedule: dict[str, list[str]] = {'RD': [], 'S': [], 'N': []}
     first_dep = None

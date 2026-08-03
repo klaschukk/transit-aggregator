@@ -1151,7 +1151,16 @@ def sitemap_lines():
     url = _build_url_fn(base, default_mtime)
     pages: list[str] = []
     if db_ready():
-        lines = cached_query("SELECT city, slug FROM city_lines", ttl=3600)
+        # Only lines that have stops. A stopless line renders noindex (its
+        # page has no stop list and no timetable), and listing noindex URLs
+        # in the sitemap is the mixed signal Google reports as "Excluded by
+        # noindex". 41 such lines were being submitted.
+        lines = cached_query("""
+            SELECT cl.city, cl.slug
+            FROM city_lines cl
+            WHERE EXISTS (SELECT 1 FROM city_line_stops cls
+                          WHERE cls.line_id = cl.id)
+        """, ttl=3600)
         for line in lines:
             mod = _lastmod_for('line',
                                f'{line["city"]}/{line["slug"]}',
