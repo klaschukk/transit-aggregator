@@ -1945,6 +1945,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Swap origin and destination',
         'ru': 'Поменять местами пункты',
     },
+    'a11y.chat_toggle': {
+        'sr': 'Otvori AI pomoćnika',
+        'en': 'Open AI assistant',
+        'ru': 'Открыть AI-помощника',
+    },
     'a11y.share': {
         'sr': 'Podeli',
         'en': 'Share',

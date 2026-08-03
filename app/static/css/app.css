@@ -125,6 +125,13 @@ img { display: block; max-width: 100%; }
      can tell apart — two steps each is the whole vocabulary:
        -tint    hover lift on a card or outline button
        -glow    a filled brand/accent button that should read as raised */
+  /* Contrast note, measured not guessed: --color-primary (#0d9488) is
+     3.74:1 on white — fine for icons and large display numbers, a WCAG
+     AA failure for any text under 24px (or under 18.7px bold). It is
+     equally a failure the other way round: white on #0d9488 is the same
+     3.74:1. --color-primary-dark (#0f766e) is 5.5:1 and clears AA in
+     both directions, so small text uses THAT, whether as the ink or as
+     the surface behind white ink. */
   --shadow-primary-tint: 0 4px 16px rgba(13,148,136,.13);
   --shadow-primary-glow: 0 6px 20px rgba(13,148,136,.4);
   --shadow-accent-glow: 0 4px 14px rgba(245,158,11,.35);
@@ -328,7 +335,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 }
 .lang-pill__item:last-child { border-right: none; }
 .lang-pill__item:hover { background: var(--color-bg-alt); color: var(--color-text); }
-.lang-pill__item--active { background: var(--color-primary); color: #fff; }
+.lang-pill__item--active { background: var(--color-primary-dark); color: #fff; }
 .lang-pill__item--active:hover { background: var(--color-primary-dark); color: #fff; }
 .site-nav-toggle {
   margin-left: auto;
@@ -1952,6 +1959,15 @@ input:focus-visible,
 /* Page transitions */
 main { animation: fadeInUp .25s ease both; }
 
+/* The mobile bottom nav gets every one of its styles — including the
+   `position: fixed` and the hide above 768px — from app.mobile.css,
+   which the <link> gates at max-width:767px. Above that the element
+   still ships in the HTML with no styles at all, so it rendered as four
+   bare 24x20 icon links in a 1440px-wide static row under the footer.
+   Desktop has the header nav; hide it here, in the sheet desktop
+   actually loads. */
+.m-bnav { display: none; }
+
 /* ── Page-level vertical rhythm ──────────────────────────────────────
    Every block in <main> used to carry its own margin-top AND
    margin-bottom — 8, 16, 20, 24 and 32px in assorted pairings. Where
@@ -2102,8 +2118,7 @@ main.container > * + * { margin-top: var(--space-6); }
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .08em;
-  color: var(--color-primary);
-  opacity: .6;
+  color: var(--color-primary-dark);
   margin-bottom: var(--space-1);
 }
 .contact-form__input {
@@ -2904,7 +2919,7 @@ select:focus-visible, textarea:focus-visible {
   padding: 0.6rem 1.1rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-pill);
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
   text-decoration: none;
   font-weight: 500;
   transition: background 0.15s, color 0.15s;
@@ -3763,7 +3778,7 @@ select:focus-visible, textarea:focus-visible {
 .home-route__price {
   font-size: var(--text-xs);
   font-weight: 600;
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
   white-space: nowrap;
 }
 
@@ -3899,12 +3914,11 @@ select:focus-visible, textarea:focus-visible {
   background-clip: text;
 }
 
-/* Filter chips — active state with gradient */
-.filter-chip--active {
-  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
-  border-color: var(--color-primary-dark);
-  color: #fff;
-}
+/* The gradient that used to live here ran from --color-primary-dark to
+   --color-primary, and its light end put white 12-14px text back at
+   3.74:1 — silently undoing the documented AA fix on .filter-chip--active
+   further up this file, because it came later in the cascade. The solid
+   primary-dark there is the whole rule. */
 
 /* Reverse route link — pill button style */
 .reverse-route {

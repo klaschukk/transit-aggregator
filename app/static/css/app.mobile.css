@@ -649,10 +649,14 @@ body.m-nav-open .site-nav#siteNav {
   box-shadow: var(--melev-1);
 }
 .filter-chip--active {
-  background: var(--color-primary);
+  /* primary-dark, not primary: white on #0d9488 is 3.74:1 and this chip
+     carries 14px label text plus a 10px .filter-chip__sub. #0f766e is
+     5.5:1 and clears AA for both. app.css says the same thing for the
+     desktop rule — this overlay quietly had its own lighter copy. */
+  background: var(--color-primary-dark);
   color: #fff;
 }
-.filter-chip__sub { display: block; font-size: 10px; opacity: .8; }
+.filter-chip__sub { display: block; font-size: 10px; }
 
 /* 10c. SEO prose — collapse pattern. The "more" toggle is added by
    mobile.js; we hide everything past the first ~6 lines until the
@@ -684,7 +688,8 @@ body.m-nav-open .site-nav#siteNav {
   gap: var(--mspace-1);
   margin-top: var(--mspace-2);
   font-weight: 600;
-  color: var(--color-primary);
+  /* 13px text: --color-primary is 3.58:1 here, primary-dark is 5.5:1. */
+  color: var(--color-primary-dark);
   background: transparent;
   border: 0;
   padding: var(--mspace-2) 0;
