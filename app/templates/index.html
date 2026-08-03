@@ -142,69 +142,68 @@
   </div>
 </section>
 
-{# ═══════ TWO COLUMNS: Routes + City ═══════ #}
+{# ═══════ POPULAR ROUTES ═══════
+   Was the left half of a two-column .home-duo next to city transport.
+   The two columns are driven by unrelated data whose lengths never
+   match — on a 1440px screen the routes ran out ~290px before the city
+   column did, leaving a block of blank page half the layout wide. Full
+   width grids instead: nothing to run out of sync, and the wide
+   breakpoints stop wasting half their width. #}
 <section class="home-section container">
-  <div class="home-duo">
-
-    <!-- Intercity -->
-    <div class="home-duo__col">
-      <h2 class="home-section__title">{{ _('home.popular_routes') }}</h2>
-      {% if popular_routes %}
-      <div class="home-routes">
-        {% for route in popular_routes %}
-        <a href="{{ lang_prefix }}/rute/{{ route.slug }}/" class="home-route">
-          <div class="home-route__cities">
-            <span class="home-route__from">{{ route.from_city }}</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
-            <span class="home-route__to">{{ route.to_city }}</span>
-          </div>
-          <div class="home-route__bottom">
-            {% if route.trip_count %}
-            <span class="home-route__meta">{{ route.trip_count }} {{ _('routes.departures') }}</span>
-            {% endif %}
-            {% if route.min_price_rsd %}
-            <span class="home-route__price">{{ _('route.from_price') }} <span class="ccy-rsd">{{ route.min_price_rsd }} RSD</span><span class="ccy-eur">{{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }} €</span></span>
-            {% endif %}
-          </div>
-        </a>
-        {% endfor %}
+  <h2 class="home-section__title">{{ _('home.popular_routes') }}</h2>
+  {% if popular_routes %}
+  <div class="home-routes">
+    {% for route in popular_routes %}
+    <a href="{{ lang_prefix }}/rute/{{ route.slug }}/" class="home-route">
+      <div class="home-route__cities">
+        <span class="home-route__from">{{ route.from_city }}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+        <span class="home-route__to">{{ route.to_city }}</span>
       </div>
-      {% endif %}
-      <a href="{{ lang_prefix }}/rute/" class="btn btn--outline home-duo__btn">{{ _('home.all_routes') }} →</a>
-    </div>
-
-    <!-- City transport -->
-    <div class="home-duo__col">
-      <h2 class="home-section__title">{{ _('home.city_transport') }}</h2>
-      <div class="home-cities-grid">
-        {% for c in cities_data %}
-        <a href="{{ lang_prefix }}/gradski/{{ c.city }}/" class="home-city-card">
-          <div class="home-city-card__icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
-              <rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/>
-              <circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/>
-            </svg>
-          </div>
-          <div class="home-city-card__info">
-            <div class="home-city-card__name">{{ c.label }}</div>
-            <div class="home-city-card__desc">{{ c.line_count }} {{ _('city.lines_count') }}{% if c.stop_count %} · {{ c.stop_count }} {{ _('common.stops') }}{% endif %}</div>
-          </div>
-        </a>
-        {% endfor %}
+      <div class="home-route__bottom">
+        {% if route.trip_count %}
+        <span class="home-route__meta">{{ route.trip_count }} {{ _('routes.departures') }}</span>
+        {% endif %}
+        {% if route.min_price_rsd %}
+        <span class="home-route__price">{{ _('route.from_price') }} <span class="ccy-rsd">{{ route.min_price_rsd }} RSD</span><span class="ccy-eur">{{ (route.min_price_rsd / config.EUR_RSD_RATE)|round|int }} €</span></span>
+        {% endif %}
       </div>
-      {% if popular_lines %}
-      <div class="home-lines">
-        {% for line in popular_lines %}
-        <a href="{{ lang_prefix }}/gradski/beograd/linija/{{ line.slug }}/" class="home-lines__item">
-          <span class="line-badge line-badge--sm"{% if line.color %} style="background:{{ line.color }}"{% endif %}>{{ line.number }}</span>
-          <span class="home-lines__name">{{ line.name }}</span>
-        </a>
-        {% endfor %}
-      </div>
-      {% endif %}
-    </div>
-
+    </a>
+    {% endfor %}
   </div>
+  {% endif %}
+  <a href="{{ lang_prefix }}/rute/" class="btn btn--outline home-section__btn">{{ _('home.all_routes') }} →</a>
+</section>
+
+{# ═══════ CITY TRANSPORT ═══════ #}
+<section class="home-section container">
+  <h2 class="home-section__title">{{ _('home.city_transport') }}</h2>
+  <div class="home-cities-grid">
+    {% for c in cities_data %}
+    <a href="{{ lang_prefix }}/gradski/{{ c.city }}/" class="home-city-card">
+      <div class="home-city-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32" aria-hidden="true">
+          <rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/>
+          <circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/>
+        </svg>
+      </div>
+      <div class="home-city-card__info">
+        <div class="home-city-card__name">{{ c.label }}</div>
+        <div class="home-city-card__desc">{{ c.line_count }} {{ _('city.lines_count') }}{% if c.stop_count %} · {{ c.stop_count }} {{ _('common.stops') }}{% endif %}</div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% if popular_lines %}
+  <div class="home-lines">
+    {% for line in popular_lines %}
+    <a href="{{ lang_prefix }}/gradski/beograd/linija/{{ line.slug }}/" class="home-lines__item">
+      <span class="line-badge line-badge--sm"{% if line.color %} style="background:{{ line.color }}"{% endif %}>{{ line.number }}</span>
+      <span class="home-lines__name">{{ line.name }}</span>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
 </section>
 
 {# Mid-page ad — between FAQ section and benefits, where engaged

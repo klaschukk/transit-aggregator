@@ -73,6 +73,30 @@ def test_css_minified_size_limit(name, budget):
     )
 
 
+@pytest.mark.parametrize("name", ["app.css", "app.mobile.css", "ads.css", "admin.css"])
+def test_css_braces_balanced(name):
+    """Every block must close exactly once.
+
+    A stray '}' does not fail a build, does not fail any other test, and
+    does not stop the minifier — the browser just discards from the bad
+    token to the next recoverable rule, so an arbitrary slice of the
+    stylesheet silently stops applying. That is exactly how a run of
+    responsive grid rules went missing once: the page still rendered,
+    only wrong. Comments are stripped first because braces inside them
+    do not count."""
+    from pathlib import Path
+    import re
+
+    src = (Path(__file__).resolve().parent.parent
+           / "app" / "static" / "css" / name).read_text()
+    stripped = re.sub(r"/\*.*?\*/", "", src, flags=re.S)
+    opens, closes = stripped.count("{"), stripped.count("}")
+    assert opens == closes, (
+        f"{name}: {opens} '{{' vs {closes} '}}' — unbalanced braces mean the "
+        f"browser drops rules from the bad token onward"
+    )
+
+
 def test_no_eager_map_script_on_map_pages(client):
     """Guard: map templates must not use render-blocking static script tags.
     Both Leaflet (old) and Mapbox GL (current) must be loaded via dynamic

@@ -380,26 +380,31 @@ body.m-nav-open .site-nav#siteNav {
 
 
 /* ── 6b. Search form polish on mobile ────────────────────────────
-   The journey-form macro already stacks vertically below 640 px via
-   app.css. Here we just bump tap targets, add elevation, and switch
-   inputs to a slightly larger font so iOS doesn't auto-zoom on focus
-   (16px is the documented threshold). */
-.journey-form {
-  background: #fff;
-  border-radius: var(--mradius-md);
+   The capsule stacks below 768px on its own (app.css). Here we only
+   raise it off the page and hold inputs at 16px, the documented
+   threshold below which iOS auto-zooms the viewport on focus.
+
+   The elevation belongs on .journey-form__capsule, not on .journey-form:
+   the form used to be a bare wrapper, so a white padded card here made
+   sense; now the capsule IS that card and wrapping it in a second one
+   would double the surface. */
+.journey-form__capsule {
   box-shadow: var(--melev-2);
-  padding: var(--mspace-3);
+  border-radius: var(--mradius-md);
 }
-.journey-form__input { font-size: 16px; min-height: 44px; }
-.journey-form__date { font-size: 16px; min-height: 44px; }
+.journey-form__input { font-size: 16px; }
+/* Retune the cell height through the token, never on .journey-form__cell
+   directly — the swap button is pinned at top:var(--jf-cell-h) to land on
+   the from↔to seam, so a raw height override would desync the two. */
+.journey-form { --jf-cell-h: 60px; }
 .journey-form__swap {
-  width: 36px; height: 36px;
+  width: 40px; height: 40px;
   border-radius: var(--mradius-pill);
-  background: var(--mtint-surface);
-  border: 0;
-  transition: transform .25s var(--mease-back);
+  transition: transform .25s var(--mease-back), background .18s, color .18s;
 }
-.journey-form__swap:active { transform: rotate(180deg); }
+/* Keep the seam-centring translate — a bare rotate() would drop it. */
+.journey-form__swap:active { transform: translateY(-50%) rotate(180deg); }
+.journey-form__submit { height: 52px; margin: var(--mspace-2); }
 
 
 /* ── 7. Empty state polish ──────────────────────────────────────── */

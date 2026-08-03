@@ -674,36 +674,6 @@ def country_hub(country: str):
     avg_price_rsd = round(sum(min_prices) / len(min_prices)) if min_prices else None
     min_price_rsd = min(min_prices) if min_prices else None
 
-    # Sample top 3 priced trips spanning the corridor — picked from the
-    # three top routes so the schedule preview shows realistic departures
-    # for the country, not a single dominant pair.
-    sample_trips: list = []
-    if routes and db_ready():
-        top_route_ids = cached_query(f"""
-            SELECT r.id FROM routes r
-            JOIN trips t ON t.route_id = r.id
-            WHERE r.type = 'intercity' AND t.price_rsd > 0
-              AND (r.from_city IN ({cities_placeholders})
-                   OR r.to_city IN ({cities_placeholders}))
-            GROUP BY r.id
-            ORDER BY COUNT(t.id) DESC LIMIT 3
-        """, list(info['cities']) * 2, ttl=3600)
-        for row in top_route_ids:
-            t_row = cached_query_one("""
-                SELECT t.departure_time, t.arrival_time, t.duration_min,
-                       t.price_rsd, o.name AS operator,
-                       r.from_city, r.to_city, r.slug AS route_slug,
-                       t.bt4_line_id
-                FROM trips t
-                JOIN operators o ON o.id = t.operator_id
-                JOIN routes r ON r.id = t.route_id
-                WHERE t.route_id = ? AND t.price_rsd > 0
-                ORDER BY t.price_rsd
-                LIMIT 1
-            """, [row['id']], ttl=3600)
-            if t_row:
-                sample_trips.append(t_row)
-
     # Reviews — same namespacing as operator/line/city. Slug is
     # "country-<slug>" so each country pools its own bucket and the
     # AggregateRating attaches to the country entity directly. Wrapped
@@ -728,7 +698,6 @@ def country_hub(country: str):
         avg_distance_km=avg_distance_km,
         avg_price_rsd=avg_price_rsd,
         min_price_rsd=min_price_rsd,
-        sample_trips=sample_trips,
         review_slug=review_slug,
         reviews=country_reviews,
         reviews_agg=country_reviews_agg,
@@ -930,33 +899,6 @@ def operator_detail(slug: str):
         round(sum(r['trip_count'] or 0 for r in routes) / 7) if routes else 0
     )
 
-    # Sample top 3 trips with prices for the schedule preview block —
-    # one departure each from the operator's 3 most-popular routes.
-    sample_trips = []
-    if routes and db_ready():
-        top_3_route_ids_rows = cached_query("""
-            SELECT r.id FROM routes r
-            JOIN trips t ON t.route_id = r.id
-            WHERE t.operator_id = ? AND r.type = 'intercity' AND t.price_rsd > 0
-            GROUP BY r.id, r.slug
-            ORDER BY COUNT(t.id) DESC LIMIT 3
-        """, [op['id']], ttl=3600)
-        for row in top_3_route_ids_rows:
-            t_row = cached_query_one("""
-                SELECT t.departure_time, t.arrival_time, t.duration_min,
-                       t.price_rsd, o.name AS operator,
-                       r.from_city, r.to_city, r.slug AS route_slug,
-                       t.bt4_line_id
-                FROM trips t
-                JOIN operators o ON o.id = t.operator_id
-                JOIN routes r ON r.id = t.route_id
-                WHERE t.route_id = ? AND t.operator_id = ? AND t.price_rsd > 0
-                ORDER BY t.departure_time
-                LIMIT 1
-            """, [row['id'], op['id']], ttl=3600)
-            if t_row:
-                sample_trips.append(t_row)
-
     # Routes operated by competitors on the same corridors — 4 routes the
     # operator does NOT run, picked from the top origins to keep them
     # contextually relevant. Gives /prevoznici/{competitor}/ pages
@@ -1007,7 +949,6 @@ def operator_detail(slug: str):
         top_origins=top_origins,
         top_destinations=top_destinations,
         countries_served=countries_served,
-        sample_trips=sample_trips,
         competitor_routes=competitor_routes,
         review_slug=review_slug,
         reviews=op_reviews,

@@ -1,40 +1,71 @@
-{# Search form — reused on index.html and search_results.html #}
+{# Journey search form — the primary conversion object on the site.
+   Rendered by index.html (inside the hero), search_results.html,
+   red_voznje.html, about.html and 404.html, on both dark and light
+   backgrounds, so it carries its own surface and never assumes one.
+
+   Layout is ONE capsule, not a stack of parts. It used to be a rounded
+   card holding two 58px rows, with the date field and the submit button
+   in a detached strip underneath — so the thing a visitor reads as "the
+   search box" was actually two objects with a seam between them, and on
+   a 1440px screen it still stacked From above To. Now the cells stack
+   below 768px (from / to / date / submit) with the swap button
+   straddling the from↔to hairline, and sit in a single row from 768px
+   up, which is the shape every traveller already knows.
+
+   The OD/DO labels were absolutely positioned at `right: 0` inside each
+   field, so they floated at the far edge of the input looking like
+   stray artefacts rather than labels. They now sit above their value,
+   which is also why they finally went through i18n.
+
+   Hooks other code depends on — do not rename without grepping:
+     .journey-form           analytics-tracker.js submit handler
+     .journey-form__date     ui-behavior.js (prefills today), test_perf
+     .journey-form__input    test_mobile_design (≥16px, iOS zoom guard)
+     #fromCity #toCity #tripDate #swapBtn   base.html swap + enter-flow
+     .js-city-input, .autocomplete, #fromDropdown, #toDropdown  base.html
+#}
 {% macro search_form(from_city='', to_city='', datum='', action='', t=None, prefix='') %}
 {% set _t = t or {} %}
 <form action="{{ (prefix ~ '/pretraga/') if not action else action }}" method="get" class="journey-form" autocomplete="off" role="search" aria-label="{{ _('a11y.search_form') }}">
-  <div class="journey-form__fields">
-    <div class="journey-form__field">
-      <span class="journey-form__dot journey-form__dot--from" aria-hidden="true"></span>
-      <div class="journey-form__input-wrap">
-        <label class="journey-form__label" for="fromCity">OD</label>
-        <input class="journey-form__input js-city-input" id="fromCity" name="od" type="text"
-               value="{{ from_city }}" placeholder="{{ _t.get('from', 'Odakle?') }}" autocomplete="off"
-               inputmode="text" enterkeyhint="next"
-               role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="fromDropdown">
-        <div class="autocomplete" id="fromDropdown" role="listbox"></div>
-      </div>
+  <div class="journey-form__capsule">
+
+    <div class="journey-form__cell journey-form__cell--from">
+      <label class="journey-form__label" for="fromCity">{{ _('form.label_from') }}</label>
+      <input class="journey-form__input js-city-input" id="fromCity" name="od" type="text"
+             value="{{ from_city }}" placeholder="{{ _t.get('from', 'Odakle?') }}" autocomplete="off"
+             inputmode="text" enterkeyhint="next"
+             role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="fromDropdown">
+      <div class="autocomplete" id="fromDropdown" role="listbox"></div>
     </div>
+
     <button type="button" class="journey-form__swap" id="swapBtn" aria-label="{{ _('a11y.swap_cities') }}">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" aria-hidden="true">
         <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>
       </svg>
     </button>
-    <div class="journey-form__field">
-      <span class="journey-form__dot journey-form__dot--to" aria-hidden="true"></span>
-      <div class="journey-form__input-wrap">
-        <label class="journey-form__label" for="toCity">DO</label>
-        <input class="journey-form__input js-city-input" id="toCity" name="do" type="text"
-               value="{{ to_city }}" placeholder="{{ _t.get('to', 'Kuda?') }}" autocomplete="off"
-               inputmode="text" enterkeyhint="search"
-               role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="toDropdown">
-        <div class="autocomplete" id="toDropdown" role="listbox"></div>
-      </div>
+
+    <div class="journey-form__cell journey-form__cell--to">
+      <label class="journey-form__label" for="toCity">{{ _('form.label_to') }}</label>
+      <input class="journey-form__input js-city-input" id="toCity" name="do" type="text"
+             value="{{ to_city }}" placeholder="{{ _t.get('to', 'Kuda?') }}" autocomplete="off"
+             inputmode="text" enterkeyhint="search"
+             role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="toDropdown">
+      <div class="autocomplete" id="toDropdown" role="listbox"></div>
     </div>
-  </div>
-  <div class="journey-form__actions">
-    <label for="tripDate" class="sr-only">{{ _('a11y.trip_date') }}</label>
-    <input class="journey-form__date" id="tripDate" name="datum" type="date" value="{{ datum }}" aria-label="{{ _('a11y.trip_date') }}">
-    <button type="submit" class="btn btn--accent">{{ _t.get('btn', 'Pretraži') }}</button>
+
+    <div class="journey-form__cell journey-form__cell--date">
+      <label class="journey-form__label" for="tripDate">{{ _('form.label_date') }}</label>
+      <input class="journey-form__input journey-form__date" id="tripDate" name="datum" type="date"
+             value="{{ datum }}" aria-label="{{ _('a11y.trip_date') }}">
+    </div>
+
+    <button type="submit" class="btn btn--accent journey-form__submit">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="17" height="17" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"/><path d="M20 20l-4.3-4.3"/>
+      </svg>
+      <span>{{ _t.get('btn', 'Pretraži') }}</span>
+    </button>
+
   </div>
 </form>
 {% endmacro %}

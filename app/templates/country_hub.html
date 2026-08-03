@@ -38,7 +38,6 @@
 {% block content %}
 
 {% from '_partials/_breadcrumb.html' import breadcrumb with context %}
-{% from '_partials/_trip_card.html' import trip_card with context %}
 {% from '_partials/_stats_strip.html' import stats_strip %}
 {% from '_partials/_empty_state.html' import empty_state %}
 
@@ -140,23 +139,6 @@
     <span>{{ _('country.filter_short') }}</span>
   </button>
 </div>
-{% endif %}
-
-{# Sample schedule — three top departures so the page surfaces real
-   prices/timing without forcing a click into a /rute/ page. #}
-{% if sample_trips %}
-<section class="section fade-in fade-in--d2">
-  <h2 class="section__title">{{ _('country.sample_schedule') }}</h2>
-  <div class="trip-list">
-    {% for trip in sample_trips %}
-      {% set _fs = trip.from_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
-      {% set _ts = trip.to_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
-      {{ trip_card(trip, buy_label=_('buy.cta'),
-                   route_slug=trip.route_slug, surface='country_hub',
-                   from_slug=_fs, to_slug=_ts) }}
-    {% endfor %}
-  </div>
-</section>
 {% endif %}
 
 <!-- Routes list -->

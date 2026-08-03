@@ -1569,11 +1569,6 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Shortest',
         'ru': 'Самые короткие',
     },
-    'country.sample_schedule': {
-        'sr': 'Primeri polazaka',
-        'en': 'Sample departures',
-        'ru': 'Примеры рейсов',
-    },
     'country.reviews_heading': {
         'sr': 'Recenzije putnika za rute do države {country}',
         'en': 'Traveller reviews for routes to {country}',
@@ -1624,11 +1619,6 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Na Prevozni.com možete porediti cene i raspored polazaka prevoznika {name} pre kupovine. Karte se kupuju kod naših partnera; mi ne naplaćujemo dodatne provizije i ne prodajemo karte direktno.',
         'en': 'On Prevozni.com you can compare {name} prices and timetables before buying. Tickets are purchased through our partners — we charge no extra fees and do not sell tickets directly.',
         'ru': 'На Prevozni.com можно сравнить цены и расписание перевозчика {name} перед покупкой. Билеты приобретаются у наших партнёров — мы не берём дополнительных комиссий и не продаём билеты напрямую.',
-    },
-    'operator.sample_schedule': {
-        'sr': 'Primeri polazaka',
-        'en': 'Sample departures',
-        'ru': 'Примеры рейсов',
     },
     'operator.competitors_h': {
         'sr': 'Iste pravce kod drugih prevoznika',
@@ -1964,6 +1954,24 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Datum putovanja',
         'en': 'Trip date',
         'ru': 'Дата поездки',
+    },
+    # Visible field labels on the journey-search capsule. These were
+    # hard-coded 'OD' / 'DO' in the macro and never reached the EN/RU
+    # locales at all. Rendered small-caps by CSS, so store natural case.
+    'form.label_from': {
+        'sr': 'Polazak',
+        'en': 'From',
+        'ru': 'Откуда',
+    },
+    'form.label_to': {
+        'sr': 'Odredište',
+        'en': 'To',
+        'ru': 'Куда',
+    },
+    'form.label_date': {
+        'sr': 'Datum',
+        'en': 'Date',
+        'ru': 'Дата',
     },
     'a11y.filters': {
         'sr': 'Filteri polazaka',
