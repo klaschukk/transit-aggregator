@@ -138,3 +138,22 @@ def test_app_mobile_css_contains_p28_sections(client):
     assert 'Page polish — route_detail' in body, 'route_detail polish section missing'
     assert '.faq-item__q' in body
     assert '.seo-block__content[data-collapse=' in body
+
+
+def test_collapse_labels_exposed_for_injected_toggles(client):
+    """mobile.js turns long SEO prose into a collapsible block on pages
+    whose template never opted in — five templates shipped
+    data-collapse="1" plus a toggle, eleven did not, so half the site
+    opened with 760-1028px of prose before any content while the other
+    half clamped to 165px.
+
+    The injected button needs localised copy, and JS must never guess a
+    translation, so base.html publishes both labels on <body>. If these
+    attributes disappear the script bails out and the collapse silently
+    stops happening — hence the guard."""
+    for path, more in (("/", "Pročitaj više"), ("/en/", "Read more"),
+                       ("/ru/", "Читать дальше")):
+        body = client.get(path).data.decode()
+        assert 'data-i18n-read-more=' in body, path
+        assert 'data-i18n-read-less=' in body, path
+        assert more in body, f"{path}: expected localised '{more}'"

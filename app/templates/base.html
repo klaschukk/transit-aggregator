@@ -196,7 +196,12 @@ window.addEventListener('load', function(){
 })();
 </script>
 </head>
-<body data-ab-ccy="{{ _ccy_variant }}" data-page-context="{{ page_context_json|default('{}')|e }}">
+<body data-ab-ccy="{{ _ccy_variant }}" data-page-context="{{ page_context_json|default('{}')|e }}"
+      {# Labels for the prose-collapse toggle mobile.js adds to any
+         long .seo-block that did not ship one. Exposed here so JS
+         never has to guess a translation. #}
+      data-i18n-read-more="{{ _('common.read_more') }}"
+      data-i18n-read-less="{{ _('common.read_less') }}">
 <svg aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden"><symbol id="ic-arrow-r" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-7-7l7 7-7 7"/></symbol></svg>
 
 <a href="#main-content" class="skip-link">{{ _('a11y.skip_to_content') }}</a>

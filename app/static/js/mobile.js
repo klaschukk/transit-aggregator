@@ -255,6 +255,44 @@
   window.prevozniHaptic = haptic;
 
 
+  /* ── Prose collapse: make it the component's default ─────────────
+     Collapsing was opt-in per template: five rendered data-collapse="1"
+     plus a .seo-block__more button, eleven did not. The five clamped to
+     a tidy 165px; the rest opened with 760-1028px of prose before any
+     content — /prevoznici/ put 872px between the visitor and the carrier
+     grid they came for.
+
+     Any long block that did not opt in gets the same treatment here, so
+     a new page inherits the behaviour instead of remembering to ask for
+     it. Progressive enhancement: without JS the prose renders in full,
+     which is the honest fallback, and short blocks are left alone. */
+  (function () {
+    if (window.matchMedia && !window.matchMedia('(max-width: 767px)').matches) return;
+    var MIN_HEIGHT = 320;   // ~2x the 11em clamp; below this, clipping buys nothing
+    var more = document.body.dataset.i18nReadMore;
+    var less = document.body.dataset.i18nReadLess;
+    if (!more || !less) return;   // no labels, no guessing
+
+    document.querySelectorAll('.seo-block').forEach(function (block) {
+      var content = block.querySelector('.seo-block__content');
+      if (!content) return;
+      if (content.hasAttribute('data-collapse')) return;      // template opted in
+      if (block.querySelector('[data-collapse-toggle]')) return;
+      if (content.getBoundingClientRect().height < MIN_HEIGHT) return;
+
+      content.setAttribute('data-collapse', '1');
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'seo-block__more';
+      btn.setAttribute('data-collapse-toggle', '');
+      btn.setAttribute('aria-expanded', 'false');
+      btn.dataset.moreLabel = more;
+      btn.dataset.lessLabel = less;
+      btn.textContent = more;
+      block.appendChild(btn);
+    });
+  })();
+
   /* ── Prose collapse toggle (P28 mobile polish) ────────────────────
      The .seo-block__content[data-collapse="1"] starts clipped via CSS
      mask-gradient on mobile; tapping the .seo-block__more button (also
