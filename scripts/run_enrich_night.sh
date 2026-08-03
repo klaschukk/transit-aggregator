@@ -78,6 +78,15 @@ python -u data/pipelines/build_db.py 2>&1 | tee -a "$LOG"
 log "Enriching stop coordinates..."
 python -u data/pipelines/enrich_stops_coords.py enrich --limit 200 2>&1 | tee -a "$LOG" || log "WARN: enrich_stops_coords failed"
 
+# Road-following polylines for the line maps. build_db preserves the table
+# across rebuilds, but only if it already exists — a DB built from scratch
+# (as on this box) has nothing to preserve, and the maps silently degrade to
+# straight lines between stops. This was the Apr 25 incident; it recurred
+# because only the manual nightly_refresh.sh ever ran the scraper, never the
+# cron path. Idempotent: existing geometries are refreshed in place.
+log "Refreshing line geometries (OSM)..."
+python -u data/pipelines/scrape_route_geometries.py 2>&1 | tail -5 | tee -a "$LOG" || log "WARN: scrape_route_geometries failed"
+
 # Pair-level affiliate map (app/affiliates/bt4_lineids.json): only departures
 # busticket4 actually sells online (purchase_allowed) get a lineId. partners.py
 # loads the JSON at import, so the start below is what ships it.

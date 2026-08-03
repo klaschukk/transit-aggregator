@@ -189,3 +189,26 @@ def test_health_status(client):
     assert data["checks"]["logs_writable"] is True
     assert "version" in data
     assert "uptime_seconds" in data
+
+
+def test_health_reports_line_geometries(client):
+    """/health must surface line_geometries, the Apr 25 incident's table.
+
+    build_db recreates the DB from scratch and does not create that table —
+    only the standalone geometry scraper does, and build_db can merely
+    preserve what already exists. So a rebuilt-from-nothing box loses it
+    silently: line maps fall back to zig-zag straight lines between stops
+    while every other check stays green. The incident write-up called for
+    probing every load-bearing table, but this one was never added, and the
+    loss recurred unnoticed. Reported as degraded, not critical — the maps
+    lose quality, the pages still serve a timetable.
+    """
+    data = json.loads(client.get("/health").data)
+    transit = data["checks"]["transit_db"]
+    assert "line_geometries" in transit, "health must report line_geometries"
+    count = transit["line_geometries"]
+    assert count is None or isinstance(count, int)
+    if not count:
+        assert data["status"] == "degraded", (
+            "missing/empty line_geometries must degrade the health status"
+        )

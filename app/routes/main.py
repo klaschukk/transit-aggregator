@@ -571,6 +571,24 @@ def health():
             transit['tables'][tbl] = count
             if not count:
                 transit['missing'].append(tbl)
+        # line_geometries is the table the Apr 25 incident was about, yet it
+        # was never added to the probe above — so when this box rebuilt the DB
+        # from scratch and lost it again, /health stayed green and every line
+        # map quietly fell back to zig-zag straight lines. It is reported as
+        # degraded rather than critical: losing road-following polylines
+        # damages the maps, but the pages still render and serve a timetable,
+        # so it must not 503 the whole site.
+        geom_count: int | None = None
+        try:
+            row = cached_query_one(
+                "SELECT COUNT(*) AS c FROM line_geometries", ttl=60)
+            geom_count = int(row['c']) if row else 0
+        except Exception:  # noqa: BLE001 — missing table is the case we detect
+            geom_count = None
+        transit['line_geometries'] = geom_count
+        if not geom_count:
+            degraded = True
+
         # Back-compat alias for existing dashboards / cron alerts.
         transit['routes'] = transit['tables'].get('routes')
         transit['ok'] = not transit['missing']
