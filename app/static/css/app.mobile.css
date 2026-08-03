@@ -669,8 +669,17 @@ body.m-nav-open .site-nav#siteNav {
   mask-image: none;
   -webkit-mask-image: none;
 }
+/* The toggle is a sibling of .seo-block__content inside a display:flex
+   .seo-block, so it sat IN the prose row and took 85px out of it: the
+   text was squeezed into 159px of a 358px panel — about twenty
+   characters a line — with the button parked alongside. Give it its own
+   row under the prose, indented to the text column (icon + gap). */
+.seo-block { flex-wrap: wrap; }
 .seo-block__more {
   display: inline-flex !important;
+  flex: 0 0 100%;
+  justify-content: flex-start;
+  margin-left: calc(40px + var(--mspace-4));
   align-items: center;
   gap: var(--mspace-1);
   margin-top: var(--mspace-2);

@@ -417,3 +417,29 @@ def test_line_faq_adds_frequency_question_when_headway(client):
     for block in re.findall(r'type="application/ld\+json">(.*?)</script>',
                             html2, re.DOTALL):
         json.loads(block)
+
+
+def test_country_hub_ships_every_route_but_shows_thirty(client):
+    """Progressive disclosure must not cost crawlability.
+
+    Rendering all 120 route cards at once made /destinacije/<c>/ 14,398px
+    tall on a 390px phone — 10,665px of it that one grid. Capping it is a
+    display decision only: every card stays in the HTML behind `hidden`,
+    so Googlebot still reads all of them and the client-side sort still
+    has the full set to work with.
+    """
+    html = client.get("/destinacije/crna-gora/").data.decode()
+    if 'id="countryRouteGrid"' not in html:
+        import pytest
+        pytest.skip("seed DB has no routes for this country")
+    # Count the cards themselves — 'class="route-card' also matches every
+    # route-card__cities / __meta / __from child, six per card.
+    cards = html.count('class="route-card fade-in')
+    assert cards >= 1
+    # The cap only exists once there is something to cap.
+    if cards > 30:
+        assert 'id="countryShowMoreBtn"' in html, "no show-more control"
+        hidden_cards = len(re.findall(r'class="route-card fade-in[^"]*"[^>]* hidden', html))
+        assert hidden_cards == cards - 30, (
+            f"expected {cards - 30} cards to ship hidden, found {hidden_cards} "
+            f"— extras must stay in the HTML, not be dropped")

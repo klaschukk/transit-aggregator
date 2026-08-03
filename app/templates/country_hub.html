@@ -145,9 +145,14 @@
 {% if routes %}
 <section class="section">
   <h2 class="section__title">{{ _('country.routes_heading') }} {{ country_name }}</h2>
-  <div class="route-grid" id="countryRouteGrid">
+  {# 120 route cards rendered at once made this page 14,398px on a 390px
+     phone, 10,665px of it this one grid. Same progressive disclosure
+     /rute/ already uses: the first 30 are visible, the rest ship in the
+     DOM behind `hidden` so they stay crawlable and stay sortable, and
+     one tap reveals them. #}
+  <div class="route-grid" id="countryRouteGrid" data-visible-cap="30">
     {% for r in routes %}
-    <a href="{{ lang_prefix }}/voznja/{{ r.from_city_slug }}-do-{{ r.to_city_slug }}/" class="route-card fade-in fade-in--d{{ loop.index0 % 5 }}"
+    <a href="{{ lang_prefix }}/voznja/{{ r.from_city_slug }}-do-{{ r.to_city_slug }}/" class="route-card fade-in fade-in--d{{ loop.index0 % 5 }}"{% if loop.index > 30 %} hidden{% endif %}
        data-trip-count="{{ r.trip_count|default(0) }}"
        data-price="{{ r.min_price_rsd|default(0) }}"
        data-distance="{{ r.distance_km|default(0) }}">
@@ -166,6 +171,13 @@
     </a>
     {% endfor %}
   </div>
+  {% if routes|length > 30 %}
+  <div id="countryShowMoreWrap">
+    <button class="btn btn--outline" id="countryShowMoreBtn" type="button">
+      {{ _('route_index.show_more') }} {{ routes|length - 30 }} {{ _('route_index.show_more_suffix') }}
+    </button>
+  </div>
+  {% endif %}
 </section>
 {% else %}
   {{ empty_state(icon='bus', text=_('country.no_routes')) }}
@@ -263,7 +275,30 @@
       }
     });
     cards.forEach(function(c) { grid.appendChild(c); });
+    applyCap(cards);
   }
+
+  /* Only the first `cap` cards in the CURRENT order are shown, so a
+     re-sort has to re-apply it: "cheapest 30" must mean the 30 cheapest,
+     not whichever 30 happened to be visible before the sort. Once the
+     user expands, the cap is dropped for good. */
+  var cap = parseInt(grid.dataset.visibleCap, 10) || 0;
+  var expanded = false;
+  function applyCap(cards) {
+    if (expanded || !cap) return;
+    cards.forEach(function(c, i) { c.hidden = i >= cap; });
+  }
+
+  var moreBtn = document.getElementById('countryShowMoreBtn');
+  var moreWrap = document.getElementById('countryShowMoreWrap');
+  if (moreBtn) {
+    moreBtn.addEventListener('click', function() {
+      expanded = true;
+      Array.from(grid.children).forEach(function(c) { c.hidden = false; });
+      if (moreWrap) moreWrap.hidden = true;
+    });
+  }
+
   filterBar.querySelectorAll('.filter-chip').forEach(function(btn) {
     btn.addEventListener('click', function() {
       filterBar.querySelector('.filter-chip--active').classList.remove('filter-chip--active');
