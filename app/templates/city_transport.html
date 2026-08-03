@@ -351,21 +351,77 @@
     if (typeof mapboxgl === 'undefined') return;
     mapboxgl.accessToken = '{{ config.MAPBOX_TOKEN }}';
 
-    var cityCoords = {
-      'beograd':    [20.4569, 44.8176],
-      'novi-sad':   [19.8335, 45.2671],
-      'nis':        [21.8958, 43.3209],
-      'kragujevac': [20.9114, 44.0128]
-    };
-    var center = cityCoords['{{ city }}'] || [20.4569, 44.8176];
-
-    var map = new mapboxgl.Map({
+    /* Framed from the extent of this city's own stops (server-side, from the
+       DB). The previous hardcoded per-city coordinate list only covered the
+       four Serbian cities, so every Montenegro city fell through to the
+       Belgrade default and opened its map ~500 km from the city it describes. */
+    var mapOpts = {
       container: 'cityMap',
       style: 'mapbox://styles/mapbox/light-v11',
-      center: center, zoom: 13,
       attributionControl: false
-    });
+    };
+{%- if map_bounds %}
+    mapOpts.bounds = [[{{ map_bounds.min_lon }}, {{ map_bounds.min_lat }}],
+                      [{{ map_bounds.max_lon }}, {{ map_bounds.max_lat }}]];
+    mapOpts.fitBoundsOptions = { padding: 40, maxZoom: 14 };
+{%- else %}
+    mapOpts.center = [20.4569, 44.8176];
+    mapOpts.zoom = 13;
+{%- endif %}
+
+    var map = new mapboxgl.Map(mapOpts);
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
+
+    /* Locate-me: centres on the rider and points out the closest stop. */
+    var geolocate = new mapboxgl.GeolocateControl({
+      positionOptions: { enableHighAccuracy: true },
+      trackUserLocation: false,
+      showUserLocation: true
+    });
+    map.addControl(geolocate, 'top-right');
+
+    var nearestPopup = null;
+
+    function distanceKm(lat1, lon1, lat2, lon2) {
+      var R = 6371, p = Math.PI / 180;
+      var dLat = (lat2 - lat1) * p, dLon = (lon2 - lon1) * p;
+      var a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+            + Math.cos(lat1 * p) * Math.cos(lat2 * p)
+            * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      return 2 * R * Math.asin(Math.sqrt(a));
+    }
+
+    geolocate.on('geolocate', function(e) {
+      var lat = e.coords.latitude, lon = e.coords.longitude;
+      /* ~2 km box around the rider — enough to find a stop without pulling
+         the whole city over the wire. */
+      var d = 0.02;
+      fetch('/api/city-stops?sw_lat=' + (lat - d) + '&sw_lon=' + (lon - d)
+          + '&ne_lat=' + (lat + d) + '&ne_lon=' + (lon + d))
+        .then(function(r) { return r.json(); })
+        .then(function(stops) {
+          var best = null, bestKm = Infinity;
+          stops.forEach(function(s) {
+            if (!s.lat || !s.lon) return;
+            var km = distanceKm(lat, lon, s.lat, s.lon);
+            if (km < bestKm) { bestKm = km; best = s; }
+          });
+          if (!best) return;
+          if (nearestPopup) nearestPopup.remove();
+          var walk = bestKm < 1
+            ? Math.round(bestKm * 1000) + ' m'
+            : bestKm.toFixed(1) + ' km';
+          nearestPopup = new mapboxgl.Popup({ maxWidth: '240px', offset: 14 })
+            .setLngLat([best.lon, best.lat])
+            .setHTML('<div class="stop-popup"><div class="stop-popup__name">'
+              + best.name + '</div><div class="stop-popup__meta">' + walk
+              + '</div><a class="stop-popup__more" href="{{ lang_prefix }}/gradski/{{ city }}/stajaliste/'
+              + best.slug + '/">{{ _("city_transport.stop_popup_more") }}</a></div>')
+            .addTo(map);
+          map.easeTo({ center: [best.lon, best.lat], zoom: Math.max(map.getZoom(), 15) });
+          loadArrivals(best.slug, best.name, nearestPopup);
+        }).catch(function() {});
+    });
 
     var stopMarkers = [];
 
@@ -380,7 +436,7 @@
     }
 
     function loadArrivals(slug, name, popup) {
-      fetch('/api/stop-arrivals?slug=' + encodeURIComponent(slug))
+      fetch('/api/stop-arrivals?slug=' + encodeURIComponent(slug) + '&city={{ city }}')
         .then(function(r) { return r.json(); })
         .then(function(arr) {
           var html = '<div class="stop-popup"><div class="stop-popup__name">' + name + '</div>';

@@ -126,9 +126,30 @@ def city_hub(city: str):
     """, [city]) if db_ready() else []
 
     stops_with_coords = 0
+    map_bounds = None
     if db_ready():
         row = cached_query_one("SELECT COUNT(*) as c FROM city_stops WHERE city = ? AND lat IS NOT NULL", [city])
         stops_with_coords = row['c'] if row else 0
+        # Extent of the city's own stops, so the map frames the city it is
+        # about. The template used to carry a hardcoded coordinate per city
+        # and fall back to Belgrade for anything missing — which is what every
+        # Montenegro city did, opening their map ~500 km away. Deriving it
+        # from the data means a newly added city is framed correctly with no
+        # template change.
+        # 2nd-98th percentile, not MIN/MAX: a handful of mis-geocoded stops
+        # drags the raw extent far outside the city — Niš spans 329 km by
+        # MIN/MAX (one stop sits north of Novi Sad) but 6 km by percentile,
+        # and framing on the raw box would open the map at region zoom.
+        map_bounds = cached_query_one("""
+            SELECT quantile_cont(lat, 0.02) AS min_lat,
+                   quantile_cont(lon, 0.02) AS min_lon,
+                   quantile_cont(lat, 0.98) AS max_lat,
+                   quantile_cont(lon, 0.98) AS max_lon
+            FROM city_stops
+            WHERE city = ? AND lat IS NOT NULL AND lon IS NOT NULL
+        """, [city])
+        if map_bounds and map_bounds['min_lat'] is None:
+            map_bounds = None
 
     # Top stops by number of lines serving them. Lifted 5 → 12 so the
     # city hub becomes a real interchange-stop hub: stop_detail pages
@@ -191,6 +212,7 @@ def city_hub(city: str):
     }, ensure_ascii=False)
     return render_template('city_transport.html', city=city, lines=lines,
                            stops_with_coords=stops_with_coords,
+                           map_bounds=map_bounds,
                            top_stops=top_stops,
                            popular_intercity=popular_intercity,
                            top_operators=top_operators,

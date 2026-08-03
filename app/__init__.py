@@ -407,9 +407,14 @@ def create_app(config_name: str | None = None) -> Flask:
         response.headers.setdefault('X-Content-Type-Options', 'nosniff')
         response.headers.setdefault('X-Frame-Options', 'SAMEORIGIN')
         response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
+        # geolocation=(self): the city map's locate-me button centres the rider
+        # and points out their nearest stop. An empty allowlist blocks the
+        # Geolocation API for our own pages too, so the control would fail
+        # silently. Third parties stay blocked — only this origin may ask, and
+        # the browser still requires explicit user consent.
         response.headers.setdefault(
             'Permissions-Policy',
-            'geolocation=(), microphone=(), camera=(), payment=()',
+            'geolocation=(self), microphone=(), camera=(), payment=()',
         )
         if 'text/html' in (response.content_type or ''):
             response.headers.setdefault('Content-Security-Policy', (

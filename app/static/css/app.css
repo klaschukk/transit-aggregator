@@ -1306,6 +1306,8 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   color: #fff; font-size: 10px; font-weight: 800; line-height: 1.5;
 }
 .stop-popup__more { display: block; font-size: 11px; color: var(--color-primary); font-weight: 600; text-decoration: none; }
+/* Walking distance shown on the nearest-stop popup after locate-me. */
+.stop-popup__meta { font-size: 11px; color: var(--color-text-muted); margin-bottom: 4px; }
 
 /* Map stop marker */
 .stop-marker-dot {
