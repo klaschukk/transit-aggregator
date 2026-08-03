@@ -210,11 +210,21 @@
 <section class="see-also" id="farGuides">
   <h2 class="see-also__title">{{ _('dest.far_heading') }}</h2>
   <p class="page-subtitle">{{ _('dest.far_sub') }}</p>
-  <div class="see-also__list">
+  {# 96 links in one block ran 4,097px down a 390px phone — a third of
+     the page spent on a single undifferentiated list. Same cap as the
+     route grids; all 96 stay in the HTML. #}
+  <div class="see-also__list" id="farGuidesList" data-visible-cap="24">
     {% for fg in far_guides %}
-    <a href="{{ lang_prefix }}/voznja/{{ fg.slug }}/" class="see-also__link">{{ fg.from }} → {{ fg.to }}</a>
+    <a href="{{ lang_prefix }}/voznja/{{ fg.slug }}/" class="see-also__link"{% if loop.index > 24 %} hidden{% endif %}>{{ fg.from }} → {{ fg.to }}</a>
     {% endfor %}
   </div>
+  {% if far_guides|length > 24 %}
+  <div data-show-more-wrap>
+    <button class="btn btn--outline" type="button" data-show-more-for="farGuidesList">
+      {{ _('route_index.show_more') }} {{ far_guides|length - 24 }} {{ _('route_index.show_more_suffix') }}
+    </button>
+  </div>
+  {% endif %}
 </section>
 {% endif %}
 

@@ -172,8 +172,8 @@
     {% endfor %}
   </div>
   {% if routes|length > 30 %}
-  <div id="countryShowMoreWrap">
-    <button class="btn btn--outline" id="countryShowMoreBtn" type="button">
+  <div id="countryShowMoreWrap" data-show-more-wrap>
+    <button class="btn btn--outline" type="button" data-show-more-for="countryRouteGrid">
       {{ _('route_index.show_more') }} {{ routes|length - 30 }} {{ _('route_index.show_more_suffix') }}
     </button>
   </div>
@@ -275,28 +275,10 @@
       }
     });
     cards.forEach(function(c) { grid.appendChild(c); });
-    applyCap(cards);
-  }
-
-  /* Only the first `cap` cards in the CURRENT order are shown, so a
-     re-sort has to re-apply it: "cheapest 30" must mean the 30 cheapest,
-     not whichever 30 happened to be visible before the sort. Once the
-     user expands, the cap is dropped for good. */
-  var cap = parseInt(grid.dataset.visibleCap, 10) || 0;
-  var expanded = false;
-  function applyCap(cards) {
-    if (expanded || !cap) return;
-    cards.forEach(function(c, i) { c.hidden = i >= cap; });
-  }
-
-  var moreBtn = document.getElementById('countryShowMoreBtn');
-  var moreWrap = document.getElementById('countryShowMoreWrap');
-  if (moreBtn) {
-    moreBtn.addEventListener('click', function() {
-      expanded = true;
-      Array.from(grid.children).forEach(function(c) { c.hidden = false; });
-      if (moreWrap) moreWrap.hidden = true;
-    });
+    /* The grid is capped by the shared [data-visible-cap] handler in
+       ui-behavior.js. Tell it the order changed so it re-picks the
+       visible N from the top of the NEW order. */
+    grid.dispatchEvent(new CustomEvent('prevozni:reordered'));
   }
 
   filterBar.querySelectorAll('.filter-chip').forEach(function(btn) {

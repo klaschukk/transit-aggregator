@@ -419,27 +419,35 @@ def test_line_faq_adds_frequency_question_when_headway(client):
         json.loads(block)
 
 
-def test_country_hub_ships_every_route_but_shows_thirty(client):
+@pytest.mark.parametrize("path,grid_id,cap,item_re", [
+    ("/destinacije/crna-gora/", "countryRouteGrid", 30, r'class="route-card fade-in'),
+    ("/prevoznici/lasta/", "operatorRouteGrid", 30, r'class="route-card fade-in'),
+    ("/destinacije/", "farGuidesList", 24, r'class="see-also__link"'),
+])
+def test_capped_grids_ship_every_item(client, path, grid_id, cap, item_re):
     """Progressive disclosure must not cost crawlability.
 
-    Rendering all 120 route cards at once made /destinacije/<c>/ 14,398px
-    tall on a 390px phone — 10,665px of it that one grid. Capping it is a
-    display decision only: every card stays in the HTML behind `hidden`,
-    so Googlebot still reads all of them and the client-side sort still
-    has the full set to work with.
+    Route grids were shipping 100-120 cards at once: /destinacije/<c>/ ran
+    14,398px on a 390px phone with 10,665px of it one grid, and
+    /prevoznici/<op>/ 12,567px with 8,886px of it another. Capping is a
+    display decision only — every item stays in the HTML behind `hidden`,
+    so Googlebot still reads the full set and the country hub's
+    client-side sort still has everything to sort.
     """
-    html = client.get("/destinacije/crna-gora/").data.decode()
-    if 'id="countryRouteGrid"' not in html:
-        import pytest
-        pytest.skip("seed DB has no routes for this country")
-    # Count the cards themselves — 'class="route-card' also matches every
-    # route-card__cities / __meta / __from child, six per card.
-    cards = html.count('class="route-card fade-in')
-    assert cards >= 1
-    # The cap only exists once there is something to cap.
-    if cards > 30:
-        assert 'id="countryShowMoreBtn"' in html, "no show-more control"
-        hidden_cards = len(re.findall(r'class="route-card fade-in[^"]*"[^>]* hidden', html))
-        assert hidden_cards == cards - 30, (
-            f"expected {cards - 30} cards to ship hidden, found {hidden_cards} "
-            f"— extras must stay in the HTML, not be dropped")
+    html = client.get(path).data.decode()
+    if f'id="{grid_id}"' not in html:
+        pytest.skip(f"seed DB renders no {grid_id} on {path}")
+    assert f'data-show-more-for="{grid_id}"' in html, "no show-more control"
+    # Count inside THIS grid only. /destinacije/ carries a second
+    # see-also block further down whose links match the same pattern.
+    grid_html = html[html.index(f'id="{grid_id}"'):
+                     html.index(f'data-show-more-for="{grid_id}"')]
+    items = len(re.findall(item_re, grid_html))
+    assert items >= 1
+    if items <= cap:
+        pytest.skip(f"seed DB has only {items} items, nothing to cap")
+    hidden = len(re.findall(item_re + r'[^>]*? hidden', grid_html))
+    assert hidden == items - cap, (
+        f"{path}: expected {items - cap} of {items} items hidden, found "
+        f"{hidden} — extras must stay in the HTML, not be dropped"
+    )

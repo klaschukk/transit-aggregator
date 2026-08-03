@@ -194,3 +194,54 @@ if ('serviceWorker' in navigator) {
   }, { threshold: 0.3 });
   statsObs.observe(statsEl);
 })();
+
+
+/* ── Capped grids ────────────────────────────────────────────────────────
+   Any grid carrying `data-visible-cap="N"` shows its first N children and
+   hides the rest; a `[data-show-more-for="<gridId>"]` button reveals them
+   all. The server renders the extras with `hidden` already, so this is
+   only re-application and the expand control — nothing is injected, and
+   with JS off the page degrades to "first N visible", never to a blank
+   list.
+
+   Capping is a display decision only: every child stays in the HTML, so
+   crawlers still read the full set. This exists because route grids were
+   shipping 100-120 cards at once — /destinacije/<country>/ was 14,398px
+   tall on a 390px phone with 10,665px of it one grid.
+
+   Grids that reorder themselves (the country hub sorts by price and
+   distance in place) must dispatch `prevozni:reordered` on the grid after
+   moving nodes: the visible N are the first N in the CURRENT order, so
+   "cheapest 30" means the 30 cheapest, not whichever 30 were on screen
+   before the sort. */
+(function () {
+  var grids = document.querySelectorAll('[data-visible-cap]');
+  if (!grids.length) return;
+
+  grids.forEach(function (grid) {
+    var cap = parseInt(grid.dataset.visibleCap, 10);
+    if (!cap || cap < 1) return;
+    var expanded = false;
+
+    function apply() {
+      if (expanded) return;
+      Array.prototype.forEach.call(grid.children, function (child, i) {
+        child.hidden = i >= cap;
+      });
+    }
+
+    grid.addEventListener('prevozni:reordered', apply);
+    apply();
+
+    var btn = document.querySelector('[data-show-more-for="' + grid.id + '"]');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      expanded = true;
+      Array.prototype.forEach.call(grid.children, function (child) {
+        child.hidden = false;
+      });
+      var wrap = btn.closest('[data-show-more-wrap]') || btn;
+      wrap.hidden = true;
+    });
+  });
+})();

@@ -131,9 +131,13 @@
 {% if routes %}
 <section class="section">
   <h2 class="section__title">{{ _('operator.routes_heading') }}</h2>
-  <div class="route-grid">
+  {# Capped by the shared [data-visible-cap] handler: 100 cards rendered
+     at once made this page 12,567px on a 390px phone, 8,886px of it this
+     grid. The extras ship in the DOM behind `hidden`, so every route
+     stays crawlable. #}
+  <div class="route-grid" id="operatorRouteGrid" data-visible-cap="30">
     {% for r in routes %}
-    <a href="{{ lang_prefix }}/rute/{{ r.slug }}/" class="route-card fade-in fade-in--d{{ loop.index0 % 5 }}">
+    <a href="{{ lang_prefix }}/rute/{{ r.slug }}/" class="route-card fade-in fade-in--d{{ loop.index0 % 5 }}"{% if loop.index > 30 %} hidden{% endif %}>
       <div class="route-card__cities">
         <span class="route-card__from">{{ r.from_city }}</span>
         <svg class="route-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
@@ -149,6 +153,13 @@
     </a>
     {% endfor %}
   </div>
+  {% if routes|length > 30 %}
+  <div data-show-more-wrap>
+    <button class="btn btn--outline" type="button" data-show-more-for="operatorRouteGrid">
+      {{ _('route_index.show_more') }} {{ routes|length - 30 }} {{ _('route_index.show_more_suffix') }}
+    </button>
+  </div>
+  {% endif %}
 </section>
 {% else %}
   {{ empty_state(icon='bus', text=_('operator.no_routes')) }}
