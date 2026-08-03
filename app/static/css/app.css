@@ -1939,6 +1939,21 @@ input:focus-visible,
 /* Page transitions */
 main { animation: fadeInUp .25s ease both; }
 
+/* ── Page-level vertical rhythm ──────────────────────────────────────
+   Every block in <main> used to carry its own margin-top AND
+   margin-bottom — 8, 16, 20, 24 and 32px in assorted pairings. Where
+   the pair collapsed you got max(); where a block's own last child
+   leaked its margin out through a zero-padding edge, you got the sum.
+   Measured on /destinacije/<country>/ the visible gaps came out 20, 24,
+   32 and 48px — four different rhythms, none of them chosen.
+
+   The container owns the rhythm; a block owns only its internals. One
+   step between siblings, set in one place. Scoped to `main.container`
+   so the home page (main.home-page, whose sections carry their own
+   rule + padding) keeps its own spacing. */
+main.container > * { margin-top: 0; margin-bottom: 0; }
+main.container > * + * { margin-top: var(--space-6); }
+
 /* ── Mobile back button ── */
 .mobile-back {
   padding: var(--space-2) 0;
