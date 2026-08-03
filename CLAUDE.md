@@ -183,6 +183,17 @@ systemctl is-active prevozni
 curl -s -o /dev/null -w '%{http_code}' --unix-socket /run/prevozni/prevozni.sock http://localhost/
 ```
 
+**`/tmp` — это tmpfs, то есть ОПЕРАТИВНАЯ ПАМЯТЬ.** Не класть туда копии
+`transit.duckdb` (~300 МБ) и прочие крупные файлы: они съедают RAM, и
+gunicorn-воркер уходит по SIGKILL (OOM) — страница отдаёт 500, в том числе
+Googlebot. Так и случилось 2026-08-03 в 02:13 (`Worker was sent SIGKILL`,
+`RuntimeError: Query interrupted`, 18 OOM-событий за сутки). Рабочие копии БД
+класть на диск, рядом с оригиналом:
+`data/dbs/.geom_work.duckdb` — как это делает `refresh_line_geometries.sh`.
+
+Swap-файл на 2 ГБ добавлен 2026-08-03 (`/swapfile`, прописан в `/etc/fstab`):
+до этого swap отсутствовал вовсе, и любой всплеск памяти сразу убивал воркер.
+
 **Окно обслуживания.** Пайплайнам нужен write-lock DuckDB, поэтому они
 останавливают сервис. Хелсчек (cron `*/5`) поднимал его обратно прямо посреди
 прогона, новый gunicorn снова забирал read-lock и `build_db`/`enrich` падали с
