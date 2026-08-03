@@ -678,12 +678,27 @@ def _line_prose_cached(*, line_slug, lang, lang_prefix, line, stops,
 @city_bp.route('/api/stop-arrivals')
 @limiter.limit("30 per minute")
 def api_stop_arrivals():
-    """Return lines at a stop with next arrivals from GTFS schedule."""
+    """Return lines at a stop with next arrivals from GTFS schedule.
+
+    `city` scopes the lookup: stop slugs are unique per city, not globally —
+    30 of them are shared (zeleznicka-stanica in Novi Sad and Niš, bolnica in
+    Novi Sad and Belgrade). Matching on the slug alone silently resolved to
+    whichever row came first, so Herceg Novi's /stajaliste/centar/ showed Novi
+    Sad's arrival for line 1, and 29 other stops lost their ETA entirely
+    because the other city's line numbers never matched the rendered rows.
+    """
     stop_slug = request.args.get('slug', '').strip()
+    city = request.args.get('city', '').strip()
     if not stop_slug or not db_ready():
         return jsonify([])
 
-    stop = query_one("SELECT id FROM city_stops WHERE slug = ?", [stop_slug])
+    if city:
+        stop = query_one(
+            "SELECT id FROM city_stops WHERE slug = ? AND city = ?",
+            [stop_slug, city])
+    else:
+        # Older cached pages call without the city; keep them working.
+        stop = query_one("SELECT id FROM city_stops WHERE slug = ?", [stop_slug])
     if not stop:
         return jsonify([])
 
@@ -742,22 +757,27 @@ def api_stop_arrivals():
         name = line['name'] or ''
         direction = name.split('—')[-1].strip() if '—' in name else name
 
-        # Real GTFS times
-        mins1 = _time_to_min(departures[0]) - current_min
-        if mins1 < 0:
-            mins1 = 0
-        mins2 = _time_to_min(departures[1]) - current_min if len(departures) > 1 else mins1 + 15
-        if mins2 < mins1:
-            mins2 = mins1 + 15
+        waits = [w for w in (_minutes_until(d, current_min) for d in departures)
+                 if w is not None]
+        if not waits:
+            # Every candidate departure is already in the past — same contract
+            # as "no GTFS data": omit rather than show a stale countdown.
+            continue
 
-        result.append({
+        entry = {
             'line': line['number'],
             'direction': direction,
             'color': line.get('color') or '#0d9488',
             'slug': line['line_slug'],
-            'mins': mins1,
-            'mins2': mins2,
-        })
+            'mins': waits[0],
+        }
+        # Only advertise a second departure when GTFS actually has one. It used
+        # to fall back to mins1 + 15, contradicting the "we do NOT fabricate"
+        # rule three lines above and inventing a bus on a 15-minute headway the
+        # timetable never promised.
+        if len(waits) > 1:
+            entry['mins2'] = waits[1]
+        result.append(entry)
 
     return jsonify(result)
 
@@ -766,6 +786,20 @@ def _time_to_min(t: str) -> int:
     """Convert HH:MM:SS to minutes since midnight. Handles 25:00:00 etc."""
     parts = t.split(':')
     return int(parts[0]) * 60 + int(parts[1])
+
+
+def _minutes_until(departure: str, current_min: int) -> int | None:
+    """Minutes from now until a GTFS departure time, or None if it has passed.
+
+    GTFS encodes a service day's after-midnight trips as 24:00:00-27:59:59, so
+    a 00:45 night bus is stored as '24:45:00'. Subtracting the wall-clock
+    minute directly turned those into ~24-hour countdowns: at 00:30 the bus
+    leaving in 15 minutes read as "24.2 h" and one that left 15 minutes ago
+    read as "23.8 h". Folding the extended hour back into a real clock minute
+    fixes both — 13345 stop_times rows use this notation.
+    """
+    wait = _time_to_min(departure) % (24 * 60) - current_min
+    return wait if wait >= 0 else None
 
 
 @city_bp.route('/api/city-stops')
@@ -783,12 +817,15 @@ def api_city_stops():
     if not db_ready():
         return jsonify([])
 
+    # LIMIT without ORDER BY let the engine pick any 500 of the matching rows,
+    # so panning back to the same viewport could return a different subset and
+    # markers appeared to flicker in and out. Order by id for a stable slice.
     stops = query("""
         SELECT name, slug, lat, lon
         FROM city_stops
         WHERE lat BETWEEN ? AND ?
           AND lon BETWEEN ? AND ?
-          AND lat IS NOT NULL
+        ORDER BY id
         LIMIT 500
     """, [sw_lat, ne_lat, sw_lon, ne_lon])
 
