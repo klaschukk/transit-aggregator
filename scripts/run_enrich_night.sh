@@ -31,7 +31,13 @@ find data/cache/og -name "*.png" -mtime +7 -delete 2>/dev/null || true
 # ── Scrapers: no DB access, so the site stays up for this whole phase ────────
 
 log "Scraping Niš stops (Overpass OSM)..."
-python -u data/pipelines/scrape_nis_stops.py 2>&1 | tee -a "$LOG" || log "WARN: scrape_nis_stops failed"
+python -u data/pipelines/scrape_nis_stops.py nis 2>&1 | tee -a "$LOG" || log "WARN: scrape_nis_stops nis failed"
+
+# Novi Sad's own source ships stop names without coordinates, so its stops
+# come from the same OSM importer. Separate invocation: a failure for one city
+# must not skip the other.
+log "Scraping Novi Sad stops (Overpass OSM)..."
+python -u data/pipelines/scrape_nis_stops.py novi-sad 2>&1 | tee -a "$LOG" || log "WARN: scrape_nis_stops novi-sad failed"
 
 # Montenegro city transport (OSM). Self-healing: writes each city's lines.json
 # only on a successful fetch, so an Overpass 504 keeps yesterday's data; build_db
