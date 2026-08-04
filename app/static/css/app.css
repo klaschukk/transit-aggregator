@@ -891,6 +891,13 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   font-weight: 600;
   line-height: 1.25;
   color: var(--color-text);
+  /* Fill the rest of the cell. The input's own box is one 20px line of
+     text; the cell around it is 60-64px. Without this the other ~40px
+     is dead — tapping the top or bottom of the "Odakle?" field, which
+     reads as one control, does nothing. This is the site's primary
+     conversion control, so it is the last place to lose a tap. */
+  flex: 1;
+  min-height: 0;
 }
 .journey-form__input::placeholder { color: var(--color-text-muted); font-weight: 400; }
 /* A date input renders its own spinner/indicator; strip the chrome that
@@ -1959,6 +1966,43 @@ input:focus-visible,
 /* Page transitions */
 main { animation: fadeInUp .25s ease both; }
 
+/* ── Review CTA, sticky-bottom variant (A/B review_cta_v1) ───────────
+   This shipped with no CSS at all: a bare inline <a> rendering 130x18
+   mid-page, well under the 24x24 WCAG 2.2 target minimum, for a variant
+   whose spec calls it a "mobile-friendly bar". Styled as the bar it
+   claims to be, and folded into the bottom-stack arbiter so it obeys the
+   same priority as every other fixed-bottom element — consent first. */
+.ab-review-sticky {
+  position: fixed;
+  left: 0; right: 0;
+  bottom: 0;
+  z-index: var(--z-promo);
+  display: flex;
+  justify-content: center;
+  padding: var(--space-3) var(--space-4)
+           max(var(--space-3), env(safe-area-inset-bottom));
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -6px 24px rgba(15, 23, 42, .10);
+}
+.ab-review-sticky__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 var(--space-6);
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-dark);
+  color: #fff;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  text-decoration: none;
+  transition: filter .15s ease;
+}
+.ab-review-sticky__btn:hover { filter: brightness(1.08); color: #fff; }
+/* Consent outranks it, same rule the other promos follow. */
+body:has(.cookie-banner[data-visible="true"]) .ab-review-sticky { display: none; }
+
 /* The mobile bottom nav gets every one of its styles — including the
    `position: fixed` and the hide above 768px — from app.mobile.css,
    which the <link> gates at max-width:767px. Above that the element
@@ -2108,6 +2152,11 @@ main.container > * + * { margin-top: var(--space-6); }
 }
 .contact-form__group {
   padding: var(--space-3) var(--space-5);
+  /* Column flex so the input can stretch to the group's full height —
+     it is a 20px line of text inside a 67px box otherwise, leaving most
+     of the visible field unclickable. */
+  display: flex;
+  flex-direction: column;
 }
 .contact-form__group + .contact-form__group {
   border-top: 1px solid var(--color-border);
@@ -2123,6 +2172,8 @@ main.container > * + * { margin-top: var(--space-6); }
 }
 .contact-form__input {
   width: 100%;
+  flex: 1;
+  min-height: 24px;
   border: none;
   background: none;
   font-size: var(--text-base);

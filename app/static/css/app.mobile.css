@@ -814,6 +814,7 @@ body { padding-bottom: var(--m-bnav-h); }
    behaviour minus the z-index inversion, which is already an
    improvement. */
 .cookie-banner   { bottom: var(--m-bnav-h); }
+.ab-review-sticky{ bottom: var(--m-bnav-h); }
 .mobile-anchor-ad{ bottom: var(--m-bnav-h); }
 .review-prompt   { bottom: calc(var(--m-bnav-h) + var(--mspace-2)); }
 .install-banner  { bottom: calc(var(--m-bnav-h) + var(--mspace-2)); }
@@ -823,8 +824,10 @@ body:has(.cookie-banner[data-visible="true"]) .review-prompt,
 body:has(.cookie-banner[data-visible="true"]) .install-banner {
   display: none;
 }
-/* Anchor ad live → it owns the band; the two nags wait their turn. */
+/* Anchor ad live → it owns the band; the nags wait their turn. The
+   sticky review CTA shares that band too, so it yields as well. */
 body:has(.mobile-anchor-ad:not(.mobile-anchor-ad--hidden)) .review-prompt,
+body:has(.mobile-anchor-ad:not(.mobile-anchor-ad--hidden)) .ab-review-sticky,
 body:has(.mobile-anchor-ad:not(.mobile-anchor-ad--hidden)) .install-banner {
   display: none;
 }
