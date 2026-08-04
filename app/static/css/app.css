@@ -1396,6 +1396,17 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 }
 .alert--success { background: var(--color-primary-light); color: var(--color-primary-dark); }
 .alert--success svg { color: var(--color-primary); flex-shrink: 0; }
+/* .alert--error was used by contact.html and defined nowhere, so a
+   failed submit rendered on the bare .alert layout: transparent
+   background, --color-text ink, no border. The one sentence telling you
+   the form did not go through looked like any other sentence on the
+   page. Danger tokens already existed for exactly this. */
+.alert--error {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+  border-left: 3px solid var(--color-danger);
+}
+.alert--error svg { color: var(--color-danger); flex-shrink: 0; }
 
 /* ETA badges */
 .eta { font-weight: 700; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }

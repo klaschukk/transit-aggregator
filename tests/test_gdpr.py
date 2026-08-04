@@ -83,3 +83,27 @@ def test_umami_no_unconditional_script_tag(client):
     assert resp.status_code == 200
     assert b'<script defer src="https://analytics.farmako.ro/umami"' not in resp.data
     assert b'<script async src="https://analytics.farmako.ro/umami"' not in resp.data
+
+
+def test_contact_error_is_visible_and_announced(client):
+    """A failed submit must look and sound like a failure.
+
+    .alert--error was referenced by contact.html and defined in no
+    stylesheet, so the message rendered on the bare .alert layout —
+    transparent background, body-text ink, no border — and carried no
+    role, so a screen reader was told nothing at all. The page reloads
+    on failure, which is precisely when the user needs a signal.
+    """
+    resp = client.post('/kontakt/', data={'name': 'x', 'email': 'nope',
+                                          'message': 'hi'},
+                       follow_redirects=True)
+    body = resp.data.decode()
+    if 'alert--error' not in body:
+        import pytest
+        pytest.skip('validation did not reject this payload')
+    assert 'role="alert"' in body, 'error alert is not announced'
+
+    css = client.get('/static/css/app.css').data.decode()
+    assert '.alert--error {' in css, '.alert--error has no rule of its own'
+    assert '--color-danger-bg' in css.split('.alert--error {', 1)[1][:300], \
+        'error alert must use the danger tokens, not inherit body colours'

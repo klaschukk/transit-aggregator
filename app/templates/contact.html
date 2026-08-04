@@ -30,7 +30,7 @@
 </div>
 
 {% if sent %}
-<div class="alert alert--success fade-in">
+<div class="alert alert--success fade-in" role="status">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M5 13l4 4L19 7"/></svg>
   {{ _('contact.sent_ok') }}
 </div>
@@ -38,7 +38,15 @@
 
 <div class="contact-layout">
   {% if error %}
-  <div class="alert alert--error">{{ _(error) }}</div>
+  {# role="alert" so the failure is announced. The page reloads on a
+     failed submit, so without it a screen-reader user gets no signal at
+     all that anything went wrong. #}
+  <div class="alert alert--error" role="alert">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true">
+      <circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/>
+    </svg>
+    {{ _(error) }}
+  </div>
   {% endif %}
   <form class="contact-form" action="{{ lang_prefix }}/kontakt/" method="post">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
