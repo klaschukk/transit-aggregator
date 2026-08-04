@@ -14,6 +14,7 @@ import os
 import re
 import sys
 import time
+from datetime import date, datetime
 from pathlib import Path
 
 import duckdb
@@ -225,6 +226,9 @@ def build() -> None:
         _load_city_schedule(conn, 'novi-sad')
         _latinise_display_names(conn)
         _cleanup(conn)
+        # After _cleanup: it deletes trip-less intercity routes, which is
+        # exactly what this restores for recently-seen slugs.
+        _remember_routes(conn)
     else:
         print("No scraped data found — loading sample data...")
         _load_sample_data(conn)
@@ -1578,6 +1582,83 @@ def _load_city_schedule(conn: duckdb.DuckDBPyConnection, city: str) -> None:
                     st_count += 1
 
     print(f"  Loaded {city} schedule: {trip_count} trips, {st_count} stop_times")
+
+
+ROUTE_HISTORY_FILE = RAW_DIR / 'route_slug_history.json'
+ROUTE_MEMORY_DAYS = 45
+
+
+def _remember_routes(conn: duckdb.DuckDBPyConnection) -> None:
+    """Keep recently-seen routes alive so a quiet day cannot 410 them.
+
+    busticket4 answers international searches for a single date, and its
+    coverage flickers: on 2026-08-04 the API returned a departure for
+    Beograd->Sofija and none for Sofija->Beograd, while our DB held exactly the
+    opposite from an earlier run. _cleanup drops any intercity route with no
+    trips, the route page then 404s into abort(410), and Google is told a live
+    route is permanently gone — /rute/beograd-sofija/ was being crawled and
+    served 410 while the API had a departure for it.
+
+    So routes are remembered for ROUTE_MEMORY_DAYS and re-inserted without
+    trips when they go missing. The page still renders, and the existing
+    thin-content rule marks a route with no schedule noindex,follow — the
+    URL keeps its identity instead of being retired and re-earned.
+
+    Runs after _cleanup, which would otherwise delete them again.
+    """
+    today = datetime.now().date()
+    history: dict[str, dict] = {}
+    if ROUTE_HISTORY_FILE.exists():
+        try:
+            with open(ROUTE_HISTORY_FILE, encoding='utf-8') as f:
+                history = json.load(f)
+        except (OSError, ValueError) as exc:
+            print(f"  WARN: unreadable route history ({exc}) — starting fresh")
+
+    live = conn.execute(
+        "SELECT slug, from_city, to_city, from_city_slug, to_city_slug, "
+        "distance_km, type FROM routes"
+    ).fetchall()
+    for slug, fc, tc, fcs, tcs, dist, rtype in live:
+        history[slug] = {
+            'from_city': fc, 'to_city': tc, 'from_city_slug': fcs,
+            'to_city_slug': tcs, 'distance_km': dist, 'type': rtype,
+            'last_seen': today.isoformat(),
+        }
+
+    live_slugs = {row[0] for row in live}
+    next_id = (conn.execute("SELECT COALESCE(MAX(id), 0) FROM routes").fetchone()[0]) + 1
+    restored = 0
+    for slug, meta in history.items():
+        if slug in live_slugs:
+            continue
+        try:
+            age = (today - date.fromisoformat(meta['last_seen'])).days
+        except (KeyError, ValueError):
+            continue
+        if age > ROUTE_MEMORY_DAYS:
+            continue
+        conn.execute(
+            "INSERT INTO routes (id, slug, from_city, to_city, from_city_slug, "
+            "to_city_slug, distance_km, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (next_id, slug, meta['from_city'], meta['to_city'],
+             meta['from_city_slug'], meta['to_city_slug'],
+             meta['distance_km'], meta['type'])
+        )
+        next_id += 1
+        restored += 1
+
+    # Forget anything past the window so the file cannot grow without bound.
+    history = {
+        s: m for s, m in history.items()
+        if m.get('last_seen')
+        and (today - date.fromisoformat(m['last_seen'])).days <= ROUTE_MEMORY_DAYS
+    }
+    ROUTE_HISTORY_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(ROUTE_HISTORY_FILE, 'w', encoding='utf-8') as f:
+        json.dump(history, f, ensure_ascii=False, indent=1, sort_keys=True)
+    print(f"  Route memory: {len(history)} known, restored {restored} "
+          f"missing this run")
 
 
 def _cleanup(conn: duckdb.DuckDBPyConnection) -> None:
