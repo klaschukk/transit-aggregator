@@ -1966,6 +1966,54 @@ input:focus-visible,
 /* Page transitions */
 main { animation: fadeInUp .25s ease both; }
 
+/* ── Guide departure table ───────────────────────────────────────────
+   /vodici/<slug>/ renders a 4-column table of departures with no CSS at
+   all: default border-collapse, zero cell padding, centred headers. At
+   390px it measured 395px inside a 316px wrapper whose overflow-x was
+   `visible`, so the Price column ran off the side and body's
+   overflow-x:hidden simply clipped it — the number a reader came for
+   was unreachable on a phone, with no scrollbar to hint it existed.
+
+   The wrapper scrolls now, and the table gets the same hairline-row
+   treatment the rest of the site uses for lists. */
+.route-trips {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: var(--space-4) 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.trips-table {
+  width: 100%;
+  min-width: 340px;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+.trips-table th,
+.trips-table td {
+  padding: var(--space-2-5) var(--space-3);
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--color-border);
+}
+.trips-table th {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--color-text-muted);
+  background: var(--color-bg-alt);
+}
+.trips-table tbody tr:last-child td { border-bottom: none; }
+.trips-table td:first-child,
+.trips-table td:nth-child(2) { font-variant-numeric: tabular-nums; }
+/* Carrier is the one column that may wrap rather than push price off. */
+.trips-table td:nth-child(3) { white-space: normal; min-width: 96px; }
+.price-free {
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
 /* ── Review CTA, sticky-bottom variant (A/B review_cta_v1) ───────────
    This shipped with no CSS at all: a bare inline <a> rendering 130x18
    mid-page, well under the 24x24 WCAG 2.2 target minimum, for a variant

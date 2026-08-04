@@ -28,7 +28,7 @@
             <span class="ccy-rsd">{{ r.min_price_rsd }} RSD</span>
             <span class="ccy-eur">{{ (r.min_price_rsd / (config.EUR_RSD_RATE or 117))|round|int }} €</span>
           {% else %}
-            <span class="price-free">{{ _('home.valueprop_free') }}</span>
+            <span class="price-free">{{ _('common.free') }}</span>
           {% endif %}
         </td>
         <td>{{ r.trip_count }}</td>

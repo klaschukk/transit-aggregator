@@ -516,6 +516,39 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Key numbers',
         'ru': 'Ключевые цифры',
     },
+    # Price cell on guide pages where city transport is free. This lived
+    # as 'home.valueprop_free' and went out with the hero strip that also
+    # used it — leaving two guide pages rendering the literal key text
+    # where a price belongs. Renamed to what it actually is.
+    'common.free': {
+        'sr': 'Besplatno',
+        'en': 'Free',
+        'ru': 'Бесплатно',
+    },
+    'ads.dismiss_aria': {
+        'sr': 'Zatvori reklamu',
+        'en': 'Dismiss ad',
+        'ru': 'Закрыть рекламу',
+    },
+    # The chat widget carried these three inline as
+    #   _('chat.x') if _('chat.x') != 'chat.x' else '<Serbian>'
+    # — a guard against the keys not existing, which meant EN and RU
+    # visitors were served Serbian chat copy. Defined properly instead.
+    'chat.powered_by': {
+        'sr': 'Prevozni · AI',
+        'en': 'Prevozni · AI',
+        'ru': 'Prevozni · AI',
+    },
+    'chat.greeting': {
+        'sr': 'Zdravo! Pitaj me o redovima vožnje, cenama karata ili linijama gradskog prevoza.',
+        'en': 'Hi! Ask me about timetables, ticket prices or city transport lines.',
+        'ru': 'Привет! Спросите меня о расписаниях, ценах на билеты или городских маршрутах.',
+    },
+    'chat.placeholder': {
+        'sr': 'Pitaj nešto...',
+        'en': 'Ask something...',
+        'ru': 'Спросите что-нибудь...',
+    },
     'ads.label': {
         'sr': 'Reklama',
         'en': 'Advertisement',

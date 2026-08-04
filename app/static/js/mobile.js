@@ -278,6 +278,12 @@
       if (!content) return;
       if (content.hasAttribute('data-collapse')) return;      // template opted in
       if (block.querySelector('[data-collapse-toggle]')) return;
+      /* Never collapse prose that IS the page. /vodici/<slug>/ puts the
+         whole guide inside a .seo-block, so the blanket rule clamped a
+         3,220-character article down to 165px behind a "read more" —
+         hiding the entire reason the page exists. <article> is the
+         signal: supplementary SEO prose is never wrapped in one. */
+      if (block.closest('article')) return;
       if (content.getBoundingClientRect().height < MIN_HEIGHT) return;
 
       content.setAttribute('data-collapse', '1');
