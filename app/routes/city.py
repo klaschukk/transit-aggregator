@@ -226,7 +226,16 @@ def city_hub(city: str):
 @city_bp.route('/gradski/<city>/linija/<line_slug>/')
 def line_detail(city: str, line_slug: str):
     # Static redirects for slugs renamed in a DB re-crawl (GSC 404 list).
-    if line_slug in _LINE_SLUG_REDIRECTS.get(city, {}):
+    # Live data wins over the static redirect map — see the same guard in
+    # stop_detail. A line the map calls renamed can come back under its old
+    # slug in a later scrape, and 301-ing away would hide a real page.
+    _line_is_live = (
+        db_ready()
+        and cached_query_one(
+            "SELECT 1 AS ok FROM city_lines WHERE city = ? AND slug = ?",
+            [city, line_slug], ttl=300) is not None
+    )
+    if not _line_is_live and line_slug in _LINE_SLUG_REDIRECTS.get(city, {}):
         new_slug = _LINE_SLUG_REDIRECTS[city][line_slug]
         return redirect(url_for('city.line_detail', city=city, line_slug=new_slug), code=301)
 
@@ -449,7 +458,17 @@ def line_detail(city: str, line_slug: str):
 @city_bp.route('/gradski/<city>/stajaliste/<stop_slug>/')
 def stop_detail(city: str, stop_slug: str):
     # Static redirects for stops renamed or removed in a DB re-crawl.
-    if stop_slug in _STOP_SLUG_REDIRECTS.get(city, {}):
+    # Live data wins over the static redirect map. These entries record stops
+    # that a past re-scrape dropped, but a later scrape can bring them back —
+    # the Novi Sad OSM stop import returned 9 of them. Redirecting away from a
+    # stop we now have hides a real page and puts a 301 in the sitemap.
+    _stop_is_live = (
+        db_ready()
+        and cached_query_one(
+            "SELECT 1 AS ok FROM city_stops WHERE city = ? AND slug = ?",
+            [city, stop_slug], ttl=300) is not None
+    )
+    if not _stop_is_live and stop_slug in _STOP_SLUG_REDIRECTS.get(city, {}):
         new_slug = _STOP_SLUG_REDIRECTS[city][stop_slug]
         if new_slug:
             return redirect(url_for('city.stop_detail', city=city, stop_slug=new_slug), code=301)

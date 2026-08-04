@@ -7,16 +7,23 @@ from pathlib import Path
 import requests
 
 BASE_DIR = Path(__file__).parent.parent
-NIS_DIR = BASE_DIR / 'raw' / 'nis'
 OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
 HEADERS = {'User-Agent': 'TransitSerbia/1.0 (prevozni.com)'}
-# Niš bounding box (generous)
-BBOX = '43.27,21.84,43.38,21.97'
+
+# City -> generous bounding box. Novi Sad was added because its source (JGSP
+# /mreza) ships stop NAMES only: 59 lines carried just 66 stops, 1.1 per line,
+# against 3.1 for Niš and 13.5 for Kragujevac. OSM route relations are the
+# same source that gave those cities their stops.
+CITY_BBOX = {
+    'nis': '43.27,21.84,43.38,21.97',
+    'novi-sad': '45.18,19.70,45.35,19.95',
+}
+DEFAULT_CITY = 'nis'
 
 
-def fetch_routes():
+def fetch_routes(bbox):
     q = f'''[out:json][timeout:60];
-relation['type'='route']['route'='bus']({BBOX});
+relation['type'='route']['route'='bus']({bbox});
 out body;'''
     r = requests.post(OVERPASS_URL, data={'data': q}, headers=HEADERS, timeout=90)
     r.raise_for_status()
@@ -54,7 +61,7 @@ def fetch_nodes(routes):
         else:
             raise RuntimeError(
                 f'Overpass kept refusing node batch {i // 300 + 1} — aborting '
-                f'rather than writing Niš with missing stops')
+                f'rather than writing the city with missing stops')
     return nodes
 
 
@@ -81,12 +88,16 @@ def build_lines(routes, nodes):
 
 
 def main():
-    lines_path = NIS_DIR / 'lines.json'
+    city = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_CITY
+    if city not in CITY_BBOX:
+        print(f'unknown city: {city} (known: {list(CITY_BBOX)})', file=sys.stderr)
+        sys.exit(2)
+    lines_path = BASE_DIR / 'raw' / city / 'lines.json'
     with open(lines_path) as f:
         existing = {l['number']: l for l in json.load(f)}
 
-    print('Fetching Niš routes from Overpass...')
-    routes = fetch_routes()
+    print(f'Fetching {city} routes from Overpass...')
+    routes = fetch_routes(CITY_BBOX[city])
     print(f'  {len(routes)} route relations found')
     nodes = fetch_nodes(routes)
     print(f'  {len(nodes)} stop nodes fetched')
