@@ -33,12 +33,6 @@ find data/cache/og -name "*.png" -mtime +7 -delete 2>/dev/null || true
 log "Scraping Niš stops (Overpass OSM)..."
 python -u data/pipelines/scrape_nis_stops.py nis 2>&1 | tee -a "$LOG" || log "WARN: scrape_nis_stops nis failed"
 
-# Novi Sad's own source ships stop names without coordinates, so its stops
-# come from the same OSM importer. Separate invocation: a failure for one city
-# must not skip the other.
-log "Scraping Novi Sad stops (Overpass OSM)..."
-python -u data/pipelines/scrape_nis_stops.py novi-sad 2>&1 | tee -a "$LOG" || log "WARN: scrape_nis_stops novi-sad failed"
-
 # Montenegro city transport (OSM). Self-healing: writes each city's lines.json
 # only on a successful fetch, so an Overpass 504 keeps yesterday's data; build_db
 # skips any city whose file is absent. Non-fatal.
@@ -50,6 +44,15 @@ python -u data/pipelines/scrape_kragujevac.py 2>&1 | tee -a "$LOG" || log "WARN:
 
 log "Scraping Novi Sad lines (JGSP)..."
 python -u data/pipelines/scrape_gspns.py 2>&1 | tee -a "$LOG" || log "WARN: scrape_gspns failed"
+
+# MUST run after scrape_gspns: both write data/raw/novi-sad/lines.json, and
+# gspns rewrites it wholesale from JGSP /mreza. With the OSM import first, the
+# 490 stops it had just fetched were overwritten by JGSP's name-only list the
+# same night. Running it second means OSM enriches the fresh JGSP lines instead.
+# Novi Sad's own source ships stop names without coordinates, so its stops come
+# from the same OSM importer used for Nis.
+log "Scraping Novi Sad stops (Overpass OSM)..."
+python -u data/pipelines/scrape_nis_stops.py novi-sad 2>&1 | tee -a "$LOG" || log "WARN: scrape_nis_stops novi-sad failed"
 
 # Affiliate freshness: trips.bt4_line_id goes stale as busticket4 schedules
 # churn, and a stale id deep-links the Kupi button into a dead 0.00 checkout.
