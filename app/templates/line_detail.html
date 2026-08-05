@@ -156,7 +156,8 @@
   {% endfor %}
 </div>
 {% else %}
-  {{ empty_state(icon='stop', text=_('line.no_stops')) }}
+  {{ empty_state(icon='stop', text=_('line.no_stops'),
+                 action_url=lang_prefix ~ '/gradski/' ~ city ~ '/', action_label=_('nav.city_transport')) }}
 {% endif %}
 
 <!-- ═══ GTFS Schedule ═══ -->

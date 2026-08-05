@@ -520,6 +520,18 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     # as 'home.valueprop_free' and went out with the hero strip that also
     # used it — leaving two guide pages rendering the literal key text
     # where a price belongs. Renamed to what it actually is.
+    # 410 is served for routes/lines/operators that existed and were
+    # withdrawn, so the copy says "no longer runs", not "wrong address".
+    'error.410_title': {
+        'sr': 'Ova stranica više ne postoji',
+        'en': 'This page no longer exists',
+        'ru': 'Этой страницы больше нет',
+    },
+    'error.410_text': {
+        'sr': 'Linija ili ruta je ukinuta. Pretražite aktuelne polaske ispod.',
+        'en': 'This line or route has been withdrawn. Search current departures below.',
+        'ru': 'Линия или маршрут отменён. Найдите актуальные рейсы ниже.',
+    },
     'common.free': {
         'sr': 'Besplatno',
         'en': 'Free',

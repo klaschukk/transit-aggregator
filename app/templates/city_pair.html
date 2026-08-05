@@ -261,7 +261,8 @@
     <p class="ai-route__note">{{ _('ai_route.disclaimer') }}</p>
   </section>
   {% else %}
-  {{ empty_state(icon='search', text=_('city_pair.no_direct'), sub=from_city ~ ' → ' ~ to_city) }}
+  {{ empty_state(icon='search', text=_('city_pair.no_direct'), sub=from_city ~ ' → ' ~ to_city,
+                 action_url=lang_prefix ~ '/rute/', action_label=_('nav.all_routes')) }}
   {% endif %}
 {% endif %}
 

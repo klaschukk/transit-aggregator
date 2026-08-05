@@ -249,7 +249,8 @@
 </div>
 
 {% else %}
-  {{ empty_state(icon='search', text=_('search.no_results'), sub=_('buy.note')) }}
+  {{ empty_state(icon='search', text=_('search.no_results'), sub=_('buy.note'),
+                 action_url=lang_prefix ~ '/rute/', action_label=_('nav.all_routes')) }}
 {% endif %}
 
 {# Mid-content ad — section-level slot AFTER the schedule/trip list and BEFORE

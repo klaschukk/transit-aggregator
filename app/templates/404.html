@@ -40,9 +40,13 @@
     </svg>
   </div>
 
-  <h1 class="error-page__code">404</h1>
-  <p class="error-page__title">{{ _('error.404_title') }}</p>
-  <p class="error-page__sub">{{ _('error.404_text') }}</p>
+  {# Shared with the 410 handler, which is deliberate — 410 gets URLs
+     dropped from the index faster than 404. The heading used to say
+     "404" regardless, telling the visitor one thing while the response
+     said another. #}
+  <h1 class="error-page__code">{{ status_code|default(404) }}</h1>
+  <p class="error-page__title">{{ _('error.410_title') if status_code == 410 else _('error.404_title') }}</p>
+  <p class="error-page__sub">{{ _('error.410_text') if status_code == 410 else _('error.404_text') }}</p>
 
   <!-- Search on 404 -->
   <div class="error-page__search">

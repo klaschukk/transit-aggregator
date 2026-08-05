@@ -24,7 +24,8 @@
 <div id="favList" class="route-grid"></div>
 
 <div id="favEmpty" hidden>
-  {{ empty_state(icon='star', text=_('fav.empty'), sub=_('fav.empty_sub')) }}
+  {{ empty_state(icon='star', text=_('fav.empty'), sub=_('fav.empty_sub'),
+                 action_url=lang_prefix ~ '/rute/', action_label=_('nav.all_routes')) }}
   <p class="page-cta">
     <a class="btn btn--primary" href="{{ lang_prefix }}/rute/">{{ _('fav.browse_routes') }}</a>
   </p>

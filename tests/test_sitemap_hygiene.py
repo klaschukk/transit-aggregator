@@ -10,6 +10,8 @@ timestamp. Scoped to /sitemap.xml (5 lines) so it stays fast.
 
 import re
 
+import pytest
+
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 

@@ -169,7 +169,8 @@
 </div>
 
 {% else %}
-  {{ empty_state(icon='stop', text=_('stop.no_lines')) }}
+  {{ empty_state(icon='stop', text=_('stop.no_lines'),
+                 action_url=lang_prefix ~ '/gradski/' ~ city ~ '/', action_label=_('nav.city_transport')) }}
 {% endif %}
 
 {# Mid-content ad slot — sits between the lines/ETA block and the

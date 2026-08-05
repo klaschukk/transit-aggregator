@@ -180,7 +180,8 @@
   {% endif %}
 </section>
 {% else %}
-  {{ empty_state(icon='bus', text=_('country.no_routes')) }}
+  {{ empty_state(icon='bus', text=_('country.no_routes'),
+                 action_url=lang_prefix ~ '/destinacije/', action_label=_('nav.destinations')) }}
 {% endif %}
 
 <!-- Newsletter — scoped to country -->

@@ -465,12 +465,14 @@ def create_app(config_name: str | None = None) -> Flask:
     # Error handlers
     @app.errorhandler(404)
     def not_found(e):
-        return render_template('404.html'), 404
+        return render_template('404.html', status_code=404), 404
 
     @app.errorhandler(410)
     def gone(e):
         # Signal permanent removal so Google drops the URL faster than 404.
-        return render_template('404.html'), 410
+        # The template is shared with 404, so pass the code through rather
+        # than let the page announce "404" over a 410 response.
+        return render_template('404.html', status_code=410), 410
 
     @app.errorhandler(500)
     def server_error(e):

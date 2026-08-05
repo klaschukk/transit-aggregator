@@ -162,7 +162,8 @@
   {% endif %}
 </section>
 {% else %}
-  {{ empty_state(icon='bus', text=_('operator.no_routes')) }}
+  {{ empty_state(icon='bus', text=_('operator.no_routes'),
+                 action_url=lang_prefix ~ '/prevoznici/', action_label=_('carriers.h1')) }}
 {% endif %}
 
 <!-- Newsletter (price alerts scoped to operator) -->
