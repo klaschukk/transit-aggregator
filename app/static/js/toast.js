@@ -27,7 +27,8 @@
     root = document.createElement('div');
     root.id = ROOT_ID;
     root.setAttribute('role', 'region');
-    root.setAttribute('aria-label', 'Notifications');
+    root.setAttribute('aria-label',
+      document.body.dataset.i18nNotifications || 'Notifications');
     root.setAttribute('aria-live', 'polite');
     document.body.appendChild(root);
     return root;

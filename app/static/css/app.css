@@ -1,6 +1,20 @@
 /* ============================================================
-   TRANSIT SRBIJA — Design System
-   Single file, mobile-first, 0 !important, 0 hardcoded colors
+   Prevozni — Design System
+   Single file, mobile-first, token-first.
+
+   This header used to claim "0 !important, 0 hardcoded colors".
+   Neither was true: 7 !important here, 19 in app.mobile.css, and 142
+   literal colour values. Stating a rule the file already breaks is
+   worse than stating none — the next person trusts it and reasons from
+   a false premise. The actual position:
+
+   - !important is legitimate for the prefers-reduced-motion kill switch
+     and nowhere else. The rest are same-selector overrides in the mobile
+     overlay that would win on source order anyway; they are cargo, not
+     load-bearing.
+   - Literal colours are legitimate for #fff on a coloured surface, for
+     rgba() tints of a token, and inside SVG data-URIs. A raw hex that
+     duplicates a token is not.
    ============================================================ */
 
 /* ── 1. Reset ── */

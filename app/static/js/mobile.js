@@ -223,8 +223,19 @@
       var cta = document.createElement('button');
       cta.type = 'button';
       cta.className = 'static-map-cta';
-      cta.textContent = '🗺  Tap to load map';
-      cta.setAttribute('aria-label', 'Load interactive map');
+      /* Was a map emoji plus hard-coded English "Tap to load map" — the
+         project bans emoji in favour of SVG, and the site's default
+         locale is Serbian, so that string was wrong for most visitors.
+         Copy comes from <body> data-* so it follows the locale. */
+      var mapLabel = document.body.dataset.i18nMapLoad || 'Tap to load map';
+      cta.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+        'stroke-width="1.6" width="18" height="18" aria-hidden="true">' +
+        '<path d="M9 3L3 6v15l6-3 6 3 6-3V3l-6 3-6-3z"/>' +
+        '<path d="M9 3v15M15 6v15"/></svg>';
+      cta.appendChild(document.createTextNode(mapLabel));
+      cta.setAttribute('aria-label',
+        document.body.dataset.i18nMapLoadAria || mapLabel);
       cta.addEventListener('click', function () {
         delete m.dataset.staticMap;
         // Surface the original Leaflet div so its lazy loader picks up.

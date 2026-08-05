@@ -240,10 +240,14 @@ sudo systemctl start prevozni && rm -f logs/.maintenance
 
 - Python: PEP 8, type hints, макс 120 символов
 - Templates: Jinja2, `{% include %}` для header/footer, `{% macro %}` для trip_card и т.д.
-- CSS: семантические переменные (--color-primary), mobile-first, 0 !important
+- CSS: семантические переменные (--color-primary), mobile-first.
+  `!important` — только для kill-switch `prefers-reduced-motion`; в
+  app.mobile.css их 19 штук исторически, они не несущие (тот же
+  селектор выиграл бы по порядку файлов) — при правках не плодить
 - Git: conventional commits (feat:, fix:, docs:, data:, infra:)
 - Inline styles: НОЛЬ (кроме динамического background:color на line-badge)
-- Emoji: НОЛЬ (SVG иконки)
+- Emoji: НОЛЬ (SVG иконки). Осталось: `✓`/`✕` в admin/dashboard.html,
+  admin/backlinks.html и `✓` как значение stats-strip в stop_detail.html
 
 ## Текущий статус (июнь 2026)
 

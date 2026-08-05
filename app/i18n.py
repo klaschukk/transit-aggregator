@@ -532,6 +532,25 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'This line or route has been withdrawn. Search current departures below.',
         'ru': 'Линия или маршрут отменён. Найдите актуальные рейсы ниже.',
     },
+    # Strings that JS injects. They were hard-coded English in mobile.js
+    # and toast.js — on a site whose default locale is Serbian, a visitor
+    # on a slow connection was shown "Tap to load map" in English, and
+    # screen readers got English labels in every locale.
+    'maps.tap_to_load': {
+        'sr': 'Dodirnite da učitate mapu',
+        'en': 'Tap to load map',
+        'ru': 'Нажмите, чтобы загрузить карту',
+    },
+    'a11y.load_map': {
+        'sr': 'Učitaj interaktivnu mapu',
+        'en': 'Load interactive map',
+        'ru': 'Загрузить интерактивную карту',
+    },
+    'a11y.notifications': {
+        'sr': 'Obaveštenja',
+        'en': 'Notifications',
+        'ru': 'Уведомления',
+    },
     'common.free': {
         'sr': 'Besplatno',
         'en': 'Free',
