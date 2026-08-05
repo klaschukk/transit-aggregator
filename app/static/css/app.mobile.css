@@ -453,8 +453,8 @@ body.m-nav-open .site-nav#siteNav {
    credibility strip. A 2x2 grid shows everything at once with no
    interaction cost. */
 .home-stats {
-  display: grid !important;
-  grid-template-columns: repeat(2, 1fr) !important;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--mspace-2);
   padding: 0 var(--mspace-3);
   margin-top: -16px;
@@ -490,7 +490,7 @@ body.m-nav-open .site-nav#siteNav {
 
 /* 9c. Popular routes — convert two-column grid into a horizontal card-rail. */
 .home-routes {
-  display: flex !important;
+  display: flex;
   overflow-x: auto;
   gap: var(--mspace-2);
   scroll-snap-type: x mandatory;
@@ -513,7 +513,7 @@ body.m-nav-open .site-nav#siteNav {
 
 /* 9d. Cities grid — clean 2x2 with bigger touch targets. */
 .home-cities-grid {
-  grid-template-columns: 1fr 1fr !important;
+  grid-template-columns: 1fr 1fr;
   gap: var(--mspace-2);
 }
 .home-city-card {
@@ -534,45 +534,6 @@ body.m-nav-open .site-nav#siteNav {
 /* 9e. How-it-works — vertical timeline replacing horizontal step row.
    Hide the decorative icon on mobile; the numbered circle is enough
    wayfinding and dropping the icon kills the broken centered-svg layout. */
-.how-it-works {
-  display: flex !important;
-  flex-direction: column;
-  gap: var(--mspace-4);
-  text-align: left !important;
-}
-.how-it-works__step {
-  display: grid !important;
-  grid-template-columns: 36px 1fr;
-  column-gap: var(--mspace-3);
-  row-gap: 2px;
-  align-items: start;
-  text-align: left !important;
-}
-.how-it-works__num {
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  background: var(--color-primary);
-  color: #fff;
-  font-size: var(--mtext-sm);
-  font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  grid-column: 1; grid-row: 1 / span 2;
-  margin: 0 !important;
-}
-.how-it-works__icon { display: none !important; }
-.how-it-works__label {
-  grid-column: 2; grid-row: 1;
-  font-size: var(--mtext-base);
-  font-weight: 700;
-  margin: 0;
-  align-self: center;
-}
-.how-it-works__desc {
-  grid-column: 2; grid-row: 2;
-  font-size: var(--mtext-sm);
-  color: var(--color-text-muted);
-  margin: 0;
-}
 
 /* 9f. Newsletter section — full-width tinted card. */
 .home-newsletter {
@@ -619,7 +580,7 @@ body.m-nav-open .site-nav#siteNav {
 /* 10a. Stats strip — densify into 3-column compact row. .stats-strip
    already exists; override gap + padding. */
 .stats-strip {
-  display: grid !important;
+  display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--mspace-1);
   padding: var(--mspace-2) var(--mspace-3);
@@ -680,7 +641,7 @@ body.m-nav-open .site-nav#siteNav {
    row under the prose, indented to the text column (icon + gap). */
 .seo-block { flex-wrap: wrap; }
 .seo-block__more {
-  display: inline-flex !important;
+  display: inline-flex;
   flex: 0 0 100%;
   justify-content: flex-start;
   margin-left: calc(40px + var(--mspace-4));
@@ -717,10 +678,10 @@ body.m-nav-open .site-nav#siteNav {
    mobile so the banner takes roughly half that, leaving the fold for
    real content. */
 .cookie-banner {
-  padding: 10px 12px max(10px, env(safe-area-inset-bottom)) 12px !important;
-  gap: 6px 10px !important;
-  font-size: var(--mtext-xs) !important;
-  box-shadow: 0 -4px 14px rgba(15, 23, 42, .12) !important;
+  padding: 10px 12px max(10px, env(safe-area-inset-bottom)) 12px;
+  gap: 6px 10px;
+  font-size: var(--mtext-xs);
+  box-shadow: 0 -4px 14px rgba(15, 23, 42, .12);
 }
 .cookie-banner__text {
   font-size: var(--mtext-xs);
