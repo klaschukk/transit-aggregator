@@ -67,20 +67,38 @@ python -u data/pipelines/scrape_intercity.py 2>&1 | tee -a "$LOG" || log "WARN: 
 log "Scraping international trips..."
 python -u data/pipelines/scrape_international.py 2>&1 | tee -a "$LOG" || log "WARN: scrape_international failed"
 
-# ── DB phase: needs the write lock, so the service must be down ─────────────
-# gunicorn holds a read lock on transit.duckdb; DuckDB allows either one writer
-# or many readers, so build_db/enrich fail with "Conflicting lock is held" while
-# the service runs. The flag stops the */5 healthcheck from restarting it
-# underneath us (see scripts/healthcheck.sh).
+# ── DB build: runs with the site UP ─────────────────────────────────────────
+# build_db writes to transit.duckdb.tmp and finishes with an atomic os.replace,
+# so the live DB stays intact and workers keep serving throughout. It used to
+# sit inside the maintenance window purely by habit, which cost ~1m51s of 503s
+# for nothing.
 
-log "Entering maintenance window (stopping service for DB rebuild)..."
+log "Rebuilding transit.duckdb (site stays up)..."
+python -u data/pipelines/build_db.py 2>&1 | tee -a "$LOG"
+
+# Pair-level affiliate map (app/affiliates/bt4_lineids.json): only departures
+# busticket4 actually sells online (purchase_allowed) get a lineId. It writes
+# JSON, never the DB, so it does not need the service down either — this was
+# the biggest slice of the old window at ~3m27s. partners.py loads the JSON at
+# import, so the restart below is what ships it.
+log "Refreshing BT4 affiliate line ids (site stays up)..."
+python -u data/pipelines/refresh_bt4_lineids.py 2>&1 | tee -a "$LOG" || log "WARN: refresh_bt4_lineids failed"
+
+# ── Maintenance window: only what genuinely needs the write lock ────────────
+# gunicorn holds a read lock on transit.duckdb; DuckDB allows either one writer
+# or many readers, so enrich fails with "Conflicting lock is held" while the
+# service runs. The flag stops the */5 healthcheck from restarting it
+# underneath us (see scripts/healthcheck.sh).
+#
+# The restart also makes workers pick up the DB that build_db swapped in — they
+# hold an open handle to the replaced inode until then — and load the fresh
+# affiliate map. Window is now seconds instead of 5+ minutes.
+
+log "Entering maintenance window (enrich needs the write lock)..."
 touch "$MAINT_FLAG"
 trap 'rm -f "$MAINT_FLAG"' EXIT
 sudo systemctl stop prevozni
 sleep 2
-
-log "Rebuilding transit.duckdb..."
-python -u data/pipelines/build_db.py 2>&1 | tee -a "$LOG"
 
 # Must run AFTER build_db: build_db recreates city_stops from the raw JSON, so
 # enriching first threw away every coordinate it had just fetched.
@@ -92,12 +110,6 @@ python -u data/pipelines/enrich_stops_coords.py enrich --limit 200 2>&1 | tee -a
 # service stopped — it would take the site down for the whole night. It has
 # its own script, scripts/refresh_line_geometries.sh, which scrapes against a
 # copy and swaps it in with seconds of downtime.
-
-# Pair-level affiliate map (app/affiliates/bt4_lineids.json): only departures
-# busticket4 actually sells online (purchase_allowed) get a lineId. partners.py
-# loads the JSON at import, so the start below is what ships it.
-log "Refreshing BT4 affiliate line ids..."
-python -u data/pipelines/refresh_bt4_lineids.py 2>&1 | tee -a "$LOG" || log "WARN: refresh_bt4_lineids failed"
 
 log "Starting transit (fresh DB + affiliate map)..."
 sudo systemctl start prevozni
