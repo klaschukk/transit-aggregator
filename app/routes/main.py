@@ -101,14 +101,25 @@ def index():
     """) if db_ready() else []
     cities_list = [c['city'] for c in cities]
 
-    stats = {'routes': 0, 'lines': 0, 'stops': 0, 'cities': 0}
+    stats = {'routes': 0, 'lines': 0, 'stops': 0, 'cities': 0,
+             'operators': 0, 'routes_priced': 0, 'trips_priced': 0}
     if db_ready():
+        # `operators` counts only carriers that actually run a priced
+        # intercity trip — the home page uses it for "compare N carriers",
+        # which would be a false claim if it counted rows nobody can book.
         row = cached_query_one("""
             SELECT
                 (SELECT COUNT(*) FROM routes WHERE type = 'intercity') AS routes,
                 (SELECT COUNT(*) FROM city_lines) AS lines,
                 (SELECT COUNT(*) FROM city_stops) AS stops,
-                (SELECT COUNT(DISTINCT city) FROM city_lines) AS cities
+                (SELECT COUNT(DISTINCT city) FROM city_lines) AS cities,
+                (SELECT COUNT(DISTINCT t.operator_id)
+                   FROM trips t JOIN routes r ON r.id = t.route_id
+                  WHERE r.type = 'intercity' AND t.price_rsd > 0) AS operators,
+                (SELECT COUNT(DISTINCT r.id)
+                   FROM routes r JOIN trips t ON t.route_id = r.id
+                  WHERE r.type = 'intercity' AND t.price_rsd > 0) AS routes_priced,
+                (SELECT COUNT(*) FROM trips WHERE price_rsd > 0) AS trips_priced
         """)
         if row:
             stats = dict(row)

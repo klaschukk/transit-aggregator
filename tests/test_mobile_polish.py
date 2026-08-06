@@ -14,29 +14,30 @@ import pytest
 # ── Home: one credibility strip, not two ──────────────────────────────
 
 
-def test_home_has_a_single_stats_strip(client):
-    """The hero used to carry a mobile-only .hero__valueprop strip
-    (routes / carriers / countries / free) directly above .home-stats
-    (routes / lines / stops / cities) — two rows of numbers, back to
-    back, saying the same thing on the only viewport where space is
-    scarce. .home-stats renders on both breakpoints and is the one that
-    survived."""
-    resp = client.get('/')
-    assert resp.status_code == 200
-    body = resp.data.decode('utf-8')
+def test_home_answers_why_buy_not_how_much_inventory(client):
+    """The slot under the search box used to hold four bare numbers —
+    routes, lines, stops, cities. It is the best real estate on the page
+    and "3 480 stops" answers no question a person about to buy a ticket
+    is asking. It now answers four that they are: what can I compare,
+    what does it cost me, where do the numbers come from, who takes my
+    money."""
+    body = client.get('/').data.decode('utf-8')
     assert 'hero__valueprop' not in body, \
         'duplicate hero stats strip is back — one credibility row is enough'
-    # The section wrapper, not its __item / __num children.
-    assert body.count('class="home-stats container') == 1
+    assert body.count('class="home-trust container') == 1
+    assert body.count('home-trust__item') == 4
+    assert 'home-stats' not in body, 'the vanity strip is back'
 
 
-def test_home_stats_strip_localised(client):
-    """The surviving strip still renders real numbers with localised
-    labels on every locale."""
-    for path, word in (('/', 'stajali'), ('/en/', 'stops'), ('/ru/', 'останов')):
-        body = client.get(path).data.decode('utf-8')
-        assert 'home-stats__num' in body, path
-        assert word in body, path
+def test_home_makes_no_price_promise(client):
+    """Prevozni takes an affiliate commission and cannot verify the
+    partner's price against the carrier's own, so the value strip must
+    never imply one. Guarded because it is the tempting claim to add."""
+    body = client.get('/').data.decode('utf-8').lower()
+    for phrase in ('najniža cena', 'najjeftinije garantovano', 'bez provizije',
+                   'lowest price', 'best price guarantee', 'no commission',
+                   'самая низкая цена', 'без комиссии'):
+        assert phrase not in body, f'unverifiable price claim on the home page: {phrase!r}'
 
 
 def test_home_drops_duplicate_feature_cards(client):

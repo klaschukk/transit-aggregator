@@ -80,9 +80,12 @@ def test_homepage_has_hero(client):
     assert "hero__title" in html
 
 
-def test_homepage_has_stats(client):
+def test_homepage_has_value_strip(client):
+    """Was .home-stats — four bare numbers under the search box. Replaced
+    by four cards that answer why a visitor should buy here rather than
+    reporting how much inventory exists."""
     html = client.get("/").data.decode()
-    assert "home-stats" in html
+    assert "home-trust" in html
 
 
 def test_homepage_has_popular_routes(client):

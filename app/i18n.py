@@ -551,6 +551,56 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Notifications',
         'ru': 'Уведомления',
     },
+    # Home value strip. Every claim here is one the site already makes in
+    # its footer or buy note — free/no registration, data from public
+    # sources, and the fact that Prevozni does not sell tickets itself.
+    # Nothing about price guarantees: we take an affiliate commission and
+    # cannot verify the partner's price against the carrier's own.
+    'home.trust_compare_h': {
+        'sr': '{routes} ruta sa cenama',
+        'en': '{routes} routes with prices',
+        'ru': '{routes} маршрутов с ценами',
+    },
+    'home.trust_compare_p': {
+        'sr': 'Polasci {operators} prevoznika na jednom mestu',
+        'en': 'Departures from {operators} carriers in one place',
+        'ru': 'Рейсы {operators} перевозчиков в одном месте',
+    },
+    'home.trust_free_h': {
+        'sr': 'Besplatno',
+        'en': 'Free',
+        'ru': 'Бесплатно',
+    },
+    'home.trust_free_p': {
+        'sr': 'Bez registracije i bez naloga',
+        'en': 'No registration, no account',
+        'ru': 'Без регистрации и аккаунта',
+    },
+    'home.trust_source_h': {
+        'sr': 'Javni izvori',
+        'en': 'Public sources',
+        'ru': 'Открытые источники',
+    },
+    'home.trust_source_p': {
+        'sr': 'Red vožnje i cene samih prevoznika',
+        'en': 'Timetables and fares from the carriers',
+        'ru': 'Расписание и цены самих перевозчиков',
+    },
+    'home.trust_buy_h': {
+        'sr': 'Kupovina kod prevoznika',
+        'en': 'You buy from the carrier',
+        'ru': 'Покупка у перевозчика',
+    },
+    'home.trust_buy_p': {
+        'sr': 'Vodimo vas na zvaničnu prodaju karata',
+        'en': 'We take you to the official ticket seller',
+        'ru': 'Ведём вас на официальную продажу билетов',
+    },
+    'home.trust_aria': {
+        'sr': 'Zašto Prevozni',
+        'en': 'Why Prevozni',
+        'ru': 'Почему Prevozni',
+    },
     'common.free': {
         'sr': 'Besplatno',
         'en': 'Free',

@@ -1170,58 +1170,58 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
    sits half-overlapping the hero so it reads as a "card hovering on the
    hero" instead of a flat strip. Switches to 2x2 below 640px and a
    compact stack at 380px. */
-.home-stats {
+/* ── Why-Prevozni strip ──────────────────────────────────────────────
+   Replaces four bare numbers directly under the search box. Same card
+   treatment, but each card is a headline + one line of explanation, so
+   the slot answers a buyer's question instead of reporting inventory. */
+.home-trust {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: 1fr;
   gap: var(--space-3);
-  background: transparent;
-  border: 0;
-  border-radius: 0;
   margin-top: calc(-1 * var(--space-8));
   position: relative;
-  z-index: 10;
-  box-shadow: none;
-  overflow: visible;
-  padding: 0;
+  z-index: var(--z-sticky);
 }
-.home-stats__item {
-  text-align: center;
-  padding: var(--space-4-5) var(--space-3) var(--space-4);
-  background: linear-gradient(180deg, #ffffff 0%, var(--color-bg-alt) 100%);
+.home-trust__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  box-shadow: 0 6px 20px rgba(15, 23, 42, .06);
-  transition: transform .18s ease, box-shadow .18s ease;
+  box-shadow: var(--shadow-sm);
 }
-.home-stats__item + .home-stats__item { border-left: 1px solid var(--color-border); }
-.home-stats__icon {
-  display: block;
-  width: 22px; height: 22px;
-  margin: 0 auto var(--space-1-5);
-  color: var(--color-primary);
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.home-trust__icon {
+  flex-shrink: 0;
+  width: 40px; height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  display: flex; align-items: center; justify-content: center;
 }
-.home-stats__num {
-  font-size: var(--text-2xl);
+.home-trust__body { min-width: 0; }
+.home-trust__h {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
   font-weight: 800;
+  line-height: 1.25;
   color: var(--color-text);
-  font-variant-numeric: tabular-nums;
-  line-height: 1.1;
-  letter-spacing: -.02em;
 }
-.home-stats__label {
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
+.home-trust__p {
   margin-top: var(--space-1);
-  font-weight: 600;
-  text-transform: lowercase;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.45;
 }
+@media (min-width: 640px) {
+  .home-trust { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .home-trust { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
 @media (hover: hover) {
-  .home-stats__item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 26px rgba(15, 23, 42, .10);
-  }
 }
 
 /* Home sections */
@@ -1282,7 +1282,6 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
      not, which is why From used to sit above To on a 1440px screen. */
   .hero__search-wrap { max-width: 940px; }
   .hero__city-grid { grid-template-columns: repeat(4, 1fr); }
-  .home-stats { max-width: 920px; margin-left: auto; margin-right: auto; }
 }
 @media (min-width: 1024px) {
   .home-routes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -1936,10 +1935,6 @@ input:focus-visible,
 
 /* ── Extra-narrow fixes (< 480px) ── */
 @media (max-width: 767px) {
-  .home-stats { grid-template-columns: repeat(2, 1fr); gap: var(--space-2); margin-top: calc(-1 * var(--space-5)); }
-  .home-stats__item { padding: var(--space-3-5) var(--space-2) var(--space-3); }
-  .home-stats__icon { width: 20px; height: 20px; margin-bottom: var(--space-1); }
-  .home-stats__num { font-size: var(--text-xl); }
 }
 @media (max-width: 479px) {
   .trip-card { gap: var(--space-1-5); padding: var(--space-2-5) var(--space-3); }
@@ -1988,8 +1983,6 @@ input:focus-visible,
 .hero__quick-links { opacity: 0; animation: fadeInUp .6s cubic-bezier(.22,.68,0,1.2) .38s both; }
 
 /* Stats counter: tabular nums + pulse when JS finishes counting */
-.home-stats__num { font-variant-numeric: tabular-nums; display: inline-block; }
-.home-stats__num.counted { animation: countPulse .35s ease; }
 
 /* Better card hovers — route cards */
 .home-route { transition: border-color .18s, box-shadow .18s, transform .18s; }
@@ -3871,9 +3864,17 @@ select:focus-visible, textarea:focus-visible {
 }
 .hero__quick-links::-webkit-scrollbar { display: none; }
 .hero__quick-links > * { flex-shrink: 0; }
-@media (min-width: 1024px) {
-  /* Wide enough that the row fits — centre it under the capsule. */
-  .hero__quick-links { justify-content: center; overflow-x: visible; }
+/* Fade the right edge so a clipped row reads as "there is more" rather
+   than as a cut-off. Sits above the chips, ignores pointer events. */
+.hero__quick-links::after {
+  content: '';
+  position: sticky;
+  right: 0;
+  flex: 0 0 var(--space-10);
+  margin-left: calc(-1 * var(--space-10));
+  align-self: stretch;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, var(--color-hero-2));
 }
 .hero__quick-label {
   font-size: var(--text-xs);
@@ -3948,12 +3949,6 @@ select:focus-visible, textarea:focus-visible {
 }
 
 /* Stats numbers — gradient for visual impact */
-.home-stats__num {
-  background: linear-gradient(135deg, var(--color-primary-dark) 20%, var(--color-primary) 80%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
 
 /* Section heading left accent bar */
 .home-section__title,

@@ -142,11 +142,13 @@ if ('serviceWorker' in navigator) {
   if (!d.value) d.value = today;
 })();
 
-/* ── Scroll-reveal + stats counter ──────────────────────────────────────
+/* ── Scroll-reveal ──────────────────────────────────────────────────────
    Adds .is-visible to .fade-in elements as they enter the viewport so
    CSS triggers the animation only when the element is actually seen.
-   Also animates .home-stats__num with a count-up when the stats section
-   scrolls into view — makes the numbers feel alive on the homepage. */
+
+   This also ran a count-up on .home-stats__num. That strip is gone — the
+   slot under the search box now answers why-buy-here instead of
+   reporting inventory — so the counter went with it. */
 (function(){
   /* Immediate fallback: no IntersectionObserver or reduced-motion */
   var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -170,29 +172,6 @@ if ('serviceWorker' in navigator) {
     revealObs.observe(el);
   });
 
-  /* Stats count-up */
-  var statsEl = document.querySelector('.home-stats');
-  if (!statsEl) return;
-  var counted = false;
-  var statsObs = new IntersectionObserver(function(entries){
-    if (counted || !entries[0].isIntersecting) return;
-    counted = true;
-    statsEl.querySelectorAll('.home-stats__num').forEach(function(num){
-      var target = parseInt(num.textContent.replace(/\D/g, ''), 10);
-      if (!target || target < 2) return;
-      var start = performance.now();
-      var dur = 900;
-      (function tick(now){
-        var p = Math.min((now - start) / dur, 1);
-        var ease = 1 - Math.pow(1 - p, 3);
-        num.textContent = Math.round(ease * target);
-        if (p < 1) { requestAnimationFrame(tick); }
-        else { num.textContent = target; num.classList.add('counted'); }
-      })(start);
-    });
-    statsObs.unobserve(statsEl);
-  }, { threshold: 0.3 });
-  statsObs.observe(statsEl);
 })();
 
 
