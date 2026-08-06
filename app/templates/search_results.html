@@ -2,11 +2,12 @@
 {% block title %}{% if from_city and to_city %}{{ from_city }} → {{ to_city }} — {{ _('search.results_for') }} — Prevozni{% else %}{{ _('search.title') }} — Prevozni{% endif %}{% endblock %}
 {% block meta_description %}{% if from_city and to_city %}{{ _('search_results.meta_from') }} {{ from_city }} {{ _('search_results.meta_to') }} {{ to_city }} — {{ _('search_results.meta_desc') }}{% else %}{{ _('search_results.meta_default') }}{% endif %}{% endblock %}
 
-{% block head_extra %}
-{% if from_city and to_city %}
-<meta name="robots" content="noindex, follow">
-{% endif %}
-{% endblock %}
+{# No <meta robots> here: base.html emits it from g.meta_robots, which the
+   route sets to "noindex, nofollow" (and mirrors into an X-Robots-Tag header).
+   This template used to add a second, conflicting "noindex, follow" tag, so a
+   populated /pretraga/ shipped two robots directives. Google resolves that to
+   the stricter one, but a page contradicting itself is not a signal worth
+   sending. #}
 
 {% block content %}
 
