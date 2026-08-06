@@ -75,9 +75,18 @@
         {% if popular_routes %}
         <div class="hero__quick-links" aria-label="{{ _('home.quick_links_aria') }}">
           <span class="hero__quick-label">{{ _('home.quick_label') }}</span>
+          {# The price is what turns a chip from a label into a reason to
+             click. min_price_rsd already came back with this query and
+             was simply not rendered — the same routes show "od N €" in
+             the list further down the page. #}
           {% for r in popular_routes[:6] %}
           <a href="{{ lang_prefix }}/rute/{{ r.slug }}/" class="hero__quick-chip">
-            {{ r.from_city }} → {{ r.to_city }}
+            <span class="hero__quick-pair">{{ r.from_city }} → {{ r.to_city }}</span>
+            {% if r.min_price_rsd %}
+            <span class="hero__quick-price">
+              <span class="ccy-rsd">{{ r.min_price_rsd }} RSD</span><span class="ccy-eur">{{ (r.min_price_rsd / config.EUR_RSD_RATE)|round|int }} €</span>
+            </span>
+            {% endif %}
           </a>
           {% endfor %}
         </div>

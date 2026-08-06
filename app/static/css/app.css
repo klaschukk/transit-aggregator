@@ -932,9 +932,12 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   transform: translateY(-50%);
   width: 40px; height: 40px;
   border-radius: var(--radius-pill);
-  border: 1px solid var(--color-border);
-  background: var(--color-bg);
-  color: var(--color-primary);
+  /* A 1px --color-border ring on a white capsule has almost no edge, so
+     this read as a smudge rather than the one pressable control inside
+     the field. Tint the disc and use the brand border. */
+  border: 1px solid var(--color-primary-200);
+  background: var(--color-primary-50);
+  color: var(--color-primary-dark);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   z-index: 3;
@@ -977,7 +980,26 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
     border-top: 0;
     border-left: 1px solid var(--color-border);
   }
-  .journey-form__cell--from { padding-left: var(--space-6); }
+  /* A 64px pill curves with a 32px radius, so the first 32px of the box
+     is corner, not usable width. At the old 24px the "Polazak" label and
+     the placeholder under it sat inside that curve. */
+  .journey-form__cell--from { padding-left: var(--space-8); }
+  /* The swap button straddles the from↔to seam and its opaque disc
+     covers the 1px divider there — which is why this capsule showed a
+     rule before "Datum" and none between the two cities, reading as an
+     asymmetric, unfinished edge. Draw the missing segments as two short
+     rules above and below the disc so the seam is continuous. */
+  .journey-form__cell--to { position: relative; }
+  .journey-form__cell--to::before,
+  .journey-form__cell--to::after {
+    content: '';
+    position: absolute;
+    left: -1px;
+    width: 1px;
+    background: var(--color-border);
+  }
+  .journey-form__cell--to::before { top: 0; height: calc(50% - 22px); }
+  .journey-form__cell--to::after { bottom: 0; height: calc(50% - 22px); }
   .journey-form__swap {
     grid-area: swap;
     position: static;
@@ -986,7 +1008,15 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
     justify-self: start;
   }
   .journey-form__swap:active { transform: rotate(180deg); }
-  .journey-form__submit { margin-right: var(--space-2); }
+  /* Nest concentrically inside the pill: a 12px-radius rectangle sitting
+     in a 32px-radius end left a crescent of white around it. A pill in a
+     pill shares the curve. */
+  .journey-form__submit {
+    border-radius: var(--radius-pill);
+    margin: var(--space-1-5);
+    padding: 0 var(--space-6);
+    height: calc(var(--jf-cell-h) - var(--space-3));
+  }
 }
 
 /* Autocomplete dropdown */
@@ -1059,7 +1089,9 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .hero__tabs {
   display: inline-flex;
   gap: var(--space-1);
-  margin-bottom: var(--space-3);
+  /* 12px left the active white pill touching the white capsule below,
+     so the two read as one blob with a notch. */
+  margin-bottom: var(--space-5);
   padding: var(--space-1);
   background: rgba(255,255,255,.12);
   border-radius: var(--radius-pill);
@@ -3851,7 +3883,9 @@ select:focus-visible, textarea:focus-visible {
   white-space: nowrap;
 }
 .hero__quick-chip {
-  display: inline-block;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
   padding: 5px var(--space-3) /* off-scale */;
   border-radius: var(--radius-pill);
   background: rgba(255,255,255,.12);
@@ -3862,6 +3896,12 @@ select:focus-visible, textarea:focus-visible {
   transition: background .15s, border-color .15s, transform .1s;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+}
+.hero__quick-pair { white-space: nowrap; }
+.hero__quick-price {
+  font-weight: 700;
+  color: var(--color-accent-light);
+  white-space: nowrap;
 }
 .hero__quick-chip:hover {
   background: rgba(255,255,255,.22);
