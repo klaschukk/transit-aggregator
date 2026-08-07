@@ -756,7 +756,12 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   border-radius: var(--radius-pill);
   text-decoration: none;
   white-space: nowrap;
-  min-height: 36px;
+  /* Measured at 76x37 on desktop — under the 44x44 WCAG 2.2 minimum, on
+     the one control the whole page exists to get pressed. The comment
+     above reasoned that the 44px parent row carried the target, but the
+     row is not the link: only these 37px were clickable. */
+  min-height: 44px;
+  padding-inline: var(--space-5);
   transition: background .15s, transform .15s;
 }
 .trip-card__buy:hover { background: var(--color-accent-dark); color: var(--color-text); transform: translateY(-1px); }

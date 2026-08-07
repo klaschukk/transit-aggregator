@@ -16,6 +16,14 @@ class Config:
     )
     BASE_URL = os.environ.get('BASE_URL', 'http://localhost:5000')
     EUR_RSD_RATE = max(1.0, float(os.environ.get('EUR_RSD_RATE', '117')))
+    # Ticket resellers that arrive in `operators` as if they were bus
+    # companies. BusTicket4 is the source for 1 770 of 2 517 priced trips
+    # and lands there under its own name, so 70% of trip cards were
+    # naming the checkout platform in the slot a reader takes to mean
+    # "who am I riding with". We do not know the operating carrier for
+    # those trips, and saying nothing is honest where guessing is not.
+    # Compared case-insensitively against operators.name.
+    RESELLER_OPERATORS = ('busticket4.me', 'busticket4', 'bookaway')
     DEBUG = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
     GA_TRACKING_ID = os.environ.get('GA_TRACKING_ID', '')
     ADSENSE_ID = os.environ.get('ADSENSE_ID', '')

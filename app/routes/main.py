@@ -114,13 +114,16 @@ def index():
                 (SELECT COUNT(*) FROM city_stops) AS stops,
                 (SELECT COUNT(DISTINCT city) FROM city_lines) AS cities,
                 (SELECT COUNT(DISTINCT t.operator_id)
-                   FROM trips t JOIN routes r ON r.id = t.route_id
-                  WHERE r.type = 'intercity' AND t.price_rsd > 0) AS operators,
+                   FROM trips t
+                   JOIN routes r ON r.id = t.route_id
+                   JOIN operators o ON o.id = t.operator_id
+                  WHERE r.type = 'intercity' AND t.price_rsd > 0
+                    AND lower(o.name) NOT IN (SELECT unnest(?))) AS operators,
                 (SELECT COUNT(DISTINCT r.id)
                    FROM routes r JOIN trips t ON t.route_id = r.id
                   WHERE r.type = 'intercity' AND t.price_rsd > 0) AS routes_priced,
                 (SELECT COUNT(*) FROM trips WHERE price_rsd > 0) AS trips_priced
-        """)
+        """, [list(current_app.config['RESELLER_OPERATORS'])])
         if row:
             stats = dict(row)
 

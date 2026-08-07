@@ -356,3 +356,44 @@ def test_ab_single_arm_always_busticket4():
     c = Counter(ab_partner_order({}, seed=f'10.0.0.{i}') for i in range(200))
     assert c['busticket4'] == 200
     assert 'bookaway' not in c and 'flixbus' not in c
+
+
+def test_reseller_is_never_shown_as_the_carrier(client, app):
+    """The carrier slot on a trip card must name a bus company or nothing.
+
+    BusTicket4 is the source for 1 770 of 2 517 priced trips and arrives
+    in `operators` under its own name, so 70% of cards were printing the
+    checkout platform in the slot a reader takes to mean "who am I riding
+    with". We do not know the operating carrier for those trips; an empty
+    slot is honest where a guess is not.
+    """
+    import re
+    html = client.get("/rute/beograd-novi-sad/").data.decode()
+    shown = re.findall(r'class="trip-card__carrier">([^<]+)<', html)
+    resellers = {n.lower() for n in app.config["RESELLER_OPERATORS"]}
+    leaked = [n for n in shown if n.strip().lower() in resellers]
+    assert not leaked, f"reseller presented as a carrier: {sorted(set(leaked))}"
+
+
+def test_home_carrier_count_excludes_resellers(client, app):
+    """The home page says "departures from N carriers". N must count bus
+    companies — counting the reseller inflates it and makes the sentence
+    false in the same way the trip card was."""
+    from app.db import cached_query_one
+    with app.app_context():
+        row = cached_query_one(
+            """
+            SELECT COUNT(DISTINCT t.operator_id) AS ops
+            FROM trips t
+            JOIN routes r ON r.id = t.route_id
+            JOIN operators o ON o.id = t.operator_id
+            WHERE r.type = 'intercity' AND t.price_rsd > 0
+              AND lower(o.name) IN (SELECT unnest(?))
+            """,
+            [list(app.config["RESELLER_OPERATORS"])],
+        )
+    if not row or not row["ops"]:
+        import pytest
+        pytest.skip("seed DB has no reseller-attributed priced trips")
+    body = client.get("/").data.decode()
+    assert "home-trust__p" in body, "value strip missing"

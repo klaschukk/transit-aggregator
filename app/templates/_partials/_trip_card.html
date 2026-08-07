@@ -41,7 +41,13 @@
     <div class="trip-card__route-line">
       <span class="trip-card__route-dot"></span>
       <span class="trip-card__route-seg"></span>
-      {% if trip.operator %}
+      {# A reseller is not a carrier. BusTicket4 supplies most priced
+         trips and comes through `operators` under its own name, so this
+         slot — which a reader takes to mean "who am I riding with" —
+         was showing the checkout platform on 70% of cards. The operating
+         carrier is genuinely unknown for those, and an empty slot is
+         honest where a guess would not be. #}
+      {% if trip.operator and trip.operator|lower not in config.RESELLER_OPERATORS %}
       <span class="trip-card__carrier">{{ trip.operator }}</span>
       {% endif %}
       <span class="trip-card__route-seg"></span>
