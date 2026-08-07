@@ -182,6 +182,27 @@ def main() -> None:
         line.pop('code', None)
 
     out_path = OUT_DIR / 'lines.json'
+
+    # JGSP /mreza gives stop NAMES only. The richer stop lists (with
+    # coordinates) come from the OSM importer that runs right after this,
+    # writing the same file — so overwriting wholesale throws them away and the
+    # city depends on Overpass succeeding every single night. It did not on
+    # 2026-08-07 (504 on the route query) and Novi Sad dropped from 286 stops
+    # to 66. Carry the existing stop list over for any line whose fresh scrape
+    # has fewer stops; the OSM run then updates them in place.
+    if out_path.exists():
+        try:
+            with open(out_path, encoding='utf-8') as f:
+                previous = {l['number']: l for l in json.load(f)}
+        except (OSError, ValueError, KeyError):
+            previous = {}
+        for line in all_lines:
+            old = previous.get(line['number'])
+            if not old:
+                continue
+            if len(old.get('stops') or []) > len(line.get('stops') or []):
+                line['stops'] = old['stops']
+
     with open(out_path, 'w', encoding='utf-8') as f:
         json.dump(all_lines, f, ensure_ascii=False, indent=2)
 

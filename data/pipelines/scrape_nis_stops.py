@@ -25,9 +25,24 @@ def fetch_routes(bbox):
     q = f'''[out:json][timeout:60];
 relation['type'='route']['route'='bus']({bbox});
 out body;'''
-    r = requests.post(OVERPASS_URL, data={'data': q}, headers=HEADERS, timeout=90)
-    r.raise_for_status()
-    return r.json().get('elements', [])
+    # Same retry the node fetch already had. Without it a single 504 killed the
+    # whole import: on 2026-08-07 Overpass timed out here, scrape_gspns had
+    # already rewritten lines.json with its name-only list, and Novi Sad went
+    # back to 66 stops for the day.
+    for attempt in range(4):
+        if attempt:
+            time.sleep(5.0 * attempt)
+        try:
+            r = requests.post(OVERPASS_URL, data={'data': q},
+                              headers=HEADERS, timeout=90)
+            if r.status_code == 200:
+                return r.json().get('elements', [])
+            print(f'  Overpass {r.status_code} on route query '
+                  f'(attempt {attempt + 1}/4)', file=sys.stderr)
+        except Exception as e:  # noqa: BLE001 — network flake, retry
+            print(f'  route query error: {e} (attempt {attempt + 1}/4)',
+                  file=sys.stderr)
+    raise RuntimeError('Overpass kept refusing the route query — aborting')
 
 
 def fetch_nodes(routes):
