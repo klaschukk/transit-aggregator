@@ -744,6 +744,21 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   border-radius: var(--radius-pill); white-space: nowrap;
 }
 .trip-card__price small { font-size: var(--text-xs); font-weight: 500; }
+/* Deliberately quiet and not numeric: it must never be mistaken for a
+   fare at a glance, only explain why there is not one. */
+.trip-card__facts {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2-5);
+  min-width: 0;
+}
+.trip-card__price-note {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
 .trip-card__buy {
   display: inline-flex; align-items: center; gap: var(--space-1);
   /* Bumped from 5×10 to 8×14 so the Kupi CTA hits ~32px — paired with

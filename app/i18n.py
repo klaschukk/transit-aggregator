@@ -601,6 +601,15 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Why Prevozni',
         'ru': 'Почему Prevozni',
     },
+    # 44 of 74 cards on Beograd–Novi Sad carry no fare, yet every one of
+    # them has a Kupi button. The price cell was simply omitted, so the
+    # card said "buy" over a blank where every neighbouring card shows
+    # money. Name the blank instead of leaving it.
+    'trip.price_on_partner': {
+        'sr': 'Cena pri kupovini',
+        'en': 'Price at checkout',
+        'ru': 'Цена при покупке',
+    },
     'common.free': {
         'sr': 'Besplatno',
         'en': 'Free',

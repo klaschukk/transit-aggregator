@@ -53,11 +53,26 @@
       <span class="trip-card__route-seg"></span>
       <span class="trip-card__route-dot trip-card__route-dot--end"></span>
     </div>
-    {% if trip.duration_min %}
-    {% set _dh = trip.duration_min // 60 %}{% set _dm = trip.duration_min % 60 %}
-    <span class="trip-card__duration">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="11" height="11" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v4l2.5 1.5"/></svg>
-      {%- if _dh %}{{ _dh }}{{ _('common.h') }}{% endif %}{% if _dm %}{% if _dh %} {% endif %}{{ _dm }}{{ _('common.min') }}{% endif -%}
+    {# Duration and the no-fare note share one row. Both .trip-card__middle
+       and .trip-card__meta are flex columns, so either one placed alone
+       claims a whole line — which on this route means 44 of 74 cards
+       growing 22px each. #}
+    {% if trip.duration_min or (not trip.price_rsd and _buy_href) %}
+    <span class="trip-card__facts">
+      {% if trip.duration_min %}
+      {% set _dh = trip.duration_min // 60 %}{% set _dm = trip.duration_min % 60 %}
+      <span class="trip-card__duration">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="11" height="11" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v4l2.5 1.5"/></svg>
+        {%- if _dh %}{{ _dh }}{{ _('common.h') }}{% endif %}{% if _dm %}{% if _dh %} {% endif %}{{ _dm }}{{ _('common.min') }}{% endif -%}
+      </span>
+      {% endif %}
+      {# Most departures on a busy route carry no fare in our data and
+         every one still offers "Kupi". The card used to show that button
+         over a blank where its neighbours show money, so the only way to
+         learn the price was to click through. #}
+      {% if not trip.price_rsd and _buy_href %}
+      <span class="trip-card__price-note">{{ _('trip.price_on_partner') }}</span>
+      {% endif %}
     </span>
     {% endif %}
     {% if trip.is_cheapest or trip.is_fastest %}
