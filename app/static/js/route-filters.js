@@ -43,7 +43,15 @@
     // Reorder the DOM. 'time' restores the server order (by departure).
     var order = original.slice();
     if (sortKey === 'price') {
-      order.sort(function (a, b) { return num(a, 'price') - num(b, 'price'); });
+      /* Departures with no fare in our data must sort LAST, not first.
+         num() returns 0 for a missing price, so "cheapest" was putting
+         every unpriced trip at the top — 44 of 74 on Beograd–Novi Sad.
+         It is the one sort a buyer clicks to compare money, and it could
+         never answer that. The duration branch below already guarded the
+         same way; price did not, and neither did any test. */
+      order.sort(function (a, b) {
+        return (num(a, 'price') || Infinity) - (num(b, 'price') || Infinity);
+      });
     } else if (sortKey === 'duration') {
       order.sort(function (a, b) {
         return (num(a, 'duration') || Infinity) - (num(b, 'duration') || Infinity);

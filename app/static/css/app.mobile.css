@@ -447,47 +447,6 @@ body.m-nav-open .site-nav#siteNav {
    Goal: every section feels app-quality, not a stretched desktop. Layout
    wraps in @media so desktop is untouched. */
 
-/* 9b. Stats — 2x2 grid on mobile. The previous horizontal scroll-rail
-   forced the user to swipe to see the last two of four numbers, which
-   is anti-pattern for a "we have N routes / N stops / N cities"
-   credibility strip. A 2x2 grid shows everything at once with no
-   interaction cost. */
-.home-stats {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--mspace-2);
-  padding: 0 var(--mspace-3);
-  margin-top: -16px;
-  overflow: visible;
-}
-.home-stats__item {
-  background: linear-gradient(180deg, #fff, var(--mtint-surface));
-  border: 1px solid var(--color-border);
-  border-radius: var(--mradius-md);
-  box-shadow: var(--melev-1);
-  padding: var(--mspace-3) var(--mspace-2);
-  text-align: center;
-}
-.home-stats__icon {
-  display: block;
-  width: 22px; height: 22px;
-  margin: 0 auto var(--mspace-1);
-  color: var(--color-primary);
-}
-.home-stats__num {
-  font-size: var(--mtext-xl);
-  font-weight: 800;
-  color: var(--color-text);
-  line-height: 1.1;
-  font-variant-numeric: tabular-nums;
-}
-.home-stats__label {
-  font-size: var(--mtext-xs);
-  color: var(--color-text-muted);
-  margin-top: 2px;
-  font-weight: 600;
-}
-
 /* 9c. Popular routes — convert two-column grid into a horizontal card-rail. */
 .home-routes {
   display: flex;
