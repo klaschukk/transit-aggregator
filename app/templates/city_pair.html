@@ -342,7 +342,7 @@
   </h2>
   <div class="see-also__list">
     {% for rp in related_pairs %}
-    <a href="{{ lang_prefix }}/voznja/{{ rp.from_city_slug }}-do-{{ rp.to_city_slug }}/" class="see-also__link">
+    <a href="{{ lang_prefix }}/rute/{{ rp.slug }}/" class="see-also__link">
       {{ rp.from_city }} → {{ rp.to_city }}
       <small>· {{ rp.trip_count }} {{ _('city_pair.departures_word') }}{% if rp.distance_km %} · {{ rp.distance_km }} km{% endif %}</small>
     </a>
@@ -359,7 +359,7 @@
   </h2>
   <div class="see-also__list">
     {% for rp in onward_pairs %}
-    <a href="{{ lang_prefix }}/voznja/{{ rp.from_city_slug }}-do-{{ rp.to_city_slug }}/" class="see-also__link">
+    <a href="{{ lang_prefix }}/rute/{{ rp.slug }}/" class="see-also__link">
       {{ rp.from_city }} → {{ rp.to_city }}
       <small>· {{ rp.trip_count }} {{ _('city_pair.departures_word') }}{% if rp.distance_km %} · {{ rp.distance_km }} km{% endif %}</small>
     </a>

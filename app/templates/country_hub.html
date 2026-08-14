@@ -152,7 +152,9 @@
      one tap reveals them. #}
   <div class="route-grid" id="countryRouteGrid" data-visible-cap="30">
     {% for r in routes %}
-    <a href="{{ lang_prefix }}/voznja/{{ r.from_city_slug }}-do-{{ r.to_city_slug }}/" class="route-card fade-in fade-in--d{{ loop.index0 % 5 }}"{% if loop.index > 30 %} hidden{% endif %}
+    {# Canonical target: /voznja/<a>-do-<b>/ canonicalises onto this very
+       /rute/<slug>/, so link the indexed page directly. #}
+    <a href="{{ lang_prefix }}/rute/{{ r.slug }}/" class="route-card fade-in fade-in--d{{ loop.index0 % 5 }}"{% if loop.index > 30 %} hidden{% endif %}
        data-trip-count="{{ r.trip_count|default(0) }}"
        data-price="{{ r.min_price_rsd|default(0) }}"
        data-distance="{{ r.distance_km|default(0) }}">

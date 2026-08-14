@@ -8,6 +8,8 @@ hreflang at it.
 
 import re
 
+import pytest
+
 VOZNJA = "/voznja/beograd-do-novi-sad/"
 RUTE = "/rute/beograd-novi-sad/"
 
@@ -60,3 +62,35 @@ def test_pair_without_route_self_references(client):
     canon = _canonical(html)
     if canon is not None:
         assert "/voznja/" in canon
+
+
+def test_city_pages_link_canonical_route_urls(client):
+    """Internal links must target /rute/<slug>/, not the /voznja/ duplicate.
+
+    A /voznja/<a>-do-<b>/ page canonicalises onto its /rute/<slug>/ owner, so
+    linking it sends readers and link equity through a self-declared duplicate.
+    City pages are 55% of search entries, and every one of their route links
+    used to point at /voznja/.
+    """
+    import re
+    for path in ('/gradski/beograd/', '/gradski/nis/'):
+        html = client.get(path).data.decode()
+        rute = set(re.findall(r'href="[^"]*(/rute/[a-z][^"]*)"', html))
+        voznja = set(re.findall(r'href="[^"]*(/voznja/[^"]*)"', html))
+        assert rute, f"{path} links no canonical /rute/<slug>/ pages"
+        # Some /voznja/ links remain by design (far-destination guides, which
+        # are self-canonical); they must not outnumber the canonical ones.
+        assert len(rute) >= len(voznja), (
+            f"{path}: {len(voznja)} /voznja/ links vs {len(rute)} canonical"
+        )
+
+
+def test_linked_route_pages_resolve(client):
+    """Every /rute/<slug>/ a city hub links must actually render."""
+    import re
+    html = client.get('/gradski/beograd/').data.decode()
+    paths = sorted(set(re.findall(r'href="[^"]*(/rute/[a-z][^"]*)"', html)))
+    if not paths:
+        pytest.skip("no route links on the city hub in this DB")
+    for p in paths[:12]:
+        assert client.get(p).status_code == 200, f"{p} linked but not 200"

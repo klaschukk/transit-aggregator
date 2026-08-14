@@ -245,7 +245,12 @@
     <h3 class="see-also__subtitle">{{ _('city_transport.popular_routes_h').format(city=city_label) }}</h3>
     <div class="see-also__grid">
       {% for r in popular_intercity %}
-      <a href="{{ lang_prefix }}/voznja/{{ r.from_city_slug }}-do-{{ r.to_city_slug }}/" class="see-also__card">
+      {# Link the canonical /rute/<slug>/, not /voznja/<a>-do-<b>/: the pair
+         page canonicalises onto exactly this route, so pointing here sends the
+         internal link straight to the indexed page — the one that carries the
+         timetable and the buy button. City pages are 55% of search entries and
+         were passing all of it through a self-declared duplicate. #}
+      <a href="{{ lang_prefix }}/rute/{{ r.slug }}/" class="see-also__card">
         <span class="see-also__card-title">{{ r.from_city }} → {{ r.to_city }}</span>
         <span class="see-also__card-meta">{{ r.trip_count }} {{ _('routes.departures') }}{% if r.distance_km %} · {{ r.distance_km }} km{% endif %}</span>
       </a>

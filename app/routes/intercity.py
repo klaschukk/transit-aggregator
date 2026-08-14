@@ -429,12 +429,12 @@ def city_pair(from_city: str, to_city: str):
     onward_pairs = []
     if route:
         related_pairs = cached_query("""
-            SELECT r.from_city, r.to_city, r.from_city_slug, r.to_city_slug,
+            SELECT r.slug, r.from_city, r.to_city, r.from_city_slug, r.to_city_slug,
                    r.distance_km, COUNT(DISTINCT t.id) as trip_count
             FROM routes r
             LEFT JOIN trips t ON t.route_id = r.id
             WHERE r.from_city = ? AND r.to_city != ? AND r.type = 'intercity'
-            GROUP BY r.from_city, r.to_city, r.from_city_slug, r.to_city_slug, r.distance_km
+            GROUP BY r.slug, r.from_city, r.to_city, r.from_city_slug, r.to_city_slug, r.distance_km
             HAVING trip_count > 0
             ORDER BY trip_count DESC
             LIMIT 8
@@ -443,12 +443,12 @@ def city_pair(from_city: str, to_city: str):
         # Onward: routes departing from the destination city — helps Google
         # understand this page sits in a travel graph, not in isolation.
         onward_pairs = cached_query("""
-            SELECT r.from_city, r.to_city, r.from_city_slug, r.to_city_slug,
+            SELECT r.slug, r.from_city, r.to_city, r.from_city_slug, r.to_city_slug,
                    r.distance_km, COUNT(DISTINCT t.id) as trip_count
             FROM routes r
             LEFT JOIN trips t ON t.route_id = r.id
             WHERE r.from_city = ? AND r.to_city != ? AND r.type = 'intercity'
-            GROUP BY r.from_city, r.to_city, r.from_city_slug, r.to_city_slug, r.distance_km
+            GROUP BY r.slug, r.from_city, r.to_city, r.from_city_slug, r.to_city_slug, r.distance_km
             HAVING trip_count > 0
             ORDER BY trip_count DESC
             LIMIT 8
