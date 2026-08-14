@@ -3867,9 +3867,15 @@ select:focus-visible, textarea:focus-visible {
 }
 
 /* ── Hero quick-link chips ───────────────────────────────────────────── */
-/* One row that scrolls sideways when it runs out of room. Wrapping
-   produced two centred rows of different widths under a form whose
-   edges are hard verticals — the ragged second row read as a mistake. */
+/* A swipe rail on phones, a single complete row on desktop.
+
+   It briefly had a gradient fading the clipped right edge. That was
+   wrong twice over: the gradient ended in --color-hero-2, a fixed navy,
+   while the hero behind it has already turned teal by that point — so it
+   painted a blue smear on a green background — and more basically, a
+   fade is an admission that the row does not fit. Measured: the rail is
+   940px and six chips plus the label need 1 075px, so three fit.
+   Desktop shows the number that fits and the row simply ends. */
 .hero__quick-links {
   display: flex;
   flex-wrap: nowrap;
@@ -3884,17 +3890,17 @@ select:focus-visible, textarea:focus-visible {
 }
 .hero__quick-links::-webkit-scrollbar { display: none; }
 .hero__quick-links > * { flex-shrink: 0; }
-/* Fade the right edge so a clipped row reads as "there is more" rather
-   than as a cut-off. Sits above the chips, ignores pointer events. */
-.hero__quick-links::after {
-  content: '';
-  position: sticky;
-  right: 0;
-  flex: 0 0 var(--space-10);
-  margin-left: calc(-1 * var(--space-10));
-  align-self: stretch;
-  pointer-events: none;
-  background: linear-gradient(to right, transparent, var(--color-hero-2));
+/* 1024px, not 768: at 768 the rail is 736px and three chips need 773,
+   so the row would clip again. Below this the rail stays a swipe rail,
+   which is the natural gesture on phone and tablet anyway, and the
+   half-visible next chip is its own affordance — no fade required. */
+@media (min-width: 1024px) {
+  .hero__quick-links {
+    overflow-x: visible;
+    justify-content: center;
+    padding-bottom: 0;
+  }
+  .hero__quick-chip:nth-of-type(n + 4) { display: none; }
 }
 .hero__quick-label {
   font-size: var(--text-xs);
