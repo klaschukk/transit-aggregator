@@ -30,11 +30,13 @@
   <div class="journey-form__capsule">
 
     <div class="journey-form__cell journey-form__cell--from">
-      <label class="journey-form__label" for="fromCity">{{ _('form.label_from') }}</label>
+      <label class="journey-form__field" for="fromCity">
+        <span class="journey-form__label">{{ _('form.label_from') }}</span>
       <input class="journey-form__input js-city-input" id="fromCity" name="od" type="text"
              value="{{ from_city }}" placeholder="{{ _t.get('from', 'Odakle?') }}" autocomplete="off"
              inputmode="text" enterkeyhint="next"
              role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="fromDropdown">
+      </label>
       <div class="autocomplete" id="fromDropdown" role="listbox"></div>
     </div>
 
@@ -45,18 +47,22 @@
     </button>
 
     <div class="journey-form__cell journey-form__cell--to">
-      <label class="journey-form__label" for="toCity">{{ _('form.label_to') }}</label>
+      <label class="journey-form__field" for="toCity">
+        <span class="journey-form__label">{{ _('form.label_to') }}</span>
       <input class="journey-form__input js-city-input" id="toCity" name="do" type="text"
              value="{{ to_city }}" placeholder="{{ _t.get('to', 'Kuda?') }}" autocomplete="off"
              inputmode="text" enterkeyhint="search"
              role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="toDropdown">
+      </label>
       <div class="autocomplete" id="toDropdown" role="listbox"></div>
     </div>
 
     <div class="journey-form__cell journey-form__cell--date">
-      <label class="journey-form__label" for="tripDate">{{ _('form.label_date') }}</label>
-      <input class="journey-form__input journey-form__date" id="tripDate" name="datum" type="date"
-             value="{{ datum }}" aria-label="{{ _('a11y.trip_date') }}">
+      <label class="journey-form__field" for="tripDate">
+        <span class="journey-form__label">{{ _('form.label_date') }}</span>
+        <input class="journey-form__input journey-form__date" id="tripDate" name="datum" type="date"
+               value="{{ datum }}" aria-label="{{ _('a11y.trip_date') }}">
+      </label>
     </div>
 
     <button type="submit" class="btn btn--accent journey-form__submit">

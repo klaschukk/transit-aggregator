@@ -369,7 +369,16 @@ window.addEventListener('load', function(){
   var _cityInputs = document.querySelectorAll('.js-city-input');
   if (!_cityInputs.length) return;
   _cityInputs.forEach(function(input) {
-    var dropdown = input.parentElement.querySelector('.autocomplete');
+    /* Resolve via aria-controls, which the input already declares, rather
+       than by walking the DOM. parentElement.querySelector() worked only
+       while the input and its listbox were siblings; wrapping the caption
+       and input in a <label> (so a click anywhere in the field focuses it)
+       moved the listbox out of that parent and silently killed the
+       autocomplete on every page using this form. The relationship is
+       declared in the markup — read it there. */
+    var dropdown = document.getElementById(input.getAttribute('aria-controls') || '')
+                || (input.closest('.journey-form__cell') || input.parentElement)
+                     .querySelector('.autocomplete');
     if (!dropdown) return;
     var timer = null;
     var activeIdx = -1;

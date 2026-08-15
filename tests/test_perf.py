@@ -198,3 +198,40 @@ def test_header_logo_is_eager_not_lazy(client):
     tag = m.group(0)
     assert 'loading="lazy"' not in tag, "above-the-fold logo must not be lazy-loaded"
     assert 'loading="eager"' in tag
+
+
+def test_autocomplete_input_and_listbox_are_wired_by_id(client):
+    """The city input must point at its listbox with aria-controls, and
+    the JS must resolve it that way.
+
+    It used to do `input.parentElement.querySelector('.autocomplete')`,
+    which held only while the two were siblings. Wrapping the caption and
+    the input in a <label> — so clicking anywhere in the 64px field
+    focuses it — moved the listbox out of that parent and killed the
+    autocomplete on every page rendering this form. Nothing caught it:
+    the markup was valid, every page still returned 200, and the failure
+    only showed when a human typed a city name.
+    """
+    html = client.get("/").data.decode()
+    assert 'aria-controls="fromDropdown"' in html
+    assert 'id="fromDropdown"' in html
+    assert 'aria-controls="toDropdown"' in html
+    assert 'id="toDropdown"' in html
+    # The lookup must not depend on the input and listbox being siblings.
+    assert "input.parentElement.querySelector('.autocomplete')" not in html, (
+        "autocomplete resolves its listbox by DOM position again — that "
+        "breaks the moment the field markup is regrouped"
+    )
+    assert "input.getAttribute('aria-controls')" in html
+
+
+def test_search_field_label_wraps_its_input(client):
+    """A click anywhere in the field focuses the input, natively.
+
+    The first attempt grew the INPUT to fill the cell instead, which
+    pinned the caption to the capsule's top edge and left the value
+    floating ~25px below it — the two stopped reading as one field.
+    """
+    html = client.get("/").data.decode()
+    for fid in ("fromCity", "toCity", "tripDate"):
+        assert f'class="journey-form__field" for="{fid}"' in html, fid

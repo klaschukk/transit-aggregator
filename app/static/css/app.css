@@ -904,6 +904,22 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .journey-form__cell--to,
 .journey-form__cell--date { border-top: 1px solid var(--color-border); }
 
+/* The <label> fills the cell so a click anywhere in those 64px focuses
+   the input — natively, no overlay. Growing the INPUT for that (which is
+   what this did first) pushed the caption hard against the capsule's top
+   edge and left the placeholder floating 25px below it, so the two
+   stopped reading as one field. The caption and its value stay a tight
+   centred pair; only their container stretches. */
+.journey-form__field {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-0-5);
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  cursor: text;
+}
 .journey-form__label {
   font-size: var(--text-xs);
   font-weight: 700;
@@ -925,13 +941,6 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   font-weight: 600;
   line-height: 1.25;
   color: var(--color-text);
-  /* Fill the rest of the cell. The input's own box is one 20px line of
-     text; the cell around it is 60-64px. Without this the other ~40px
-     is dead — tapping the top or bottom of the "Odakle?" field, which
-     reads as one control, does nothing. This is the site's primary
-     conversion control, so it is the last place to lose a tap. */
-  flex: 1;
-  min-height: 0;
 }
 .journey-form__input::placeholder { color: var(--color-text-muted); font-weight: 400; }
 /* A date input renders its own spinner/indicator; strip the chrome that
