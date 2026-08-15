@@ -84,42 +84,55 @@ python -u data/pipelines/build_db.py 2>&1 | tee -a "$LOG"
 log "Refreshing BT4 affiliate line ids (site stays up)..."
 python -u data/pipelines/refresh_bt4_lineids.py 2>&1 | tee -a "$LOG" || log "WARN: refresh_bt4_lineids failed"
 
-# ── Maintenance window: only what genuinely needs the write lock ────────────
-# gunicorn holds a read lock on transit.duckdb; DuckDB allows either one writer
-# or many readers, so enrich fails with "Conflicting lock is held" while the
-# service runs. The flag stops the */5 healthcheck from restarting it
-# underneath us (see scripts/healthcheck.sh).
+# ── Enrich: on a COPY, so the site never stops ──────────────────────────────
+# gunicorn holds a read lock on transit.duckdb and DuckDB allows either one
+# writer or many readers, so enrich cannot write to the live file. Stopping the
+# service for it cost ~1m37s of 5xx every night — and Google counts those
+# against the "Server error (5xx)" validation, which is exactly the report we
+# need to pass. 503 is a 5xx like any other.
 #
-# The restart also makes workers pick up the DB that build_db swapped in — they
-# hold an open handle to the replaced inode until then — and load the fresh
-# affiliate map. Window is now seconds instead of 5+ minutes.
+# So: copy, enrich the copy, swap it in atomically, then SIGHUP gunicorn.
+# os.replace and a graceful reload are both zero-downtime, so the nightly no
+# longer produces a single 5xx.
 
-log "Entering maintenance window (enrich needs the write lock)..."
-touch "$MAINT_FLAG"
-trap 'rm -f "$MAINT_FLAG"' EXIT
-sudo systemctl stop prevozni
-sleep 2
+ENRICH_WORK=$DIR/data/dbs/.enrich_work.duckdb
+log "Enriching stop coordinates (on a copy, site stays up)..."
+rm -f "$ENRICH_WORK"
+if cp "$DIR/data/dbs/transit.duckdb" "$ENRICH_WORK"; then
+  if DUCKDB_PATH="$ENRICH_WORK" python -u data/pipelines/enrich_stops_coords.py \
+       enrich --limit 200 2>&1 | tee -a "$LOG"; then
+    # Only swap when the copy still looks sane — never replace a good DB with
+    # a truncated one.
+    STOPS=$(python -c "
+import duckdb, sys
+try:
+    c = duckdb.connect('$ENRICH_WORK', read_only=True)
+    print(c.execute('SELECT COUNT(*) FROM city_stops').fetchone()[0])
+except Exception:
+    print(0)
+")
+    if [ "${STOPS:-0}" -gt 100 ]; then
+      mv -f "$ENRICH_WORK" "$DIR/data/dbs/transit.duckdb"
+      log "Enriched DB swapped in ($STOPS stops)"
+    else
+      log "WARN: enriched copy has $STOPS stops — not swapping"
+    fi
+  else
+    log "WARN: enrich_stops_coords failed — keeping current DB"
+  fi
+  rm -f "$ENRICH_WORK"
+fi
 
-# Must run AFTER build_db: build_db recreates city_stops from the raw JSON, so
-# enriching first threw away every coordinate it had just fetched.
-log "Enriching stop coordinates..."
-python -u data/pipelines/enrich_stops_coords.py enrich --limit 200 2>&1 | tee -a "$LOG" || log "WARN: enrich_stops_coords failed"
-
-# NOTE: line geometries are deliberately NOT refreshed here. The OSM scrape
-# takes ~35s per line (~5h for Belgrade alone), and this block runs with the
-# service stopped — it would take the site down for the whole night. It has
-# its own script, scripts/refresh_line_geometries.sh, which scrapes against a
-# copy and swaps it in with seconds of downtime.
-
-log "Starting transit (fresh DB + affiliate map)..."
-sudo systemctl start prevozni
-rm -f "$MAINT_FLAG"
-trap - EXIT
+# Graceful reload: workers re-exec one at a time, so they pick up the DB that
+# build_db and the enrich swap put in place, plus the fresh affiliate map,
+# without the socket ever refusing a request.
+log "Reloading transit (fresh DB + affiliate map)..."
+sudo systemctl reload prevozni
 sleep 3
 HSTATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --unix-socket /run/prevozni/prevozni.sock http://localhost/health || echo "000")
-log "Health after start: $HSTATUS"
+log "Health after reload: $HSTATUS"
 if [ "$HSTATUS" != "200" ]; then
-  log "WARN: not healthy after start, retrying..."
+  log "WARN: not healthy after reload, restarting..."
   sudo systemctl restart prevozni
   sleep 3
   HSTATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --unix-socket /run/prevozni/prevozni.sock http://localhost/health || echo "000")

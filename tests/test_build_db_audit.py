@@ -50,7 +50,7 @@ def test_audit_flags_dup_line_slug_half_coord_and_foreign_stop(tmp_path, monkeyp
         (1, 'beograd', '9Л', 'A', 'linija-9l', 'bus', '#000', None),
         (2, 'beograd', '9л', 'B', 'linija-9l', 'bus', '#000', None),
     ])
-    conn.executemany("INSERT INTO city_stops VALUES (?,?,?,?,?,?,?)", [
+    conn.executemany("INSERT INTO city_stops (id, city, name, slug, lat, lon, code) VALUES (?,?,?,?,?,?,?)", [
         (1, 'nis', 'Normal', 'normal', 43.3, 21.9, None),   # in Serbia
         (2, 'nis', 'Half', 'half', 43.3, None, None),       # half-coordinate
         (3, 'nis', 'München', 'munchen', 48.1, 11.5, None),  # outside Serbia
@@ -77,7 +77,7 @@ def test_audit_clean_db_reports_zeroes(tmp_path, monkeypatch):
     conn = _audit_conn(tmp_path, monkeypatch)
     conn.execute("INSERT INTO city_lines VALUES "
                  "(1,'beograd','7','Sedmica','linija-7','bus','#000',NULL)")
-    conn.execute("INSERT INTO city_stops VALUES "
+    conn.execute("INSERT INTO city_stops (id, city, name, slug, lat, lon, code) VALUES "
                  "(1,'beograd','Trg','trg',44.8,20.4,NULL)")
     conn.execute("INSERT INTO city_line_stops VALUES (1,1,1)")  # line has a stop
     report = _audit_data_quality(conn)

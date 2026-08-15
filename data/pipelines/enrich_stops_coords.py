@@ -14,6 +14,7 @@ Usage:
 import argparse
 import json
 import math
+import os
 import re
 import sys
 import time
@@ -23,7 +24,11 @@ import duckdb
 import requests
 
 BASE_DIR = Path(__file__).parent.parent
-DB_PATH = BASE_DIR / 'dbs' / 'transit.duckdb'
+# DUCKDB_PATH lets the nightly point this at a COPY of the live DB: gunicorn
+# holds a read lock on the real file, and stopping the service to release it
+# cost ~1m37s of 5xx every night — which Google counts against the
+# "Server error (5xx)" validation we need to pass.
+DB_PATH = Path(os.environ.get('DUCKDB_PATH') or (BASE_DIR / 'dbs' / 'transit.duckdb'))
 PROGRESS_FILE = BASE_DIR / 'raw' / 'enrich_stops_progress.json'
 SUSPICIOUS_FILE = BASE_DIR / 'raw' / 'suspicious_stops.json'
 # Survives build_db rebuilds, which recreate city_stops from the raw JSON.

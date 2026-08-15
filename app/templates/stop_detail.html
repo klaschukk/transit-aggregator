@@ -1,16 +1,23 @@
 {% extends "base.html" %}
 {% set city_names = {'beograd': 'Beograd', 'novi-sad': 'Novi Sad', 'nis': 'Niš', 'kragujevac': 'Kragujevac', 'podgorica': 'Podgorica', 'herceg-novi': 'Herceg Novi', 'budva': 'Budva'} %}
 {% set city_label = city_names.get(city, city|title) %}
+{# Belgrade the administrative unit spans ~60 km and 17 municipalities, so
+   1523 of its stops are not in Belgrade proper — Stara banja sits 27 km out,
+   in Obrenovac, and its lines (860вп Duboko - Veliko polje) mean nothing to a
+   Belgrade rider. Show the real settlement when we know it, keeping the city
+   in parentheses so the administrative context is not lost. #}
+{% set place_label = stop.locality if stop.locality else city_label %}
+{% set place_full = (stop.locality ~ ' (' ~ city_label ~ ')') if stop.locality else city_label %}
 
-{% block title %}{{ _('stop_detail.stop_prefix') }} {{ stop.name }} ({{ city_label }}): {{ _('stop_detail.title_stop_city') }} {{ current_year }} | Prevozni{% endblock %}
-{% block meta_description %}{{ _('stop_detail.stop_prefix') }} {{ stop.name }}, {{ city_label }}: {% if stop_info and stop_info.line_count %}{{ stop_info.line_count }} {{ _('stop_detail.meta_lines_suffix') }}, {% endif %}{{ _('line_detail.schedule_heading') }}{% if stop_info and stop_info.first_departure %} {{ stop_info.first_departure }}–{{ stop_info.last_departure }}{% endif %}. {{ _('stop_detail.meta_eta') }}{% endblock %}
+{% block title %}{{ _('stop_detail.stop_prefix') }} {{ stop.name }} ({{ place_label }}): {{ _('stop_detail.title_stop_city') }} {{ current_year }} | Prevozni{% endblock %}
+{% block meta_description %}{{ _('stop_detail.stop_prefix') }} {{ stop.name }}, {{ place_full }}: {% if stop_info and stop_info.line_count %}{{ stop_info.line_count }} {{ _('stop_detail.meta_lines_suffix') }}, {% endif %}{{ _('line_detail.schedule_heading') }}{% if stop_info and stop_info.first_departure %} {{ stop_info.first_departure }}–{{ stop_info.last_departure }}{% endif %}. {{ _('stop_detail.meta_eta') }}{% endblock %}
 
 {% block head_extra %}
 {# BusStation (preferred over BusStop for richer SERP) + WebPage entity
    so the stop URL gets a Place identity even when not a bus terminal.
    AggregateRating attaches when any approved reviews exist. #}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BusStation","name":"{{ stop.name }}","publicAccess":true,"url":"{{ request.url_root.rstrip('/') }}{{ lang_prefix }}/gradski/{{ city }}/stajaliste/{{ stop.slug }}/","containedInPlace":{"@type":"City","name":"{{ city_label }}","address":{"@type":"PostalAddress","addressCountry":"RS","addressLocality":"{{ city_label }}"}}{% if stop.lat and stop.lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stop.lat }},"longitude":{{ stop.lon }}}{% endif %}{% if stop_info and stop_info.first_departure %},"openingHours":"Mo-Fr {{ stop_info.first_departure }}-{{ stop_info.last_departure }}"{% endif %}{% if stop_info and stop_info.line_count %},"description":"{{ stop_info.line_count }} linija: {{ stop_info.line_types|join(', ') }}"{% endif %}{% if reviews_agg and reviews_agg.n %},"aggregateRating":{"@type":"AggregateRating","ratingValue":{{ reviews_agg.avg }},"reviewCount":{{ reviews_agg.n }},"bestRating":5,"worstRating":1}{% endif %}}
+{"@context":"https://schema.org","@type":"BusStation","name":"{{ stop.name }}","publicAccess":true,"url":"{{ request.url_root.rstrip('/') }}{{ lang_prefix }}/gradski/{{ city }}/stajaliste/{{ stop.slug }}/","containedInPlace":{"@type":"City","name":"{{ place_label }}","address":{"@type":"PostalAddress","addressCountry":"RS","addressLocality":"{{ place_label }}"}}{% if stop.lat and stop.lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stop.lat }},"longitude":{{ stop.lon }}}{% endif %}{% if stop_info and stop_info.first_departure %},"openingHours":"Mo-Fr {{ stop_info.first_departure }}-{{ stop_info.last_departure }}"{% endif %}{% if stop_info and stop_info.line_count %},"description":"{{ stop_info.line_count }} linija: {{ stop_info.line_types|join(', ') }}"{% endif %}{% if reviews_agg and reviews_agg.n %},"aggregateRating":{"@type":"AggregateRating","ratingValue":{{ reviews_agg.avg }},"reviewCount":{{ reviews_agg.n }},"bestRating":5,"worstRating":1}{% endif %}}
 </script>
 {# WebPage describes the page itself — Google reads this for breadcrumb
    + page-level signal that complements the BusStation entity above. #}
@@ -68,7 +75,7 @@
       </svg>
     </button>
   </h1>
-  <p class="page-subtitle">{{ _('stop.subtitle') }} — {{ city_label }}</p>
+  <p class="page-subtitle">{{ _('stop.subtitle') }} — {{ place_full }}</p>
   <a href="{{ lang_prefix }}/gradski/{{ city }}/" class="reverse-route">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M19 12H5m0 0l7 7m-7-7l7-7"/></svg>
     {{ _('stop.back_to_city') }} {{ city_label }}

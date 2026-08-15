@@ -154,7 +154,8 @@ def build_seed(out_path: Path) -> Path:
         conn.executemany(
             "INSERT INTO city_lines VALUES (?, ?, ?, ?, ?, ?, ?, ?)", CITY_LINES)
         conn.executemany(
-            "INSERT INTO city_stops VALUES (?, ?, ?, ?, ?, ?, ?)", CITY_STOPS)
+            "INSERT INTO city_stops (id, city, name, slug, lat, lon, code) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)", CITY_STOPS)
         conn.executemany(
             "INSERT INTO city_line_stops VALUES (?, ?, ?)", CITY_LINE_STOPS)
         conn.executemany(

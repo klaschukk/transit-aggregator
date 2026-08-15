@@ -508,7 +508,7 @@ def stop_detail(city: str, stop_slug: str):
         )
 
     stop = query_one("""
-        SELECT id, city, name, slug, lat, lon, code
+        SELECT id, city, name, slug, lat, lon, code, locality
         FROM city_stops
         WHERE city = ? AND slug = ?
     """, [city, stop_slug]) if db_ready() else None

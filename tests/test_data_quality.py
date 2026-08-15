@@ -238,3 +238,45 @@ def test_slugs_stay_ascii_and_latin_dj(db):
     rows = db.q("SELECT city, slug FROM city_stops WHERE slug IS NOT NULL")
     non_ascii = [r['slug'] for r in rows if not r['slug'].isascii()]
     assert not non_ascii, f"non-ASCII slugs: {non_ascii[:5]}"
+
+
+# ── Suburban stops name their real settlement ──
+
+
+def test_suburban_stops_have_a_locality(db):
+    """Stops far from the city centre must name the town they are actually in.
+
+    "Beograd" the administrative unit is 17 municipalities spanning ~60 km:
+    765 of its stops sit more than 30 km out (Dudovica is 62 km). A page headed
+    "Gradski prevoz Beograd" showing Obrenovac's suburban 860-series told a
+    Belgrade rider about buses that do not run in their city.
+    """
+    row = db.one("""
+        SELECT COUNT(*) AS c FROM city_stops
+        WHERE city = 'beograd' AND lat IS NOT NULL
+    """)
+    if not row or row['c'] < 100:
+        pytest.skip("seed DB has too few Belgrade stops")
+    far_unnamed = db.one("""
+        SELECT COUNT(*) AS c FROM city_stops
+        WHERE city = 'beograd' AND lat IS NOT NULL AND locality IS NULL
+          AND 2 * 6371 * asin(sqrt(
+                pow(sin((lat - 44.8176) * pi() / 360), 2)
+                + cos(lat * pi() / 180) * cos(44.8176 * pi() / 180)
+                * pow(sin((lon - 20.4569) * pi() / 360), 2))) > 25
+    """)
+    assert far_unnamed['c'] < 200, (
+        f"{far_unnamed['c']} stops over 25 km from Belgrade still claim to be "
+        f"in Belgrade with no locality"
+    )
+
+
+def test_central_stops_keep_the_plain_city_label(db):
+    """The guard must not relabel genuinely central stops."""
+    row = db.one("""
+        SELECT locality FROM city_stops
+        WHERE city = 'beograd' AND slug = 'sajam'
+    """)
+    if not row:
+        pytest.skip("sajam not in this DB")
+    assert row['locality'] is None, "a central Belgrade stop must stay 'Beograd'"

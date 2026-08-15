@@ -224,6 +224,7 @@ def build() -> None:
         _load_balkan(conn)
         _load_gtfs(conn)
         _load_city_schedule(conn, 'novi-sad')
+        _assign_localities(conn)
         _latinise_display_names(conn)
         _cleanup(conn)
         # After _cleanup: it deletes trip-less intercity routes, which is
@@ -595,6 +596,12 @@ def _create_schema(conn: duckdb.DuckDBPyConnection) -> None:
             lat DOUBLE,
             lon DOUBLE,
             code VARCHAR,
+            -- Actual settlement, which is often NOT the `city` bucket. Belgrade
+            -- the administrative unit covers 17 municipalities: 765 of its 2582
+            -- stops sit more than 30 km from the centre (Dudovica is 62 km), so
+            -- a page headed "Gradski prevoz Beograd" was showing riders
+            -- suburban lines they have never heard of.
+            locality VARCHAR,
             UNIQUE (city, slug)
         )
     """)
@@ -1065,6 +1072,65 @@ def _load_city_lines(conn: duckdb.DuckDBPyConnection, city: str, lines_path: Pat
                     pass
 
     print(f"  Loaded {count} {city} lines, {stop_count}+{extra_stops} stops, {link_count} line-stop links")
+
+
+# Belgrade the administrative unit ("Grad Beograd") is 17 municipalities
+# spanning ~60 km, and GSP numbers their suburban lines in the same catalogue
+# as the urban ones. Labelling every stop "Beograd" told a rider in Obrenovac
+# they were looking at Belgrade city transport, and told a Belgrade rider that
+# lines like 860вп (Duboko - Veliko polje) run in their city. Neither is true.
+#
+# Centres of the outlying municipalities, used to name the stop's real
+# settlement. Only stops beyond SUBURB_MIN_KM from the city centre get one —
+# inner-city stops keep the plain city label.
+SUBURB_CENTRES: dict[str, list[tuple[str, float, float]]] = {
+    'beograd': [
+        ('Obrenovac',    44.6547, 20.2003),
+        ('Lazarevac',    44.3861, 20.2578),
+        ('Mladenovac',   44.4383, 20.6944),
+        ('Grocka',       44.6714, 20.7156),
+        ('Barajevo',     44.5942, 20.4342),
+        ('Sopot',        44.5203, 20.5786),
+        ('Surčin',       44.7933, 20.2844),
+        ('Umka',         44.6606, 20.3097),
+        ('Ripanj',       44.6247, 20.5225),
+        ('Vrčin',        44.6939, 20.6039),
+    ],
+}
+SUBURB_MIN_KM = 12.0      # inside this, the plain city label is accurate
+SUBURB_MAX_MATCH_KM = 18.0  # farther than this from any centre → leave unnamed
+
+
+def _assign_localities(conn: duckdb.DuckDBPyConnection) -> None:
+    """Name the settlement a suburban stop actually sits in."""
+    city_centres = {
+        'beograd': (44.8176, 20.4569),
+    }
+    filled = 0
+    for city, centre in city_centres.items():
+        centres = SUBURB_CENTRES.get(city)
+        if not centres:
+            continue
+        rows = conn.execute(
+            "SELECT id, lat, lon FROM city_stops "
+            "WHERE city = ? AND lat IS NOT NULL AND lon IS NOT NULL", [city]
+        ).fetchall()
+        updates = []
+        for sid, lat, lon in rows:
+            if _haversine_km(centre, (lat, lon)) < SUBURB_MIN_KM:
+                continue
+            best, best_km = None, SUBURB_MAX_MATCH_KM
+            for name, clat, clon in centres:
+                d = _haversine_km((clat, clon), (lat, lon))
+                if d < best_km:
+                    best, best_km = name, d
+            if best:
+                updates.append((best, sid))
+        if updates:
+            conn.executemany(
+                "UPDATE city_stops SET locality = ? WHERE id = ?", updates)
+            filled += len(updates)
+    print(f"  Localities: named {filled} suburban stops")
 
 
 def _latinise_display_names(conn: duckdb.DuckDBPyConnection) -> None:
