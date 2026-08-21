@@ -133,7 +133,7 @@ Production environment requires these env vars:
 - `SECRET_KEY` — **обязателен** (при отсутствии app бросает RuntimeError на старте).
   Сгенерировать: `python -c "import secrets; print(secrets.token_hex(32))"`.
   Хранить в systemd unit (`Environment=`) или `.env` (не коммитить).
-- `ADSENSE_ID` — **обязателен для монетизации** (`ca-pub-9538841764038287`).
+- `ADSENSE_ID` — **обязателен для монетизации** (`ca-pub-1417138799653355`).
   Без него `{% if config.ADSENSE_ID %}` ложно → adsbygoogle.js вообще не
   грузится, ни один слот не рендерится, а `/ads.txt` отдаёт заглушку вместо
   `google.com, pub-…, DIRECT, f08c47fec0942fa0`. Реклама молча не работает.
@@ -275,7 +275,7 @@ sudo systemctl start prevozni && rm -f logs/.maintenance
 - [x] BusTicket4 affiliateId=735 — основной партнёр (комиссия 2%), per-trip checkout;
       Bookaway (offer_id=34, aff_id=4033, TUNE-трекер) — ТОЛЬКО дальние направления (Азия);
       FlixBus убран
-- [x] Google AdSense — live (ca-pub-9538841764038287)
+- [x] Google AdSense — live (ca-pub-1417138799653355)
 - [x] Newsletter + price alerts (double-opt-in через SMTP)
 - [x] AI-чат с контекстом страниц
 - [x] Дальние направления (Азия), фаза 1: AI-составление маршрута (Groq,
