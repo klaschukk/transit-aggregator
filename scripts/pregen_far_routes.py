@@ -41,13 +41,25 @@ from app.slug import slugify_serbian as _sl  # noqa: E402
 # Top origins (where most of our users start) × marquee far destinations
 # (highest search intent). Re-run with a longer list to widen coverage.
 SR_HUBS = ['Beograd', 'Novi Sad', 'Niš', 'Kragujevac']
-TOP_FAR = [
-    'bangkok', 'phuket', 'chiang-mai', 'krabi', 'bali', 'denpasar', 'ubud',
-    'hanoi', 'ho-chi-minh', 'da-nang', 'phnom-penh', 'siem-reap',
-    'kuala-lumpur', 'singapore', 'manila', 'cebu', 'colombo', 'delhi', 'goa',
-    'mumbai', 'kathmandu', 'tokyo', 'kyoto', 'seoul', 'dubai', 'abu-dhabi',
-    'doha', 'cairo', 'hurghada',
-]
+# Every destination Bookaway actually sells, not a hand-picked subset. The
+# hardcoded list covered 29 of the 67 entries in bookaway_far.json, so 38
+# destinations Bookaway pays for had no page at all — Pattaya, Osaka, Penang,
+# Petra, Sharm el-Sheikh among them. These pages are the best-monetised
+# surface we have: Bookaway pays ~$1.5 a conversion against ~$0.26 from
+# BusTicket4's 2% on a 1517 RSD ticket.
+#
+# Reading the file keeps the two in sync — adding a destination there now
+# creates its pages on the next nightly, with no second edit here.
+def _all_far_destinations() -> list[str]:
+    path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        'app', 'affiliates', 'bookaway_far.json')
+    with open(path, encoding='utf-8') as f:
+        data = json.load(f)
+    return sorted(k for k in data if not k.startswith('_'))
+
+
+TOP_FAR = _all_far_destinations()
 
 
 # The binding Groq limit here is tokens, not requests: the free 70B tier
