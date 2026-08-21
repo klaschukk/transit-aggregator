@@ -451,3 +451,35 @@ def test_capped_grids_ship_every_item(client, path, grid_id, cap, item_re):
         f"{path}: expected {items - cap} of {items} items hidden, found "
         f"{hidden} — extras must stay in the HTML, not be dropped"
     )
+
+
+def test_robots_allows_answer_engines_blocks_trainers(client):
+    """Answer engines cite and send readers; trainers only ingest.
+
+    They were all blocked together, which cost the traffic without protecting
+    anything — ChatGPT-User is not a crawler at all, it is a person asking
+    ChatGPT to open one of our pages, and 91 of those were refused every two
+    days. Applebot, never blocked, brought 1845 requests in the same window.
+    """
+    body = client.get("/robots.txt").data.decode()
+
+    def directive_for(agent: str) -> str:
+        m = re.search(rf"User-agent: {re.escape(agent)}\n(Allow|Disallow): /",
+                      body)
+        assert m, f"{agent} missing from robots.txt"
+        return m.group(1)
+
+    for agent in ("OAI-SearchBot", "ChatGPT-User", "PerplexityBot"):
+        assert directive_for(agent) == "Allow", f"{agent} must be allowed"
+    for agent in ("GPTBot", "ClaudeBot", "CCBot", "Bytespider", "Amazonbot",
+                  "Google-Extended"):
+        assert directive_for(agent) == "Disallow", f"{agent} must stay blocked"
+
+
+def test_robots_still_allows_search_engines(client):
+    """The wildcard group must keep Googlebot and friends fully allowed."""
+    body = client.get("/robots.txt").data.decode()
+    tail = body[body.index("User-agent: *"):]
+    assert "Allow: /" in tail
+    for path in ("/api/", "/admin/", "/health"):
+        assert f"Disallow: {path}" in tail

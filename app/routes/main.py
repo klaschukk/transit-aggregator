@@ -1490,28 +1490,45 @@ def robots():
     # letting them index wastes server resources and exposes original
     # content (scraped timetables, FAQ prose) to models that won't cite
     # or link back. Search-engine bots (Google/Bing/Yandex) stay allowed.
-    ai_bots = (
-        'GPTBot',           # OpenAI
-        'ChatGPT-User',     # OpenAI on-demand browsing
-        'OAI-SearchBot',    # OpenAI SearchGPT
-        'ClaudeBot',        # Anthropic
+    # Training crawlers: they ingest the content and send nothing back, so
+    # they stay blocked.
+    ai_training_bots = (
+        'GPTBot',           # OpenAI model training
+        'ClaudeBot',        # Anthropic model training
         'anthropic-ai',     # legacy Anthropic name
         'Claude-Web',       # legacy Claude web crawler
-        'Google-Extended',  # Google Gemini/Bard training (NOT Googlebot)
+        'Google-Extended',  # Gemini / Vertex training (NOT Googlebot, and it
+                            # does not affect AI Overviews in Search)
         'CCBot',            # Common Crawl (feeds most open LLMs)
-        'PerplexityBot',    # Perplexity
         'Bytespider',       # ByteDance / TikTok
-        'Amazonbot',        # Alexa / Amazon AI
+        'Amazonbot',        # Alexa / Amazon AI — ingests without citing
         'cohere-ai',        # Cohere
         'FacebookBot',      # Meta AI training
         'Diffbot',          # crawl-for-resale aggregator
     )
+    # Answer engines: they cite the source and send readers here, which is the
+    # same trade Googlebot makes. Blocking them alongside the trainers cost us
+    # the traffic without protecting anything — ChatGPT-User is not even a
+    # crawler, it is a person asking ChatGPT to open one of our pages, and we
+    # were turning away 91 of those every two days. Applebot was never blocked
+    # and brings 1845 requests in the same window, more than every other AI
+    # agent combined.
+    ai_search_bots = (
+        'OAI-SearchBot',    # ChatGPT Search index
+        'ChatGPT-User',     # a human asking ChatGPT to fetch a page
+        'PerplexityBot',    # Perplexity answers, cited
+    )
     lines = [
         '# AI training crawlers — block (no traffic return, content reuse risk)',
     ]
-    for bot in ai_bots:
+    for bot in ai_training_bots:
         lines.append(f'User-agent: {bot}')
         lines.append('Disallow: /')
+        lines.append('')
+    lines.append('# AI answer engines — allowed: they link back, like a search engine')
+    for bot in ai_search_bots:
+        lines.append(f'User-agent: {bot}')
+        lines.append('Allow: /')
         lines.append('')
 
     lines += [
