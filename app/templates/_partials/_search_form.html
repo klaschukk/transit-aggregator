@@ -33,7 +33,7 @@
       <label class="journey-form__field" for="fromCity">
         <span class="journey-form__label">{{ _('form.label_from') }}</span>
       <input class="journey-form__input js-city-input" id="fromCity" name="od" type="text"
-             value="{{ from_city }}" placeholder="{{ _t.get('from', 'Odakle?') }}" autocomplete="off"
+             value="{{ from_city }}" placeholder="{{ _('form.placeholder_from') }}" autocomplete="off"
              inputmode="text" enterkeyhint="next"
              role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="fromDropdown">
       </label>
@@ -50,7 +50,7 @@
       <label class="journey-form__field" for="toCity">
         <span class="journey-form__label">{{ _('form.label_to') }}</span>
       <input class="journey-form__input js-city-input" id="toCity" name="do" type="text"
-             value="{{ to_city }}" placeholder="{{ _t.get('to', 'Kuda?') }}" autocomplete="off"
+             value="{{ to_city }}" placeholder="{{ _('form.placeholder_to') }}" autocomplete="off"
              inputmode="text" enterkeyhint="search"
              role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="toDropdown">
       </label>

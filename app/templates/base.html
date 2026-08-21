@@ -133,6 +133,12 @@ window.addEventListener('load', function(){
 (function(){
   function fill(el){
     if (el.dataset.adFilled) return;
+    /* No slot id → no ad unit. An <ins class="adsbygoogle"> without
+       data-ad-slot is not a valid unit: AdSense never fills it, so the page
+       shipped empty placeholders while ADSENSE_SLOT_* were unset. Leaving the
+       container untouched also keeps Auto Ads free to place their own unit
+       here. Set ADSENSE_SLOT_<KEY> to switch this slot to a real ad unit. */
+    if (!el.dataset.adSlotId) { el.dataset.adFilled = 'noslot'; return; }
     el.dataset.adFilled = '1';
     var ins = document.createElement('ins');
     ins.className = 'adsbygoogle ad-slot__ins';

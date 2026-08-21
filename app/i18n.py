@@ -2096,6 +2096,19 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'To',
         'ru': 'Куда',
     },
+    # Example cities, not a restatement of the label. The placeholders used to
+    # echo it — label "From" over placeholder "From?" — which reads as a
+    # stutter and tells the user nothing about what to type.
+    'form.placeholder_from': {
+        'sr': 'npr. Beograd',
+        'en': 'e.g. Belgrade',
+        'ru': 'напр. Белград',
+    },
+    'form.placeholder_to': {
+        'sr': 'npr. Novi Sad',
+        'en': 'e.g. Novi Sad',
+        'ru': 'напр. Нови-Сад',
+    },
     'form.label_date': {
         'sr': 'Datum',
         'en': 'Date',
