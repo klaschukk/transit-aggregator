@@ -4165,6 +4165,19 @@ select:focus-visible, textarea:focus-visible {
   flex-direction: column;
   align-items: flex-end;
   gap: var(--space-3);
+  /* On mobile this box spans left:12px to right:12px (full viewport width
+     minus margins) so the opened panel can be near-full-width — but as a
+     flex container its own empty area is still hit-tested and clickable,
+     even where only transparent gap sits between the collapsed toggle and
+     the left edge. That area was intercepting taps meant for whatever sits
+     underneath (the search button, "Kupi" cards) on every page, confirmed
+     via elementsFromPoint(). Turn off hit-testing on the container itself;
+     the two direct children opt back in below, so only the round toggle
+     and the open panel are ever actually clickable. */
+  pointer-events: none;
+}
+.chat-widget > * {
+  pointer-events: auto;
 }
 /* The FAB lives at --z-modal, above the consent banner, and its 56px
    circle landed squarely on the "Accept all" button in the banner's
