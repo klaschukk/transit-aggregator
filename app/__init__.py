@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 from flask import Flask, render_template, request, g, abort, make_response
 from config import config_map
 from .i18n import get_text, SUPPORTED_LANGS, DEFAULT_LANG
+from .slug import transliterate_cyrillic_serbian
 from . import observability
 
 
@@ -146,6 +147,27 @@ def create_app(config_name: str | None = None) -> Flask:
         except RuntimeError:
             return default
     app.jinja_env.globals['ab_variant'] = _ab_variant_global
+
+    # ── Line-number badge: Cyrillic -> Latin at render time only ──────────
+    # city_lines.number can carry a Cyrillic letter glued to Latin digits
+    # ('105л', '25П') — a browser audit flagged badges reading "2Л"/"АДА1"
+    # next to plain Latin "5"/"A1" in the same list. `number` also
+    # participates in city_lines' UNIQUE (city, number) constraint, and
+    # DuckDB 1.2.1 raises a spurious FK ConstraintException on ANY UPDATE
+    # that touches a UNIQUE-constrained column once a child table
+    # (city_line_stops) references the row — confirmed by testing that the
+    # identical transliteration already applied in build_db.py to `name`
+    # (not UNIQUE-constrained) works fine. Fixing it in storage would mean
+    # either dropping/rebuilding the constraint mid-pipeline or moving every
+    # scraper's INSERT to pre-latinise `number`, both riskier than this.
+    #
+    # Fixing it here instead is also strictly safer: /api/stop-arrivals
+    # returns the SAME unmodified `number` from this column, and city.js
+    # matches DOM elements by `data-line="{{ line.number }}"` against that
+    # response. Only latinise the human-facing text (badges, titles, FAQ
+    # copy) via this filter; never apply it to a `data-*` attribute — doing
+    # so would desync the two and break every ETA lookup.
+    app.jinja_env.filters['latin'] = transliterate_cyrillic_serbian
 
     # ── i18n: detect language from URL prefix ──
     @app.before_request

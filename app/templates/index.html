@@ -234,7 +234,7 @@
   <div class="home-lines">
     {% for line in popular_lines %}
     <a href="{{ lang_prefix }}/gradski/beograd/linija/{{ line.slug }}/" class="home-lines__item">
-      <span class="line-badge line-badge--sm"{% if line.color %} style="background:{{ line.color }}"{% endif %}>{{ line.number }}</span>
+      <span class="line-badge line-badge--sm"{% if line.color %} style="background:{{ line.color }}"{% endif %}>{{ line.number|latin }}</span>
       <span class="home-lines__name">{{ line.name }}</span>
     </a>
     {% endfor %}

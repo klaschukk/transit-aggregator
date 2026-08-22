@@ -171,7 +171,7 @@
            data-num="{{ line.number }}"
            data-name="{{ line.name }}"
            data-type="{{ line.type }}"{% if _paginate and ns.idx >= _vis_limit %} hidden{% endif %}>
-          <span class="line-badge line-badge--sm"{% if line.color %} style="background:{{ line.color }}"{% endif %}>{{ line.number }}</span>
+          <span class="line-badge line-badge--sm"{% if line.color %} style="background:{{ line.color }}"{% endif %}>{{ line.number|latin }}</span>
           <span class="line-chip__name">{{ line.name }}</span>
         </a>
         {% set ns.idx = ns.idx + 1 %}

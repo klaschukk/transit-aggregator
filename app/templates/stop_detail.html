@@ -138,7 +138,7 @@
   <div class="stop-lines__list" id="arrivalsList">
     {% for line in lines_at_stop %}
     <a href="{{ lang_prefix }}/gradski/{{ city }}/linija/{{ line.slug }}/" class="stop-line-row fade-in">
-      <span class="line-badge"{% if line.color %} style="background:{{ line.color }}"{% endif %}>{{ line.number }}</span>
+      <span class="line-badge"{% if line.color %} style="background:{{ line.color }}"{% endif %}>{{ line.number|latin }}</span>
       <div class="stop-line-row__info">
         <div class="stop-line-row__name">{{ line.name }}</div>
         {% if line.sched_first %}<div class="stop-line-row__sched">{{ line.sched_first }}–{{ line.sched_last }}</div>{% endif %}
@@ -165,7 +165,7 @@
   <div class="stop-lines__list">
     {% for dep in departures %}
     <a href="{{ lang_prefix }}/gradski/{{ city }}/linija/{{ dep.line_slug }}/" class="stop-line-row">
-      <span class="line-badge"{% if dep.color %} style="background:{{ dep.color }}"{% endif %}>{{ dep.number }}</span>
+      <span class="line-badge"{% if dep.color %} style="background:{{ dep.color }}"{% endif %}>{{ dep.number|latin }}</span>
       <div class="stop-line-row__info">
         <div class="stop-line-row__name">{{ dep.headsign or dep.line_name }}</div>
       </div>

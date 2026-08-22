@@ -16,33 +16,33 @@
    carry BOTH "{Linija} {N}", the city, "red vožnje" AND "stajališta" to match
    either pattern. The (often long, Cyrillic) line endpoint name added nothing
    to query-match and is dropped from the title (kept in description/H1). #}
-{% block title %}{{ _('line_detail.line_prefix') }} {{ line.number }} {{ city_label }}: {{ _('line.schedule_title') }}, {{ _('line.stops') }} {{ current_year }} | Prevozni{% endblock %}
+{% block title %}{{ _('line_detail.line_prefix') }} {{ line.number|latin }} {{ city_label }}: {{ _('line.schedule_title') }}, {{ _('line.stops') }} {{ current_year }} | Prevozni{% endblock %}
 {# Description front-loads BOTH search intents: "red vožnje" (schedule) was
    missing entirely before, yet half the queries are "{N} red voznje {city}".
    Now: "{Linija} {N} {city} — red vožnje, {X} stajališta, polasci …" puts both
    keywords in the first ~40 chars, then the differentiators Google's transit
    widget lacks (map + live arrivals). #}
-{% block meta_description %}{{ _('line_detail.line_prefix') }} {{ line.number }} {{ city_label }} — {{ _('line.schedule_title')|lower }}, {{ stops|length if stops else 0 }} {{ _('line.stops') }}{% if first_dep and last_dep %}, {{ _('line_detail.meta_departures')|lower }} {{ first_dep }} {{ _('line_detail.meta_to') }} {{ last_dep }}{% endif %}{% if headway %}, {{ _('line.frequency_label') }} ~{{ headway }} {{ _('common.min') }}{% endif %}. {{ _('line_detail.meta_eta') }}{% endblock %}
+{% block meta_description %}{{ _('line_detail.line_prefix') }} {{ line.number|latin }} {{ city_label }} — {{ _('line.schedule_title')|lower }}, {{ stops|length if stops else 0 }} {{ _('line.stops') }}{% if first_dep and last_dep %}, {{ _('line_detail.meta_departures')|lower }} {{ first_dep }} {{ _('line_detail.meta_to') }} {{ last_dep }}{% endif %}{% if headway %}, {{ _('line.frequency_label') }} ~{{ headway }} {{ _('common.min') }}{% endif %}. {{ _('line_detail.meta_eta') }}{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"ItemList","name":"Linija {{ line.number }}: {{ line.name }}","description":"Red vožnje linije {{ line.number }} u {{ city_loc }}","numberOfItems":{{ stops|length if stops else 0 }},"itemListElement":[{% for s in stops[:20] %}{"@type":"ListItem","position":{{ loop.index }},"item":{"@type":"BusStop","name":"{{ s.name }}"{% if s.lat and s.lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ s.lat }},"longitude":{{ s.lon }}}{% endif %}}}{% if not loop.last %},{% endif %}{% endfor %}]}
+{"@context":"https://schema.org","@type":"ItemList","name":"Linija {{ line.number|latin }}: {{ line.name }}","description":"Red vožnje linije {{ line.number|latin }} u {{ city_loc }}","numberOfItems":{{ stops|length if stops else 0 }},"itemListElement":[{% for s in stops[:20] %}{"@type":"ListItem","position":{{ loop.index }},"item":{"@type":"BusStop","name":"{{ s.name }}"{% if s.lat and s.lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ s.lat }},"longitude":{{ s.lon }}}{% endif %}}}{% if not loop.last %},{% endif %}{% endfor %}]}
 </script>
 {# BusTrip with itinerary endpoints — gives Google a single trip entity
    the line page can map to in SERP rich results, complementing the
    ItemList of stops above. #}
 {% if stops %}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BusTrip","name":"{{ _('city.line') }} {{ line.number }} — {{ city_label }}","description":"{{ line.name }}","provider":{"@type":"Organization","name":"{{ city_operator }}"},"departureBusStop":{"@type":"BusStop","name":"{{ stops[0].name }}"{% if stops[0].lat and stops[0].lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stops[0].lat }},"longitude":{{ stops[0].lon }}}{% endif %}},"arrivalBusStop":{"@type":"BusStop","name":"{{ stops[-1].name }}"{% if stops[-1].lat and stops[-1].lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stops[-1].lat }},"longitude":{{ stops[-1].lon }}}{% endif %}}{% if first_dep %},"departureTime":"{{ first_dep }}"{% endif %}{% if last_dep %},"arrivalTime":"{{ last_dep }}"{% endif %}{% if reviews_agg and reviews_agg.n %},"aggregateRating":{"@type":"AggregateRating","ratingValue":{{ reviews_agg.avg }},"reviewCount":{{ reviews_agg.n }},"bestRating":5,"worstRating":1}{% endif %}}
+{"@context":"https://schema.org","@type":"BusTrip","name":"{{ _('city.line') }} {{ line.number|latin }} — {{ city_label }}","description":"{{ line.name }}","provider":{"@type":"Organization","name":"{{ city_operator }}"},"departureBusStop":{"@type":"BusStop","name":"{{ stops[0].name }}"{% if stops[0].lat and stops[0].lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stops[0].lat }},"longitude":{{ stops[0].lon }}}{% endif %}},"arrivalBusStop":{"@type":"BusStop","name":"{{ stops[-1].name }}"{% if stops[-1].lat and stops[-1].lon %},"geo":{"@type":"GeoCoordinates","latitude":{{ stops[-1].lat }},"longitude":{{ stops[-1].lon }}}{% endif %}}{% if first_dep %},"departureTime":"{{ first_dep }}"{% endif %}{% if last_dep %},"arrivalTime":"{{ last_dep }}"{% endif %}{% if reviews_agg and reviews_agg.n %},"aggregateRating":{"@type":"AggregateRating","ratingValue":{{ reviews_agg.avg }},"reviewCount":{{ reviews_agg.n }},"bestRating":5,"worstRating":1}{% endif %}}
 </script>
 {# Service + Provider — surfaces the city operator (GSP / JGSP / JGP)
    so SERP can show the operator badge alongside the line schedule. #}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Service","serviceType":"Public bus transportation","name":"{{ _('city.line') }} {{ line.number }} {{ city_label }}","areaServed":{"@type":"City","name":"{{ city_label }}"},"provider":{"@type":"Organization","name":"{{ city_operator }}"}}
+{"@context":"https://schema.org","@type":"Service","serviceType":"Public bus transportation","name":"{{ _('city.line') }} {{ line.number|latin }} {{ city_label }}","areaServed":{"@type":"City","name":"{{ city_label }}"},"provider":{"@type":"Organization","name":"{{ city_operator }}"}}
 </script>
 {% endif %}
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"{{ _('line_detail.faq.q_stops').format(number=line.number) }}","acceptedAnswer":{"@type":"Answer","text":"{% if stops %}{{ _('line_detail.faq.a_stops').format(number=line.number, name=line.name, city=city_label, count=stops|length, first=stops[0].name, last=stops[-1].name) }}{% else %}{{ _('line_detail.faq.a_stops_no_endpoints').format(number=line.number, name=line.name, city=city_label, count=0) }}{% endif %}"}},{"@type":"Question","name":"{{ _('line_detail.faq.q_when').format(number=line.number) }}","acceptedAnswer":{"@type":"Answer","text":"{% if first_dep and last_dep %}{{ _('line_detail.faq.a_when_range').format(number=line.number, first=first_dep, last=last_dep) }}{% else %}{{ _('line_detail.faq.a_when_unknown').format(number=line.number) }}{% endif %}"}},{"@type":"Question","name":"{{ _('line_detail.faq.q_type').format(number=line.number) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('line_detail.faq.a_type').format(number=line.number, type=line_type_label|lower, city=city_label) }}"}}{% if headway %},{"@type":"Question","name":"{{ _('line_detail.faq.q_freq').format(number=line.number) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('line_detail.faq.a_freq').format(number=line.number, headway=headway) }}"}}{% endif %}]}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"{{ _('line_detail.faq.q_stops').format(number=line.number|latin) }}","acceptedAnswer":{"@type":"Answer","text":"{% if stops %}{{ _('line_detail.faq.a_stops').format(number=line.number|latin, name=line.name, city=city_label, count=stops|length, first=stops[0].name, last=stops[-1].name) }}{% else %}{{ _('line_detail.faq.a_stops_no_endpoints').format(number=line.number|latin, name=line.name, city=city_label, count=0) }}{% endif %}"}},{"@type":"Question","name":"{{ _('line_detail.faq.q_when').format(number=line.number|latin) }}","acceptedAnswer":{"@type":"Answer","text":"{% if first_dep and last_dep %}{{ _('line_detail.faq.a_when_range').format(number=line.number|latin, first=first_dep, last=last_dep) }}{% else %}{{ _('line_detail.faq.a_when_unknown').format(number=line.number|latin) }}{% endif %}"}},{"@type":"Question","name":"{{ _('line_detail.faq.q_type').format(number=line.number|latin) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('line_detail.faq.a_type').format(number=line.number|latin, type=line_type_label|lower, city=city_label) }}"}}{% if headway %},{"@type":"Question","name":"{{ _('line_detail.faq.q_freq').format(number=line.number|latin) }}","acceptedAnswer":{"@type":"Answer","text":"{{ _('line_detail.faq.a_freq').format(number=line.number|latin, headway=headway) }}"}}{% endif %}]}
 </script>
 {# Maps render with Mapbox GL; unpkg/tile.openstreetmap were Leaflet
    leftovers, so these hints warmed hosts the page never calls while
@@ -67,21 +67,21 @@
 
 {{ breadcrumb([
   {'url': lang_prefix ~ '/gradski/' ~ city ~ '/', 'label': _('city.title') ~ ' ' ~ city_label},
-  {'label': _('city.line') ~ ' ' ~ line.number}
+  {'label': _('city.line') ~ ' ' ~ (line.number|latin)}
 ]) }}
 
 <div class="page-title fade-in">
   <h1>
-    <span class="line-badge line-badge--lg"{% if line.color %} style="background:{{ line.color }}"{% endif %}>{{ line.number }}</span>
+    <span class="line-badge line-badge--lg"{% if line.color %} style="background:{{ line.color }}"{% endif %}>{{ line.number|latin }}</span>
     {{ line.name }}
     <button type="button" class="js-fav-btn fav-btn" aria-label="{{ _('fav.save_aria') }}"
             data-path="/gradski/{{ city }}/linija/{{ line.slug }}/"
             data-key="line-{{ city }}-{{ line.slug }}"
-            data-from="{{ _('city.line') }} {{ line.number }}" data-to="{{ city_label }}">
+            data-from="{{ _('city.line') }} {{ line.number|latin }}" data-to="{{ city_label }}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
     </button>
     <button type="button" class="share-btn" data-share-current
-            data-share-title="{{ _('city.line') }} {{ line.number }} {{ city_label }} | Prevozni"
+            data-share-title="{{ _('city.line') }} {{ line.number|latin }} {{ city_label }} | Prevozni"
             aria-label="{{ _('a11y.share') }}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true">
         <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
@@ -227,7 +227,7 @@
   <div class="see-also__list">
     {% for rl in related_lines %}
     <a href="{{ lang_prefix }}/gradski/{{ city }}/linija/{{ rl.slug }}/" class="see-also__link">
-      <span class="line-badge line-badge--sm"{% if rl.color %} style="background:{{ rl.color }}"{% endif %}>{{ rl.number }}</span>
+      <span class="line-badge line-badge--sm"{% if rl.color %} style="background:{{ rl.color }}"{% endif %}>{{ rl.number|latin }}</span>
       {{ rl.name }}
     </a>
     {% endfor %}
@@ -284,7 +284,7 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
   </div>
   <div class="seo-block__content">
-    <h2>{{ _('line_prose.heading').format(number=line.number, city=city_label) }}</h2>
+    <h2>{{ _('line_prose.heading').format(number=line.number|latin|latin, city=city_label) }}</h2>
     <p>{{ prose.geography }}</p>
     {% if prose.schedule %}<p>{{ prose.schedule }}</p>{% endif %}
     {% if prose.transfers %}<p>{{ prose.transfers|safe }}</p>{% endif %}
