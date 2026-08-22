@@ -20,6 +20,7 @@ The `build_prose(...)` entry point returns a `dict` keyed by paragraph
 from __future__ import annotations
 
 from hashlib import md5
+from html import escape as _esc
 from typing import Iterable
 
 from app.content.pois import _haversine_m, nearest_poi
@@ -533,6 +534,15 @@ def _compute_slots(
         line_numbers = ', '.join(numbers) if numbers else '—'
 
     type_breakdown_str = _type_breakdown(lines, lang)
+    # Names below come from scraped upstream sources — GSP/JGSP feeds and,
+    # for Niš/Kragujevac/Montenegro, OpenStreetMap via Overpass, which anyone
+    # can edit. These strings are interpolated into prose rendered with
+    # `|safe` in the template (the pool templates below embed real <a href>
+    # markup, which is why the paragraph as a whole can't be autoescaped), so
+    # an attacker-controlled name would otherwise be a stored-XSS vector.
+    # Escape every externally-sourced value at the point it enters `slots`;
+    # the static template text itself is trusted and stays unescaped.
+    stop_name_safe = _esc(stop.get('name') or '')
     endpoints = _top_endpoints(lines, stop.get('name') or '')
 
     poi = nearest_poi(lat, lon, lang) if lat and lon else None
@@ -543,7 +553,7 @@ def _compute_slots(
             if n.get('lat') is None or n.get('lon') is None:
                 continue
             d = _haversine_m(lat, lon, n['lat'], n['lon'])
-            nearby_list_parts.append(f'{n.get("name", "?")} ({d} {dist_unit})')
+            nearby_list_parts.append(f'{_esc(n.get("name") or "?")} ({d} {dist_unit})')
     nearby_list = ', '.join(nearby_list_parts)
 
     # Squash POI if we're effectively AT the landmark (distance < 50 m reads
@@ -566,7 +576,7 @@ def _compute_slots(
     has_center_distance = center_km is not None
 
     return {
-        'stop_name': stop.get('name') or '',
+        'stop_name': stop_name_safe,
         'city_label': city_label,
         'city_loc': city_loc,
         'city_gen': city_gen,
@@ -581,8 +591,8 @@ def _compute_slots(
         'size_category_ru': size_category_ru,
         'first_dep': (gtfs_stats or {}).get('first_departure') or '',
         'last_dep': (gtfs_stats or {}).get('last_departure') or '',
-        'endpoints': ', '.join(endpoints),
-        'poi_name': poi['name'] if poi else '',
+        'endpoints': _esc(', '.join(endpoints)),
+        'poi_name': _esc(poi['name']) if poi else '',
         'poi_distance': (f'{poi["distance_m"]} {poi_dist_label}' if has_poi else ''),
         'nearby_list': nearby_list,
         'center_km': center_km if center_km is not None else '',

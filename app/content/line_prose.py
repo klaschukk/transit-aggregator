@@ -24,6 +24,7 @@ template guards each key with `{% if prose.geography %}…{% endif %}`.
 from __future__ import annotations
 
 from hashlib import md5
+from html import escape as _esc
 from math import asin, cos, radians, sin, sqrt
 
 
@@ -513,7 +514,7 @@ def _compute_slots(
         cnt = s.get('line_count') or 0
         # The interchange query already filters line_count > 1; +1 cnt
         # would be misleading. Show the raw count.
-        transfers.append(f'{name} ({cnt} {line_word})')
+        transfers.append(f'{_esc(name)} ({cnt} {line_word})')
         if len(transfers) >= 3:
             break
     transfers_list = ', '.join(transfers)
@@ -527,8 +528,14 @@ def _compute_slots(
         'city_loc': city_loc,
         'city_gen': city_gen,
         'city_slug': city,
-        'terminal_a': terminal_a,
-        'terminal_b': terminal_b,
+        # Stop names come from scraped upstream sources — GSP/JGSP feeds and,
+        # for Niš/Kragujevac/Montenegro, OpenStreetMap via Overpass, which anyone
+        # can edit. Prose renders with `|safe` (the pool templates embed real
+        # <a href> markup), so an unescaped name would be a stored-XSS vector —
+        # escape at the point each name enters the slots dict; the comparison
+        # logic above (terminal_names, dedup) stays on the raw values.
+        'terminal_a': _esc(terminal_a),
+        'terminal_b': _esc(terminal_b),
         'stop_count': len(stops),
         'length_km': length_km if length_km else '—',
         'avg_gap_m': avg_gap_m if avg_gap_m else 0,

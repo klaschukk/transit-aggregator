@@ -325,3 +325,36 @@ def test_cyrillic_names_roundtrip(app_ctx):
     out = build_prose(line, stops, lang='sr')
     assert 'Младеновац АС' in out['geography']
     assert '{' not in out['geography']
+
+
+def test_stop_prose_escapes_untrusted_names():
+    """Stop/POI/nearby/endpoint names must not leak raw HTML into `|safe` prose.
+
+    For Niš, Kragujevac and Montenegro these names come from OpenStreetMap via
+    Overpass, which anyone can edit — an attacker-controlled name would be a
+    stored-XSS vector once rendered with |safe (needed because the template
+    pool embeds real <a href> internal links, so the paragraph can't just be
+    autoescaped wholesale).
+    """
+    from app.content.stop_prose import build_prose
+
+    payload = '<script>alert(1)</script>Trg'
+    stop = {'name': payload, 'slug': 'trg', 'city': 'nis', 'lat': 43.32, 'lon': 21.9}
+    lines = [{'number': '1', 'name': 'A - B', 'type': 'bus'}]
+    prose = build_prose(stop, lines, [], None, lang='sr', lang_prefix='')
+    combined = ''.join(prose.values())
+    assert '<script>' not in combined
+    assert '&lt;script&gt;' in combined
+
+
+def test_line_prose_escapes_untrusted_terminal_names():
+    from app.content.line_prose import build_prose
+
+    payload = '<img src=x onerror=alert(1)>'
+    stops = [{'name': payload}, {'name': 'B'}]
+    line = {'number': '1', 'name': f'{payload} — B', 'type': 'bus', 'city': 'nis'}
+    prose = build_prose(line, stops, schedule_rd=[], schedule_sat=[],
+                        interchange=[], lang='sr', lang_prefix='')
+    combined = ''.join(prose.values())
+    assert '<img' not in combined
+    assert '&lt;img' in combined
