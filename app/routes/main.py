@@ -10,6 +10,7 @@ from flask import Blueprint, render_template, request, make_response, jsonify, c
 from app.db import query, cached_query, cached_query_one, db_ready
 from app.extensions import limiter, csrf
 from app.routes.city import CITY_LABELS
+from app.slug import normalize_slug
 
 main_bp = Blueprint('main', __name__)
 
@@ -158,11 +159,39 @@ def index():
                            popular_lines=popular_lines)
 
 
+def _resolve_city_name(raw: str) -> str:
+    """Match a typed/linked city name to the exact spelling stored in routes.
+
+    /pretraga/?od=Beograd&do=Nis returned zero results even though the
+    Beograd-Niš pair exists with 27 trips: the query compared
+    lower(r.to_city) = lower(?) directly, so "Nis" never matched "Niš" —
+    an exact-match search on the third-largest city in Serbia, reachable
+    by anyone who types the name without a Serbian-Latin keyboard, pastes
+    it from an address bar, or gets it from a social link. Fold both sides
+    through normalize_slug (already the single source of truth for
+    diacritic/cyrillic folding across the codebase) before matching; if the
+    folded form isn't a known city, fall through unchanged so a genuinely
+    unrecognised name still resolves to "no results" for the right reason.
+    """
+    if not raw or not db_ready():
+        return raw
+    rows = cached_query("""
+        SELECT DISTINCT from_city AS name FROM routes WHERE type = 'intercity'
+        UNION
+        SELECT DISTINCT to_city FROM routes WHERE type = 'intercity'
+    """, ttl=3600)
+    folded = normalize_slug(raw)
+    for row in rows:
+        if normalize_slug(row['name']) == folded:
+            return row['name']
+    return raw
+
+
 @main_bp.route('/pretraga/')
 def search():
     """Search results page."""
-    from_city = request.args.get('od', '').strip()
-    to_city = request.args.get('do', '').strip()
+    from_city = _resolve_city_name(request.args.get('od', '').strip())
+    to_city = _resolve_city_name(request.args.get('do', '').strip())
     date = request.args.get('datum', '')
 
     results = []
