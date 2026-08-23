@@ -93,6 +93,9 @@
   </div>
 </div>
 
+{% from '_partials/_ad_slot.html' import ad_slot with context %}
+{{ ad_slot('search_mid', format='responsive', ignore_noindex=True) }}
+
 {% else %}
 {% if far %}
 <!-- ═══ Far-destination AI itinerary (Phase 1, dynamic) ═══
