@@ -43,6 +43,11 @@ class Config:
         'city_transport_mid': os.environ.get('ADSENSE_SLOT_CITY_TRANSPORT_MID', ''),
         'catalog_in_feed':    os.environ.get('ADSENSE_SLOT_CATALOG_IN_FEED', ''),
         'guide_sidebar':      os.environ.get('ADSENSE_SLOT_GUIDE_SIDEBAR', ''),
+        # guides/_guide_base.html actually calls ad_slot('guide_bottom', ...),
+        # not 'guide_sidebar' — that key predates the current guide layout and
+        # nothing renders it. Kept both: guide_bottom is the live slot, guide_sidebar
+        # stays reserved for if a real sidebar unit gets added later.
+        'guide_bottom':       os.environ.get('ADSENSE_SLOT_GUIDE_BOTTOM', ''),
         'search_mid':         os.environ.get('ADSENSE_SLOT_SEARCH_MID', ''),
         'stop_bottom':        os.environ.get('ADSENSE_SLOT_STOP_BOTTOM', ''),
         'line_bottom':        os.environ.get('ADSENSE_SLOT_LINE_BOTTOM', ''),
