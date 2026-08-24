@@ -24,9 +24,16 @@
   .ad-slot--large-rectangle{min-height:250px;}
   .ad-slot--leaderboard{min-height:100px;}
 }
-/* Mobile sticky anchor — ≤640px only, padded for iOS safe-area. */
+/* Mobile sticky anchor — ≤640px only, padded for iOS safe-area.
+   Position/z-index are NOT set here on purpose: app.css owns the base
+   .mobile-anchor-ad rule (position:fixed, z-index:var(--z-promo)) and
+   app.mobile.css's "bottom-stack arbiter" owns `bottom` (parks the ad
+   above the bnav instead of under it). This file loads after both, so
+   redeclaring bottom/z-index here silently won the cascade and undid
+   the arbiter — the ad sat at bottom:0 with z-index:60, overlapping the
+   bnav exactly like the bug the arbiter was built to prevent. Only add
+   what this file is actually responsible for: sizing, for CLS. */
 .mobile-anchor-ad{
-  position:fixed;left:0;right:0;bottom:0;z-index:60;
   height:calc(80px + env(safe-area-inset-bottom,0));
   padding-bottom:env(safe-area-inset-bottom,0);
   background:rgba(255,255,255,.96);
