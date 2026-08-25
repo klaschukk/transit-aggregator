@@ -199,7 +199,16 @@ def _folded_city_names() -> dict[str, str]:
         SELECT DISTINCT to_city FROM routes WHERE type = 'intercity'
     """, ttl=3600)
     folded = {normalize_slug(row['name']): row['name'] for row in rows}
-    _folded_city_names_cache['all'] = (now, folded)
+    if folded:
+        # rows is only ever empty here on a transient query() error (query()
+        # sets errored and returns [] rather than raising; cached_query()
+        # correctly refuses to cache that []). Once db_ready() is true the
+        # routes table always has cities, so an empty result means "the DB
+        # blipped," not "there are no cities" — caching {} for a full hour
+        # would silently disable diacritic city matching (489e1ba) for
+        # every /pretraga/ request until the TTL expired, long after the DB
+        # itself recovered.
+        _folded_city_names_cache['all'] = (now, folded)
     return folded
 
 

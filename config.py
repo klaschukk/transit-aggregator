@@ -49,8 +49,12 @@ class Config:
         # stays reserved for if a real sidebar unit gets added later.
         'guide_bottom':       os.environ.get('ADSENSE_SLOT_GUIDE_BOTTOM', ''),
         # guides_index.html (the /vodici/ hub) calls a third, differently-named
-        # key: 'guides_bottom' (plural) — same bug, different page. No dedicated
-        # unit exists for it yet; reuses the guide_bottom unit until one does.
+        # key: 'guides_bottom' (plural) — same bug, different page. Its own env
+        # var, ADSENSE_SLOT_GUIDES_BOTTOM, is set to the same AdSense unit ID
+        # as ADSENSE_SLOT_GUIDE_BOTTOM in production — a manual convention,
+        # not something this code enforces, so if one changes the other won't
+        # follow automatically. Give guides_bottom its own dedicated unit
+        # whenever that becomes worth the AdSense-console trip.
         'guides_bottom':      os.environ.get('ADSENSE_SLOT_GUIDES_BOTTOM', ''),
         'search_mid':         os.environ.get('ADSENSE_SLOT_SEARCH_MID', ''),
         'stop_bottom':        os.environ.get('ADSENSE_SLOT_STOP_BOTTOM', ''),
