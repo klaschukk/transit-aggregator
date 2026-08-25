@@ -168,7 +168,7 @@
         {% for line in group %}
         <a href="{{ lang_prefix }}/gradski/{{ city }}/linija/{{ line.slug }}/"
            class="line-chip"
-           data-num="{{ line.number }}"
+           data-num="{{ line.number|latin }}"
            data-name="{{ line.name }}"
            data-type="{{ line.type }}"{% if _paginate and ns.idx >= _vis_limit %} hidden{% endif %}>
           <span class="line-badge line-badge--sm"{% if line.color %} style="background:{{ line.color }}"{% endif %}>{{ line.number|latin }}</span>

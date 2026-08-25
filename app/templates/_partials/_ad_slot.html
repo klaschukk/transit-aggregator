@@ -16,8 +16,9 @@
      ad_slot('city_sidebar', format='skyscraper', desktop_only=True)
      ad_slot('search_mid', format='responsive', ignore_noindex=True)
        <- for a page noindexed for reasons unrelated to content thinness
-          (e.g. /pretraga: canonical lives at /voznja/, not this URL) where
-          the branch calling this has already confirmed real content exists
+          (e.g. /pretraga is noindex purely to keep dynamic query URLs out
+          of the index — it has no separate canonical) where the branch
+          calling this has already confirmed real content exists
 #}
 
 {%- macro ad_slot(slot_key, format='responsive', desktop_only=False, label=True, lazy=True, ignore_noindex=False) -%}

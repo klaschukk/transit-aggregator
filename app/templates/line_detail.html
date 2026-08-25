@@ -284,7 +284,7 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
   </div>
   <div class="seo-block__content">
-    <h2>{{ _('line_prose.heading').format(number=line.number|latin|latin, city=city_label) }}</h2>
+    <h2>{{ _('line_prose.heading').format(number=line.number|latin, city=city_label) }}</h2>
     <p>{{ prose.geography }}</p>
     {% if prose.schedule %}<p>{{ prose.schedule }}</p>{% endif %}
     {% if prose.transfers %}<p>{{ prose.transfers|safe }}</p>{% endif %}

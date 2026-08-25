@@ -175,16 +175,32 @@ def _resolve_city_name(raw: str) -> str:
     """
     if not raw or not db_ready():
         return raw
+    return _folded_city_names().get(normalize_slug(raw), raw)
+
+
+_folded_city_names_cache: dict[str, tuple[float, dict[str, str]]] = {}
+
+
+def _folded_city_names() -> dict[str, str]:
+    """normalize_slug(name) -> canonical name, cached like cached_query's ttl.
+
+    _resolve_city_name used to re-run normalize_slug() over every known city
+    name on every /pretraga/ request; the city list itself was cached but the
+    folding work wasn't. Cache the folded dict instead of the raw rows so the
+    fold happens once per TTL window rather than once per request.
+    """
+    now = time.time()
+    cached = _folded_city_names_cache.get('all')
+    if cached and now - cached[0] < 3600:
+        return cached[1]
     rows = cached_query("""
         SELECT DISTINCT from_city AS name FROM routes WHERE type = 'intercity'
         UNION
         SELECT DISTINCT to_city FROM routes WHERE type = 'intercity'
     """, ttl=3600)
-    folded = normalize_slug(raw)
-    for row in rows:
-        if normalize_slug(row['name']) == folded:
-            return row['name']
-    return raw
+    folded = {normalize_slug(row['name']): row['name'] for row in rows}
+    _folded_city_names_cache['all'] = (now, folded)
+    return folded
 
 
 @main_bp.route('/pretraga/')
