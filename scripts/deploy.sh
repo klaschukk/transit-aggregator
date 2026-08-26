@@ -9,7 +9,7 @@
 # Usage:  scripts/deploy.sh [branch]      (default: main)
 set -euo pipefail
 
-DIR=/opt/prevozni
+DIR=/home/deploy/transit-aggregator
 BRANCH="${1:-main}"
 cd "$DIR"
 
@@ -27,10 +27,10 @@ echo "==> Rebuilding CSS dist"
 "$DIR/venv/bin/python" scripts/minify_css.py || echo "WARN: minify_css failed, dist may be stale"
 
 echo "==> Restarting service"
-systemctl restart transit
+sudo systemctl restart prevozni
 sleep 3
 
-CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 http://127.0.0.1:8000/health || echo 000)
+CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 --unix-socket /run/prevozni/prevozni.sock http://localhost/health || echo 000)
 if [ "$CODE" = "200" ]; then
   echo "==> Deploy OK ($(git rev-parse --short HEAD))"
 else

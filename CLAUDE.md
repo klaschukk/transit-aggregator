@@ -25,7 +25,7 @@
 | SSL | Cloudflare Flexible (origin TLS нет) |
 | Process | systemd (transit.service) |
 | Compression | flask-compress (gzip) + nginx gzip |
-| Analytics | Umami |
+| Analytics | Umami — cloud.umami.is (website ID `6af0f7f1-e6d7-4d30-b3f0-f47265a83db8`). Self-hosted migration in progress: shared instance on this same box, run by the flight-punctuality project (Docker, `127.0.0.1:3001`), see Инфраструктура. |
 | Данные | Скраперы (bgprevoz, gspns, busticket4.me, srbijavoz, polazak.rs) |
 
 ## URL архитектура
@@ -152,15 +152,27 @@ Production environment requires these env vars:
 - `DUCKDB_PATH` — путь к `transit.duckdb` (по умолчанию `data/dbs/transit.duckdb`).
 - `GSC_CREDENTIALS_PATH` — service account JSON для Search Console API
   (по умолчанию `/home/klaschuk/.gsc-credentials.json`, mode 0600).
-  ⚠️ Дефолтный путь на текущем боксе (178.105.76.3) **мёртвый** — файла нет,
-  GSC-скрипты (`weekly_seo.sh` и пр.) не сконфигурированы и не работают.
-  Setup: `docs/06_tech/gsc-setup.md`.
+  ⚠️ Не задан и файла нет нигде на текущем боксе (проверено 2026-08-25) —
+  `scripts/gsc_fetch.py` не сконфигурирован и не работает; GSC-данные
+  для анализа брать через ручной экспорт CSV из Search Console, не через
+  этот скрипт. Setup: `docs/06_tech/gsc-setup.md`.
 - `GSC_SITE_URL` — GSC property identifier
   (по умолчанию `sc-domain:prevozni.com`).
 - `SMTP_HOST`, `SMTP_PORT` (587), `SMTP_USER`, `SMTP_PASS`,
   `MAIL_FROM` — outbound email (newsletter confirm/welcome/unsubscribe).
   Без `SMTP_HOST` mailer пишет в `logs/mail_dev.log` — double-opt-in
   работает локально и в тестах без реального mailbox.
+- `ADSENSE_SLOT_*` — 15 отдельных ad-unit ID (все настоящие, живые с
+  2026-08-24), ключи см. `config.py` → `ADSENSE_SLOTS`:
+  `HOME_TOP`, `HOME_MID`, `MOBILE_ANCHOR`, `ROUTE_BOTTOM`, `ROUTE_MID`,
+  `LINE_BOTTOM`, `LINE_MID`, `STOP_BOTTOM`, `STOP_MID`,
+  `CITY_PAIR_BOTTOM`, `CITY_PAIR_MID`, `CITY_TRANSPORT_MID`,
+  `CATALOG_IN_FEED`, `SEARCH_MID`, `GUIDE_BOTTOM` (+ `GUIDES_BOTTOM` на
+  `/vodici/` — тот же физический юнит, что и `GUIDE_BOTTOM`, задан
+  отдельной переменной). Без конкретного `ADSENSE_SLOT_<KEY>` слот не
+  падает молча — рендерится как Auto Ads placement hint без
+  `data-ad-slot` (сайт без `enable_page_level_ads`, так что это ничего
+  не показывает). Так было ВЕЗДЕ кроме `search_mid` до 2026-08-24.
 
 ## Инфраструктура
 
@@ -174,8 +186,25 @@ Service: systemd prevozni.service (User=deploy)
 Workers: gunicorn -w 2 --bind unix:/run/prevozni/prevozni.sock
 Reverse proxy: nginx → unix-сокет; 502/504 переписываются в 503 + Retry-After
 SSL: Cloudflare Flexible — X-Forwarded-Proto в nginx, НЕ ТРОГАТЬ эту логику
-На боксе также живут popaj и valocheck — их не трогать
+На боксе также живут popaj, valocheck и flight-punctuality — их не трогать
 ```
+
+**Бокс мульти-тенантный, не только Flask+systemd.** С 2026-08-25 на боксе
+также крутится Docker (`docker.service`, демон + `docker-proxy`) — поднят
+проектом flight-punctuality под self-hosted Umami (`umami` +
+`umami-db`/postgres:16-alpine, слушают только `127.0.0.1:3001`). `docker`
+CLI стоит в `/usr/bin/docker`, но большинству сессий это не нужно —
+только если работаешь с контейнерами flight-punctuality. Отдельно,
+абсолютно не связанные с prevozni, но живут на диске: нативные
+PostgreSQL 17 (`systemctl status postgresql`) и Node.js 20 + npm + pnpm —
+остались от одной заброшенной попытки поставить self-hosted Umami
+нативно (откачена, база `umami`/юзер `umami` удалены), простаивают,
+ничего не едят, можно смело переиспользовать под что-то ещё.
+
+Параллельные Claude-сессии на этом боксе — реальность, не гипотеза:
+координируйся через `SendMessage`/`ListAgents` перед тем, как ставить
+системный софт (Docker, БД, systemd unit) — легко задублировать работу
+другой сессии, разбирающей соседний проект на этом же боксе.
 
 Проверка после любого изменения работающего кода:
 
@@ -193,8 +222,11 @@ Googlebot. Так и случилось 2026-08-03 в 02:13 (`Worker was sent SI
 класть на диск, рядом с оригиналом:
 `data/dbs/.geom_work.duckdb` — как это делает `refresh_line_geometries.sh`.
 
-Swap-файл на 2 ГБ добавлен 2026-08-03 (`/swapfile`, прописан в `/etc/fstab`):
-до этого swap отсутствовал вовсе, и любой всплеск памяти сразу убивал воркер.
+Swap: 6 ГБ на двух файлах (`/swapfile` 2 ГБ с 2026-08-03, `/swapfile2` ещё
+4 ГБ добавлен 2026-08-25 перед установкой Umami/Postgres — оба
+прописаны в `/etc/fstab`, до 2026-08-03 swap отсутствовал вовсе, и
+любой всплеск памяти сразу убивал воркер). `free -h` перед любой новой
+резидентной службой (БД, Node-процесс) — на боксе уже было тесно.
 
 **Окно обслуживания.** Пайплайнам нужен write-lock DuckDB, поэтому они
 останавливают сервис. Хелсчек (cron `*/5`) поднимал его обратно прямо посреди
@@ -209,15 +241,26 @@ touch logs/.maintenance && sudo systemctl stop prevozni
 sudo systemctl start prevozni && rm -f logs/.maintenance
 ```
 
-**Прод и рабочий чекаут — один и тот же бокс.** На 178.105.76.3 лежит
-рабочий чекаут `/root/klaschuk/transit-aggregator` — это живая инфраструктура:
-ночной пайплайн собирает в нём БД, и прод-сервис читает её оттуда
-(`DUCKDB_PATH=/root/klaschuk/transit-aggregator/data/dbs/transit.duckdb`).
-Сам gunicorn с 2026-06-13 крутится из отдельного прод-чекаута `/opt/prevozni`
-под непривилегированным юзером `prevozni` (до этого — прямо из рабочего
-чекаута под root). Деплой делает `git reset --hard origin/main` и стирает
-всё незакоммиченное, поэтому **ВСЯ работа — только в изолированных worktree**
-(`/root/klaschuk/.wt/*`); основной чекаут не трогать, он держится на main.
+**Прод и рабочий чекаут — один и тот же бокс, один и тот же чекаут**
+(`/home/deploy/transit-aggregator`, юзер `deploy`) — никаких отдельных
+worktree не требуется, редактируй файлы прямо здесь и рестартуй сервис.
+Этот бокс — не тот, что был раньше: по `git reflog` чекаут склонирован
+заново 2026-07-31 15:16, весь `journalctl` начинается с 2026-07-31
+14:43 (единственный boot) — переезд на новую машину случился после того,
+как старый сервер (178.105.76.3, другие пути, другой юзер) лежал ~месяц
+из-за незакрытого счёта у старого хостера (см. «История одного простоя»
+ниже). `git reset --hard origin/main` из `deploy.sh`/GitLab CI стирает
+незакоммиченное — коммить перед тем, как надолго уходить от бокса, если
+не хочешь потерять работу при чужом деплое.
+
+**История одного простоя (для контекста, не переоткрывать).** Трафик
+рухнул с ~815 кликов/день (26.06) почти до нуля (2/день, 14.07) и
+просидел там весь июль — причина: у старого хостера кончилась оплата,
+сайт был недоступен ~месяц, из-за чего "Server error (5xx)" в Search
+Console вырос до ~19–20K страниц. С переездом на этот бокс (31.07/01.08)
+трафик и индексация начали восстанавливаться сами; к 21.08 показы дошли
+до ~38K/день (~65% от пика). Это не код-баг и не лечится с этой
+стороны — только время + не дать оплате повиснуть на новом хостере.
 
 **Деплой** — только вручную, автодеплой-крона НЕТ (отключён 2026-06-04):
 
@@ -226,7 +269,11 @@ sudo systemctl start prevozni && rm -f logs/.maintenance
 - либо `scripts/deploy.sh` прямо на боксе.
 
 Оба пути: `git reset --hard origin/main` → `pip install` → minify CSS →
-`systemctl restart transit` → проверка `/health == 200`.
+`systemctl restart prevozni` → проверка `/health == 200` (через unix-сокет).
+
+`scripts/deploy.sh` был сломан на этом боксе (хардкодил `/opt/prevozni`,
+`systemctl restart transit`, health-check по TCP :8000 — всё от старого
+сервера) и не запустился бы вообще; починен 2026-08-25 под текущие пути.
 
 **Cron:**
 
@@ -283,6 +330,38 @@ sudo systemctl start prevozni && rm -f logs/.maintenance
 - [x] Гайды /vodici/
 - [x] Destinations page (14 топ направлений Балкан)
 - [x] hreflang × 3, og:locale:alternate, robots max-image-preview, Organization JSON-LD
+
+## Изменения после переезда (август 2026)
+
+- [x] Переезд на текущий бокс 2026-07-31/08-01 (см. «История одного простоя» выше)
+- [x] `FLASK_ENV` — был не задан на новом боксе → `create_app()` тихо
+      падал на `DevelopmentConfig` (несжатый CSS, без кэша шаблонов, без
+      кастомной 500-страницы на неотловленных ошибках). Добавлен
+      `FLASK_ENV=production` в systemd unit
+- [x] Все 15 слотов AdSense получили реальные `ADSENSE_SLOT_*` (были
+      пустые везде кроме `search_mid` — рендерились как Auto Ads hint без
+      единого показа с самого запуска монетизации)
+- [x] `ads.css` тихо перебивал bottom-stack arbiter из `app.mobile.css` —
+      `.mobile-anchor-ad` сидел на `bottom:0`/`z-index:60` вместо
+      `var(--m-bnav-h)`/`var(--z-promo)`, перекрывая нижнюю навигацию
+- [x] Umami: CSP/i18n ссылались на мёртвый `analytics.farmako.ro` (домен
+      до миграции на `cloud.umami.is`) — скрипт и beacon блокировались
+      браузером, своя аналитика не собирала ничего с момента миграции
+- [x] Поиск `/pretraga/` — diacritic-insensitive matching (`Nis` → `Niš`)
+- [x] Кириллица/латиница в номерах линий унифицированы через `|latin`
+      Jinja-фильтр (рендер-слой; в БД не лезть — `city_lines.number`
+      участвует в `UNIQUE(city, number)`, DuckDB 1.2.1 бросает
+      ConstraintException на UPDATE такой колонки, если на строку есть
+      FK-ссылка — проверено, не чинить в build_db.py)
+- [x] nginx: доступ только с IP Cloudflare (allow/deny), брендированная
+      503-страница при полном падении апстрима
+
+**В процессе, не завершено:** self-hosted Umami для prevozni.com —
+ждём DNS-запись `stats.flightpunctuality.online` от проекта
+flight-punctuality (общий инстанс, см. Инфраструктура); website ID уже
+выдан (`0bf85965-824a-4732-914a-d58f97cbb307`), переключение
+script-src/connect-src/script-tag — минутное дело, как только домен
+зарезолвится (сейчас NXDOMAIN).
 
 ## Документация
 
