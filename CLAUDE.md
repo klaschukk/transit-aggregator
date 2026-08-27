@@ -264,16 +264,24 @@ Console вырос до ~19–20K страниц. С переездом на э�
 
 **Деплой** — только вручную, автодеплой-крона НЕТ (отключён 2026-06-04):
 
-- кнопка ▶ в GitLab CI (stage `deploy`, `when: manual`; test-гейт
-  прогоняется автоматически на каждый push в main и MR);
-- либо `scripts/deploy.sh` прямо на боксе.
+- `scripts/deploy.sh` прямо на боксе — **единственный рабочий путь сейчас**.
+- ⚠️ кнопка ▶ в GitLab CI (stage `deploy`, `when: manual`) НЕ РАБОТАЕТ —
+  `.gitlab-ci.yml` всё ещё хардкодит старый мёртвый сервер
+  (`DEPLOY_HOST=178.105.76.3`, `root`, `/opt/prevozni`, `systemctl
+  restart transit`, health-check по TCP :8000) и CI/CD-переменная
+  `DEPLOY_SSH_KEY` не подходит новому боксу (в `authorized_keys`
+  деплой-юзера только личный ключ `klaschuk@macbook.local`, не
+  CI-ключ). Test-гейт (прогон pytest на каждый push в main/MR) при этом
+  исправен и работает — сломан только сам SSH-деплой шаг. Починка
+  требует провижининга отдельного CI SSH-ключа — намеренно не сделано
+  молча, см. `docs/06_tech/deploy_guide.md` за шагами.
 
-Оба пути: `git reset --hard origin/main` → `pip install` → minify CSS →
-`systemctl restart prevozni` → проверка `/health == 200` (через unix-сокет).
-
-`scripts/deploy.sh` был сломан на этом боксе (хардкодил `/opt/prevozni`,
-`systemctl restart transit`, health-check по TCP :8000 — всё от старого
-сервера) и не запустился бы вообще; починен 2026-08-25 под текущие пути.
+`scripts/deploy.sh`: `git reset --hard origin/main` → `pip install` →
+minify CSS → `systemctl restart prevozni` → проверка `/health == 200`
+(через unix-сокет). Сам скрипт был сломан на этом боксе тем же способом
+(хардкодил `/opt/prevozni`, `transit`, TCP :8000) и не запустился бы
+вообще; починен 2026-08-25 под текущие пути — `.gitlab-ci.yml` тогда же
+почему-то поправлен не был.
 
 **Cron:**
 
@@ -367,5 +375,11 @@ script-src/connect-src/script-tag — минутное дело, как толь
 
 - `docs/README.md` — оглавление всей документации.
 - Самые важные: `docs/06_tech/infrastructure.md` и `docs/06_tech/deploy_guide.md`
-  (актуализированы 2026-06-12).
+  (переписаны 2026-08-27 под текущий бокс; старые версии, описывавшие
+  сервер до переезда, лежат в `docs/90_archive/06_tech/`).
 - `docs/90_archive/` — архив, НЕ поддерживается, на него не опираться.
+- ⚠️ GitLab CI кнопка ▶ деплоя (см. «Деплой» выше) сейчас нацелена на
+  мёртвый старый сервер (178.105.76.3/root/opt-prevozni) и не сработает
+  даже после правки хоста — SSH-ключ в CI/CD-переменной тоже устарел.
+  Единственный рабочий путь — `scripts/deploy.sh` вручную на боксе.
+  Детали и шаги починки: `docs/06_tech/deploy_guide.md`.
