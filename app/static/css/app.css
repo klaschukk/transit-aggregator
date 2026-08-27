@@ -1299,6 +1299,22 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .home-city-card__icon { color: var(--color-primary); flex-shrink: 0; }
 .home-city-card__name { font-size: var(--text-lg); font-weight: 800; }
 .home-city-card__desc { font-size: var(--text-sm); color: var(--color-primary-dark); font-weight: 600; }
+.home-city-card__modes { display: flex; flex-wrap: wrap; gap: var(--space-1-5); margin-top: var(--space-1-5); }
+
+/* Transport-mode chip — colored pill, one per mode present in a city
+   (bus/tram/trolley/train). Reuses vehicle_icon() SVGs + --mode-* tokens
+   so a city's chip colors always match its line-badge/map colors. */
+.mode-chip {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-family: var(--font-display); font-weight: 700; font-size: 11px;
+  padding: 2px 7px 2px 5px; border-radius: var(--radius-pill);
+  color: #fff; line-height: 1.5;
+}
+.mode-chip .vehicle-icon { color: #fff; }
+.mode-chip--bus     { background: var(--mode-bus); }
+.mode-chip--tram    { background: var(--mode-tram); }
+.mode-chip--trolley { background: var(--mode-trolley); }
+.mode-chip--train   { background: var(--mode-train); }
 
 /* ── Home responsive ── */
 @media (min-width: 640px) {
@@ -1391,6 +1407,22 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   }
 }
 .city-map { height: 100%; }
+
+/* Route-overview map (/rute/<slug>/) — two pins + animated line, much
+   shorter than the city map since it's an orientation aid, not a
+   navigation tool. Same CLS-safe reserved-height approach. */
+.route-map-wrap {
+  aspect-ratio: 16 / 7;
+  min-height: 160px;
+  max-height: 260px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--space-5);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-alt);
+  touch-action: pan-x pan-y pinch-zoom;
+}
+.route-map { height: 100%; }
 
 /* Compact stop popup */
 .stop-popup { min-width: 140px; max-width: 200px; }
@@ -3819,6 +3851,16 @@ select:focus-visible, textarea:focus-visible {
   margin-bottom: var(--space-1-5);
 }
 .ad-slot__ins { min-height: 90px; }
+/* Pre-hydration lazy placeholder (not yet scrolled within 200px, so fill()
+   in base.html hasn't run) — a bare uppercase label floating in empty
+   space reads as a broken module. A contained box reads as "ad slot",
+   not "layout bug", until it either fills or collapses via :has() above. */
+.ad-slot.js-ad-lazy:not([data-ad-filled]) {
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-3) var(--space-4);
+  min-height: 90px;
+}
 /* AdSense stamps data-ad-status="unfilled" on the <ins> when it has no
    creative to serve. Without this the wrapper still paid for itself:
    64px of margin, the "Reklama" label and a 90px reserved box, all

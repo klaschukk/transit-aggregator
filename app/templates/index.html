@@ -212,6 +212,7 @@
 </section>
 
 {# ═══════ CITY TRANSPORT ═══════ #}
+{% from '_partials/_mode_chip.html' import mode_chip %}
 <section class="home-section container">
   <h2 class="home-section__title">{{ _('home.city_transport') }}</h2>
   <div class="home-cities-grid">
@@ -226,6 +227,11 @@
       <div class="home-city-card__info">
         <div class="home-city-card__name">{{ c.label }}</div>
         <div class="home-city-card__desc">{{ c.line_count }} {{ _('city.lines_count') }}{% if c.stop_count %} · {{ c.stop_count }} {{ _('common.stops') }}{% endif %}</div>
+        {% if c.modes %}
+        <div class="home-city-card__modes">
+          {% for m in c.modes %}{{ mode_chip(m.mode, m.count) }}{% endfor %}
+        </div>
+        {% endif %}
       </div>
     </a>
     {% endfor %}

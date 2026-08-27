@@ -1,0 +1,12 @@
+{# Colored transport-mode chip — bus/tram/trolley/train, reusing the
+   existing vehicle_icon() SVGs and the --mode-* CSS tokens (app.css §2).
+   `mode` is the folded bucket from app/routes/main.py's _TYPE_TO_MODE,
+   not the raw city_lines.type — map back to a representative type for
+   the icon (vehicle_icon keys on the fine-grained type). #}
+{% from '_partials/_vehicle_icon.html' import vehicle_icon %}
+{% macro mode_chip(mode, count=none) -%}
+{%- set _icon_type = {'bus': 'bus', 'tram': 'tram', 'trolley': 'trolleybus', 'train': 'bg-voz'}.get(mode, 'bus') -%}
+<span class="mode-chip mode-chip--{{ mode }}">
+  {{ vehicle_icon(_icon_type, size=13) }}{% if count is not none %}{{ count }}{% endif %}
+</span>
+{%- endmacro %}

@@ -301,6 +301,9 @@ def route_detail(slug: str):
             _seen_hub.add(_hub[0])
             city_transport_links.append({'slug': _hub[0], 'label': _hub[1]})
 
+    from app.city_coords import route_map_coords
+    map_route_coords = route_map_coords(route['from_city'], route['to_city'])
+
     og_image_url = f"{current_app.config['BASE_URL']}/og/route/{slug}.png"
     page_context_json = _json.dumps({
         'type': 'route',
@@ -323,7 +326,8 @@ def route_detail(slug: str):
                            reviews=reviews_list, reviews_agg=reviews_agg,
                            city_transport_links=city_transport_links,
                            og_image_url=og_image_url,
-                           page_context_json=page_context_json)
+                           page_context_json=page_context_json,
+                           map_route_coords=map_route_coords)
 
 
 def _compose_far_itinerary(info: dict, lang: str):

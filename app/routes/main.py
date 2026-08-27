@@ -141,6 +141,30 @@ def index():
     for c in cities_data:
         c['label'] = CITY_LABELS.get(c['city'], c['city'].title())
 
+    # Mode chips per city (bus/tram/trolley/train) — folds city_lines.type's
+    # finer categories (night, e-bus, suburban → bus; bg-voz → train) onto
+    # the 4 CSS mode tokens (--mode-bus/tram/trolley/train). Ordered so the
+    # rarer, more distinctive modes (tram/trolley/train) lead — a city with
+    # trams wants that visible, not buried after a big bus count.
+    _TYPE_TO_MODE = {
+        'bus': 'bus', 'night': 'bus', 'e-bus': 'bus', 'suburban': 'bus',
+        'tram': 'tram', 'trolleybus': 'trolley', 'bg-voz': 'train',
+    }
+    _MODE_ORDER = ['train', 'tram', 'trolley', 'bus']
+    if db_ready():
+        type_rows = cached_query("""
+            SELECT city, type, COUNT(*) as c FROM city_lines GROUP BY city, type
+        """)
+        _modes_by_city: dict[str, dict[str, int]] = {}
+        for r in type_rows:
+            mode = _TYPE_TO_MODE.get(r['type'], 'bus')
+            bucket = _modes_by_city.setdefault(r['city'], {})
+            bucket[mode] = bucket.get(mode, 0) + r['c']
+        for c in cities_data:
+            counts = _modes_by_city.get(c['city'], {})
+            c['modes'] = [{'mode': m, 'count': counts[m]}
+                          for m in _MODE_ORDER if counts.get(m)]
+
     # Popular city lines (by number of stops)
     popular_lines = cached_query("""
         SELECT cl.number, cl.name, cl.slug, cl.color,
