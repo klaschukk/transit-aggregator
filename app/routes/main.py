@@ -305,6 +305,16 @@ def search():
                 (o for o in offers if o.partner_key == 'bookaway'), None,
             )
 
+    # 1-hop connection suggestions ("no direct route" != "no route" — see
+    # app/connections.py). Only when it's not already a far-destination
+    # case above: a domestic pair with a real regional connection and an
+    # Asia-style AI itinerary are mutually exclusive in practice, and the
+    # real connection is the more useful answer when both could apply.
+    connections = []
+    if from_city and to_city and not results and not far:
+        from app.connections import find_connections
+        connections = find_connections(from_city, to_city)
+
     # Search results are noindex (header below). Mirror it into g.meta_robots so
     # the in-page <meta robots> agrees AND the ad_slot macro suppresses ads here:
     # an empty-results page carrying an ad is an AdSense policy risk, and Google
@@ -317,6 +327,7 @@ def search():
                                          min_price=min_price,
                                          popular_routes=popular_routes,
                                          far=far, bookaway_offer=bookaway_offer,
+                                         connections=connections,
                                          map_route_coords=map_route_coords))
     resp.headers['X-Robots-Tag'] = 'noindex, nofollow'
     return resp

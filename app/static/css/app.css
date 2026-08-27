@@ -1797,6 +1797,66 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .ai-route__note { margin: var(--space-3) 0 0; font-size: var(--text-xs); color: var(--color-text-muted); }
 @media (prefers-reduced-motion: reduce) { .ai-route__spinner { animation: none; } }
 
+/* 1-hop connection suggestions (app/connections.py) — same visual family
+   as .ai-route (badge + tinted card), own layout: two legs either side of
+   a wait-time divider, each leg linking out to its own /rute/ page. */
+.connections { margin: var(--space-6) 0; }
+.connections__head { margin-bottom: var(--space-4); }
+.connections__badge {
+  display: inline-block; padding: var(--space-0-5) var(--space-2);
+  border-radius: var(--radius-pill); background: var(--color-accent);
+  color: #fff; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase; margin-bottom: var(--space-2);
+}
+.connections__title { font-size: var(--text-xl); margin: var(--space-1) 0 0; }
+.connections__note { margin: var(--space-4) 0 0; font-size: var(--text-xs); color: var(--color-text-muted); }
+
+.connection-card {
+  margin-bottom: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-bg-alt) 100%);
+  border: 1px solid var(--color-primary-200);
+}
+.connection-card__via {
+  font-size: var(--text-sm); color: var(--color-text-muted);
+  text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: var(--space-3);
+}
+.connection-card__via b { color: var(--color-text); text-transform: none; letter-spacing: normal; }
+.connection-card__legs {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  align-items: center; gap: var(--space-3);
+}
+@media (max-width: 640px) {
+  .connection-card__legs { grid-template-columns: 1fr; }
+  .connection-card__wait { justify-content: flex-start; padding-left: var(--space-2); }
+}
+.connection-card__leg { min-width: 0; }
+.connection-card__leg-label {
+  display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.03em; color: var(--color-primary-dark); margin-bottom: var(--space-1);
+}
+.connection-card__row {
+  display: flex; align-items: baseline; gap: var(--space-1-5); flex-wrap: wrap;
+}
+.connection-card__time { font-family: var(--font-display); font-weight: 800; font-size: var(--text-base); }
+.connection-card__arrow { color: var(--color-text-muted); }
+.connection-card__op { font-size: var(--text-xs); color: var(--color-text-muted); }
+.connection-card__link {
+  display: inline-block; margin-top: var(--space-1); font-size: var(--text-sm);
+  color: var(--color-primary-dark); font-weight: 600;
+}
+.connection-card__wait {
+  display: flex; align-items: center; gap: var(--space-1-5);
+  color: var(--color-text-muted); font-size: var(--text-xs);
+  white-space: nowrap; justify-content: center;
+}
+.connection-card__price {
+  margin-top: var(--space-3); padding-top: var(--space-3);
+  border-top: 1px dashed var(--color-primary-200);
+  font-weight: 700; font-size: var(--text-sm);
+}
+
 /* Multi-partner block (route_detail bottom) */
 .partners-block {
   background: var(--color-bg-alt); border-radius: var(--radius-md);

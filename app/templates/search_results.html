@@ -45,7 +45,7 @@
       <span class="ccy-rsd">{{ min_price }} RSD</span><span class="ccy-eur">{{ (min_price / (config.EUR_RSD_RATE or 117))|round|int }} €</span>
     {% endif %}
   </p>
-  {% else %}
+  {% elif not connections %}
   <p class="page-subtitle">{{ _('search.no_results') }}</p>
   {% endif %}
 </div>
@@ -141,6 +141,56 @@
   </a>
   {% endif %}
   <p class="ai-route__note">{{ _('ai_route.disclaimer') }}</p>
+</section>
+{% elif connections %}
+<!-- ═══ 1-hop connection suggestions (app/connections.py) ═══
+     No direct route, but from_city->via_city and via_city->to_city both
+     run with a realistic same-day connection window. Each leg links to
+     its own /rute/ page — no combined checkout exists, same "book each
+     leg separately" model as the AI far-destination branch above. -->
+<section class="connections" aria-labelledby="connectionsHeading">
+  <div class="connections__head">
+    <span class="connections__badge">{{ _('connections.badge') }}</span>
+    <h2 class="connections__title" id="connectionsHeading">{{ _('connections.heading') }}</h2>
+  </div>
+  {% for c in connections %}
+  <div class="connection-card fade-in{% if not loop.first %} fade-in--d2{% endif %}">
+    <div class="connection-card__via">{{ _('connections.via') }} <b>{{ c.via_city }}</b></div>
+    <div class="connection-card__legs">
+      <div class="connection-card__leg">
+        <span class="connection-card__leg-label">{{ _('connections.leg') }} 1</span>
+        <div class="connection-card__row">
+          <span class="connection-card__time">{{ c.leg1.departure_time }}</span>
+          <span class="connection-card__arrow">→</span>
+          <span class="connection-card__time">{{ c.leg1.arrival_time }}</span>
+          {% if c.leg1.operator %}<span class="connection-card__op">{{ c.leg1.operator }}</span>{% endif %}
+        </div>
+        <a href="{{ lang_prefix }}/rute/{{ c.leg1_route_slug }}/" class="connection-card__link">{{ from_city }} → {{ c.via_city }} →</a>
+      </div>
+      <div class="connection-card__wait">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        {{ c.wait_min }} min {{ _('connections.wait') }}
+      </div>
+      <div class="connection-card__leg">
+        <span class="connection-card__leg-label">{{ _('connections.leg') }} 2</span>
+        <div class="connection-card__row">
+          <span class="connection-card__time">{{ c.leg2.departure_time }}</span>
+          <span class="connection-card__arrow">→</span>
+          <span class="connection-card__time">{{ c.leg2.arrival_time }}</span>
+          {% if c.leg2.operator %}<span class="connection-card__op">{{ c.leg2.operator }}</span>{% endif %}
+        </div>
+        <a href="{{ lang_prefix }}/rute/{{ c.leg2_route_slug }}/" class="connection-card__link">{{ c.via_city }} → {{ to_city }} →</a>
+      </div>
+    </div>
+    {% if c.total_price_rsd %}
+    <div class="connection-card__price">
+      {{ _('connections.total_price') }}
+      <span class="ccy-rsd">{{ c.total_price_rsd }} RSD</span><span class="ccy-eur">{{ (c.total_price_rsd / (config.EUR_RSD_RATE or 117))|round|int }} €</span>
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+  <p class="connections__note">{{ _('connections.disclaimer') }}</p>
 </section>
 {% else %}
 <!-- No results — warm empty state with a way forward -->

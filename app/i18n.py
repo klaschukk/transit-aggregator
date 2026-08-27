@@ -1105,6 +1105,21 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'No direct departures found for this route.',
         'ru': 'Прямых рейсов по этому маршруту не найдено.',
     },
+    'connections.badge': {'sr': 'Sa presedanjem', 'en': 'With a connection', 'ru': 'С пересадкой'},
+    'connections.heading': {
+        'sr': 'Nema direktne linije, ali možete presesti',
+        'en': 'No direct route, but you can connect',
+        'ru': 'Прямого рейса нет, но можно пересесть',
+    },
+    'connections.via': {'sr': 'preko', 'en': 'via', 'ru': 'через'},
+    'connections.wait': {'sr': 'čekanje', 'en': 'wait', 'ru': 'ожидание'},
+    'connections.leg': {'sr': 'Deonica', 'en': 'Leg', 'ru': 'Отрезок'},
+    'connections.total_price': {'sr': 'Ukupno od', 'en': 'Total from', 'ru': 'Всего от'},
+    'connections.disclaimer': {
+        'sr': 'Dve odvojene karte, kod različitih prevoznika — kupuju se posebno na svakoj deonici.',
+        'en': 'Two separate tickets, different carriers — bought separately for each leg.',
+        'ru': 'Два отдельных билета у разных перевозчиков — покупаются раздельно на каждом отрезке.',
+    },
 
     # ── Line detail ──
     'line.timeline': {'sr': 'Trasa linije', 'en': 'Line route', 'ru': 'Маршрут линии'},
