@@ -69,6 +69,12 @@
     </button>
   </h1>
   <p class="page-subtitle">{{ lines|length }} {{ _('city.lines_count') }}{% if stops_with_coords %} · {{ stops_with_coords }} {{ _('city.stops_on_map') }}{% endif %}</p>
+  {% if modes|length > 1 %}
+  {% from '_partials/_mode_chip.html' import mode_chip %}
+  <div class="home-city-card__modes" style="margin-top: var(--space-2)">
+    {% for m in modes %}{{ mode_chip(m.mode, m.count) }}{% endfor %}
+  </div>
+  {% endif %}
   <a href="{{ lang_prefix }}/rute/" class="reverse-route">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
     {{ _('city.intercity') }} — {{ city_label }}

@@ -125,6 +125,9 @@ def city_hub(city: str):
         ORDER BY CAST(REGEXP_REPLACE(cl.number, '[^0-9]', '', 'g') || '0' AS INTEGER)
     """, [city]) if db_ready() else []
 
+    from app.transit_modes import mode_counts
+    modes = mode_counts([l['type'] for l in lines if l.get('type')])
+
     stops_with_coords = 0
     map_bounds = None
     if db_ready():
@@ -211,6 +214,7 @@ def city_hub(city: str):
         'line_count': len(lines) if lines else 0,
     }, ensure_ascii=False)
     return render_template('city_transport.html', city=city, lines=lines,
+                           modes=modes,
                            stops_with_coords=stops_with_coords,
                            map_bounds=map_bounds,
                            top_stops=top_stops,
