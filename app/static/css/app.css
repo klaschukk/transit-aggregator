@@ -1088,7 +1088,10 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .hero {
   position: relative;
   background: linear-gradient(145deg, var(--color-hero-1) 0%, var(--color-hero-2) 45%, var(--color-primary) 100%);
-  padding: var(--space-12) 0 var(--space-12);
+  /* Tightened from --space-12 both sides: the search capsule is the page's
+     one job here, not the gradient — less air around it reads as more
+     confident, not cramped, at this content length. */
+  padding: var(--space-10) 0 var(--space-8);
   overflow: hidden;
 }
 .hero__bg {
@@ -1098,16 +1101,21 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 }
 .hero__inner { position: relative; text-align: center; }
 .hero__title {
-  font-size: var(--text-2xl);
+  /* Was --text-2xl (max 31px) — a hero-centric pattern's one headline reads
+     more confident bigger; --text-3xl is already on the same modular scale,
+     no new token needed. */
+  font-size: var(--text-3xl);
   color: var(--color-bg);
   margin-bottom: var(--space-2);
-  line-height: 1.15;
+  line-height: 1.12;
   letter-spacing: -0.02em;
 }
 .hero__sub {
   font-size: var(--text-base);
   color: rgba(255,255,255,.78);
-  margin-bottom: var(--space-6);
+  /* Was --space-6 — title→subtitle→capsule is one thought, not three
+     sections; tighter gap pulls the capsule up closer to the headline. */
+  margin-bottom: var(--space-4);
   letter-spacing: 0.01em;
 }
 .hero__search-wrap { max-width: 600px; margin: 0 auto; }
@@ -1186,8 +1194,13 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .hero__city-arrow { color: var(--color-text-muted); flex-shrink: 0; }
 .hero .journey-form { margin-bottom: 0; }
 .hero .journey-form__capsule {
-  border: none;
-  box-shadow: var(--shadow-lg);
+  /* Faint bright edge + deeper elevation than --shadow-lg (0 8px 24px) —
+     on a dark gradient a plain shadow barely separates the white capsule
+     from the backdrop it already contrasts with; the real "floating, this
+     is the one thing on the page" read comes from lift, not more shadow
+     alone. Search-as-CTA wants the highest contrast element on the page. */
+  border: 1px solid rgba(255,255,255,.5);
+  box-shadow: 0 20px 40px rgba(4,25,23,.35);
 }
 .hero .journey-form__submit {
   box-shadow: var(--shadow-accent-glow);
