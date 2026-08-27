@@ -261,6 +261,14 @@ def search():
     if not date or date == datetime.now().strftime('%Y-%m-%d'):
         results = [r for r in results if (r.get('departure_time') or '') >= now_time]
 
+    # Route-overview map — same treatment as /rute/<slug>/. Only meaningful
+    # once there's a real pair with real results; an empty/no-results search
+    # has nothing to plot.
+    map_route_coords = None
+    if results and from_city and to_city:
+        from app.city_coords import route_map_coords
+        map_route_coords = route_map_coords(from_city, to_city)
+
     # Min price for summary header
     min_price = None
     if results:
@@ -312,7 +320,8 @@ def search():
                                          to_city=to_city, datum=date,
                                          min_price=min_price,
                                          popular_routes=popular_routes,
-                                         far=far, bookaway_offer=bookaway_offer))
+                                         far=far, bookaway_offer=bookaway_offer,
+                                         map_route_coords=map_route_coords))
     resp.headers['X-Robots-Tag'] = 'noindex, nofollow'
     return resp
 
