@@ -439,6 +439,11 @@ def create_app(config_name: str | None = None) -> Flask:
             'geolocation=(self), microphone=(), camera=(), payment=()',
         )
         if 'text/html' in (response.content_type or ''):
+            # style-src/font-src allow fonts.googleapis.com/fonts.gstatic.com
+            # for Google's own Funding Choices consent UI (CMP ID 300, footer
+            # link) — it self-styles with Google Sans/Material Symbols and was
+            # silently falling back to unstyled system fonts under CSP block,
+            # confirmed via console: "violates ... style-src" on every page.
             response.headers.setdefault('Content-Security-Policy', (
                 "default-src 'self'; "
                 "script-src 'self' 'unsafe-inline' "
@@ -452,9 +457,11 @@ def create_app(config_name: str | None = None) -> Flask:
                 "https://fundingchoicesmessages.google.com "
                 "https://ep2.adtrafficquality.google; "
                 "style-src 'self' 'unsafe-inline' "
-                "https://unpkg.com https://api.mapbox.com; "
+                "https://unpkg.com https://api.mapbox.com "
+                "https://fonts.googleapis.com; "
                 "img-src 'self' data: blob: https:; "
-                "font-src 'self' data: https://api.mapbox.com; "
+                "font-src 'self' data: https://api.mapbox.com "
+                "https://fonts.gstatic.com; "
                 "connect-src 'self' "
                 "https://cloud.umami.is "
                 "https://gateway.umami.is "
