@@ -143,14 +143,16 @@ def _departures_left_today(trips: list[dict], now_hhmm: str) -> int:
 @intercity_bp.route('/rute/<slug>/')
 def route_detail(slug: str):
     route = query_one("""
-        SELECT r.id, r.slug, r.from_city, r.to_city, r.distance_km, r.type,
+        SELECT r.id, r.slug, r.from_city, r.to_city, r.from_city_slug, r.to_city_slug,
+               r.distance_km, r.type,
                COUNT(DISTINCT t.id) as trip_count,
                MIN(t.price_rsd) FILTER (WHERE t.price_rsd > 0) as min_price_rsd,
                MAX(t.price_rsd) as max_price_rsd
         FROM routes r
         LEFT JOIN trips t ON t.route_id = r.id
         WHERE r.slug = ? AND r.type = 'intercity'
-        GROUP BY r.id, r.slug, r.from_city, r.to_city, r.distance_km, r.type
+        GROUP BY r.id, r.slug, r.from_city, r.to_city, r.from_city_slug, r.to_city_slug,
+                 r.distance_km, r.type
     """, [slug]) if db_ready() else None
 
     if not route:
@@ -303,6 +305,8 @@ def route_detail(slug: str):
 
     from app.city_coords import route_map_coords
     map_route_coords = route_map_coords(route['from_city'], route['to_city'])
+    if map_route_coords and route.get('from_city_slug') and route.get('to_city_slug'):
+        map_route_coords['pair_key'] = f"{route['from_city_slug']}:{route['to_city_slug']}"
 
     og_image_url = f"{current_app.config['BASE_URL']}/og/route/{slug}.png"
     page_context_json = _json.dumps({

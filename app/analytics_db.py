@@ -259,6 +259,23 @@ CREATE TABLE IF NOT EXISTS composed_routes (
 CREATE INDEX IF NOT EXISTS composed_routes_hits_idx
     ON composed_routes(hits DESC);
 
+-- Road-following geometry for the /rute + /pretraga route-overview map,
+-- fetched once per city pair via Mapbox Directions (scripts/pregen_route_geometries.py)
+-- and read at request time only — never called live, same cache-only
+-- discipline as composed_routes (a synchronous 3rd-party call on every
+-- pageview would slow Googlebot and has no request-time billing cap).
+-- pair_key is '<from_city_slug>:<to_city_slug>', matching ai_compose.py's
+-- far-pair convention. geometry is a JSON array of [lon, lat] pairs.
+CREATE TABLE IF NOT EXISTS route_geometries (
+    pair_key    TEXT PRIMARY KEY,
+    from_city   TEXT,
+    to_city     TEXT,
+    geometry    TEXT NOT NULL,
+    distance_m  INTEGER,
+    duration_s  INTEGER,
+    fetched_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
+);
+
 -- BusTicket4 affiliate SALES (conversions), mirrored hourly from their flaky
 -- panel by scripts/bt4_sales_fetch.py so we can read them in our own admin.
 -- One row per calendar day; upserted each fetch (last run wins).
@@ -524,6 +541,45 @@ def upsert_composed_route(
         )
     except sqlite3.Error as exc:
         logger.error("upsert_composed_route failed: %s", exc)
+
+
+def get_route_geometry(pair_key: str) -> list | None:
+    """Cached road-following [[lon,lat], ...] for the route-overview map, or
+    None when scripts/pregen_route_geometries.py hasn't fetched this pair yet
+    — the caller falls back to a straight line between the two city pins."""
+    import json as _json
+    rows = query(
+        "SELECT geometry FROM route_geometries WHERE pair_key = ?", [pair_key],
+    )
+    if not rows:
+        return None
+    try:
+        return _json.loads(rows[0]['geometry'])
+    except ValueError:
+        return None
+
+
+def upsert_route_geometry(
+    pair_key: str, from_city: str, to_city: str, geometry: list,
+    distance_m: int | None = None, duration_s: int | None = None,
+) -> None:
+    """Store (or refresh) a route's road geometry. Idempotent per pair_key —
+    re-running the pregen script just refreshes stale geometry."""
+    import json as _json
+    try:
+        _get_conn().execute(
+            "INSERT INTO route_geometries "
+            "(pair_key, from_city, to_city, geometry, distance_m, duration_s) "
+            "VALUES (?, ?, ?, ?, ?, ?) "
+            "ON CONFLICT(pair_key) DO UPDATE SET "
+            "geometry = excluded.geometry, distance_m = excluded.distance_m, "
+            "duration_s = excluded.duration_s, "
+            "fetched_at = strftime('%Y-%m-%dT%H:%M:%SZ','now')",
+            [pair_key[:120], (from_city or '')[:120], (to_city or '')[:120],
+             _json.dumps(geometry), distance_m, duration_s],
+        )
+    except sqlite3.Error as exc:
+        logger.error("upsert_route_geometry failed: %s", exc)
 
 
 def top_composed_routes(limit: int = 300) -> list[dict]:

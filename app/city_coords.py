@@ -52,4 +52,9 @@ def route_map_coords(from_city: str, to_city: str) -> dict | None:
             'min_lat': min(a[0], b[0]), 'max_lat': max(a[0], b[0]),
             'min_lon': min(a[1], b[1]), 'max_lon': max(a[1], b[1]),
         },
+        # Set by the caller to '<from_slug>:<to_slug>' — _route_map_script.html
+        # fetches /api/route-geometry?pair=<pair_key> itself once the map's
+        # intent-gated load fires, rather than the view embedding the (often
+        # sizeable) coordinate array inline via Jinja tojson on every pageview.
+        'pair_key': None,
     }

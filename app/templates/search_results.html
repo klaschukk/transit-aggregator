@@ -57,7 +57,8 @@
        data-from-lat="{{ map_route_coords.from.lat }}" data-from-lon="{{ map_route_coords.from.lon }}"
        data-to-lat="{{ map_route_coords.to.lat }}" data-to-lon="{{ map_route_coords.to.lon }}"
        data-min-lat="{{ map_route_coords.bounds.min_lat }}" data-min-lon="{{ map_route_coords.bounds.min_lon }}"
-       data-max-lat="{{ map_route_coords.bounds.max_lat }}" data-max-lon="{{ map_route_coords.bounds.max_lon }}"></div>
+       data-max-lat="{{ map_route_coords.bounds.max_lat }}" data-max-lon="{{ map_route_coords.bounds.max_lon }}"
+       {%- if map_route_coords.pair_key %} data-pair-key="{{ map_route_coords.pair_key }}"{% endif %}></div>
 </div>
 {% endif %}
 

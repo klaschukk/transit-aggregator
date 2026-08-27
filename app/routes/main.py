@@ -240,7 +240,7 @@ def search():
         results = query("""
             SELECT t.departure_time, t.arrival_time, t.duration_min,
                    t.price_rsd, o.name as operator, r.from_city, r.to_city,
-                   t.bt4_line_id
+                   r.from_city_slug, r.to_city_slug, t.bt4_line_id
             FROM trips t
             JOIN routes r ON r.id = t.route_id
             JOIN operators o ON o.id = t.operator_id
@@ -260,6 +260,10 @@ def search():
     if results and from_city and to_city:
         from app.city_coords import route_map_coords
         map_route_coords = route_map_coords(from_city, to_city)
+        if map_route_coords:
+            _fs, _ts = results[0].get('from_city_slug'), results[0].get('to_city_slug')
+            if _fs and _ts:
+                map_route_coords['pair_key'] = f'{_fs}:{_ts}'
 
     # Min price for summary header
     min_price = None
@@ -556,6 +560,30 @@ def api_ab_convert():
         experiment=exp, event=event, value=value, variant=variant,
     )
     return '', 204
+
+
+@main_bp.route('/api/route-geometry')
+@limiter.limit("60 per minute")
+def api_route_geometry():
+    """JSON: cached road-following polyline for the route-overview map
+    (_partials/_route_map_script.html). Read-only lookup — the only writer
+    is scripts/pregen_route_geometries.py, never a live Mapbox Directions
+    call from a request. Split out of the page HTML (rather than embedded
+    inline via Jinja tojson) so the coordinate array — tens to hundreds of
+    [lon,lat] pairs — only downloads once a visitor actually triggers the
+    map's intent-gated load, not on every /rute/ and /pretraga/ pageview;
+    embedding it inline pushed a single route page over its gzipped-size
+    budget in tests/test_perf.py by itself."""
+    from app import analytics_db
+    pair_key = request.args.get('pair', '').strip()[:120]
+    if not pair_key or ':' not in pair_key:
+        return jsonify(error='bad_pair'), 400
+    geometry = analytics_db.get_route_geometry(pair_key)
+    resp = jsonify(geometry=geometry)
+    # Road geometry is static until the next pregen run (weekly at most) —
+    # safe to cache hard, client + Cloudflare edge alike.
+    resp.headers['Cache-Control'] = 'public, max-age=604800'
+    return resp
 
 
 @main_bp.route('/api/cities')
