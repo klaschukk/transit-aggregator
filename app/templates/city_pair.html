@@ -125,6 +125,18 @@
   {'value': route.trip_count|default(0), 'label': _('route.per_day'), 'icon': 'schedule'},
 ] + ([{'value': (route.min_price_rsd / config.EUR_RSD_RATE)|round|int ~ '€', 'label': 'od', 'icon': 'price'}] if route.min_price_rsd else [])) }}
 
+{% if route.distance_km and route.distance_km >= 150 and route.trip_count and route.trip_count <= 5 %}
+{# Same honest book-ahead nudge as route_detail.html — same threshold
+   (real distance + real daily departure count), just placed above the
+   trip-card list instead of inside a single CTA box, since city_pair
+   pages render one buy button per departure (trip_card), not one
+   consolidated box. #}
+<p class="buy-ticket__urgency fade-in">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+  {{ _('buy.book_ahead').format(n=route.trip_count) }}
+</p>
+{% endif %}
+
 <button class="btn btn--outline filter-toggle" id="filterToggle">
   <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M3 3a1 1 0 011-1h12a1 1 0 01.82 1.573l-4.82 7v4.427a1 1 0 01-.553.894l-2 1A1 1 0 018 16v-5.427L3.18 3.573A1 1 0 013 3z"/></svg>
   {{ _('filter.heading') }}
