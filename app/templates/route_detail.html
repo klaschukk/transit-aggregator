@@ -202,6 +202,19 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20" aria-hidden="true"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2 2 2 0 010 4 2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 00-2-2 2 2 0 010-4 2 2 0 002-2V7a2 2 0 00-2-2H5z"/></svg>
     <span>{{ _('buy.title') }}</span>
   </div>
+  {% if route.distance_km and route.distance_km >= 150 and route.trip_count and route.trip_count <= 5 %}
+  {# Honest book-ahead nudge — not fabricated urgency. Real distance +
+     real daily departure count from this route's own row (same numbers
+     the stats strip above already shows), shown only for the ~260
+     long-distance, low-frequency routes where missing a departure
+     genuinely costs a day, not the high-frequency short/commuter routes
+     (Pančevo-Beograd, 79/day) where locals mostly pay the driver in
+     person and advance booking isn't the norm. #}
+  <p class="buy-ticket__urgency">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+    {{ _('buy.book_ahead').format(n=route.trip_count) }}
+  </p>
+  {% endif %}
   <div class="buy-ticket__links">
     {% if _primary_href %}
     <a href="{{ _primary_href }}" target="_blank" rel="noopener nofollow sponsored"

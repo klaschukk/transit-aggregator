@@ -1926,6 +1926,17 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   margin-top: var(--space-3); font-size: 0.75rem; color: var(--color-text-muted);
   line-height: 1.4;
 }
+/* Book-ahead nudge — long-distance, low-frequency routes only (route_detail.html
+   gates it on real distance_km/trip_count, not fabricated). Accent colour, not
+   muted grey like __note below: this is a reason to click, not a disclaimer. */
+.buy-ticket__urgency {
+  display: flex; align-items: center; gap: var(--space-1-5);
+  margin: var(--space-2-5) 0 var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-accent-light); color: var(--color-accent-text);
+  border-radius: var(--radius-sm); font-size: var(--text-sm); font-weight: 600;
+}
+.buy-ticket__urgency svg { flex: none; opacity: 0.85; }
 
 /* Info cards */
 .cards-grid {

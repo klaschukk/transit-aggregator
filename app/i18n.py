@@ -1780,6 +1780,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Purchase is made on partner websites. Prevozni does not sell tickets.',
         'ru': 'Покупка на сайтах партнёров. Prevozni не продаёт билеты.',
     },
+    'buy.book_ahead': {
+        'sr': 'Samo {n} polazaka dnevno na ovoj relaciji — preporučujemo kupovinu unapred.',
+        'en': 'Only {n} departures a day on this route — advance booking recommended.',
+        'ru': 'Всего {n} рейс(ов) в день на этом направлении — рекомендуем покупать заранее.',
+    },
     'buy.cta': {
         'sr': 'Kupi',
         'en': 'Buy',
