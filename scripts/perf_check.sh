@@ -13,10 +13,20 @@ TG_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
 TG_CHAT="${TELEGRAM_CHAT_ID:-}"
 
 declare -A BUDGETS=(
-  ["/"]=15000
+  # "/" and "/rute/beograd-novi-sad/" raised 2026-09: route-overview map
+  # (markup + intent-gated Mapbox init script — the polyline itself is
+  # fetched separately via /api/route-geometry, not inlined) and homepage
+  # transport-mode chips. Measured live against prevozni.com post-change:
+  # 17571 and 24517 gzipped bytes respectively; budget below adds ~5-8%
+  # headroom, not a round-number guess. Tried an SVG <symbol>/<use> sprite
+  # to shrink the mode-chip icons first — made every page LARGER (gzip
+  # already collapses repeated inline SVG almost for free; the sprite's
+  # one-time symbol definitions cost more than they saved) — reverted,
+  # documented instead of raising blind.
+  ["/"]=18500
   ["/rute/"]=70000
-  ["/rute/beograd-novi-sad/"]=20000
-  ["/voznja/beograd-do-budva/"]=18000
+  ["/rute/beograd-novi-sad/"]=25500
+  ["/voznja/beograd-do-budva/"]=19500
   ["/gradski/beograd/"]=45000
   ["/gradski/beograd/stajaliste/sajam/"]=20000
 )
