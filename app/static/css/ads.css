@@ -40,10 +40,13 @@
   border-top:1px solid var(--color-border);
   box-shadow:0 -2px 10px rgba(0,0,0,.04);
 }
-.mobile-anchor-ad__close{
-  position:absolute;top:4px;right:6px;width:24px;height:24px;
-  border:0;border-radius:50%;background:rgba(0,0,0,.08);
-  color:#555;font-size:16px;line-height:1;cursor:pointer;
-}
+/* .mobile-anchor-ad__close is deliberately NOT redeclared here — this
+   file used to give it its own position:absolute;top:4px;right:6px;
+   width:24px;height:24px, which (same cascade-order bug as the arbiter
+   fix above, just missed on this sibling rule) silently beat app.css's
+   later flex-based, 44×44 thumb-target close button. That let the tap
+   target end up pulled out of the flex row and, in practice, dead —
+   reported live 2026-09-02: "close button doesn't work on phone,
+   [ad] is horribly in the way." app.css's version is the only one now. */
 .mobile-anchor-ad--hidden{display:none;}
 @media(min-width:641px){.mobile-anchor-ad{display:none;}}
