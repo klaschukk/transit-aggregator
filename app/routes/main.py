@@ -240,7 +240,8 @@ def search():
         results = query("""
             SELECT t.departure_time, t.arrival_time, t.duration_min,
                    t.price_rsd, o.name as operator, r.from_city, r.to_city,
-                   r.from_city_slug, r.to_city_slug, t.bt4_line_id
+                   r.from_city_slug, r.to_city_slug, t.bt4_line_id,
+                   CASE WHEN o.name = 'Srbija Voz' THEN 'train' ELSE 'bus' END as type
             FROM trips t
             JOIN routes r ON r.id = t.route_id
             JOIN operators o ON o.id = t.operator_id
