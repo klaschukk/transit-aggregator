@@ -52,6 +52,7 @@
 
 {% if results and map_route_coords %}
 <div class="route-map-wrap fade-in">
+  {% include '_partials/_route_map_globe.html' %}
   <div id="routeMap" class="route-map"
        role="img" aria-label="{{ from_city }} → {{ to_city }}"
        data-from-lat="{{ map_route_coords.from.lat }}" data-from-lon="{{ map_route_coords.from.lon }}"

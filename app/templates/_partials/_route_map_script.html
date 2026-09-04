@@ -104,7 +104,27 @@
 
     var mapLoaded = new Promise(function(resolve) { map.on('load', resolve); });
 
+    /* Safety net: if a tile/network hiccup means 'load' never fires, don't
+       pulse the globe forever — release it after 8s regardless so the
+       placeholder background shows through instead of a stuck animation. */
+    var globeReleased = false;
+    function releaseGlobe() {
+      if (globeReleased) return;
+      globeReleased = true;
+      var globe = document.getElementById('routeMapGlobe');
+      if (globe) {
+        globe.addEventListener('animationend', function() { globe.remove(); }, { once: true });
+        globe.classList.add('route-map-globe--exit');
+      }
+    }
+    setTimeout(releaseGlobe, 8000);
+
     Promise.all([mapLoaded, geometryFetch]).then(function() {
+      /* Globe hands off to the real map right as markers + the route-line
+         draw begin — "zoomed in from orbit, here's your route" in one
+         continuous beat. */
+      releaseGlobe();
+
       new mapboxgl.Marker({ element: pin('#0d9488') }).setLngLat(from).addTo(map);
       new mapboxgl.Marker({ element: pin('#e53e3e') }).setLngLat(to).addTo(map);
 

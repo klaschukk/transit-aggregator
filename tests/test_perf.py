@@ -19,7 +19,7 @@ import pytest
 BUDGETS_GZIPPED = {
     "/": 20400,                                # raised: default-English first-visit redirect JS (in <head>, every page)
     "/rute/": 70000,
-    "/rute/beograd-novi-sad/": 24500,          # raised: route-overview map (markup + intent-gated Mapbox
+    "/rute/beograd-novi-sad/": 25300,          # raised: route-overview map (markup + intent-gated Mapbox
                                                 # init script, geometry itself fetched separately via
                                                 # /api/route-geometry — not inlined). Full-suite runs also
                                                 # see ~5KB more than an isolated run on this exact route
@@ -29,6 +29,9 @@ BUDGETS_GZIPPED = {
                                                 # +46B 2026-09: ResizeObserver fix for a real live bug (map
                                                 # rendering as a narrow rectangle, stuck at its init-time
                                                 # width) — real fix, not fat.
+                                                # +407B 2026-09: "globe" loading-state animation (inline SVG
+                                                # sphere + CSS keyframes) that plays while Mapbox loads, then
+                                                # hands off to the real map — requested feature, real markup.
     "/voznja/beograd-do-budva/": 22200,        # raised: default-English first-visit redirect JS (in <head>, every page)
     "/gradski/beograd/": 46000,
     "/gradski/beograd/stajaliste/sajam/": 23400,  # raised: default-English first-visit redirect JS (in <head>, every page)
