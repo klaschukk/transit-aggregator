@@ -154,7 +154,6 @@
 
 {% if map_route_coords %}
 <div class="route-map-wrap fade-in">
-  {% include '_partials/_route_map_globe.html' %}
   <div id="routeMap" class="route-map"
        role="img" aria-label="{{ route.from_city }} → {{ route.to_city }}"
        data-from-lat="{{ map_route_coords.from.lat }}" data-from-lon="{{ map_route_coords.from.lon }}"
@@ -253,6 +252,13 @@
     </div>
   </div>
 </div>
+{% if has_multiple_modes %}
+<div class="time-chips" id="modeFilter" aria-label="{{ _('filter.transport_type') }}">
+  <button class="time-chip time-chip--active" data-mode="">{{ _('route.filter_all') }}</button>
+  <button class="time-chip" data-mode="bus">{{ _('filter.bus') }}</button>
+  <button class="time-chip" data-mode="train">{{ _('filter.train') }}</button>
+</div>
+{% endif %}
 {% if operators_on_route|length > 1 %}
 <div class="time-chips" id="carrierFilter" aria-label="{{ _('filter.carrier') }}">
   <button class="time-chip time-chip--active" data-carrier="">{{ _('route.carrier_all') }}</button>

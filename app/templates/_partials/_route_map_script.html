@@ -3,10 +3,14 @@
    (data-from-lat/lon, data-to-lat/lon, data-min/max-*) from a
    map_route_coords dict built by app.city_coords.route_map_coords().
 
-   Same intent-gated Mapbox GL loader as city_transport.html, plus a
-   hand-rolled line-draw animation (no turf.js dependency for a 2-point
-   lerp). Skips the animation under prefers-reduced-motion — draws the
-   full line immediately instead. #}
+   Same intent-gated Mapbox GL loader as city_transport.html. The
+   "zoom in from orbit" effect is Mapbox's own globe projection +
+   fitBounds(), not a hand-rolled animation: the map is constructed
+   pulled back to orbit height, then fitBounds() flies the camera down
+   to the route (fitBounds uses flyTo internally unless linear:true is
+   passed), and Mapbox morphs globe -> flat Mercator on its own as the
+   zoom passes ~5. Skips the flight under prefers-reduced-motion —
+   lands directly on the route instead. #}
 {% if map_route_coords %}
 <script>
 (function() {
@@ -52,17 +56,35 @@
     var d = mapEl.dataset;
     var from = [parseFloat(d.fromLon), parseFloat(d.fromLat)];
     var to   = [parseFloat(d.toLon), parseFloat(d.toLat)];
+    var bounds = [[parseFloat(d.minLon), parseFloat(d.minLat)],
+                  [parseFloat(d.maxLon), parseFloat(d.maxLat)]];
+    var fitOpts = { padding: 56, maxZoom: 9 };
 
-    var map = new mapboxgl.Map({
+    var reduceMotion = window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var mapOpts = {
       container: 'routeMap',
       style: 'mapbox://styles/mapbox/light-v11',
       attributionControl: false,
       interactive: true,
-      bounds: [[parseFloat(d.minLon), parseFloat(d.minLat)],
-                [parseFloat(d.maxLon), parseFloat(d.maxLat)]],
-      fitBoundsOptions: { padding: 56, maxZoom: 9 }
-    });
+      projection: 'globe'
+    };
+    if (reduceMotion) {
+      // Land straight on the route — no orbit glance, no flight.
+      mapOpts.bounds = bounds;
+      mapOpts.fitBoundsOptions = fitOpts;
+    } else {
+      // Pulled back to orbit height so the first paint reads as "the
+      // whole Earth"; fitBounds() below flies the camera down once
+      // tiles are ready.
+      mapOpts.center = from;
+      mapOpts.zoom = 0.9;
+    }
+
+    var map = new mapboxgl.Map(mapOpts);
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
+    map.on('style.load', function() { map.setFog({}); });
 
     /* Mapbox GL reads the container's offsetWidth/offsetHeight ONCE, at
        construction — it does not re-measure on its own. This intent-gated
@@ -102,86 +124,84 @@
       return el;
     }
 
-    var mapLoaded = new Promise(function(resolve) { map.on('load', resolve); });
+    // The destination pin rides along on the globe from the start — a
+    // single dot to aim the flight at, same as the departure pin arrives
+    // once the camera lands on the route.
+    var toPin = new mapboxgl.Marker({ element: pin('#e53e3e') }).setLngLat(to);
 
-    /* Safety net: if a tile/network hiccup means 'load' never fires, don't
-       pulse the globe forever — release it after 8s regardless so the
-       placeholder background shows through instead of a stuck animation. */
-    var globeReleased = false;
-    function releaseGlobe() {
-      if (globeReleased) return;
-      globeReleased = true;
-      var globe = document.getElementById('routeMapGlobe');
-      if (globe) {
-        globe.addEventListener('animationend', function() { globe.remove(); }, { once: true });
-        globe.classList.add('route-map-globe--exit');
-      }
-    }
-    setTimeout(releaseGlobe, 8000);
+    var mapLoaded = new Promise(function(resolve) { map.once('load', resolve); });
 
     Promise.all([mapLoaded, geometryFetch]).then(function() {
-      /* Globe hands off to the real map right as markers + the route-line
-         draw begin — "zoomed in from orbit, here's your route" in one
-         continuous beat. */
-      releaseGlobe();
+      function reveal() {
+        new mapboxgl.Marker({ element: pin('#0d9488') }).setLngLat(from).addTo(map);
 
-      new mapboxgl.Marker({ element: pin('#0d9488') }).setLngLat(from).addTo(map);
-      new mapboxgl.Marker({ element: pin('#e53e3e') }).setLngLat(to).addTo(map);
+        var hasRoad = !!(roadCoords && roadCoords.length > 1);
+        var fullLine = hasRoad ? roadCoords : [from, to];
 
-      var hasRoad = !!(roadCoords && roadCoords.length > 1);
-      var fullLine = hasRoad ? roadCoords : [from, to];
-
-      map.addSource('route-line', {
-        type: 'geojson',
-        data: { type: 'Feature', geometry: { type: 'LineString', coordinates: [fullLine[0]] } }
-      });
-      map.addLayer({
-        id: 'route-line', type: 'line', source: 'route-line',
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        /* Dashed for the straight-line fallback (visibly "as the crow
-           flies", not a claim about the real road); solid once it's the
-           actual Directions polyline. */
-        paint: { 'line-color': '#0d9488', 'line-width': 3,
-                  'line-dasharray': hasRoad ? [1, 0] : [0.2, 1.6] }
-      });
-
-      var reduceMotion = window.matchMedia &&
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (reduceMotion) {
-        map.getSource('route-line').setData({
-          type: 'Feature', geometry: { type: 'LineString', coordinates: fullLine }
+        map.addSource('route-line', {
+          type: 'geojson',
+          data: { type: 'Feature', geometry: { type: 'LineString', coordinates: [fullLine[0]] } }
         });
+        map.addLayer({
+          id: 'route-line', type: 'line', source: 'route-line',
+          layout: { 'line-cap': 'round', 'line-join': 'round' },
+          /* Dashed for the straight-line fallback (visibly "as the crow
+             flies", not a claim about the real road); solid once it's the
+             actual Directions polyline. */
+          paint: { 'line-color': '#0d9488', 'line-width': 3,
+                    'line-dasharray': hasRoad ? [1, 0] : [0.2, 1.6] }
+        });
+
+        if (reduceMotion) {
+          map.getSource('route-line').setData({
+            type: 'Feature', geometry: { type: 'LineString', coordinates: fullLine }
+          });
+          return;
+        }
+
+        var start = null, duration = hasRoad ? 1500 : 1100;
+        function frame(ts) {
+          if (!start) start = ts;
+          var t = Math.min(1, (ts - start) / duration);
+          var eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+          var coords;
+          if (fullLine.length > 2) {
+            // Reveal progressively more of the real polyline, interpolating
+            // the last visible segment so the draw is smooth, not stepped.
+            var pos = eased * (fullLine.length - 1);
+            var idx = Math.floor(pos), frac = pos - idx;
+            coords = fullLine.slice(0, idx + 1);
+            if (idx < fullLine.length - 1) {
+              var p0 = fullLine[idx], p1 = fullLine[idx + 1];
+              coords.push([p0[0] + (p1[0] - p0[0]) * frac,
+                           p0[1] + (p1[1] - p0[1]) * frac]);
+            }
+          } else {
+            var lng = from[0] + (to[0] - from[0]) * eased;
+            var lat = from[1] + (to[1] - from[1]) * eased;
+            coords = [from, [lng, lat]];
+          }
+          map.getSource('route-line').setData({
+            type: 'Feature', geometry: { type: 'LineString', coordinates: coords }
+          });
+          if (t < 1) requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+      }
+
+      if (reduceMotion) {
+        toPin.addTo(map);
+        reveal();
         return;
       }
 
-      var start = null, duration = hasRoad ? 1500 : 1100;
-      function frame(ts) {
-        if (!start) start = ts;
-        var t = Math.min(1, (ts - start) / duration);
-        var eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
-        var coords;
-        if (fullLine.length > 2) {
-          // Reveal progressively more of the real polyline, interpolating
-          // the last visible segment so the draw is smooth, not stepped.
-          var pos = eased * (fullLine.length - 1);
-          var idx = Math.floor(pos), frac = pos - idx;
-          coords = fullLine.slice(0, idx + 1);
-          if (idx < fullLine.length - 1) {
-            var p0 = fullLine[idx], p1 = fullLine[idx + 1];
-            coords.push([p0[0] + (p1[0] - p0[0]) * frac,
-                         p0[1] + (p1[1] - p0[1]) * frac]);
-          }
-        } else {
-          var lng = from[0] + (to[0] - from[0]) * eased;
-          var lat = from[1] + (to[1] - from[1]) * eased;
-          coords = [from, [lng, lat]];
-        }
-        map.getSource('route-line').setData({
-          type: 'Feature', geometry: { type: 'LineString', coordinates: coords }
-        });
-        if (t < 1) requestAnimationFrame(frame);
-      }
-      requestAnimationFrame(frame);
+      toPin.addTo(map);
+      // Brief pause on the orbit view before the flight starts, so it
+      // reads as "here's the world" and not just a stutter mid-load.
+      setTimeout(function() {
+        map.fitBounds(bounds, Object.assign({ duration: 3200 }, fitOpts));
+        map.once('moveend', reveal);
+      }, 450);
     });
   }
 })();

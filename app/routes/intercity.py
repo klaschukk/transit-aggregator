@@ -216,6 +216,10 @@ def route_detail(slug: str):
         ORDER BY t.departure_time
     """, [slug]) if db_ready() else []
     _has_schedule = bool(trips)
+    # Bus/train filter chip only earns its place on a route that actually
+    # mixes modes — most don't (only Srbija Voz sells train; see the CASE
+    # in the query above), and a toggle with one option is noise.
+    has_multiple_modes = len({t.get('type') for t in trips}) > 1
 
     today = date.today()
     days = [today + timedelta(days=i) for i in range(3)]
@@ -332,7 +336,8 @@ def route_detail(slug: str):
                            city_transport_links=city_transport_links,
                            og_image_url=og_image_url,
                            page_context_json=page_context_json,
-                           map_route_coords=map_route_coords)
+                           map_route_coords=map_route_coords,
+                           has_multiple_modes=has_multiple_modes)
 
 
 def _compose_far_itinerary(info: dict, lang: str):

@@ -1,13 +1,15 @@
 /* route-filters.js — trip list controls on /rute/<slug>/ and /voznja/.
  *
  * All trip cards are server-rendered (good for SEO); this script only
- * shows/hides and reorders the existing DOM nodes. Three single-select
+ * shows/hides and reorders the existing DOM nodes. Four single-select
  * chip groups drive it:
  *   #timeFilter    — time-of-day window (data-from / data-to hours)
+ *   #modeFilter    — bus/train (data-mode; empty = all). Only rendered
+ *                    when a route actually mixes modes.
  *   #carrierFilter — single operator (data-carrier; empty = all)
  *   #sortChips     — sort key (data-sort: time | price | duration)
  *
- * Cards expose data-hour, data-price, data-duration, data-operator.
+ * Cards expose data-hour, data-price, data-duration, data-operator, data-type.
  */
 (function () {
   'use strict';
@@ -22,7 +24,7 @@
   var countEl = document.getElementById('tripCount');
   var visibleEl = document.getElementById('tripVisible');
 
-  var fromH = 0, toH = 24, carrier = '', sortKey = 'time';
+  var fromH = 0, toH = 24, mode = '', carrier = '', sortKey = 'time';
 
   function num(c, attr) { return parseInt(c.dataset[attr], 10) || 0; }
 
@@ -35,7 +37,7 @@
   function apply() {
     var visible = 0;
     cards.forEach(function (c) {
-      var show = inTime(c) && (!carrier || c.dataset.operator === carrier);
+      var show = inTime(c) && (!mode || c.dataset.type === mode) && (!carrier || c.dataset.operator === carrier);
       c.style.display = show ? '' : 'none';
       if (show) visible++;
     });
@@ -81,6 +83,7 @@
   }
 
   wire('timeFilter', function (b) { fromH = parseInt(b.dataset.from, 10); toH = parseInt(b.dataset.to, 10); });
+  wire('modeFilter', function (b) { mode = b.dataset.mode || ''; });
   wire('carrierFilter', function (b) { carrier = b.dataset.carrier || ''; });
   wire('sortChips', function (b) { sortKey = b.dataset.sort; });
 })();
