@@ -64,6 +64,22 @@
     });
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
 
+    /* Mapbox GL reads the container's offsetWidth/offsetHeight ONCE, at
+       construction — it does not re-measure on its own. This intent-gated
+       loader can fire while the container's final layout width is still
+       settling (font swap, an ad slot above it resolving, the .fade-in
+       reveal), so the canvas can end up permanently stuck at whatever
+       narrower width it saw at that instant — reported live: "map shows
+       as a rectangle on the left, not full width" on desktop. A
+       ResizeObserver catches every later size change (not just window
+       resize) and tells Mapbox to re-measure. */
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(function() { map.resize(); });
+      ro.observe(mapEl);
+    } else {
+      window.addEventListener('resize', function() { map.resize(); });
+    }
+
     /* Cached Mapbox Directions polyline (scripts/pregen_route_geometries.py),
        fetched on demand rather than embedded inline via Jinja tojson — a
        route's coordinate array (tens to hundreds of [lon,lat] pairs) added

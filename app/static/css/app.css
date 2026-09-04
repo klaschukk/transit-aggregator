@@ -1425,6 +1425,13 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
    shorter than the city map since it's an orientation aid, not a
    navigation tool. Same CLS-safe reserved-height approach. */
 .route-map-wrap {
+  /* Explicit 100% — without it, aspect-ratio + max-height clamping together
+     let some engines solve for a NARROWER width instead of just clipping
+     height (260px max-height * 16/7 ratio = 594px — exactly the shrunk
+     width reported live: "map shows as a rectangle on the left, not full
+     width"). Block elements are 100% width by default, but that default
+     is exactly what stopped applying once the ratio math kicked in. */
+  width: 100%;
   aspect-ratio: 16 / 7;
   min-height: 160px;
   max-height: 260px;

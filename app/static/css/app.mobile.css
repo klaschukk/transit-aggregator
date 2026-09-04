@@ -770,8 +770,16 @@ body:has(.cookie-banner[data-visible="true"]) {
    over the drawer's tap targets. */
 .m-nav-open .m-bnav { transform: translateY(120%); }
 
-/* AI chat widget: full-width panel, lifted above the bottom nav bar. */
-.chat-widget { bottom: calc(var(--m-bnav-h, 48px) + 16px); right: 12px; left: 12px; align-items: flex-end; }
+/* AI chat widget: full-width panel, lifted above the bottom nav bar.
+   Collapsed toggle sits bottom-LEFT (align-items: flex-start), not the
+   more conventional bottom-right — every primary CTA on this site (buy
+   buttons, price badges) is right-aligned, so a right-anchored 56px
+   circle sits exactly where a single-departure route's only "Kupi"
+   button renders on initial view. Reported live with a screenshot:
+   Beograd→Sofija (1 departure) had the chat bubble visually on top of
+   the buy button. Nothing docks bottom-left on mobile, so this side
+   has no equivalent collision to trade it for. */
+.chat-widget { bottom: calc(var(--m-bnav-h, 48px) + 16px); right: 12px; left: 12px; align-items: flex-start; }
 .chat-box { width: 100%; max-height: 70vh; }
 
 /* ── Focus-visible on colored mobile surfaces ──────────────────────
