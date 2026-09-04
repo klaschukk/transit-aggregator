@@ -4,6 +4,7 @@ from datetime import date, datetime, timedelta
 from flask import Blueprint, render_template, abort, request, redirect, url_for, current_app, g
 from app.db import query, query_one, cached_query, db_ready
 from app.slug import normalize_slug
+from app.trip_badges import tag_best_trips
 
 intercity_bp = Blueprint('intercity', __name__)
 
@@ -249,15 +250,8 @@ def route_detail(slug: str):
                        if selected_day == 0 else 0)
 
     # Best-option badges: tag a single cheapest / fastest trip so the card
-    # can flag the best pick. Only when there's a real spread (>1 trip and
-    # min != max) so we never badge a lone trip or badge every card.
-    if len(trips) > 1:
-        if price_min is not None and price_max is not None and price_min != price_max:
-            next(t for t in trips if t.get('price_rsd') == price_min)['is_cheapest'] = True
-        durs = [t['duration_min'] for t in trips if t.get('duration_min')]
-        if len(durs) > 1 and min(durs) != max(durs):
-            d_min = min(durs)
-            next(t for t in trips if t.get('duration_min') == d_min)['is_fastest'] = True
+    # can flag the best pick (see app.trip_badges for the shared rule).
+    tag_best_trips(trips)
 
     # Reverse route slug
     reverse_route = query_one("""
@@ -438,6 +432,8 @@ def city_pair(from_city: str, to_city: str):
             cheapest_price = min(prices)
             cheapest_trip = next((t for t in trips if t.get('price_rsd') == cheapest_price), None)
             route_info['cheapest_operator'] = cheapest_trip['operator'] if cheapest_trip else None
+
+        tag_best_trips(trips, min_plausible_duration=min_plausible)
 
     # Related city pairs: other destinations from the same origin
     related_pairs = []

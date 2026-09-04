@@ -254,6 +254,10 @@ def search():
     if not date or date == datetime.now().strftime('%Y-%m-%d'):
         results = [r for r in results if (r.get('departure_time') or '') >= now_time]
 
+    # Best-option badges — same rule as route_detail/city_pair (app.trip_badges).
+    from app.trip_badges import tag_best_trips
+    tag_best_trips(results)
+
     # Route-overview map — same treatment as /rute/<slug>/. Only meaningful
     # once there's a real pair with real results; an empty/no-results search
     # has nothing to plot.
