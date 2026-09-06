@@ -88,4 +88,58 @@
   wire('modeFilter', function (b) { mode = b.dataset.mode || ''; });
   wire('carrierFilter', function (b) { carrier = b.dataset.carrier || ''; });
   wire('sortChips', function (b) { sortKey = b.dataset.sort; });
+
+  /* ── Live "departs in Xh Ym" on the next upcoming card ──
+   * Only rendered on the "today" tab (list.dataset.now set server-side from
+   * Belgrade wall-clock time at render — see intercity.py's
+   * _belgrade_now_hhmm()). Ticks forward from that ONE server reading using
+   * elapsed real time (Date.now() diff), never the visitor's own clock/
+   * timezone, so a visitor in another timezone still sees Serbia-local
+   * countdown. Re-scans on every filter/sort change (apply() calls it) so
+   * "next" always reflects what's actually visible, not the full list. */
+  var nowAttr = list.dataset.now;
+  if (nowAttr && /^\d{2}:\d{2}$/.test(nowAttr)) {
+    var baseMin = parseInt(nowAttr.slice(0, 2), 10) * 60 + parseInt(nowAttr.slice(3, 5), 10);
+    var baseTs = Date.now();
+    var countdownEl = null;
+    var label = list.dataset.departsLabel || '';
+    var unitH = list.dataset.unitH || 'h';
+    var unitMin = list.dataset.unitMin || 'min';
+
+    function updateCountdown() {
+      var nowMin = baseMin + Math.floor((Date.now() - baseTs) / 60000);
+      var next = null, bestDelta = Infinity;
+      cards.forEach(function (c) {
+        if (c.style.display === 'none') return;
+        var timeEl = c.querySelector('.trip-card__time--depart');
+        var dep = timeEl && timeEl.firstChild ? timeEl.firstChild.textContent.trim() : '';
+        if (!/^\d{2}:\d{2}$/.test(dep)) return;
+        var depMin = parseInt(dep.slice(0, 2), 10) * 60 + parseInt(dep.slice(3, 5), 10);
+        // Window capped at 3h — a countdown reading "in 14h" isn't urgency,
+        // it's noise; the badge should only appear when it's actually useful.
+        var delta = depMin - nowMin;
+        if (delta > 0 && delta <= 180 && delta < bestDelta) { bestDelta = delta; next = timeEl; }
+      });
+      if (countdownEl && countdownEl.parentNode !== next) {
+        countdownEl.remove();
+        countdownEl = null;
+      }
+      if (next) {
+        if (!countdownEl) {
+          countdownEl = document.createElement('span');
+          countdownEl.className = 'trip-card__countdown';
+          next.appendChild(countdownEl);
+        }
+        var h = Math.floor(bestDelta / 60), m = bestDelta % 60;
+        countdownEl.textContent = label + ' ' + (h ? h + unitH + ' ' : '') + m + unitMin;
+      }
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 30000);
+    // apply() already exists above; wrap it so every filter/sort change
+    // re-evaluates which card is "next" among what's now visible.
+    var _apply = apply;
+    apply = function () { _apply(); updateCountdown(); };
+  }
 })();

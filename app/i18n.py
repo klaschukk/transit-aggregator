@@ -1965,6 +1965,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'day.today': {'sr': 'Danas', 'en': 'Today', 'ru': 'Сегодня', 'bg': 'Днес'},
     'day.tomorrow': {'sr': 'Sutra', 'en': 'Tomorrow', 'ru': 'Завтра', 'bg': 'Утре'},
     'route.departures_left': {'sr': 'Još danas', 'en': 'Left today', 'ru': 'Ещё сегодня', 'bg': 'Още днес'},
+    'route.departs_in': {'sr': 'Polazi za', 'en': 'Departs in', 'ru': 'Отправляется через', 'bg': 'Тръгва след'},
     'day.day_after': {'sr': 'Prekosutra', 'en': 'Day after', 'ru': 'Послезавтра', 'bg': 'Вдругиден'},
 
     'route.similar': {'sr': 'Slične rute iz', 'en': 'Similar routes from', 'ru': 'Похожие маршруты из', 'bg': 'Подобни маршрути от'},

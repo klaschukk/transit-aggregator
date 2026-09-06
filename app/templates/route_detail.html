@@ -271,7 +271,10 @@
   {{ _('route.shown_of') }} <strong id="tripVisible">0</strong> {{ _('route.of') }} <strong>{{ trips|length }}</strong> {{ _('routes.departures') }}
 </div>
 
-<div class="trip-list fade-in fade-in--d2" id="tripList">
+<div class="trip-list fade-in fade-in--d2" id="tripList"
+     {%- if selected_day == 0 %} data-now="{{ belgrade_now_hhmm }}"
+     data-departs-label="{{ _('route.departs_in') }}"
+     data-unit-h="{{ _('common.h') }}" data-unit-min="{{ _('common.min') }}"{% endif %}>
   {% for trip in trips %}
     {{ trip_card(trip, offers=_offers_trip, buy_label=_('buy.cta'),
                  route_slug=route.slug, surface='route_detail',

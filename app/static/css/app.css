@@ -2012,6 +2012,25 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 }
 .buy-ticket__urgency svg { flex: none; opacity: 0.85; }
 
+/* Live "departs in Xh Ym" badge — route-filters.js adds/moves this to
+   whichever card is currently the next real upcoming departure (today tab
+   only, capped at a 3h window). Same accent pair as .buy-ticket__urgency —
+   same "this is worth noticing" register, scaled down for a trip-card slot. */
+.trip-card__countdown {
+  display: block; margin-top: 3px;
+  font-size: 10px; font-weight: 700; line-height: 1.3;
+  color: var(--color-accent-text); background: var(--color-accent-light);
+  padding: 1px 6px; border-radius: var(--radius-pill);
+  white-space: nowrap; animation: countdown-pulse 2.4s ease-in-out infinite;
+}
+@keyframes countdown-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .72; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .trip-card__countdown { animation: none; }
+}
+
 /* Info cards */
 .cards-grid {
   display: flex;

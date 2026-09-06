@@ -262,7 +262,12 @@ def route_detail(slug: str):
     # Honest "still catchable today" scarcity: count departures left after the
     # current Serbia time. Only meaningful on the today tab; the template hides
     # it once it hits zero so we never show a stale "0 left" or a past time.
-    departures_left = (_departures_left_today(trips, _belgrade_now_hhmm())
+    # Also handed to the template as belgrade_now_hhmm — the live "departs in
+    # Xh Ym" countdown on the next upcoming card ticks forward client-side
+    # from this single server-side reading rather than trusting the
+    # visitor's own clock/timezone.
+    belgrade_now_hhmm = _belgrade_now_hhmm() if selected_day == 0 else None
+    departures_left = (_departures_left_today(trips, belgrade_now_hhmm)
                        if selected_day == 0 else 0)
 
     # Best-option badges: tag a single cheapest / fastest trip so the card
@@ -348,7 +353,8 @@ def route_detail(slug: str):
                            page_context_json=page_context_json,
                            map_route_coords=map_route_coords,
                            has_multiple_modes=has_multiple_modes,
-                           avg_duration_hours=avg_duration_hours)
+                           avg_duration_hours=avg_duration_hours,
+                           belgrade_now_hhmm=belgrade_now_hhmm)
 
 
 def _compose_far_itinerary(info: dict, lang: str):
