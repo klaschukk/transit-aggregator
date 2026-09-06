@@ -1870,6 +1870,67 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   font-weight: 700; font-size: var(--text-sm);
 }
 
+/* Decorative journey strip above the leg details — a Rome2Rio-style
+   dot-line-dot map of the trip. Default state (no JS, no --animate class)
+   is already fully drawn: a no-JS visitor or a prefers-reduced-motion one
+   sees a complete, correct line immediately. .connection-card__timeline--animate
+   (added once by IntersectionObserver in search_results.html) replays the
+   draw from zero for a viewport that's actually watching. Origin/destination
+   dot colours match the route-overview map's pin colours exactly (#0d9488 /
+   #e53e3e, set inline in _route_map_script.html) so the same city reads the
+   same way on both the map and this strip. */
+.connection-card__timeline {
+  display: flex; align-items: center; gap: 0;
+  margin: var(--space-3) 0 var(--space-1-5);
+}
+.connection-card__tl-dot {
+  flex-shrink: 0; width: 10px; height: 10px; border-radius: 50%;
+  border: 2px solid var(--color-bg); box-shadow: 0 0 0 1px var(--color-primary-200);
+}
+.connection-card__tl-dot--a { background: #0d9488; }
+.connection-card__tl-dot--b { background: #fff; box-shadow: 0 0 0 1px var(--color-text-muted); }
+.connection-card__tl-dot--c { background: #e53e3e; }
+.connection-card__tl-line {
+  position: relative; flex: 1; height: 3px; margin: 0 2px;
+  background: var(--color-primary-200); border-radius: 2px;
+}
+.connection-card__tl-fill {
+  position: absolute; inset: 0; border-radius: inherit;
+  background: var(--color-primary); transform: scaleX(1); transform-origin: left;
+}
+.connection-card__tl-bus {
+  position: absolute; top: 50%; left: calc(100% - 14px); width: 14px; height: 14px;
+  transform: translateY(-50%); color: var(--color-primary-dark);
+}
+.connection-card__timeline--animate .connection-card__tl-fill {
+  animation: connTlDraw .8s ease-out both;
+}
+.connection-card__timeline--animate .connection-card__tl-bus {
+  animation: connTlBus .8s ease-out both;
+}
+.connection-card__tl-line--leg2 .connection-card__tl-fill,
+.connection-card__tl-line--leg2 .connection-card__tl-bus {
+  animation-delay: .85s;
+}
+@keyframes connTlDraw {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@keyframes connTlBus {
+  from { left: 0; opacity: 0; }
+  8%   { opacity: 1; }
+  to   { left: calc(100% - 14px); opacity: 1; }
+}
+.connection-card__tl-labels {
+  display: flex; justify-content: space-between;
+  font-size: var(--text-xs); color: var(--color-text-muted);
+  margin-bottom: var(--space-3);
+}
+@media (prefers-reduced-motion: reduce) {
+  .connection-card__timeline--animate .connection-card__tl-fill,
+  .connection-card__timeline--animate .connection-card__tl-bus { animation: none; }
+}
+
 /* Multi-partner block (route_detail bottom) */
 .partners-block {
   background: var(--color-bg-alt); border-radius: var(--radius-md);

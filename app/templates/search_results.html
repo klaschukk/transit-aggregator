@@ -156,6 +156,28 @@
   {% for c in connections %}
   <div class="connection-card fade-in{% if not loop.first %} fade-in--d2{% endif %}">
     <div class="connection-card__via">{{ _('connections.via') }} <b>{{ c.via_city }}</b></div>
+    {# Purely decorative journey strip (Rome2Rio-style dot-line-dot map of
+       the trip) — the real, accessible leg-by-leg info is the .connection-card__legs
+       block right below it, unchanged. js/connection-timeline.js adds
+       --in-view once this scrolls into sight, which is what triggers the
+       draw-in + bus-glide animation; without JS (or prefers-reduced-motion)
+       it just renders fully drawn, no CSS dependency on JS running. #}
+    <div class="connection-card__timeline" aria-hidden="true">
+      <span class="connection-card__tl-dot connection-card__tl-dot--a"></span>
+      <span class="connection-card__tl-line connection-card__tl-line--leg1">
+        <span class="connection-card__tl-fill"></span>
+        <svg class="connection-card__tl-bus" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm2 11a1.5 1.5 0 103 0H6zm9 0a1.5 1.5 0 103 0h-3zM5 8h14V6H5v2z"/></svg>
+      </span>
+      <span class="connection-card__tl-dot connection-card__tl-dot--b"></span>
+      <span class="connection-card__tl-line connection-card__tl-line--leg2">
+        <span class="connection-card__tl-fill"></span>
+        <svg class="connection-card__tl-bus" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm2 11a1.5 1.5 0 103 0H6zm9 0a1.5 1.5 0 103 0h-3zM5 8h14V6H5v2z"/></svg>
+      </span>
+      <span class="connection-card__tl-dot connection-card__tl-dot--c"></span>
+    </div>
+    <div class="connection-card__tl-labels" aria-hidden="true">
+      <span>{{ from_city }}</span><span>{{ c.via_city }}</span><span>{{ to_city }}</span>
+    </div>
     <div class="connection-card__legs">
       <div class="connection-card__leg">
         <span class="connection-card__leg-label">{{ _('connections.leg') }} 1</span>
@@ -415,6 +437,26 @@
       html += '</ul>';
     }
     body.innerHTML = html;
+  }
+
+  /* ── Connection journey-strip draw-in ──
+     Default CSS state is already fully drawn (a no-JS visitor sees a
+     complete, correct journey line, not a broken half-drawn one). This
+     only ADDS the "watch it draw" moment for a real viewport, once, and
+     is skipped entirely under prefers-reduced-motion — no class means
+     no animation, straight to the static fully-drawn state above. */
+  var timelines = document.querySelectorAll('.connection-card__timeline');
+  if (timelines.length && 'IntersectionObserver' in window &&
+      !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('connection-card__timeline--animate');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    timelines.forEach(function(el) { io.observe(el); });
   }
 })();
 </script>
