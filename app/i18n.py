@@ -4,7 +4,17 @@ Simple i18n system for Prevozni.
 Usage in templates:  {{ _('nav.all_routes') }}
 Usage in Python:     from app.i18n import get_text; get_text('nav.all_routes', 'en')
 
-Supported languages: sr (default), en, ru
+Supported languages: sr (default), en, ru, bg
+
+bg coverage is partial by design (~200 keys — nav/footer/common UI chrome,
+buy/filter/search, route_detail + city_pair + search_results, PWA install
+prompt) added 2026-09 alongside the Bulgaria-domestic + Bulgaria<->Greece
+routes (union-ivkoni.com). get_text() falls back to 'sr' for any key
+without a 'bg' entry — never a raw key or a blank string — so an
+untranslated corner of the site (guides, legal pages, city-transport
+detail pages) degrades to Serbian rather than breaking. Extend bg
+coverage over time; there's no flag or TODO list to track it beyond
+grepping for "'bg':" in this file.
 """
 
 TRANSLATIONS: dict[str, dict[str, str]] = {
@@ -13,61 +23,73 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Sve rute',
         'en': 'All routes',
         'ru': 'Все маршруты',
+        'bg': 'Всички маршрути',
     },
     'nav.city_transport': {
         'sr': 'Gradski prevoz',
         'en': 'City transport',
         'ru': 'Городской транспорт',
+        'bg': 'Градски транспорт',
     },
     'nav.search': {
         'sr': 'Pretraga',
         'en': 'Search',
         'ru': 'Поиск',
+        'bg': 'Търсене',
     },
     'nav.about': {
         'sr': 'O nama',
         'en': 'About',
         'ru': 'О нас',
+        'bg': 'За нас',
     },
     'nav.menu': {
         'sr': 'Meni',
         'en': 'Menu',
         'ru': 'Меню',
+        'bg': 'Меню',
     },
     'a11y.mobile_nav': {
         'sr': 'Donja navigacija',
         'en': 'Bottom navigation',
         'ru': 'Нижняя навигация',
+        'bg': 'Долна навигация',
     },
     'nav.home': {
         'sr': 'Početna',
         'en': 'Home',
         'ru': 'Главная',
+        'bg': 'Начало',
     },
     'nav.routes': {
         'sr': 'Rute',
         'en': 'Routes',
         'ru': 'Маршруты',
+        'bg': 'Маршрути',
     },
     'nav.city': {
         'sr': 'Gradski',
         'en': 'City',
         'ru': 'Город',
+        'bg': 'Градски',
     },
     'nav.saved': {
         'sr': 'Sačuvano',
         'en': 'Saved',
         'ru': 'Избранное',
+        'bg': 'Запазено',
     },
     'nav.more': {
         'sr': 'Više',
         'en': 'More',
         'ru': 'Ещё',
+        'bg': 'Още',
     },
     'a11y.bottom_nav': {
         'sr': 'Glavna mobilna navigacija',
         'en': 'Primary mobile navigation',
         'ru': 'Основная мобильная навигация',
+        'bg': 'Основна мобилна навигация',
     },
     'browse.title': {
         'sr': 'Pregledaj sve',
@@ -130,51 +152,61 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Red vožnje autobusa, tramvaja i vozova u Srbiji. Besplatno, bez registracije.',
         'en': 'Bus, tram and train schedules in Serbia. Free, no registration.',
         'ru': 'Расписание автобусов, трамваев и поездов в Сербии. Бесплатно, без регистрации.',
+        'bg': 'Разписания на автобуси, трамваи и влакове в Сърбия. Безплатно, без регистрация.',
     },
     'footer.navigation': {
         'sr': 'Navigacija',
         'en': 'Navigation',
         'ru': 'Навигация',
+        'bg': 'Навигация',
     },
     'footer.popular_routes': {
         'sr': 'Popularne rute',
         'en': 'Popular routes',
         'ru': 'Популярные маршруты',
+        'bg': 'Популярни маршрути',
     },
     'footer.cities': {
         'sr': 'Gradovi',
         'en': 'Cities',
         'ru': 'Города',
+        'bg': 'Градове',
     },
     'footer.carriers': {
         'sr': 'Prevoznici',
         'en': 'Carriers',
         'ru': 'Перевозчики',
+        'bg': 'Превозвачи',
     },
     'footer.stations': {
         'sr': 'Stanice',
         'en': 'Stations',
         'ru': 'Станции',
+        'bg': 'Автогари',
     },
     'footer.about': {
         'sr': 'O nama',
         'en': 'About us',
         'ru': 'О нас',
+        'bg': 'За нас',
     },
     'footer.contact': {
         'sr': 'Kontakt',
         'en': 'Contact',
         'ru': 'Контакт',
+        'bg': 'Контакти',
     },
     'footer.copyright': {
         'sr': 'Sva prava zadržana.',
         'en': 'All rights reserved.',
         'ru': 'Все права защищены.',
+        'bg': 'Всички права запазени.',
     },
     'footer.privacy': {
         'sr': 'Privatnost',
         'en': 'Privacy',
         'ru': 'Конфиденциальность',
+        'bg': 'Поверителност',
     },
     'privacy.title': {
         'sr': 'Politika privatnosti',
@@ -249,6 +281,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Podaci su informativnog karaktera i preuzeti iz javno dostupnih izvora. Prevozni ne garantuje tačnost podataka — uvek proverite red vožnje direktno kod prevoznika. Ovaj sajt ne prodaje karte niti posreduje u prodaji prevoznih usluga.',
         'en': 'Data is for informational purposes and sourced from publicly available sources. Prevozni does not guarantee data accuracy — always check the schedule directly with the carrier. This site does not sell tickets.',
         'ru': 'Данные носят информационный характер и получены из открытых источников. Prevozni не гарантирует точность данных — всегда проверяйте расписание у перевозчика. Сайт не продает билеты.',
+        'bg': 'Данните са с информативен характер и са взети от публично достъпни източници. Prevozni не гарантира точността на данните — винаги проверявайте разписанието директно при превозвача. Този сайт не продава билети и не е посредник в продажбата на транспортни услуги.',
     },
 
     # ── Homepage ──
@@ -440,76 +473,91 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Polazak',
         'en': 'Departure',
         'ru': 'Отправление',
+        'bg': 'Тръгване',
     },
     'common.arrival': {
         'sr': 'Dolazak',
         'en': 'Arrival',
         'ru': 'Прибытие',
+        'bg': 'Пристигане',
     },
     'common.duration': {
         'sr': 'Trajanje',
         'en': 'Duration',
         'ru': 'Время в пути',
+        'bg': 'Продължителност',
     },
     'common.price': {
         'sr': 'Cena',
         'en': 'Price',
         'ru': 'Цена',
+        'bg': 'Цена',
     },
     'common.carrier': {
         'sr': 'Prevoznik',
         'en': 'Carrier',
         'ru': 'Перевозчик',
+        'bg': 'Превозвач',
     },
     'common.daily': {
         'sr': 'dnevno',
         'en': 'daily',
         'ru': 'ежедневно',
+        'bg': 'дневно',
     },
     'common.lines': {
         'sr': 'linija',
         'en': 'lines',
         'ru': 'линий',
+        'bg': 'линии',
     },
     'common.stops': {
         'sr': 'stajališta',
         'en': 'stops',
         'ru': 'остановок',
+        'bg': 'спирки',
     },
     'common.routes': {
         'sr': 'ruta',
         'en': 'routes',
         'ru': 'маршрутов',
+        'bg': 'маршрута',
     },
     'common.show_more': {
         'sr': 'Prikaži još',
         'en': 'Show more',
         'ru': 'Показать ещё',
+        'bg': 'Покажи още',
     },
     'common.read_more': {
         'sr': 'Pročitaj više',
         'en': 'Read more',
         'ru': 'Читать дальше',
+        'bg': 'Прочети повече',
     },
     'common.read_less': {
         'sr': 'Sakri',
         'en': 'Read less',
         'ru': 'Свернуть',
+        'bg': 'Скрий',
     },
     'common.carriers': {
         'sr': 'prevoznika',
         'en': 'carriers',
         'ru': 'перевозчиков',
+        'bg': 'превозвачи',
     },
     'common.languages': {
         'sr': 'jezika',
         'en': 'languages',
         'ru': 'языка',
+        'bg': 'езика',
     },
     'common.countries': {
         'sr': 'zemalja',
         'en': 'countries',
         'ru': 'стран',
+        'bg': 'държави',
     },
     'home.valueprop_aria': {
         'sr': 'Ključne brojke',
@@ -545,11 +593,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Učitaj interaktivnu mapu',
         'en': 'Load interactive map',
         'ru': 'Загрузить интерактивную карту',
+        'bg': 'Зареди интерактивна карта',
     },
     'a11y.notifications': {
         'sr': 'Obaveštenja',
         'en': 'Notifications',
         'ru': 'Уведомления',
+        'bg': 'Известия',
     },
     # Home value strip. Every claim here is one the site already makes in
     # its footer or buy note — free/no registration, data from public
@@ -614,6 +664,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Besplatno',
         'en': 'Free',
         'ru': 'Бесплатно',
+        'bg': 'Безплатно',
     },
     'ads.dismiss_aria': {
         'sr': 'Zatvori reklamu',
@@ -648,21 +699,25 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'sada',
         'en': 'now',
         'ru': 'сейчас',
+        'bg': 'сега',
     },
     'common.min': {
         'sr': 'min',
         'en': 'min',
         'ru': 'мин',
+        'bg': 'мин',
     },
     'common.h': {
         'sr': 'h',
         'en': 'h',
         'ru': 'ч',
+        'bg': 'ч',
     },
     'common.map_on_map': {
         'sr': 'stajališta na mapi',
         'en': 'stops on map',
         'ru': 'остановок на карте',
+        'bg': 'спирки на картата',
     },
 
     # ── Routes page ──
@@ -670,16 +725,19 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Sve autobuske i vozne rute u Srbiji',
         'en': 'All bus and train routes in Serbia',
         'ru': 'Все автобусные и железнодорожные маршруты Сербии',
+        'bg': 'Всички автобусни и жп маршрути в Сърбия',
     },
     'routes.departures': {
         'sr': 'polazaka',
         'en': 'departures',
         'ru': 'рейсов',
+        'bg': 'тръгвания',
     },
     'routes.routes_label': {
         'sr': 'ruta',
         'en': 'routes',
         'ru': 'маршрутов',
+        'bg': 'маршрута',
     },
 
     # ── City transport ──
@@ -895,6 +953,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Početna',
         'en': 'Home',
         'ru': 'Главная',
+        'bg': 'Начало',
     },
 
     # ── Contact page ──
@@ -949,7 +1008,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     # ── About page ──
     'about.title': {'sr': 'O nama', 'en': 'About us', 'ru': 'О нас'},
     # /red-voznje/ — head-term hub for "red vožnje autobusa i vozova"
-    'nav.timetables': {'sr': 'Red vožnje', 'en': 'Timetables', 'ru': 'Расписание'},
+    'nav.timetables': {'sr': 'Red vožnje', 'en': 'Timetables', 'ru': 'Расписание', 'bg': 'Разписание'},
     'red_voznje.title': {
         'sr': 'Red vožnje autobusa i vozova — Srbija',
         'en': 'Bus and train timetables — Serbia',
@@ -1034,21 +1093,23 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
 
     # ── Route pages ──
-    'route.schedule': {'sr': 'Red vožnje', 'en': 'Schedule', 'ru': 'Расписание'},
+    'route.schedule': {'sr': 'Red vožnje', 'en': 'Schedule', 'ru': 'Расписание', 'bg': 'Разписание'},
     'route.reverse': {
         'sr': 'Pogledajte i obrnuti smer',
         'en': 'See the reverse direction',
         'ru': 'Смотрите обратное направление',
+        'bg': 'Вижте и обратната посока',
     },
 
     # ── Search results ──
-    'search.title': {'sr': 'Pretraga', 'en': 'Search', 'ru': 'Поиск'},
-    'search.results_for': {'sr': 'Rezultati pretrage', 'en': 'Search results', 'ru': 'Результаты поиска'},
-    'search.no_results': {'sr': 'Nema rezultata', 'en': 'No results', 'ru': 'Нет результатов'},
+    'search.title': {'sr': 'Pretraga', 'en': 'Search', 'ru': 'Поиск', 'bg': 'Търсене'},
+    'search.results_for': {'sr': 'Rezultati pretrage', 'en': 'Search results', 'ru': 'Результаты поиска', 'bg': 'Резултати от търсенето'},
+    'search.no_results': {'sr': 'Nema rezultata', 'en': 'No results', 'ru': 'Нет результатов', 'bg': 'Няма резултати'},
     'route.filter_no_match': {
         'sr': 'Nijedan polazak ne odgovara izabranim filterima.',
         'en': 'No departures match your filters.',
         'ru': 'Ни один рейс не соответствует выбранным фильтрам.',
+        'bg': 'Нито едно тръгване не отговаря на избраните филтри.',
     },
 
     # ── Error pages ──
@@ -1082,48 +1143,52 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'stop.next_arrivals': {'sr': 'Sledeći polasci', 'en': 'Next departures', 'ru': 'Ближайшие отправления'},
 
     # ── Route detail / search ──
-    'route.daily_departures': {'sr': 'polazaka dnevno', 'en': 'departures daily', 'ru': 'рейсов в день'},
-    'route.per_day': {'sr': 'polazaka/dan', 'en': 'departures/day', 'ru': 'рейсов/день'},
-    'route.shown_of': {'sr': 'Prikazano', 'en': 'Shown', 'ru': 'Показано'},
-    'route.of': {'sr': 'od', 'en': 'of', 'ru': 'из'},
-    'route.km': {'sr': 'km', 'en': 'km', 'ru': 'км'},
-    'route.from_price': {'sr': 'od', 'en': 'from', 'ru': 'от'},
+    'route.daily_departures': {'sr': 'polazaka dnevno', 'en': 'departures daily', 'ru': 'рейсов в день', 'bg': 'тръгвания дневно'},
+    'route.per_day': {'sr': 'polazaka/dan', 'en': 'departures/day', 'ru': 'рейсов/день', 'bg': 'тръгвания/ден'},
+    'route.shown_of': {'sr': 'Prikazano', 'en': 'Shown', 'ru': 'Показано', 'bg': 'Показани'},
+    'route.of': {'sr': 'od', 'en': 'of', 'ru': 'из', 'bg': 'от'},
+    'route.km': {'sr': 'km', 'en': 'km', 'ru': 'км', 'bg': 'км'},
+    'route.from_price': {'sr': 'od', 'en': 'from', 'ru': 'от', 'bg': 'от'},
     'route.see_reverse': {
         'sr': 'Pogledajte i obrnuti smer',
         'en': 'See also the reverse direction',
         'ru': 'Смотрите также обратное направление',
+        'bg': 'Вижте също и обратната посока',
     },
-    'route.all_routes': {'sr': 'Sve rute', 'en': 'All routes', 'ru': 'Все маршруты'},
-    'route.filter_all': {'sr': 'Svi polasci', 'en': 'All departures', 'ru': 'Все рейсы'},
-    'route.sort_label': {'sr': 'Sortiraj', 'en': 'Sort', 'ru': 'Сортировка'},
-    'route.sort_time': {'sr': 'Po polasku', 'en': 'Departure', 'ru': 'По отправлению'},
-    'route.sort_price': {'sr': 'Najjeftinije', 'en': 'Cheapest', 'ru': 'Дешевле'},
-    'route.sort_duration': {'sr': 'Najbrže', 'en': 'Fastest', 'ru': 'Быстрее'},
-    'route.carrier_all': {'sr': 'Svi prevoznici', 'en': 'All carriers', 'ru': 'Все перевозчики'},
-    'route.workday': {'sr': 'Radnim danom', 'en': 'Weekdays', 'ru': 'Будни'},
-    'route.weekend': {'sr': 'Vikend', 'en': 'Weekend', 'ru': 'Выходные'},
+    'route.all_routes': {'sr': 'Sve rute', 'en': 'All routes', 'ru': 'Все маршруты', 'bg': 'Всички маршрути'},
+    'route.filter_all': {'sr': 'Svi polasci', 'en': 'All departures', 'ru': 'Все рейсы', 'bg': 'Всички тръгвания'},
+    'route.sort_label': {'sr': 'Sortiraj', 'en': 'Sort', 'ru': 'Сортировка', 'bg': 'Сортирай'},
+    'route.sort_time': {'sr': 'Po polasku', 'en': 'Departure', 'ru': 'По отправлению', 'bg': 'По тръгване'},
+    'route.sort_price': {'sr': 'Najjeftinije', 'en': 'Cheapest', 'ru': 'Дешевле', 'bg': 'Най-евтино'},
+    'route.sort_duration': {'sr': 'Najbrže', 'en': 'Fastest', 'ru': 'Быстрее', 'bg': 'Най-бързо'},
+    'route.carrier_all': {'sr': 'Svi prevoznici', 'en': 'All carriers', 'ru': 'Все перевозчики', 'bg': 'Всички превозвачи'},
+    'route.workday': {'sr': 'Radnim danom', 'en': 'Weekdays', 'ru': 'Будни', 'bg': 'Работни дни'},
+    'route.weekend': {'sr': 'Vikend', 'en': 'Weekend', 'ru': 'Выходные', 'bg': 'Уикенд'},
 
     # ── Search page ──
-    'search.departures_found': {'sr': 'polazaka', 'en': 'departures', 'ru': 'рейсов'},
+    'search.departures_found': {'sr': 'polazaka', 'en': 'departures', 'ru': 'рейсов', 'bg': 'тръгвания'},
     'search.no_results_text': {
         'sr': 'Nismo pronašli direktne polaske za ovaj pravac.',
         'en': 'No direct departures found for this route.',
         'ru': 'Прямых рейсов по этому маршруту не найдено.',
+        'bg': 'Не намерихме директни тръгвания за това направление.',
     },
-    'connections.badge': {'sr': 'Sa presedanjem', 'en': 'With a connection', 'ru': 'С пересадкой'},
+    'connections.badge': {'sr': 'Sa presedanjem', 'en': 'With a connection', 'ru': 'С пересадкой', 'bg': 'С прекачване'},
     'connections.heading': {
         'sr': 'Nema direktne linije, ali možete presesti',
         'en': 'No direct route, but you can connect',
         'ru': 'Прямого рейса нет, но можно пересесть',
+        'bg': 'Няма директна линия, но можете да прекачите',
     },
-    'connections.via': {'sr': 'preko', 'en': 'via', 'ru': 'через'},
-    'connections.wait': {'sr': 'čekanje', 'en': 'wait', 'ru': 'ожидание'},
-    'connections.leg': {'sr': 'Deonica', 'en': 'Leg', 'ru': 'Отрезок'},
-    'connections.total_price': {'sr': 'Ukupno od', 'en': 'Total from', 'ru': 'Всего от'},
+    'connections.via': {'sr': 'preko', 'en': 'via', 'ru': 'через', 'bg': 'през'},
+    'connections.wait': {'sr': 'čekanje', 'en': 'wait', 'ru': 'ожидание', 'bg': 'изчакване'},
+    'connections.leg': {'sr': 'Deonica', 'en': 'Leg', 'ru': 'Отрезок', 'bg': 'Отсечка'},
+    'connections.total_price': {'sr': 'Ukupno od', 'en': 'Total from', 'ru': 'Всего от', 'bg': 'Общо от'},
     'connections.disclaimer': {
         'sr': 'Dve odvojene karte, kod različitih prevoznika — kupuju se posebno na svakoj deonici.',
         'en': 'Two separate tickets, different carriers — bought separately for each leg.',
         'ru': 'Два отдельных билета у разных перевозчиков — покупаются раздельно на каждом отрезке.',
+        'bg': 'Два отделни билета, при различни превозвачи — купуват се поотделно за всяка отсечка.',
     },
 
     # ── Line detail ──
@@ -1266,6 +1331,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Trajanje',
         'en': 'Duration',
         'ru': 'Длительность',
+        'bg': 'Продължителност',
     },
 
     # ── Operator detail page ──
@@ -1779,26 +1845,31 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Kupite kartu online',
         'en': 'Buy ticket online',
         'ru': 'Купить билет онлайн',
+        'bg': 'Купете билет онлайн',
     },
     'buy.note': {
         'sr': 'Kupovina se obavlja na sajtovima partnera. Prevozni ne prodaje karte.',
         'en': 'Purchase is made on partner websites. Prevozni does not sell tickets.',
         'ru': 'Покупка на сайтах партнёров. Prevozni не продаёт билеты.',
+        'bg': 'Покупката се извършва на сайтовете на партньорите. Prevozni не продава билети.',
     },
     'buy.book_ahead': {
         'sr': 'Samo {n} polazaka dnevno na ovoj relaciji — preporučujemo kupovinu unapred.',
         'en': 'Only {n} departures a day on this route — advance booking recommended.',
         'ru': 'Всего {n} рейс(ов) в день на этом направлении — рекомендуем покупать заранее.',
+        'bg': 'Само {n} тръгвания дневно по това направление — препоръчваме предварителна покупка.',
     },
     'buy.cta': {
         'sr': 'Kupi',
         'en': 'Buy',
         'ru': 'Купить',
+        'bg': 'Купи',
     },
     'buy.via_partner': {
         'sr': 'Kupi preko',
         'en': 'Buy via',
         'ru': 'Купить через',
+        'bg': 'Купи през',
     },
     # ── Far-destination AI itinerary (search fallback to Bookaway) ──
     'ai_route.badge': {
@@ -1881,37 +1952,42 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Kupi kartu kod naših partnera',
         'en': 'Buy your ticket from our partners',
         'ru': 'Купить билет у наших партнёров',
+        'bg': 'Купи билет от нашите партньори',
     },
     'buy.partners_note': {
         'sr': 'Cene su iste — mi dobijemo malu proviziju ako kupite preko ovih linkova.',
         'en': 'Prices are the same — we receive a small commission if you book via these links.',
         'ru': 'Цены одинаковые — мы получаем небольшую комиссию при бронировании по этим ссылкам.',
+        'bg': 'Цените са същите — ние получаваме малка комисиона, ако купите през тези връзки.',
     },
 
     # ── Day labels ──
-    'day.today': {'sr': 'Danas', 'en': 'Today', 'ru': 'Сегодня'},
-    'day.tomorrow': {'sr': 'Sutra', 'en': 'Tomorrow', 'ru': 'Завтра'},
-    'route.departures_left': {'sr': 'Još danas', 'en': 'Left today', 'ru': 'Ещё сегодня'},
-    'day.day_after': {'sr': 'Prekosutra', 'en': 'Day after', 'ru': 'Послезавтра'},
+    'day.today': {'sr': 'Danas', 'en': 'Today', 'ru': 'Сегодня', 'bg': 'Днес'},
+    'day.tomorrow': {'sr': 'Sutra', 'en': 'Tomorrow', 'ru': 'Завтра', 'bg': 'Утре'},
+    'route.departures_left': {'sr': 'Još danas', 'en': 'Left today', 'ru': 'Ещё сегодня', 'bg': 'Още днес'},
+    'day.day_after': {'sr': 'Prekosutra', 'en': 'Day after', 'ru': 'Послезавтра', 'bg': 'Вдругиден'},
 
-    'route.similar': {'sr': 'Slične rute iz', 'en': 'Similar routes from', 'ru': 'Похожие маршруты из'},
-    'route.other_from': {'sr': 'Drugi pravci iz', 'en': 'Other routes from', 'ru': 'Другие направления из'},
+    'route.similar': {'sr': 'Slične rute iz', 'en': 'Similar routes from', 'ru': 'Похожие маршруты из', 'bg': 'Подобни маршрути от'},
+    'route.other_from': {'sr': 'Drugi pravci iz', 'en': 'Other routes from', 'ru': 'Другие направления из', 'bg': 'Други направления от'},
     'route.city_transport_heading': {
         'sr': 'Gradski prevoz',
         'en': 'City transport',
         'ru': 'Городской транспорт',
+        'bg': 'Градски транспорт',
     },
     'route.city_transport_link': {
         'sr': '{city}: linije i stajališta',
         'en': '{city}: lines and stops',
         'ru': '{city}: линии и остановки',
+        'bg': '{city}: линии и спирки',
     },
     'route.carriers_on_route': {
         'sr': 'Prevoznici na ovoj ruti',
         'en': 'Carriers on this route',
         'ru': 'Перевозчики на этом маршруте',
+        'bg': 'Превозвачи на този маршрут',
     },
-    'route.about': {'sr': 'O ruti', 'en': 'About route', 'ru': 'О маршруте'},
+    'route.about': {'sr': 'O ruti', 'en': 'About route', 'ru': 'О маршруте', 'bg': 'За маршрута'},
 
     # ── Destinations page ──
     'dest.title': {
@@ -2053,7 +2129,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Столица Австрии. Шёнбрунн, Рингштрассе, Пратер, кофейни и классическая музика.',
     },
 
-    'nav.destinations': {'sr': 'Destinacije', 'en': 'Destinations', 'ru': 'Направления'},
+    'nav.destinations': {'sr': 'Destinacije', 'en': 'Destinations', 'ru': 'Направления', 'bg': 'Дестинации'},
 
     'dest.turkey': {'sr': 'Turska', 'en': 'Turkey', 'ru': 'Турция'},
     'dest.istanbul': {
@@ -2072,41 +2148,49 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Preskoči na sadržaj',
         'en': 'Skip to content',
         'ru': 'Перейти к содержимому',
+        'bg': 'Прескочи към съдържанието',
     },
     'a11y.language_switcher': {
         'sr': 'Izbor jezika',
         'en': 'Language selector',
         'ru': 'Выбор языка',
+        'bg': 'Избор на език',
     },
     'a11y.currency_switcher': {
         'sr': 'Izbor valute',
         'en': 'Currency selector',
         'ru': 'Выбор валюты',
+        'bg': 'Избор на валута',
     },
     'a11y.search_form': {
         'sr': 'Pretraga polazaka',
         'en': 'Journey search',
         'ru': 'Поиск поездок',
+        'bg': 'Търсене на тръгвания',
     },
     'a11y.swap_cities': {
         'sr': 'Zameni polazište i odredište',
         'en': 'Swap origin and destination',
         'ru': 'Поменять местами пункты',
+        'bg': 'Размени начална и крайна точка',
     },
     'a11y.chat_toggle': {
         'sr': 'Otvori AI pomoćnika',
         'en': 'Open AI assistant',
         'ru': 'Открыть AI-помощника',
+        'bg': 'Отвори AI асистент',
     },
     'a11y.share': {
         'sr': 'Podeli',
         'en': 'Share',
         'ru': 'Поделиться',
+        'bg': 'Сподели',
     },
     'a11y.trip_date': {
         'sr': 'Datum putovanja',
         'en': 'Trip date',
         'ru': 'Дата поездки',
+        'bg': 'Дата на пътуване',
     },
     # Visible field labels on the journey-search capsule. These were
     # hard-coded 'OD' / 'DO' in the macro and never reached the EN/RU
@@ -2143,31 +2227,37 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Filteri polazaka',
         'en': 'Journey filters',
         'ru': 'Фильтры поездок',
+        'bg': 'Филтри на тръгванията',
     },
     'a11y.city_map': {
         'sr': 'Interaktivna mapa gradskih stajališta',
         'en': 'Interactive city stops map',
         'ru': 'Интерактивная карта городских остановок',
+        'bg': 'Интерактивна карта на градските спирки',
     },
     'a11y.line_map': {
         'sr': 'Interaktivna mapa linije',
         'en': 'Interactive line map',
         'ru': 'Интерактивная карта линии',
+        'bg': 'Интерактивна карта на линията',
     },
     'a11y.stop_map': {
         'sr': 'Mapa lokacije stajališta',
         'en': 'Stop location map',
         'ru': 'Карта местоположения остановки',
+        'bg': 'Карта на местоположението на спирката',
     },
     'a11y.breadcrumb': {
         'sr': 'Putanja',
         'en': 'Breadcrumb',
         'ru': 'Хлебные крошки',
+        'bg': 'Навигационна пътека',
     },
     'a11y.pagination': {
         'sr': 'Paginacija',
         'en': 'Pagination',
         'ru': 'Пагинация',
+        'bg': 'Странициране',
     },
 
     # ── Default meta (base.html) ──
@@ -2175,21 +2265,25 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Prevozni — red vožnje u Srbiji',
         'en': 'Prevozni — transport schedules in Serbia',
         'ru': 'Prevozni — расписание транспорта в Сербии',
+        'bg': 'Prevozni — разписания в Сърбия',
     },
     'meta.default_description': {
         'sr': 'Red vožnje autobusa, vozova i gradskog prevoza u Srbiji. Pronađite polazak, uporedite cene i prevoznike. Besplatno, bez registracije.',
         'en': 'Bus, train and city transport schedules in Serbia. Find departures, compare prices and carriers. Free, no registration.',
         'ru': 'Расписание автобусов, поездов и городского транспорта в Сербии. Ищите отправления, сравнивайте цены и перевозчиков. Бесплатно, без регистрации.',
+        'bg': 'Разписания на автобуси, влакове и градски транспорт в Сърбия. Намерете тръгване, сравнете цени и превозвачи. Безплатно, без регистрация.',
     },
     'meta.og_image_alt': {
         'sr': 'Prevozni — red vožnje Srbija',
         'en': 'Prevozni — Serbia transport schedules',
         'ru': 'Prevozni — расписание транспорта Сербии',
+        'bg': 'Prevozni — разписания Сърбия',
     },
     'meta.city_not_found': {
         'sr': 'Grad nije pronađen',
         'en': 'City not found',
         'ru': 'Город не найден',
+        'bg': 'Градът не е намерен',
     },
 
     # ── Error pages ──
@@ -2269,6 +2363,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Sve rute',
         'en': 'All routes',
         'ru': 'Все маршруты',
+        'bg': 'Всички маршрути',
     },
 
     # ── carriers_index.html ──
@@ -2432,76 +2527,91 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'autobus i voz',
         'en': 'bus and train',
         'ru': 'автобус и поезд',
+        'bg': 'автобус и влак',
     },
     'city_pair.meta_prefix': {
         'sr': 'Kako doći od',
         'en': 'How to travel from',
         'ru': 'Как добраться из',
+        'bg': 'Как да стигнете от',
     },
     'city_pair.meta_mid': {
         'sr': 'do',
         'en': 'to',
         'ru': 'до',
+        'bg': 'до',
     },
     'city_pair.meta_suffix': {
         'sr': 'Red vožnje, cene karata i prevoznici.',
         'en': 'Schedule, ticket prices and carriers.',
         'ru': 'Расписание, цены билетов и перевозчики.',
+        'bg': 'Разписание, цени на билетите и превозвачи.',
     },
     'city_pair.see_all_departures': {
         'sr': 'Pogledaj sve polaske →',
         'en': 'See all departures →',
         'ru': 'Все отправления →',
+        'bg': 'Виж всички тръгвания →',
     },
     'city_pair.carriers_heading': {
         'sr': 'Prevoznici',
         'en': 'Carriers',
         'ru': 'Перевозчики',
+        'bg': 'Превозвачи',
     },
     'city_pair.carriers_hint': {
         'sr': 'Proverite kod prevoznika za aktuelne linije.',
         'en': 'Check with carriers for current lines.',
         'ru': 'Уточняйте актуальные рейсы у перевозчиков.',
+        'bg': 'Проверете при превозвача за актуални линии.',
     },
     'city_pair.prices_heading': {
         'sr': 'Cene',
         'en': 'Prices',
         'ru': 'Цены',
+        'bg': 'Цени',
     },
     'city_pair.prices_hint': {
         'sr': 'Cene variraju po prevoznicima. Kupite karte na blagajni.',
         'en': 'Prices vary by carrier. Buy tickets at the ticket office.',
         'ru': 'Цены у разных перевозчиков отличаются. Билеты продаются в кассе.',
+        'bg': 'Цените варират според превозвача. Купете билети на касата.',
     },
     'city_pair.tips_heading': {
         'sr': 'Saveti',
         'en': 'Tips',
         'ru': 'Советы',
+        'bg': 'Съвети',
     },
     'city_pair.tip_buy_early': {
         'sr': 'Kupite kartu unapred u sezoni i za vikende.',
         'en': 'Buy tickets in advance during the season and weekends.',
         'ru': 'Покупайте билеты заранее в сезон и на выходные.',
+        'bg': 'Купете билет предварително през сезона и през уикендите.',
     },
     'city_pair.faq_heading': {
         'sr': 'Često postavljana pitanja',
         'en': 'Frequently asked questions',
         'ru': 'Часто задаваемые вопросы',
+        'bg': 'Често задавани въпроси',
     },
     'city_pair.other_routes_from': {
         'sr': 'Druge rute iz grada',
         'en': 'Other routes from',
         'ru': 'Другие маршруты из',
+        'bg': 'Други маршрути от града',
     },
     'city_pair.departures_word': {
         'sr': 'polazaka',
         'en': 'departures',
         'ru': 'отправлений',
+        'bg': 'тръгвания',
     },
     'city_pair.no_direct': {
         'sr': 'Direktna veza nije u bazi',
         'en': 'No direct route in database',
         'ru': 'Прямой маршрут отсутствует в базе',
+        'bg': 'Директна връзка не е в базата данни',
     },
 
     # ── city_pair body prose (was hardcoded SR; now translated) ──
@@ -2509,69 +2619,83 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': '{count} polazaka dnevno',
         'en': '{count} departures per day',
         'ru': '{count} отправлений в день',
+        'bg': '{count} тръгвания дневно',
     },
     'city_pair.subtitle_from_price': {
         'sr': 'od', 'en': 'from', 'ru': 'от',
+        'bg': 'от',
     },
     'city_pair.seo_h2': {
         'sr': '{from_city} — {to_city}: prevoz',
         'en': '{from_city} — {to_city}: travel',
         'ru': '{from_city} — {to_city}: транспорт',
+        'bg': '{from_city} — {to_city}: транспорт',
     },
     'city_pair.prose_distance': {
         'sr': 'Rastojanje između {from_city} i {to_city} iznosi {km} km.',
         'en': 'The distance between {from_city} and {to_city} is {km} km.',
         'ru': 'Расстояние между {from_city} и {to_city} составляет {km} км.',
+        'bg': 'Разстоянието между {from_city} и {to_city} е {km} км.',
     },
     'city_pair.prose_duration_range': {
         'sr': 'Putovanje traje od {h_min}h {m_min}min do {h_max}h {m_max}min u zavisnosti od prevoznika.',
         'en': 'The journey takes {h_min}h {m_min}min to {h_max}h {m_max}min depending on the carrier.',
         'ru': 'Поездка занимает от {h_min}ч {m_min}мин до {h_max}ч {m_max}мин в зависимости от перевозчика.',
+        'bg': 'Пътуването отнема от {h_min}ч {m_min}мин до {h_max}ч {m_max}мин в зависимост от превозвача.',
     },
     'city_pair.prose_operators': {
         'sr': 'Na ovoj ruti voze: {operators}.',
         'en': 'Carriers on this route: {operators}.',
         'ru': 'На этом маршруте работают перевозчики: {operators}.',
+        'bg': 'По този маршрут пътуват: {operators}.',
     },
     'city_pair.prose_price_range': {
         'sr': 'Cene karata kreću se od {min} do {max} RSD ({eur_min}–{eur_max}€).',
         'en': 'Ticket prices range from {min} to {max} RSD ({eur_min}–{eur_max}€).',
         'ru': 'Цены на билеты — от {min} до {max} RSD ({eur_min}–{eur_max}€).',
+        'bg': 'Цените на билетите варират от {min} до {max} RSD ({eur_min}–{eur_max}€).',
     },
     'city_pair.prose_first_last': {
         'sr': 'Prvi polazak je u {first}, a poslednji u {last}.',
         'en': 'The first departure is at {first}, the last at {last}.',
         'ru': 'Первое отправление в {first}, последнее в {last}.',
+        'bg': 'Първото тръгване е в {first}, а последното в {last}.',
     },
     'city_pair.carriers_count': {
         'sr': 'Na liniji {from_city} — {to_city} voze {n} prevoznika: {operators}.',
         'en': 'There are {n} carriers on {from_city} — {to_city}: {operators}.',
         'ru': 'На линии {from_city} — {to_city} работают {n} перевозчиков: {operators}.',
+        'bg': 'По линията {from_city} — {to_city} пътуват {n} превозвача: {operators}.',
     },
     'city_pair.cheapest_op': {
         'sr': 'Najjeftinije karte nudi {operator}.',
         'en': 'The cheapest tickets are offered by {operator}.',
         'ru': 'Самые дешёвые билеты предлагает {operator}.',
+        'bg': 'Най-евтините билети предлага {operator}.',
     },
     'city_pair.prices_range_buy': {
         'sr': 'Karte od {min} RSD ({eur_min}€) do {max} RSD ({eur_max}€). Kupite na blagajni autobuske stanice ili online.',
         'en': 'Tickets from {min} RSD ({eur_min}€) to {max} RSD ({eur_max}€). Buy at the bus station counter or online.',
         'ru': 'Билеты от {min} RSD ({eur_min}€) до {max} RSD ({eur_max}€). Покупка в кассе автовокзала или онлайн.',
+        'bg': 'Билети от {min} RSD ({eur_min}€) до {max} RSD ({eur_max}€). Купете на касата на автогарата или онлайн.',
     },
     'city_pair.tip_first_last_short': {
         'sr': 'Prvi polazak u {first}, poslednji u {last}.',
         'en': 'First departure {first}, last {last}.',
         'ru': 'Первое отправление {first}, последнее {last}.',
+        'bg': 'Първо тръгване в {first}, последно в {last}.',
     },
     'city_pair.tip_duration': {
         'sr': 'Putovanje traje {h_min}h {m_min}min{suffix}.',
         'en': 'Journey takes {h_min}h {m_min}min{suffix}.',
         'ru': 'Поездка занимает {h_min}ч {m_min}мин{suffix}.',
+        'bg': 'Пътуването отнема {h_min}ч {m_min}мин{suffix}.',
     },
     'city_pair.tip_duration_range_suffix': {
         'sr': '–{h_max}h {m_max}min',
         'en': '–{h_max}h {m_max}min',
         'ru': '–{h_max}ч {m_max}мин',
+        'bg': '–{h_max}ч {m_max}мин',
     },
 
     # ── route_detail.html ──
@@ -2579,102 +2703,122 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'red vožnje',
         'en': 'schedule',
         'ru': 'расписание',
+        'bg': 'разписание',
     },
     'route_detail.meta_schedule': {
         'sr': 'Red vožnje',
         'en': 'Schedule',
         'ru': 'Расписание',
+        'bg': 'Разписание',
     },
     'route_detail.meta_daily': {
         'sr': 'polazaka dnevno',
         'en': 'departures daily',
         'ru': 'отправлений в день',
+        'bg': 'тръгвания дневно',
     },
     'route_detail.meta_carriers': {
         'sr': 'prevoznici',
         'en': 'carriers',
         'ru': 'перевозчики',
+        'bg': 'превозвачи',
     },
     'route_detail.meta_and_more': {
         'sr': 'i dr',
         'en': 'and more',
         'ru': 'и др',
+        'bg': 'и др.',
     },
     'route_detail.meta_from': {
         'sr': 'Od',
         'en': 'From',
         'ru': 'От',
+        'bg': 'От',
     },
     # CTR-optimized snippets: title/meta rewrites (2026+)
     'route_detail.title_departures': {
         'sr': 'polazaka dnevno',
         'en': 'departures daily',
         'ru': 'отправлений в день',
+        'bg': 'тръгвания дневно',
     },
     'route_detail.title_short': {
         'sr': 'red vožnje i cene',
         'en': 'schedule and prices',
         'ru': 'расписание и цены',
+        'bg': 'разписание и цени',
     },
     'route_detail.meta_compare_cta': {
         'sr': 'Uporedi prevoznike i cene besplatno.',
         'en': 'Compare carriers and prices for free.',
         'ru': 'Сравните перевозчиков и цены бесплатно.',
+        'bg': 'Сравнете превозвачи и цени безплатно.',
     },
     'route_detail.meta_prefix': {
         'sr': 'Autobuska ruta',
         'en': 'Bus route',
         'ru': 'Автобусный маршрут',
+        'bg': 'Автобусен маршрут',
     },
     'route_detail.meta_body': {
         'sr': 'Red vožnje, cene karata, prevoznici i trajanje putovanja. Uporedite polaske i kupite kartu online preko partnera. Besplatno, bez registracije.',
         'en': 'Schedule, ticket prices, carriers and trip duration. Compare departures and buy a ticket online via partners. Free, no registration required.',
         'ru': 'Расписание, цены билетов, перевозчики и время в пути. Сравните отправления и купите билет онлайн через партнёров. Бесплатно, без регистрации.',
+        'bg': 'Разписание, цени на билетите, превозвачи и продължителност на пътуването. Сравнете тръгванията и купете билет онлайн през партньор. Безплатно, без регистрация.',
     },
     'route.prose_distance': {
         'sr': 'Vožnja od {from_city} do {to_city} iznosi oko {km} km.',
         'en': 'The trip from {from_city} to {to_city} is about {km} km.',
         'ru': 'Поездка из {from_city} в {to_city} занимает около {km} км.',
+        'bg': 'Пътуването от {from_city} до {to_city} е около {km} км.',
     },
     'route.prose_duration': {
         'sr': 'Prosečno trajanje putovanja autobusom je oko {hours} sata.',
         'en': 'Average bus trip duration is around {hours} hours.',
         'ru': 'Средняя длительность поездки на автобусе — около {hours} часов.',
+        'bg': 'Средната продължителност на пътуването с автобус е около {hours} часа.',
     },
     'route.prose_operators': {
         'sr': 'Na ovoj ruti voze prevoznici: {ops}.',
         'en': 'Carriers on this route: {ops}.',
         'ru': 'На этом маршруте работают перевозчики: {ops}.',
+        'bg': 'По този маршрут пътуват превозвачите: {ops}.',
     },
     'route.prose_price_range': {
         'sr': 'Cene karata se kreću od {min} do {max} RSD, u zavisnosti od prevoznika i dana.',
         'en': 'Ticket prices range from {min} to {max} RSD, depending on carrier and day.',
         'ru': 'Цены билетов колеблются от {min} до {max} RSD в зависимости от перевозчика и дня.',
+        'bg': 'Цените на билетите варират от {min} до {max} RSD, в зависимост от превозвача и деня.',
     },
     'route.prose_price_single': {
         'sr': 'Cena karte iznosi oko {price} RSD.',
         'en': 'Ticket price is around {price} RSD.',
         'ru': 'Цена билета — около {price} RSD.',
+        'bg': 'Цената на билета е около {price} RSD.',
     },
     'route.prose_context': {
         'sr': 'Autobuske linije između {from_city} i {to_city} povezuju putnike tokom cele godine. Na ovoj stranici prikazujemo kompletan red vožnje za svaki dan u nedelji, sa mogućnošću filtriranja po vremenu polaska, trajanju putovanja ili ceni. Podaci se ažuriraju svake noći iz više izvora (busticket4.me, polazak.rs, srbijavoz.rs), a prikazane cene su orjentacione — konačnu cenu i raspoloživost mesta potvrđuje partner kod kog kupujete kartu.',
         'en': 'Bus lines between {from_city} and {to_city} run year-round. This page shows the full schedule for each day of the week, with filters for departure time, trip duration and price. Data is refreshed nightly from multiple sources (busticket4.me, polazak.rs, srbijavoz.rs), and displayed prices are indicative — the final fare and seat availability is confirmed by the partner where you buy the ticket.',
         'ru': 'Автобусные рейсы между {from_city} и {to_city} работают круглый год. На этой странице показано полное расписание по дням недели, с фильтрами по времени отправления, длительности поездки и цене. Данные обновляются каждую ночь из нескольких источников (busticket4.me, polazak.rs, srbijavoz.rs), а показанные цены ориентировочные — финальную цену и наличие мест подтверждает партнёр, у которого вы покупаете билет.',
+        'bg': 'Автобусните линии между {from_city} и {to_city} свързват пътници целогодишно. На тази страница показваме пълното разписание за всеки ден от седмицата, с възможност за филтриране по час на тръгване, продължителност на пътуването или цена. Данните се обновяват всяка нощ от няколко източника (busticket4.me, polazak.rs, srbijavoz.rs), а показаните цени са ориентировъчни — крайната цена и наличността на места се потвърждават от партньора, от когото купувате билета.',
     },
     'route.prose_buy': {
         'sr': 'Kartu za rutu {from_city} — {to_city} možete kupiti direktno kod prevoznika na autobuskoj stanici ili online preko partnera (BusTicket4.me). Online kupovina obično nudi nekoliko različitih polazaka po istoj ceni, pa vredi uporediti vremena. Za grupe preko 5 putnika ili studentske popuste kontaktirajte prevoznika direktno — Prevozni ne prodaje karte i nije posrednik u kupovini.',
         'en': 'You can buy a ticket for {from_city} — {to_city} directly from the carrier at the bus station or online via partners (BusTicket4.me). Online purchase usually offers several departures at the same price, so it is worth comparing times. For groups of 5+ or student discounts contact the carrier directly — Prevozni does not sell tickets and is not a purchase intermediary.',
         'ru': 'Билет на маршрут {from_city} — {to_city} можно купить напрямую у перевозчика на автовокзале или онлайн через партнёров (BusTicket4.me). Онлайн-покупка обычно предлагает несколько отправлений по одной цене — стоит сравнить время. Для групп от 5 человек или студенческих скидок обращайтесь напрямую к перевозчику — Prevozni не продаёт билеты и не является посредником.',
+        'bg': 'Билет за маршрута {from_city} — {to_city} можете да купите директно от превозвача на автогарата или онлайн през партньор (BusTicket4.me). Онлайн покупката обикновено предлага няколко различни тръгвания на една и съща цена, затова си струва да сравните часовете. За групи над 5 души или студентски отстъпки се свържете директно с превозвача — Prevozni не продава билети и не е посредник в продажбата.',
     },
     'city_pair.title_travel': {
         'sr': 'autobus, voz, cene',
         'en': 'bus, train, prices',
         'ru': 'автобус, поезд, цены',
+        'bg': 'автобус, влак, цени',
     },
     'city_pair.meta_cta': {
         'sr': 'Uporedi polaske, cene i vreme putovanja. Besplatno.',
         'en': 'Compare departures, prices and travel time. Free.',
         'ru': 'Сравните отправления, цены и время в пути. Бесплатно.',
+        'bg': 'Сравнете тръгвания, цени и време на пътуване. Безплатно.',
     },
     'line_detail.title': {
         'sr': 'Red Vožnje Linije',
@@ -2707,46 +2851,55 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Red vožnje od',
         'en': 'Schedule from',
         'ru': 'Расписание от',
+        'bg': 'Разписание от',
     },
     'search_results.meta_to': {
         'sr': 'do',
         'en': 'to',
         'ru': 'до',
+        'bg': 'до',
     },
     'search_results.meta_desc': {
         'sr': 'svi polasci, cene karata i prevoznici na jednom mestu.',
         'en': 'all departures, ticket prices and carriers in one place.',
         'ru': 'все отправления, цены билетов и перевозчики в одном месте.',
+        'bg': 'всички тръгвания, цени на билетите и превозвачи на едно място.',
     },
     'search_results.meta_default': {
         'sr': 'Pretražite red vožnje autobusa i vozova između gradova Srbije. Uporedite polaske, cene i prevoznike. Besplatno.',
         'en': 'Search bus and train schedules between cities in Serbia. Compare departures, prices and carriers. Free.',
         'ru': 'Ищите расписание автобусов и поездов между городами Сербии. Сравнивайте отправления, цены и перевозчиков. Бесплатно.',
+        'bg': 'Претърсете разписанието на автобуси и влакове между градовете на Сърбия. Сравнете тръгвания, цени и превозвачи. Безплатно.',
     },
     'search_results.h1': {
         'sr': 'Pronađite prevoz',
         'en': 'Find transport',
         'ru': 'Найдите транспорт',
+        'bg': 'Намерете превоз',
     },
     'search_results.hero_sub': {
         'sr': 'Autobus ili voz između gradova Srbije',
         'en': 'Bus or train between cities in Serbia',
         'ru': 'Автобус или поезд между городами Сербии',
+        'bg': 'Автобус или влак между градовете на Сърбия',
     },
     'search_results.sort_label': {
         'sr': 'Sortiraj:',
         'en': 'Sort:',
         'ru': 'Сортировка:',
+        'bg': 'Сортирай:',
     },
     'search_results.sort_time': {
         'sr': 'Po vremenu',
         'en': 'By time',
         'ru': 'По времени',
+        'bg': 'По време',
     },
     'search_results.sort_price': {
         'sr': 'Po ceni',
         'en': 'By price',
         'ru': 'По цене',
+        'bg': 'По цена',
     },
 
     # ── city_transport.html ──
@@ -2845,31 +2998,37 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Filteri',
         'en': 'Filters',
         'ru': 'Фильтры',
+        'bg': 'Филтри',
     },
     'filter.close': {
         'sr': 'Zatvori',
         'en': 'Close',
         'ru': 'Закрыть',
+        'bg': 'Затвори',
     },
     'filter.transport_type': {
         'sr': 'Tip prevoza',
         'en': 'Transport type',
         'ru': 'Тип транспорта',
+        'bg': 'Вид транспорт',
     },
     'filter.bus': {
         'sr': 'Autobus',
         'en': 'Bus',
         'ru': 'Автобус',
+        'bg': 'Автобус',
     },
     'filter.train': {
         'sr': 'Voz',
         'en': 'Train',
         'ru': 'Поезд',
+        'bg': 'Влак',
     },
     'filter.carrier': {
         'sr': 'Prevoznik',
         'en': 'Carrier',
         'ru': 'Перевозчик',
+        'bg': 'Превозвач',
     },
 
     # ── Search form ──
@@ -2884,137 +3043,164 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Koliko traje putovanje {from_city} — {to_city}?',
         'en': 'How long does the {from_city} — {to_city} trip take?',
         'ru': 'Сколько длится поездка {from_city} — {to_city}?',
+        'bg': 'Колко продължава пътуването {from_city} — {to_city}?',
     },
     'city_pair.faq.q_price': {
         'sr': 'Koja je cena karte {from_city} — {to_city}?',
         'en': 'What is the ticket price for {from_city} — {to_city}?',
         'ru': 'Сколько стоит билет {from_city} — {to_city}?',
+        'bg': 'Каква е цената на билета {from_city} — {to_city}?',
     },
     'city_pair.faq.q_departures': {
         'sr': 'Koliko polazaka dnevno ima {from_city} — {to_city}?',
         'en': 'How many daily departures are there from {from_city} to {to_city}?',
         'ru': 'Сколько ежедневных рейсов {from_city} — {to_city}?',
+        'bg': 'Колко тръгвания дневно има {from_city} — {to_city}?',
     },
     'city_pair.faq.q_operators': {
         'sr': 'Koji prevoznici voze {from_city} — {to_city}?',
         'en': 'Which carriers operate {from_city} — {to_city}?',
         'ru': 'Какие перевозчики обслуживают {from_city} — {to_city}?',
+        'bg': 'Кои превозвачи обслужват {from_city} — {to_city}?',
     },
     'city_pair.faq.a_duration_range': {
         'sr': 'Putovanje od {from_city} do {to_city} traje od {h_min}h {m_min}min do {h_max}h {m_max}min.',
         'en': 'The trip from {from_city} to {to_city} takes from {h_min}h {m_min}min up to {h_max}h {m_max}min.',
         'ru': 'Поездка из {from_city} в {to_city} занимает от {h_min}ч {m_min}мин до {h_max}ч {m_max}мин.',
+        'bg': 'Пътуването от {from_city} до {to_city} отнема от {h_min}ч {m_min}мин до {h_max}ч {m_max}мин.',
     },
     'city_pair.faq.a_duration_distance_suffix': {
         'sr': ' Rastojanje je {km} km.',
         'en': ' The distance is {km} km.',
         'ru': ' Расстояние — {km} км.',
+        'bg': ' Разстоянието е {km} км.',
     },
     'city_pair.faq.a_duration_distance_only': {
         'sr': 'Rastojanje je oko {km} km. Tačno trajanje zavisi od prevoznika.',
         'en': 'The distance is about {km} km. Exact duration depends on the carrier.',
         'ru': 'Расстояние около {km} км. Точное время зависит от перевозчика.',
+        'bg': 'Разстоянието е около {km} км. Точната продължителност зависи от превозвача.',
     },
     'city_pair.faq.a_duration_unknown': {
         'sr': 'Trajanje zavisi od prevoznika i tipa prevoza.',
         'en': 'Duration depends on the carrier and transport type.',
         'ru': 'Время в пути зависит от перевозчика и вида транспорта.',
+        'bg': 'Продължителността зависи от превозвача и вида транспорт.',
     },
     'city_pair.faq.a_price_range': {
         'sr': 'Cene karata kreću se od {min} do {max} RSD ({eur_min}–{eur_max}€).',
         'en': 'Ticket prices range from {min} to {max} RSD ({eur_min}–{eur_max}€).',
         'ru': 'Цены билетов варьируются от {min} до {max} RSD ({eur_min}–{eur_max}€).',
+        'bg': 'Цените на билетите варират от {min} до {max} RSD ({eur_min}–{eur_max}€).',
     },
     'city_pair.faq.a_price_cheapest_suffix': {
         'sr': ' Najjeftiniji prevoznik je {operator}.',
         'en': ' The cheapest carrier is {operator}.',
         'ru': ' Самый дешёвый перевозчик — {operator}.',
+        'bg': ' Най-евтиният превозвач е {operator}.',
     },
     'city_pair.faq.a_price_from': {
         'sr': 'Cene karata počinju od {min} RSD (oko {eur}€).',
         'en': 'Ticket prices start from {min} RSD (about {eur}€).',
         'ru': 'Цены билетов начинаются от {min} RSD (около {eur}€).',
+        'bg': 'Цените на билетите започват от {min} RSD (около {eur}€).',
     },
     'city_pair.faq.a_price_unknown': {
         'sr': 'Cene variraju u zavisnosti od prevoznika.',
         'en': 'Prices vary depending on the carrier.',
         'ru': 'Цены зависят от перевозчика.',
+        'bg': 'Цените варират в зависимост от превозвача.',
     },
     'city_pair.faq.a_departures_full': {
         'sr': 'Na ovoj ruti ima {count} polazaka dnevno. Prvi polazak je u {first}, poslednji u {last}.',
         'en': 'This route has {count} daily departures. First at {first}, last at {last}.',
         'ru': 'На этом маршруте {count} рейсов в день. Первый в {first}, последний в {last}.',
+        'bg': 'По този маршрут има {count} тръгвания дневно. Първото тръгване е в {first}, последното в {last}.',
     },
     'city_pair.faq.a_departures_operators_suffix': {
         'sr': ' Voze: {operators}.',
         'en': ' Operated by: {operators}.',
         'ru': ' Обслуживают: {operators}.',
+        'bg': ' Пътуват: {operators}.',
     },
     'city_pair.faq.a_departures_count_only': {
         'sr': 'Na ovoj ruti ima {count} polazaka dnevno.',
         'en': 'This route has {count} daily departures.',
         'ru': 'На этом маршруте {count} рейсов в день.',
+        'bg': 'По този маршрут има {count} тръгвания дневно.',
     },
     'city_pair.faq.a_departures_unknown': {
         'sr': 'Broj polazaka varira. Proverite aktuelni red vožnje.',
         'en': 'The number of departures varies. Check the current schedule.',
         'ru': 'Количество рейсов меняется. Проверьте актуальное расписание.',
+        'bg': 'Броят на тръгванията варира. Проверете актуалното разписание.',
     },
     'city_pair.faq.a_operators_list': {
         'sr': 'Na liniji {from_city} — {to_city} voze {n} prevoznika: {operators}.',
         'en': 'On the {from_city} — {to_city} route there are {n} carriers: {operators}.',
         'ru': 'На маршруте {from_city} — {to_city} работают {n} перевозчиков: {operators}.',
+        'bg': 'По линията {from_city} — {to_city} пътуват {n} превозвача: {operators}.',
     },
     'city_pair.faq.a_operators_cheapest_suffix': {
         'sr': ' Najjeftiniji prevoznik je {operator} sa cenama od {min} RSD.',
         'en': ' The cheapest carrier is {operator} with prices from {min} RSD.',
         'ru': ' Самый дешёвый перевозчик — {operator}, цены от {min} RSD.',
+        'bg': ' Най-евтиният превозвач е {operator} с цени от {min} RSD.',
     },
     # JSON-LD short variants
     'city_pair.faq.ld_duration_range': {
         'sr': 'Putovanje traje od {h_min}h {m_min}min do {h_max}h {m_max}min.',
         'en': 'The trip takes from {h_min}h {m_min}min up to {h_max}h {m_max}min.',
         'ru': 'Поездка занимает от {h_min}ч {m_min}мин до {h_max}ч {m_max}мин.',
+        'bg': 'Пътуването отнема от {h_min}ч {m_min}мин до {h_max}ч {m_max}мин.',
     },
     'city_pair.faq.ld_price_range': {
         'sr': 'Od {min} do {max} RSD ({eur_min}–{eur_max}€).',
         'en': 'From {min} to {max} RSD ({eur_min}–{eur_max}€).',
         'ru': 'От {min} до {max} RSD ({eur_min}–{eur_max}€).',
+        'bg': 'От {min} до {max} RSD ({eur_min}–{eur_max}€).',
     },
     'city_pair.faq.ld_price_cheapest_suffix': {
         'sr': ' Najjeftiniji: {operator}.',
         'en': ' Cheapest: {operator}.',
         'ru': ' Самый дешёвый: {operator}.',
+        'bg': ' Най-евтин: {operator}.',
     },
     'city_pair.faq.ld_price_from': {
         'sr': 'Od {min} RSD ({eur}€).',
         'en': 'From {min} RSD ({eur}€).',
         'ru': 'От {min} RSD ({eur}€).',
+        'bg': 'От {min} RSD ({eur}€).',
     },
     'city_pair.faq.ld_price_unknown': {
         'sr': 'Cene variraju.',
         'en': 'Prices vary.',
         'ru': 'Цены варьируются.',
+        'bg': 'Цените варират.',
     },
     'city_pair.faq.ld_departures_full': {
         'sr': '{count} polazaka dnevno. Prvi u {first}, poslednji u {last}.',
         'en': '{count} departures daily. First at {first}, last at {last}.',
         'ru': '{count} рейсов в день. Первый в {first}, последний в {last}.',
+        'bg': '{count} тръгвания дневно. Първо в {first}, последно в {last}.',
     },
     'city_pair.faq.ld_departures_count_only': {
         'sr': '{count} polazaka dnevno.',
         'en': '{count} departures daily.',
         'ru': '{count} рейсов в день.',
+        'bg': '{count} тръгвания дневно.',
     },
     'city_pair.faq.ld_departures_unknown': {
         'sr': 'Broj polazaka varira.',
         'en': 'The number of departures varies.',
         'ru': 'Количество рейсов меняется.',
+        'bg': 'Броят на тръгванията варира.',
     },
     'city_pair.faq.ld_operators_list': {
         'sr': 'Voze {n} prevoznika: {operators}.',
         'en': '{n} carriers operate: {operators}.',
         'ru': '{n} перевозчиков: {operators}.',
+        'bg': 'Пътуват {n} превозвача: {operators}.',
     },
 
     # ── route_detail FAQ JSON-LD ──
@@ -3022,41 +3208,49 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Koliko polazaka ima od {from_city} do {to_city}?',
         'en': 'How many departures are there from {from_city} to {to_city}?',
         'ru': 'Сколько рейсов из {from_city} в {to_city}?',
+        'bg': 'Колко тръгвания има от {from_city} до {to_city}?',
     },
     'route_detail.faq.a_departures': {
         'sr': 'Dnevno ima {count} polazaka od {from_city} do {to_city}.',
         'en': 'There are {count} daily departures from {from_city} to {to_city}.',
         'ru': 'Ежедневно выполняется {count} рейсов из {from_city} в {to_city}.',
+        'bg': 'Дневно има {count} тръгвания от {from_city} до {to_city}.',
     },
     'route_detail.faq.q_price': {
         'sr': 'Koliko košta karta {from_city} — {to_city}?',
         'en': 'How much is a {from_city} — {to_city} ticket?',
         'ru': 'Сколько стоит билет {from_city} — {to_city}?',
+        'bg': 'Колко струва билет {from_city} — {to_city}?',
     },
     'route_detail.faq.a_price_from': {
         'sr': 'Cena karte počinje od {min} RSD.',
         'en': 'Ticket price starts from {min} RSD.',
         'ru': 'Цена билета начинается от {min} RSD.',
+        'bg': 'Цената на билета започва от {min} RSD.',
     },
     'route_detail.faq.a_price_unknown': {
         'sr': 'Cene variraju u zavisnosti od prevoznika; proverite aktuelne cene na stranici.',
         'en': 'Prices vary by carrier; check current prices on the page.',
         'ru': 'Цены зависят от перевозчика; проверьте актуальные цены на странице.',
+        'bg': 'Цените варират в зависимост от превозвача; проверете актуалните цени на страницата.',
     },
     'route_detail.faq.q_operators': {
         'sr': 'Koji prevoznici voze liniju {from_city} — {to_city}?',
         'en': 'Which carriers operate the {from_city} — {to_city} route?',
         'ru': 'Какие перевозчики обслуживают маршрут {from_city} — {to_city}?',
+        'bg': 'Кои превозвачи обслужват линията {from_city} — {to_city}?',
     },
     'route_detail.faq.a_operators_list': {
         'sr': 'Na ovoj liniji voze: {operators}.',
         'en': 'This route is operated by: {operators}.',
         'ru': 'Этот маршрут обслуживают: {operators}.',
+        'bg': 'По тази линия пътуват: {operators}.',
     },
     'route_detail.faq.a_operators_unknown': {
         'sr': 'Proverite listu polazaka za aktuelne prevoznike.',
         'en': 'Check the departures list for current carriers.',
         'ru': 'Проверьте список рейсов для актуальных перевозчиков.',
+        'bg': 'Проверете списъка с тръгвания за актуалните превозвачи.',
     },
 
     # ── line_detail FAQ JSON-LD ──
@@ -3852,6 +4046,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Zatvori',
         'en': 'Dismiss',
         'ru': 'Закрыть',
+        'bg': 'Затвори',
     },
     'dest.faq_q1': {
         'sr': 'Koliko traje putovanje autobusom od Beograda do Budve?',
@@ -4180,36 +4375,43 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Obaveštenje o ceni',
         'en': 'Price alert',
         'ru': 'Уведомление о цене',
+        'bg': 'Известие за цена',
     },
     'price_alert.subtitle': {
         'sr': 'Javljamo kada cena za {pair} padne ili stigne akcija.',
         'en': "We'll email when {pair} drops in price or goes on sale.",
         'ru': 'Сообщим, когда цена {pair} упадёт или появится акция.',
+        'bg': 'Ще ви уведомим, когато цената за {pair} падне или излезе промоция.',
     },
     'price_alert.button': {
         'sr': 'Prati cenu',
         'en': 'Track price',
         'ru': 'Следить за ценой',
+        'bg': 'Следи цената',
     },
     'price_alert.sub_hint': {
         'sr': 'Jedan email kad najniža cena padne za 10% ili više.',
         'en': 'One email whenever the cheapest ticket drops 10% or more.',
         'ru': 'Одно письмо, когда минимальная цена падает на 10% и больше.',
+        'bg': 'Един имейл, когато най-ниската цена падне с 10% или повече.',
     },
     'price_alert.ok_check_inbox': {
         'sr': 'Proverite email — poslali smo link za potvrdu.',
         'en': 'Check your inbox — we sent a confirmation link.',
         'ru': 'Проверьте почту — мы отправили ссылку для подтверждения.',
+        'bg': 'Проверете имейла си — изпратихме линк за потвърждение.',
     },
     'price_alert.ok_already': {
         'sr': 'Već ste pretplaćeni — obaveštavaćemo Vas čim cena padne.',
         'en': "You're already subscribed — we'll email you on the next drop.",
         'ru': 'Вы уже подписаны — напишем, как только цена упадёт.',
+        'bg': 'Вече сте абонирани — ще ви уведомим веднага щом цената падне.',
     },
     'price_alert.err': {
         'sr': 'Nešto je pošlo po zlu. Pokušajte ponovo.',
         'en': 'Something went wrong. Please try again.',
         'ru': 'Что-то пошло не так. Попробуйте ещё раз.',
+        'bg': 'Нещо се обърка. Опитайте отново.',
     },
     'subscribe.email_placeholder': {
         'sr': 'Vaš email',
@@ -4273,26 +4475,31 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Instalirajte Prevozni',
         'en': 'Install Prevozni',
         'ru': 'Установить Prevozni',
+        'bg': 'Инсталирайте Prevozni',
     },
     'pwa.install_sub': {
         'sr': 'Brže otvaranje, manje reklama, offline pretraga.',
         'en': 'Faster launches, less clutter, offline search.',
         'ru': 'Быстрый запуск, меньше шума, поиск офлайн.',
+        'bg': 'По-бързо отваряне, по-малко реклами, офлайн търсене.',
     },
     'pwa.install_cta': {
         'sr': 'Instaliraj',
         'en': 'Install',
         'ru': 'Установить',
+        'bg': 'Инсталирай',
     },
     'pwa.dismiss': {
         'sr': 'Ne sada',
         'en': 'Not now',
         'ru': 'Не сейчас',
+        'bg': 'Не сега',
     },
     'pwa.install_ios_title': {
         'sr': 'Dodajte na početni ekran',
         'en': 'Add to Home Screen',
         'ru': 'На главный экран',
+        'bg': 'Добавете към началния екран',
     },
     'pwa.install_ios_hint': {
         'sr': 'Otvorite stranicu u Safariju, tapnite dugme Podeli, pa '
@@ -4301,11 +4508,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               'choose "Add to Home Screen" to install Prevozni as an app.',
         'ru': 'Откройте страницу в Safari, нажмите кнопку «Поделиться» и '
               'выберите «На экран „Домой"», чтобы установить Prevozni.',
+        'bg': 'Отворете страницата в Safari, натиснете бутона Споделяне, после ',
     },
     'pwa.install_ios_close': {
         'sr': 'Zatvori',
         'en': 'Close',
         'ru': 'Закрыть',
+        'bg': 'Затвори',
     },
 
     # ── Footer legal links + disclosure ──
@@ -4313,16 +4522,19 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Uslovi korišćenja',
         'en': 'Terms of Service',
         'ru': 'Условия использования',
+        'bg': 'Условия за ползване',
     },
     'footer.cookies': {
         'sr': 'Politika kolačića',
         'en': 'Cookie Policy',
         'ru': 'Политика cookies',
+        'bg': 'Политика за бисквитките',
     },
     'footer.partners': {
         'sr': 'Partnerske provizije: BusTicket4.me. Klikom na "Kupi" možete napustiti naš sajt.',
         'en': 'Partner commissions: BusTicket4.me. Clicking "Buy" may take you off-site.',
         'ru': 'Партнёрские комиссии: BusTicket4.me. Нажатие «Купить» может увести с сайта.',
+        'bg': 'Партньорски комисиони: BusTicket4.me. С клик върху "Купи" може да напуснете нашия сайт.',
     },
 
     # ── Cookie consent banner ──
@@ -5030,7 +5242,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
 }
 
-SUPPORTED_LANGS = ('sr', 'en', 'ru')
+SUPPORTED_LANGS = ('sr', 'en', 'ru', 'bg')
 DEFAULT_LANG = 'sr'
 
 
