@@ -34,7 +34,9 @@ def test_every_route_city_has_a_centroid():
     # Plausible lat/lon in/around the Balkans, widened west+north to also
     # cover the srbijatours.com diaspora-route cities (Serbia <-> Germany
     # long-haul coaches) added 2026-09 — lon 6 reaches Düsseldorf, lat 54
-    # reaches Hamburg/Bremen.
+    # reaches Hamburg/Bremen — and widened east to cover the
+    # union-ivkoni.com Bulgaria cities added the same week — lon 28
+    # reaches Varna/Burgas on the Black Sea coast.
     for city, (lat, lon) in CITY_COORDS.items():
         assert 35 <= lat <= 54, city
-        assert 6 <= lon <= 25, city
+        assert 6 <= lon <= 28, city

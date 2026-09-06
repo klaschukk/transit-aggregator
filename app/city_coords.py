@@ -51,6 +51,13 @@ CITY_COORDS: dict[str, tuple[float, float]] = {
     'Nirnberg': (49.45, 11.08), 'Paderborn': (51.72, 8.75), 'Ravensburg': (47.78, 9.61),
     'Regensburg': (49.02, 12.10), 'Rozenhajm': (47.86, 12.13), 'Ulm': (48.40, 9.99),
     'Vircburg': (49.79, 9.93), 'Štutgart': (48.78, 9.18), 'Švajnfurt': (50.05, 10.24),
+    # Bulgaria — Union Ivkoni domestic + Bulgaria<->Greece routes, added
+    # 2026-09-06 (not Serbia-connected, added at the owner's explicit
+    # direction). Sofija/Solun/Atina already existed above. Kept in sync
+    # with data/pipelines/build_db.py's CITY_COORDS per that file's note.
+    'Plovdiv': (42.15, 24.75), 'Burgas': (42.50, 27.47), 'Varna': (43.21, 27.91),
+    'Stara Zagora': (42.43, 25.63), 'Pleven': (43.41, 24.62), 'Ruse': (43.85, 25.97),
+    'Blagoevgrad': (42.02, 23.09), 'Veliko Tarnovo': (43.08, 25.62),
 }
 
 

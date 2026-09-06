@@ -125,6 +125,12 @@ CITY_COORDS: dict[str, tuple[float, float]] = {
     'Nirnberg': (49.45, 11.08), 'Paderborn': (51.72, 8.75), 'Ravensburg': (47.78, 9.61),
     'Regensburg': (49.02, 12.10), 'Rozenhajm': (47.86, 12.13), 'Ulm': (48.40, 9.99),
     'Vircburg': (49.79, 9.93), 'Štutgart': (48.78, 9.18), 'Švajnfurt': (50.05, 10.24),
+    # Bulgaria — Union Ivkoni domestic + Bulgaria<->Greece routes, added
+    # 2026-09-06 (not Serbia-connected, added at the owner's explicit
+    # direction). Sofija/Solun/Atina already existed above.
+    'Plovdiv': (42.15, 24.75), 'Burgas': (42.50, 27.47), 'Varna': (43.21, 27.91),
+    'Stara Zagora': (42.43, 25.63), 'Pleven': (43.41, 24.62), 'Ruse': (43.85, 25.97),
+    'Blagoevgrad': (42.02, 23.09), 'Veliko Tarnovo': (43.08, 25.62),
 }
 # Great-circle → road multiplier (Balkans terrain detours ~25% over straight line).
 _ROAD_FACTOR = 1.25
@@ -695,6 +701,7 @@ def _load_operators(conn: duckdb.DuckDBPyConnection) -> None:
         (15, 'Sirmiumbus', 'sirmiumbus', None, 'bus'),
         (16, 'Autoprevoz Kikinda', 'autoprevoz-kikinda', None, 'bus'),
         (17, 'Srbija Tours International', 'srbija-tours-international', 'https://www.srbijatours.com', 'bus'),
+        (18, 'Union Ivkoni', 'union-ivkoni', 'https://www.union-ivkoni.com', 'bus'),
     ]
     conn.executemany("INSERT INTO operators VALUES (?, ?, ?, ?, ?)", operators)
 
@@ -776,6 +783,19 @@ def _load_intercity(conn: duckdb.DuckDBPyConnection,
             t['_source'] = 'srbijatours'
         all_trips.extend(srbijatours_trips)
         print(f"  srbijatours.com trips: {len(srbijatours_trips)}")
+
+    # Source 6: union-ivkoni.com — Bulgaria-domestic + Bulgaria<->Greece.
+    # Not Serbia-connected at all, unlike every other source here — added
+    # at the owner's explicit direction to grow beyond the Serbia-only
+    # scope (2026-09-06). Real published EUR prices, converted to RSD.
+    ivkoni_path = RAW_DIR / 'ivkoni' / 'trips.json'
+    if ivkoni_path.exists():
+        with open(ivkoni_path, encoding='utf-8') as f:
+            ivkoni_trips = json.load(f)
+        for t in ivkoni_trips:
+            t['_source'] = 'ivkoni'
+        all_trips.extend(ivkoni_trips)
+        print(f"  union-ivkoni.com trips: {len(ivkoni_trips)}")
 
     if not all_trips:
         return

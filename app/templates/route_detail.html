@@ -345,7 +345,13 @@
        {% if reverse_slug %}{{ _('route.see_reverse') }} <a href="{{ lang_prefix }}/rute/{{ reverse_slug }}/">{{ route.to_city }} → {{ route.from_city }}</a>.{% endif %}
     </p>
     <p>{{ _('route.prose_context').format(from_city=route.from_city, to_city=route.to_city) }}</p>
-    <p>{{ _('route.prose_buy').format(from_city=route.from_city, to_city=route.to_city) }}</p>
+    {# Names BusTicket4.me by name — only true when this route actually has
+       a working buy link (_primary_href, same flag gating the CTA button
+       above). A route with no affiliate coverage (e.g. Union Ivkoni,
+       srbijatours.com — informational schedule only) would otherwise tell
+       readers they can buy via a partner that doesn't sell this route at
+       all, contradicting the missing "Kupi" button right above it. #}
+    {% if _primary_href %}<p>{{ _('route.prose_buy').format(from_city=route.from_city, to_city=route.to_city) }}</p>{% endif %}
   </div>
   <button type="button" class="seo-block__more" data-collapse-toggle
           data-more-label="{{ _('common.read_more') }}"
