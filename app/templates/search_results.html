@@ -162,7 +162,7 @@
     {# Purely decorative journey strip (Rome2Rio-style dot-line-dot map of
        the trip) — the real, accessible leg-by-leg info is the .connection-card__legs
        block right below it, unchanged. js/connection-timeline.js adds
-       --in-view once this scrolls into sight, which is what triggers the
+       --animate once this scrolls into view, which is what triggers the
        draw-in + bus-glide animation; without JS (or prefers-reduced-motion)
        it just renders fully drawn, no CSS dependency on JS running. #}
     <div class="connection-card__timeline" aria-hidden="true">
@@ -304,6 +304,9 @@
 
 {% block scripts %}
 {% include '_partials/_route_map_script.html' %}
+{% if connections %}
+<script defer src="{{ url_for('static', filename='js/connection-timeline.js') }}?v={{ asset_version }}"></script>
+{% endif %}
 <script>
 (function() {
   /* ── Filter toggle ── */
