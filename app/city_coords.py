@@ -36,6 +36,21 @@ CITY_COORDS: dict[str, tuple[float, float]] = {
     'Zagreb': (45.81, 15.98), 'Zaječar': (43.90, 22.27), 'Zenica': (44.20, 17.91),
     'Zrenjanin': (45.38, 20.39), 'Čačak': (43.89, 20.35), 'Šabac': (44.75, 19.69),
     'Šid': (45.13, 19.23), 'Štip': (41.74, 22.20),
+    # Kept in sync with data/pipelines/build_db.py's CITY_COORDS — see that
+    # file's comment for why these were added (srbijatours.com diaspora routes).
+    'Aleksinac': (43.54, 21.70), 'Bujanovac': (42.46, 21.77), 'Paraćin': (43.86, 21.41),
+    'Preševo': (42.31, 21.65), 'Varvarin': (43.72, 21.35), 'Velika Plana': (44.34, 21.06),
+    'Vladičin Han': (42.70, 22.06), 'Ćuprija': (43.93, 21.37),
+    'Augsburg': (48.37, 10.90), 'Bamberg': (49.89, 10.89), 'Berlin': (52.52, 13.40),
+    'Bilefeld': (52.02, 8.53), 'Bremen': (53.08, 8.81), 'Diseldorf': (51.23, 6.77),
+    'Drezden': (51.05, 13.74), 'Duizburg': (51.43, 6.76), 'Esen': (51.46, 7.01),
+    'Frankfurt': (50.11, 8.68), 'Fridrihshafen': (47.65, 9.48), 'Fulda': (50.55, 9.68),
+    'Hamburg': (53.55, 10.00), 'Hanover': (52.37, 9.73), 'Kasel': (51.31, 9.50),
+    'Keln': (50.94, 6.96), 'Landsberg': (48.05, 10.88), 'Lindau': (47.55, 9.68),
+    'Manhajm': (49.49, 8.47), 'Memingen': (47.98, 10.18), 'Minhen': (48.14, 11.58),
+    'Nirnberg': (49.45, 11.08), 'Paderborn': (51.72, 8.75), 'Ravensburg': (47.78, 9.61),
+    'Regensburg': (49.02, 12.10), 'Rozenhajm': (47.86, 12.13), 'Ulm': (48.40, 9.99),
+    'Vircburg': (49.79, 9.93), 'Štutgart': (48.78, 9.18), 'Švajnfurt': (50.05, 10.24),
 }
 
 

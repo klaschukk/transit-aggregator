@@ -337,8 +337,8 @@
      the height clip only at ≤767px — desktop reads the full prose. #}
   <div class="seo-block__content" data-collapse="1">
     <h2>{{ _('route.about') }} {{ route.from_city }} — {{ route.to_city }}</h2>
-    <p>{% if route.distance_km %}{{ _('route.prose_distance').format(from_city=route.from_city, to_city=route.to_city, km=route.distance_km) }}
-       {{ _('route.prose_duration').format(hours=(route.distance_km / 80)|round|int) }}{% endif %}
+    <p>{% if route.distance_km %}{{ _('route.prose_distance').format(from_city=route.from_city, to_city=route.to_city, km=route.distance_km) }}{% endif %}
+       {% if avg_duration_hours %}{{ _('route.prose_duration').format(hours=avg_duration_hours) }}{% endif %}
        {% if operators_on_route %}{{ _('route.prose_operators').format(ops=operators_on_route|join(', ')) }}{% endif %}
        {% if price_min and price_max and price_min != price_max %}{{ _('route.prose_price_range').format(min=price_min, max=price_max) }}
        {% elif price_min %}{{ _('route.prose_price_single').format(price=price_min) }}{% endif %}

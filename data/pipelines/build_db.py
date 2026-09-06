@@ -107,6 +107,24 @@ CITY_COORDS: dict[str, tuple[float, float]] = {
     'Zagreb': (45.81, 15.98), 'Zaječar': (43.90, 22.27), 'Zenica': (44.20, 17.91),
     'Zrenjanin': (45.38, 20.39), 'Čačak': (43.89, 20.35), 'Šabac': (44.75, 19.69),
     'Šid': (45.13, 19.23), 'Štip': (41.74, 22.20),
+    # Small Serbian towns along the Niš-Preševo (E75) corridor, and German
+    # cities — added for the srbijatours.com diaspora-route scraper
+    # (Serbia <-> Germany long-haul coaches). German names are transliterated
+    # exactly as srbijatours.com displays them (Serbian-Latin phonetic
+    # spelling), not the German spelling, so they match trips.from_city/to_city.
+    'Aleksinac': (43.54, 21.70), 'Bujanovac': (42.46, 21.77), 'Paraćin': (43.86, 21.41),
+    'Preševo': (42.31, 21.65), 'Varvarin': (43.72, 21.35), 'Velika Plana': (44.34, 21.06),
+    'Vladičin Han': (42.70, 22.06), 'Ćuprija': (43.93, 21.37),
+    'Augsburg': (48.37, 10.90), 'Bamberg': (49.89, 10.89), 'Berlin': (52.52, 13.40),
+    'Bilefeld': (52.02, 8.53), 'Bremen': (53.08, 8.81), 'Diseldorf': (51.23, 6.77),
+    'Drezden': (51.05, 13.74), 'Duizburg': (51.43, 6.76), 'Esen': (51.46, 7.01),
+    'Frankfurt': (50.11, 8.68), 'Fridrihshafen': (47.65, 9.48), 'Fulda': (50.55, 9.68),
+    'Hamburg': (53.55, 10.00), 'Hanover': (52.37, 9.73), 'Kasel': (51.31, 9.50),
+    'Keln': (50.94, 6.96), 'Landsberg': (48.05, 10.88), 'Lindau': (47.55, 9.68),
+    'Manhajm': (49.49, 8.47), 'Memingen': (47.98, 10.18), 'Minhen': (48.14, 11.58),
+    'Nirnberg': (49.45, 11.08), 'Paderborn': (51.72, 8.75), 'Ravensburg': (47.78, 9.61),
+    'Regensburg': (49.02, 12.10), 'Rozenhajm': (47.86, 12.13), 'Ulm': (48.40, 9.99),
+    'Vircburg': (49.79, 9.93), 'Štutgart': (48.78, 9.18), 'Švajnfurt': (50.05, 10.24),
 }
 # Great-circle → road multiplier (Balkans terrain detours ~25% over straight line).
 _ROAD_FACTOR = 1.25
@@ -676,6 +694,7 @@ def _load_operators(conn: duckdb.DuckDBPyConnection) -> None:
         (14, 'Banbus', 'banbus', None, 'bus'),
         (15, 'Sirmiumbus', 'sirmiumbus', None, 'bus'),
         (16, 'Autoprevoz Kikinda', 'autoprevoz-kikinda', None, 'bus'),
+        (17, 'Srbija Tours International', 'srbija-tours-international', 'https://www.srbijatours.com', 'bus'),
     ]
     conn.executemany("INSERT INTO operators VALUES (?, ?, ?, ?, ?)", operators)
 
@@ -744,6 +763,19 @@ def _load_intercity(conn: duckdb.DuckDBPyConnection,
             t['_source'] = 'intl'
         all_trips.extend(intl_trips)
         print(f"  International trips: {len(intl_trips)}")
+
+    # Source 5: srbijatours.com — Serbia <-> Germany diaspora coaches.
+    # No price is published on the schedule page (only in their own booking
+    # flow), so every row has price_rsd=0 — same "Kupi" fallback path
+    # already handled for busticket4 rows with a missing fare.
+    srbijatours_path = RAW_DIR / 'srbijatours' / 'trips.json'
+    if srbijatours_path.exists():
+        with open(srbijatours_path, encoding='utf-8') as f:
+            srbijatours_trips = json.load(f)
+        for t in srbijatours_trips:
+            t['_source'] = 'srbijatours'
+        all_trips.extend(srbijatours_trips)
+        print(f"  srbijatours.com trips: {len(srbijatours_trips)}")
 
     if not all_trips:
         return

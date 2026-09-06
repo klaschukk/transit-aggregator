@@ -31,7 +31,10 @@ def test_every_route_city_has_a_centroid():
     # centroid is added, so distance backfill never silently regresses to 0.
     # (Checked against the live DB in CI is overkill; assert the known set here.)
     assert 'Beograd' in CITY_COORDS and 'Podgorica' in CITY_COORDS
-    # All listed coords are plausible lat/lon in/around the Balkans.
+    # Plausible lat/lon in/around the Balkans, widened west+north to also
+    # cover the srbijatours.com diaspora-route cities (Serbia <-> Germany
+    # long-haul coaches) added 2026-09 — lon 6 reaches Düsseldorf, lat 54
+    # reaches Hamburg/Bremen.
     for city, (lat, lon) in CITY_COORDS.items():
-        assert 35 <= lat <= 49, city
-        assert 12 <= lon <= 25, city
+        assert 35 <= lat <= 54, city
+        assert 6 <= lon <= 25, city

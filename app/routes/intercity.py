@@ -243,6 +243,22 @@ def route_detail(slug: str):
     price_min = min(prices) if prices else None
     price_max = max(prices) if prices else None
 
+    # "About this route" prose duration: prefer the real average trip
+    # duration over the distance/80km/h guess. That guess is fine for most
+    # domestic hops but was visibly wrong for the srbijatours.com diaspora
+    # routes — a 970 km Beograd-Minhen coach genuinely takes 15h15m (border
+    # crossings, rest stops), not the "12 sata" the 80 km/h formula claimed,
+    # contradicting the actual "15h 15min" shown two lines above it on the
+    # same page. Falls back to the old estimate only when no trip has a
+    # usable duration_min (e.g. a route with schedule but no timed data).
+    durations = [t['duration_min'] for t in trips if t.get('duration_min')]
+    if durations:
+        avg_duration_hours = round(sum(durations) / len(durations) / 60)
+    elif route.get('distance_km'):
+        avg_duration_hours = round(route['distance_km'] / 80)
+    else:
+        avg_duration_hours = None
+
     # Honest "still catchable today" scarcity: count departures left after the
     # current Serbia time. Only meaningful on the today tab; the template hides
     # it once it hits zero so we never show a stale "0 left" or a past time.
@@ -331,7 +347,8 @@ def route_detail(slug: str):
                            og_image_url=og_image_url,
                            page_context_json=page_context_json,
                            map_route_coords=map_route_coords,
-                           has_multiple_modes=has_multiple_modes)
+                           has_multiple_modes=has_multiple_modes,
+                           avg_duration_hours=avg_duration_hours)
 
 
 def _compose_far_itinerary(info: dict, lang: str):
