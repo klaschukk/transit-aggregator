@@ -65,6 +65,8 @@
       countEl.hidden = (visible === total);
       visibleEl.textContent = visible;
     }
+    var emptyEl = document.getElementById('filterEmpty');
+    if (emptyEl) emptyEl.hidden = (visible !== 0);
   }
 
   // Single-select chip group: highlight clicked, run setter, re-apply.

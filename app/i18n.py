@@ -1045,6 +1045,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'search.title': {'sr': 'Pretraga', 'en': 'Search', 'ru': 'Поиск'},
     'search.results_for': {'sr': 'Rezultati pretrage', 'en': 'Search results', 'ru': 'Результаты поиска'},
     'search.no_results': {'sr': 'Nema rezultata', 'en': 'No results', 'ru': 'Нет результатов'},
+    'route.filter_no_match': {
+        'sr': 'Nijedan polazak ne odgovara izabranim filterima.',
+        'en': 'No departures match your filters.',
+        'ru': 'Ни один рейс не соответствует выбранным фильтрам.',
+    },
 
     # ── Error pages ──
     'error.404_text': {

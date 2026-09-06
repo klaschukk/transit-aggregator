@@ -158,6 +158,9 @@
                      bt4_fallback_line_id=(_bt4_trip.bt4_line_id if _bt4_trip else None)) }}
       {% endfor %}
     </div>
+    <div id="filterEmpty" hidden>
+      {{ empty_state(icon='search', text=_('route.filter_no_match')) }}
+    </div>
   </div>
 </div>
 
@@ -453,6 +456,7 @@
   });
 
   function applyFilters() {
+    var visible = 0;
     cards.forEach(function(card) {
       var type = card.dataset.type || 'bus';
       var operator = card.dataset.operator || '';
@@ -465,8 +469,12 @@
       var opCb = document.querySelector('[data-operator="' + operator + '"]');
       if (opCb && !opCb.checked) opOk = false;
 
-      card.style.display = (typeOk && opOk) ? '' : 'none';
+      var show = typeOk && opOk;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
     });
+    var emptyEl = document.getElementById('filterEmpty');
+    if (emptyEl) emptyEl.hidden = (visible !== 0);
   }
 })();
 </script>

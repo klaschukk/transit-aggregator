@@ -102,6 +102,9 @@
                      bt4_fallback_line_id=(_bt4_trip.bt4_line_id if _bt4_trip else None)) }}
       {% endfor %}
     </div>
+    <div id="filterEmpty" hidden>
+      {{ empty_state(icon='search', text=_('route.filter_no_match')) }}
+    </div>
   </div>
 </div>
 
@@ -350,6 +353,8 @@
       countEl.hidden = (visible === total);
       visibleEl.textContent = visible;
     }
+    var emptyEl = document.getElementById('filterEmpty');
+    if (emptyEl) emptyEl.hidden = (visible !== 0);
   }
 
   /* ── Sort ── */
