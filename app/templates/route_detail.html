@@ -274,12 +274,26 @@
 </div>
 {% endif %}
 {% if operators_on_route|length > 1 %}
-<div class="time-chips" id="carrierFilter" aria-label="{{ _('filter.carrier') }}">
+{# Capped like the route/guide grids elsewhere (see destinations.html,
+   country_hub.html): a design review found this wall of chips — date
+   tabs + time-of-day + sort + mode + up to ~16 operator pills across
+   6+ rows — standing between a mobile visitor and the first trip card
+   on the site's highest-traffic page type. The "all" button is child 0
+   so it's never capped; up to 6 real carriers show, the rest are one
+   tap away. All still render in the HTML for crawlers/no-JS. #}
+<div class="time-chips" id="carrierFilter" aria-label="{{ _('filter.carrier') }}" data-visible-cap="7">
   <button class="time-chip time-chip--active" data-carrier="">{{ _('route.carrier_all') }}</button>
   {% for op in operators_on_route %}
-  <button class="time-chip" data-carrier="{{ op }}">{{ op }}</button>
+  <button class="time-chip" data-carrier="{{ op }}"{% if loop.index > 6 %} hidden{% endif %}>{{ op }}</button>
   {% endfor %}
 </div>
+{% if operators_on_route|length > 6 %}
+<div data-show-more-wrap>
+  <button class="btn btn--outline" type="button" data-show-more-for="carrierFilter">
+    {{ _('common.show_more') }}
+  </button>
+</div>
+{% endif %}
 {% endif %}
 <div class="trip-count" id="tripCount" hidden>
   {{ _('route.shown_of') }} <strong id="tripVisible">0</strong> {{ _('route.of') }} <strong>{{ trips|length }}</strong> {{ _('routes.departures') }}
