@@ -715,15 +715,24 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
 .trip-card__time--arrive { font-size: var(--text-base); color: var(--color-text-muted); min-width: 48px; text-align: right; }
 .trip-card__middle { flex: 1; display: flex; flex-direction: column; align-items: center; gap: var(--space-1); min-width: 0; }
 .trip-card__carrier {
-  height: 22px; padding: 0 var(--space-2-5);
+  height: 22px; line-height: 22px; padding: 0 var(--space-2-5);
   /* White-on-primary at 9–12px bold was 3.74:1. primary-dark clears AA. */
   background: var(--color-primary-dark);
   color: var(--color-bg);
   border-radius: var(--radius-pill);
   font-size: var(--text-xs);
   font-weight: 800;
-  display: inline-flex;
-  align-items: center;
+  /* Was inline-flex — text-overflow: ellipsis (set at the <640px/<480px
+     breakpoints below) silently fails to render on flex containers in
+     Chromium, so long carrier names ("Kavim Jedinstvo", "Srbija Voz")
+     hard-clipped mid-word into garbled text ("KAV IM JED") instead of
+     truncating with "…". inline-block + line-height restores the same
+     vertical centering (single text line, no icon in this badge) and
+     lets ellipsis actually work. */
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  vertical-align: middle;
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
