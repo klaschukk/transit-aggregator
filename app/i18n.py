@@ -4553,26 +4553,31 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Obaveštenje o kolačićima',
         'en': 'Cookie notice',
         'ru': 'Уведомление о cookies',
+        'bg': 'Известие за бисквитките',
     },
     'cookies.banner.text': {
         'sr': 'Koristimo kolačiće za osnovne funkcije (jezik, valuta, sačuvane rute) i anonimnu analitiku bez praćenja. Možete prihvatiti sve ili samo neophodne.',
         'en': 'We use cookies for essential features (language, currency, saved routes) and anonymous analytics without tracking. You can accept all or essentials only.',
         'ru': 'Мы используем cookies для базовых функций (язык, валюта, сохранённые маршруты) и анонимной аналитики без отслеживания. Можно принять всё или только необходимые.',
+        'bg': 'Използваме бисквитки за основни функции (език, валута, запазени маршрути) и анонимна статистика без проследяване. Можете да приемете всички или само необходимите.',
     },
     'cookies.banner.accept_all': {
         'sr': 'Prihvatam',
         'en': 'Accept all',
         'ru': 'Принять всё',
+        'bg': 'Приемам всички',
     },
     'cookies.banner.essential': {
         'sr': 'Samo neophodni',
         'en': 'Essentials only',
         'ru': 'Только необходимые',
+        'bg': 'Само необходимите',
     },
     'cookies.banner.more': {
         'sr': 'Više',
         'en': 'More',
         'ru': 'Подробнее',
+        'bg': 'Повече',
     },
 
     # ── Cookie Policy page ──
