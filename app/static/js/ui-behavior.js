@@ -7,7 +7,18 @@
    persists in `cookie_consent` (1 year). On "all" we dynamically append
    the Umami script so analytics resume without a reload. The /politika-
    kolacica/ page exposes a `.js-consent-reset` button that clears the
-   cookie so the banner returns on next navigation. */
+   cookie so the banner returns on next navigation.
+
+   Delayed behind Google Funding Choices' own consent dialog (ad-personalization
+   consent, configured in AdSense — not something this codebase renders or
+   controls) via its documented callbackQueue API: a design review found the
+   two consent surfaces firing independently and overlapping on mobile, one
+   floating card physically on top of this banner's filter-chip area. Waiting
+   for CONSENT_DATA_READY (fires once FC has decided whether it needs to show
+   a message, and after the user resolves it if so) means our own banner never
+   competes with theirs for the same screen space. A short fallback timeout
+   covers the case where googlefc never loads at all (ad blocker, consent
+   already resolved in a prior session, FC not configured for this region). */
 (function(){
   var KEY = 'cookie_consent';
   function readConsent(){
@@ -29,7 +40,16 @@
   }
   var banner = document.getElementById('cookieBanner');
   if (banner && !readConsent()) {
-    banner.setAttribute('data-visible', 'true');
+    var shown = false;
+    function showBanner(){
+      if (shown) return;
+      shown = true;
+      banner.setAttribute('data-visible', 'true');
+    }
+    window.googlefc = window.googlefc || {};
+    window.googlefc.callbackQueue = window.googlefc.callbackQueue || [];
+    window.googlefc.callbackQueue.push({ 'CONSENT_DATA_READY': showBanner });
+    setTimeout(showBanner, 4000); // fallback if googlefc never fires (blocked/absent)
     banner.addEventListener('click', function(ev){
       var btn = ev.target.closest('button[data-consent]');
       if (!btn) return;
