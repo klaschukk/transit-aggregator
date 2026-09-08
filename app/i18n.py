@@ -2767,6 +2767,16 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Расписание, цены билетов, перевозчики и время в пути. Сравните отправления и купите билет онлайн через партнёров. Бесплатно, без регистрации.',
         'bg': 'Разписание, цени на билетите, превозвачи и продължителност на пътуването. Сравнете тръгванията и купете билет онлайн през партньор. Безплатно, без регистрация.',
     },
+    # Same as meta_body but for routes with zero affiliate coverage (Union
+    # Ivkoni, srbijatours.com) — drops the "buy online via partner" claim
+    # that would otherwise be false for these, mirroring the on-page
+    # route.prose_buy / _primary_href gate.
+    'route_detail.meta_body_no_partner': {
+        'sr': 'Red vožnje, cene karata, prevoznici i trajanje putovanja. Besplatno, bez registracije.',
+        'en': 'Schedule, ticket prices, carriers and trip duration. Free, no registration required.',
+        'ru': 'Расписание, цены билетов, перевозчики и время в пути. Бесплатно, без регистрации.',
+        'bg': 'Разписание, цени на билетите, превозвачи и продължителност на пътуването. Безплатно, без регистрация.',
+    },
     'route.prose_distance': {
         'sr': 'Vožnja od {from_city} do {to_city} iznosi oko {km} km.',
         'en': 'The trip from {from_city} to {to_city} is about {km} km.',

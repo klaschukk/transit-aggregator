@@ -1,17 +1,20 @@
 <!DOCTYPE html>
-{% set _lang_html = {'sr':'sr','en':'en','ru':'ru'}[lang] %}
-{% set _og_locale = {'sr':'sr_RS','en':'en_US','ru':'ru_RU'}[lang] %}
+{% set _og_locales = {'sr':'sr_RS','en':'en_US','ru':'ru_RU','bg':'bg_BG'} %}
+{% set _lang_html = lang %}
+{% set _og_locale = _og_locales[lang] %}
 <html lang="{{ _lang_html }}">
 <head>
 <meta charset="UTF-8">
 <script>document.documentElement.className+=' js';</script>{# `js` flag → CSS below reveals .fade-in for no-JS visitors #}
-{# Steer a NEW FOREIGN visitor to English; Balkan/ex-YU browsers keep Serbian
-   (it's a Serbia-market site, so locals must land on Serbian). Search crawlers
-   are skipped by user-agent, so the Serbian version stays the indexed canonical
-   and SEO is untouched — this only steers real foreign users. The first language
+{# Steer a NEW FOREIGN visitor to English (or Bulgarian, for a bg-language
+   browser — real content now exists for Bulgaria/Greece routes, added
+   2026-09); Balkan/ex-YU browsers keep Serbian (it's a Serbia-market site,
+   so locals must land on Serbian). Search crawlers are skipped by
+   user-agent, so the Serbian version stays the indexed canonical and SEO
+   is untouched — this only steers real foreign users. The first language
    a visitor sees is remembered in a `lang` cookie, so manually switching back
    sticks and they are never redirected again. Reversible: delete this block. #}
-<script>(function(){try{var d=document,e=d.documentElement,Y=';path=/;max-age=31536000;samesite=Lax';if(/bot|crawl|spider|google|bing|yandex|baidu|slurp|duckduck|facebookexternalhit|headless|lighthouse|preview/i.test(navigator.userAgent||''))return;var L=(navigator.language||'').toLowerCase(),local=/^(sr|hr|bs|sl|mk|me|cnr)\b/.test(L);if(!/(?:^|;)\s*lang=/.test(d.cookie)&&(e.lang||'sr')==='sr'&&!local){d.cookie='lang=en'+Y;var p=location.pathname+location.search+location.hash;location.replace('/en'+(p==='/'?'/':p));return;}d.cookie='lang='+(e.lang||'sr')+Y;}catch(_){}})();</script>
+<script>(function(){try{var d=document,e=d.documentElement,Y=';path=/;max-age=31536000;samesite=Lax';if(/bot|crawl|spider|google|bing|yandex|baidu|slurp|duckduck|facebookexternalhit|headless|lighthouse|preview/i.test(navigator.userAgent||''))return;var L=(navigator.language||'').toLowerCase(),local=/^(sr|hr|bs|sl|mk|me|cnr)\b/.test(L),target=/^bg\b/.test(L)?'bg':'en';if(!/(?:^|;)\s*lang=/.test(d.cookie)&&(e.lang||'sr')==='sr'&&!local){d.cookie='lang='+target+Y;var p=location.pathname+location.search+location.hash;location.replace('/'+target+(p==='/'?'/':p));return;}d.cookie='lang='+(e.lang||'sr')+Y;}catch(_){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0d9488">
 <meta name="robots" content="{{ meta_robots }}">
@@ -26,9 +29,9 @@
 <meta name="description" content="{% block meta_description %}{{ _('meta.default_description') }}{% endblock %}">
 <meta name="author" content="Prevozni">
 <link rel="canonical" href="{{ canonical_url }}">
-<link rel="alternate" hreflang="sr" href="{{ hreflang_urls['sr'] }}">
-<link rel="alternate" hreflang="en" href="{{ hreflang_urls['en'] }}">
-<link rel="alternate" hreflang="ru" href="{{ hreflang_urls['ru'] }}">
+{% for l in supported_langs %}
+<link rel="alternate" hreflang="{{ l }}" href="{{ hreflang_urls[l] }}">
+{% endfor %}
 <link rel="alternate" hreflang="x-default" href="{{ hreflang_urls['x-default'] }}">
 <meta property="og:title" content="{{ self.title() }}">
 <meta property="og:description" content="{{ self.meta_description() }}">
@@ -37,7 +40,7 @@
 <meta property="og:site_name" content="Prevozni">
 <meta property="og:locale" content="{{ _og_locale }}">
 {%- for l in supported_langs if l != lang %}
-<meta property="og:locale:alternate" content="{{ {'sr':'sr_RS','en':'en_US','ru':'ru_RU'}[l] }}">
+<meta property="og:locale:alternate" content="{{ _og_locales[l] }}">
 {%- endfor %}
 {% set _og_url = og_image_url|default(config.BASE_URL ~ '/static/img/og-image.png') %}
 <meta property="og:image" content="{{ _og_url }}">
