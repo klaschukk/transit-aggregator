@@ -203,6 +203,15 @@
   {% endfor %}
 </div>
 
+{# The whole box is about buying online — on a route with zero affiliate
+   coverage (Union Ivkoni, srbijatours.com) there's nothing to buy here at
+   all, so showing it renders an empty action box: a header, an honest
+   "book ahead" nudge with nowhere to act on it, and a note that flatly
+   contradicts itself by claiming "purchase happens on partner websites"
+   right below an empty spot where the partner button should be. Hiding
+   the whole thing is both more honest and less clutter than a box with
+   no action in it. #}
+{% if _primary_href %}
 <div class="buy-ticket fade-in">
   <div class="buy-ticket__header">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20" aria-hidden="true"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2 2 2 0 010 4 2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 00-2-2 2 2 0 010-4 2 2 0 002-2V7a2 2 0 00-2-2H5z"/></svg>
@@ -222,7 +231,6 @@
   </p>
   {% endif %}
   <div class="buy-ticket__links">
-    {% if _primary_href %}
     <a href="{{ _primary_href }}" target="_blank" rel="noopener nofollow sponsored"
        class="buy-ticket__btn buy-ticket__btn--{{ _primary_partner }}"
        style="background: {{ _primary_color }};"
@@ -231,10 +239,10 @@
       {{ _primary_name }}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg>
     </a>
-    {% endif %}
   </div>
   <p class="buy-ticket__note">{{ _('buy.note') }}</p>
 </div>
+{% endif %}
 
 {% if trips %}
 
