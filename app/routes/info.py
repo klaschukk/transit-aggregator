@@ -621,6 +621,53 @@ _CITY_TO_COUNTRY: dict[str, str] = {
     for city in info['cities']
 }
 
+# country_hub()'s <title>/meta description used to hardcode "Autobus Srbija
+# {Country}" for every hub — correct while every hub's routes actually
+# originated in Serbia. Since ardatur.bg (added 2026-09-09) is scoped to
+# Bulgaria only, the nemacka/turska/ceska/madjarska/austrija hubs are
+# currently 100% Sofija/Plovdiv/Varna-origin routes with ZERO Serbia
+# connection (srbijatours.com's real Serbia->Germany routes exist but
+# publish no prices, so they're filtered out of this aggregate by
+# `t.price_rsd > 0` — see country_hub()). Claiming "Bus Serbia -> Germany"
+# on a page that's actually 100% Bulgaria->Germany is a false SERP snippet,
+# so the i18n key used for the title/meta prefix is picked dynamically
+# based on which country most of the shown routes actually originate from
+# (see _detect_home_country below). None = Serbia, the implicit default
+# home market that (by design) never appears as a _COUNTRY_HUBS entry
+# itself.
+_HOME_COUNTRY_I18N: dict[str | None, dict[str, str]] = {
+    None: {
+        'title_prefix': 'country.title_prefix',
+        'meta_prefix': 'country.meta_prefix',
+    },
+    'bugarska': {
+        'title_prefix': 'country.title_prefix_bg_anchor',
+        'meta_prefix': 'country.meta_prefix_bg_anchor',
+    },
+}
+
+
+def _detect_home_country(routes: list[dict], target_cities: tuple[str, ...]) -> str | None:
+    """Which country do most of this hub's routes actually originate from?
+
+    Tallies the non-target-country city on each route via _CITY_TO_COUNTRY
+    (None = unmapped = Serbia, the implicit home market). Falls back to
+    None (Serbia) whenever the dominant anchor isn't one we have dedicated
+    title/meta copy for, so a future source anchored in yet another country
+    degrades to the safe default instead of a KeyError or a half-translated
+    page.
+    """
+    tally: dict[str | None, int] = {}
+    for r in routes:
+        for city in (r['from_city'], r['to_city']):
+            if city not in target_cities:
+                slug = _CITY_TO_COUNTRY.get(city)
+                tally[slug] = tally.get(slug, 0) + 1
+    if not tally:
+        return None
+    home = max(tally, key=tally.get)
+    return home if home in _HOME_COUNTRY_I18N else None
+
 
 def country_hub_for_city(city_name: str) -> dict | None:
     """Return {'slug', 'name'} of the country hub containing this city, or None.
@@ -715,6 +762,9 @@ def country_hub(country: str):
     from app import analytics_db
     country_reviews, country_reviews_agg = analytics_db.review_block(review_slug)
 
+    home_country = _detect_home_country(routes, info['cities'])
+    home_i18n = _HOME_COUNTRY_I18N[home_country]
+
     from flask import current_app
     og_image_url = f"{current_app.config['BASE_URL']}/og/country/{country}.png"
     return render_template(
@@ -735,6 +785,8 @@ def country_hub(country: str):
         reviews=country_reviews,
         reviews_agg=country_reviews_agg,
         og_image_url=og_image_url,
+        home_title_key=home_i18n['title_prefix'],
+        home_meta_key=home_i18n['meta_prefix'],
     )
 
 

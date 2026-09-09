@@ -1676,16 +1676,37 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Autobus Srbija',
         'en': 'Bus Serbia',
         'ru': 'Автобус Сербия',
+        'bg': 'Автобус Сърбия',
+    },
+    # Picked instead of country.title_prefix when a hub's routes are
+    # actually dominated by a non-Serbia origin (currently: ardatur.bg's
+    # Bulgaria-only routes feeding nemacka/turska/ceska/madjarska/austrija —
+    # see _detect_home_country in app/routes/info.py). Without this, those
+    # 5 hubs' <title>/meta falsely claimed "Bus Serbia -> Germany" etc. on
+    # a page that's 100% Bulgaria-origin.
+    'country.title_prefix_bg_anchor': {
+        'sr': 'Autobus Bugarska',
+        'en': 'Bus Bulgaria',
+        'ru': 'Автобус Болгария',
+        'bg': 'Автобус България',
     },
     'country.title_suffix': {
         'sr': 'raspored i cene',
         'en': 'schedule and prices',
         'ru': 'расписание и цены',
+        'bg': 'разписание и цени',
     },
     'country.meta_prefix': {
         'sr': 'Red vožnje autobusa iz Srbije za',
         'en': 'Bus schedule from Serbia to',
         'ru': 'Расписание автобусов из Сербии в',
+        'bg': 'Разписание на автобуси от Сърбия за',
+    },
+    'country.meta_prefix_bg_anchor': {
+        'sr': 'Red vožnje autobusa iz Bugarske za',
+        'en': 'Bus schedule from Bulgaria to',
+        'ru': 'Расписание автобусов из Болгарии в',
+        'bg': 'Разписание на автобуси от България за',
     },
     'country.meta_routes': {'sr': 'ruta', 'en': 'routes', 'ru': 'маршрутов'},
     'country.meta_trips': {'sr': 'polazaka', 'en': 'departures', 'ru': 'отправлений'},

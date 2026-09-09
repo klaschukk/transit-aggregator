@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('country.title_prefix') }} {{ country_name }} — {{ _('country.title_suffix') }} {{ current_year }} | Prevozni{% endblock %}
-{% block meta_description %}{{ _('country.meta_prefix') }} {{ country_name }}: {{ total_routes }} {{ _('country.meta_routes') }}, {{ total_trips }} {{ _('country.meta_trips') }}, {{ cities|length }} {{ _('country.meta_cities') }}{% if min_price_rsd %}, {{ _('route_detail.meta_from')|lower }} {{ min_price_rsd }} RSD{% endif %}.{% if reviews_agg and reviews_agg.n and reviews_agg.n >= 5 %} {{ reviews_agg.avg }}★ ({{ reviews_agg.n }}).{% endif %} {{ _('country.meta_cta') }}{% endblock %}
+{% block title %}{{ _(home_title_key) }} {{ country_name }} — {{ _('country.title_suffix') }} {{ current_year }} | Prevozni{% endblock %}
+{% block meta_description %}{{ _(home_meta_key) }} {{ country_name }}: {{ total_routes }} {{ _('country.meta_routes') }}, {{ total_trips }} {{ _('country.meta_trips') }}, {{ cities|length }} {{ _('country.meta_cities') }}{% if min_price_rsd %}, {{ _('route_detail.meta_from')|lower }} {{ min_price_rsd }} RSD{% endif %}.{% if reviews_agg and reviews_agg.n and reviews_agg.n >= 5 %} {{ reviews_agg.avg }}★ ({{ reviews_agg.n }}).{% endif %} {{ _('country.meta_cta') }}{% endblock %}
 
 {% block head_extra %}
 <script type="application/ld+json">
@@ -16,8 +16,8 @@
 {
   "@context": "https://schema.org",
   "@type": "Product",
-  "name": "{{ _('country.title_prefix') }} {{ country_name }}",
-  "description": "{{ _('country.meta_prefix') }} {{ country_name }}",
+  "name": "{{ _(home_title_key) }} {{ country_name }}",
+  "description": "{{ _(home_meta_key) }} {{ country_name }}",
   "aggregateRating": {
     "@type": "AggregateRating",
     "ratingValue": {{ reviews_agg.avg }},
@@ -65,7 +65,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
     </button>
     <button type="button" class="share-btn" data-share-current
-            data-share-title="{{ _('country.title_prefix') }} {{ country_name }} | Prevozni"
+            data-share-title="{{ _(home_title_key) }} {{ country_name }} | Prevozni"
             aria-label="{{ _('a11y.share') }}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true">
         <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
