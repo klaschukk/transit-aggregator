@@ -505,6 +505,13 @@ def create_app(config_name: str | None = None) -> Flask:
     # Error handlers
     @app.errorhandler(404)
     def not_found(e):
+        # Without this, inject_i18n()'s context processor defaults
+        # meta_robots to the indexable "index, follow" — a hard 404 has no
+        # unique content to index, so it was shipping <meta name="robots"
+        # content="index, follow"> on every not-found page (Google mostly
+        # ignores meta robots on a true 4xx, but other crawlers/SEO
+        # auditors don't, and it's simply wrong either way).
+        g.meta_robots = 'noindex, follow'
         return render_template('404.html', status_code=404), 404
 
     @app.errorhandler(410)
@@ -512,6 +519,7 @@ def create_app(config_name: str | None = None) -> Flask:
         # Signal permanent removal so Google drops the URL faster than 404.
         # The template is shared with 404, so pass the code through rather
         # than let the page announce "404" over a 410 response.
+        g.meta_robots = 'noindex, follow'
         return render_template('404.html', status_code=410), 410
 
     @app.errorhandler(500)
