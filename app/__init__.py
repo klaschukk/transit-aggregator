@@ -278,6 +278,15 @@ def create_app(config_name: str | None = None) -> Flask:
         import time as _time
         review_loaded_at = f'{_time.time():.3f}'
 
+        # Single source of truth for the "see-also" country cross-link
+        # widget (country_hub.html, carriers_index.html) — was previously
+        # duplicated as two separately-hardcoded (slug, name) lists in
+        # those templates, both of which silently missed every country
+        # hub added after they were written (grcka/bugarska missing from
+        # one, nemacka/turska/ceska/madjarska/austrija missing from both).
+        from app.routes.info import _COUNTRY_HUBS as _country_hubs
+        all_country_hubs = [(slug, info['name']) for slug, info in _country_hubs.items()]
+
         # `ab_variant` is registered as a Jinja global in create_app
         # (search for `_ab_variant_global`). Do NOT shadow it from this
         # context_processor — context-processor returns override
@@ -302,6 +311,7 @@ def create_app(config_name: str | None = None) -> Flask:
             'affiliate_offers': affiliate_offers,
             'bt4_checkout_url': _bt4_checkout_url,
             '_review_loaded_at': review_loaded_at,
+            'all_country_hubs': all_country_hubs,
         }
 
     # Register blueprints

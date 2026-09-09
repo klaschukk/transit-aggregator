@@ -136,15 +136,7 @@
 <section class="see-also">
   <h2 class="see-also__title">{{ _('see_also.country_network') }}</h2>
   <div class="see-also__list">
-    {% for slug, name in [
-      ('crna-gora','Crna Gora'),
-      ('bosna','Bosna i Hercegovina'),
-      ('hrvatska','Hrvatska'),
-      ('makedonija','Severna Makedonija'),
-      ('slovenija','Slovenija'),
-      ('grcka','Grčka'),
-      ('bugarska','Bugarska'),
-    ] %}
+    {% for slug, name in all_country_hubs %}
     <a href="{{ lang_prefix }}/destinacije/{{ slug }}/" class="see-also__link">{{ name }}</a>
     {% endfor %}
     <a href="{{ lang_prefix }}/destinacije/" class="see-also__link">{{ _('nav.destinations') }}</a>

@@ -576,6 +576,39 @@ _COUNTRY_HUBS: dict[str, dict] = {
         'name': 'Bugarska',
         'cities': ('Sofia', 'Sofija', 'Plovdiv', 'Varna', 'Burgas'),
     },
+    # Added 2026-09-09: srbijatours.com (Germany diaspora) + ardatur.bg
+    # (Turkey/Czechia/Hungary/Austria) brought real routes to these
+    # countries but never got a hub entry, so /destinacije/ never linked
+    # them and route_detail's "Sve rute za {Country}" cross-link silently
+    # never fired for any of these cities. City lists match
+    # data/pipelines/build_db.py's CITY_COORDS / routes.from_city|to_city
+    # spelling exactly (transliterated Latin names, not native spelling).
+    'nemacka': {
+        'name': 'Nemačka',
+        'cities': ('Augsburg', 'Bamberg', 'Berlin', 'Bilefeld', 'Bremen',
+                   'Diseldorf', 'Drezden', 'Duizburg', 'Esen', 'Frankfurt',
+                   'Fridrihshafen', 'Fulda', 'Hamburg', 'Hanover', 'Kasel',
+                   'Keln', 'Landsberg', 'Lindau', 'Manhajm', 'Memingen',
+                   'Minhen', 'Nirnberg', 'Paderborn', 'Ravensburg',
+                   'Regensburg', 'Rozenhajm', 'Ulm', 'Vircburg',
+                   'Štutgart', 'Švajnfurt'),
+    },
+    'turska': {
+        'name': 'Turska',
+        'cities': ('Istanbul',),
+    },
+    'ceska': {
+        'name': 'Češka',
+        'cities': ('Prag',),
+    },
+    'madjarska': {
+        'name': 'Mađarska',
+        'cities': ('Budimpešta',),
+    },
+    'austrija': {
+        'name': 'Austrija',
+        'cities': ('Beč',),
+    },
 }
 
 
