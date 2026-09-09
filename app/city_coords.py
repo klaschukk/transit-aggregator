@@ -58,6 +58,10 @@ CITY_COORDS: dict[str, tuple[float, float]] = {
     'Plovdiv': (42.15, 24.75), 'Burgas': (42.50, 27.47), 'Varna': (43.21, 27.91),
     'Stara Zagora': (42.43, 25.63), 'Pleven': (43.41, 24.62), 'Ruse': (43.85, 25.97),
     'Blagoevgrad': (42.02, 23.09), 'Veliko Tarnovo': (43.08, 25.62),
+    # ArdaTur (ardatur.bg) — Bulgaria <-> wider Europe/Turkey, added
+    # 2026-09-09. Only the 3 not already covered by an earlier source.
+    # Kept in sync with data/pipelines/build_db.py's CITY_COORDS.
+    'Istanbul': (41.01, 28.98), 'Prag': (50.08, 14.44), 'Beč': (48.21, 16.37),
 }
 
 

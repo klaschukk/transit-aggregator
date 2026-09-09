@@ -36,7 +36,8 @@ def test_every_route_city_has_a_centroid():
     # long-haul coaches) added 2026-09 — lon 6 reaches Düsseldorf, lat 54
     # reaches Hamburg/Bremen — and widened east to cover the
     # union-ivkoni.com Bulgaria cities added the same week — lon 28
-    # reaches Varna/Burgas on the Black Sea coast.
+    # reaches Varna/Burgas on the Black Sea coast — and widened once more
+    # for ardatur.bg's Istanbul (lon ~29).
     for city, (lat, lon) in CITY_COORDS.items():
         assert 35 <= lat <= 54, city
-        assert 6 <= lon <= 28, city
+        assert 6 <= lon <= 29, city

@@ -131,6 +131,9 @@ CITY_COORDS: dict[str, tuple[float, float]] = {
     'Plovdiv': (42.15, 24.75), 'Burgas': (42.50, 27.47), 'Varna': (43.21, 27.91),
     'Stara Zagora': (42.43, 25.63), 'Pleven': (43.41, 24.62), 'Ruse': (43.85, 25.97),
     'Blagoevgrad': (42.02, 23.09), 'Veliko Tarnovo': (43.08, 25.62),
+    # ArdaTur (ardatur.bg) — Bulgaria <-> wider Europe/Turkey, added
+    # 2026-09-09. Only the 3 not already covered by an earlier source.
+    'Istanbul': (41.01, 28.98), 'Prag': (50.08, 14.44), 'Beč': (48.21, 16.37),
 }
 # Great-circle → road multiplier (Balkans terrain detours ~25% over straight line).
 _ROAD_FACTOR = 1.25
@@ -702,6 +705,7 @@ def _load_operators(conn: duckdb.DuckDBPyConnection) -> None:
         (16, 'Autoprevoz Kikinda', 'autoprevoz-kikinda', None, 'bus'),
         (17, 'Srbija Tours International', 'srbija-tours-international', 'https://www.srbijatours.com', 'bus'),
         (18, 'Union Ivkoni', 'union-ivkoni', 'https://www.union-ivkoni.com', 'bus'),
+        (19, 'ArdaTur', 'ardatur', 'https://ardatur.bg', 'bus'),
     ]
     conn.executemany("INSERT INTO operators VALUES (?, ?, ?, ?, ?)", operators)
 
@@ -796,6 +800,20 @@ def _load_intercity(conn: duckdb.DuckDBPyConnection,
             t['_source'] = 'ivkoni'
         all_trips.extend(ivkoni_trips)
         print(f"  union-ivkoni.com trips: {len(ivkoni_trips)}")
+
+    # Source 7: ardatur.bg — Bulgaria <-> wider Europe/Turkey. Scoped to
+    # BG-international only (Sofia/Plovdiv/Varna as origins); BG-domestic
+    # is already union-ivkoni's job. Adds destinations neither existing
+    # source has (Istanbul, Prague, Budapest, Vienna) plus a second real
+    # operator's own departures/prices on Athens/Thessaloniki/Munich/Berlin.
+    ardatur_path = RAW_DIR / 'ardatur' / 'trips.json'
+    if ardatur_path.exists():
+        with open(ardatur_path, encoding='utf-8') as f:
+            ardatur_trips = json.load(f)
+        for t in ardatur_trips:
+            t['_source'] = 'ardatur'
+        all_trips.extend(ardatur_trips)
+        print(f"  ardatur.bg trips: {len(ardatur_trips)}")
 
     if not all_trips:
         return
