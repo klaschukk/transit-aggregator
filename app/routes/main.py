@@ -1660,6 +1660,19 @@ def robots():
         'Allow: /',
         '',
         'Disallow: /api/',
+        # Narrow allow-list carved out of the blanket /api/ block above —
+        # these are read-only GETs that feed live data into already-indexed
+        # pages (ETA badges, map pins). robots.txt precedence is by most
+        # specific match, so these override the /api/ Disallow for just
+        # these paths; every POST/webhook/token endpoint under /api/ stays
+        # blocked. Letting Googlebot's renderer actually fetch these (it was
+        # hitting the blanket block) doesn't expose anything a real
+        # browser can't already reach — robots.txt was never doing access
+        # control here, just crawl guidance.
+        'Allow: /api/stop-arrivals',
+        'Allow: /api/city-stops',
+        'Allow: /api/cities',
+        'Allow: /api/route-geometry',
         'Disallow: /admin/',
         'Disallow: /health',
         # NOTE: /pretraga/ (search results) is intentionally NOT disallowed.
