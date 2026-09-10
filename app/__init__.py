@@ -6,7 +6,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-from flask import Flask, render_template, request, g, abort, make_response
+from flask import Flask, render_template, request, g, abort, make_response, redirect
 from config import config_map
 from .i18n import get_text, SUPPORTED_LANGS, DEFAULT_LANG
 from .slug import transliterate_cyrillic_serbian
@@ -89,6 +89,25 @@ def create_app(config_name: str | None = None) -> Flask:
         release=_ASSET_VERSION,
         traces_sample_rate=app.config.get('SENTRY_TRACES_SAMPLE_RATE', 0.1),
     )
+
+    # ── www -> apex host redirect ──────────────────────────────────────
+    # Cloudflare/nginx answer both prevozni.com and www.prevozni.com with
+    # the identical origin response — no redirect, no canonical host
+    # enforcement anywhere before this. Google was crawling www.* as a
+    # fully separate, uncanonicalized copy of the whole site (35.7K of
+    # the last 90 days' crawl requests went to the www host per GSC Crawl
+    # stats, alongside 295K on the apex) — found 2026-09-10 investigating
+    # slow post-outage traffic recovery. First before_request so it
+    # short-circuits everything else (i18n detection, DB-ready check,
+    # A/B cookie logic) for the ~10% of crawl hits that land here.
+    @app.before_request
+    def _redirect_www_to_apex():
+        host = request.host.split(':', 1)[0]  # strip a dev-server port, if any
+        if host == 'www.prevozni.com':
+            target = f'https://prevozni.com{request.path}'
+            if request.query_string:
+                target += '?' + request.query_string.decode('utf-8')
+            return redirect(target, code=301)
 
     # ── A/B framework: surface the per-browser ab_id on flask.g ────────
     # Cookie is only written back (in after_request) when at least one

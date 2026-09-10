@@ -483,3 +483,23 @@ def test_robots_still_allows_search_engines(client):
     assert "Allow: /" in tail
     for path in ("/api/", "/admin/", "/health"):
         assert f"Disallow: {path}" in tail
+
+
+def test_www_host_redirects_to_apex(client):
+    """www.prevozni.com served the identical page with no redirect — an
+    uncanonicalized duplicate host Google was crawling separately (35.7K of
+    90 days' crawl requests per GSC Crawl stats). Path and query must
+    survive the hop, scheme must be forced to https regardless of how the
+    request arrived."""
+    resp = client.get("/rute/beograd-novi-sad/?dan=1",
+                       headers={"Host": "www.prevozni.com"})
+    assert resp.status_code == 301
+    assert resp.headers["Location"] == "https://prevozni.com/rute/beograd-novi-sad/?dan=1"
+
+
+def test_apex_host_not_redirected(client):
+    """Sanity check the redirect is host-scoped, not blanket — the apex
+    domain itself (and any other Host, e.g. the test client's default)
+    must render normally, not loop-redirect."""
+    resp = client.get("/", headers={"Host": "prevozni.com"})
+    assert resp.status_code == 200
