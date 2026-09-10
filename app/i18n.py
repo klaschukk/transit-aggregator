@@ -1715,6 +1715,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Uporedite cene i kupite kartu. Besplatno.',
         'en': 'Compare prices, buy tickets. Free.',
         'ru': 'Сравните цены, купите билет. Бесплатно.',
+        'bg': 'Сравнете цени, купете билет. Безплатно.',
     },
     'country.h1': {
         'sr': 'Autobuske rute —',
@@ -2782,21 +2783,26 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Автобусный маршрут',
         'bg': 'Автобусен маршрут',
     },
+    # Shortened 2026-09-10: with the dynamic prefix (city names, km,
+    # trip_count, price), the old ~140-char body pushed ~31% of a random
+    # 200-route sample past Google's ~160-char SERP snippet truncation —
+    # the CTA was routinely cut off mid-sentence. Reuses country.meta_cta's
+    # established shorter phrasing instead of inventing new copy.
     'route_detail.meta_body': {
-        'sr': 'Red vožnje, cene karata, prevoznici i trajanje putovanja. Uporedite polaske i kupite kartu online preko partnera. Besplatno, bez registracije.',
-        'en': 'Schedule, ticket prices, carriers and trip duration. Compare departures and buy a ticket online via partners. Free, no registration required.',
-        'ru': 'Расписание, цены билетов, перевозчики и время в пути. Сравните отправления и купите билет онлайн через партнёров. Бесплатно, без регистрации.',
-        'bg': 'Разписание, цени на билетите, превозвачи и продължителност на пътуването. Сравнете тръгванията и купете билет онлайн през партньор. Безплатно, без регистрация.',
+        'sr': 'Red vožnje, cene karata, prevoznici i trajanje putovanja. Uporedite cene i kupite kartu. Besplatno.',
+        'en': 'Schedule, ticket prices, carriers and trip duration. Compare prices, buy tickets. Free.',
+        'ru': 'Расписание, цены билетов, перевозчики и время в пути. Сравните цены, купите билет. Бесплатно.',
+        'bg': 'Разписание, цени на билетите, превозвачи и продължителност на пътуването. Сравнете цени, купете билет. Безплатно.',
     },
     # Same as meta_body but for routes with zero affiliate coverage (Union
     # Ivkoni, srbijatours.com) — drops the "buy online via partner" claim
     # that would otherwise be false for these, mirroring the on-page
     # route.prose_buy / _primary_href gate.
     'route_detail.meta_body_no_partner': {
-        'sr': 'Red vožnje, cene karata, prevoznici i trajanje putovanja. Besplatno, bez registracije.',
-        'en': 'Schedule, ticket prices, carriers and trip duration. Free, no registration required.',
-        'ru': 'Расписание, цены билетов, перевозчики и время в пути. Бесплатно, без регистрации.',
-        'bg': 'Разписание, цени на билетите, превозвачи и продължителност на пътуването. Безплатно, без регистрация.',
+        'sr': 'Red vožnje, cene karata, prevoznici i trajanje putovanja. Besplatno.',
+        'en': 'Schedule, ticket prices, carriers and trip duration. Free.',
+        'ru': 'Расписание, цены билетов, перевозчики и время в пути. Бесплатно.',
+        'bg': 'Разписание, цени на билетите, превозвачи и продължителност на пътуването. Безплатно.',
     },
     'route.prose_distance': {
         'sr': 'Vožnja od {from_city} do {to_city} iznosi oko {km} km.',
