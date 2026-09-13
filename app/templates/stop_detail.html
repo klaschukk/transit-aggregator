@@ -240,17 +240,36 @@
 {% block scripts %}
 {% if stop.lat and stop.lon %}
 <script>
-/* Mapbox GL JS for stop map — LCP candidate, load immediately via async JS. */
+/* Mapbox GL JS lazy-loader for stop map (IntersectionObserver-gated) — same
+   strategy as line_detail.html. Was "load immediately, it's the LCP
+   candidate" from when this map was the page hero; it was demoted below the
+   title/stats strip (see the stop-hero comment above) but the eager loader
+   never followed, so every stop page paid Mapbox's ~300 KB / 2s+ CPU cost
+   up front for a map that's no longer what LCP needs first. Live PageSpeed
+   run confirmed it: mobile LCP 11.8s, worse than line_detail's lazy 10.8s. */
 (function() {
   var lat = {{ stop.lat }}, lon = {{ stop.lon }};
-  var css = document.createElement('link');
-  css.rel = 'stylesheet'; css.href = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css';
-  css.media = 'print'; css.onload = function(){ this.media = 'all'; };
-  document.head.appendChild(css);
-  var js = document.createElement('script');
-  js.src = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';
-  js.async = true;
-  js.onload = function() {
+  var mapEl = document.getElementById('stopMap');
+  if (!mapEl) return;
+  var MB_CSS = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css';
+  var MB_JS  = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';
+  var loaded = false;
+
+  function loadMapbox() {
+    if (loaded) return; loaded = true;
+    var css = document.createElement('link'); css.rel = 'stylesheet'; css.href = MB_CSS;
+    document.head.appendChild(css);
+    var js = document.createElement('script'); js.src = MB_JS; js.onload = initMap;
+    document.head.appendChild(js);
+  }
+
+  if (!('IntersectionObserver' in window)) { loadMapbox(); return; }
+  var io = new IntersectionObserver(function(entries) {
+    if (entries.some(function(e){ return e.isIntersecting; })) { io.disconnect(); loadMapbox(); }
+  }, { rootMargin: '200px' });
+  io.observe(mapEl);
+
+  function initMap() {
     if (typeof mapboxgl === 'undefined') return;
     mapboxgl.accessToken = '{{ config.MAPBOX_TOKEN }}';
     var map = new mapboxgl.Map({
@@ -267,8 +286,7 @@
       + 'box-shadow:0 2px 8px rgba(13,148,136,.4);';
     new mapboxgl.Marker({ element: el, anchor: 'center' })
       .setLngLat([lon, lat]).addTo(map);
-  };
-  document.head.appendChild(js);
+  }
 })();
 </script>
 {% endif %}
