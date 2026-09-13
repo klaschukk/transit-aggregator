@@ -30,8 +30,9 @@
       </div>
       <div class="lang-pill" role="group" aria-label="{{ _('a11y.language_switcher') }}">
         {%- set _clean = request.path | replace(lang_prefix, '', 1) if lang_prefix else request.path -%}
+        {%- set _lang_names = {'sr': 'Srpski', 'en': 'English', 'ru': 'Русский', 'bg': 'Български'} -%}
         {%- for l in supported_langs -%}
-        <a href="{{ lang_url(_clean, l) }}" class="lang-pill__item{% if l == lang %} lang-pill__item--active{% endif %}"{% if l == lang %} aria-current="true"{% endif %} lang="{{ l }}" hreflang="{{ l }}">{{ l|upper }}</a>
+        <a href="{{ lang_url(_clean, l) }}" class="lang-pill__item{% if l == lang %} lang-pill__item--active{% endif %}"{% if l == lang %} aria-current="true"{% endif %} lang="{{ l }}" hreflang="{{ l }}" aria-label="{{ _lang_names.get(l, l|upper) }}">{{ l|upper }}</a>
         {%- endfor -%}
       </div>
     </nav>
