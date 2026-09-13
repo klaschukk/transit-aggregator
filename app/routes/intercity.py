@@ -386,6 +386,25 @@ def _compose_far_itinerary(info: dict, lang: str):
     return data
 
 
+def _known_city_slugs() -> set[str]:
+    """Every city slug that could plausibly back a real /voznja/ pair —
+    a domestic/international route endpoint or a far-destination AI
+    guide target. The URL pattern <from>-do-<to> accepts any two words,
+    so a slug outside this set has zero chance of ever getting real
+    content; there's nothing to preserve by keeping it a 200 (see
+    city_pair below, which 404s when NEITHER side matches)."""
+    rows_from = cached_query(
+        "SELECT DISTINCT from_city_slug AS slug FROM routes", ttl=21600,
+    ) if db_ready() else []
+    rows_to = cached_query(
+        "SELECT DISTINCT to_city_slug AS slug FROM routes", ttl=21600,
+    ) if db_ready() else []
+    slugs = {r['slug'] for r in rows_from + rows_to if r.get('slug')}
+    from app.ai_compose import FAR_DESTINATIONS
+    slugs.update(FAR_DESTINATIONS.keys())
+    return slugs
+
+
 @intercity_bp.route('/voznja/<from_city>-do-<to_city>/')
 def city_pair(from_city: str, to_city: str):
     # Canonical redirect: uppercase or cyrillic URL → lowercase Latin.
@@ -396,6 +415,15 @@ def city_pair(from_city: str, to_city: str):
             url_for('intercity.city_pair', from_city=from_norm, to_city=to_norm),
             code=301,
         )
+
+    # Junk guard: neither side names a place we track anywhere (domestic/
+    # international route endpoint or far-destination guide target) — a
+    # typo, a bot probe, or a nonsense combination. Real near-misses keep
+    # exactly one recognisable side and stay reachable as thin/noindex or
+    # a far guide below; only the zero-signal combination 404s.
+    known = _known_city_slugs()
+    if known and from_city not in known and to_city not in known:
+        abort(404)
 
     route = query_one("""
         SELECT r.id, r.slug, r.from_city, r.to_city, r.distance_km, r.type,

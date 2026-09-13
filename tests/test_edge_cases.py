@@ -217,8 +217,10 @@ def test_city_case_sensitive(client):
 
 
 def test_city_pair_nonexistent(client):
+    # Neither side names a place we track anywhere (route endpoint or far
+    # guide target) — junk guard 404s it instead of an eternal thin 200.
     resp = client.get("/voznja/mars-do-jupiter/")
-    assert resp.status_code == 200  # renders empty page, not 404
+    assert resp.status_code == 404
     assert "Traceback" not in resp.data.decode()
 
 

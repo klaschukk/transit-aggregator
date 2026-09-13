@@ -57,8 +57,12 @@ def test_voznja_hreflang_matches_canonical(client):
 
 def test_pair_without_route_self_references(client):
     """A pair with no backing route row has no owner to fold onto, so it must
-    keep self-referencing (not emit a broken /rute/ canonical)."""
-    html = client.get("/voznja/nonexistentcity-do-nowhereville/").data.decode()
+    keep self-referencing (not emit a broken /rute/ canonical).
+
+    One side (beograd) must be a real, known city — a pair where NEITHER
+    side is recognised anywhere 404s instead (see test_edge_cases.py::
+    test_city_pair_nonexistent), which isn't what this test exercises."""
+    html = client.get("/voznja/beograd-do-nowhereville/").data.decode()
     canon = _canonical(html)
     if canon is not None:
         assert "/voznja/" in canon
