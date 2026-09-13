@@ -2873,11 +2873,6 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'en': 'Line map, all stops and live arrivals.',
         'ru': 'Карта линии, все остановки и прибытия онлайн.',
     },
-    'stop_detail.title_stop_city': {
-        'sr': 'red vožnje i linije',
-        'en': 'schedule and lines',
-        'ru': 'расписание и линии',
-    },
     'stop_detail.meta_eta': {
         'sr': 'Sve linije, prvi i poslednji polazak, uživo ETA na karti.',
         'en': 'All lines, first and last departure, live ETA on the map.',
@@ -3014,6 +3009,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Stajalište',
         'en': 'Stop',
         'ru': 'Остановка',
+    },
+    'stop_detail.title_suffix': {
+        'sr': 'red vožnje',
+        'en': 'schedule',
+        'ru': 'расписание',
     },
     'stop_detail.meta_schedule': {
         'sr': 'red vožnje i polasci.',
