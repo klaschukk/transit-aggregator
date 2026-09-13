@@ -14,6 +14,22 @@
 - Общение: **русский**
 - Код, коммиты, комментарии: **английский**
 
+## Дисциплина изменений
+
+Перед тем как считать любое изменение готовым, без исключений:
+
+- `pytest` — весь набор зелёный (сейчас 1116+ тестов)
+- правка CSS → `scripts/minify_css.py` (прод отдаёт `dist/*.css`, bare
+  `systemctl restart` бандл не пересобирает)
+- живой health-check после каждого изменения — команды в
+  «Инфраструктура» ниже, не считать готовым по логам/статике
+- коммит — только локально, с `Co-Authored-By`; **пуш в GitLab/origin
+  делает только владелец руками**, сессии не пушат
+- другие проекты на этом же боксе (popaj, valocheck, flight-punctuality)
+  не трогать — подробности там же, в «Инфраструктура»
+- не фабриковать данные расписаний/цен: источник не публикует маршрут —
+  пропустить его, не гадать
+
 ## Стек
 
 | Слой | Технология |
@@ -101,7 +117,7 @@ transit/
 │   ├── run_enrich_night.sh  ← cron 3:00 AM (лёгкий ночной пайплайн)
 │   └── nightly_refresh.sh   ← полный пайплайн, только ВРУЧНУЮ (в cron его нет)
 ├── logs/                    ← access.log, error.log
-└── tests/                   ← pytest (876 тестов)
+└── tests/                   ← pytest (1116+ тестов)
 ```
 
 ## БД (DuckDB)
@@ -321,7 +337,7 @@ minify CSS → `systemctl restart prevozni` → проверка `/health == 200
 - [x] ETA на остановках (GTFS + headway fallback)
 - [x] nginx + Cloudflare + gunicorn + gzip + healthcheck
 - [x] Connection pooling + TTL cache (0.04s response)
-- [x] 876 тестов (pytest)
+- [x] 1116+ тестов (pytest)
 - [x] Домен prevozni.com + Cloudflare SSL
 - [x] Umami analytics
 - [x] Telegram bot notifications (контакт-форма)
