@@ -95,6 +95,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Pregledaj sve',
         'en': 'Browse all',
         'ru': 'Смотреть все',
+        'bg': 'Разгледай всички',
     },
     'browse.routes': {
         'sr': 'Sve rute',
@@ -212,21 +213,25 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Politika privatnosti',
         'en': 'Privacy Policy',
         'ru': 'Политика конфиденциальности',
+        'bg': 'Политика за поверителност',
     },
     'privacy.intro': {
         'sr': 'Prevozni poštuje vašu privatnost. Ova stranica objašnjava koje podatke prikupljamo i kako ih koristimo.',
         'en': 'Prevozni respects your privacy. This page explains what data we collect and how we use it.',
         'ru': 'Prevozni уважает вашу конфиденциальность. Здесь описано, какие данные мы собираем и как используем.',
+        'bg': 'Prevozni уважава вашата поверителност. Тази страница обяснява какви данни събираме и как ги използваме.',
     },
     'privacy.cookies_h': {
         'sr': 'Kolačići',
         'en': 'Cookies',
         'ru': 'Cookies',
+        'bg': 'Бисквитки',
     },
     'privacy.cookies_ab_h': {
         'sr': 'A/B testiranje',
         'en': 'A/B testing',
         'ru': 'A/B-тестирование',
+        'bg': 'A/B тестване',
     },
     'privacy.cookies_ab_body': {
         'sr': 'Da bismo merili koje varijante stranica daju bolje iskustvo, '
@@ -241,41 +246,49 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               'устанавливаем cookie <code>ab_v1</code> (на 1 год). В нём '
               'хранится только случайный идентификатор, не связанный ни с '
               'какими личными данными.',
+        'bg': 'За да измерваме кои варианти на страниците дават по-добро изживяване, използваме бисквитка от първа страна <code>ab_v1</code> (1 година). Тя съдържа само случаен идентификатор и не се свързва с никакви лични данни.',
     },
     'privacy.cookies_body': {
         'sr': 'Koristimo samo neophodne kolačiće (npr. CSRF token). Ne koristimo reklamne niti praćeće kolačiće trećih strana.',
         'en': 'We use only essential cookies (e.g. CSRF token). No third-party advertising or tracking cookies.',
         'ru': 'Мы используем только необходимые cookies (например, CSRF-токен). Никаких рекламных или трекинговых cookies третьих сторон.',
+        'bg': 'Използваме само необходими бисквитки (напр. CSRF токен). Не използваме рекламни, нито проследяващи бисквитки на трети страни.',
     },
     'privacy.analytics_h': {
         'sr': 'Analitika',
         'en': 'Analytics',
         'ru': 'Аналитика',
+        'bg': 'Аналитика',
     },
     'privacy.analytics_body': {
         'sr': 'Koristimo Umami analitiku — anonimne, agregirane statistike poseta bez kolačića i bez praćenja pojedinaca.',
         'en': 'We use Umami analytics — anonymous, aggregated page view statistics with no cookies and no individual tracking.',
         'ru': 'Мы используем Umami — анонимную агрегированную статистику посещений без cookies и отслеживания пользователей.',
+        'bg': 'Използваме аналитиката Umami — анонимна, агрегирана статистика за посещенията без бисквитки и без проследяване на отделни лица.',
     },
     'privacy.contact_h': {
         'sr': 'Kontakt forma',
         'en': 'Contact form',
         'ru': 'Контактная форма',
+        'bg': 'Контактна форма',
     },
     'privacy.contact_body': {
         'sr': 'Poruke iz kontakt forme se šalju preko Telegram bota i čuvaju u logovima radi odgovora. Ne delimo ih sa trećim stranama.',
         'en': 'Messages from the contact form are sent via a Telegram bot and stored in logs so we can reply. They are not shared with third parties.',
         'ru': 'Сообщения из контактной формы отправляются через Telegram-бот и сохраняются в логах для ответа. Третьим лицам не передаются.',
+        'bg': 'Съобщенията от контактната форма се изпращат чрез Telegram бот и се съхраняват в логове с цел отговор. Не ги споделяме с трети страни.',
     },
     'privacy.rights_h': {
         'sr': 'Vaša prava (GDPR)',
         'en': 'Your rights (GDPR)',
         'ru': 'Ваши права (GDPR)',
+        'bg': 'Вашите права (GDPR)',
     },
     'privacy.rights_body': {
         'sr': 'Imate pravo pristupa, ispravke i brisanja podataka. Za zahteve pišite na info@prevozni.com.',
         'en': 'You have the right to access, rectify and erase your data. Email info@prevozni.com for requests.',
         'ru': 'Вы имеете право на доступ, исправление и удаление данных. Запросы — на info@prevozni.com.',
+        'bg': 'Имате право на достъп, коригиране и заличаване на данни. За заявки пишете на info@prevozni.com.',
     },
     'footer.disclaimer': {
         'sr': 'Podaci su informativnog karaktera i preuzeti iz javno dostupnih izvora. Prevozni ne garantuje tačnost podataka — uvek proverite red vožnje direktno kod prevoznika. Ovaj sajt ne prodaje karte niti posreduje u prodaji prevoznih usluga.',
@@ -301,11 +314,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Prevozni Srbija, misija i kontakt',
         'en': 'Prevozni Serbia, mission and contact',
         'ru': 'Prevozni Сербия, миссия и контакт',
+        'bg': 'Prevozni Сърбия, мисия и контакт',
     },
     'contact.meta': {
         'sr': 'Imate pitanje, sugestiju ili ste primetili grešku na Prevozni? Pišite nam na info@prevozni.com ili popunite kontakt formu. Odgovaramo u roku od 48 sati.',
         'en': 'Got a question, suggestion or spotted a bug on Prevozni? Email info@prevozni.com or use the contact form. We reply within 48 hours.',
         'ru': 'Есть вопрос, предложение или заметили ошибку на Prevozni? Напишите на info@prevozni.com или заполните контактную форму. Отвечаем в течение 48 часов.',
+        'bg': 'Имате въпрос, предложение или сте забелязали грешка на Prevozni? Пишете ни на info@prevozni.com или попълнете контактната форма. Отговаряме в рамките на 48 часа.',
     },
     'about.what_h': {
         'sr': 'Šta je Prevozni',
@@ -326,87 +341,104 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Odakle dolaze podaci',
         'en': 'Where the data comes from',
         'ru': 'Откуда берутся данные',
+        'bg': 'Откъде идват данните',
     },
     'contact.intro_h': {
         'sr': 'Kako da nam pišete',
         'en': 'How to reach us',
         'ru': 'Как с нами связаться',
+        'bg': 'Как да ни пишете',
     },
     'contact.intro_p1': {
         'sr': 'Najbrži način: <strong>info@prevozni.com</strong>. Možete i da koristite formu ispod — poruka stiže u isti inbox + automatski u naš Telegram kanal za operativne stvari, pa je odgovor obično u roku od 24 sata (radnim danima) ili do 48 sati (vikendom i praznicima).',
         'en': 'Fastest channel: <strong>info@prevozni.com</strong>. You can also use the form below — it lands in the same inbox plus our ops Telegram channel, so typical response time is within 24 hours on weekdays, up to 48 hours on weekends and holidays.',
         'ru': 'Самый быстрый канал: <strong>info@prevozni.com</strong>. Также можно использовать форму ниже — сообщение попадает в тот же ящик плюс в наш оперативный Telegram-канал, поэтому обычно отвечаем в течение 24 часов по будням и до 48 часов по выходным и праздникам.',
+        'bg': 'Най-бързият начин: <strong>info@prevozni.com</strong>. Можете също да използвате формата по-долу — съобщението пристига в същата пощенска кутия + автоматично в нашия Telegram канал за оперативни въпроси, така че отговорът обикновено е в рамките на 24 часа (в работни дни) или до 48 часа (през уикенди и празници).',
     },
     'privacy.cookies_body2': {
         'sr': 'Koristimo isključivo kolačiće prve strane (eng. first-party cookies) za čuvanje vaših preferenci (jezik sajta, valuta za cene, sačuvane rute). Ne postavljamo marketinške kolačiće trećih strana, ne pratimo vas na drugim sajtovima, ne gradimo vaš profil za prodaju oglasnih agencija.',
         'en': 'We only use first-party cookies to remember your preferences (site language, currency display, saved routes). We do not set third-party marketing cookies, do not track you across other sites, and do not build profiles for sale to ad networks.',
         'ru': 'Мы используем только first-party cookies для сохранения ваших настроек (язык сайта, валюта цен, сохранённые маршруты). Мы не ставим маркетинговые cookies третьих сторон, не отслеживаем вас на других сайтах и не строим профили для продажи рекламным сетям.',
+        'bg': 'Използваме изключително бисквитки от първа страна (англ. first-party cookies) за съхраняване на вашите предпочитания (език на сайта, валута за цените, запазени маршрути). Не поставяме маркетингови бисквитки на трети страни, не ви проследяваме на други сайтове, не изграждаме ваш профил за продажба на рекламни агенции.',
     },
     'privacy.analytics_body2': {
         'sr': 'Za razumevanje kako ljudi koriste Prevozni koristimo Umami — privacy-first analitiku koja ne koristi kolačiće i ne prikuplja lične identifikatore. Umami beleži agregatne statistike (broj poseta po stranici, dolazni izvori, tip uređaja) ali ne povezuje događaje sa individualnim korisnikom. Svi podaci ostaju na našem serveru; ne šalju se Google Analytics-u ili drugim trećim stranama.',
         'en': 'To understand how people use Prevozni we use Umami — privacy-first analytics that does not use cookies and does not collect personal identifiers. Umami records aggregate statistics (visits per page, referrers, device type) but does not tie events to individual users. All data stays on our server; it is not sent to Google Analytics or any third party.',
         'ru': 'Чтобы понимать как люди пользуются Prevozni мы используем Umami — privacy-first аналитику, которая не использует cookies и не собирает персональные идентификаторы. Umami записывает агрегированную статистику (визиты по страницам, источники переходов, тип устройства), но не связывает события с конкретным пользователем. Все данные остаются на нашем сервере, они не отправляются в Google Analytics или другие третьи стороны.',
+        'bg': 'За да разберем как хората използват Prevozni, използваме Umami — privacy-first аналитика, която не използва бисквитки и не събира лични идентификатори. Umami записва агрегирана статистика (брой посещения по страница, източници на трафик, тип устройство), но не свързва събитията с конкретен потребител. Всички данни остават на нашия сървър; не се изпращат към Google Analytics или други трети страни.',
     },
     'privacy.third_party_h': {
         'sr': 'Linkovi trećih strana',
         'en': 'Third-party links',
         'ru': 'Ссылки третьих сторон',
+        'bg': 'Линкове на трети страни',
     },
     'privacy.third_party_body': {
         'sr': 'Prevozni sadrži linkove ka sajtovima prevoznika i partnera (BusTicket4.me i drugi). Kada kliknete na takav link, napuštate naš sajt i ulazite u politiku privatnosti tog partnera. Nismo odgovorni za njihove prakse — pročitajte njihovu politiku pre nego što unesete lične podatke ili kupite kartu. Mi možemo da dobijemo proviziju od partnera ako kupite preko linka sa našeg sajta; to nikad ne utiče na cenu koju vi plaćate.',
         'en': 'Prevozni contains links to carriers and partners (BusTicket4.me and others). When you click such a link you leave our site and enter that partner\'s privacy policy. We are not responsible for their practices — read their policy before entering personal data or buying a ticket. We may receive a commission from partners if you buy via a link on our site; this never affects the price you pay.',
         'ru': 'Prevozni содержит ссылки на сайты перевозчиков и партнёров (BusTicket4.me и другие). При клике на такую ссылку вы покидаете наш сайт и попадаете под политику конфиденциальности этого партнёра. Мы не отвечаем за их практики — прочитайте их политику перед вводом личных данных или покупкой билета. Мы можем получать комиссию от партнёров при покупке через нашу ссылку; это никак не влияет на цену которую вы платите.',
+        'bg': 'Prevozni съдържа линкове към сайтовете на превозвачи и партньори (BusTicket4.me и други). Когато кликнете върху такъв линк, напускате нашия сайт и попадате под политиката за поверителност на съответния партньор. Ние не носим отговорност за техните практики — прочетете тяхната политика, преди да въведете лични данни или да купите билет. Възможно е да получим комисиона от партньора, ако купите чрез линк от нашия сайт; това никога не влияе на цената, която вие плащате.',
     },
     'privacy.affiliate_h': {
         'sr': 'Praćenje klikova na "Kupi" (BusTicket4.me)',
         'en': 'Tracking of "Buy" (BusTicket4.me) clicks',
         'ru': 'Отслеживание кликов по кнопке «Купить» (BusTicket4.me)',
+        'bg': 'Проследяване на кликове върху „Купи“ (BusTicket4.me)',
     },
     'privacy.adsense_h': {
         'sr': 'Google AdSense (reklame)',
         'en': 'Google AdSense (advertising)',
         'ru': 'Google AdSense (реклама)',
+        'bg': 'Google AdSense (реклами)',
     },
     'privacy.adsense_body': {
         'sr': 'Na nekim stranicama prikazujemo reklame preko Google AdSense. Ako ste prihvatili sve kolačiće, AdSense može da koristi kolačiće trećih strana za personalizaciju reklama na osnovu vaše istorije pregleda na drugim sajtovima. Ako ste izabrali samo osnovne kolačiće, AdSense radi u režimu neperonalizovanih reklama (requestNonPersonalizedAds) — reklame se biraju na osnovu sadržaja stranice, a ne vašeg profila. AdSense automatski dobija minimalne podatke o pregledu (IP, user-agent) prema njihovoj <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener nofollow">politici reklamiranja</a>. Možete da isključite personalizaciju u <a href="https://adssettings.google.com/" target="_blank" rel="noopener nofollow">Google Ads Settings</a> u bilo kom trenutku.',
         'en': 'On some pages we display ads through Google AdSense. If you accepted all cookies, AdSense may use third-party cookies to personalise ads based on your browsing history across other sites. If you accepted only essential cookies, AdSense runs in non-personalised mode (requestNonPersonalizedAds) — ads are picked based on page content, not your profile. AdSense automatically receives minimal request data (IP, user-agent) per their <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener nofollow">advertising policy</a>. You can opt out of personalisation in <a href="https://adssettings.google.com/" target="_blank" rel="noopener nofollow">Google Ads Settings</a> at any time.',
         'ru': 'На некоторых страницах мы показываем рекламу через Google AdSense. Если вы приняли все cookies, AdSense может использовать сторонние cookies для персонализации рекламы на основе истории просмотров на других сайтах. Если вы выбрали только основные cookies, AdSense работает в режиме неперсонализированной рекламы (requestNonPersonalizedAds) — реклама подбирается по содержанию страницы, а не по вашему профилю. AdSense автоматически получает минимальные данные запроса (IP, user-agent) согласно их <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener nofollow">политике рекламы</a>. Отключить персонализацию можно в любой момент в <a href="https://adssettings.google.com/" target="_blank" rel="noopener nofollow">Google Ads Settings</a>.',
+        'bg': 'На някои страници показваме реклами чрез Google AdSense. Ако сте приели всички бисквитки, AdSense може да използва бисквитки на трети страни за персонализиране на реклами въз основа на вашата история на разглеждане на други сайтове. Ако сте избрали само основни бисквитки, AdSense работи в режим на неперсонализирани реклами (requestNonPersonalizedAds) — рекламите се избират въз основа на съдържанието на страницата, а не на вашия профил. AdSense автоматично получава минимални данни за прегледа (IP, user-agent) съгласно тяхната <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener nofollow">политика за реклами</a>. Можете да изключите персонализацията в <a href="https://adssettings.google.com/" target="_blank" rel="noopener nofollow">Google Ads Settings</a> по всяко време.',
     },
     'privacy.reviews_h': {
         'sr': 'Korisničke recenzije',
         'en': 'User reviews',
         'ru': 'Пользовательские отзывы',
+        'bg': 'Потребителски отзиви',
     },
     'privacy.reviews_body': {
         'sr': 'Ako ostavite recenziju rute (dugme „Ostavite vašu recenziju" na stranici rute), čuvamo vašu ocenu, tekst komentara i ime koje ste uneli — oni se javno prikazuju nakon moderacije. Email adresu ne čuvamo u otvorenom obliku: sa nje računamo sha256 hash sa solju radi provere autorstva (za brisanje recenzije) i identifikacije „proverenih" autora koji su ranije objavili 3+ odobrene recenzije. Pored toga čuvamo jezik (sr/en/ru), anonimizovani hash IP adrese, i vreme slanja — isključivo za zaštitu od spama i auditing. U svakom trenutku možete da zatražite brisanje svoje recenzije dugmetom „Zatraži brisanje" ispod svake recenzije; potvrđujete uneti istu email adresu kojom ste prvobitno poslali, a naš moderator soft-briše zapis u roku od 7 dana u skladu sa GDPR-om.',
         'en': 'If you leave a route review (via the "Leave your review" form), we store your rating, comment text, and the name you entered — these are shown publicly after moderation. Your email address is never stored in cleartext: we compute a salted sha256 hash of it for authorship checks (so you can request deletion later) and to identify "trusted" authors who have previously posted 3+ approved reviews. We also keep the submission language (sr/en/ru), a salted IP hash, and the timestamp — only for spam protection and audit. You can request deletion any time via the "Request deletion" button under each review; you prove ownership by re-entering the same email, and our moderator soft-deletes the record within 7 days per GDPR.',
         'ru': 'Если вы оставите отзыв о маршруте (через форму «Оставить отзыв»), мы храним оценку, текст комментария и указанное имя — они публикуются после модерации. Email в открытом виде не храним: вычисляем sha256-хэш с солью, чтобы позже проверить авторство (при запросе удаления) и опознать «проверенных» авторов, у которых уже опубликовано 3+ одобренных отзыва. Также храним язык отправки (sr/en/ru), хэш IP и время отправки — только для защиты от спама и аудита. В любой момент можно запросить удаление кнопкой «Запросить удаление» под каждым отзывом; вы подтверждаете владение, указав тот же email, а модератор мягко удалит запись в течение 7 дней согласно GDPR.',
+        'bg': 'Ако оставите отзив за маршрут (бутон „Оставете своя отзив“ на страницата на маршрута), съхраняваме вашата оценка, текста на коментара и името, което сте въвели — те се показват публично след модерация. Имейл адреса не съхраняваме в отворен вид: от него изчисляваме sha256 хеш със сол с цел проверка на авторството (за изтриване на отзива) и идентификация на „проверени“ автори, които преди това са публикували 3+ одобрени отзива. Освен това съхраняваме езика (sr/en/ru), анонимизиран хеш на IP адреса и времето на изпращане — единствено за защита от спам и одит. По всяко време можете да поискате изтриване на своя отзив чрез бутона „Заявете изтриване“ под всеки отзив; потвърждавате, като въведете същия имейл адрес, с който първоначално сте го изпратили, а нашият модератор меко изтрива записа в срок от 7 дни в съответствие с GDPR.',
     },
     'privacy.affiliate_body': {
         'sr': 'Kad kliknete na dugme "Kupi" koje vodi na BusTicket4.me, beležimo minimalni zapis o kliku na sopstvenom serveru: identifikator rute (npr. beograd-budva), tip stranice sa koje ste kliknuli (katalog, detalj rute, pretraga), prevoznika, vreme polaska, anonimizovani hash vaše IP adrese (sha256 sa sol-tajnom koja se redovno menja) i osnovne tehničke podatke pretraživača. Ne beležimo sirovu IP adresu, ime, email niti bilo šta što može direktno da vas identifikuje. Ove zapise čuvamo maksimalno 90 dana u interne svrhe — da znamo koji delovi sajta ljudima stvarno pomažu da nađu kartu i da pravilno pripišemo proviziju od BusTicket4.me-a. Isti zapisi se šalju i u našu analitiku (Umami) kao anonimni event "ba_click". Ako želite da vaši klikovi ne budu zabeleženi, uključite ad-blocker ili privatni mod u pretraživaču — naš sajt nastavlja da radi bez ovih zapisa.',
         'en': 'When you click a "Buy" button that goes to BusTicket4.me, we keep a minimal click record on our own server: the route identifier (e.g. beograd-budva), the page type the click came from (catalog, route detail, search), the carrier, departure time, a salted sha256 hash of your IP (salt rotates regularly) and basic browser technical data. We do not store raw IPs, names, emails or anything directly identifying you. These records are kept for at most 90 days and used internally to understand which parts of the site actually help people find a ticket and to correctly attribute BusTicket4.me commissions. The same events are mirrored to our analytics (Umami) as an anonymous "ba_click" event. If you prefer your clicks not to be recorded, use an ad-blocker or private browsing — the site works without these records.',
         'ru': 'Когда вы нажимаете кнопку «Купить», ведущую на BusTicket4.me, мы сохраняем на нашем сервере минимальную запись: идентификатор маршрута (например beograd-budva), тип страницы с которой был клик (каталог, детали маршрута, поиск), перевозчика, время рейса, анонимизированный sha256-хэш вашего IP с регулярно меняющейся солью и базовые технические данные браузера. Мы не храним сырой IP, имя, email или что-либо прямо вас идентифицирующее. Эти записи хранятся не более 90 дней и используются внутренне — чтобы понимать какие части сайта реально помогают людям найти билет и корректно атрибутировать комиссии BusTicket4.me. Эти же события отправляются в нашу аналитику (Umami) как анонимный event «ba_click». Если вы не хотите чтобы клики записывались — включите ad-blocker или приватный режим, сайт работает и без этих записей.',
+        'bg': 'Когато кликнете върху бутона „Купи“, който води към BusTicket4.me, записваме минимален запис за клика на собствения си сървър: идентификатор на маршрута (напр. beograd-budva), типа страница, от която сте кликнали (каталог, детайли на маршрут, търсене), превозвача, часа на тръгване, анонимизиран хеш на вашия IP адрес (sha256 със сол-тайна, която се сменя редовно) и основни технически данни за браузъра. Не записваме суровия IP адрес, име, имейл, нито каквото и да е друго, което може директно да ви идентифицира. Тези записи съхраняваме максимум 90 дни за вътрешни цели — за да знаем кои части от сайта реално помагат на хората да намерят билет и за да разпределим правилно комисионата от BusTicket4.me. Същите записи се изпращат и в нашата аналитика (Umami) като анонимно събитие „ba_click“. Ако искате вашите кликове да не бъдат записвани, включете ad-blocker или частен режим в браузъра — нашият сайт продължава да работи без тези записи.',
     },
     'privacy.rights_body2': {
         'sr': 'Ako želite da zatražite izvoz, izmenu ili brisanje podataka (na primer vaše kontakt poruke), pošaljite zahtev na info@prevozni.com. Obradićemo ga u roku od 30 dana u skladu sa GDPR-om i srpskim Zakonom o zaštiti podataka o ličnosti. Nije potrebno da navodite razlog.',
         'en': 'If you want to request export, correction or deletion of your data (for example a contact form message you sent), email info@prevozni.com. We will process the request within 30 days in line with GDPR and the Serbian Personal Data Protection Act. You do not need to state a reason.',
         'ru': 'Если вы хотите запросить экспорт, исправление или удаление данных (например вашего сообщения из контактной формы), напишите на info@prevozni.com. Мы обработаем запрос в течение 30 дней в соответствии с GDPR и сербским законом о защите персональных данных. Причину указывать не обязательно.',
+        'bg': 'Ако желаете да поискате износ, промяна или изтриване на данни (например вашите съобщения от контактната форма), изпратете заявка на info@prevozni.com. Ще я обработим в срок от 30 дни в съответствие с GDPR и сръбския Закон за защита на личните данни. Не е необходимо да посочвате причина.',
     },
     'privacy.changes_h': {
         'sr': 'Izmene ove politike',
         'en': 'Changes to this policy',
         'ru': 'Изменения этой политики',
+        'bg': 'Промени в тази политика',
     },
     'privacy.changes_body': {
         'sr': 'Ako nešto bitno promenimo (na primer dodamo novi analitički alat ili pustimo reklame), objavićemo novu verziju ove stranice i ažurirati datum ispod. Za suštinske izmene obavestićemo i preko banera na početnoj strani minimalno 14 dana unapred. Trenutna verzija: april 2026.',
         'en': 'If we change something material (for example add a new analytics tool or enable ads), we publish a new version of this page and update the date below. For substantive changes we also announce a homepage banner at least 14 days in advance. Current version: April 2026.',
         'ru': 'Если мы изменяем что-то существенное (например добавляем новый аналитический инструмент или включаем рекламу), мы публикуем новую версию этой страницы и обновляем дату ниже. Для существенных изменений также вывешиваем баннер на главной странице минимум за 14 дней. Текущая версия: апрель 2026.',
+        'bg': 'Ако направим съществена промяна (например добавим нов аналитичен инструмент или пуснем реклами), ще публикуваме нова версия на тази страница и ще актуализираме датата по-долу. За съществени промени ще уведомим и чрез банер на началната страница най-малко 14 дни предварително. Текуща версия: април 2026.',
     },
 
     'contact.intro_p2': {
         'sr': 'Šta nam najviše pomaže: <strong>tačan URL stranice</strong> gde ste naišli na grešku, <strong>screenshot</strong> (ako je vizuelni bug) i <strong>naziv pretraživača i uređaja</strong>. Za predloge novih gradova ili ruta — napišite kuda biste voleli da putujete, ubrzavamo obogaćivanje podataka na osnovu stvarne potražnje.',
         'en': 'What helps us most: the <strong>exact URL</strong> where you hit the problem, a <strong>screenshot</strong> (for visual bugs), and the <strong>browser + device</strong> you are on. For feature requests or new cities/routes — tell us where you\'d like to travel; we prioritise data enrichment based on actual demand.',
         'ru': 'Что помогает больше всего: <strong>точный URL</strong> страницы где вы столкнулись с проблемой, <strong>скриншот</strong> (для визуальных багов) и <strong>браузер + устройство</strong>. Для предложений по новым городам или маршрутам — напишите куда вам хотелось бы поехать, мы приоритизируем обогащение данных по реальному спросу.',
+        'bg': 'Това, което ни помага най-много: <strong>точният URL адрес на страницата</strong>, където сте забелязали грешката, <strong>снимка на екрана</strong> (ако е визуален бъг) и <strong>името на браузъра и устройството</strong>. За предложения за нови градове или маршрути — напишете ни къде бихте искали да пътувате, ускоряваме обогатяването на данните въз основа на реалното търсене.',
     },
 
     'about.sources_p': {
@@ -602,6 +634,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Dodirnite da učitate mapu',
         'en': 'Tap to load map',
         'ru': 'Нажмите, чтобы загрузить карту',
+        'bg': 'Докоснете, за да заредите картата',
     },
     'a11y.load_map': {
         'sr': 'Učitaj interaktivnu mapu',
@@ -693,6 +726,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Zatvori reklamu',
         'en': 'Dismiss ad',
         'ru': 'Закрыть рекламу',
+        'bg': 'Затвори рекламата',
     },
     # The chat widget carried these three inline as
     #   _('chat.x') if _('chat.x') != 'chat.x' else '<Serbian>'
@@ -702,21 +736,25 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Prevozni · AI',
         'en': 'Prevozni · AI',
         'ru': 'Prevozni · AI',
+        'bg': 'Prevozni · AI',
     },
     'chat.greeting': {
         'sr': 'Zdravo! Pitaj me o redovima vožnje, cenama karata ili linijama gradskog prevoza.',
         'en': 'Hi! Ask me about timetables, ticket prices or city transport lines.',
         'ru': 'Привет! Спросите меня о расписаниях, ценах на билеты или городских маршрутах.',
+        'bg': 'Здравей! Попитай ме за разписанията, цените на билетите или линиите на градския транспорт.',
     },
     'chat.placeholder': {
         'sr': 'Pitaj nešto...',
         'en': 'Ask something...',
         'ru': 'Спросите что-нибудь...',
+        'bg': 'Попитай нещо...',
     },
     'ads.label': {
         'sr': 'Reklama',
         'en': 'Advertisement',
         'ru': 'Реклама',
+        'bg': 'Реклама',
     },
     'common.now': {
         'sr': 'sada',
@@ -778,6 +816,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Linija',
         'en': 'Line',
         'ru': 'Линия',
+        'bg': 'Линия',
     },
     'city.next_departures': {
         'sr': 'Sledeći polasci',
@@ -874,6 +913,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Gradski prevoz',
         'en': 'City transport',
         'ru': 'Городской транспорт',
+        'bg': 'Градски транспорт',
     },
     'city.lines_count': {
         'sr': 'linija',
@@ -885,31 +925,37 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'stajališta na mapi',
         'en': 'stops on map',
         'ru': 'остановок на карте',
+        'bg': 'спирки на картата',
     },
     'city.stops_label': {
         'sr': 'stajališta',
         'en': 'stops',
         'ru': 'остановок',
+        'bg': 'спирки',
     },
     'city.tram_trolley_label': {
         'sr': 'tramvaja i trolejbusa',
         'en': 'tram + trolley lines',
         'ru': 'трамв./троллейб.',
+        'bg': 'трамвая и тролейбуса',
     },
     'city.popular_stops': {
         'sr': 'Popularna stajališta',
         'en': 'Popular stops',
         'ru': 'Популярные остановки',
+        'bg': 'Популярни спирки',
     },
     'city.carriers_from': {
         'sr': 'Prevoznici iz {city}',
         'en': 'Carriers from {city}',
         'ru': 'Перевозчики из {city}',
+        'bg': 'Превозвачи от {city}',
     },
     'line.interchange_stops': {
         'sr': 'Glavna stajališta — presedanja',
         'en': 'Major interchange stops',
         'ru': 'Главные пересадочные остановки',
+        'bg': 'Главни спирки — прекачвания',
     },
     'city.intercity': {
         'sr': 'Međugradski prevoz',
@@ -921,56 +967,67 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Sve međugradske rute',
         'en': 'All intercity routes',
         'ru': 'Все междугородние маршруты',
+        'bg': 'Всички междуградски маршрути',
     },
     'city.bus_train_from': {
         'sr': 'Autobus i voz iz',
         'en': 'Bus and train from',
         'ru': 'Автобус и поезд из',
+        'bg': 'Автобус и влак от',
     },
     'city.departures_from': {
         'sr': 'Polasci iz',
         'en': 'Departures from',
         'ru': 'Отправления из',
+        'bg': 'Заминавания от',
     },
     'city.search_dest': {
         'sr': 'Pretraži destinacije',
         'en': 'Search destinations',
         'ru': 'Поиск направлений',
+        'bg': 'Търсене на дестинации',
     },
     'city.eta_note': {
         'sr': 'Vreme dolaska na mapi je procena prema rasporedu. Moguća su odstupanja.',
         'en': 'Arrival times on the map are estimates based on the schedule. Deviations are possible.',
         'ru': 'Время прибытия на карте — оценка по расписанию. Возможны отклонения.',
+        'bg': 'Времето на пристигане на картата е приблизително, изчислено по разписанието. Възможни са отклонения.',
     },
     'city.search_line': {
         'sr': 'Broj linije ili naziv...',
         'en': 'Line number or name...',
         'ru': 'Номер линии или название...',
+        'bg': 'Номер на линия или име...',
     },
     'city.all': {
         'sr': 'Sve',
         'en': 'All',
         'ru': 'Все',
+        'bg': 'Всички',
     },
     'city.tram': {
         'sr': 'Tramvaj',
         'en': 'Tram',
         'ru': 'Трамвай',
+        'bg': 'Трамвай',
     },
     'city.trolleybus': {
         'sr': 'Trolejbus',
         'en': 'Trolleybus',
         'ru': 'Троллейбус',
+        'bg': 'Тролейбус',
     },
     'city.bus': {
         'sr': 'Autobus',
         'en': 'Bus',
         'ru': 'Автобус',
+        'bg': 'Автобус',
     },
     'city.night': {
         'sr': 'Noćne linije',
         'en': 'Night lines',
         'ru': 'Ночные линии',
+        'bg': 'Нощни линии',
     },
 
     # ── Breadcrumbs ──
@@ -982,32 +1039,36 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
 
     # ── Contact page ──
-    'contact.title': {'sr': 'Kontakt', 'en': 'Contact', 'ru': 'Контакт'},
+    'contact.title': {'sr': 'Kontakt', 'en': 'Contact', 'ru': 'Контакт', 'bg': 'Контакт'},
     'contact.subtitle': {
         'sr': 'Imate pitanje, sugestiju ili ste primetili grešku?',
         'en': 'Have a question, suggestion, or found an error?',
         'ru': 'Есть вопрос, предложение или нашли ошибку?',
+        'bg': 'Имате въпрос, предложение или сте забелязали грешка?',
     },
-    'contact.name': {'sr': 'Ime', 'en': 'Name', 'ru': 'Имя'},
-    'contact.name_ph': {'sr': 'Vaše ime', 'en': 'Your name', 'ru': 'Ваше имя'},
-    'contact.email': {'sr': 'Email', 'en': 'Email', 'ru': 'Email'},
-    'contact.message': {'sr': 'Poruka', 'en': 'Message', 'ru': 'Сообщение'},
+    'contact.name': {'sr': 'Ime', 'en': 'Name', 'ru': 'Имя', 'bg': 'Име'},
+    'contact.name_ph': {'sr': 'Vaše ime', 'en': 'Your name', 'ru': 'Ваше имя', 'bg': 'Вашето име'},
+    'contact.email': {'sr': 'Email', 'en': 'Email', 'ru': 'Email', 'bg': 'Имейл'},
+    'contact.message': {'sr': 'Poruka', 'en': 'Message', 'ru': 'Сообщение', 'bg': 'Съобщение'},
     'contact.message_ph': {
         'sr': 'Opišite vaše pitanje ili sugestiju...',
         'en': 'Describe your question or suggestion...',
         'ru': 'Опишите ваш вопрос или предложение...',
+        'bg': 'Опишете вашия въпрос или предложение...',
     },
-    'contact.send': {'sr': 'Pošalji', 'en': 'Send', 'ru': 'Отправить'},
+    'contact.send': {'sr': 'Pošalji', 'en': 'Send', 'ru': 'Отправить', 'bg': 'Изпрати'},
     'contact.response_time': {
         'sr': 'Odgovaramo u roku od',
         'en': 'We respond within',
         'ru': 'Отвечаем в течение',
+        'bg': 'Отговаряме в рамките на',
     },
-    'contact.hours': {'sr': '24 sata', 'en': '24 hours', 'ru': '24 часов'},
+    'contact.hours': {'sr': '24 sata', 'en': '24 hours', 'ru': '24 часов', 'bg': '24 часа'},
     'contact.sent_ok': {
         'sr': 'Poruka je poslata. Hvala!',
         'en': 'Message sent. Thanks!',
         'ru': 'Сообщение отправлено. Спасибо!',
+        'bg': 'Съобщението е изпратено. Благодарим!',
     },
     'contact.error.required': {
         'sr': 'Molimo popunite sva polja.',
@@ -1031,7 +1092,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
 
     # ── About page ──
-    'about.title': {'sr': 'O nama', 'en': 'About us', 'ru': 'О нас'},
+    'about.title': {'sr': 'O nama', 'en': 'About us', 'ru': 'О нас', 'bg': 'За нас'},
     # /red-voznje/ — head-term hub for "red vožnje autobusa i vozova"
     'nav.timetables': {'sr': 'Red vožnje', 'en': 'Timetables', 'ru': 'Расписание', 'bg': 'Разписание'},
     'red_voznje.title': {
@@ -1066,21 +1127,25 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Prevozni — besplatni red vožnje autobusa, vozova i gradskog prevoza u Srbiji. Bez registracije, na 3 jezika.',
         'en': 'Prevozni — free bus, train and city transport schedules across Serbia. No registration, in 3 languages.',
         'ru': 'Prevozni — бесплатное расписание автобусов, поездов и городского транспорта в Сербии. Без регистрации, на 3 языках.',
+        'bg': 'Prevozni — безплатно разписание на автобуси, влакове и градски транспорт в Сърбия. Без регистрация, на 3 езика.',
     },
     'about.intro_short': {
         'sr': 'Prevozni objedinjuje raspored {routes}+ međugradskih ruta i {ops}+ prevoznika u Srbiji i regionu, plus gradski prevoz u 4 grada. Besplatno, bez registracije, na 3 jezika.',
         'en': 'Prevozni aggregates schedules for {routes}+ intercity routes from {ops}+ carriers in Serbia and the region, plus city transit in 4 cities. Free, no signup, in 3 languages.',
         'ru': 'Prevozni объединяет расписание {routes}+ междугородних маршрутов и {ops}+ перевозчиков в Сербии и регионе, плюс городской транспорт в 4 городах. Бесплатно, без регистрации, на 3 языках.',
+        'bg': 'Prevozni обединява разписанието на {routes}+ междуградски линии и {ops}+ превозвачи в Сърбия и региона, плюс градски транспорт в 4 града. Безплатно, без регистрация, на 3 езика.',
     },
     'about.search_h': {
         'sr': 'Pronađite vožnju',
         'en': 'Find a ride',
         'ru': 'Найти рейс',
+        'bg': 'Намерете превоз',
     },
     'about.sources_short': {
         'sr': 'Podatke prikupljamo svakodnevnim skraperima sa zvaničnih izvora — bgprevoz.rs, gspns.co.rs, jgpnis.rs, busticket4.me, polazak.rs, srbijavoz.rs i drugih. Pre putovanja proverite raspored direktno kod prevoznika; cene i polasci se mogu menjati. Prevozni je besplatan i ne prodaje karte — kupovina ide kod naših affiliate partnera.',
         'en': 'Data is collected daily from official sources — bgprevoz.rs, gspns.co.rs, jgpnis.rs, busticket4.me, polazak.rs, srbijavoz.rs and others. Always confirm the schedule with the carrier before traveling; prices and departures can change. Prevozni is free and does not sell tickets — purchases go through our affiliate partners.',
         'ru': 'Данные обновляются ежедневными скраперами из официальных источников — bgprevoz.rs, gspns.co.rs, jgpnis.rs, busticket4.me, polazak.rs, srbijavoz.rs и других. Перед поездкой обязательно сверяйтесь с расписанием перевозчика; цены и рейсы могут меняться. Prevozni бесплатен и не продает билеты — покупка идет через наших affiliate-партнёров.',
+        'bg': 'Данните събираме ежедневно чрез скрепери от официални източници — bgprevoz.rs, gspns.co.rs, jgpnis.rs, busticket4.me, polazak.rs, srbijavoz.rs и други. Преди пътуване проверете разписанието директно при превозвача; цените и часовете на тръгване може да се променят. Prevozni е безплатен и не продава билети — покупката се извършва при нашите афилиейт партньори.',
     },
     'about.mission': {
         'sr': 'Prevozni prikuplja i objedinjuje podatke iz različitih izvora kako bi vam uštedeo vreme pri planiranju putovanja kroz Srbiju.',
@@ -1095,17 +1160,18 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
 
     # ── See also / shared sections ──
-    'see_also.title': {'sr': 'Pogledajte još', 'en': 'See also', 'ru': 'Смотрите также'},
-    'see_also.all_routes': {'sr': 'Sve međugradske rute', 'en': 'All intercity routes', 'ru': 'Все междугородние маршруты'},
+    'see_also.title': {'sr': 'Pogledajte još', 'en': 'See also', 'ru': 'Смотрите также', 'bg': 'Вижте още'},
+    'see_also.all_routes': {'sr': 'Sve međugradske rute', 'en': 'All intercity routes', 'ru': 'Все междугородние маршруты', 'bg': 'Всички междуградски маршрути'},
     'see_also.all_routes_desc': {
         'sr': 'Autobus i voz između gradova Srbije',
         'en': 'Bus and train between Serbian cities',
         'ru': 'Автобус и поезд между городами Сербии',
+        'bg': 'Автобус и влак между градовете на Сърбия',
     },
-    'see_also.city_beograd': {'sr': 'Gradski prevoz Beograd', 'en': 'Belgrade city transport', 'ru': 'Городской транспорт Белград'},
-    'see_also.city_desc': {'sr': 'Linije, stajališta, mapa', 'en': 'Lines, stops, map', 'ru': 'Линии, остановки, карта'},
+    'see_also.city_beograd': {'sr': 'Gradski prevoz Beograd', 'en': 'Belgrade city transport', 'ru': 'Городской транспорт Белград', 'bg': 'Градски транспорт Белград'},
+    'see_also.city_desc': {'sr': 'Linije, stajališta, mapa', 'en': 'Lines, stops, map', 'ru': 'Линии, остановки, карта', 'bg': 'Линии, спирки, карта'},
     'see_also.about': {'sr': 'O nama', 'en': 'About us', 'ru': 'О нас'},
-    'see_also.about_desc': {'sr': 'Misija i izvori podataka', 'en': 'Mission and data sources', 'ru': 'Миссия и источники данных'},
+    'see_also.about_desc': {'sr': 'Misija i izvori podataka', 'en': 'Mission and data sources', 'ru': 'Миссия и источники данных', 'bg': 'Мисия и източници на данни'},
     'see_also.country_hint': {
         'sr': 'Pogledajte sve rute do destinacija u ovoj zemlji',
         'en': 'See all routes to destinations in this country',
@@ -1115,6 +1181,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Druge zemlje na Prevozni',
         'en': 'Other countries on Prevozni',
         'ru': 'Другие страны на Prevozni',
+        'bg': 'Други държави в Prevozni',
     },
 
     # ── Route pages ──
@@ -1157,14 +1224,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     # ── Stations page ──
 
     # ── Line detail ──
-    'line.stops': {'sr': 'stajališta', 'en': 'stops', 'ru': 'остановок'},
+    'line.stops': {'sr': 'stajališta', 'en': 'stops', 'ru': 'остановок', 'bg': 'спирки'},
     'line.direction_a': {'sr': 'Smer A', 'en': 'Direction A', 'ru': 'Направление А'},
     'line.direction_b': {'sr': 'Smer B', 'en': 'Direction B', 'ru': 'Направление Б'},
     'line.first_departure': {'sr': 'Prvi polazak', 'en': 'First departure', 'ru': 'Первый рейс'},
     'line.last_departure': {'sr': 'Poslednji polazak', 'en': 'Last departure', 'ru': 'Последний рейс'},
 
     # ── Stop detail ──
-    'stop.lines_here': {'sr': 'Linije na ovom stajalištu', 'en': 'Lines at this stop', 'ru': 'Линии на этой остановке'},
+    'stop.lines_here': {'sr': 'Linije na ovom stajalištu', 'en': 'Lines at this stop', 'ru': 'Линии на этой остановке', 'bg': 'Линии на тази спирка'},
     'stop.next_arrivals': {'sr': 'Sledeći polasci', 'en': 'Next departures', 'ru': 'Ближайшие отправления'},
 
     # ── Route detail / search ──
@@ -1218,27 +1285,30 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
     # ── Line detail ──
     'line.timeline': {'sr': 'Trasa linije', 'en': 'Line route', 'ru': 'Маршрут линии'},
-    'line.schedule_title': {'sr': 'Red vožnje', 'en': 'Schedule', 'ru': 'Расписание'},
+    'line.schedule_title': {'sr': 'Red vožnje', 'en': 'Schedule', 'ru': 'Расписание', 'bg': 'Разписание'},
     'line.departures_from': {'sr': 'Polasci od', 'en': 'Departures from', 'ru': 'Отправление от'},
 
     # ── Stop detail ──
     'stop.title': {'sr': 'Stajalište', 'en': 'Stop', 'ru': 'Остановка'},
     'stop.on_map': {'sr': 'na mapi', 'en': 'on map', 'ru': 'на карте'},
-    'stop.nearby': {'sr': 'Obližnja stajališta', 'en': 'Nearby stops', 'ru': 'Ближайшие остановки'},
+    'stop.nearby': {'sr': 'Obližnja stajališta', 'en': 'Nearby stops', 'ru': 'Ближайшие остановки', 'bg': 'Близки спирки'},
     # New strings introduced when porting route_detail chrome to stop_detail
     # (parity audit 2026-04-26).
     'stop.subtitle': {
         'sr': 'Stajalište gradskog prevoza',
         'en': 'Public transport stop',
         'ru': 'Остановка городского транспорта',
+        'bg': 'Спирка на градския транспорт',
     },
     'stop.back_to_city': {
         'sr': 'Sve linije i stajališta',
         'en': 'All lines and stops',
         'ru': 'Все линии и остановки',
+        'bg': 'Всички линии и спирки',
     },
     'stop.lines_count_label': {
         'sr': 'linija', 'en': 'lines', 'ru': 'линий',
+        'bg': 'линии',
     },
     'stop.first_dep_label': {
         'sr': 'prvi polazak', 'en': 'first departure', 'ru': 'первый рейс',
@@ -1248,26 +1318,31 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
     'stop.coords_label': {
         'sr': 'na mapi', 'en': 'on map', 'ru': 'на карте',
+        'bg': 'на картата',
     },
     'stop.action_title': {
         'sr': 'Planiraj putovanje',
         'en': 'Plan your trip',
         'ru': 'Спланировать поездку',
+        'bg': 'Планирай пътуването',
     },
     'stop.action_search': {
         'sr': 'Pretraži polaske odavde',
         'en': 'Search departures from here',
         'ru': 'Найти рейсы отсюда',
+        'bg': 'Търси тръгванията оттук',
     },
     'stop.action_maps': {
         'sr': 'Otvori u mapama',
         'en': 'Open in maps',
         'ru': 'Открыть на карте',
+        'bg': 'Отвори в картите',
     },
     'stop.action_note': {
         'sr': 'ETA se računa na osnovu zvaničnog GTFS reda vožnje.',
         'en': 'ETA is computed from the official GTFS schedule.',
         'ru': 'ETA рассчитывается по официальному расписанию GTFS.',
+        'bg': 'ETA се изчислява въз основа на официалното разписание по GTFS.',
     },
     'stop.lines_via': {
         'sr': 'Linije kroz ovo stajalište',
@@ -1285,33 +1360,41 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Sve linije',
         'en': 'All lines',
         'ru': 'Все линии',
+        'bg': 'Всички линии',
     },
     'line.action_title': {
         'sr': 'Saznaj kada krećeš',
         'en': 'Find your departure',
         'ru': 'Найди свой рейс',
+        'bg': 'Разбери кога тръгваш',
     },
     'line.action_search': {
         'sr': 'Pretraži kroz mrežu linija',
         'en': 'Search the line network',
         'ru': 'Поиск по сети линий',
+        'bg': 'Търси в мрежата от линии',
     },
     'line.action_map': {
         'sr': 'Pogledaj trasu na mapi',
         'en': 'See route on map',
         'ru': 'Посмотреть маршрут на карте',
+        'bg': 'Виж маршрута на картата',
     },
     'line.stop_count_label': {
         'sr': 'stajališta', 'en': 'stops', 'ru': 'остановок',
+        'bg': 'спирки',
     },
     'line.type_label': {
         'sr': 'tip', 'en': 'type', 'ru': 'тип',
+        'bg': 'тип',
     },
     'line.service_label': {
         'sr': 'polasci', 'en': 'service', 'ru': 'рейсы',
+        'bg': 'тръгвания',
     },
     'line.frequency_label': {
         'sr': 'interval', 'en': 'every', 'ru': 'интервал',
+        'bg': 'интервал',
     },
     'line.filter_all': {
         'sr': 'Svi polasci', 'en': 'All departures', 'ru': 'Все рейсы',
@@ -1324,22 +1407,27 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
     'line.day_workday': {
         'sr': 'Radni dan', 'en': 'Weekday', 'ru': 'Будни',
+        'bg': 'Делничен ден',
     },
     'line.day_saturday': {
         'sr': 'Subota', 'en': 'Saturday', 'ru': 'Суббота',
+        'bg': 'Събота',
     },
     'line.day_sunday': {
         'sr': 'Nedelja', 'en': 'Sunday', 'ru': 'Воскресенье',
+        'bg': 'Неделя',
     },
     'line.schedule_from_first': {
         'sr': 'polasci od prvog stajališta',
         'en': 'from first stop',
         'ru': 'от первой остановки',
+        'bg': 'тръгвания от първата спирка',
     },
     'line.schedule_from': {
         'sr': 'polasci sa',
         'en': 'departures from',
         'ru': 'отправления с',
+        'bg': 'тръгвания от',
     },
 
     # ── City index ──
@@ -1399,21 +1487,25 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Kako doći do {country} iz Srbije?',
         'en': 'How to get to {country} from Serbia?',
         'ru': 'Как добраться до {country} из Сербии?',
+        'bg': 'Как да стигна до {country} от Сърбия?',
     },
     'country.faq.a_travel': {
         'sr': 'Iz Srbije do {country} saobraća {routes} autobuskih linija. Red vožnje, cene i prevoznici na jednom mestu.',
         'en': '{routes} bus routes run from Serbia to {country}. Schedules, prices and carriers in one place.',
         'ru': 'Из Сербии в {country} ходит {routes} автобусных маршрутов. Расписание, цены и перевозчики в одном месте.',
+        'bg': 'От Сърбия до {country} се движат {routes} автобусни линии. Разписание, цени и превозвачи на едно място.',
     },
     'country.faq.q_price': {
         'sr': 'Koliko košta karta za {country}?',
         'en': 'How much is a ticket to {country}?',
         'ru': 'Сколько стоит билет в {country}?',
+        'bg': 'Колко струва билет за {country}?',
     },
     'country.faq.a_price': {
         'sr': 'Karte za {country} počinju od {min} RSD, u zavisnosti od grada i prevoznika.',
         'en': 'Tickets to {country} start from {min} RSD, depending on the city and carrier.',
         'ru': 'Билеты в {country} — от {min} RSD, в зависимости от города и перевозчика.',
+        'bg': 'Билетите за {country} започват от {min} RSD, в зависимост от града и превозвача.',
     },
     'operator.meta_routes': {
         'sr': 'međugradskih ruta',
@@ -1471,6 +1563,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Sačuvaj rutu',
         'en': 'Save route',
         'ru': 'Сохранить маршрут',
+        'bg': 'Запази маршрута',
     },
     'fav.remove': {
         'sr': 'Ukloni',
@@ -1535,85 +1628,101 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Vodiči za putovanja autobusom — Prevozni',
         'en': 'Bus travel guides — Prevozni',
         'ru': 'Гиды по автобусным поездкам — Prevozni',
+        'bg': 'Пътеводители за пътувания с автобус — Prevozni',
     },
     'guides.index_meta': {
         'sr': 'Praktični vodiči za putovanja autobusom i vozom po Srbiji i Balkanu: cene, redovi vožnje, poređenja, saveti.',
         'en': 'Practical guides for bus and train travel across Serbia and the Balkans: prices, schedules, comparisons, tips.',
         'ru': 'Практические гиды по автобусным и железнодорожным поездкам по Сербии и Балканам: цены, расписания, сравнения, советы.',
+        'bg': 'Практични пътеводители за пътувания с автобус и влак из Сърбия и Балканите: цени, разписания, сравнения, съвети.',
     },
     'guides.index_h1': {
         'sr': 'Vodiči za putnike',
         'en': 'Traveller guides',
         'ru': 'Гиды для путешественников',
+        'bg': 'Пътеводители за пътници',
     },
     'guides.index_subtitle': {
         'sr': 'Sve što treba da znate pre putovanja',
         'en': 'Everything you need to know before you travel',
         'ru': 'Всё что нужно знать перед поездкой',
+        'bg': 'Всичко, което трябва да знаете преди пътуването',
     },
     'guides.intro_h': {
         'sr': 'Kako koristiti ove vodiče',
         'en': 'How to use these guides',
         'ru': 'Как пользоваться этими гидами',
+        'bg': 'Как да използвате тези пътеводители',
     },
     'guides.intro_p': {
         'sr': 'Naši vodiči odgovaraju na konkretna pitanja putnika: kako doći do određenog grada, kada su najjeftinije karte, kako izabrati između autobusa i voza. Sav sadržaj se ažurira kada se promene redovi vožnje ili cene kod prevoznika.',
         'en': 'Our guides answer specific traveller questions: how to reach a specific city, when tickets are cheapest, how to choose between bus and train. All content is refreshed when carrier schedules or prices change.',
         'ru': 'Наши гиды отвечают на конкретные вопросы путешественников: как добраться до определённого города, когда билеты дешевле, как выбрать между автобусом и поездом. Весь контент обновляется при изменениях расписания или цен у перевозчиков.',
+        'bg': 'Нашите пътеводители отговарят на конкретни въпроси на пътниците: как да стигнете до определен град, кога билетите са най-евтини, как да изберете между автобус и влак. Цялото съдържание се актуализира при промяна на разписанията или цените на превозвачите.',
     },
-    'guides.cat_travel': {'sr': 'Putovanja', 'en': 'Travel', 'ru': 'Путешествия'},
-    'guides.cat_tips': {'sr': 'Saveti', 'en': 'Tips', 'ru': 'Советы'},
+    'guides.cat_travel': {'sr': 'Putovanja', 'en': 'Travel', 'ru': 'Путешествия', 'bg': 'Пътувания'},
+    'guides.cat_tips': {'sr': 'Saveti', 'en': 'Tips', 'ru': 'Советы', 'bg': 'Съвети'},
 
     # Guide 1 — Belgrade → Budva
     'guides.beograd_budva.title': {
         'sr': 'Kako doći iz Beograda u Budvu: autobus, voz, cene 2026',
         'en': 'How to get from Belgrade to Budva: bus, train, prices 2026',
         'ru': 'Как добраться из Белграда в Будву: автобус, поезд, цены 2026',
+        'bg': 'Как да стигнете от Белград до Будва: автобус, влак, цени 2026',
     },
     'guides.beograd_budva.meta': {
         'sr': 'Pun vodič za put Beograd → Budva 2026: autobus (najbrže, 10–12h), cene od 30€, preporučeni prevoznici i saveti.',
         'en': 'Full guide for Belgrade → Budva trip in 2026: bus (fastest, 10–12h), prices from €30, recommended carriers and tips.',
         'ru': 'Полный гид по поездке Белград → Будва в 2026: автобус (быстрее всего, 10–12ч), цены от 30€, рекомендуемые перевозчики и советы.',
+        'bg': 'Пълен наръчник за пътуването Белград → Будва 2026: автобус (най-бързо, 10–12ч), цени от 30€, препоръчани превозвачи и съвети.',
     },
     'guides.beograd_budva.p1': {
         'sr': 'Beograd i Budva razdvaja oko <strong>600 km</strong> — put kroz Užice, Zlatibor, Nikšić i Podgoricu. Direktnog voza nema; najpraktičniji način je <strong>autobus preko noći</strong> (10–12 sati). Letnja sezona: i dnevne linije i veći broj prevoznika. Zimi: uglavnom noćne linije.',
         'en': 'Belgrade and Budva are separated by about <strong>600 km</strong> — the route runs through Užice, Zlatibor, Nikšić and Podgorica. There is no direct train; the most practical way is an <strong>overnight bus</strong> (10–12 hours). In summer: more daytime lines and more carriers. In winter: mostly overnight lines.',
         'ru': 'Белград и Будву разделяет около <strong>600 км</strong> — путь через Ужице, Златибор, Никшич и Подгорицу. Прямого поезда нет; самый практичный вариант — <strong>ночной автобус</strong> (10–12 часов). Летом: больше дневных рейсов и перевозчиков. Зимой: в основном ночные рейсы.',
+        'bg': 'Белград и Будва са разделени от около <strong>600 км</strong> — маршрут през Ужице, Златибор, Никшич и Подгорица. Директен влак няма; най-практичният начин е <strong>нощен автобус</strong> (10–12 часа). През летния сезон има и дневни линии, и повече превозвачи. През зимата — предимно нощни линии.',
     },
     'guides.beograd_budva.h2_options': {
         'sr': 'Opcije prevoza',
         'en': 'Travel options',
         'ru': 'Варианты транспорта',
+        'bg': 'Варианти за превоз',
     },
     'guides.beograd_budva.p2': {
         'sr': 'Na ovoj relaciji prevoz organizuju <strong>Lasta</strong>, <strong>Kavim-Jedinstvo</strong>, <strong>OZLEM</strong> i još nekoliko regionalnih prevoznika. Prosečna vožnja traje <strong>10 sati 30 minuta</strong> sa jednom pauzom. Većina autobusa su savremeni, sa WC-om, WiFi-jem i klimom.',
         'en': 'The route is operated by <strong>Lasta</strong>, <strong>Kavim-Jedinstvo</strong>, <strong>OZLEM</strong> and several regional carriers. Average trip is <strong>10 hours 30 minutes</strong> with one break. Most buses are modern, with toilet, WiFi and A/C.',
         'ru': 'Маршрут обслуживают <strong>Lasta</strong>, <strong>Kavim-Jedinstvo</strong>, <strong>OZLEM</strong> и несколько региональных перевозчиков. Средняя поездка — <strong>10 часов 30 минут</strong> с одной остановкой. Большинство автобусов современные, с туалетом, WiFi и кондиционером.',
+        'bg': 'На тази линия превоза организират <strong>Lasta</strong>, <strong>Kavim-Jedinstvo</strong>, <strong>OZLEM</strong> и още няколко регионални превозвача. Средното времетраене на пътуването е <strong>10 часа и 30 минути</strong>, с една почивка. Повечето автобуси са съвременни, с тоалетна, WiFi и климатик.',
     },
     'guides.beograd_budva.h2_price': {
         'sr': 'Cene karata',
         'en': 'Ticket prices',
         'ru': 'Цены билетов',
+        'bg': 'Цени на билетите',
     },
     'guides.beograd_budva.p3': {
         'sr': 'Karte koštaju <strong>30–45€</strong> (3500–5200 RSD) zavisno od prevoznika i sezone. U julu-avgustu cene idu gore. Za najjeftinije karte: kupujte unapred i izbegavajte vikende. Povratna karta je često 5–10% jeftinija od dve u jednom smeru.',
         'en': 'Tickets cost <strong>€30–45</strong> (3500–5200 RSD) depending on carrier and season. Prices rise in July–August. For cheapest fares: book in advance and avoid weekends. Return tickets are often 5–10% cheaper than two one-ways.',
         'ru': 'Билеты стоят <strong>30–45€</strong> (3500–5200 RSD) в зависимости от перевозчика и сезона. Летом цены растут. Для самых дешёвых билетов: покупайте заранее и избегайте выходных. Обратный билет часто на 5–10% дешевле двух в одну сторону.',
+        'bg': 'Билетите струват <strong>30–45€</strong> (3500–5200 RSD) в зависимост от превозвача и сезона. През юли и август цените се покачват. За най-евтини билети: купувайте предварително и избягвайте уикендите. Билетът за отиване и връщане често е с 5–10% по-евтин от два билета в една посока.',
     },
     'guides.beograd_budva.h2_when': {
         'sr': 'Kada putovati',
         'en': 'When to travel',
         'ru': 'Когда ехать',
+        'bg': 'Кога да пътувате',
     },
     'guides.beograd_budva.p4': {
         'sr': 'Glavna sezona je <strong>jun-septembar</strong> — tada je najveći izbor polazaka i najviše turista. Van sezone (novembar-mart) put je jeftiniji i mirniji, ali je broj polazaka manji (obično samo noćni). Srećom, Budva radi cele godine — čak i zimi tu ima života.',
         'en': 'Peak season is <strong>June–September</strong> — most departures and most tourists. Off-season (November–March) is cheaper and quieter, but fewer departures (usually overnight only). Luckily Budva is open year-round — even in winter it has a pulse.',
         'ru': 'Пик — <strong>июнь-сентябрь</strong> — больше всего рейсов и туристов. Несезон (ноябрь-март) — дешевле и тише, но меньше рейсов (обычно только ночные). К счастью, Будва живёт круглый год — даже зимой там есть жизнь.',
+        'bg': 'Основният сезон е <strong>юни–септември</strong> — тогава изборът от курсове е най-голям, а туристите — най-много. Извън сезона (ноември–март) пътуването е по-евтино и по-спокойно, но курсовете са по-малко (обикновено само нощни). За щастие Будва работи целогодишно — дори през зимата там кипи живот.',
     },
     'guides.beograd_budva.cta': {
         'sr': 'Proveri polazke Beograd → Budva',
         'en': 'Check Belgrade → Budva departures',
         'ru': 'Посмотреть рейсы Белград → Будва',
+        'bg': 'Провери курсовете Белград → Будва',
     },
 
     # Guide 2 — cheap tickets
@@ -1621,39 +1730,46 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Najjeftinije autobus karte u Srbiji: 7 saveta 2026',
         'en': 'Cheapest bus tickets in Serbia: 7 tips for 2026',
         'ru': 'Самые дешёвые билеты на автобус в Сербии: 7 советов 2026',
+        'bg': 'Най-евтините автобусни билети в Сърбия: 7 съвета за 2026',
     },
     'guides.cheap_tickets.meta': {
         'sr': 'Kako kupiti najjeftinije karte za autobus u Srbiji: kada bukirati, gde tražiti, koji prevoznici daju popuste.',
         'en': 'How to buy the cheapest bus tickets in Serbia: when to book, where to look, which carriers offer discounts.',
         'ru': 'Как купить самые дешёвые билеты на автобус в Сербии: когда бронировать, где искать, какие перевозчики дают скидки.',
+        'bg': 'Как да купите най-евтините автобусни билети в Сърбия: кога да резервирате, къде да търсите, кои превозвачи предлагат отстъпки.',
     },
     'guides.cheap_tickets.p1': {
         'sr': 'Cene autobuskih karata u Srbiji variraju i do 40% zavisno od dana, prevoznika i načina kupovine. Evo kako ih spustiti na minimum.',
         'en': 'Bus ticket prices in Serbia vary by up to 40% depending on the day, carrier and purchase method. Here is how to push them to the minimum.',
         'ru': 'Цены автобусных билетов в Сербии различаются до 40% в зависимости от дня, перевозчика и способа покупки. Вот как опустить их до минимума.',
+        'bg': 'Цените на автобусните билети в Сърбия варират до 40% в зависимост от деня, превозвача и начина на закупуване. Ето как да ги сведете до минимум.',
     },
-    'guides.cheap_tickets.h2_when': {'sr': 'Kada kupiti', 'en': 'When to buy', 'ru': 'Когда покупать'},
+    'guides.cheap_tickets.h2_when': {'sr': 'Kada kupiti', 'en': 'When to buy', 'ru': 'Когда покупать', 'bg': 'Кога да купите'},
     'guides.cheap_tickets.p2': {
         'sr': 'Autobuske karte u Srbiji nemaju tako izražen dynamic pricing kao avio, ali i dalje: <strong>utorak-četvrtak</strong> su najjeftiniji dani, vikendi i praznici 10–25% skuplji. Vožnje rano ujutru i kasno noću su obično jeftinije od popodnevnih.',
         'en': 'Serbian bus tickets don\'t have dynamic pricing like airlines, but still: <strong>Tuesday-Thursday</strong> are cheapest days, weekends and holidays 10–25% more expensive. Early morning and late-night runs are usually cheaper than afternoon ones.',
         'ru': 'Автобусные билеты в Сербии не имеют такого динамичного ценообразования как авиа, но всё же: <strong>вторник-четверг</strong> — самые дешёвые дни, выходные и праздники на 10–25% дороже. Утренние и ночные рейсы обычно дешевле дневных.',
+        'bg': 'Автобусните билети в Сърбия нямат толкова изразено динамично ценообразуване като самолетните, но все пак: <strong>вторник-четвъртък</strong> са най-евтините дни, а през уикендите и празниците цените са с 10–25% по-високи. Курсовете рано сутрин и късно вечер обикновено са по-евтини от следобедните.',
     },
-    'guides.cheap_tickets.h2_where': {'sr': 'Gde tražiti', 'en': 'Where to look', 'ru': 'Где искать'},
+    'guides.cheap_tickets.h2_where': {'sr': 'Gde tražiti', 'en': 'Where to look', 'ru': 'Где искать', 'bg': 'Къде да търсите'},
     'guides.cheap_tickets.p3': {
         'sr': 'Većina prevoznika prodaje online preko partnera <strong>BusTicket4.me</strong>. Direktno na šalteru autobuske stanice ponekad je i jeftinije — posebno kod manjih lokalnih prevoznika (Niš-Ekspres, Severtrans, Autoprevoz).',
         'en': 'Most carriers sell online via partners <strong>BusTicket4.me</strong>. Buying directly at the bus-station counter is sometimes cheaper — especially with smaller local carriers (Niš-Ekspres, Severtrans, Autoprevoz).',
         'ru': 'Большинство перевозчиков продают онлайн через партнёров <strong>BusTicket4.me</strong>. Прямо на кассе автовокзала иногда дешевле — особенно у небольших местных перевозчиков (Niš-Ekspres, Severtrans, Autoprevoz).',
+        'bg': 'Повечето превозвачи продават онлайн чрез партньора <strong>BusTicket4.me</strong>. Директно на гишето на автогарата понякога излиза дори по-евтино — особено при по-малките местни превозвачи (Niš-Ekspres, Severtrans, Autoprevoz).',
     },
-    'guides.cheap_tickets.h2_tips': {'sr': 'Praktični saveti', 'en': 'Practical tips', 'ru': 'Практические советы'},
+    'guides.cheap_tickets.h2_tips': {'sr': 'Praktični saveti', 'en': 'Practical tips', 'ru': 'Практические советы', 'bg': 'Практични съвети'},
     'guides.cheap_tickets.p4': {
         'sr': 'Povratna karta obično je 5–10% jeftinija od dve odvojene. Studentske i penzionerske popuste daju Lasta, Kavim i Niš-Ekspres (do 30%). Za više ljudi: proveriti grupne cene kod prevoznika — česta ušteda 15–20%. Ne bukirati u petak popodne i nedelju uveče — to je cenovni pik nedelje.',
         'en': 'Return tickets are usually 5–10% cheaper than two one-ways. Student and senior discounts: Lasta, Kavim and Niš-Ekspres (up to 30%). For groups: check group rates with the carrier — typical savings 15–20%. Avoid booking Friday afternoon and Sunday evening — weekly price peak.',
         'ru': 'Обратные билеты обычно на 5–10% дешевле двух в одну сторону. Студенческие и пенсионерские скидки: Lasta, Kavim и Niš-Ekspres (до 30%). Для групп: проверьте групповые тарифы у перевозчика — обычно экономия 15–20%. Не бронируйте в пятницу днём и воскресенье вечером — пик цен недели.',
+        'bg': 'Билетът за отиване и връщане обикновено е с 5–10% по-евтин от два отделни билета. Отстъпки за студенти и пенсионери предлагат Lasta, Kavim и Niš-Ekspres (до 30%). За по-големи групи: проверете груповите цени при превозвача — обичайно спестявате 15–20%. Избягвайте резервации в петък следобед и неделя вечер — това е ценовият пик на седмицата.',
     },
     'guides.cheap_tickets.cta': {
         'sr': 'Vidi sve rute i cene',
         'en': 'See all routes and prices',
         'ru': 'Посмотреть все маршруты и цены',
+        'bg': 'Виж всички маршрути и цени',
     },
 
     # Guide 3 — bus vs train
@@ -1661,39 +1777,46 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Autobus ili voz u Srbiji: šta je bolje?',
         'en': 'Bus or train in Serbia: which is better?',
         'ru': 'Автобус или поезд в Сербии: что лучше?',
+        'bg': 'Автобус или влак в Сърбия: кое е по-добро?',
     },
     'guides.bus_vs_train.meta': {
         'sr': 'Poređenje autobusa i voza u Srbiji: brzina, cena, komfor, pokrivenost. Kada izabrati šta.',
         'en': 'Bus vs. train comparison for Serbia: speed, price, comfort, coverage. When to pick which.',
         'ru': 'Сравнение автобуса и поезда в Сербии: скорость, цена, комфорт, покрытие. Когда что выбрать.',
+        'bg': 'Сравнение между автобус и влак в Сърбия: скорост, цена, комфорт, покритие. Кога какво да изберете.',
     },
     'guides.bus_vs_train.p1': {
         'sr': 'U Srbiji autobus pokriva skoro sve relacije (275+ međugradskih), dok voz radi na oko 15 glavnih pravaca. Ipak, na nekim rutama voz je ozbiljan takmičar — jeftiniji i komforniji.',
         'en': 'In Serbia, the bus covers nearly every route (275+ intercity), while the train runs on about 15 main corridors. Still, on certain routes the train is a serious contender — cheaper and more comfortable.',
         'ru': 'В Сербии автобус покрывает почти все направления (275+ междугородних), поезд работает на ~15 основных коридорах. Тем не менее на некоторых маршрутах поезд — серьёзный конкурент: дешевле и комфортнее.',
+        'bg': 'В Сърбия автобусът покрива почти всички връзки (над 275 междуградски линии), докато влакът обслужва около 15 главни направления. И все пак по някои маршрути влакът е сериозен конкурент — по-евтин и по-комфортен.',
     },
-    'guides.bus_vs_train.h2_bus': {'sr': 'Kada autobus', 'en': 'When bus wins', 'ru': 'Когда автобус выигрывает'},
+    'guides.bus_vs_train.h2_bus': {'sr': 'Kada autobus', 'en': 'When bus wins', 'ru': 'Когда автобус выигрывает', 'bg': 'Кога автобус'},
     'guides.bus_vs_train.p2': {
         'sr': 'Autobus je bolji izbor za <strong>manje gradove</strong> (Čačak, Kraljevo, Užice, Valjevo, Leskovac), <strong>putovanja u region</strong> (Crna Gora, Bosna, Hrvatska), i <strong>noćne polaske</strong> kada možete da spavate u sedištu. Prevoznika je mnogo, frekvencija velika.',
         'en': 'The bus is better for <strong>smaller cities</strong> (Čačak, Kraljevo, Užice, Valjevo, Leskovac), <strong>regional travel</strong> (Montenegro, Bosnia, Croatia), and <strong>overnight runs</strong> where you can sleep in the seat. Lots of carriers, high frequency.',
         'ru': 'Автобус лучше для <strong>небольших городов</strong> (Чачак, Кралево, Ужице, Валево, Лесковац), <strong>региональных поездок</strong> (Черногория, Босния, Хорватия) и <strong>ночных рейсов</strong> где можно поспать в кресле. Много перевозчиков, высокая частота.',
+        'bg': 'Автобусът е по-добрият избор за <strong>по-малките градове</strong> (Чачак, Кралево, Ужице, Валево, Лесковац), <strong>пътувания в региона</strong> (Черна гора, Босна, Хърватия) и <strong>нощни курсове</strong>, когато можете да поспите на седалката. Превозвачите са много, а честотата е голяма.',
     },
-    'guides.bus_vs_train.h2_train': {'sr': 'Kada voz', 'en': 'When train wins', 'ru': 'Когда поезд выигрывает'},
+    'guides.bus_vs_train.h2_train': {'sr': 'Kada voz', 'en': 'When train wins', 'ru': 'Когда поезд выигрывает', 'bg': 'Кога влак'},
     'guides.bus_vs_train.p3': {
         'sr': 'Voz je bolji na pravcu <strong>Beograd — Novi Sad</strong> (brza Soko linija, 37 min) i na relacijama <strong>Beograd — Subotica</strong>, <strong>Beograd — Niš</strong>. Komfor je veći (možete da ustanete i prošetate), cene često niže nego autobus, i nema zastoja u saobraćaju.',
         'en': 'The train wins on <strong>Belgrade — Novi Sad</strong> (the fast Soko line, 37 min) and on <strong>Belgrade — Subotica</strong>, <strong>Belgrade — Niš</strong>. More comfort (you can stand and walk), often cheaper than the bus, no traffic jams.',
         'ru': 'Поезд выигрывает на направлении <strong>Белград — Нови-Сад</strong> (скорая линия Soko, 37 мин) и на <strong>Белград — Суботица</strong>, <strong>Белград — Ниш</strong>. Больше комфорта (можно встать и пройтись), часто дешевле автобуса, нет пробок.',
+        'bg': 'Влакът е по-добрият вариант в посока <strong>Белград — Нови Сад</strong> (бързата линия „Соко“, 37 мин.) и по маршрутите <strong>Белград — Суботица</strong>, <strong>Белград — Ниш</strong>. Комфортът е по-голям (можете да станете и да се разходите), цените често са по-ниски от тези на автобуса, а няма и задръствания.',
     },
-    'guides.bus_vs_train.h2_verdict': {'sr': 'Verdikt', 'en': 'Verdict', 'ru': 'Вывод'},
+    'guides.bus_vs_train.h2_verdict': {'sr': 'Verdikt', 'en': 'Verdict', 'ru': 'Вывод', 'bg': 'Заключение'},
     'guides.bus_vs_train.p4': {
         'sr': 'Za <strong>Novi Sad</strong>, <strong>Subotica</strong>, <strong>Niš</strong>: pokušajte voz (posebno Soko). Za sve ostalo: autobus. Kad god ima oba — uporedite cenu i vreme na ovom sajtu pre kupovine.',
         'en': 'For <strong>Novi Sad</strong>, <strong>Subotica</strong>, <strong>Niš</strong>: try the train (especially Soko). For everything else: bus. Whenever both are available — compare price and time on this site before buying.',
         'ru': 'Для <strong>Нови-Сад</strong>, <strong>Суботица</strong>, <strong>Ниш</strong>: попробуйте поезд (особенно Soko). Для всего остального: автобус. Когда оба варианта есть — сравните цену и время на этом сайте перед покупкой.',
+        'bg': 'За <strong>Нови Сад</strong>, <strong>Суботица</strong>, <strong>Ниш</strong>: опитайте влака (особено „Соко“). За всичко останало: автобус. Когато има и двата варианта — сравнете цената и времето на този сайт, преди да купите билет.',
     },
     'guides.bus_vs_train.cta': {
         'sr': 'Uporedi polaske',
         'en': 'Compare departures',
         'ru': 'Сравнить рейсы',
+        'bg': 'Сравни курсовете',
     },
 
     # ── Country hub page ──
@@ -1733,9 +1856,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Расписание автобусов из Болгарии в',
         'bg': 'Разписание на автобуси от България за',
     },
-    'country.meta_routes': {'sr': 'ruta', 'en': 'routes', 'ru': 'маршрутов'},
-    'country.meta_trips': {'sr': 'polazaka', 'en': 'departures', 'ru': 'отправлений'},
-    'country.meta_cities': {'sr': 'gradova', 'en': 'cities', 'ru': 'городов'},
+    'country.meta_routes': {'sr': 'ruta', 'en': 'routes', 'ru': 'маршрутов', 'bg': 'маршрута'},
+    'country.meta_trips': {'sr': 'polazaka', 'en': 'departures', 'ru': 'отправлений', 'bg': 'тръгвания'},
+    'country.meta_cities': {'sr': 'gradova', 'en': 'cities', 'ru': 'городов', 'bg': 'града'},
     'country.meta_cta': {
         'sr': 'Uporedite cene i kupite kartu. Besplatno.',
         'en': 'Compare prices, buy tickets. Free.',
@@ -1746,84 +1869,100 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Autobuske rute —',
         'en': 'Bus routes —',
         'ru': 'Автобусные маршруты —',
+        'bg': 'Автобусни маршрути —',
     },
-    'country.stat_routes': {'sr': 'ruta', 'en': 'routes', 'ru': 'маршрутов'},
-    'country.stat_cities': {'sr': 'gradova', 'en': 'cities', 'ru': 'городов'},
+    'country.stat_routes': {'sr': 'ruta', 'en': 'routes', 'ru': 'маршрутов', 'bg': 'маршрута'},
+    'country.stat_cities': {'sr': 'gradova', 'en': 'cities', 'ru': 'городов', 'bg': 'града'},
     'country.stat_trips': {'sr': 'dnevnih polazaka', 'en': 'daily departures', 'ru': 'ежедневных отправлений'},
     'country.routes_heading': {
         'sr': 'Sve rute za',
         'en': 'All routes to',
         'ru': 'Все маршруты в',
+        'bg': 'Всички маршрути за',
     },
     'country.no_routes': {
         'sr': 'Trenutno nema dostupnih ruta za ovu zemlju.',
         'en': 'No routes available for this country at the moment.',
         'ru': 'В настоящее время нет доступных маршрутов в эту страну.',
+        'bg': 'В момента няма налични маршрути за тази държава.',
     },
     'country.about_h': {
         'sr': 'Putovanja autobusom u {country}',
         'en': 'Bus travel to {country}',
         'ru': 'Автобусные поездки в {country}',
+        'bg': 'Пътуване с автобус до {country}',
     },
     'country.about_p': {
         'sr': 'Na Prevozni.com pronaći ćete {routes} aktivnih autobuskih ruta koje povezuju Srbiju sa državom {country}, sa ukupno {trips} polazaka dnevno. Od toga {from_sr} rute polaze iz srpskih gradova, a {intra} rute su unutar same zemlje. Pokriveno je {cities} gradova.',
         'en': 'On Prevozni.com you will find {routes} active bus routes connecting Serbia with {country}, with {trips} daily departures in total. {from_sr} routes depart from Serbian cities, and {intra} routes are within the country itself. {cities} cities are covered.',
         'ru': 'На Prevozni.com вы найдёте {routes} активных автобусных маршрутов, соединяющих Сербию со страной {country}, всего {trips} ежедневных отправлений. Из них {from_sr} маршрутов отправляются из сербских городов, а {intra} маршрутов — внутри самой страны. Охвачено {cities} городов.',
+        'bg': 'В Prevozni.com ще намерите {routes} активни автобусни маршрута, свързващи Сърбия с {country}, с общо {trips} тръгвания дневно. От тях {from_sr} маршрута тръгват от сръбски градове, а {intra} маршрута са в рамките на самата държава. Обхванати са {cities} града.',
     },
     'country.cities_p': {
         'sr': 'Gradovi u {country} koji su pokriveni: {cities}. Kliknite na rutu da vidite konkretne polaske, cene karata i kupovinu kod partnera.',
         'en': 'Cities in {country} covered: {cities}. Click a route to see departures, ticket prices and partner purchase links.',
         'ru': 'Города в {country}, охваченные сервисом: {cities}. Нажмите на маршрут чтобы увидеть отправления, цены билетов и покупку у партнёра.',
+        'bg': 'Градове в {country}, които са обхванати: {cities}. Кликнете върху маршрут, за да видите конкретните тръгвания, цените на билетите и покупка при партньор.',
     },
     'country.carriers_h': {
         'sr': 'Prevoznici za {country}',
         'en': 'Carriers to {country}',
         'ru': 'Перевозчики в {country}',
+        'bg': 'Превозвачи за {country}',
     },
     'country.subtitle': {
         'sr': 'Međugradske autobuske rute, cene i raspored',
         'en': 'Intercity bus routes, prices and schedules',
         'ru': 'Междугородние автобусные маршруты, цены и расписание',
+        'bg': 'Междуградски автобусни маршрути, цени и разписание',
     },
     'country.stat_avg_distance': {
         'sr': 'prosečna razdaljina',
         'en': 'average distance',
         'ru': 'средняя дистанция',
+        'bg': 'средно разстояние',
     },
     'country.stat_avg_price': {
         'sr': 'prosečna cena',
         'en': 'average price',
         'ru': 'средняя цена',
+        'bg': 'средна цена',
     },
     'country.prose_travel_time': {
         'sr': 'Prosečna razdaljina rute do države {country} iznosi oko {km} km, što odgovara putovanju od približno {hours} sati standardnim autobusom.',
         'en': 'The average route distance to {country} is around {km} km, roughly {hours} hours by standard bus.',
         'ru': 'Средняя дистанция маршрута до страны {country} — около {km} км, что соответствует поездке примерно за {hours} часов на стандартном автобусе.',
+        'bg': 'Средното разстояние на маршрута до {country} е около {km} км, което съответства на пътуване от приблизително {hours} часа със стандартен автобус.',
     },
     'country.prose_avg_price': {
         'sr': 'Prosečna najpovoljnija cena karte za pravac {country} kreće se oko {price} dinara.',
         'en': 'The average lowest ticket price for {country} is around {price} RSD.',
         'ru': 'Средняя минимальная цена билета в направлении {country} — около {price} динаров.',
+        'bg': 'Средната най-изгодна цена на билет за {country} е около {price} динара.',
     },
     'country.prose_buy': {
         'sr': 'Sve cene su informativne i ažurirane prema podacima naših partnera. Karte za rute do države {country} kupuju se kod naših booking partnera; mi ne naplaćujemo dodatne provizije.',
         'en': 'All prices are indicative and updated from partner data. Tickets to {country} are purchased through our booking partners; we charge no extra fees.',
         'ru': 'Все цены ориентировочны и обновляются по данным наших партнёров. Билеты в страну {country} покупаются у наших партнёров; мы не берём дополнительной комиссии.',
+        'bg': 'Всички цени са информативни и се актуализират според данните на нашите партньори. Билетите за маршрутите до {country} се купуват от нашите партньори за резервации; ние не начисляваме допълнителни такси.',
     },
     'country.filter_popular': {
         'sr': 'Najpopularnije',
         'en': 'Most popular',
         'ru': 'Самые популярные',
+        'bg': 'Най-популярни',
     },
     'country.filter_cheap': {
         'sr': 'Najjeftinije',
         'en': 'Cheapest',
         'ru': 'Самые дешёвые',
+        'bg': 'Най-евтини',
     },
     'country.filter_short': {
         'sr': 'Najkraće',
         'en': 'Shortest',
         'ru': 'Самые короткие',
+        'bg': 'Най-кратки',
     },
     'country.reviews_heading': {
         'sr': 'Recenzije putnika za rute do države {country}',
@@ -1834,6 +1973,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Iz Beograda',
         'en': 'From Belgrade',
         'ru': 'Из Белграда',
+        'bg': 'От Белград',
     },
 
     'operator.cities_p': {
@@ -2042,6 +2182,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Top destinacije na Balkanu',
         'en': 'Top Balkan destinations',
         'ru': 'Лучшие направления на Балканах',
+        'bg': 'Топ дестинации на Балканите',
     },
     'dest.subtitle': {
         'sr': 'Najpopularnija mesta za putovanje autobusom i vozom',
@@ -2247,11 +2388,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Polazak',
         'en': 'From',
         'ru': 'Откуда',
+        'bg': 'От',
     },
     'form.label_to': {
         'sr': 'Odredište',
         'en': 'To',
         'ru': 'Куда',
+        'bg': 'До',
     },
     # Example cities, not a restatement of the label. The placeholders used to
     # echo it — label "From" over placeholder "From?" — which reads as a
@@ -2260,16 +2403,19 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'npr. Beograd',
         'en': 'e.g. Belgrade',
         'ru': 'напр. Белград',
+        'bg': 'напр. Белград',
     },
     'form.placeholder_to': {
         'sr': 'npr. Novi Sad',
         'en': 'e.g. Novi Sad',
         'ru': 'напр. Нови-Сад',
+        'bg': 'напр. Нови Сад',
     },
     'form.label_date': {
         'sr': 'Datum',
         'en': 'Date',
         'ru': 'Дата',
+        'bg': 'Дата',
     },
     'a11y.filters': {
         'sr': 'Filteri polazaka',
@@ -2381,11 +2527,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Prikaži još',
         'en': 'Show more',
         'ru': 'Показать ещё',
+        'bg': 'Покажи още',
     },
     'route_index.show_more_suffix': {
         'sr': 'ruta',
         'en': 'routes',
         'ru': 'маршрутов',
+        'bg': 'маршрута',
     },
     'route_index.no_results': {
         'sr': 'Nema rezultata za ovaj upit',
@@ -2429,6 +2577,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Prevoznici',
         'en': 'Carriers',
         'ru': 'Перевозчики',
+        'bg': 'Превозвачи',
     },
     'carriers.website': {
         'sr': 'Sajt',
@@ -2904,11 +3053,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Karta linije, sve stanice i uživo dolasci.',
         'en': 'Line map, all stops and live arrivals.',
         'ru': 'Карта линии, все остановки и прибытия онлайн.',
+        'bg': 'Карта на линията, всички спирки и тръгвания на живо.',
     },
     'stop_detail.meta_eta': {
         'sr': 'Sve linije, prvi i poslednji polazak, uživo ETA na karti.',
         'en': 'All lines, first and last departure, live ETA on the map.',
         'ru': 'Все линии, первый и последний рейс, онлайн-ETA на карте.',
+        'bg': 'Всички линии, първо и последно тръгване, ETA на живо на картата.',
     },
 
     # ── search_results.html ──
@@ -2972,26 +3123,31 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Gradski prevoz',
         'en': 'City transport',
         'ru': 'Городской транспорт',
+        'bg': 'Градски транспорт',
     },
     'city_transport.title_suffix': {
         'sr': 'linije i stajališta',
         'en': 'lines and stops',
         'ru': 'линии и остановки',
+        'bg': 'линии и спирки',
     },
     'city_transport.meta_prefix': {
         'sr': 'Red vožnje gradskog prevoza u',
         'en': 'City transport schedule in',
         'ru': 'Расписание городского транспорта в',
+        'bg': 'Разписание на градския транспорт в',
     },
     'city_transport.meta_lines': {
         'sr': 'linija, stajališta i polasci.',
         'en': 'lines, stops and departures.',
         'ru': 'линий, остановок и отправлений.',
+        'bg': 'линии, спирки и тръгвания.',
     },
     'city_transport.meta_extra': {
         'sr': 'Interaktivna mapa stajališta, red vožnje i dolasci uživo. Besplatno →',
         'en': 'Interactive stop map, schedules and live arrivals. Free →',
         'ru': 'Интерактивная карта остановок, расписание и прибытия онлайн. Бесплатно →',
+        'bg': 'Интерактивна карта на спирките, разписание и тръгвания на живо. Безплатно →',
     },
     'city_transport.stop_popup_more': {
         'sr': 'Polasci →',
@@ -3004,11 +3160,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Red vožnje',
         'en': 'Schedule',
         'ru': 'Расписание',
+        'bg': 'Разписание',
     },
     'line_detail.line_prefix': {
         'sr': 'Linija',
         'en': 'Line',
         'ru': 'Линия',
+        'bg': 'Линия',
     },
     'line_detail.meta_schedule': {
         'sr': 'Red vožnje linije',
@@ -3029,11 +3187,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Polasci od',
         'en': 'Departures from',
         'ru': 'Отправления с',
+        'bg': 'Тръгвания от',
     },
     'line_detail.meta_to': {
         'sr': 'do',
         'en': 'to',
         'ru': 'до',
+        'bg': 'до',
     },
 
     # ── stop_detail.html ──
@@ -3041,11 +3201,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Stajalište',
         'en': 'Stop',
         'ru': 'Остановка',
+        'bg': 'Спирка',
     },
     'stop_detail.title_suffix': {
         'sr': 'red vožnje',
         'en': 'schedule',
         'ru': 'расписание',
+        'bg': 'разписание',
     },
     'stop_detail.meta_schedule': {
         'sr': 'red vožnje i polasci.',
@@ -3056,6 +3218,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'linija',
         'en': 'lines',
         'ru': 'линий',
+        'bg': 'линии',
     },
     'stop_detail.meta_and_more': {
         'sr': 'i dr.',
@@ -3328,41 +3491,49 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Koliko stajališta ima linija {number}?',
         'en': 'How many stops does line {number} have?',
         'ru': 'Сколько остановок у линии {number}?',
+        'bg': 'Колко спирки има линия {number}?',
     },
     'line_detail.faq.a_stops': {
         'sr': 'Linija {number} ({name}) u {city}u ima {count} stajališta, od {first} do {last}.',
         'en': 'Line {number} ({name}) in {city} has {count} stops, from {first} to {last}.',
         'ru': 'Линия {number} ({name}) в городе {city} имеет {count} остановок, от {first} до {last}.',
+        'bg': 'Линия {number} ({name}) в {city} има {count} спирки, от {first} до {last}.',
     },
     'line_detail.faq.a_stops_no_endpoints': {
         'sr': 'Linija {number} ({name}) u {city}u ima {count} stajališta.',
         'en': 'Line {number} ({name}) in {city} has {count} stops.',
         'ru': 'Линия {number} ({name}) в городе {city} имеет {count} остановок.',
+        'bg': 'Линия {number} ({name}) в {city} има {count} спирки.',
     },
     'line_detail.faq.q_when': {
         'sr': 'Kada saobraća linija {number}?',
         'en': 'When does line {number} run?',
         'ru': 'Когда работает линия {number}?',
+        'bg': 'Кога се движи линия {number}?',
     },
     'line_detail.faq.a_when_range': {
         'sr': 'Linija {number} saobraća od {first} do {last} radnim danom prema GTFS redu vožnje.',
         'en': 'Line {number} runs from {first} to {last} on weekdays according to the GTFS schedule.',
         'ru': 'Линия {number} работает с {first} до {last} по будням согласно расписанию GTFS.',
+        'bg': 'Линия {number} се движи от {first} до {last} в делничен ден според разписанието по GTFS.',
     },
     'line_detail.faq.a_when_unknown': {
         'sr': 'Tačan red vožnje linije {number} proverite na stajalištima ili kod gradskog prevoznika.',
         'en': 'Check the exact schedule for line {number} at the stops or with the city carrier.',
         'ru': 'Точное расписание линии {number} уточняйте на остановках или у городского перевозчика.',
+        'bg': 'Точното разписание на линия {number} проверете на спирките или при градския превозвач.',
     },
     'line_detail.faq.q_type': {
         'sr': 'Koji je tip linije {number}?',
         'en': 'What type is line {number}?',
         'ru': 'Какой тип у линии {number}?',
+        'bg': 'Какъв тип е линия {number}?',
     },
     'line_detail.faq.a_type': {
         'sr': 'Linija {number} je {type} u sistemu gradskog prevoza grada {city}.',
         'en': 'Line {number} is a {type} in the {city} city transport system.',
         'ru': 'Линия {number} — это {type} в системе городского транспорта города {city}.',
+        'bg': 'Линия {number} е {type} в системата на градския транспорт на град {city}.',
     },
     # "Na koliko minuta ide linija N" is a top GSC query pattern; surfaced only
     # when we have a real GTFS-derived headway (gated in the template).
@@ -3370,11 +3541,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Na koliko minuta ide linija {number}?',
         'en': 'How often does line {number} run?',
         'ru': 'Как часто ходит линия {number}?',
+        'bg': 'На колко минути идва линия {number}?',
     },
     'line_detail.faq.a_freq': {
         'sr': 'Linija {number} radnim danom ima polazak u proseku na svakih ~{headway} minuta.',
         'en': 'On weekdays line {number} departs on average about every ~{headway} minutes.',
         'ru': 'По будням линия {number} отправляется в среднем примерно каждые ~{headway} минут.',
+        'bg': 'Линия {number} в делничен ден има тръгване средно на всеки ~{headway} минути.',
     },
 
     # ── stop_detail FAQ JSON-LD ──
@@ -3382,46 +3555,55 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Koje linije staju na stajalištu {stop}?',
         'en': 'Which lines stop at {stop}?',
         'ru': 'Какие линии останавливаются на остановке {stop}?',
+        'bg': 'Кои линии спират на спирка {stop}?',
     },
     'stop_detail.faq.a_lines': {
         'sr': 'Na stajalištu {stop} u {city}u staje {count} linija gradskog prevoza ({types}).',
         'en': 'At stop {stop} in {city}, {count} city transport lines stop ({types}).',
         'ru': 'На остановке {stop} в городе {city} останавливается {count} линий городского транспорта ({types}).',
+        'bg': 'На спирка {stop} в {city} спират {count} линии на градския транспорт ({types}).',
     },
     'stop_detail.faq.q_when': {
         'sr': 'Kada polaze autobusi sa stajališta {stop}?',
         'en': 'When do buses depart from {stop}?',
         'ru': 'Когда отправляются автобусы с остановки {stop}?',
+        'bg': 'Кога тръгват автобусите от спирка {stop}?',
     },
     'stop_detail.faq.a_when_range': {
         'sr': 'Prvi polazak sa stajališta {stop} je u {first}, a poslednji u {last} radnim danom.',
         'en': 'The first departure from {stop} is at {first}, the last at {last} on weekdays.',
         'ru': 'Первый рейс с остановки {stop} в {first}, последний в {last} по будням.',
+        'bg': 'Първото тръгване от спирка {stop} е в {first}, а последното — в {last}, в делничен ден.',
     },
     'stop_detail.faq.a_when_unknown': {
         'sr': 'Tačan red vožnje proverite na samom stajalištu ili preko mobilne aplikacije gradskog prevoznika.',
         'en': 'Check the exact schedule at the stop itself or via the city carrier mobile app.',
         'ru': 'Точное расписание уточняйте на самой остановке или в мобильном приложении городского перевозчика.',
+        'bg': 'Точното разписание проверете на самата спирка или чрез мобилното приложение на градския превозвач.',
     },
     'stop_detail.faq.q_where': {
         'sr': 'Gde se nalazi stajalište {stop}?',
         'en': 'Where is stop {stop} located?',
         'ru': 'Где находится остановка {stop}?',
+        'bg': 'Къде се намира спирка {stop}?',
     },
     'stop_detail.faq.a_where': {
         'sr': 'Stajalište {stop} se nalazi u gradu {city}.',
         'en': 'Stop {stop} is located in the city of {city}.',
         'ru': 'Остановка {stop} находится в городе {city}.',
+        'bg': 'Спирка {stop} се намира в град {city}.',
     },
     'stop_detail.faq.a_where_coords_suffix': {
         'sr': ' Koordinate: {lat}, {lon}.',
         'en': ' Coordinates: {lat}, {lon}.',
         'ru': ' Координаты: {lat}, {lon}.',
+        'bg': ' Координати: {lat}, {lon}.',
     },
     'stop_detail.faq.a_where_outro': {
         'sr': ' Detaljna mapa i lista linija dostupni su besplatno na Prevozni.com.',
         'en': ' A detailed map and list of lines are available for free on Prevozni.com.',
         'ru': ' Подробная карта и список линий доступны бесплатно на Prevozni.com.',
+        'bg': ' Подробна карта и списък на линиите са достъпни безплатно на Prevozni.com.',
     },
 
     # ── Hub SEO intros & FAQ: route_index (/rute/) ──
@@ -3650,6 +3832,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'O gradskom prevozu: {city}',
         'en': 'About public transit in {city}',
         'ru': 'О городском транспорте: {city}',
+        'bg': 'За градския транспорт: {city}',
     },
     'city_transport.intro_beograd_p1': {
         'sr': '<strong>GSP Beograd</strong> upravlja najvećom mrežom javnog prevoza u Srbiji: autobusi, tramvaji i trolejbusi čine više od 500 linija, '
@@ -3667,6 +3850,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               'Ночные линии (префикс «N») работают 7 дней в неделю каждые 30–60 минут, соединяя центр с основными окраинами. '
               'Трамвайная сеть — 12 дневных линий в центре и Новом Белграде; 8 троллейбусных линий — Звездара, Вождовац и Палилула. '
               'BG:Voz — пригородная железная дорога до Батайницы, Овчи и Ресника.',
+        'bg': '<strong>ГСП Белград</strong> управлява най-голямата мрежа за градски транспорт в Сърбия: автобусите, трамваите и тролейбусите образуват над 500 линии, с над 87 000 тръгвания дневно. Системата обхваща 17 белградски общини — от Земун и Нови Белград, през Врачар и Вождовац, до Раковица и Гроцка. Нощните линии (с обозначение „N“) се движат седем дни в седмицата, на всеки 30–60 минути, свързвайки центъра с основните периферни квартали. Трамвайната мрежа има 12 дневни линии около центъра и Нови Белград, а тролейбусната система обхваща 8 линии към Звездара, Вождовац и Палилула. Освен това BG:Voz — крайградската жп система — свързва Белград с Батайница, Овча и Ресник.',
     },
     'city_transport.intro_beograd_p2': {
         'sr': 'Karte se kupuju preko <strong>BusPlus kartice</strong>, koja se puni na kioscima ili u GSP-ovim prodajnim mestima. '
@@ -3684,6 +3868,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               'У BG:Voz отдельная тарифная система — билеты Srbija Voz. '
               'Для поездок за пределами Белграда — сеть <a href="{prefix}/rute/">междугородних автобусов и поездов</a> с отправлением с автостанции BAS, '
               'центрального ж/д вокзала Прокоп и терминала Lasta.',
+        'bg': 'Билетите се купуват чрез <strong>картата BusPlus</strong>, която се зарежда на павилиони или в продажните пунктове на ГСП. Цената на еднократно пътуване в зона I е около 50 RSD, а дневният билет струва 290 RSD. Студенти, пенсионери и ученици получават отстъпка срещу удостоверение за статут. BG:Voz използва различна тарифна система — билетите се купуват на гарите на Сърбия Воз. За пътувания извън Белград се използва мрежата от <a href="{prefix}/rute/">междуградски автобуси и влакове</a>, с тръгвания от автогара БАС, Централна железопътна гара Прокоп и автогара Ласта.',
     },
     'city_transport.intro_novi_sad_p1': {
         'sr': '<strong>JGSP Novi Sad</strong> upravlja javnim gradskim prevozom u drugom najvećem gradu Srbije. '
@@ -3698,6 +3883,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               'Сеть — 60+ автобусных линий, соединяющих центр с пригородами (Петроварадин, Сремска-Каменица, Футог, Ветерник, Руменка, Кач). '
               'В Нови-Саде нет трамваев и троллейбусов — только автобусы. '
               'GTFS-расписание Нови-Сада есть в нашей базе, поэтому доступно точное время рейсов на будни, субботу и воскресенье.',
+        'bg': '<strong>ЈГСП Нови Сад</strong> управлява градския обществен транспорт във втория по големина град на Сърбия. Мрежата се състои от над 60 автобусни линии, свързващи централното градско ядро с крайградските селища (Петроварадин, Сремска Каменица, Футог, Ветерник, Руменка, Кач). Градският транспорт в Нови Сад е предимно автобусен — в града няма трамваи или тролейбуси. GTFS разписание за Нови Сад е налично в нашата база данни, така че е възможно да се покажат точните часове на тръгване за делничен ден, събота и неделя.',
     },
     'city_transport.intro_novi_sad_p2': {
         'sr': 'Karte se kupuju preko <strong>AP kartice JGSP Novi Sad</strong>, pametne kartice koja se puni u AP kioscima ili aplikaciji Moj JGSP. '
@@ -3709,6 +3895,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Билеты — по смарт-карте <strong>JGSP Novi Sad (AP)</strong>, которую пополняют в киосках AP или приложении Moj JGSP. '
               'Одна поездка — около 65 RSD, ученический проездной — от 1000 RSD. Разовый билет можно купить и у водителя по чуть более высокой цене. '
               '<a href="{prefix}/rute/">Междугородние рейсы</a> — с автовокзала Нови-Сада: Белград, Суботица, Ниш, Зренянин и десятки других городов.',
+        'bg': 'Билетите се купуват чрез <strong>картата АП на ЈГСП Нови Сад</strong>, безконтактна карта, която се зарежда на АП павилиони или в приложението Moj JGSP. Цената на еднократно пътуване е около 65 RSD, а месечната карта за ученици струва от 1000 RSD. Единичен билет може да се купи и при водача на малко по-висока цена. За <a href="{prefix}/rute/">междуградски линии</a> се използва автогара Нови Сад — свързваща Нови Сад с Белград, Суботица, Ниш, Зренянин и десетки други градове.',
     },
     'city_transport.intro_nis_p1': {
         'sr': '<strong>JGP Niš-Ekspres</strong> operiše gradskim prevozom u Nišu i okolini. '
@@ -3723,6 +3910,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               'Сеть — около 50 автобусных линий по Нишу и пригородам: от Медошеваца и Бубни на западе до Донего-Мэдюрова и Црвеного-Крста на востоке. '
               'Трамваев и троллейбусов нет. Публичного GTFS-расписания для Ниша нет, поэтому показываем трассы и списки остановок — '
               'точное время уточняйте в автобусе или в киосках Niš-Ekspres.',
+        'bg': '<strong>ЈГП Ниш-Експрес</strong> управлява градския транспорт в Ниш и околността. Мрежата обхваща около 50 автобусни линии, покриващи Ниш и крайградските квартали — от Медошевац и Бубан на запад до Долно Меджурово и Червен кръст на изток. Няма трамвайна или тролейбусна система. GTFS разписание за Ниш не е публично достъпно, затова показваме маршрути и списъци със спирки, а за точното време на тръгване препоръчваме проверка във возилото или на павилионите на Ниш-Експрес.',
     },
     'city_transport.intro_nis_p2': {
         'sr': 'Karte se kupuju u vozilu kod vozača (jednokratna vožnja oko 50 RSD) ili na mesečnim karticama Niš-Ekspresa za đake, studente i penzionere. '
@@ -3734,6 +3922,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Билеты — у водителя (одна поездка ~50 RSD) или по месячным картам Niš-Ekspres для школьников, студентов и пенсионеров. '
               'Ниш — важный узел <a href="{prefix}/rute/">междугородних и международных автобусных линий</a>: Скопье, София, Стамбул и др. — с автовокзала Ниша. '
               'Железные дороги Сербии (Srbija Voz) — линии на Белград, Прешево (граница с С. Македонией) и Пирот.',
+        'bg': 'Билетите се купуват във возилото при водача (еднократно пътуване около 50 RSD) или чрез месечни карти на Ниш-Експрес за ученици, студенти и пенсионери. Ниш е и важен възел за <a href="{prefix}/rute/">междуградски и международни автобусни линии</a> към Скопие, София, Истанбул и други европейски градове — с тръгване от автогара Ниш. Железниците на Сърбия (Сърбия Воз) също обслужват Ниш чрез линии към Белград, Прешево (границата със Северна Македония) и Пирот.',
     },
     'city_transport.intro_kragujevac_p1': {
         'sr': '<strong>Kragujevac</strong>, četvrti po veličini grad Srbije i istorijska prestonica (1818–1841), '
@@ -3748,6 +3937,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               'имеет компактную сеть из 23 автобусных линий: центр и пригороды (Станово, Аэродром, Пивара, Белошавац, Бубань). '
               'Показываем трассы и списки остановок по данным OSM/Overpass; '
               'публичного GTFS-расписания нет — время рейсов уточняйте на остановках или у перевозчика.',
+        'bg': '<strong>Крагуевац</strong>, четвъртият по големина град в Сърбия и историческа столица (1818–1841), разполага с компактна автобусна мрежа от 23 линии, обхващаща центъра и околните квартали (Станово, Аеродром, Пивара, Белошавац, Бубан). За Крагуевац показваме маршрути и списъци със спирки, получени от данните на OSM/Overpass; точно GTFS разписание не е публично достъпно, затова за времето на тръгванията препоръчваме проверка на спирките или при превозвача.',
     },
     'city_transport.intro_kragujevac_p2': {
         'sr': 'Karte se kupuju u autobusu kod vozača, a za đake i studente postoje povlašćene mesečne karte. '
@@ -3762,6 +3952,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               'Крагуевац хорошо связан с Белградом (20+ рейсов в день) и Кралево; '
               'ищите <a href="{prefix}/rute/">все междугородние маршруты</a> для подбора оптимального рейса. '
               'Автовокзал в центре города, рядом с ж/д станцией, которая связана с Белградом и Лапово.',
+        'bg': 'Билетите се купуват в автобуса при водача, а за ученици и студенти има преференциални месечни карти. Крагуевац е отлично свързан с Белград (над 20 тръгвания дневно) и Кралево; търсенето на <a href="{prefix}/rute/">всички междуградски линии</a> ви помага да намерите най-добрия курс за всеки ден. Автогара Крагуевац се намира в центъра на града, близо до железопътната гара, която също е свързана с Белград и Лапово.',
     },
     # Generic city-transport intro — fallback for cities without a hand-written
     # block (Montenegro: Podgorica, Herceg Novi, Budva). Honest about the data:
@@ -3776,6 +3967,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Городской транспорт в {city} — все автобусные линии, остановки и трассы в одном месте. '
               'Для каждой линии показываем последовательность остановок и трассу на карте — видно, куда идёт и где сесть. '
               'Выбери линию или остановку ниже.',
+        'bg': 'Градски транспорт в {city} — всички автобусни линии, спирки и маршрути на едно място. За всяка линия показваме реда на спирките и маршрута на картата, за да виждате лесно накъде отива и къде да се качите. Изберете линия или спирка по-долу.',
     },
     'city_transport.intro_generic_p2': {
         'sr': 'Podaci o linijama i stajalištima dolaze iz OpenStreetMap zajednice i redovno se osvežavaju. '
@@ -3787,21 +3979,25 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Данные о линиях и остановках берутся из сообщества OpenStreetMap и регулярно обновляются. '
               'Открой остановку, чтобы увидеть, какие линии там останавливаются. '
               'Для междугородних поездок смотри <a href="{prefix}/rute/">все маршруты</a>.',
+        'bg': 'Данните за линиите и спирките идват от общността на OpenStreetMap и се обновяват редовно. Отворете спирка, за да видите кои линии спират там. За междуградски транспорт вижте <a href="{prefix}/rute/">всички маршрути</a>.',
     },
     'city_transport.faq_heading': {
         'sr': 'Često postavljana pitanja',
         'en': 'Frequently asked questions',
         'ru': 'Частые вопросы',
+        'bg': 'Често задавани въпроси',
     },
     'city_transport.faq_q1': {
         'sr': 'Kako da kupim kartu za gradski prevoz u {city}u?',
         'en': 'How do I buy a transit ticket in {city}?',
         'ru': 'Как купить билет на городской транспорт в {city}?',
+        'bg': 'Как да купя билет за градския транспорт в {city}?',
     },
     'city_transport.faq_q2': {
         'sr': 'Koliko linija opslužuje {city}?',
         'en': 'How many lines serve {city}?',
         'ru': 'Сколько линий обслуживает {city}?',
+        'bg': 'Колко линии обслужват {city}?',
     },
     'city_transport.faq_a2': {
         'sr': 'U mreži ima {n} aktivnih linija, sa ukupno {stops} stajališta mapiranih u našoj bazi. '
@@ -3810,11 +4006,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               'Lines are filterable by type (bus, tram, trolleybus, night) at the top of the page.',
         'ru': 'Сеть включает {n} активных линий и {stops} остановок в нашей базе. '
               'Линии можно фильтровать по типу (автобус, трамвай, троллейбус, ночная) вверху страницы.',
+        'bg': 'В мрежата има {n} активни линии, с общо {stops} спирки, картографирани в нашата база данни. Номерата на линиите се показват с филтър по тип (автобус, трамвай, тролейбус, нощна) в горната част на страницата.',
     },
     'city_transport.faq_q3': {
         'sr': 'Radi li gradski prevoz nedeljom i praznikom?',
         'en': 'Does transit run on Sundays and holidays?',
         'ru': 'Работает ли транспорт по воскресеньям и праздникам?',
+        'bg': 'Работи ли градският транспорт в неделя и на празници?',
     },
     'city_transport.faq_a3': {
         'sr': 'Da, većina linija saobraća sedam dana u nedelji, sa smanjenom frekvencijom subotom i nedeljom. '
@@ -3823,11 +4021,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               'The schedule is split into Saturday and Sunday tabs on each line page. On public holidays the Sunday schedule typically applies.',
         'ru': 'Да, большинство линий работают 7 дней в неделю с сокращённой частотой по выходным. '
               'Расписание в табах «Субота» и «Недеља» на странице каждой линии. В госпраздники обычно действует воскресное расписание.',
+        'bg': 'Да, повечето линии се движат седем дни в седмицата, с намалена честота в събота и неделя. Разписанието можете да видите в раздела „Събота“ и „Неделя“ на страницата на всяка линия. В държавни празници обикновено се прилага неделно разписание.',
     },
     'city_transport.faq_q4': {
         'sr': 'Kako stižem iz {city}a u druge gradove Srbije?',
         'en': 'How do I get from {city} to other cities in Serbia?',
         'ru': 'Как добраться из {city} в другие города Сербии?',
+        'bg': 'Как да стигна от {city} до други градове в Сърбия?',
     },
     'city_transport.faq_a4': {
         'sr': 'Za međugradski prevoz koristite našu stranicu <a href="{prefix}/rute/">svih ruta</a> ili direktno tražite polazak preko '
@@ -3836,6 +4036,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               '<a rel="nofollow" href="{prefix}/pretraga/?od={city}">departures from {city}</a>. We show bus and train routes with price, duration and departure count.',
         'ru': 'Для междугородних поездок используйте <a href="{prefix}/rute/">страницу всех маршрутов</a> или ищите напрямую через '
               '<a rel="nofollow" href="{prefix}/pretraga/?od={city}">рейсы из {city}</a>. Показываем автобусные и ж/д маршруты с ценой, временем и количеством рейсов.',
+        'bg': 'За междуградски транспорт използвайте нашата страница <a href="{prefix}/rute/">всички маршрути</a> или потърсете директно тръгване чрез <a rel="nofollow" href="{prefix}/pretraga/?od={city}">тръгванията от {city}</a>. Показваме автобусни и железопътни маршрути с цена, продължителност и брой тръгвания.',
     },
 
     # ── Hub SEO intros & FAQ: carriers_index (/prevoznici/) ──
@@ -4101,16 +4302,19 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Poziv da ostavite recenziju',
         'en': 'Review request',
         'ru': 'Запрос отзыва',
+        'bg': 'Покана да оставите отзив',
     },
     'review.prompt_intro': {
         'sr': 'Kako je prošlo putovanje',
         'en': 'How was your trip',
         'ru': 'Как прошла поездка',
+        'bg': 'Как премина пътуването',
     },
     'review.prompt_cta': {
         'sr': 'Ostavi recenziju',
         'en': 'Leave a review',
         'ru': 'Оставить отзыв',
+        'bg': 'Остави отзив',
     },
     'a11y.dismiss': {
         'sr': 'Zatvori',
@@ -4242,6 +4446,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Popularne međugradske rute iz {city}a',
         'en': 'Popular intercity routes from {city}',
         'ru': 'Популярные междугородние маршруты из {city}',
+        'bg': 'Популярни междуградски маршрути от {city}',
     },
     'route_index.related_cities_h': {
         'sr': 'Otkrijte gradski prevoz',
@@ -4252,34 +4457,41 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'O stajalištu {stop_name}',
         'en': 'About the {stop_name} stop',
         'ru': 'Об остановке {stop_name}',
+        'bg': 'За спирка {stop_name}',
     },
     'line_prose.heading': {
         'sr': 'O liniji {number} — {city}',
         'en': 'About line {number} in {city}',
         'ru': 'О линии {number} — {city}',
+        'bg': 'За линия {number} — {city}',
     },
 
     # ── Reviews / UGC ──
     'review.heading': {
         'sr': 'Iskustva putnika', 'en': 'Traveller reviews', 'ru': 'Отзывы пассажиров',
+        'bg': 'Впечатления на пътниците',
     },
     'review.summary_empty': {
         'sr': 'Budite prvi koji ostavlja recenziju za ovu rutu.',
         'en': 'Be the first to review this route.',
         'ru': 'Будьте первым, кто оставит отзыв о маршруте.',
+        'bg': 'Бъдете първият, който оставя отзив за този маршрут.',
     },
     'review.summary_few': {
         'sr': '{n} ocena, prosek {avg} ★ · podelite i vaše iskustvo',
         'en': '{n} ratings, average {avg} ★ · share your experience too',
         'ru': '{n} оценок, средняя {avg} ★ · поделитесь своим опытом',
+        'bg': '{n} оценки, средно {avg} ★ · споделете и вашето впечатление',
     },
     'review.summary': {
         'sr': '{n} ocena · prosek {avg} ★',
         'en': '{n} ratings · average {avg} ★',
         'ru': '{n} оценок · средняя {avg} ★',
+        'bg': '{n} оценки · средно {avg} ★',
     },
     'review.form_heading': {
         'sr': 'Ostavite vašu recenziju', 'en': 'Leave your review', 'ru': 'Оставить отзыв',
+        'bg': 'Оставете своя отзив',
     },
     'review.cta_short': {
         'sr': 'Ostavite recenziju',
@@ -4288,106 +4500,127 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     },
     'review.rating_label': {
         'sr': 'Ocena (1–5)', 'en': 'Rating (1–5)', 'ru': 'Оценка (1–5)',
+        'bg': 'Оценка (1–5)',
     },
     'review.comment_label': {
         'sr': 'Komentar (50–500 znakova)',
         'en': 'Comment (50–500 characters)',
         'ru': 'Комментарий (50–500 символов)',
+        'bg': 'Коментар (50–500 знака)',
     },
     'review.comment_ph': {
         'sr': 'Kako je bila vožnja? Komfor, tačnost, cena, osoblje, prtljag, WiFi, stajališta…',
         'en': 'How was the ride? Comfort, timekeeping, price, staff, luggage, WiFi, stops…',
         'ru': 'Как прошла поездка? Комфорт, пунктуальность, цена, персонал, багаж, WiFi, остановки…',
+        'bg': 'Как мина пътуването? Комфорт, точност, цена, персонал, багаж, WiFi, спирки…',
     },
-    'review.name_label': {'sr': 'Ime (2–40 slova)', 'en': 'Name (2–40 letters)', 'ru': 'Имя (2–40 букв)'},
+    'review.name_label': {'sr': 'Ime (2–40 slova)', 'en': 'Name (2–40 letters)', 'ru': 'Имя (2–40 букв)', 'bg': 'Име (2–40 букви)'},
     'review.email_label': {
         'sr': 'Email (opciono, za obaveštenje)',
         'en': 'Email (optional, for approval notice)',
         'ru': 'Email (необязательно, для уведомления)',
+        'bg': 'Имейл (по избор, за известие)',
     },
-    'review.submit': {'sr': 'Pošalji recenziju', 'en': 'Submit review', 'ru': 'Отправить отзыв'},
+    'review.submit': {'sr': 'Pošalji recenziju', 'en': 'Submit review', 'ru': 'Отправить отзыв', 'bg': 'Изпрати отзив'},
     'review.consent': {
         'sr': 'Slanjem dozvoljavate objavu vaše ocene i komentara nakon moderacije. Email ne objavljujemo.',
         'en': 'By submitting you allow us to publish the rating and comment after moderation. Email is never published.',
         'ru': 'Отправляя отзыв, вы разрешаете опубликовать оценку и комментарий после модерации. Email не публикуем.',
+        'bg': 'С изпращането разрешавате публикуването на вашата оценка и коментар след модерация. Имейлът не се публикува.',
     },
     'review.ok.pending': {
         'sr': 'Hvala! Pregledaćemo recenziju u roku od 24–48 h.',
         'en': 'Thanks! We will review your comment within 24–48 hours.',
         'ru': 'Спасибо! Мы проверим отзыв в течение 24–48 часов.',
+        'bg': 'Благодарим! Ще прегледаме отзива в срок от 24–48 ч.',
     },
     'review.ok.auto': {
         'sr': 'Hvala! Recenzija je objavljena.',
         'en': 'Thanks! Your review is live.',
         'ru': 'Спасибо! Отзыв опубликован.',
+        'bg': 'Благодарим! Отзивът е публикуван.',
     },
     'review.err.generic': {
         'sr': 'Došlo je do greške. Pokušajte ponovo.',
         'en': 'Something went wrong. Please try again.',
         'ru': 'Что-то пошло не так. Попробуйте снова.',
+        'bg': 'Възникна грешка. Опитайте отново.',
     },
     'review.err.rate_limit': {
         'sr': 'Previše pokušaja u kratkom vremenu. Pokušajte ponovo za sat vremena.',
         'en': 'Too many attempts. Please retry in about an hour.',
         'ru': 'Слишком много попыток. Повторите примерно через час.',
+        'bg': 'Твърде много опити за кратко време. Опитайте отново след час.',
     },
     'review.err.rating': {
         'sr': 'Odaberite ocenu od 1 do 5 zvezdica.',
         'en': 'Pick a rating from 1 to 5 stars.',
         'ru': 'Выберите оценку от 1 до 5 звёзд.',
+        'bg': 'Изберете оценка от 1 до 5 звезди.',
     },
     'review.err.comment_length': {
         'sr': 'Komentar treba da ima 50–500 znakova.',
         'en': 'Comment must be 50–500 characters.',
         'ru': 'Комментарий должен быть 50–500 символов.',
+        'bg': 'Коментарът трябва да съдържа 50–500 знака.',
     },
     'review.err.name_length': {
         'sr': 'Ime treba da ima 2–40 slova.',
         'en': 'Name must be 2–40 letters.',
         'ru': 'Имя должно быть 2–40 букв.',
+        'bg': 'Името трябва да съдържа 2–40 букви.',
     },
     'review.err.email_invalid': {
         'sr': 'Email adresa nije validna.',
         'en': 'Email address is not valid.',
         'ru': 'Email адрес недействителен.',
+        'bg': 'Имейл адресът не е валиден.',
     },
     'review.err.no_urls': {
         'sr': 'Linkovi na spoljne sajtove nisu dozvoljeni u komentarima.',
         'en': 'Links to external sites are not allowed in comments.',
         'ru': 'Ссылки на внешние сайты в комментариях не разрешены.',
+        'bg': 'Линкове към външни сайтове не са разрешени в коментарите.',
     },
     'review.err.profanity': {
         'sr': 'Komentar sadrži neprihvatljiv sadržaj.',
         'en': 'Comment contains unacceptable content.',
         'ru': 'Комментарий содержит неприемлемое содержание.',
+        'bg': 'Коментарът съдържа неприемливо съдържание.',
     },
     'review.err.spam': {
         'sr': 'Slanje je odbijeno.',
         'en': 'Submission rejected.',
         'ru': 'Отправка отклонена.',
+        'bg': 'Изпращането беше отхвърлено.',
     },
     'review.err.too_fast': {
         'sr': 'Pokušaj je prebrz — pročitajte formu pažljivo.',
         'en': 'That was too fast — please read the form and try again.',
         'ru': 'Слишком быстро — перечитайте форму и попробуйте ещё раз.',
+        'bg': 'Опитът е твърде бърз — прочетете формата внимателно.',
     },
     'review.delete.link': {
         'sr': 'Zatraži brisanje',
         'en': 'Request deletion',
         'ru': 'Запросить удаление',
+        'bg': 'Заявете изтриване',
     },
     'review.delete.prompt': {
         'sr': 'Unesite email adresu kojom ste ostavili recenziju:',
         'en': 'Enter the email you submitted the review with:',
         'ru': 'Введите email, с которым вы оставили отзыв:',
+        'bg': 'Въведете имейл адреса, с който сте оставили отзива:',
     },
     'review.delete.sent': {
         'sr': 'Zahtev za brisanje je primljen. Obradićemo ga u roku od 7 dana u skladu sa GDPR-om.',
         'en': 'Deletion request received. We will process it within 7 days per GDPR.',
         'ru': 'Запрос на удаление принят. Обработаем в течение 7 дней согласно GDPR.',
+        'bg': 'Заявката за изтриване е получена. Ще я обработим в срок от 7 дни в съответствие с GDPR.',
     },
     'review.lang_note': {
         'sr': 'Recenzija na srpskom', 'en': 'Review in English', 'ru': 'Отзыв на русском',
+        'bg': 'Отзив на български',
     },
 
     # ── Newsletter / email subscribe ──
@@ -4395,56 +4628,67 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Newsletter',
         'en': 'Newsletter',
         'ru': 'Рассылка',
+        'bg': 'Бюлетин',
     },
     'newsletter.subtitle': {
         'sr': 'Najjeftinije karte i nove rute — jednom nedeljno. Bez spama.',
         'en': 'Cheapest tickets and new routes, weekly. No spam.',
         'ru': 'Самые дешёвые билеты и новые маршруты — раз в неделю. Без спама.',
+        'bg': 'Най-евтините билети и нови маршрути — веднъж седмично. Без спам.',
     },
     'newsletter.placeholder': {
         'sr': 'vaš@email.rs',
         'en': 'your@email.com',
         'ru': 'ваш@email.ru',
+        'bg': 'ваш@email.bg',
     },
     'newsletter.button': {
         'sr': 'Pretplati se',
         'en': 'Subscribe',
         'ru': 'Подписаться',
+        'bg': 'Абонирай се',
     },
     'newsletter.consent': {
         'sr': 'Saglasan/a sam sa obradom email adrese prema <a href="{prefix}/privatnost/">Politici privatnosti</a>.',
         'en': 'I agree to email processing per the <a href="{prefix}/privatnost/">Privacy policy</a>.',
         'ru': 'Согласен/на с обработкой email согласно <a href="{prefix}/privatnost/">Политике конфиденциальности</a>.',
+        'bg': 'Съгласявам се с обработката на имейл адреса ми съгласно <a href="{prefix}/privatnost/">Политиката за поверителност</a>.',
     },
     'newsletter.success_pending': {
         'sr': 'Proverite email — poslali smo Vam link za potvrdu.',
         'en': 'Check your inbox — we sent a confirmation link.',
         'ru': 'Проверьте почту — отправили письмо с подтверждением.',
+        'bg': 'Проверете имейла си — изпратихме ви линк за потвърждение.',
     },
     'newsletter.success_already': {
         'sr': 'Već ste pretplaćeni — hvala!',
         'en': "You're already subscribed — thanks!",
         'ru': 'Вы уже подписаны — спасибо!',
+        'bg': 'Вече сте абонирани — благодарим!',
     },
     'newsletter.error_email': {
         'sr': 'Email adresa nije ispravna.',
         'en': 'Email address is invalid.',
         'ru': 'Некорректный email.',
+        'bg': 'Имейл адресът не е валиден.',
     },
     'newsletter.error_consent': {
         'sr': 'Potvrdite saglasnost da biste se pretplatili.',
         'en': 'Tick the consent box to subscribe.',
         'ru': 'Отметьте согласие, чтобы подписаться.',
+        'bg': 'Потвърдете съгласието си, за да се абонирате.',
     },
     'newsletter.error_generic': {
         'sr': 'Greška pri slanju. Pokušajte ponovo.',
         'en': 'Something went wrong. Try again.',
         'ru': 'Ошибка отправки. Попробуйте ещё раз.',
+        'bg': 'Грешка при изпращане. Опитайте отново.',
     },
     'newsletter.error_ratelimit': {
         'sr': 'Previše pokušaja. Pokušajte za sat vremena.',
         'en': 'Too many attempts. Try again in an hour.',
         'ru': 'Слишком много попыток. Попробуйте через час.',
+        'bg': 'Твърде много опити. Опитайте след час.',
     },
 
     # ── Price-alert (route-scoped newsletter) ──
@@ -4651,11 +4895,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Politika kolačića',
         'en': 'Cookie Policy',
         'ru': 'Политика cookies',
+        'bg': 'Политика за бисквитките',
     },
     'cookies.page.meta': {
         'sr': 'Koje kolačiće Prevozni koristi, zašto, koliko se čuvaju i kako da ih onemogućite ili povučete saglasnost.',
         'en': 'Which cookies Prevozni uses, why, how long they are stored, and how to disable them or withdraw consent.',
         'ru': 'Какие cookies использует Prevozni, зачем, сколько хранятся и как их отключить или отозвать согласие.',
+        'bg': 'Кои бисквитки използва Prevozni, защо, колко дълго се съхраняват и как да ги забраните или оттеглите съгласието си.',
     },
     'cookies.page.intro': {
         'sr': 'Ova stranica objašnjava koje kolačiće i tehnologije lokalnog skladištenja Prevozni koristi, u koju svrhu, koliko dugo se čuvaju i kako da kontrolišete ili povučete svoju saglasnost.',
@@ -4803,101 +5049,121 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Uslovi korišćenja',
         'en': 'Terms of Service',
         'ru': 'Условия использования',
+        'bg': 'Условия за ползване',
     },
     'tos.meta': {
         'sr': 'Uslovi korišćenja sajta Prevozni — ko smo, šta nudimo, odricanje od odgovornosti za tačnost podataka, partnerski linkovi i korisnički sadržaj.',
         'en': 'Terms of Service for Prevozni — who we are, what we provide, disclaimer on data accuracy, affiliate links and user content.',
         'ru': 'Условия использования сайта Prevozni — кто мы, что предоставляем, отказ от ответственности за точность данных, партнёрские ссылки и пользовательский контент.',
+        'bg': 'Условия за ползване на сайта Prevozni — кои сме, какво предлагаме, отказ от отговорност за точността на данните, партньорски линкове и потребителско съдържание.',
     },
     'tos.intro': {
         'sr': 'Ovi uslovi regulišu korišćenje sajta prevozni.com. Nastavkom korišćenja prihvatate ih u celini. Ako se ne slažete, molimo ne koristite sajt.',
         'en': 'These terms govern the use of prevozni.com. By continuing to use the site you accept them in full. If you disagree, please do not use the site.',
         'ru': 'Эти условия регулируют использование сайта prevozni.com. Продолжая использовать сайт, вы принимаете их полностью. Если не согласны, пожалуйста, не пользуйтесь сайтом.',
+        'bg': 'Тези условия уреждат използването на сайта prevozni.com. С продължаването на използването ги приемате изцяло. Ако не сте съгласни, моля, не използвайте сайта.',
     },
     'tos.updated': {
         'sr': 'Poslednja izmena: april 2026.',
         'en': 'Last updated: April 2026.',
         'ru': 'Последнее обновление: апрель 2026.',
+        'bg': 'Последна промяна: април 2026.',
     },
     'tos.s1_h': {
         'sr': '1. Ko smo',
         'en': '1. Who we are',
         'ru': '1. Кто мы',
+        'bg': '1. Кои сме',
     },
     'tos.s1_body': {
         'sr': 'Prevozni je nezavisan projekat koji agregira javno dostupne podatke o javnom prevozu u Srbiji i regionu. Nismo prevoznik, agencija za prodaju karata ni zvanični predstavnik bilo kojeg prevoznika. Za kontakt koristite <strong>info@prevozni.com</strong> ili formu na <a href="/kontakt/">/kontakt/</a>.',
         'en': 'Prevozni is an independent project that aggregates publicly available public-transit data for Serbia and the region. We are not a carrier, a ticket agency, or an official representative of any carrier. For contact use <strong>info@prevozni.com</strong> or the form at <a href="/kontakt/">/kontakt/</a>.',
         'ru': 'Prevozni — независимый проект, агрегирующий общедоступные данные об общественном транспорте Сербии и региона. Мы не перевозчик, не билетное агентство и не официальный представитель какого-либо перевозчика. Для связи — <strong>info@prevozni.com</strong> или форма на <a href="/kontakt/">/kontakt/</a>.',
+        'bg': 'Prevozni е независим проект, който агрегира публично достъпни данни за обществения транспорт в Сърбия и региона. Ние не сме превозвач, агенция за продажба на билети, нито официален представител на който и да е превозвач. За контакт използвайте <strong>info@prevozni.com</strong> или формата на <a href="/kontakt/">/kontakt/</a>.',
     },
     'tos.s2_h': {
         'sr': '2. Usluge',
         'en': '2. Services',
         'ru': '2. Услуги',
+        'bg': '2. Услуги',
     },
     'tos.s2_body': {
         'sr': 'Sajt pruža besplatan pregled reda vožnje, cena i prevoznika za međugradske autobuse, vozove i gradski prevoz. Ne prodajemo karte; kupovinu obavlja sam prevoznik ili partnerska platforma na koju vas vodi dugme "Kupi". Ne garantujemo dostupnost polaska koji se prikazuje — proverite direktno kod prevoznika pre putovanja.',
         'en': 'The site provides free schedule, price and carrier information for intercity buses, trains and urban transport. We do not sell tickets; purchase is handled by the carrier itself or by a partner platform reached via the "Buy" button. We do not guarantee the availability of any displayed departure — please verify directly with the carrier before travelling.',
         'ru': 'Сайт предоставляет бесплатную информацию о расписании, ценах и перевозчиках для междугородних автобусов, поездов и городского транспорта. Мы не продаём билеты; покупка осуществляется самим перевозчиком или партнёрской платформой по кнопке «Купить». Мы не гарантируем наличие отображаемого рейса — проверяйте непосредственно у перевозчика перед поездкой.',
+        'bg': 'Сайтът предоставя безплатен преглед на разписанията, цените и превозвачите за междуградски автобуси, влакове и градски транспорт. Ние не продаваме билети; покупката се извършва от самия превозвач или от партньорска платформа, към която ви насочва бутонът „Купи“. Не гарантираме наличността на показания курс — проверете директно при превозвача преди пътуването.',
     },
     'tos.s3_h': {
         'sr': '3. Tačnost podataka',
         'en': '3. Data accuracy',
         'ru': '3. Точность данных',
+        'bg': '3. Точност на данните',
     },
     'tos.s3_body': {
         'sr': 'Podaci dolaze iz više javnih izvora (vidi <a href="/o-nama/">/o-nama/</a>) i osvežavaju se automatski. Trudimo se da budu tačni, ali ih pružamo "takve kakvi jesu" — bez garancije o ažurnosti, potpunosti ili pogodnosti za određenu namenu. Prevoznici mogu u svakom trenutku promeniti red vožnje, cene ili ukinuti liniju; uvek proverite zvanični sajt prevoznika ili stanice pre puta.',
         'en': 'Data comes from several public sources (see <a href="/o-nama/">/o-nama/</a>) and is refreshed automatically. We aim for accuracy but provide it "as is" — without warranty of timeliness, completeness or fitness for a particular purpose. Carriers can change schedules, prices or cancel lines at any time; always check the carrier\'s or station\'s official site before travelling.',
         'ru': 'Данные поступают из нескольких публичных источников (см. <a href="/o-nama/">/o-nama/</a>) и обновляются автоматически. Мы стремимся к точности, но предоставляем данные «как есть», без гарантий актуальности, полноты или пригодности для конкретной цели. Перевозчики могут в любой момент изменить расписание, цены или отменить рейс; всегда сверяйтесь с официальным сайтом перевозчика или станции перед поездкой.',
+        'bg': 'Данните идват от множество публични източници (вижте <a href="/o-nama/">/o-nama/</a>) и се обновяват автоматично. Стараем се те да бъдат точни, но ги предоставяме „такива, каквито са“ — без гаранция за актуалност, пълнота или пригодност за определена цел. Превозвачите могат по всяко време да променят разписанието, цените или да прекратят линия; винаги проверявайте официалния сайт на превозвача или автогарата преди пътуването.',
     },
     'tos.s4_h': {
         'sr': '4. Partnerski linkovi (affiliate disclosure)',
         'en': '4. Affiliate links (disclosure)',
         'ru': '4. Партнёрские ссылки (disclosure)',
+        'bg': '4. Партньорски линкове (affiliate disclosure)',
     },
     'tos.s4_body': {
         'sr': 'Neki linkovi za kupovinu karte (dugme "Kupi" pored polaska) vode na partnerske platforme <strong>BusTicket4.me</strong> ili <strong>FlixBus</strong>. Ako kupite kartu preko takvog linka, Prevozni može da dobije malu proviziju koja pokriva troškove održavanja sajta. <strong>Cena koju vi plaćate se ne menja.</strong> Partnerski linkovi su jasno obeleženi kao "Kupi" a u naš sistem se beleži samo anonimni agregirani zapis klika (bez ličnih podataka) — detalji u <a href="/privatnost/">Politici privatnosti</a>.',
         'en': 'Some ticket-purchase links (the "Buy" button next to a departure) go to partner platforms <strong>BusTicket4.me</strong> or <strong>FlixBus</strong>. If you buy a ticket via such a link, Prevozni may receive a small commission that helps cover hosting and maintenance. <strong>The price you pay is not affected.</strong> Affiliate links are clearly labelled "Buy" and only an anonymous aggregate click record (no personal data) is stored on our side — details in the <a href="/privatnost/">Privacy Policy</a>.',
         'ru': 'Некоторые ссылки покупки билета (кнопка «Купить» рядом с рейсом) ведут на партнёрские платформы <strong>BusTicket4.me</strong> или <strong>FlixBus</strong>. Если вы покупаете билет по такой ссылке, Prevozni может получить небольшую комиссию, которая покрывает расходы на хостинг и поддержку. <strong>Цена для вас не меняется.</strong> Партнёрские ссылки явно помечены как «Купить», а у нас сохраняется только анонимная агрегированная запись клика (без персональных данных) — подробности в <a href="/privatnost/">Политике конфиденциальности</a>.',
+        'bg': 'Някои линкове за покупка на билет (бутонът „Купи“ до курса) водят към партньорските платформи <strong>BusTicket4.me</strong> или <strong>FlixBus</strong>. Ако купите билет чрез такъв линк, Prevozni може да получи малка комисиона, която покрива разходите за поддръжка на сайта. <strong>Цената, която вие плащате, не се променя.</strong> Партньорските линкове са ясно обозначени като „Купи“, а в нашата система се записва само анонимен, агрегиран запис за клика (без лични данни) — подробности в <a href="/privatnost/">Политиката за поверителност</a>.',
     },
     'tos.s5_h': {
         'sr': '5. Korisnički sadržaj (recenzije)',
         'en': '5. User content (reviews)',
         'ru': '5. Пользовательский контент (отзывы)',
+        'bg': '5. Потребителско съдържание (отзиви)',
     },
     'tos.s5_body': {
         'sr': 'Korisnici mogu da ostave recenziju rute. Zadržavate autorska prava nad tekstom koji ste napisali; slanjem nam dajete <strong>ne-isključivu, besplatnu, globalnu licencu</strong> da recenziju javno prikazujemo, indeksiramo i prevodimo kada je to potrebno. Zabranjujemo: spam, linkove, lične podatke trećih lica, uvrede i govor mržnje. Zadržavamo pravo da moderiramo, uredimo ili obrišemo recenziju bez prethodnog obaveštenja. Možete zatražiti brisanje svoje recenzije dugmetom "Zatraži brisanje" ispod nje, u skladu sa <a href="/privatnost/">Politikom privatnosti</a>.',
         'en': 'Users may leave route reviews. You retain copyright over the text you wrote; by submitting you grant us a <strong>non-exclusive, royalty-free, worldwide licence</strong> to display, index and translate the review where relevant. We forbid: spam, links, third-party personal data, insults and hate speech. We reserve the right to moderate, edit or delete any review without prior notice. You can request deletion of your review via the "Request deletion" button beneath it, as described in the <a href="/privatnost/">Privacy Policy</a>.',
         'ru': 'Пользователи могут оставлять отзывы о маршрутах. Авторские права на текст остаются за вами; при отправке вы предоставляете нам <strong>неисключительную, безвозмездную, всемирную лицензию</strong> на публичное отображение, индексацию и перевод отзыва при необходимости. Запрещены: спам, ссылки, персональные данные третьих лиц, оскорбления и язык ненависти. Мы оставляем за собой право модерировать, редактировать или удалять любой отзыв без предварительного уведомления. Удаление своего отзыва можно запросить кнопкой «Запросить удаление» под ним, как описано в <a href="/privatnost/">Политике конфиденциальности</a>.',
+        'bg': 'Потребителите могат да оставят отзив за маршрут. Вие запазвате авторските права върху текста, който сте написали; изпращайки го, ни давате <strong>неизключителен, безплатен, глобален лиценз</strong> да показваме отзива публично, да го индексираме и превеждаме, когато е необходимо. Забраняваме: спам, линкове, лични данни на трети лица, обиди и език на омразата. Запазваме правото да модерираме, редактираме или изтриваме отзив без предварително уведомление. Можете да поискате изтриване на своя отзив чрез бутона „Заявете изтриване“ под него, в съответствие с <a href="/privatnost/">Политиката за поверителност</a>.',
     },
     'tos.s6_h': {
         'sr': '6. Ograničenje odgovornosti',
         'en': '6. Limitation of liability',
         'ru': '6. Ограничение ответственности',
+        'bg': '6. Ограничаване на отговорността',
     },
     'tos.s6_body': {
         'sr': 'U meri dozvoljenoj zakonom, Prevozni i njegovi autori nisu odgovorni za bilo kakvu direktnu, indirektnu, slučajnu ili posledičnu štetu koja proizlazi iz korišćenja ili nemogućnosti korišćenja sajta, uključujući ali ne ograničavajući se na propuštena putovanja, nekorektne informacije o polascima, cenama ili stanicama, i prekide u radu. Korišćenjem sajta prihvatate da je putovanje vaša lična odluka i odgovornost.',
         'en': 'To the extent permitted by law, Prevozni and its authors are not liable for any direct, indirect, incidental or consequential damages arising from use or inability to use the site, including but not limited to missed trips, incorrect departure / price / station information, and service interruptions. By using the site you agree that travel decisions remain your personal responsibility.',
         'ru': 'В той мере, в какой это допускается законом, Prevozni и его авторы не несут ответственности за прямые, косвенные, случайные или последующие убытки, возникающие в связи с использованием или невозможностью использования сайта, включая (но не ограничиваясь): пропущенные поездки, неверную информацию о рейсах / ценах / станциях и перебои в работе. Используя сайт, вы соглашаетесь, что решение о поездке остаётся вашей личной ответственностью.',
+        'bg': 'До степента, разрешена от закона, Prevozni и неговите автори не носят отговорност за каквито и да било преки, косвени, случайни или последващи вреди, произтичащи от използването или невъзможността за използване на сайта, включително, но не само пропуснати пътувания, неточна информация за курсове, цени или автогари, и прекъсвания в работата. С използването на сайта приемате, че пътуването е ваше лично решение и отговорност.',
     },
     'tos.s7_h': {
         'sr': '7. Merodavno pravo',
         'en': '7. Governing law',
         'ru': '7. Применимое право',
+        'bg': '7. Приложимо право',
     },
     'tos.s7_body': {
         'sr': 'Ovi uslovi se tumače u skladu sa pravom Republike Srbije. Za sve sporove koji proizlaze iz korišćenja sajta nadležan je sud u Beogradu, Srbija, osim ako imperativne norme zaštite potrošača u vašoj državi prebivališta ne propisuju drugačije.',
         'en': 'These terms are interpreted under the law of the Republic of Serbia. Any disputes arising from use of the site fall under the jurisdiction of the court in Belgrade, Serbia, unless mandatory consumer-protection rules in your country of residence require otherwise.',
         'ru': 'Эти условия толкуются в соответствии с правом Республики Сербия. Все споры, возникающие в связи с использованием сайта, подсудны суду в Белграде, Сербия, если иное не предусмотрено императивными нормами защиты прав потребителей страны вашего проживания.',
+        'bg': 'Тези условия се тълкуват в съответствие с правото на Република Сърбия. За всички спорове, произтичащи от използването на сайта, компетентен е съдът в Белград, Сърбия, освен ако императивни норми за защита на потребителите в държавата на вашето местожителство не предвиждат друго.',
     },
     'tos.s8_h': {
         'sr': '8. Izmene uslova',
         'en': '8. Changes to these terms',
         'ru': '8. Изменения условий',
+        'bg': '8. Промени в условията',
     },
     'tos.s8_body': {
         'sr': 'Možemo povremeno da ažuriramo ove uslove. Svaka nova verzija se objavljuje na ovoj stranici sa datumom izmene. Ako izmena bitno utiče na vaša prava, objavljujemo baner na početnoj strani najmanje 14 dana unapred. Nastavkom korišćenja sajta nakon objave prihvatate izmenjene uslove.',
         'en': 'We may update these terms from time to time. Each new version is published on this page with a change date. If a change materially affects your rights, we publish a homepage banner at least 14 days in advance. Continued use of the site after publication constitutes acceptance of the updated terms.',
         'ru': 'Мы можем периодически обновлять эти условия. Каждая новая версия публикуется на этой странице с датой изменения. Если изменение существенно затрагивает ваши права, мы вывешиваем баннер на главной странице минимум за 14 дней. Продолжение использования сайта после публикации означает принятие обновлённых условий.',
+        'bg': 'Можем периодично да актуализираме тези условия. Всяка нова версия се публикува на тази страница с дата на промяната. Ако промяната съществено засяга вашите права, публикуваме банер на началната страница най-малко 14 дни предварително. С продължаването на използването на сайта след публикуването приемате изменените условия.',
     },
 
     'home.quick_label': {'sr': 'Popularno:', 'en': 'Popular:', 'ru': 'Популярно:'},
@@ -4912,13 +5178,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'bg': 'Популярно:',
     },
 
-    'city.loading': {'sr': 'Podaci se učitavaju...', 'en': 'Loading data...', 'ru': 'Загрузка...'},
-    'line.no_stops': {'sr': 'Nema podataka o stajalištima', 'en': 'No stop data available', 'ru': 'Нет данных об остановках'},
-    'stop.no_lines': {'sr': 'Nema podataka o linijama', 'en': 'No line data available', 'ru': 'Нет данных о маршрутах'},
+    'city.loading': {'sr': 'Podaci se učitavaju...', 'en': 'Loading data...', 'ru': 'Загрузка...', 'bg': 'Данните се зареждат...'},
+    'line.no_stops': {'sr': 'Nema podataka o stajalištima', 'en': 'No stop data available', 'ru': 'Нет данных об остановках', 'bg': 'Няма данни за спирки'},
+    'stop.no_lines': {'sr': 'Nema podataka o linijama', 'en': 'No line data available', 'ru': 'Нет данных о маршрутах', 'bg': 'Няма данни за линии'},
     'line.schedule_unavailable': {
         'sr': 'Tačan raspored trenutno nije dostupan. Proverite direktno kod prevoznika ili na autobuskoj stanici.',
         'en': 'Exact schedule is not currently available. Please check directly with the carrier or at the bus station.',
         'ru': 'Точное расписание временно недоступно. Уточните у перевозчика или на автовокзале.',
+        'bg': 'Точното разписание в момента не е достъпно. Проверете директно при превозвача или на автогарата.',
     },
 
     # ── Guide: Beograd–Novi Sad ──
@@ -4926,11 +5193,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Autobus Beograd → Novi Sad {year} — Cene i Red Vožnje',
         'en': 'Bus Belgrade → Novi Sad {year} — Prices and Schedule',
         'ru': 'Автобус Белград → Нови-Сад {year} — Цены и Расписание',
+        'bg': 'Автобус Белград → Нови Сад {year} — Цени и разписание',
     },
     'guides.beograd_ns.meta': {
         'sr': 'Sve o prevozu Beograd–Novi Sad: cene karata od 640 RSD, vreme putovanja 1–2h, poređenje autobusa i voza i aktuelni polasci.',
         'en': 'Everything about Belgrade–Novi Sad transport: ticket prices from 640 RSD, 1–2h travel time, bus vs train comparison and current departures.',
         'ru': 'Всё о транспорте Белград–Нови-Сад: билеты от 640 динаров, время в пути 1–2ч, сравнение автобуса и поезда, актуальные рейсы.',
+        'bg': 'Всичко за транспорта Белград–Нови Сад: цени на билетите от 640 RSD, време за пътуване 1–2ч, сравнение между автобус и влак и актуални тръгвания.',
     },
     'guides.beograd_ns.p1': {
         'sr': 'Beograd i Novi Sad razdvaja svega 90 km auto-putom, a taj rastojanje možete prevaliti autobusom, vozom ili privatnim prevozom. '
@@ -4939,11 +5208,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               'This is the most popular domestic route — over 30 departures run daily at prices to suit every budget.',
         'ru': 'Белград и Нови-Сад разделяют всего 90 км по автостраде. Добраться можно автобусом, поездом или на машине. '
               'Это самый популярный внутренний маршрут: более 30 рейсов в день по доступным ценам.',
+        'bg': 'Белград и Нови Сад са отдалечени само на 90 км по магистралата, а това разстояние може да се измине с автобус, влак или личен превоз. Това е най-популярната вътрешна линия — дневно има над 30 курса, а цените са достъпни за всеки бюджет.',
     },
     'guides.beograd_ns.h2_options': {
         'sr': 'Opcije prevoza',
         'en': 'Transport options',
         'ru': 'Варианты транспорта',
+        'bg': 'Варианти за превоз',
     },
     'guides.beograd_ns.p2': {
         'sr': '<strong>Autobus</strong> — najčešći izbor. Lasta, Jugoprevoz i drugi prevoznici voze svakih sat-dva tokom dana i noći. '
@@ -4961,11 +5232,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               '<strong>Поезд</strong> — у Srbija Voz несколько рейсов в день, время в пути около 1ч 30мин. '
               'Некоторые поездки бесплатны для пассажиров с билетом на дальний поезд.<br><br>'
               '<strong>BlaBlaCar / такси</strong> — гибко, но дороже. Идеально для поездки группой.',
+        'bg': '<strong>Автобус</strong> — най-честият избор. Lasta, Jugoprevoz и други превозвачи возят на всеки час-два, денем и нощем. Тръгването е от Белградската автобусна гара (BAS), а пристигането — на автогарата в Нови Сад. Времетраене на пътуването: 60–90 минути.<br><br><strong>Влак</strong> — Srbija Voz предлага няколко курса дневно, времетраене около 1 ч. и 30 мин. Някои курсове са безплатни за пътници с билет за далечен влак.<br><br><strong>BlaBlaCar / такси</strong> — гъвкаво, но по-скъпо. Идеално, ако пътувате в група.',
     },
     'guides.beograd_ns.h2_price': {
         'sr': 'Cene karata',
         'en': 'Ticket prices',
         'ru': 'Цены на билеты',
+        'bg': 'Цени на билетите',
     },
     'guides.beograd_ns.p3': {
         'sr': 'Autobuska karta košta između <strong>640 i 1 050 RSD</strong> (5–9 €) u zavisnosti od prevoznika i polaska. '
@@ -4980,11 +5253,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               'Ночные рейсы и небольшие перевозчики зачастую дешевле. '
               'Поезд Srbija Voz — цена варьируется, но есть доступные дневные билеты. '
               'Разницы между онлайн-покупкой и кассой нет.',
+        'bg': 'Автобусният билет струва между <strong>640 и 1 050 RSD</strong> (5–9 €) в зависимост от превозвача и курса. Нощните курсове и тези с по-малки превозвачи често са по-евтини. Влакът на Srbija Voz — цената варира, но има изгодни дневни билети. Купуването на билет онлайн или на гишето — няма разлика в цената.',
     },
     'guides.beograd_ns.h2_tips': {
         'sr': 'Korisni saveti',
         'en': 'Useful tips',
         'ru': 'Полезные советы',
+        'bg': 'Полезни съвети',
     },
     'guides.beograd_ns.p4': {
         'sr': '• Putujete vikendom ili praznikom? Kupite kartu unapred — popularni polasci se pune brzo.<br>'
@@ -4999,16 +5274,19 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               '• Автовокзал Нови-Сада находится в центре — до Бульвара освобождения и торгового центра пешком.<br>'
               '• Ночные рейсы (после полуночи) дешевле и подходят, если не торопитесь.<br>'
               '• Парковка в Нови-Саде в выходные дорогая — автобус выгоднее.',
+        'bg': '• Пътувате през уикенда или на празник? Купете билет предварително — популярните курсове се запълват бързо.<br>• Автогарата в Нови Сад е в центъра — лесно се стига пеша до булевард „Освобождение“ и търговския център.<br>• Нощните курсове (след полунощ) са по-евтини и са добър вариант, ако не бързате.<br>• Паркирането в Нови Сад може да е скъпо през уикенда — автобусът е по-разумното решение.',
     },
     'guides.beograd_ns.h2_departures': {
         'sr': 'Aktuelni polasci',
         'en': 'Current departures',
         'ru': 'Актуальные рейсы',
+        'bg': 'Актуални курсове',
     },
     'guides.beograd_ns.cta': {
         'sr': 'Pogledaj sve polaske',
         'en': 'View all departures',
         'ru': 'Смотреть все рейсы',
+        'bg': 'Виж всички курсове',
     },
 
     # ── Guide: Prevoz do mora ──
@@ -5016,11 +5294,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Prevoz do mora iz Srbije {year} — Autobus, Cene, Saveti',
         'en': 'Transport to the Sea from Serbia {year} — Bus, Prices, Tips',
         'ru': 'Транспорт к морю из Сербии {year} — Автобус, Цены, Советы',
+        'bg': 'Транспорт до морето от Сърбия {year} — Автобус, цени, съвети',
     },
     'guides.more.meta': {
         'sr': 'Kako doći do mora iz Beograda autobusom: Budva, Bar, Herceg Novi, Split, Dubrovnik — cene, vreme putovanja i letnji saveti.',
         'en': 'How to get to the sea from Belgrade by bus: Budva, Bar, Herceg Novi, Split, Dubrovnik — prices, travel times and summer tips.',
         'ru': 'Как добраться до моря из Белграда автобусом: Будва, Бар, Херцег-Нови, Сплит, Дубровник — цены, время в пути и советы на лето.',
+        'bg': 'Как да стигнете до морето от Белград с автобус: Будва, Бар, Херцег Нови, Сплит, Дубровник — цени, време за пътуване и летни съвети.',
     },
     'guides.more.p1': {
         'sr': 'Leto je — i Beograd se prazni. Hiljade putnika svake sezone kreću prema Jadranskom i Jonskom moru, '
@@ -5032,11 +5312,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Лето — и Белград пустеет. Тысячи пассажиров каждый сезон направляются к Адриатическому и Ионическому морям, '
               'а автобус остаётся самым популярным и выгодным способом добраться. '
               'Вот всё, что нужно знать перед отправлением.',
+        'bg': 'Лято е — и Белград се изпразва. Всеки сезон хиляди пътници потеглят към Адриатическо и Йонийско море, а автобусът остава най-популярният и най-изгоден начин на придвижване. Ето всичко, което трябва да знаете, преди да тръгнете.',
     },
     'guides.more.h2_destinations': {
         'sr': 'Najpopularnije destinacije i cene',
         'en': 'Most popular destinations and prices',
         'ru': 'Самые популярные направления и цены',
+        'bg': 'Най-популярни дестинации и цени',
     },
     'guides.more.p2': {
         'sr': 'Iz Beograda saobraćaju direktne linije do svih glavnih primorskih gradova. '
@@ -5045,11 +5327,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               'Prices are approximate and may vary by carrier and season:',
         'ru': 'Из Белграда ходят прямые рейсы во все основные прибрежные города. '
               'Цены приблизительные и могут варьироваться в зависимости от перевозчика и сезона:',
+        'bg': 'От Белград има директни линии до всички основни крайморски градове. Цените са ориентировъчни и може да варират в зависимост от превозвача и сезона:',
     },
     'guides.more.h2_tips': {
         'sr': 'Saveti za letnje putovanje',
         'en': 'Summer travel tips',
         'ru': 'Советы для летних поездок',
+        'bg': 'Съвети за лятното пътуване',
     },
     'guides.more.p3': {
         'sr': '• <strong>Kupite kartu 2–3 nedelje unapred</strong> — leto je vrhunac sezone, autobuske karte nestaju brzo posebno za vikende.<br>'
@@ -5067,16 +5351,19 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               '• <strong>Следите за багажом</strong> — каждый чемодан в багажном отсеке оплачивается отдельно (обычно 200–300 динаров).<br>'
               '• <strong>Черногория</strong>: Будва самая популярная, но Бар лучший терминал и цены ниже.<br>'
               '• <strong>Хорватия</strong>: Сплит и Дубровник — пограничный переход, держите документы под рукой.',
+        'bg': '• <strong>Купете билета 2–3 седмици предварително</strong> — лятото е върхът на сезона и автобусните билети се изчерпват бързо, особено за уикендите.<br>• <strong>Нощните тръгвания</strong> са златният стандарт: тръгвате вечерта, а се събуждате на морето. Спестявате от хотел.<br>• <strong>Внимавайте с багажа</strong> — всеки куфар в багажното отделение се таксува отделно от автобуса (обикновено 200–300 RSD).<br>• <strong>Черна гора</strong>: Будва е най-популярна, но Бар има по-добър автобусен терминал и по-ниски цени.<br>• <strong>Хърватия</strong>: Сплит и Дубровник изискват граничен преход — подгответе документите на видимо място.',
     },
     'guides.more.h2_routes': {
         'sr': 'Aktuelne linije do mora',
         'en': 'Current sea routes',
         'ru': 'Актуальные маршруты к морю',
+        'bg': 'Актуални линии до морето',
     },
     'guides.more.cta': {
         'sr': 'Pretraži karte za more',
         'en': 'Search sea tickets',
         'ru': 'Найти билеты к морю',
+        'bg': 'Търсене на билети за морето',
     },
 
     # ── Guide: FlixBus Srbija ──
@@ -5084,145 +5371,175 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Tramvaj Beograd {year}: sve tramvajske linije i red vožnje',
         'en': 'Belgrade tram {year}: all tram lines and schedule',
         'ru': 'Трамвай Белград {year}: все трамвайные линии и расписание',
+        'bg': 'Трамвай Белград {year}: всички трамвайни линии и разписание',
     },
     'guides.tramvaj_bg.meta': {
         'sr': 'Sve tramvajske linije u Beogradu — kompletna lista tramvaja sa redom vožnje, stajalištima i mapom trase. Tramvajska mreža grada na jednom mestu.',
         'en': 'All tram lines in Belgrade — the complete list of trams with schedules, stops and route maps. The city tram network in one place.',
         'ru': 'Все трамвайные линии Белграда — полный список трамваев с расписанием, остановками и картой маршрута. Трамвайная сеть города в одном месте.',
+        'bg': 'Всички трамвайни линии в Белград — пълен списък на трамваите с разписание, спирки и карта на маршрута. Трамвайната мрежа на града на едно място.',
     },
     'guides.tramvaj_bg.p1': {
         'sr': 'U Beogradu tramvaji saobraćaju na {count} linija koje povezuju centar grada i druge delove. Ispod su sve tramvajske linije sa direktnim linkom na red vožnje i stajališta.',
         'en': 'Belgrade has {count} tram lines connecting the city centre with other parts of town. Below are all the tram lines with a direct link to their schedule and stops.',
         'ru': 'В Белграде трамваи ходят по {count} линиям, связывая центр города с другими районами. Ниже все трамвайные линии со ссылкой на расписание и остановки.',
+        'bg': 'В Белград трамваите се движат по {count} линии, които свързват центъра на града с останалите части. По-долу са всички трамвайни линии с директен линк към разписанието и спирките.',
     },
     'guides.tramvaj_bg.h2_lines': {
         'sr': 'Sve tramvajske linije u Beogradu',
         'en': 'All Belgrade tram lines',
         'ru': 'Все трамвайные линии Белграда',
+        'bg': 'Всички трамвайни линии в Белград',
     },
     'guides.tramvaj_bg.p_lines': {
         'sr': 'Kliknite na liniju za tačan red vožnje, stajališta i mapu trase:',
         'en': 'Tap a line for its exact schedule, stops and route map:',
         'ru': 'Нажмите на линию для точного расписания, остановок и карты маршрута:',
+        'bg': 'Кликнете върху линията за точното разписание, спирките и картата на маршрута:',
     },
     'guides.tramvaj_bg.line_prefix': {
         'sr': 'Linija', 'en': 'Line', 'ru': 'Линия',
+        'bg': 'Линия',
     },
     'guides.tramvaj_bg.h2_tips': {
         'sr': 'Korisni saveti',
         'en': 'Useful tips',
         'ru': 'Полезные советы',
+        'bg': 'Полезни съвети',
     },
     'guides.tramvaj_bg.p_tips': {
         'sr': 'Tačan red vožnje i učestalost tramvaja proverite na stranici svake linije — raspored se razlikuje radnim danom i vikendom. Noću mrežu preuzimaju noćne autobuske linije.',
         'en': 'Check each tram\'s exact schedule and frequency on its line page — the timetable differs on weekdays and weekends. At night the network is covered by night bus lines.',
         'ru': 'Точное расписание и частоту трамваев смотрите на странице каждой линии — расписание отличается в будни и выходные. Ночью сеть обслуживают ночные автобусные линии.',
+        'bg': 'Точното разписание и честотата на трамваите проверявайте на страницата на всяка линия — графикът се различава в работни дни и през уикенда. Нощем мрежата се поема от нощните автобусни линии.',
     },
     'guides.aerodrom_bg.title': {
         'sr': 'Kako doći do aerodroma Beograd {year}: autobus i prevoz',
         'en': 'How to get to Belgrade airport {year}: bus and transport',
         'ru': 'Как добраться до аэропорта Белграда {year}: автобус и транспорт',
+        'bg': 'Как да стигнете до летище Белград {year}: автобус и транспорт',
     },
     'guides.aerodrom_bg.meta': {
         'sr': 'Gradski autobus do aerodroma „Nikola Tesla“ iz Beograda — linije 72, A1 (ekspres), 600, 607 i noćna 72N, sa redom vožnje i stajalištima.',
         'en': 'City bus to „Nikola Tesla“ airport from Belgrade — lines 72, A1 (express), 600, 607 and night line 72N, with schedules and stops.',
         'ru': 'Городской автобус до аэропорта «Никола Тесла» из Белграда — линии 72, A1 (экспресс), 600, 607 и ночная 72N, с расписанием и остановками.',
+        'bg': 'Градски автобус до летище „Никола Тесла“ от Белград — линии 72, A1 (експресна), 600, 607 и нощна 72N, с разписание и спирки.',
     },
     'guides.aerodrom_bg.p1': {
         'sr': 'Do beogradskog aerodroma „Nikola Tesla“ iz grada vodi {count} linija gradskog prevoza, pa ne morate na taksi. Ispod su sve linije sa direktnim linkom na red vožnje i stajališta.',
         'en': 'There are {count} city-transport lines from Belgrade to „Nikola Tesla“ airport, so you don\'t need a taxi. Below are all the lines with a direct link to their schedule and stops.',
         'ru': 'До белградского аэропорта «Никола Тесла» из города идёт {count} линий городского транспорта, так что такси не обязательно. Ниже все линии со ссылкой на расписание и остановки.',
+        'bg': 'До белградското летище „Никола Тесла“ от града водят {count} линии на градския транспорт, така че не се налага да вземате такси. По-долу ще намерите всички линии с директен линк към разписанието и спирките.',
     },
     'guides.aerodrom_bg.h2_lines': {
         'sr': 'Linije do aerodroma „Nikola Tesla“',
         'en': 'Lines to „Nikola Tesla“ airport',
         'ru': 'Линии до аэропорта «Никола Тесла»',
+        'bg': 'Линии до летище „Никола Тесла“',
     },
     'guides.aerodrom_bg.p_lines': {
         'sr': 'Kliknite na liniju za tačan red vožnje, stajališta i mapu trase:',
         'en': 'Tap a line for its exact schedule, stops and route map:',
         'ru': 'Нажмите на линию для точного расписания, остановок и карты маршрута:',
+        'bg': 'Кликнете върху линията, за да видите точното разписание, спирките и картата на маршрута:',
     },
     'guides.aerodrom_bg.line_prefix': {
         'sr': 'Linija', 'en': 'Line', 'ru': 'Линия',
+        'bg': 'Линия',
     },
     'guides.aerodrom_bg.h2_which': {
         'sr': 'Koju liniju izabrati',
         'en': 'Which line to choose',
         'ru': 'Какую линию выбрать',
+        'bg': 'Коя линия да изберете',
     },
     'guides.aerodrom_bg.p_which': {
         'sr': 'Linija 72 polazi sa Zelenog venca, a ekspres e-bus A1 sa Trga Slavija — obe idu pravo do aerodroma. Linije 600 (od Železničke stanice) i 607 (Banovo Brdo) povezuju druge delove grada. Noću do aerodroma saobraća linija 72N.',
         'en': 'Line 72 departs from Zeleni venac, and the express e-bus A1 from Trg Slavija — both go straight to the airport. Lines 600 (from the railway station) and 607 (Banovo Brdo) connect other parts of the city. At night, line 72N serves the airport.',
         'ru': 'Линия 72 отправляется с Zeleni venac, а экспресс e-bus A1 — с Trg Slavija; обе идут прямо в аэропорт. Линии 600 (от ж/д вокзала) и 607 (Banovo Brdo) связывают другие районы. Ночью в аэропорт ходит линия 72N.',
+        'bg': 'Линия 72 тръгва от Зелени венац, а експресният електробус A1 — от площад Славия — и двете стигат направо до летището. Линиите 600 (от Железопътната гара) и 607 (Баново бърдо) свързват други части на града. През нощта до летището се движи линия 72N.',
     },
     'guides.aerodrom_bg.h2_tips': {
         'sr': 'Korisni saveti',
         'en': 'Useful tips',
         'ru': 'Полезные советы',
+        'bg': 'Полезни съвети',
     },
     'guides.aerodrom_bg.p_tips': {
         'sr': 'Tačno vreme polaska i učestalost proverite na stranici svake linije — red vožnje se razlikuje radnim danom i vikendom. Ako putujete iz drugog grada u Srbiji, međugradske polaske ka Beogradu uporedite u našem pretraživaču.',
         'en': 'Check the exact departure time and frequency on each line\'s page — the schedule differs on weekdays and weekends. If you are travelling from another city in Serbia, compare intercity departures to Belgrade in our search.',
         'ru': 'Точное время отправления и частоту смотрите на странице каждой линии — расписание отличается в будни и выходные. Если вы едете из другого города Сербии, сравните междугородние рейсы до Белграда в нашем поиске.',
+        'bg': 'Точния час на тръгване и честотата проверявайте на страницата на всяка линия — разписанието се различава в работни дни и през уикенда. Ако пътувате от друг град в Сърбия, сравнете междуградските курсове до Белград в нашата търсачка.',
     },
     'guides.nocni_bg.title': {
         'sr': 'Noćni autobus Beograd {year}: noćne linije i red vožnje',
         'en': 'Belgrade night bus {year}: all night lines and schedule',
         'ru': 'Ночной автобус Белград {year}: ночные линии и расписание',
+        'bg': 'Нощен автобус Белград {year}: нощни линии и разписание',
     },
     'guides.nocni_bg.meta': {
         'sr': 'Sve noćne linije gradskog prevoza u Beogradu — kompletna lista noćnih autobusa, red vožnje i stajališta. Uključujući noćni prevoz do aerodroma.',
         'en': 'All Belgrade night-bus lines — the complete list of night buses with schedules and stops, including night transport to the airport.',
         'ru': 'Все ночные линии городского транспорта Белграда — полный список ночных автобусов, расписание и остановки, включая ночной транспорт до аэропорта.',
+        'bg': 'Всички нощни линии на градския транспорт в Белград — пълен списък на нощните автобуси, разписанието и спирките. Включително нощен транспорт до летището.',
     },
     'guides.nocni_bg.p1': {
         'sr': 'U Beogradu noću saobraća {count} noćnih linija gradskog prevoza, koje preuzimaju mrežu kada dnevni autobusi, tramvaji i trolejbusi prestanu da voze. Polasci kreću sa centralnih čvorišta u gradu i pokrivaju sve delove Beograda i prigradska naselja.',
         'en': 'Belgrade has {count} night public-transport lines that take over the network once the daytime buses, trams and trolleybuses stop running. They depart from the central hubs in the city and reach every part of Belgrade and the suburbs.',
         'ru': 'В Белграде ночью работает {count} ночных линий городского транспорта, которые берут на себя сеть, когда дневные автобусы, трамваи и троллейбусы прекращают ходить. Рейсы отправляются с центральных узлов города и охватывают все районы Белграда и пригороды.',
+        'bg': 'В Белград нощем се движат {count} нощни линии на градския транспорт, които поемат мрежата, когато дневните автобуси, трамваи и тролейбуси спрат да возят. Тръгванията са от централните възлови точки в града и покриват всички части на Белград и крайградските селища.',
     },
     'guides.nocni_bg.h2_lines': {
         'sr': 'Spisak noćnih linija u Beogradu',
         'en': 'List of Belgrade night lines',
         'ru': 'Список ночных линий Белграда',
+        'bg': 'Списък на нощните линии в Белград',
     },
     'guides.nocni_bg.p_lines': {
         'sr': 'Kliknite na liniju za tačan red vožnje, stajališta i mapu trase:',
         'en': 'Tap a line for its exact schedule, stops and route map:',
         'ru': 'Нажмите на линию для точного расписания, остановок и карты маршрута:',
+        'bg': 'Кликнете върху линията за точното разписание, спирките и картата на маршрута:',
     },
     'guides.nocni_bg.line_prefix': {
         'sr': 'Linija', 'en': 'Line', 'ru': 'Линия',
+        'bg': 'Линия',
     },
     'guides.nocni_bg.h2_airport': {
         'sr': 'Noćni prevoz do aerodroma',
         'en': 'Night transport to the airport',
         'ru': 'Ночной транспорт до аэропорта',
+        'bg': 'Нощен превоз до летището',
     },
     'guides.nocni_bg.p_airport': {
         'sr': 'Do aerodroma „Nikola Tesla“ noću saobraća i noćna linija',
         'en': 'The „Nikola Tesla“ airport is also served at night by night line',
         'ru': 'До аэропорта «Никола Тесла» ночью ходит и ночная линия',
+        'bg': 'До летище „Никола Тесла“ нощем се движи и нощна линия',
     },
     'guides.nocni_bg.h2_tips': {
         'sr': 'Korisni saveti',
         'en': 'Useful tips',
         'ru': 'Полезные советы',
+        'bg': 'Полезни съвети',
     },
     'guides.nocni_bg.p_tips': {
         'sr': 'Noćne linije obično voze ređe od dnevnih, pa unapred proverite vreme polaska na stranici izabrane linije. Glavna polazna mesta u centru su Trg republike, Studentski trg i Trg Slavija. Za putovanja van Beograda uporedite i međugradske polaske u našem pretraživaču.',
         'en': 'Night lines usually run less frequently than daytime ones, so check the departure time on the line\'s page in advance. The main central departure points are Trg republike, Studentski trg and Trg Slavija. For trips outside Belgrade, compare intercity departures in our search too.',
         'ru': 'Ночные линии обычно ходят реже дневных, поэтому заранее проверьте время отправления на странице нужной линии. Главные точки отправления в центре — Trg republike, Studentski trg и Trg Slavija. Для поездок за пределы Белграда сравните и междугородние рейсы в нашем поиске.',
+        'bg': 'Нощните линии обикновено се движат по-рядко от дневните, затова проверете предварително часа на тръгване на страницата на избраната линия. Основните тръгвания в центъра са от площад Република, Студентски площад и площад Славия. За пътувания извън Белград сравнете и междуградските тръгвания в нашата търсачка.',
     },
     'guides.flixbus.title': {
         'sr': 'FlixBus Srbija {year} — Linije, Cene i Poređenje',
         'en': 'FlixBus Serbia {year} — Routes, Prices and Comparison',
         'ru': 'FlixBus Сербия {year} — Маршруты, Цены и Сравнение',
+        'bg': 'FlixBus Сърбия {year} — Линии, цени и сравнение',
     },
     'guides.flixbus.meta': {
         'sr': 'FlixBus linije kroz Srbiju, poređenje sa Lastom i BEX-om — kad je FlixBus jeftiniji i kad da birate domaći prevoz.',
         'en': 'FlixBus routes through Serbia, comparison with Lasta and BEX — when FlixBus is cheaper and when to choose a local carrier.',
         'ru': 'Маршруты FlixBus через Сербию, сравнение с Lasta и BEX — когда FlixBus дешевле и когда выбрать местного перевозчика.',
+        'bg': 'Линии на FlixBus през Сърбия, сравнение с Lasta и BEX — кога FlixBus е по-евтин и кога да изберете местен превозвач.',
     },
     'guides.flixbus.p1': {
         'sr': 'FlixBus je 2019. ušao na srpsko tržište i od tada nudi međunarodne i tranzitne linije kroz Srbiju. '
@@ -5234,11 +5551,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'FlixBus вышел на сербский рынок в 2019 году и с тех пор предлагает международные и транзитные маршруты через Сербию. '
               'Зелёные автобусы стали узнаваемы, но всегда ли они самые дешёвые? '
               'Мы сравнили FlixBus с местными перевозчиkami, чтобы вы приняли правильное решение.',
+        'bg': 'FlixBus навлезе на сръбския пазар през 2019 г. и оттогава предлага международни и транзитни линии през Сърбия. Зелените автобуси станаха разпознаваеми, но винаги ли са и най-евтини? Сравнихме FlixBus с местните превозвачи, за да можете да вземете правилното решение.',
     },
     'guides.flixbus.h2_lines': {
         'sr': 'FlixBus linije koje prolaze kroz Srbiju',
         'en': 'FlixBus routes through Serbia',
         'ru': 'Маршруты FlixBus через Сербию',
+        'bg': 'Линии на FlixBus през Сърбия',
     },
     'guides.flixbus.p2': {
         'sr': 'FlixBus ne nudi domaći prevoz unutar Srbije, ali saobraća na brojnim međunarodnim linijama koje prolaze kroz Beograd:<br><br>'
@@ -5262,11 +5581,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               '• <strong>Белград → Любляна</strong> (7ч, от ~15 €)<br>'
               '• <strong>Белград → Скопье</strong> (4ч, от ~10 €)<br><br>'
               'Отправление с автовокзала BAS в центре Белграда. Билеты покупаются только онлайн на <strong>flixbus.rs</strong>.',
+        'bg': 'FlixBus не предлага вътрешен превоз в Сърбия, но обслужва множество международни линии, минаващи през Белград:<br><br>• <strong>Белград → Будапеща</strong> (4–5h, от ~15 €)<br>• <strong>Белград → Виена</strong> (8h, от ~20 €)<br>• <strong>Белград → Загреб</strong> (5h, от ~12 €)<br>• <strong>Белград → Любляна</strong> (7h, от ~15 €)<br>• <strong>Белград → Скопие</strong> (4h, от ~10 €)<br><br>Тръгванията са от автогара BAS в центъра на Белград. Билети се купуват единствено онлайн на <strong>flixbus.rs</strong>.',
     },
     'guides.flixbus.h2_compare': {
         'sr': 'FlixBus vs domaći prevoz — kad šta birati',
         'en': 'FlixBus vs local carriers — when to choose what',
         'ru': 'FlixBus vs местные перевозчики — когда что выбрать',
+        'bg': 'FlixBus срещу местния превоз — кога какво да изберете',
     },
     'guides.flixbus.p3': {
         'sr': '<strong>Izaberite FlixBus kada:</strong><br>'
@@ -5293,11 +5614,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               '• Путешествуете внутри Сербии — FlixBus эти направления не охватывает.<br>'
               '• Едете к морю (Черногория, Адриатика) — у местных перевозчиков густая сеть прибрежных маршрутов.<br>'
               '• Покупаете билет в последний момент на кассе.',
+        'bg': '<strong>Изберете FlixBus, когато:</strong><br>• Пътувате в чужбина (Унгария, Австрия, Хърватия) — FlixBus често е конкурентен по цена и предлага удобни автобуси.<br>• Предпочитате онлайн резервация с възможност за промяна на билета.<br>• Пътувате нощем и цените безплатния Wi-Fi и USB зарядно.<br><br><strong>Изберете местен превоз (Lasta, BEX, Niš-Ekspres), когато:</strong><br>• Пътувате в рамките на Сърбия — FlixBus не покрива тези дестинации.<br>• Пътувате към морето (Черна гора, Адриатика) — местните превозвачи имат гъста мрежа от крайморски линии.<br>• Купувате билет в последния момент на гишето.',
     },
     'guides.flixbus.h2_tips': {
         'sr': 'Saveti za putovanje FlixBusom',
         'en': 'Tips for travelling with FlixBus',
         'ru': 'Советы для поездок на FlixBus',
+        'bg': 'Съвети за пътуване с FlixBus',
     },
     'guides.flixbus.p4': {
         'sr': '• Karte su najjeftinije ako kupujete 4–6 nedelja unapred.<br>'
@@ -5315,11 +5638,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               '• Задержки возможны на транзитных маршрутах (автобус едет из другой страны).<br>'
               '• Багаж: одно место в багажном отсеке бесплатно, ручная кладь на сиденье.<br>'
               '• В Сербии у FlixBus нет своих станций — используйте BAS или маркеры на карте в приложении.',
+        'bg': '• Билетите са най-евтини, ако ги купите 4–6 седмици предварително.<br>• FlixBus има програма за лоялност — събирате точки за всеки билет.<br>• Възможни са закъснения по транзитните линии (автобусът пристига от друга държава).<br>• Багаж: един куфар в багажното отделение безплатно, ръчен багаж на седалката.<br>• В Сърбия FlixBus няма собствени автогари — използвайте BAS или означенията на картата в приложението.',
     },
     'guides.flixbus.cta': {
         'sr': 'Pretraži domaće polaske',
         'en': 'Search local departures',
         'ru': 'Найти внутренние рейсы',
+        'bg': 'Търсене на вътрешни курсове',
     },
     # ── Operator/Country FAQ ──
 
