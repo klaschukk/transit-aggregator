@@ -67,6 +67,9 @@ python -u data/pipelines/scrape_intercity.py 2>&1 | tee -a "$LOG" || log "WARN: 
 log "Scraping international trips..."
 python -u data/pipelines/scrape_international.py 2>&1 | tee -a "$LOG" || log "WARN: scrape_international failed"
 
+log "Scraping ArdaTur (Bulgaria <-> wider Europe/Turkey)..."
+python -u data/pipelines/scrape_ardatur.py 2>&1 | tee -a "$LOG" || log "WARN: scrape_ardatur failed"
+
 # ── DB build: runs with the site UP ─────────────────────────────────────────
 # build_db writes to transit.duckdb.tmp and finishes with an atomic os.replace,
 # so the live DB stays intact and workers keep serving throughout. It used to
