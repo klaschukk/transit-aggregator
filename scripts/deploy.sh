@@ -25,6 +25,7 @@ echo "==> Installing deps"
 # CSS edits silently never shipped.
 echo "==> Rebuilding CSS dist"
 "$DIR/venv/bin/python" scripts/minify_css.py || echo "WARN: minify_css failed, dist may be stale"
+"$DIR/venv/bin/python" scripts/minify_js.py || echo "WARN: minify_js failed, dist may be stale"
 
 echo "==> Restarting service"
 sudo systemctl restart prevozni

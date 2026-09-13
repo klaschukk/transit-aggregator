@@ -517,6 +517,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script defer src="{{ url_for('static', filename='js/route-filters.js') }}?v={{ asset_version }}"></script>
+{% if not config.DEBUG %}<script defer src="{{ url_for('static', filename='js/dist/route-filters.js') }}?v={{ asset_version }}"></script>{% else %}<script defer src="{{ url_for('static', filename='js/route-filters.js') }}?v={{ asset_version }}"></script>{% endif %}
 {% include '_partials/_route_map_script.html' %}
 {% endblock %}

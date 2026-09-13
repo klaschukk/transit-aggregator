@@ -40,4 +40,4 @@
   <button class="review-prompt__close" type="button"
           data-review-dismiss aria-label="{{ _('a11y.dismiss') }}">×</button>
 </div>
-<script defer src="{{ url_for('static', filename='js/review-prompt.js') }}?v={{ asset_version }}"></script>
+{% if not config.DEBUG %}<script defer src="{{ url_for('static', filename='js/dist/review-prompt.js') }}?v={{ asset_version }}"></script>{% else %}<script defer src="{{ url_for('static', filename='js/review-prompt.js') }}?v={{ asset_version }}"></script>{% endif %}

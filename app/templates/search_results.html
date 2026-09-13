@@ -305,7 +305,7 @@
 {% block scripts %}
 {% include '_partials/_route_map_script.html' %}
 {% if connections %}
-<script defer src="{{ url_for('static', filename='js/connection-timeline.js') }}?v={{ asset_version }}"></script>
+{% if not config.DEBUG %}<script defer src="{{ url_for('static', filename='js/dist/connection-timeline.js') }}?v={{ asset_version }}"></script>{% else %}<script defer src="{{ url_for('static', filename='js/connection-timeline.js') }}?v={{ asset_version }}"></script>{% endif %}
 {% endif %}
 <script>
 (function() {

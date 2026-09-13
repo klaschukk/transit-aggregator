@@ -56,3 +56,4 @@ seonaut-main/
 # Generated at deploy time
 data/cache/
 app/static/css/dist/
+app/static/js/dist/

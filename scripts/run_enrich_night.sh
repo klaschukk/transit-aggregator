@@ -24,6 +24,7 @@ fi
 
 log "Minifying CSS..."
 python -u scripts/minify_css.py 2>&1 | tee -a "$LOG" || log "WARN: minify_css failed"
+python -u scripts/minify_js.py 2>&1 | tee -a "$LOG" || log "WARN: minify_js failed"
 
 log "Cleaning OG image cache (>7 days)..."
 find data/cache/og -name "*.png" -mtime +7 -delete 2>/dev/null || true

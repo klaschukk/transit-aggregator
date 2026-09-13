@@ -64,7 +64,7 @@
    net cost on desktop is one ~5KB gzipped GET that doesn't affect FCP. #}
 {% if not config.DEBUG %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dist/app.mobile.css') }}?v={{ asset_version }}" media="(max-width: 767px)">{% else %}<link rel="stylesheet" href="{{ url_for('static', filename='css/app.mobile.css') }}?v={{ asset_version }}" media="(max-width: 767px)">{% endif %}
 <style>html:not(.js) .fade-in{opacity:1;transform:none}</style>
-{% if config.ADSENSE_ID %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ads.css') }}?v={{ asset_version }}">{% endif %}
+{% if config.ADSENSE_ID %}{% if not config.DEBUG %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dist/ads.css') }}?v={{ asset_version }}">{% else %}<link rel="stylesheet" href="{{ url_for('static', filename='css/ads.css') }}?v={{ asset_version }}">{% endif %}{% endif %}
 {# adsbygoogle.js is loaded ONCE, below — after the NPA/consent flag is set.
    Do not re-add the loader here: a second <script> tag fetches+executes the
    ad library twice on every page (wasted main-thread time + "ins already has
@@ -238,17 +238,17 @@ window.addEventListener('load', function(){
 
 {% block scripts %}{% endblock %}
 
-<script defer src="{{ url_for('static', filename='js/install-promo.js') }}?v={{ asset_version }}"></script>
+{% if not config.DEBUG %}<script defer src="{{ url_for('static', filename='js/dist/install-promo.js') }}?v={{ asset_version }}"></script>{% else %}<script defer src="{{ url_for('static', filename='js/install-promo.js') }}?v={{ asset_version }}"></script>{% endif %}
 
 {# Site UI behaviour (cookie banner, currency switcher, saved routes, sw
    kill-switch, date input, scroll-reveal) — external + defer so ~8 KB of
    markup-independent JS is cached instead of re-sent with every page. #}
-<script defer src="{{ url_for('static', filename='js/ui-behavior.js') }}?v={{ asset_version }}"></script>
+{% if not config.DEBUG %}<script defer src="{{ url_for('static', filename='js/dist/ui-behavior.js') }}?v={{ asset_version }}"></script>{% else %}<script defer src="{{ url_for('static', filename='js/ui-behavior.js') }}?v={{ asset_version }}"></script>{% endif %}
 
 {# Centralised analytics tracker — external + defer so the ~7.5 KB of event wiring is
    fetched once and cached across navigations instead of re-sent inside every HTML
    response. Delegated on document, so defer execution order is safe. #}
-<script defer src="{{ url_for('static', filename='js/analytics-tracker.js') }}?v={{ asset_version }}"></script>
+{% if not config.DEBUG %}<script defer src="{{ url_for('static', filename='js/dist/analytics-tracker.js') }}?v={{ asset_version }}"></script>{% else %}<script defer src="{{ url_for('static', filename='js/analytics-tracker.js') }}?v={{ asset_version }}"></script>{% endif %}
 
 <script>
 /* ── Reviews: star widget + AJAX submit + GDPR delete request ──────────
@@ -563,11 +563,11 @@ window.addEventListener('load', function(){
 {# Toast notifications — minimal API, no deps. Loaded BEFORE mobile.js
    so mobile.js's share / haptic helpers can call window.toast.show
    without a load-order race. #}
-<script src="{{ url_for('static', filename='js/toast.js') }}?v={{ asset_version }}" defer></script>
+{% if not config.DEBUG %}<script src="{{ url_for('static', filename='js/dist/toast.js') }}?v={{ asset_version }}" defer></script>{% else %}<script src="{{ url_for('static', filename='js/toast.js') }}?v={{ asset_version }}" defer></script>{% endif %}
 {# Mobile UX behaviours — the script self-bails on desktop via matchMedia,
    so loading it everywhere is cheap. `defer` makes sure it runs after
    parsing without blocking the LCP path. #}
-<script src="{{ url_for('static', filename='js/mobile.js') }}?v={{ asset_version }}" defer></script>
+{% if not config.DEBUG %}<script src="{{ url_for('static', filename='js/dist/mobile.js') }}?v={{ asset_version }}" defer></script>{% else %}<script src="{{ url_for('static', filename='js/mobile.js') }}?v={{ asset_version }}" defer></script>{% endif %}
 
 <!-- ── AI Chat widget ── -->
 <div id="chatWidget" class="chat-widget" aria-live="polite" aria-label="AI pomoćnik">
