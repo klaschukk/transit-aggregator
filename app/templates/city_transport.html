@@ -12,7 +12,11 @@
 {% set type_order = ['tram', 'trolleybus', 'e-bus', 'bus', 'suburban', 'bg-voz', 'night'] %}
 {% from '_partials/_vehicle_icon.html' import vehicle_icon with context %}
 
-{% block title %}{{ _('city_transport.title_prefix') }} {{ city_label }} {{ current_year }} — {{ _('city_transport.title_suffix') }} | Prevozni{% endblock %}
+{# Dropped {{ current_year }} and "| Prevozni" 2026-09-13: same fixed-overhead
+   pattern as the stop_detail/city_pair fixes — Herceg Novi/Kragujevac were
+   already 63-64 chars, this buys back 16 chars of margin sitewide on these
+   7 flagship city-hub pages. #}
+{% block title %}{{ _('city_transport.title_prefix') }} {{ city_label }} — {{ _('city_transport.title_suffix') }}{% endblock %}
 {% block meta_description %}{{ _('city_transport.meta_prefix') }} {{ city_loc }}{% if city_op_brand %} ({{ city_op_brand }}){% endif %}. {{ lines|length }} {{ _('city_transport.meta_lines') }} {{ _('city_transport.meta_extra') }}{% endblock %}
 
 {% block head_extra %}
