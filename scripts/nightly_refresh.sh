@@ -96,6 +96,8 @@ run_scraper scrape_gspns_schedule    scrape_gspns_schedule.py
 run_scraper scrape_naissus           scrape_naissus.py
 run_scraper scrape_international     scrape_international.py
 run_scraper scrape_ardatur           scrape_ardatur.py
+run_scraper scrape_ivkoni            scrape_ivkoni.py
+run_scraper scrape_srbijatours       scrape_srbijatours.py
 
 # Rebuild database — this is critical
 $VENV -u data/pipelines/build_db.py >> "$LOG" 2>&1
