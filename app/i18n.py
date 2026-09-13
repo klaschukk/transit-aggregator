@@ -289,11 +289,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Prevozni — Red Vožnje Srbija 2026: Autobus i Voz',
         'en': 'Prevozni — Serbia Bus & Train 2026: Schedules & Prices',
         'ru': 'Prevozni — Автобусы Сербии 2026: Расписание и Цены',
+        'bg': 'Prevozni — Автобуси и влакове в Сърбия 2026: Разписания и цени',
     },
     'home.meta': {
         'sr': 'Autobus i voz između gradova Srbije — red vožnje, cene od 350 din, 500+ ruta. Beograd, Novi Sad, Niš i region. Pronađi besplatno →',
         'en': 'Bus and train in Serbia 2026 — schedules, prices from 350 RSD, 500+ routes. Belgrade, Novi Sad, Niš. Find for free →',
         'ru': 'Автобусы и поезда по Сербии 2026 — расписание, цены от 350 din, 500+ маршрутов. Белград, Нови-Сад, Ниш. Бесплатно →',
+        'bg': 'Автобус и влак в Сърбия 2026 — разписания, цени от 350 RSD, 500+ маршрута. Белград, Нови Сад, Ниш. Намерете безплатно →',
     },
     'about.title_suffix': {
         'sr': 'Prevozni Srbija, misija i kontakt',
@@ -416,56 +418,67 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Nađite autobus i kupite kartu',
         'en': 'Find your bus, buy your ticket',
         'ru': 'Найдите автобус и купите билет',
+        'bg': 'Намерете автобус и купете билет',
     },
     'home.hero_subtitle': {
         'sr': 'Pronađite autobus, voz ili gradski prevoz na jednom mestu',
         'en': 'Find bus, train or city transport in one place',
         'ru': 'Найдите автобус, поезд или городской транспорт в одном месте',
+        'bg': 'Намерете автобус, влак или градски транспорт на едно място',
     },
     'home.hero_sub_descriptive': {
         'sr': 'Autobus, voz i gradska mreža — Srbija, Crna Gora, BiH i region',
         'en': 'Bus, train and city transport — Serbia, Montenegro, BiH & region',
         'ru': 'Автобус, поезд и городской транспорт — Сербия, Черногория, БиГ и регион',
+        'bg': 'Автобус, влак и градски транспорт — Сърбия, Черна гора, БиГ и региона',
     },
     'home.hero_sub_feature_list': {
         'sr': '335 ruta · karta stajališta · 6 zemalja · besplatno',
         'en': '335 routes · stop map · 6 countries · free',
         'ru': '335 маршрутов · карта остановок · 6 стран · бесплатно',
+        'bg': '335 маршрута · карта на спирките · 6 държави · безплатно',
     },
     'home.hero_sub_price_compare': {
         'sr': 'Uporedite cene Lasta, Niš-Ekspres i drugih — bez naknade',
         'en': 'Compare Lasta, Niš-Ekspres and other carriers — no fee',
         'ru': 'Сравните цены Lasta, Niš-Ekspres и других — без комиссии',
+        'bg': 'Сравнете цените на Lasta, Niš-Ekspres и други — без такса',
     },
     'home.search_from': {
         'sr': 'Odakle?',
         'en': 'From?',
         'ru': 'Откуда?',
+        'bg': 'Откъде?',
     },
     'home.search_to': {
         'sr': 'Dokle?',
         'en': 'To?',
         'ru': 'Куда?',
+        'bg': 'Докъде?',
     },
     'home.search_btn': {
         'sr': 'Pretraži',
         'en': 'Search',
         'ru': 'Найти',
+        'bg': 'Търсене',
     },
     'home.popular_routes': {
         'sr': 'Popularne rute',
         'en': 'Popular routes',
         'ru': 'Популярные маршруты',
+        'bg': 'Популярни маршрути',
     },
     'home.city_transport': {
         'sr': 'Gradski prevoz',
         'en': 'City transport',
         'ru': 'Городской транспорт',
+        'bg': 'Градски транспорт',
     },
     'home.all_routes': {
         'sr': 'Sve rute',
         'en': 'All routes',
         'ru': 'Все маршруты',
+        'bg': 'Всички маршрути',
     },
 
     # ── Common ──
@@ -563,6 +576,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Ključne brojke',
         'en': 'Key numbers',
         'ru': 'Ключевые цифры',
+        'bg': 'Ключови цифри',
     },
     # Price cell on guide pages where city transport is free. This lived
     # as 'home.valueprop_free' and went out with the hero strip that also
@@ -610,46 +624,55 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': '{routes} ruta sa cenama',
         'en': '{routes} routes with prices',
         'ru': '{routes} маршрутов с ценами',
+        'bg': '{routes} маршрута с цени',
     },
     'home.trust_compare_p': {
         'sr': 'Polasci {operators} prevoznika na jednom mestu',
         'en': 'Departures from {operators} carriers in one place',
         'ru': 'Рейсы {operators} перевозчиков в одном месте',
+        'bg': 'Тръгвания на {operators} превозвача на едно място',
     },
     'home.trust_free_h': {
         'sr': 'Besplatno',
         'en': 'Free',
         'ru': 'Бесплатно',
+        'bg': 'Безплатно',
     },
     'home.trust_free_p': {
         'sr': 'Bez registracije i bez naloga',
         'en': 'No registration, no account',
         'ru': 'Без регистрации и аккаунта',
+        'bg': 'Без регистрация и без акаунт',
     },
     'home.trust_source_h': {
         'sr': 'Javni izvori',
         'en': 'Public sources',
         'ru': 'Открытые источники',
+        'bg': 'Публични източници',
     },
     'home.trust_source_p': {
         'sr': 'Red vožnje i cene samih prevoznika',
         'en': 'Timetables and fares from the carriers',
         'ru': 'Расписание и цены самих перевозчиков',
+        'bg': 'Разписания и цени на самите превозвачи',
     },
     'home.trust_buy_h': {
         'sr': 'Kupovina kod prevoznika',
         'en': 'You buy from the carrier',
         'ru': 'Покупка у перевозчика',
+        'bg': 'Купуване от превозвача',
     },
     'home.trust_buy_p': {
         'sr': 'Vodimo vas na zvaničnu prodaju karata',
         'en': 'We take you to the official ticket seller',
         'ru': 'Ведём вас на официальную продажу билетов',
+        'bg': 'Насочваме ви към официалната продажба на билети',
     },
     'home.trust_aria': {
         'sr': 'Zašto Prevozni',
         'en': 'Why Prevozni',
         'ru': 'Почему Prevozni',
+        'bg': 'Защо Prevozni',
     },
     # 44 of 74 cards on Beograd–Novi Sad carry no fare, yet every one of
     # them has a Kupi button. The price cell was simply omitted, so the
@@ -856,6 +879,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'linija',
         'en': 'lines',
         'ru': 'линий',
+        'bg': 'линии',
     },
     'city.stops_on_map': {
         'sr': 'stajališta na mapi',
@@ -891,6 +915,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Međugradski prevoz',
         'en': 'Intercity transport',
         'ru': 'Междугородний транспорт',
+        'bg': 'Междуградски транспорт',
     },
     'city.all_intercity': {
         'sr': 'Sve međugradske rute',
@@ -4158,11 +4183,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Često postavljana pitanja',
         'en': 'Frequently asked questions',
         'ru': 'Частые вопросы',
+        'bg': 'Често задавани въпроси',
     },
     'home.faq_q1': {
         'sr': 'Šta je Prevozni.com?',
         'en': 'What is Prevozni.com?',
         'ru': 'Что такое Prevozni.com?',
+        'bg': 'Какво е Prevozni.com?',
     },
     'home.faq_a1': {
         'sr': 'Prevozni.com je besplatan agregator reda vožnje autobusa, vozova, tramvaja i trolejbusa u Srbiji. '
@@ -4174,11 +4201,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Prevozni.com — бесплатный агрегатор расписания автобусов, поездов, трамваев и троллейбусов Сербии. '
               'Охватываем городской транспорт Белграда, Нови-Сада, Ниша и Крагуеваца, плюс 270+ междугородних и международных маршрутов. '
               'Без регистрации, без рекламы, данные обновляются ежедневно из официальных источников.',
+        'bg': 'Prevozni.com е безплатен агрегатор на разписания на автобуси, влакове, трамваи и тролейбуси в Сърбия. Обхващаме градския транспорт в Белград, Нови Сад, Ниш и Крагуевац, плюс над 270 междуградски и международни маршрута. Без регистрация, без реклами, данните се обновяват ежедневно от официални източници.',
     },
     'home.faq_q2': {
         'sr': 'Koje gradove i rute pokriva sajt?',
         'en': 'Which cities and routes does the site cover?',
         'ru': 'Какие города и маршруты покрывает сайт?',
+        'bg': 'Кои градове и маршрути покрива сайтът?',
     },
     'home.faq_a2': {
         'sr': 'U bazi imamo 4 grada sa detaljnim gradskim prevozom (610 linija, 3700+ stajališta) i 517 međugradskih/međunarodnih ruta '
@@ -4190,11 +4219,13 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'В базе — 4 города с подробным городским транспортом (610 линий, 3700+ остановок) и 517 междугородних/международных маршрутов '
               '(Черногория, БиГ, Хорватия, Венгрия, С. Македония, Турция, Германия, Австрия и др.). '
               'Полный обзор на <a href="{prefix}/gradski/">странице городского транспорта</a> и <a href="{prefix}/rute/">каталоге маршрутов</a>.',
+        'bg': 'В базата има 4 града с подробен градски транспорт (610 линии, над 3700 спирки) и 517 междуградски/международни маршрута (Черна гора, Босна, Хърватия, Унгария, Северна Македония, Турция, Германия, Австрия и др.). Пълен преглед на <a href="{prefix}/gradski/">страницата за градски транспорт</a> и <a href="{prefix}/rute/">каталога с маршрути</a>.',
     },
     'home.faq_q3': {
         'sr': 'Da li je sajt besplatan i bez reklama?',
         'en': 'Is the site free and ad-free?',
         'ru': 'Бесплатный ли сайт и без рекламы?',
+        'bg': 'Безплатен ли е сайтът и без реклами?',
     },
     'home.faq_a3': {
         'sr': 'Da, Prevozni.com je potpuno besplatan i bez registracije. Ne prikazujemo invazivne reklame i ne prodajemo vaše podatke. '
@@ -4203,6 +4234,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
               'Visits are tracked only with anonymous analytics (Umami); the project is funded by occasional affiliate commissions when you buy tickets via our partners.',
         'ru': 'Да, Prevozni.com полностью бесплатный и без регистрации. Мы не показываем навязчивую рекламу и не продаём ваши данные. '
               'Посещения фиксируются только анонимной аналитикой (Umami); проект живёт за счёт редких партнёрских комиссий при покупке билетов через партнёров.',
+        'bg': 'Да, Prevozni.com е напълно безплатен и без регистрация. Не показваме натрапчиви реклами и не продаваме вашите данни. Посещенията се проследяват само чрез анонимна аналитика (Umami); проектът се издържа от случайни партньорски комисиони при покупка на билети през нашите партньори.',
     },
 
     # ── Popular / "See also" blocks ──
@@ -4877,6 +4909,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'sr': 'Rezervišite smeštaj u {to_city} na vreme — leto je sezona najveće potražnje.',
         'en': 'Book accommodation in {to_city} early — summer is peak season.',
         'ru': 'Забронируйте жильё в {to_city} заранее — летом высокий сезон.',
+        'bg': 'Популярно:',
     },
 
     'city.loading': {'sr': 'Podaci se učitavaju...', 'en': 'Loading data...', 'ru': 'Загрузка...'},
