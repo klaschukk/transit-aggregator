@@ -66,12 +66,18 @@ EXPERIMENTS: dict[str, ExperimentSpec] = {
     ),
 
     # 4. Currency default for tourists. Excludes Serbo-Croatian readers
-    #    (sr/hr/bs/me) — they already see RSD natively. EUR-default tests
-    #    whether tourists feel more confident about pricing in their currency.
+    #    (sr/hr/bs/me) — they already see RSD natively. Hypothesis was that
+    #    an EUR default would make tourists more confident about pricing.
+    # WINNER SHIPPED 2026-09-13: rsd beat eur by +112% relative conversion
+    # (0.43% vs 0.20%, z=9.5, p<0.0001, non-overlapping 95% CIs) over 4.5
+    # months and 220K+ exposures — the opposite of the hypothesis. Ramped
+    # rsd to 100%; eur weight kept at 0 (not deleted) so the framework and
+    # /admin/ab/currency_default_v1 stay queryable per the ship-the-winner
+    # process (docs/06_tech/ab-process.md). Archive after 30 days.
     'currency_default_v1': ExperimentSpec(
         key='currency_default_v1',
         variants=('rsd', 'eur'),
-        weights=(1.0, 1.0),
+        weights=(1.0, 0.0),
         surface='trip_card',
         started_at='2026-04-24',
         min_runtime_days=7,
