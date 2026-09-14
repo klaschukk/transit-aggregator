@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _(home_title_key) }} {{ country_name }} — {{ _('country.title_suffix') }} {{ current_year }} | Prevozni{% endblock %}
+{# Dropped {{ current_year }} + "| Prevozni" 2026-09-14: same fixed-overhead
+   pattern fixed elsewhere this week — Bosna/Makedonija's longer country
+   names were already 67-68 chars. #}
+{% block title %}{{ _(home_title_key) }} {{ country_name }} — {{ _('country.title_suffix') }}{% endblock %}
 {% block meta_description %}{{ _(home_meta_key) }} {{ country_name }}: {{ total_routes }} {{ _('country.meta_routes') }}, {{ total_trips }} {{ _('country.meta_trips') }}, {{ cities|length }} {{ _('country.meta_cities') }}{% if min_price_rsd %}, {{ _('route_detail.meta_from')|lower }} {{ min_price_rsd }} RSD{% endif %}.{% if reviews_agg and reviews_agg.n and reviews_agg.n >= 5 %} {{ reviews_agg.avg }}★ ({{ reviews_agg.n }}).{% endif %} {{ _('country.meta_cta') }}{% endblock %}
 
 {% block head_extra %}
