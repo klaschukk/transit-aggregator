@@ -13,15 +13,23 @@
 ] %}
 <script type="application/ld+json">{{ {'@context':'https://schema.org','@type':'FAQPage','mainEntity':_faq_entities}|tojson }}</script>
 {# SiteNavigationElement — surfaces top routes + city hubs as Google
-   sitelinks. No UGC, just real on-site navigation. #}
+   sitelinks. No UGC, just real on-site navigation.
+   "name" values used to be hardcoded Serbian regardless of page language
+   (found 2026-09-14 auditing /bg/ for leftover sr strings — invisible to
+   users since this is structured data, not rendered text, but wrong on
+   every non-sr locale nonetheless). City/country proper nouns (Beograd,
+   Novi Sad, Crna Gora, Bosna i Hercegovina) are left as-is: the DB and
+   every route/country page already render these same Latin forms
+   regardless of UI language, so this now matches site-wide practice
+   rather than introducing a one-off translation nothing else uses. #}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "SiteNavigationElement",
   "name": [
-    "Sve rute", "Gradski prevoz", "Top destinacije",
+    {{ _('home.all_routes')|tojson }}, {{ _('city_transport.title_prefix')|tojson }}, {{ _('nav.destinations')|tojson }},
     "Beograd → Novi Sad", "Beograd → Niš",
-    "Gradski prevoz Beograd", "Gradski prevoz Novi Sad",
+    {{ (_('city_transport.title_prefix') ~ ' Beograd')|tojson }}, {{ (_('city_transport.title_prefix') ~ ' Novi Sad')|tojson }},
     "Crna Gora", "Bosna i Hercegovina"
   ],
   "url": [
