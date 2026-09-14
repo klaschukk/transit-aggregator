@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('guides.index_title') }} | Prevozni{% endblock %}
+{# guides.index_title already ends in "— Prevozni" in every locale — the
+   template used to append "| Prevozni" again, showing "...— Prevozni |
+   Prevozni" in the SERP title. #}
+{% block title %}{{ _('guides.index_title') }}{% endblock %}
 {% block meta_description %}{{ _('guides.index_meta') }}{% endblock %}
 
 {% block content %}
