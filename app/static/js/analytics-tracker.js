@@ -123,9 +123,14 @@
     if (exp && event) logAbConvert(exp, event, variant);
   });
 
-  /* ── Hero search form submit — A/B Exp 3 conversion on home page. ── */
+  /* ── Hero search form submit — A/B Exp 3 conversion on home page.
+     _search_form.html's actual <form> class is "journey-form" — this
+     selector looked for "search-form"/"[data-search-form]", which no
+     template has ever used, so this handler has never once fired since
+     hero_sub_v1 launched 2026-04-24 (confirmed: zero conv: rows in
+     ab_events for it, despite 19K+ exposures). ── */
   document.addEventListener('submit', function(ev){
-    var form = ev.target.closest('form.search-form, form[data-search-form]');
+    var form = ev.target.closest('form.journey-form');
     if (!form) return;
     var heroSub = document.querySelector('[data-ab-hero-sub]');
     if (heroSub) {

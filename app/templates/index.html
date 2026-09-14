@@ -80,7 +80,9 @@
              was simply not rendered — the same routes show "od N €" in
              the list further down the page. #}
           {% for r in popular_routes[:6] %}
-          <a href="{{ lang_prefix }}/rute/{{ r.slug }}/" class="hero__quick-chip">
+          <a href="{{ lang_prefix }}/rute/{{ r.slug }}/" class="hero__quick-chip"
+             data-ab-experiment="hero_sub_v1" data-ab-variant="{{ _hero_variant }}"
+             data-ab-event="quick_link_click">
             <span class="hero__quick-pair">{{ r.from_city }} → {{ r.to_city }}</span>
             {% if r.min_price_rsd %}
             <span class="hero__quick-price">
