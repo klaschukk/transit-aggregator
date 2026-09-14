@@ -84,6 +84,14 @@ _ROUTE_SLUG_REDIRECTS: dict[str, str] = {
 
 @intercity_bp.route('/rute/')
 def route_index():
+    # Ordered by trip_count (daily departures — the same "popular" signal
+    # the top-8 widget below already uses), alphabetical as a tiebreaker.
+    # Was plain alphabetical, which buried every high-traffic route among
+    # 1539 alphabetically-sorted pairs — only the first 50 render visible
+    # before "show more" hides the rest, so alphabetical order meant a
+    # handful of "Ada"/"Arandjelovac" routes got the prominent slots
+    # instead of the routes that actually carry the most departures (and,
+    # via the ItemList JSON-LD above, the same order feeds Google too).
     routes = cached_query("""
         SELECT r.slug, r.from_city, r.to_city, r.distance_km,
                COUNT(DISTINCT t.id) as trip_count,
@@ -92,7 +100,7 @@ def route_index():
         LEFT JOIN trips t ON t.route_id = r.id
         WHERE r.type = 'intercity'
         GROUP BY r.slug, r.from_city, r.to_city, r.distance_km
-        ORDER BY r.from_city, r.to_city
+        ORDER BY trip_count DESC, r.from_city, r.to_city
     """) if db_ready() else []
 
     # Popular routes block: top 8 by trip_count for SEO interlinking
