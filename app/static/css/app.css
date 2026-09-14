@@ -73,12 +73,20 @@ img { display: block; max-width: 100%; }
   --color-accent-dark: #d97706;
   --color-accent-light: #fde68a;  /* amber-200 — trip badge surface */
   --color-accent-text: #78350f;   /* amber-900 — AA text on accent-light */
-  /* Transit-mode palette — one source for badges, icons, trip-card accents. */
-  --mode-bus: var(--color-primary);
-  --mode-tram: #e53e3e;
-  --mode-trolley: #d69e2e;
+  /* Transit-mode palette — one source for badges, icons, trip-card accents.
+     Darkened 2026-09-14: bus/tram/trolley/ebus all failed WCAG AA (white
+     text needs 4.5:1) — mode-chip renders white-on-this-color at 11px bold,
+     below the "large text" 3:1 exemption threshold. Lighthouse caught bus
+     at 3.74:1 on the homepage city cards; tram (4.13), trolley (2.39,
+     the worst) and ebus (3.25) had the same defect elsewhere, just not on
+     that specific scan. Each value below is the minimum darkening (in HSL
+     lightness) that clears 4.5:1 while staying recognisably the same hue —
+     train/night were already fine (8.2:1 / 11.5:1), left untouched. */
+  --mode-bus: #0b7e74;
+  --mode-tram: #e22727;
+  --mode-trolley: #966e1d;
   --mode-train: #7c336e;
-  --mode-ebus: #38a169;
+  --mode-ebus: #2e8456;
   --mode-night: #2b2d87;
   --color-text: #0f172a;
   --color-text-muted: #475569;

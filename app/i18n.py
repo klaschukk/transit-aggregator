@@ -4884,10 +4884,10 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'bg': 'Само необходимите',
     },
     'cookies.banner.more': {
-        'sr': 'Više',
-        'en': 'More',
-        'ru': 'Подробнее',
-        'bg': 'Повече',
+        'sr': 'Politika kolačića',
+        'en': 'Cookie Policy',
+        'ru': 'Политика cookie',
+        'bg': 'Политика за бисквитки',
     },
 
     # ── Cookie Policy page ──
