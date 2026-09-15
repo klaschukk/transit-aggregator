@@ -13,7 +13,7 @@ import hashlib
 import logging
 import sqlite3
 import threading
-from datetime import date as _date, datetime as _datetime
+from datetime import date as _date, datetime as _datetime, timedelta as _timedelta
 from pathlib import Path
 
 # Register adapters so Python date/datetime objects are stored as ISO strings,
@@ -932,12 +932,20 @@ def insert_or_refresh_price_snapshot(
 
 def price_snapshots_for_route(route_slug: str, days: int = 7) -> list[dict]:
     days_i = max(0, int(days))
+    # Cutoff computed in Python (server-local date, matching date.today() used
+    # everywhere else — snapshots are written with this same "today") rather
+    # than SQLite's date('now', ...), which is always UTC. The server runs
+    # CEST (UTC+2): for ~2h after local midnight, local and UTC disagree on
+    # the calendar date, so the UTC-based cutoff silently included one extra
+    # day every night. Caught by test_snapshot_history_window failing at
+    # 01:28 CEST (00:28 the previous day in UTC).
+    cutoff = _date.today() - _timedelta(days=days_i)
     rows = query(
         "SELECT date, min_price, max_price, avg_price, trip_count "
         "FROM price_snapshots "
-        f"WHERE route_slug = ? AND date >= date('now', '-{days_i} days') "
+        "WHERE route_slug = ? AND date >= ? "
         "ORDER BY date DESC",
-        [route_slug],
+        [route_slug, cutoff.isoformat()],
     )
     # Convert ISO date strings back to Python date objects so evaluate_snapshots
     # can compare with date.today() directly (matches DuckDB's return type).
