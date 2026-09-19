@@ -20,7 +20,20 @@ from app.affiliates.partners import FAR_DESTINATIONS
 from app.slug import slugify_serbian
 
 # Reuse the chat model/UA — same Groq account, same Cloudflare-friendly UA.
-COMPOSE_MODEL = 'llama-3.3-70b-versatile'
+# llama-3.3-70b-versatile was decommissioned by Groq on 2026-08-16 (confirmed
+# via console.groq.com/docs/deprecations) — every compose call since then
+# has 404'd with model_not_found. compose_itinerary_via_groq() swallows all
+# exceptions (by design, so a model outage degrades to the plain Bookaway
+# CTA instead of a 500), so this failed 100% silently: nightly
+# pregen_far_routes.py logged "0 composed" for over a month and nobody
+# noticed because a FAIL just means the far-destination page stays a thin
+# noindex pair — no crash, no error page, just missing SEO content. Migrated
+# to Groq's own documented replacement, openai/gpt-oss-120b. Could not
+# live-verify past this point: this box's outbound IP got Cloudflare-blocked
+# (403 error 1010) while probing which model name was still valid — retest
+# once that clears (a fresh curl from a different network, or just wait and
+# rerun scripts/pregen_far_routes.py --n 1 here later).
+COMPOSE_MODEL = 'openai/gpt-oss-120b'
 _UA = 'PrevozniBot/1.0 (+https://prevozni.com)'
 _ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions'
 
