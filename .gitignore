@@ -57,3 +57,4 @@ seonaut-main/
 data/cache/
 app/static/css/dist/
 app/static/js/dist/
+data/backups/

@@ -12,6 +12,7 @@ mkdir -p "$DIR/logs"
 
 log() { echo "$(date '+%Y-%m-%d %H:%M:%S') $*" | tee -a "$LOG"; }
 
+RUN_START_LINES=$(wc -l < "$LOG" 2>/dev/null || echo 0)
 log "Starting nightly enrich..."
 cd "$DIR"
 source venv/bin/activate
@@ -163,11 +164,33 @@ fi
 
 log "Done!"
 
-# Write last_refresh.json so /health shows nightly status
-python3 -c "
-import json, time
-status = 'ok' if '$HSTATUS' == '200' else 'degraded'
-with open('$DIR/logs/last_refresh.json', 'w') as f:
+# Write last_refresh.json so /health shows nightly status AND which steps
+# failed tonight. Every step here is fail-soft (`|| log "WARN: X failed"`), so
+# before this a broken scraper or a dead model was visible only by grepping
+# enrich.log — the Groq model retirement ("0 composed" for a month) and the
+# root-owned-files PermissionErrors both went unnoticed for that reason.
+python3 - "$DIR" "$HSTATUS" "$LOG" "$RUN_START_LINES" <<'PY'
+import json, re, sys, time
+d, hs, log, start = sys.argv[1:5]
+# split on \n only: wc -l counts newlines, splitlines() also splits on \r (progress bars) and would skew the offset
+lines = open(log, errors='replace').read().split('\n')[int(start):]
+scrapers, warnings, last_done = {}, [], None
+for ln in lines:
+    m = re.search(r'WARN: (\S+) failed', ln)
+    if m:
+        scrapers[m.group(1)] = 'fail'
+    elif 'WARN:' in ln:
+        warnings.append(ln.split('WARN:', 1)[1].strip()[:120])
+    m = re.search(r'Done: (\d+) composed, (\d+) cached, (\d+) failed', ln)
+    if m:
+        last_done = (int(m.group(1)), int(m.group(3)))
+# pregen takes hours (paced, cooldowns on failure), so a previous night's run can
+# finish inside this window — only the LAST "Done:" line counts.
+if last_done and last_done[0] == 0 and last_done[1] > 0:
+    scrapers['pregen_far_routes'] = 'fail'  # nothing composed, only failures
+status = 'ok' if hs == '200' else 'degraded'
+with open(d + '/logs/last_refresh.json', 'w') as f:
     json.dump({'finished_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
-               'finished_ts': time.time(), 'status': status, 'health_http': '$HSTATUS'}, f)
-"
+               'finished_ts': time.time(), 'status': status, 'health_http': hs,
+               'scrapers': scrapers, 'warnings': warnings}, f)
+PY

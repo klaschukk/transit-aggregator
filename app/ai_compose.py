@@ -14,25 +14,22 @@ and is wired up by the ``/pretraga`` handler so each pair hits Groq at most once
 from __future__ import annotations
 
 import json
+import logging
+import urllib.error
 import urllib.request
 
 from app.affiliates.partners import FAR_DESTINATIONS
 from app.slug import slugify_serbian
 
+logger = logging.getLogger(__name__)
+
 # Reuse the chat model/UA — same Groq account, same Cloudflare-friendly UA.
-# llama-3.3-70b-versatile was decommissioned by Groq on 2026-08-16 (confirmed
-# via console.groq.com/docs/deprecations) — every compose call since then
-# has 404'd with model_not_found. compose_itinerary_via_groq() swallows all
-# exceptions (by design, so a model outage degrades to the plain Bookaway
-# CTA instead of a 500), so this failed 100% silently: nightly
-# pregen_far_routes.py logged "0 composed" for over a month and nobody
-# noticed because a FAIL just means the far-destination page stays a thin
-# noindex pair — no crash, no error page, just missing SEO content. Migrated
-# to Groq's own documented replacement, openai/gpt-oss-120b. Could not
-# live-verify past this point: this box's outbound IP got Cloudflare-blocked
-# (403 error 1010) while probing which model name was still valid — retest
-# once that clears (a fresh curl from a different network, or just wait and
-# rerun scripts/pregen_far_routes.py --n 1 here later).
+# llama-3.3-70b-versatile was retired by Groq on 2026-08-16 (every call 404'd
+# with model_not_found for a month before anyone noticed — see the warning log
+# in compose_itinerary_via_groq). openai/gpt-oss-120b is Groq's documented
+# replacement; verified live 2026-09-20 (177 itineraries composed overnight).
+# It is a reasoning model: reasoning tokens count against the free tier's
+# 200K tokens/day, which is what caps the nightly pregen (~160-180 per night).
 COMPOSE_MODEL = 'openai/gpt-oss-120b'
 _UA = 'PrevozniBot/1.0 (+https://prevozni.com)'
 _ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions'
@@ -135,7 +132,17 @@ def compose_itinerary_via_groq(
             body = json.loads(resp.read().decode('utf-8'))
         content = body['choices'][0]['message']['content']
         data = json.loads(content)
-    except Exception:
+    except urllib.error.HTTPError as exc:
+        # Still degrades to None (callers fall back to the plain Bookaway CTA),
+        # but say WHY: a retired model (404 model_not_found) and a daily-quota
+        # 429 look identical to a caller, and the first one silently zeroed
+        # every far-destination itinerary for a month before anyone noticed.
+        logger.warning('groq compose HTTP %s for %s->%s: %s', exc.code,
+                       from_city, to_city, exc.read()[:160].decode('utf-8', 'replace'))
+        return None
+    except Exception as exc:  # noqa: BLE001 — network/JSON: same fallback
+        logger.warning('groq compose failed for %s->%s: %s: %s', from_city, to_city,
+                       type(exc).__name__, str(exc)[:120])
         return None
 
     return _sanitize(data, from_city, to_city)

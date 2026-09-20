@@ -798,6 +798,8 @@ def health():
                 k for k, v in scrapers.items()
                 if isinstance(v, str) and v.startswith('fail')
             )
+            if payload.get('warnings'):
+                nightly['warnings'] = payload['warnings'][:8]
             if failed_scrapers:
                 nightly['failed_scrapers'] = failed_scrapers
                 # A partial-failure isn't critical (data is stale, not gone),
