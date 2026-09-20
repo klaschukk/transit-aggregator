@@ -4035,6 +4035,13 @@ select:focus-visible, textarea:focus-visible {
   margin: var(--space-8) auto;
   max-width: 728px;
   text-align: center;
+  /* One calm, clearly-labelled module (before AND after the ad loads), so an
+     ad never reads as page content and a not-yet-loaded slot never reads as a
+     layout bug. Soft tint + hairline border, no dashed placeholder. */
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3) var(--space-3);
 }
 .ad-slot__label {
   display: block;
@@ -4045,14 +4052,10 @@ select:focus-visible, textarea:focus-visible {
   margin-bottom: var(--space-1-5);
 }
 .ad-slot__ins { min-height: 90px; }
-/* Pre-hydration lazy placeholder (not yet scrolled within 200px, so fill()
-   in base.html hasn't run) — a bare uppercase label floating in empty
-   space reads as a broken module. A contained box reads as "ad slot",
-   not "layout bug", until it either fills or collapses via :has() above. */
+/* Pre-hydration lazy placeholder (not yet within 200px of the viewport, so
+   fill() in base.html hasn't run): keeps the reserved height (CLS = 0);
+   the module styling above already makes it read as an ad slot. */
 .ad-slot.js-ad-lazy:not([data-ad-filled]) {
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-3) var(--space-3) var(--space-4);
   min-height: 90px;
 }
 /* AdSense stamps data-ad-status="unfilled" on the <ins> when it has no
