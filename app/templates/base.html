@@ -107,23 +107,6 @@
 })();
 </script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config.ADSENSE_ID }}" crossorigin="anonymous"></script>
-{# Auto ads — Google places additional units on top of the 15 manual
-   ADSENSE_SLOT_* placements below, on whatever it judges high-value
-   inventory (was OFF: the NPA snippet above only ever pushed
-   requestNonPersonalizedAds, never enable_page_level_ads, so every
-   auto-ads placement hint rendered with no data-ad-slot and showed
-   nothing — see _partials/_ad_slot.html's own note on this). Queued
-   on the same
-   array the NPA flag above already set, so consent/NPA still applies
-   to whatever auto ads renders. Owner-approved 2026-09-19 to raise RPM
-   even at the cost of a more ad-dense page — revisit if it clashes
-   with the "clean comparison site" positioning. #}
-<script>
-(adsbygoogle = window.adsbygoogle || []).push({
-  google_ad_client: "{{ config.ADSENSE_ID }}",
-  enable_page_level_ads: true
-});
-</script>
 {# Adblock detector — sets a cookie if `adsbygoogle` is still undefined
    5s after page load. House ads check the cookie on the next request
    and skip the slot script entirely so adblock users see the house
