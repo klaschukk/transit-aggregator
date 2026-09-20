@@ -119,6 +119,30 @@ def test_mobile_anchor_not_rendered_with_essential_consent(client):
     assert b'id="mobileAnchorAd"' not in resp.data
 
 
+def _anchor_conditions(app, client, flag):
+    app.config['ADSENSE_ID'] = 'ca-pub-1234567890'
+    app.config['ADSENSE_SLOTS'] = {**app.config.get('ADSENSE_SLOTS', {}),
+                                   'mobile_anchor': '555'}
+    app.config['ADS_MOBILE_ANCHOR'] = flag
+    client.set_cookie(key='cookie_consent', value='all',
+                      path='/', domain='localhost')
+
+
+def test_mobile_anchor_off_by_default_even_with_all_conditions(client, app):
+    """Owner call 2026-09-21: the sticky anchor stacked on the bottom nav on
+    every phone page. Consent + slot id + ADSENSE_ID all present must STILL
+    render nothing unless ADS_MOBILE_ANCHOR is switched on."""
+    saved = {k: app.config.get(k) for k in ('ADSENSE_ID', 'ADSENSE_SLOTS', 'ADS_MOBILE_ANCHOR')}
+    try:
+        _anchor_conditions(app, client, False)
+        assert b'id="mobileAnchorAd"' not in client.get('/').data
+        _anchor_conditions(app, client, True)
+        assert b'id="mobileAnchorAd"' in client.get('/').data
+    finally:
+        for k, v in saved.items():
+            app.config[k] = v
+
+
 def test_mobile_anchor_still_off_without_slot_id(client, app):
     """Even with consent=all + ADSENSE_ID set, the anchor needs the
     mobile_anchor slot id. Missing slot → no render."""

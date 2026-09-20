@@ -156,8 +156,26 @@ window.addEventListener('load', function(){
         el.dataset.adNpa === 'true' ? {npa:1} : {});
     } catch(e){}
   }
+  /* Placement guard — one rule for every screen size. The gap is measured in
+     THIS device's own screens, so a phone (844px tall), tablet and desktop all
+     get the same feel: no ad in the first screen, and never two ads within
+     ~1.5 screens of each other. A slot that breaks the rule is collapsed and
+     never requests an ad (short pages end up with one unit, long ones two).
+     Auto Ads are deliberately NOT enabled — they ignore all of this. */
+  function guard(slots){
+    var vh = window.innerHeight || 800;
+    var minGap = Math.max(900, vh * 1.5), lastTop = -Infinity, kept = [];
+    slots.forEach(function(el){
+      var top = el.getBoundingClientRect().top + (window.pageYOffset || 0);
+      if (!el.offsetParent || top < vh || top - lastTop < minGap) {
+        el.hidden = true; el.dataset.adFilled = 'skipped'; return;
+      }
+      lastTop = top; kept.push(el);
+    });
+    return kept;
+  }
   function init(){
-    var slots = document.querySelectorAll('.js-ad-lazy');
+    var slots = guard(document.querySelectorAll('.js-ad-lazy'));
     if (!slots.length) return;
     if (!('IntersectionObserver' in window)) { slots.forEach(fill); return; }
     var obs = new IntersectionObserver(function(entries){
@@ -169,9 +187,9 @@ window.addEventListener('load', function(){
     }, { rootMargin: '200px 0px' });
     slots.forEach(function(el){ obs.observe(el); });
   }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else { init(); }
+  /* Wait for `load` so image/font layout has settled before measuring. */
+  if (document.readyState === 'complete') { init(); }
+  else { window.addEventListener('load', init); }
 })();
 </script>
 {% endif %}
@@ -230,7 +248,7 @@ window.addEventListener('load', function(){
 
 {% include '_partials/_install_banner.html' %}
 
-{% include '_partials/_mobile_anchor_ad.html' %}
+{% if config.get('ADS_MOBILE_ANCHOR') %}{% include '_partials/_mobile_anchor_ad.html' %}{% endif %}
 
 {% include '_partials/_review_prompt.html' %}
 

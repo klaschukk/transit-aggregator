@@ -121,13 +121,10 @@
   </div>
 </section>
 
-{# Top-of-fold ad — leaderboard/728×90 desktop, responsive mobile.
-   Sits above stats (anchor content). Highest-RPM home placement per
-   AdSense travel-niche benchmarks. #}
-<div class="container">
-  {% from '_partials/_ad_slot.html' import ad_slot with context %}
-  {{ ad_slot('home_top', format='leaderboard', lazy=False) }}
-</div>
+{# No ad above the fold on the homepage (removed 2026-09-21): it sat right
+   under the search hero on every screen size — the first thing a visitor saw
+   after the search box. home_mid further down is the homepage's ad. #}
+{% from '_partials/_ad_slot.html' import ad_slot with context %}
 
 {# ═══════ WHY PREVOZNI ═══════
    This slot used to hold four bare numbers — routes, lines, stops,

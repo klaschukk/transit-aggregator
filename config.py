@@ -27,6 +27,9 @@ class Config:
     DEBUG = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
     GA_TRACKING_ID = os.environ.get('GA_TRACKING_ID', '')
     ADSENSE_ID = os.environ.get('ADSENSE_ID', '')
+    # Sticky bottom anchor ad on phones. OFF by default: it sat 80px above the
+    # bottom nav on every page (owner: "horribly in the way"). Set ADS_MOBILE_ANCHOR=1 to bring it back.
+    ADS_MOBILE_ANCHOR = os.environ.get('ADS_MOBILE_ANCHOR', '') == '1'
     # Publisher ID for /ads.txt (`pub-XXXXXXXXX`). Same numeric body as
     # ADSENSE_ID — kept separate so /ads.txt is independent of whether
     # the site is currently rendering ads (a paused campaign still
