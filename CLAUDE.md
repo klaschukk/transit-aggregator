@@ -269,6 +269,7 @@ minify CSS → `systemctl restart prevozni` → проверка `/health == 200
 ## Что где (вместо старых чек-листов статуса)
 
 - Статус за 1 вызов: `scripts/preflight.sh`. Изменение → живо и здорово за 1 вызов: `scripts/ship_local.sh` (`--fast` без pytest).
+- Новый чат: `scripts/preflight.sh` → `docs/06_tech/handoff-2026-09-21.md` (состояние, блокеры владельца, открытые пункты).
 - Что менялось: `git log`. Старые срезы и хронология переезда: `docs/06_tech/history-2026.md`.
 - Незакрытое: переезд аналитики на self-hosted Umami ждёт DNS `stats.flightpunctuality.online` (website ID `0bf85965-824a-4732-914a-d58f97cbb307`).
 
