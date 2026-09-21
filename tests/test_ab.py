@@ -211,6 +211,15 @@ def test_invalid_sticky_value_falls_through_to_seed(app):
         assert out in ('A', 'B')
 
 
+def test_sticky_cookie_ignored_when_variant_ramped_to_zero(app):
+    """A shipped winner (loser at weight 0) must reach returning visitors too."""
+    spec = _spec(weights=(1.0, 0.0))
+    with app.test_request_context(
+        '/', headers={'Cookie': f'{AB_VARIANT_COOKIE_PREFIX}exp_x=B'}
+    ):
+        assert assign(spec, seed='any-seed') == 'A'
+
+
 # ── Exposure dedup ─────────────────────────────────────────────────────
 
 

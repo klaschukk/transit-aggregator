@@ -20,7 +20,7 @@ from app.ab import ExperimentSpec
 DEFAULTS: dict[str, str] = {
     'cta_copy_v1': 'Kupi',
     'cta_color_v2': 'accent',
-    'hero_sub_v1': 'feature_list',
+    'hero_sub_v1': 'descriptive',
     'currency_default_v1': 'rsd',
     'review_cta_v1': 'after-trips',
 }
@@ -54,12 +54,18 @@ EXPERIMENTS: dict[str, ExperimentSpec] = {
 
     # 3. Home hero subtitle. Tests value-prop framing: simple description,
     #    proof-by-numbers, named-operators.
+    # RETIRED 2026-09-21 WITHOUT A STATISTICAL WINNER: conversion tracking
+    # was broken for 4.5 months (wrong selector) and at current traffic
+    # significance would take ~255 days. `feature_list` also hard-coded a stale
+    # "335 routes · 6 countries". Ramped the neutral, number-free `descriptive`
+    # to 100%; other weights 0 (not deleted) so /admin/ab/hero_sub_v1 stays
+    # queryable. Archive after 30 days.
     'hero_sub_v1': ExperimentSpec(
         key='hero_sub_v1',
         # Variant keys, not full strings — full copy lives in i18n. Keeps
         # variant labels short for cookies and dashboard rows.
         variants=('descriptive', 'feature_list', 'price_compare'),
-        weights=(1.0, 1.0, 1.0),
+        weights=(1.0, 0.0, 0.0),
         surface='home_hero',
         started_at='2026-04-24',
         min_runtime_days=7,

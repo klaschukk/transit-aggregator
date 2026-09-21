@@ -194,7 +194,9 @@ def assign(spec: ExperimentSpec, seed: str | None = None) -> str | None:
     """Return the variant for the current user, or None if out-of-cohort.
 
     Sticky: existing `ab_<key>` cookie wins even if weights changed, as long
-    as the value is still a declared variant.
+    as the value is still a declared variant AND still has weight > 0. A
+    variant ramped to weight 0 (a shipped winner or a retired test) must not
+    keep serving the loser to returning visitors for the cookie's 180 days.
     """
     if seed is None:
         seed = assignment_seed()
@@ -208,7 +210,8 @@ def assign(spec: ExperimentSpec, seed: str | None = None) -> str | None:
     if request is not None:
         existing = request.cookies.get(cookie_name)
         if existing and existing in spec.variants:
-            return existing
+            if spec.weights[spec.variants.index(existing)] > 0:
+                return existing
 
     return _weighted_pick(spec, seed)
 
