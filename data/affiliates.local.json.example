@@ -1,0 +1,7 @@
+{
+  "_readme": "Copy to affiliates.local.json (git-ignored), fill in, then: sudo systemctl restart prevozni. Only https:// links. Optional placeholders in a URL: {from} {to} {from_name} {to_name}. Leave a URL empty to keep that button hidden.",
+  "AFF_TRANSFER_URL": "",
+  "AFF_TRANSFER_NAME": "",
+  "AFF_CARS_URL": "",
+  "AFF_CARS_NAME": ""
+}

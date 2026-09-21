@@ -513,7 +513,7 @@ def api_ba_click():
 
     # Partner allowlist — same anti-cardinality guard. Unknown keys bucket to
     # 'other' so the per-partner breakdown stays clean.
-    if partner and partner not in ('bookaway', 'busticket4', 'flixbus'):
+    if partner and partner not in ('bookaway', 'busticket4', 'flixbus', 'transfer', 'cars'):
         partner = 'other'
 
     insert_ba_click(

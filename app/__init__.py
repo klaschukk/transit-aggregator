@@ -166,6 +166,8 @@ def create_app(config_name: str | None = None) -> Flask:
         except RuntimeError:
             return default
     app.jinja_env.globals['ab_variant'] = _ab_variant_global
+    from app.affiliates.transfers import transfer_offers as _transfer_offers
+    app.jinja_env.globals['transfer_offers'] = _transfer_offers
 
     # ── Line-number badge: Cyrillic -> Latin at render time only ──────────
     # city_lines.number can carry a Cyrillic letter glued to Latin digits

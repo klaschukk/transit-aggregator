@@ -1,7 +1,19 @@
+import json
 import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parent
+
+
+def _local_aff(key: str) -> str:
+    """Optional owner-edited data/affiliates.local.json (git-ignored). The app does not
+    read .env and the systemd unit is root-owned, so affiliate links live here; an
+    environment variable of the same name wins."""
+    try:
+        with open(BASE_DIR / 'data' / 'affiliates.local.json', encoding='utf-8') as fh:
+            return str(json.load(fh).get(key, '') or '')
+    except (OSError, ValueError):
+        return ''
 
 
 class Config:
@@ -85,6 +97,15 @@ class Config:
     # Without a key the dashboard simply hides the API section. Bookaway is
     # far-destinations-only (Asia) since 2026-06-10, so low numbers here are
     # expected — regular Balkan routes go to BusTicket4.
+    # Door-to-door offers on tourist corridors (app/affiliates/transfers.py).
+    # Dormant until a link is set. Paste the affiliate deep link (https only);
+    # optional placeholders {from} {to} {from_name} {to_name} are URL-encoded in.
+    # *_NAME is shown on the button ("· Kiwitaxi"); leave empty to hide it.
+    AFF_TRANSFER_URL = os.environ.get('AFF_TRANSFER_URL') or _local_aff('AFF_TRANSFER_URL')
+    AFF_TRANSFER_NAME = os.environ.get('AFF_TRANSFER_NAME') or _local_aff('AFF_TRANSFER_NAME')
+    AFF_CARS_URL = os.environ.get('AFF_CARS_URL') or _local_aff('AFF_CARS_URL')
+    AFF_CARS_NAME = os.environ.get('AFF_CARS_NAME') or _local_aff('AFF_CARS_NAME')
+
     BOOKAWAY_API_KEY = os.environ.get('BOOKAWAY_API_KEY', '')
     BOOKAWAY_NETWORK_ID = os.environ.get('BOOKAWAY_NETWORK_ID', 'bookaway2')
 

@@ -62,7 +62,7 @@
 
   /* Partner buy CTAs — log every outbound affiliate click (data-partner) */
   document.addEventListener('click', function(ev){
-    var el = ev.target.closest('.trip-card__buy, .buy-ticket__btn, .partners-block__btn');
+    var el = ev.target.closest('.trip-card__buy, .buy-ticket__btn, .partners-block__btn, .transfer-offer__btn');
     if (!el) return;
     if (!el.dataset.partner) return;  /* skip non-affiliate .buy-ticket__btn (city map CTAs) — no blank ba_clicks */
     var payload = {
@@ -79,7 +79,7 @@
        banner asks "How was Beograd → Budva? Leave a review". Pure first-
        party signal, no fake reviews — we just nudge real customers to
        come back and write one. */
-    if (payload.route_slug) {
+    if (payload.route_slug && payload.partner !== 'transfer' && payload.partner !== 'cars') {
       try {
         var prTrip = encodeURIComponent(JSON.stringify({
           slug: payload.route_slug,

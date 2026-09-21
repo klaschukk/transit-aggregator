@@ -319,6 +319,8 @@
                  action_url=lang_prefix ~ '/rute/', action_label=_('nav.all_routes')) }}
 {% endif %}
 
+{% include '_partials/_transfer_offer.html' %}
+
 {# Mid-content ad — section-level slot AFTER the schedule/trip list and BEFORE
    the price-alert / partner grid / prose / reviews. Sits between content
    sections so it is visible without breaking the trip-card flow. Distinct

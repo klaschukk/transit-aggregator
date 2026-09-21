@@ -476,6 +476,36 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Сравните цены Lasta, Niš-Ekspres и других — без комиссии',
         'bg': 'Сравнете цените на Lasta, Niš-Ekspres и други — без такса',
     },
+    'transfer.h': {
+        'sr': 'Radije od vrata do vrata?',
+        'en': 'Prefer door-to-door?',
+        'ru': 'Удобнее от двери до двери?',
+        'bg': 'По-удобно от врата до врата?',
+    },
+    'transfer.text': {
+        'sr': 'Rezervišite privatni transfer ili iznajmite automobil za relaciju {route}. Cene određuje partner.',
+        'en': 'Book a private transfer or rent a car for {route}. Prices are set by the partner.',
+        'ru': 'Забронируйте частный трансфер или арендуйте авто на маршруте {route}. Цены устанавливает партнёр.',
+        'bg': 'Резервирайте частен трансфер или наемете кола за маршрута {route}. Цените се определят от партньора.',
+    },
+    'transfer.btn_transfer': {
+        'sr': 'Uporedi privatne transfere',
+        'en': 'Compare private transfers',
+        'ru': 'Сравнить цены на трансфер',
+        'bg': 'Сравни частни трансфери',
+    },
+    'transfer.btn_cars': {
+        'sr': 'Uporedi rent-a-car',
+        'en': 'Compare rental cars',
+        'ru': 'Сравнить аренду авто',
+        'bg': 'Сравни коли под наем',
+    },
+    'transfer.disclosure': {
+        'sr': 'Sponzorisani linkovi: možemo dobiti proviziju, bez dodatnog troška za vas.',
+        'en': 'Sponsored links: we may earn a commission at no extra cost to you.',
+        'ru': 'Партнёрские ссылки: мы можем получить комиссию, для вас цена не меняется.',
+        'bg': 'Спонсорирани връзки: може да получим комисионна, без допълнителна цена за вас.',
+    },
     'home.search_from': {
         'sr': 'Odakle?',
         'en': 'From?',

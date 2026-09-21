@@ -4616,3 +4616,13 @@ body:has(.cookie-banner[data-visible="true"]) .chat-widget { display: none; }
   .chat-box, .chat-msg { animation: none; }
   .chat-header__title::before, .chat-msg--typing span > span { animation: none; }
 }
+
+/* Door-to-door offer on tourist corridors (dormant until an affiliate link is configured) */
+.transfer-offer { margin: var(--space-6) 0; padding: var(--space-5, 20px); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface, #fff); }
+.transfer-offer__h { margin: 0 0 var(--space-2, 8px); font-size: 1.05rem; }
+.transfer-offer__text { margin: 0 0 var(--space-4, 16px); color: var(--color-text-muted, #475569); font-size: 0.95rem; }
+.transfer-offer__actions { display: flex; flex-wrap: wrap; gap: var(--space-3, 12px); }
+.transfer-offer__btn { display: inline-flex; align-items: center; gap: 6px; padding: 11px 18px; border-radius: var(--radius-pill); border: 1.5px solid var(--color-primary); color: var(--color-primary-dark, #0f766e); background: transparent; font-weight: 600; text-decoration: none; }
+.transfer-offer__btn:hover, .transfer-offer__btn:focus-visible { background: var(--color-primary-darker, #115e59); border-color: var(--color-primary-darker, #115e59); color: #fff; }
+.transfer-offer__partner { font-weight: 400; opacity: 0.8; }
+.transfer-offer__note { margin: var(--space-3, 12px) 0 0; color: var(--color-text-muted, #64748b); font-size: 0.78rem; }

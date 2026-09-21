@@ -58,3 +58,6 @@ data/cache/
 app/static/css/dist/
 app/static/js/dist/
 data/backups/
+
+# owner-edited affiliate links (see data/affiliates.local.json.example)
+data/affiliates.local.json

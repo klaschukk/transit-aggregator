@@ -1,0 +1,20 @@
+{# Door-to-door offers on tourist corridors. Renders nothing unless an affiliate
+   link is configured (AFF_TRANSFER_URL / AFF_CARS_URL) AND the pair is a tourist
+   corridor — see app/affiliates/transfers.py. Needs: route, _from_slug, _to_slug. #}
+{% set _tr_offers = transfer_offers(_from_slug, _to_slug, route.from_city, route.to_city) %}
+{% if _tr_offers %}
+<section class="transfer-offer fade-in fade-in--d2" aria-labelledby="transferOfferH">
+  <h2 class="transfer-offer__h" id="transferOfferH">{{ _('transfer.h') }}</h2>
+  <p class="transfer-offer__text">{{ _('transfer.text').format(route=route.from_city ~ ' → ' ~ route.to_city) }}</p>
+  <div class="transfer-offer__actions">
+    {% for _o in _tr_offers %}
+    <a class="transfer-offer__btn" href="{{ _o.url }}" target="_blank" rel="sponsored nofollow noopener"
+       data-partner="{{ _o.key }}" data-route-slug="{{ route.slug }}" data-surface="route_detail">
+      {%- if _o.key == 'transfer' %}{{ _('transfer.btn_transfer') }}{% else %}{{ _('transfer.btn_cars') }}{% endif -%}
+      {%- if _o.name %} <span class="transfer-offer__partner">· {{ _o.name }}</span>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  <p class="transfer-offer__note">{{ _('transfer.disclosure') }}</p>
+</section>
+{% endif %}
