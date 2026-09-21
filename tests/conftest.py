@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from app import create_app
@@ -19,6 +21,15 @@ def _isolate_flask_env(monkeypatch):
     landed. Tests that need production pass config_name explicitly.
     """
     monkeypatch.delenv("FLASK_ENV", raising=False)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _isolate_dev_mail_log(tmp_path_factory):
+    """Keep fixture mails out of the production logs/mail_dev.log."""
+    path = tmp_path_factory.mktemp("mail") / "mail_dev.log"
+    os.environ["MAIL_DEV_LOG_PATH"] = str(path)
+    yield path
+    os.environ.pop("MAIL_DEV_LOG_PATH", None)
 
 
 @pytest.fixture(scope="session")

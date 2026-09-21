@@ -223,8 +223,10 @@ def test_confirm_writes_welcome_mail_to_dev_log(sub_app, sub_client, tmp_path):
     confirm_tok, _ = _last_token(sub_app, email)
     sub_client.get(f'/api/subscribe/confirm/{confirm_tok}')
 
+    import os
     from pathlib import Path
-    log_path = Path(sub_app.root_path).parent / 'logs' / 'mail_dev.log'
+    log_path = Path(os.environ.get('MAIL_DEV_LOG_PATH')
+                    or Path(sub_app.root_path).parent / 'logs' / 'mail_dev.log')
     assert log_path.exists(), "DEV mailer should have written the log"
     body = log_path.read_text()
     assert email in body

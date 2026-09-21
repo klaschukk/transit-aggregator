@@ -12,6 +12,7 @@ and leave send_mail()'s signature + log line intact.
 from __future__ import annotations
 
 import logging
+import os
 import smtplib
 import ssl
 from email.message import EmailMessage
@@ -113,11 +114,14 @@ def _append_dev_log(to: str, subject: str, text: str,
                     html: str | None,
                     list_unsubscribe: str | None = None) -> bool:
     try:
-        root = Path(current_app.root_path).parent
-        log_dir = root / 'logs'
-        log_dir.mkdir(parents=True, exist_ok=True)
+        # MAIL_DEV_LOG_PATH lets the test suite keep its fixture mails out of
+        # the real logs/mail_dev.log (it had grown to 8 MB of localhost:5000 noise).
+        override = os.environ.get('MAIL_DEV_LOG_PATH')
+        log_path = (Path(override) if override
+                    else Path(current_app.root_path).parent / 'logs' / _DEV_LOG_FILENAME)
+        log_path.parent.mkdir(parents=True, exist_ok=True)
         from datetime import datetime, timezone
-        with (log_dir / _DEV_LOG_FILENAME).open('a', encoding='utf-8') as f:
+        with log_path.open('a', encoding='utf-8') as f:
             f.write(
                 f"\n{'=' * 60}\n"
                 f"{datetime.now(timezone.utc).replace(tzinfo=None).isoformat()}Z  to={to}\n"
