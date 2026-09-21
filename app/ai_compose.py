@@ -30,6 +30,9 @@ logger = logging.getLogger(__name__)
 # replacement; verified live 2026-09-20 (177 itineraries composed overnight).
 # It is a reasoning model: reasoning tokens count against the free tier's
 # 200K tokens/day, which is what caps the nightly pregen (~160-180 per night).
+# reasoning_effort=low (verified live 2026-09-21 on 3 pairs): ~750 tokens per
+# itinerary instead of ~1165, faster, and it stops the default effort from
+# burning 600 of the 700 max_tokens on reasoning and truncating the answer.
 COMPOSE_MODEL = 'openai/gpt-oss-120b'
 _UA = 'PrevozniBot/1.0 (+https://prevozni.com)'
 _ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions'
@@ -114,6 +117,7 @@ def compose_itinerary_via_groq(
         ],
         'max_tokens': 700,
         'temperature': 0.3,
+        'reasoning_effort': 'low',
         'response_format': {'type': 'json_object'},
     }).encode()
 

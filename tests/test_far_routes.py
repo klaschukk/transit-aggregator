@@ -71,6 +71,34 @@ def test_sanitize_rejects_non_dict():
 
 # ── /api/compose-route endpoint ──────────────────────────────────────────
 
+def test_groq_payload_uses_low_reasoning_effort(monkeypatch):
+    """Default effort burns ~600 of the 700 max_tokens on reasoning and truncates
+    the answer; the request must ask for low effort."""
+    sent = {}
+
+    class _Resp:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def read(self):
+            return json.dumps({'choices': [{'message': {'content': json.dumps(
+                {'feasible': True, 'summary': 's', 'legs': [
+                    {'mode': 'bus', 'from': 'A', 'to': 'B', 'duration': '~2h', 'note': 'n'}]})}}]}).encode()
+
+    def fake_urlopen(req, timeout=0):
+        sent.update(json.loads(req.data.decode()))
+        return _Resp()
+
+    monkeypatch.setattr(ai_compose.urllib.request, 'urlopen', fake_urlopen)
+    out = ai_compose.compose_itinerary_via_groq('Beograd', 'Sofia', 'en', 'k')
+    assert out and out['feasible']
+    assert sent['reasoning_effort'] == 'low'
+    assert sent['model'] == ai_compose.COMPOSE_MODEL
+
+
 def test_compose_endpoint_rejects_non_far(client):
     r = client.get('/api/compose-route?od=Beograd&do=Nis')
     assert r.status_code == 400
