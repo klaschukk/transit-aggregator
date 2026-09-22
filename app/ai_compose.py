@@ -103,8 +103,32 @@ def compose_itinerary_via_groq(
     """Ask Groq for one itinerary. Returns the parsed/validated dict or None on
     any failure (network, non-JSON, bad shape) — callers degrade to the plain
     Bookaway CTA so the page is always useful even when the model is down."""
+    data, _hard_failure = compose_itinerary_via_groq_ex(
+        from_city, to_city, lang, api_key, timeout)
+    return data
+
+
+def compose_itinerary_via_groq_ex(
+    from_city: str, to_city: str, lang: str, api_key: str, timeout: int = 20,
+) -> tuple[dict | None, bool]:
+    """Same as compose_itinerary_via_groq, plus a ``hard_failure`` flag a batch
+    caller (scripts/pregen_far_routes.py) can use to tell "the API/account is
+    unreachable, stop hammering it" apart from "the model said this route isn't
+    feasible" — the latter is an ordinary, expected outcome for many pairs and
+    must NOT trip a circuit breaker; the former means every remaining call in
+    the sweep will fail too (2026-09-22: a Cloudflare error-1010 block on this
+    box's IP turned an ~8 h pregen run into a no-op that also broke the live
+    /api/chat feature — see docs/06_tech/handoff-2026-09-21.md).
+
+    hard_failure is True for network errors, timeouts and any non-2xx HTTP
+    response (429 quota, 404 retired model, 403 Cloudflare block, 5xx) —
+    anything that means we never got a real answer. It's False when Groq
+    responded and the answer was just unusable (bad JSON from the model,
+    infeasible route) — a normal, per-pair outcome that doesn't imply the
+    next call will fail too.
+    """
     if not api_key:
-        return None
+        return None, True
     lang_name = _LANG_NAME.get(lang, 'Serbian (latin)')
     system = _SYSTEM.replace('{lang}', lang_name)
     user = f'Origin: {from_city}\nDestination: {to_city}\nPlan the trip.'
@@ -141,15 +165,17 @@ def compose_itinerary_via_groq(
         # but say WHY: a retired model (404 model_not_found) and a daily-quota
         # 429 look identical to a caller, and the first one silently zeroed
         # every far-destination itinerary for a month before anyone noticed.
-        logger.warning('groq compose HTTP %s for %s->%s: %s', exc.code,
-                       from_city, to_city, exc.read()[:160].decode('utf-8', 'replace'))
-        return None
+        body_snippet = exc.read()[:160].decode('utf-8', 'replace')
+        hint = ' (Cloudflare block on this box\'s IP — stop retrying, wait it out)' if exc.code == 403 and '1010' in body_snippet else ''
+        logger.warning('groq compose HTTP %s for %s->%s: %s%s', exc.code,
+                       from_city, to_city, body_snippet, hint)
+        return None, True
     except Exception as exc:  # noqa: BLE001 — network/JSON: same fallback
         logger.warning('groq compose failed for %s->%s: %s: %s', from_city, to_city,
                        type(exc).__name__, str(exc)[:120])
-        return None
+        return None, True
 
-    return _sanitize(data, from_city, to_city)
+    return _sanitize(data, from_city, to_city), False
 
 
 _ALLOWED_MODES = {'bus', 'train', 'flight', 'ferry', 'taxi', 'metro'}

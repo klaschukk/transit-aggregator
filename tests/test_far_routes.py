@@ -316,3 +316,57 @@ def test_destinations_links_cached_far_guides(client, app, monkeypatch):
     html = r.get_data(as_text=True)
     assert '/voznja/beograd-do-bangkok/' in html
     assert 'Beograd → Bangkok' in html
+
+
+# ── hard vs soft failure (compose_itinerary_via_groq_ex) ──────────────────
+
+
+def test_ex_no_api_key_is_a_hard_failure():
+    data, hard = ai_compose.compose_itinerary_via_groq_ex('Beograd', 'Sofia', 'en', '')
+    assert data is None and hard is True
+
+
+def test_ex_http_error_is_a_hard_failure(monkeypatch):
+    def fake_urlopen(req, timeout=0):
+        raise __import__('urllib.error', fromlist=['HTTPError']).HTTPError(
+            'https://api.groq.com/x', 403, 'Forbidden', {}, __import__('io').BytesIO(b'error code: 1010'))
+
+    monkeypatch.setattr(ai_compose.urllib.request, 'urlopen', fake_urlopen)
+    data, hard = ai_compose.compose_itinerary_via_groq_ex('Beograd', 'Sofia', 'en', 'k')
+    assert data is None and hard is True
+
+
+def test_ex_network_exception_is_a_hard_failure(monkeypatch):
+    def fake_urlopen(req, timeout=0):
+        raise TimeoutError('timed out')
+
+    monkeypatch.setattr(ai_compose.urllib.request, 'urlopen', fake_urlopen)
+    data, hard = ai_compose.compose_itinerary_via_groq_ex('Beograd', 'Sofia', 'en', 'k')
+    assert data is None and hard is True
+
+
+def test_ex_model_says_infeasible_is_a_soft_failure(monkeypatch):
+    """A real answer that just isn't a usable route must NOT look like an
+    infra failure — pregen's circuit breaker would wrongly abort a normal run."""
+    class _Resp:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def read(self):
+            return json.dumps({'choices': [{'message': {
+                'content': json.dumps({'feasible': False})}}]}).encode()
+
+    monkeypatch.setattr(ai_compose.urllib.request, 'urlopen',
+                        lambda req, timeout=0: _Resp())
+    data, hard = ai_compose.compose_itinerary_via_groq_ex('Beograd', 'Sofia', 'en', 'k')
+    assert hard is False and data is not None and data['feasible'] is False
+
+
+def test_compose_itinerary_via_groq_still_returns_plain_data(monkeypatch):
+    """Public wrapper keeps its old (data-or-None) contract for existing callers."""
+    monkeypatch.setattr(ai_compose, 'compose_itinerary_via_groq_ex',
+                        lambda *a, **kw: ({'feasible': True}, False))
+    assert ai_compose.compose_itinerary_via_groq('Beograd', 'Sofia', 'en', 'k') == {'feasible': True}

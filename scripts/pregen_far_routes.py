@@ -34,7 +34,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import analytics_db, create_app  # noqa: E402
 from app.affiliates.partners import FAR_DESTINATIONS  # noqa: E402
-from app.ai_compose import compose_itinerary_via_groq  # noqa: E402
+from app.ai_compose import compose_itinerary_via_groq_ex  # noqa: E402
 from app.i18n import SUPPORTED_LANGS  # noqa: E402
 from app.slug import slugify_serbian as _sl  # noqa: E402
 
@@ -74,6 +74,16 @@ RETRY_BACKOFF = 45.0
 # the normal gap — back off hard before continuing the sweep.
 FAILURE_COOLDOWN = 30.0
 
+# Circuit breaker: a HARD failure (network/HTTP-level — see
+# compose_itinerary_via_groq_ex) means the API is unreachable for every
+# remaining pair too (revoked key, exhausted daily quota, a Cloudflare block
+# on this box's IP — the 2026-09-22 incident: ~4 h of a single pregen run
+# retrying a 403 error-1010 block pair by pair instead of noticing after a
+# few tries and giving up). An ordinary "model said infeasible" (soft
+# failure) does NOT count — that's expected for a chunk of far pairs and
+# must not abort a run that's otherwise making progress.
+CONSECUTIVE_HARD_FAILURE_LIMIT = 6
+
 
 def main() -> None:
     app = create_app(os.environ.get('FLASK_ENV', 'development'))
@@ -83,7 +93,11 @@ def main() -> None:
         if not key:
             print('ERROR: GROQ_API_KEY not set'); return
         ok = skipped = failed = 0
+        consecutive_hard_failures = 0
+        aborted = False
         for hub in SR_HUBS:
+            if aborted:
+                break
             hub_slug = _sl(hub)
             for far_slug in TOP_FAR:
                 meta = FAR_DESTINATIONS.get(far_slug)
@@ -93,6 +107,8 @@ def main() -> None:
                 disp = meta.get('display', far_slug.replace('-', ' ').title())
                 # All langs per pair: base.html advertises hreflang sr/en/ru
                 # unconditionally, so every variant must be a real page.
+                if aborted:
+                    break
                 for lang in SUPPORTED_LANGS:
                     if analytics_db.get_composed_route(pair_key, lang):
                         skipped += 1
@@ -104,8 +120,9 @@ def main() -> None:
                     # failures (272 of 348 on the first full run). Pace the
                     # calls and retry with a widening backoff.
                     data = None
+                    hard_failure = False
                     for attempt in range(MAX_ATTEMPTS):
-                        data = compose_itinerary_via_groq(
+                        data, hard_failure = compose_itinerary_via_groq_ex(
                             hub, disp, lang, key, timeout=25)
                         if data and data.get('feasible'):
                             break
@@ -117,13 +134,26 @@ def main() -> None:
                             json.dumps(data, ensure_ascii=False),
                         )
                         ok += 1
+                        consecutive_hard_failures = 0
                         print(f'OK   {pair_key} [{lang}]')
                         time.sleep(REQUEST_GAP)
                     else:
                         failed += 1
-                        print(f'FAIL {pair_key} [{lang}]', flush=True)
+                        consecutive_hard_failures = (
+                            consecutive_hard_failures + 1 if hard_failure else 0)
+                        print(f'FAIL {pair_key} [{lang}]'
+                              f'{" (hard)" if hard_failure else ""}', flush=True)
+                        if consecutive_hard_failures >= CONSECUTIVE_HARD_FAILURE_LIMIT:
+                            print(f'ABORTED after {consecutive_hard_failures} consecutive '
+                                  f'hard failures at {pair_key} [{lang}] — the API looks '
+                                  f'unreachable (quota, revoked key, or a Cloudflare block '
+                                  f'on this box\'s IP), not \'route infeasible\'. Re-run once '
+                                  f'that clears; progress so far is kept.', flush=True)
+                            aborted = True
+                            break
                         time.sleep(FAILURE_COOLDOWN)
-        print(f'\nDone: {ok} composed, {skipped} cached, {failed} failed')
+        status = 'ABORTED (see above)' if aborted else 'Done'
+        print(f'\n{status}: {ok} composed, {skipped} cached, {failed} failed')
 
 
 if __name__ == '__main__':
