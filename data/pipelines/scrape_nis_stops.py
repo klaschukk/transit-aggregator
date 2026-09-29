@@ -20,6 +20,29 @@ CITY_BBOX = {
 }
 DEFAULT_CITY = 'nis'
 
+# The bbox query also returns every long-distance coach relation that merely
+# passes through the city (FlixBus Wien-Pančevo, München-Plovdiv, ...). Their
+# refs are unknown to the city operator, so the merge used to append them as
+# new "city lines" with stops in Vienna and Paris. Same box as build_db's
+# stops_outside_serbia audit.
+SERBIA_BBOX = (42.0, 18.0, 47.0, 23.0)  # south, west, north, east
+COACH_OPERATORS = ('flixbus',)
+
+
+def is_intercity(line: dict, tags: dict | None = None) -> bool:
+    """True for a coach route rather than a city line: a known long-distance
+    operator in the tags/name, or any stop outside Serbia."""
+    tags = tags or {}
+    text = ' '.join(str(v) for v in (line.get('name', ''), tags.get('operator', ''),
+                                     tags.get('network', ''), tags.get('brand', '')))
+    if any(op in text.lower() for op in COACH_OPERATORS):
+        return True
+    s, w, n, e = SERBIA_BBOX
+    return any(not (s <= st['lat'] <= n and w <= st['lon'] <= e)
+               for st in line.get('stops') or []
+               if isinstance(st, dict)  # JGSP ships bare stop-name strings
+               and st.get('lat') is not None and st.get('lon') is not None)
+
 
 def fetch_routes(bbox):
     q = f'''[out:json][timeout:60];
@@ -97,8 +120,11 @@ def build_lines(routes, nodes):
                     if name and name not in seen:
                         seen.add(name)
                         stops.append({'name': name, 'lat': nd['lat'], 'lon': nd['lon']})
+        line = {'number': ref, 'name': tags.get('name', ref), 'type': 'bus', 'stops': stops}
+        if is_intercity(line, tags):
+            continue
         if ref not in by_ref or len(stops) > len(by_ref[ref].get('stops', [])):
-            by_ref[ref] = {'number': ref, 'name': tags.get('name', ref), 'type': 'bus', 'stops': stops}
+            by_ref[ref] = line
     return list(by_ref.values())
 
 
@@ -110,6 +136,12 @@ def main():
     lines_path = BASE_DIR / 'raw' / city / 'lines.json'
     with open(lines_path) as f:
         existing = {l['number']: l for l in json.load(f)}
+    # Drop coach routes an earlier run merged in before the filter existed.
+    dropped = [ref for ref, l in existing.items() if is_intercity(l)]
+    for ref in dropped:
+        del existing[ref]
+    if dropped:
+        print(f'  Dropped {len(dropped)} intercity lines: {", ".join(dropped)}')
 
     print(f'Fetching {city} routes from Overpass...')
     routes = fetch_routes(CITY_BBOX[city])
