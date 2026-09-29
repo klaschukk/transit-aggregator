@@ -4,11 +4,7 @@
 {% set _from_slug = from_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
 {% set _to_slug = to_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
 {% set _offers_trip = affiliate_offers(_from_slug, _to_slug, from_city, to_city, 'city-pair') %}
-{# Dropped {{ current_year }} and the "| Prevozni" brand suffix 2026-09-13:
-   a live 100-pair sample showed 31% of titles over 60 chars (median 56,
-   max 71) — those 16 fixed chars were exactly what pushed the longer
-   city-name pairs into SERP truncation. #}
-{% block title %}{{ from_city }} → {{ to_city }}: {{ _('city_pair.title_travel') }}{% if route and route.min_price_rsd %} od {{ route.min_price_rsd }} RSD{% endif %}{% endblock %}
+{% block title %}{{ from_city }} → {{ to_city }} {{ current_year }}: {{ _('city_pair.title_travel') }}{% if route and route.min_price_rsd %} od {{ route.min_price_rsd }} RSD{% endif %} | Prevozni{% endblock %}
 {% block meta_description %}{{ _('city_pair.meta_prefix') }} {{ from_city }} {{ _('city_pair.meta_mid') }} {{ to_city }} {{ current_year }}{% if route and route.trip_count %}: {{ route.trip_count }} {{ _('city_pair.departures_word') }}{% endif %}{% if route and route.min_price_rsd %}, {{ _('route_detail.meta_from')|lower }} {{ route.min_price_rsd }} RSD{% endif %}.{% if reviews_agg and reviews_agg.n and reviews_agg.n >= 5 %} {{ reviews_agg.avg }}★ ({{ reviews_agg.n }}).{% endif %} {{ _('city_pair.meta_cta') }}{% endblock %}
 
 {% block head_extra %}

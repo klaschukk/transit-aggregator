@@ -9,13 +9,7 @@
 {% set place_label = stop.locality if stop.locality else city_label %}
 {% set place_full = (stop.locality ~ ' (' ~ city_label ~ ')') if stop.locality else city_label %}
 
-{# Title was "Stajalište {name} ({place}): red vožnje i linije {year} | Prevozni"
-   — fixed overhead alone (~51 chars) left no room for real stop/place names:
-   99% of 3456 stops produced a >60-char title (median 73, max 118), which
-   Google's SERP truncates with "...". Dropped the year, the "| Prevozni"
-   brand suffix and "i linije" (redundant — a stop page is already a list of
-   lines): median drops to 48, only 8.5% still exceed 60. #}
-{% block title %}{{ _('stop_detail.stop_prefix') }} {{ stop.name }}, {{ place_label }} – {{ _('stop_detail.title_suffix') }}{% endblock %}
+{% block title %}{{ _('stop_detail.stop_prefix') }} {{ stop.name }} ({{ place_label }}): {{ _('stop_detail.title_stop_city') }} {{ current_year }} | Prevozni{% endblock %}
 {% block meta_description %}{{ _('stop_detail.stop_prefix') }} {{ stop.name }}, {{ place_full }}: {% if stop_info and stop_info.line_count %}{{ stop_info.line_count }} {{ _('stop_detail.meta_lines_suffix') }}, {% endif %}{{ _('line_detail.schedule_heading') }}{% if stop_info and stop_info.first_departure %} {{ stop_info.first_departure }}–{{ stop_info.last_departure }}{% endif %}. {{ _('stop_detail.meta_eta') }}{% endblock %}
 
 {% block head_extra %}

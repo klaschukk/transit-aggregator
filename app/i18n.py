@@ -3085,6 +3085,12 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Карта линии, все остановки и прибытия онлайн.',
         'bg': 'Карта на линията, всички спирки и тръгвания на живо.',
     },
+    'stop_detail.title_stop_city': {
+        'sr': 'red vožnje i linije',
+        'en': 'schedule and lines',
+        'ru': 'расписание и линии',
+        'bg': 'разписание и линии',
+    },
     'stop_detail.meta_eta': {
         'sr': 'Sve linije, prvi i poslednji polazak, uživo ETA na karti.',
         'en': 'All lines, first and last departure, live ETA on the map.',
