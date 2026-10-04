@@ -49,7 +49,7 @@
 | SSL | Cloudflare Flexible (origin TLS нет) |
 | Process | systemd (transit.service) |
 | Compression | flask-compress (gzip) + nginx gzip |
-| Analytics | Umami — cloud.umami.is (website ID `6af0f7f1-e6d7-4d30-b3f0-f47265a83db8`). Self-hosted migration in progress: shared instance on this same box, run by the flight-punctuality project (Docker, `127.0.0.1:3001`), see Инфраструктура. |
+| Analytics | Umami self-hosted (с 2026-10-04): `stats.flightpunctuality.online`, website ID `0bf85965-824a-4732-914a-d58f97cbb307`. Общий инстанс проекта flight-punctuality (Docker `umami`/`umami-db`, `127.0.0.1:3001`) — контейнеры не трогать; читать: `docker exec umami-db psql -U umami -d umami`. Грузится только при cookie_consent=all. Старый Cloud-ID `6af0f7f1…` больше не пишет. |
 | Данные | Скраперы (bgprevoz, gspns, busticket4.me, srbijavoz, polazak.rs) |
 
 ## URL архитектура
@@ -271,7 +271,6 @@ minify CSS → `systemctl restart prevozni` → проверка `/health == 200
 - Статус за 1 вызов: `scripts/preflight.sh`. Изменение → живо и здорово за 1 вызов: `scripts/ship_local.sh` (`--fast` без pytest).
 - Новый чат: `scripts/preflight.sh` → `docs/06_tech/handoff-2026-09-21.md` (состояние, блокеры владельца, открытые пункты).
 - Что менялось: `git log`. Старые срезы и хронология переезда: `docs/06_tech/history-2026.md`.
-- Незакрытое: переезд аналитики на self-hosted Umami ждёт DNS `stats.flightpunctuality.online` (website ID `0bf85965-824a-4732-914a-d58f97cbb307`).
 
 ## Документация
 

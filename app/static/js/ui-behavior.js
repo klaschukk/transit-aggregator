@@ -33,8 +33,8 @@
     if (document.querySelector('script[data-umami-loaded]')) return;
     var s = document.createElement('script');
     s.defer = true;
-    s.src = 'https://cloud.umami.is/script.js';
-    s.setAttribute('data-website-id', '6af0f7f1-e6d7-4d30-b3f0-f47265a83db8');
+    s.src = 'https://stats.flightpunctuality.online/script.js';
+    s.setAttribute('data-website-id', '0bf85965-824a-4732-914a-d58f97cbb307');
     s.setAttribute('data-umami-loaded', '1');
     document.head.appendChild(s);
   }

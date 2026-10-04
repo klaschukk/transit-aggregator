@@ -154,7 +154,7 @@ CLAUDE.md, эта секция — только про **где** они физ�
 | `/health` | JSON; 200 только когда критические проверки зелёные, иначе 503 + Retry-After. Проверяет transit_db (наличие/возраст/COUNT по критическим таблицам), analytics_db (degraded, не 503), logs_writable, disk_free_pct, маркер ночного прогона, uptime, `version` = git SHA |
 | Cron-healthcheck | `*/5` мин, `sudo scripts/healthcheck.sh`: не-200 → `systemctl restart prevozni` |
 | systemd | `Restart=always` / `RestartSec=3` |
-| Аналитика | Umami (cloud.umami.is, миграция на self-hosted в процессе — см. CLAUDE.md) + GA4 (`G-0XPYJTVSSZ`); своя `analytics.sqlite` |
+| Аналитика | Umami self-hosted (`stats.flightpunctuality.online`, с 2026-10-04 — см. CLAUDE.md) + GA4 (`G-0XPYJTVSSZ`); своя `analytics.sqlite` |
 | Sentry | код готов (`docs/06_tech/sentry-setup.md`), статус активности на этом боксе не проверен в рамках этого аудита — сверить `SENTRY_DSN` в юните |
 | Внешний uptime-мониторинг | следов на боксе нет (как и на старом сервере) |
 
