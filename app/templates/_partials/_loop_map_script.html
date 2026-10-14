@@ -81,17 +81,11 @@
 
   var TEAL = '#0d9488', TEAL_DARK = '#0f766e', AMBER = '#f59e0b', INK = '#0f172a', SLATE = '#94a3b8';
 
-  /* Small raster sprites drawn once on a canvas: a white pill behind city
-     names, a chevron for the direction of travel, and an empty box that keeps
-     labels off the pins. */
+  /* A chevron for the direction of travel, drawn once on a canvas. */
   function sprite(w, h, draw) {
     var c = document.createElement('canvas'); c.width = w; c.height = h;
     var x = c.getContext('2d'); draw(x);
     return x.getImageData(0, 0, w, h);
-  }
-  function roundRect(x, l, t, w, h, r) {
-    x.beginPath(); x.moveTo(l + r, t); x.arcTo(l + w, t, l + w, t + h, r); x.arcTo(l + w, t + h, l, t + h, r);
-    x.arcTo(l, t + h, l, t, r); x.arcTo(l, t, l + w, t, r); x.closePath();
   }
   /* A geometry from the cache may run b->a; draw every leg from its start. */
   function orient(line, a) {
@@ -108,10 +102,10 @@
     var bounds = new mapboxgl.LngLatBounds(pts[0], pts[0]);
     pts.forEach(function(p) { bounds.extend(p); });
     /* Names sit to the right of a point by default, so the right edge needs
-       room for "Herceg Novi". */
+       room for "Herceg Novi"; the left edge clears the tool buttons. */
     function pad() {
       var w = el.clientWidth || 360;
-      return { top: 48, bottom: 40, left: 44, right: Math.round(Math.min(110, w * 0.24)) };
+      return { top: 48, bottom: 40, left: 68, right: Math.round(Math.min(110, w * 0.24)) };
     }
 
     var map = new mapboxgl.Map({
@@ -135,6 +129,58 @@
       setTimeout(function() { map.resize(); whole(); }, 60);
     });
 
+    /* City names are HTML pills placed by hand: each tries eight spots
+       around its point and takes the first that stays inside the map and
+       clears every pin, the tool buttons and the names already placed. The
+       built-in symbol placement ignores the map edge and dropped names on the
+       crowded coast. */
+    var layer = document.createElement('div');
+    layer.className = 'loop-map__labels';
+    el.insertBefore(layer, el.querySelector('.loop-map__tools'));
+    var labels = data.stops.map(function(s) {
+      var d = document.createElement('span');
+      d.className = 'loop-label'; d.textContent = s.name;
+      layer.appendChild(d);
+      return d;
+    });
+    var first = [];   /* stop indexes whose names go first (start, finish) */
+    var rafId = 0;
+    function queue() { if (!rafId) rafId = requestAnimationFrame(function() { rafId = 0; layout(); }); }
+    function layout() {
+      var W = el.clientWidth, H = el.clientHeight, taken = [], m = 4;
+      function hit(r) {
+        if (r[0] < m || r[1] < m || r[2] > W - m || r[3] > H - m) return true;
+        for (var k = 0; k < taken.length; k++) {
+          var t = taken[k];
+          if (r[0] < t[2] && r[2] > t[0] && r[1] < t[3] && r[3] > t[1]) return true;
+        }
+        return false;
+      }
+      /* Tool buttons, zoom control, logo. */
+      taken.push([0, 0, 62, isRoute && W < 1024 ? 112 : 60], [W - 52, 0, W, 84], [0, H - 34, 100, H], [W - 34, H - 34, W, H]);
+      var xy = pts.map(function(p) { return map.project(p); });
+      var rad = isRoute ? 15 : 9;
+      xy.forEach(function(q) { taken.push([q.x - rad, q.y - rad, q.x + rad, q.y + rad]); });
+      var order = first.slice();
+      data.stops.forEach(function(s, i) { if (order.indexOf(i) < 0) order.push(i); });
+      order.forEach(function(i) {
+        var d = labels[i], q = xy[i], w = d.offsetWidth, h = d.offsetHeight, g = rad + 4, place = null;
+        var spots = [[q.x + g, q.y - h / 2], [q.x - g - w, q.y - h / 2], [q.x - w / 2, q.y + g], [q.x - w / 2, q.y - g - h],
+                     [q.x + g - 4, q.y + 2], [q.x + g - 4, q.y - h - 2], [q.x - g - w + 4, q.y + 2], [q.x - g - w + 4, q.y - h - 2]];
+        for (var k = 0; k < spots.length && !place; k++) {
+          var r = [spots[k][0], spots[k][1], spots[k][0] + w, spots[k][1] + h];
+          if (!hit(r)) place = r;
+        }
+        if (place) {
+          taken.push(place);
+          d.style.transform = 'translate(' + Math.round(place[0]) + 'px,' + Math.round(place[1]) + 'px)';
+          d.classList.add('is-on');
+        } else {
+          d.classList.remove('is-on');
+        }
+      });
+    }
+
     map.on('load', function() {
       /* Keep the relief, water and borders of the outdoors style; drop what
          competes with the route: its own town names (ours are localized),
@@ -155,15 +201,10 @@
         map.setLayoutProperty('country-label', 'text-size', 11);
       }
 
-      map.addImage('loop-pill', sprite(64, 48, function(x) {
-        x.shadowColor = 'rgba(15,23,42,.28)'; x.shadowBlur = 6; x.shadowOffsetY = 2;
-        x.fillStyle = '#ffffff'; roundRect(x, 8, 6, 48, 32, 16); x.fill();
-      }), { pixelRatio: 2, stretchX: [[24, 40]], stretchY: [[20, 24]], content: [16, 10, 48, 34] });
       map.addImage('loop-chev', sprite(28, 28, function(x) {
         x.strokeStyle = '#ffffff'; x.lineWidth = 4; x.lineCap = 'round'; x.lineJoin = 'round';
         x.beginPath(); x.moveTo(9, 6); x.lineTo(18, 14); x.lineTo(9, 22); x.stroke();
       }), { pixelRatio: 2 });
-      map.addImage('loop-block', sprite(4, 4, function() {}), { pixelRatio: 1 });
 
       map.addSource('stops', { type: 'geojson', data: { type: 'FeatureCollection',
         features: data.stops.map(function(s, i) {
@@ -171,19 +212,8 @@
                    geometry: { type: 'Point', coordinates: [s.lon, s.lat] } };
         }) } });
       if (isRoute) route(); else network();
-      /* City names on white pills. Eight candidate spots each, so the
-         crowded coast (Herceg Novi, Kotor, Budva) still gets names. */
-      map.addLayer({ id: 'stop-labels', type: 'symbol', source: 'stops',
-        layout: { 'text-field': ['get', 'name'], 'text-size': 12.5,
-                  'text-font': ['DIN Pro Medium', 'Arial Unicode MS Regular'],
-                  'text-variable-anchor': ['left', 'right', 'top', 'bottom', 'bottom-left', 'top-left', 'bottom-right', 'top-right'],
-                  'text-radial-offset': isRoute ? 2.4 : 2.1, 'text-justify': 'auto', 'text-padding': 2,
-                  'icon-image': 'loop-pill', 'icon-text-fit': 'both', 'icon-text-fit-padding': [3, 7, 3, 7], 'icon-padding': 0 },
-        paint: { 'text-color': INK } });
-      /* Invisible boxes over the pins: placed first (top layer), so a name
-         never covers a neighbouring pin. */
-      map.addLayer({ id: 'stop-block', type: 'symbol', source: 'stops',
-        layout: { 'icon-image': 'loop-block', 'icon-size': isRoute ? 7 : 4.5, 'icon-allow-overlap': true } });
+      layout();
+      map.on('move', queue); map.on('resize', queue);
       el.classList.add('is-live');
     });
 
@@ -330,6 +360,8 @@
         map.setPaintProperty('net-stops', 'circle-stroke-width', ['match', ['get', 'slug'], a || '-', 3, b || '-', 3, 2.5]);
         map.setFilter('net-halo', ['in', ['get', 'slug'], ['literal', [a, b]]]);
         map.setPaintProperty('net-halo', 'circle-color', ['match', ['get', 'slug'], a || '-', TEAL, AMBER]);
+        first = [a, b].filter(function(x) { return x in index; }).map(function(x) { return index[x]; });
+        queue();
       }
       paint();
       map.on('mouseenter', 'net-stops', function(e) {
