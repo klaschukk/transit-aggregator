@@ -24,3 +24,24 @@
 - Клики пишутся в `ba_clicks` с `partner = transfer | cars` — видны в админке рядом с BT4 и в SQL:
   `select route_slug, partner, count(*) from ba_clicks where partner in ('transfer','cars') group by 1,2 order by 3 desc;`
 - Рекламные правила не менялись: авто-реклама и липкий anchor по-прежнему выключены.
+
+## Balkan Loop планировщик (`/balkan-loop/`, с 2026-10-14)
+
+Страница строит маршрут «старт, финиш, N дней» из прямых автобусов между 13 городами кольца (`app/planner.py`, список `STOPS`).
+Работает и без партнёрок: каждая deonica ведёт на `/rute/<slug>/`, где уже стоит кнопка BusTicket4.
+
+Четыре спящих слота (`app/affiliates/trip_extras.py`), тот же файл `data/affiliates.local.json`:
+
+| Ключ | Где показывается | Плейсхолдер |
+|------|------------------|-------------|
+| `AFF_STAY_URL` / `AFF_STAY_NAME` | под каждым городом (жильё) | `{city}` |
+| `AFF_TOURS_URL` / `AFF_TOURS_NAME` | под каждым городом (туры) | `{city}` |
+| `AFF_ESIM_URL` / `AFF_ESIM_NAME` | один раз под маршрутом | нет |
+| `AFF_INSURANCE_URL` / `AFF_INSURANCE_NAME` | один раз под маршрутом | нет |
+
+Только `https://`. После правки файла: `scripts/ship_local.sh --fast`. Клики пишутся в `ba_clicks` с `surface = planner`
+и `partner = stay | tours | esim | insurance`:
+`select partner, route_slug, count(*) from ba_clicks where surface='planner' group by 1,2 order by 3 desc;`
+
+Стоп-условие, о котором договорились 2026-10-14: если к 15 декабря `/en/balkan-loop/` не набирает показов в Search Console,
+дальше в планировщик не вкладываемся.
