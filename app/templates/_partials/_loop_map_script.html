@@ -280,6 +280,23 @@
         li.addEventListener('mouseenter', on); li.addEventListener('mouseleave', off);
         li.addEventListener('focusin', on); li.addEventListener('focusout', off);
       });
+      /* Scrolling the list walks the map along: the stop in the middle of
+         the screen lights up, and the map pans only if its pin is out of view. */
+      if ('IntersectionObserver' in window) {
+        var current = -1;
+        var io = new IntersectionObserver(function(entries) {
+          entries.forEach(function(en) {
+            if (!en.isIntersecting) return;
+            var k = parseInt(en.target.dataset.n, 10) - 1;
+            if (k === current || !pins[k]) return;
+            if (current >= 0 && pins[current]) pins[current].classList.remove('is-current');
+            current = k; pins[k].classList.add('is-current');
+            var stop = data.stops[k];
+            if (!map.getBounds().contains([stop.lon, stop.lat])) map.easeTo({ center: [stop.lon, stop.lat], duration: reduce ? 0 : 700 });
+          });
+        }, { rootMargin: '-45% 0px -50% 0px' });
+        Array.prototype.forEach.call(document.querySelectorAll('.loop-stop[data-n]'), function(li) { io.observe(li); });
+      }
       /* "Show on map" buttons in the list: fly to the stop (and bring the
          mini-map into view where it is not sticky). */
       Array.prototype.forEach.call(document.querySelectorAll('.loop-stop__locate'), function(btn) {

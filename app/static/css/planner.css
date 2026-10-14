@@ -99,7 +99,8 @@
 /* ── Map ── */
 .loop-map { position: relative; height: 320px; overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: #d5eceb; box-shadow: var(--shadow-sm); isolation: isolate; }
 @media (min-width: 720px) { .loop-map { height: 440px; } }
-@media (min-width: 1024px) { .loop-layout .loop-map { height: min(calc(100vh - var(--header-h) - var(--space-8)), 640px); } }
+/* Desktop: a full-height panel that rides along the whole stop list. */
+@media (min-width: 1024px) { .loop-layout .loop-map { height: calc(100vh - var(--header-h) - var(--space-8)); min-height: 460px; } }
 .loop-map.is-expanded { height: 72vh; }
 .loop-map__poster, .loop-map__canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .loop-map__poster { transition: opacity .3s ease; }
@@ -115,6 +116,7 @@
 .loop-pin--end { background: #f59e0b; }
 .loop-pin::after { content: ""; position: absolute; inset: -8px; }
 .loop-pin:hover, .loop-pin:focus-visible, .loop-pin.is-active { background: var(--color-accent); color: var(--color-text); transform: scale(1.2); }
+.loop-pin.is-current { background: var(--color-accent); color: var(--color-text); transform: scale(1.25); box-shadow: 0 0 0 6px rgba(245, 158, 11, .3), 0 2px 6px rgba(15, 23, 42, .4); }
 .loop-pin:focus-visible { outline: 2px solid var(--color-text); outline-offset: 2px; }
 .loop-map__labels { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; opacity: 0; transition: opacity .3s ease; }
 .loop-map.is-live .loop-map__labels { opacity: 1; }
