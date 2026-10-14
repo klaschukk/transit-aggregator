@@ -238,9 +238,19 @@ def test_og_image_for_preset(client, loop_legs):
     assert client.get('/og/balkan-loop/nope.png').status_code == 200   # static fallback
 
 
-def test_planner_partners_are_accepted_by_click_log(client):
+def test_planner_partners_are_accepted_by_click_log(client, tmp_path, monkeypatch):
+    # A throwaway click log: the shared client points at the live analytics DB.
+    from app import analytics_db
+    app = client.application
+    monkeypatch.setitem(app.config, 'ANALYTICS_DB_PATH', str(tmp_path / 'analytics.sqlite'))
+    with app.app_context():
+        analytics_db.init_schema()
     r = client.post('/api/ba-click', json={'route_slug': 'kotor', 'surface': 'planner', 'partner': 'stay'})
     assert r.status_code == 204
+    import sqlite3
+    rows = sqlite3.connect(tmp_path / 'analytics.sqlite').execute(
+        "SELECT surface, partner FROM ba_clicks").fetchall()
+    assert rows == [('planner', 'stay')]
 
 
 def test_itinerary_page_has_a_map_with_one_pin_per_stop(client, loop_legs):
