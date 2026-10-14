@@ -99,6 +99,15 @@
 /* ── Map ── */
 .loop-map { position: relative; height: 320px; overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: #d5eceb; box-shadow: var(--shadow-sm); isolation: isolate; }
 @media (min-width: 720px) { .loop-map { height: 440px; } }
+/* Phones and tablets: a compact map pinned under the header while the list
+   scrolls (the scroll story drives it); it follows the header when that
+   slides away on scroll. */
+@media (max-width: 1023px) {
+  .loop-layout__map { position: sticky; top: var(--header-h); z-index: 5; transition: top .2s ease; }
+  body:has(.site-header.is-hidden) .loop-layout__map { top: 0; }
+  .loop-layout .loop-map { height: clamp(200px, 32vh, 300px); box-shadow: var(--shadow-md, 0 6px 18px rgba(15, 23, 42, .18)); }
+  .loop-layout .loop-map.is-expanded { height: 72vh; }
+}
 /* Desktop: a full-height panel that rides along the whole stop list. */
 @media (min-width: 1024px) { .loop-layout .loop-map { height: calc(100vh - var(--header-h) - var(--space-8)); min-height: 460px; } }
 .loop-map.is-expanded { height: 72vh; }
