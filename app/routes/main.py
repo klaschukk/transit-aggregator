@@ -522,6 +522,7 @@ def api_ba_click():
     if surface and surface not in (
         'search', 'route_detail', 'city_pair', 'route_detail_global',
         'city_pair_global', 'search_global', 'planner', 'route_next', 'city_pair_next',
+        'city_xsell', 'city_xsell_route',
     ):
         surface = 'other'
 

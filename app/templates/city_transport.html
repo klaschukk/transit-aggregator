@@ -196,6 +196,8 @@
   {{ empty_state(icon='bus', text=_('city.loading')) }}
 {% endif %}
 
+{% include '_partials/_city_xsell.html' %}
+
 {# Mid-page ad — between line-grid (anchor content) and the see-also
    blocks (interlinking). Single slot keeps ad density at 1 per page. #}
 {% from '_partials/_ad_slot.html' import ad_slot with context %}

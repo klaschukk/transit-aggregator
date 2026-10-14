@@ -6,6 +6,7 @@ from flask import Blueprint, render_template, abort, request, jsonify, redirect,
 from app.db import query, query_one, cached_query, cached_query_one, db_ready
 from app.extensions import limiter
 from app.slug import normalize_slug, slugify_serbian
+from app.city_xsell import intercity_from_city, is_hub_stop
 
 city_bp = Blueprint('city', __name__)
 
@@ -213,7 +214,7 @@ def city_hub(city: str):
         'city': city_display,
         'line_count': len(lines) if lines else 0,
     }, ensure_ascii=False)
-    return render_template('city_transport.html', city=city, lines=lines,
+    return render_template('city_transport.html', city=city, xsell=intercity_from_city(city), lines=lines,
                            modes=modes,
                            stops_with_coords=stops_with_coords,
                            map_bounds=map_bounds,
@@ -445,7 +446,7 @@ def line_detail(city: str, line_slug: str):
         'line_name': line.get('name') if line else None,
         'stop_count': len(stops) if stops else 0,
     }, ensure_ascii=False)
-    return render_template('line_detail.html', city=city, line=line, stops=stops,
+    return render_template('line_detail.html', city=city, xsell=intercity_from_city(city), line=line, stops=stops,
                            schedule=schedule, has_gtfs=has_gtfs,
                            first_dep=first_dep, last_dep=last_dep, headway=headway,
                            line_type_label=line_type_label,
@@ -660,7 +661,8 @@ def stop_detail(city: str, stop_slug: str):
         'stop_name': stop.get('name') if stop else None,
         'line_count': stop_info.get('line_count') if stop_info else 0,
     }, ensure_ascii=False)
-    return render_template('stop_detail.html', city=city, stop=stop,
+    return render_template('stop_detail.html', city=city, xsell=intercity_from_city(city),
+                           xsell_top=is_hub_stop(stop_slug), stop=stop,
                            departures=departures, lines_at_stop=lines_at_stop,
                            nearby_stops=nearby_stops, stop_info=stop_info,
                            prose=prose,

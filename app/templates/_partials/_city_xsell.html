@@ -1,0 +1,38 @@
+{# Intercity departures from this city, on /gradski/ pages. Needs: xsell
+   (app.city_xsell.intercity_from_city), city_label, lang_prefix.
+   The row links to /rute/<slug>/ (analytics-tracker.js remembers the slug so a buy
+   there is logged as surface city_xsell_route); the Kupi button goes straight
+   to the BT4 checkout of the exact departure shown (surface city_xsell). #}
+{% if xsell %}
+<section class="xsell fade-in" aria-labelledby="xsellTitle">
+  <h2 class="xsell__title" id="xsellTitle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M3 11h18M7 17v2m10-2v2M7 14h.01M17 14h.01"/></svg>
+    {{ _('xsell.title') }}
+  </h2>
+  <p class="xsell__sub">{{ _('xsell.sub').format(city=city_label) }}</p>
+  <ul class="xsell__list">
+    {% for r in xsell %}
+    <li class="xsell__row">
+      <a class="xsell__link js-xsell" href="{{ lang_prefix }}/rute/{{ r.slug }}/" data-route-slug="{{ r.slug }}">
+        <span class="xsell__to">{{ r.to_city }}</span>
+        <span class="xsell__meta">
+          {% if r.next_time %}{{ _('route.next_bus') }} <strong>{{ r.next_time }}</strong>
+            {%- if r.next_in_min is not none and r.next_in_min < 120 %} · {{ _('xsell.in') }} {% if r.next_in_min >= 60 %}{{ r.next_in_min // 60 }} {{ _('common.h') }} {% endif %}{{ r.next_in_min % 60 }} {{ _('common.min') }}{% endif %}
+          {%- else %}{{ _('xsell.none_today') }}{% endif %}
+          {%- if r.price_min %} · {{ _('route.from_price') }} <span class="ccy-rsd">{{ r.price_min }} RSD</span><span class="ccy-eur">{{ (r.price_min / (config.EUR_RSD_RATE or 117))|round|int }} €</span>{% endif %}
+        </span>
+      </a>
+      {% set _buy = bt4_checkout_url(r.from_slug, r.to_slug, r.bt4_line_id, r.date) if r.bt4_line_id else '' %}
+      {% if _buy %}
+      <a class="xsell__buy" href="{{ _buy }}" target="_blank" rel="noopener nofollow sponsored"
+         aria-label="{{ _('buy.cta') }} — {{ r.to_city }} {{ r.next_time }}"
+         data-partner="busticket4" data-surface="city_xsell" data-route-slug="{{ r.slug }}"
+         data-time="{{ r.next_time }}">{{ _('buy.cta') }}</a>
+      {% else %}
+      <svg class="xsell__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}

@@ -8,6 +8,7 @@
    Selectors used:
      .trip-card__buy              per-trip partner CTA
      .buy-ticket__btn             whole-route partner CTA
+     .xsell__buy / .js-xsell      city-page intercity cross-sell (buy / row link)
      .js-ccy-btn                  currency switcher
      .js-fav-btn                  save-route star
      form.search-form             homepage/search departure picker
@@ -60,9 +61,19 @@
     } catch(e){}
   }
 
+  /* City-page cross-sell rows (.js-xsell, _city_xsell.html) — remember which
+     route the visitor went to, and count the hop itself in Umami. */
+  var XSELL_KEY = 'prevozni.xsell';
+  document.addEventListener('click', function(ev){
+    var a = ev.target.closest('.js-xsell');
+    if (!a) return;
+    try { sessionStorage.setItem(XSELL_KEY, a.dataset.routeSlug || ''); } catch(e){}
+    u('xsell_click', {route: a.dataset.routeSlug || '', path: location.pathname});
+  });
+
   /* Partner buy CTAs — log every outbound affiliate click (data-partner) */
   document.addEventListener('click', function(ev){
-    var el = ev.target.closest('.trip-card__buy, .buy-ticket__btn, .partners-block__btn, .transfer-offer__btn, .loop-offer__btn');
+    var el = ev.target.closest('.trip-card__buy, .buy-ticket__btn, .partners-block__btn, .transfer-offer__btn, .loop-offer__btn, .xsell__buy');
     if (!el) return;
     if (!el.dataset.partner) return;  /* skip non-affiliate .buy-ticket__btn (city map CTAs) — no blank ba_clicks */
     var payload = {
@@ -72,6 +83,13 @@
       trip_time:  el.dataset.time || '',
       partner:    el.dataset.partner || '',
     };
+    /* A buy on /rute/<slug>/ reached through a city-page cross-sell row gets
+       its own surface, so the /gradski/ → intercity funnel is measurable. */
+    if (payload.surface.indexOf('route_') === 0 && payload.route_slug) {
+      try {
+        if (sessionStorage.getItem(XSELL_KEY) === payload.route_slug) payload.surface = 'city_xsell_route';
+      } catch(e){}
+    }
     u('ba_click', payload);
     logBaClick(payload);
     /* Review-prompt seed — drop a 7-day cookie naming the route the user

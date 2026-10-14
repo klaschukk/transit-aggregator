@@ -128,6 +128,9 @@
   <p class="buy-ticket__note">{{ _('stop.action_note') }}</p>
 </div>
 
+{# At bus/train station stops intercity departures come before the city lines. #}
+{% if xsell_top %}{% include '_partials/_city_xsell.html' %}{% endif %}
+
 {# Lines & arrivals #}
 {% if lines_at_stop %}
 <div class="stop-lines fade-in fade-in--d1">
@@ -179,6 +182,8 @@
   {{ empty_state(icon='stop', text=_('stop.no_lines'),
                  action_url=lang_prefix ~ '/gradski/' ~ city ~ '/', action_label=_('nav.city_transport')) }}
 {% endif %}
+
+{% if not xsell_top %}{% include '_partials/_city_xsell.html' %}{% endif %}
 
 {# Mid-content ad slot — sits between the lines/ETA block and the
    "nearby stops" / prose / reviews tail. Section-level so it never
