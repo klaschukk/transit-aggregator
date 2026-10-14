@@ -3626,6 +3626,12 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'отправлений в день',
         'bg': 'тръгвания дневно',
     },
+    'route_detail.title_departure_one': {
+        'sr': 'polazak dnevno',
+        'en': 'departure daily',
+        'ru': 'отправление в день',
+        'bg': 'тръгване дневно',
+    },
     'route_detail.title_short': {
         'sr': 'red vožnje i cene',
         'en': 'schedule and prices',

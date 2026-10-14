@@ -170,6 +170,8 @@ def create_app(config_name: str | None = None) -> Flask:
     app.jinja_env.globals['transfer_offers'] = _transfer_offers
     from app.planner import STOPS as _LOOP_STOPS
     app.jinja_env.globals['is_loop_stop'] = lambda slug: slug in _LOOP_STOPS
+    from app.snippet_price import snippet_price as _snippet_price
+    app.jinja_env.globals['snippet_price'] = _snippet_price
 
     # ── Line-number badge: Cyrillic -> Latin at render time only ──────────
     # city_lines.number can carry a Cyrillic letter glued to Latin digits

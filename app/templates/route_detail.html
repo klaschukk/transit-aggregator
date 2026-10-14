@@ -9,7 +9,8 @@
      short     → "{pair}: {N} polazaka dnevno, od {price} RSD {year}"
    No-price routes keep the previous generic phrasing (with brand suffix). #}
 {% set _pair_name = route.from_city ~ ' → ' ~ route.to_city %}
-{% set _price_phrase = (_('route_detail.meta_from')|lower ~ ' ' ~ price_min ~ ' RSD') if price_min else None %}
+{% set _price_phrase = (_('route_detail.meta_from')|lower ~ ' ' ~ snippet_price(price_min, route.from_city_slug, route.to_city_slug)) if price_min else None %}
+{% set _dep_word = _('route_detail.title_departure_one') if route.trip_count == 1 else _('route_detail.title_departures') %}
 {# Buy ticket — always visible. Offers come from app.affiliates; the
    first is the primary CTA (priority: availability → commission → UX),
    the rest render in the partners block below the trip list. Computed up
@@ -38,8 +39,8 @@
 {% set _bt4_trip = (trips | selectattr('bt4_line_id') | list | first) if trips else None %}
 {% set _bt4_main = bt4_checkout_url(_from_slug, _to_slug, _bt4_trip.bt4_line_id) if _bt4_trip else '' %}
 {% if _bt4_main %}{% set _primary_href = _bt4_main %}{% set _primary_partner = 'busticket4' %}{% set _primary_name = 'BusTicket4' %}{% set _primary_color = '#166534' %}{% endif %}
-{% block title %}{% if _price_phrase %}{% if _pair_name|length > 20 %}{{ _pair_name }}: {{ _price_phrase }} {{ current_year }}{% else %}{{ _pair_name }}: {% if route.trip_count %}{{ route.trip_count }} {{ _('route_detail.title_departures') }}, {% endif %}{{ _price_phrase }} {{ current_year }}{% endif %}{% else %}{% if _pair_name|length > 28 %}{{ _pair_name }}: {{ _('route_detail.title_short') }} {{ current_year }} | Prevozni{% elif _pair_name|length > 20 %}{{ _pair_name }} — {{ _('route_detail.title_short') }} {{ current_year }} | Prevozni{% else %}{{ _pair_name }}: {% if route.trip_count %}{{ route.trip_count }} {{ _('route_detail.title_departures') }} {% endif %}{{ current_year }} | Prevozni{% endif %}{% endif %}{% endblock %}
-{% block meta_description %}{{ _('route_detail.meta_prefix') }} {{ _pair_name }}{% if route.distance_km %} ({{ route.distance_km }} km){% endif %}: {% if route.trip_count %}{{ route.trip_count }} {{ _('route_detail.meta_daily') }}{% if price_min %}, {{ _('route_detail.meta_from')|lower }} {{ price_min }} RSD{% endif %}. {% endif %}{% if reviews_agg and reviews_agg.n and reviews_agg.n >= 5 %}{{ reviews_agg.avg }}★ ({{ reviews_agg.n }}). {% endif %}{{ _('route_detail.meta_body') if _primary_href else _('route_detail.meta_body_no_partner') }}{% endblock %}
+{% block title %}{% if _price_phrase %}{% if _pair_name|length > 20 %}{{ _pair_name }}: {{ _price_phrase }} {{ current_year }}{% else %}{{ _pair_name }}: {% if route.trip_count %}{{ route.trip_count }} {{ _dep_word }}, {% endif %}{{ _price_phrase }} {{ current_year }}{% endif %}{% else %}{% if _pair_name|length > 28 %}{{ _pair_name }}: {{ _('route_detail.title_short') }} {{ current_year }} | Prevozni{% elif _pair_name|length > 20 %}{{ _pair_name }} — {{ _('route_detail.title_short') }} {{ current_year }} | Prevozni{% else %}{{ _pair_name }}: {% if route.trip_count %}{{ route.trip_count }} {{ _dep_word }} {% endif %}{{ current_year }} | Prevozni{% endif %}{% endif %}{% endblock %}
+{% block meta_description %}{{ _('route_detail.meta_prefix') }} {{ _pair_name }}{% if route.distance_km %} ({{ route.distance_km }} km){% endif %}: {% if route.trip_count %}{{ route.trip_count }} {{ _dep_word }}{% if price_min %}, {{ _price_phrase }}{% endif %}. {% endif %}{% if reviews_agg and reviews_agg.n and reviews_agg.n >= 5 %}{{ reviews_agg.avg }}★ ({{ reviews_agg.n }}). {% endif %}{{ _('route_detail.meta_body') if _primary_href else _('route_detail.meta_body_no_partner') }}{% endblock %}
 
 {% block head_extra %}
 {% if request.args.get('dan') %}

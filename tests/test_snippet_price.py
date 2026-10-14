@@ -1,0 +1,33 @@
+"""Titles/meta of routes outside Serbia quote euro (app/snippet_price.py)."""
+import re
+
+from app.snippet_price import is_euro_pair, snippet_price
+
+
+def _title(client, path):
+    return re.search(r'<title>([^<]*)', client.get(path).get_data(as_text=True)).group(1)
+
+
+def test_euro_only_when_both_ends_abroad(app):
+    with app.app_context():
+        assert is_euro_pair('budva', 'kotor') and is_euro_pair('mostar', 'budva')
+        assert not is_euro_pair('beograd', 'budva') and not is_euro_pair('kotor', '')
+        assert snippet_price(409, 'budva', 'kotor') == '3.5 €'
+        assert snippet_price(3393, 'kotor', 'dubrovnik') == '29 €'
+        assert snippet_price(1170, 'herceg-novi', 'podgorica') == '10 €'
+        assert snippet_price(500, 'beograd', 'novi-sad') == '500 RSD'
+
+
+def test_route_titles(client):
+    assert 'from 3.5 €' in _title(client, '/en/rute/budva-kotor/')
+    assert 'RSD' in _title(client, '/rute/beograd-novi-sad/')
+
+
+def test_pair_title_translated_and_in_euro(client):
+    t = _title(client, '/en/voznja/kotor-do-dubrovnik/')
+    assert ' od ' not in t and 'from' in t and '€' in t
+
+
+def test_single_departure_is_singular(client):
+    html = client.get('/en/rute/mostar-budva/').get_data(as_text=True)
+    assert '1 departures' not in html.split('</head>')[0]
