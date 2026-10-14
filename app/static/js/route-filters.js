@@ -69,6 +69,33 @@
     if (emptyEl) emptyEl.hidden = (visible !== 0);
   }
 
+  /* Animated re-apply (FLIP): cards that stay glide to their new place,
+     cards that appear fade in. Only cards near the screen are animated, so a
+     74-trip list stays cheap; reduced motion or no Web Animations = instant. */
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function near(r) { return r.bottom > -innerHeight && r.top < innerHeight * 2; }
+  function flip() {
+    if (reduce || !Element.prototype.animate) { apply(); return; }
+    var before = new Map();
+    cards.forEach(function (c) { if (c.style.display !== 'none') before.set(c, c.getBoundingClientRect().top); });
+    apply();
+    cards.forEach(function (c) {
+      if (c.style.display === 'none') return;
+      var r = c.getBoundingClientRect();
+      if (!near(r)) return;
+      if (before.has(c)) {
+        var dy = before.get(c) - r.top;
+        if (Math.abs(dy) > 1 && Math.abs(dy) < innerHeight * 1.5) {
+          c.animate([{ transform: 'translateY(' + dy + 'px)' }, { transform: 'none' }],
+                    { duration: 380, easing: 'cubic-bezier(.2,.8,.2,1)' });
+        }
+      } else {
+        c.animate([{ opacity: 0, transform: 'translateY(10px) scale(.98)' }, { opacity: 1, transform: 'none' }],
+                  { duration: 260, easing: 'ease-out' });
+      }
+    });
+  }
+
   // Single-select chip group: highlight clicked, run setter, re-apply.
   function wire(groupId, setter) {
     var g = document.getElementById(groupId);
@@ -79,7 +106,7 @@
         if (act) act.classList.remove('time-chip--active');
         btn.classList.add('time-chip--active');
         setter(btn);
-        apply();
+        flip();
       });
     });
   }
