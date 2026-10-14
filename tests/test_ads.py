@@ -205,7 +205,9 @@ def test_ads_label_translated_when_adsense_enabled(client, app):
     original_slots = dict(app.config.get('ADSENSE_SLOTS', {}))
     try:
         app.config['ADSENSE_ID'] = 'ca-pub-1234567890'
-        app.config['ADSENSE_SLOTS'] = {**original_slots, 'home_top': '999'}
+        # home_mid is the slot the home page renders; a slot with no unit id
+        # renders nothing at all (no empty box under an ad label).
+        app.config['ADSENSE_SLOTS'] = {**original_slots, 'home_mid': '999'}
         client.set_cookie(key='cookie_consent', value='all',
                           path='/', domain='localhost')
         resp = client.get('/')

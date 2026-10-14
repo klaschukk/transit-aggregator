@@ -4,7 +4,11 @@
      cookie_consent == 'all'  → personalized ads
      anything else            → non-personalized ads (npa:1, GDPR-safe)
      slot_id set in config    → specific slot
-     slot_id not set          → Auto Ads placement hint (no data-ad-slot)
+     slot_id not set          → renders nothing. Auto Ads are off on this site,
+                                 so a unit-less placeholder could never fill: it
+                                 only left an empty box under an "Ad" label
+                                 (bad UX, and a disclosure label next to no ad
+                                 is an AdSense policy risk)
      lazy=True (default)      → IntersectionObserver loads ins only when
                                  scrolled within 200px of viewport (better CWV)
      lazy=False               → immediate push() at parse time (above-fold slots)
@@ -31,6 +35,7 @@
    for an unrelated (SEO canonicalization) reason. #}
 {%- if config.ADSENSE_ID and (ignore_noindex or 'noindex' not in (meta_robots|default(''))) -%}
 {%- set slot_id = config.get('ADSENSE_SLOTS', {}).get(slot_key, '') -%}
+{%- if slot_id -%}
 {%- set _consent = request.cookies.get('cookie_consent', '') -%}
 {%- set _npa = (_consent != 'all') -%}
 {%- set _cls = 'ad-slot ad-slot--' ~ format
@@ -57,5 +62,6 @@
   <script>(adsbygoogle = window.adsbygoogle || []).push({{ '{npa:1}' if _npa else '{}' }});</script>
 </div>
 {%- endif %}
+{%- endif -%}
 {%- endif -%}
 {%- endmacro -%}

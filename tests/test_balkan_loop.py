@@ -283,14 +283,17 @@ def test_sketch_fits_its_box_and_keeps_north_up():
 
 
 def test_planner_pages_carry_one_ad_slot_each(app, client, loop_legs):
-    old = app.config.get('ADSENSE_ID')
-    app.config['ADSENSE_ID'] = 'ca-pub-test'
+    old = app.config.get('ADSENSE_ID'), dict(app.config.get('ADSENSE_SLOTS', {}))
     try:
+        app.config['ADSENSE_ID'] = 'ca-pub-test'
+        # No unit id yet: nothing is rendered, not an empty labelled box.
+        assert 'class="ad-slot' not in client.get(f'/en{PRESET}').data.decode()
+        app.config['ADSENSE_SLOTS'] = {**old[1], 'planner_hub': '111', 'planner_mid': '222'}
         hub = client.get('/en/balkan-loop/').data.decode()
         preset = client.get(f'/en{PRESET}').data.decode()
         result = client.get('/en/balkan-loop/?from=kotor&to=tirana&days=8').data.decode()
     finally:
-        app.config['ADSENSE_ID'] = old
+        app.config['ADSENSE_ID'], app.config['ADSENSE_SLOTS'] = old
     assert hub.count('data-slot="planner_hub"') == 1 and 'data-slot="planner_mid"' not in hub
     assert preset.count('data-slot="planner_mid"') == 1 and 'data-slot="planner_hub"' not in preset
     assert 'class="ad-slot' not in result          # noindex page: no ads
