@@ -75,15 +75,6 @@ a.btn:active,
   transition: transform var(--mtap-duration) var(--mease-out);
 }
 
-/* Page transitions — lift content slightly into view. fade-in already
-   exists in app.css; we layer translateY on top for mobile only. */
-.fade-in {
-  animation: m-fade-rise .25s var(--mease-out) both;
-}
-@keyframes m-fade-rise {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
 
 
 /* ── 4. Card polish ──────────────────────────────────────────────── */
@@ -435,7 +426,6 @@ body.m-nav-open .site-nav#siteNav {
     transition-duration: .001ms !important;
     scroll-behavior: auto !important;
   }
-  .fade-in { animation: none; opacity: 1; transform: none; }
 }
 
 /* Auto dark-mode disabled per user request — phones with system dark

@@ -162,37 +162,7 @@ if ('serviceWorker' in navigator) {
   if (!d.value) d.value = today;
 })();
 
-/* ── Scroll-reveal ──────────────────────────────────────────────────────
-   Adds .is-visible to .fade-in elements as they enter the viewport so
-   CSS triggers the animation only when the element is actually seen.
-
-   This also ran a count-up on .home-stats__num. That strip is gone — the
-   slot under the search box now answers why-buy-here instead of
-   reporting inventory — so the counter went with it. */
-(function(){
-  /* Immediate fallback: no IntersectionObserver or reduced-motion */
-  var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (!('IntersectionObserver' in window) || prefersReduced) {
-    document.querySelectorAll('.fade-in').forEach(function(el){ el.classList.add('is-visible'); });
-    return;
-  }
-
-  /* Scroll-reveal observer */
-  var revealObs = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if (!e.isIntersecting) return;
-      e.target.classList.add('is-visible');
-      revealObs.unobserve(e.target);
-    });
-  }, { threshold: 0.08, rootMargin: '0px 0px -32px 0px' });
-
-  document.querySelectorAll('.fade-in').forEach(function(el){
-    /* Hero children animate via CSS keyframes already — skip observer */
-    if (el.closest('.hero')) { el.classList.add('is-visible'); return; }
-    revealObs.observe(el);
-  });
-
-})();
+/* Scroll-reveal is CSS-only now (animation-timeline: view() in app.css). */
 
 
 /* ── Capped grids ────────────────────────────────────────────────────────

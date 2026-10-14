@@ -2223,43 +2223,40 @@ input:focus-visible,
 }
 
 /* ── Animations ── */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
 @keyframes countPulse {
   0%, 100% { transform: scale(1); }
   40%       { transform: scale(1.08); }
 }
 
-/* Scroll-reveal: .fade-in starts hidden; JS adds .is-visible to trigger */
-.fade-in {
-  opacity: 0;
-  transform: translateY(16px);
-  will-change: opacity, transform;
+/* Scroll-reveal, CSS only: a .fade-in block rises in as it enters the
+   screen (scroll-driven animation). Never hidden by default: content in the
+   first screen is painted at once (LCP), browsers without view() timelines
+   just show it, and the end state is transform:none, so nothing is left as
+   a containing block for fixed/sticky children. It used to start at
+   opacity 0 until a deferred script ran, and phones ran two animations in
+   a row (content blinked). */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .fade-in { animation: reveal-up linear both; animation-timeline: view(); animation-range: entry 0% entry 40%; }
+  }
 }
-.fade-in.is-visible {
-  animation: fadeInUp .55s cubic-bezier(.22,.68,0,1.2) both;
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(28px) scale(.985); }
+  to   { opacity: 1; transform: none; }
 }
-.fade-in--d1.is-visible { animation-delay: .06s; }
-.fade-in--d2.is-visible { animation-delay: .12s; }
-.fade-in--d3.is-visible { animation-delay: .18s; }
-.fade-in--d4.is-visible { animation-delay: .24s; }
 
 /* Reduced-motion + no-JS fallbacks */
 @media (prefers-reduced-motion: reduce) {
-  .fade-in, .hero__title, .hero__sub, .hero__form,
-  .hero__quick-links {
-    animation: none; opacity: 1; transform: none;
-  }
+  .hero__title, .hero__sub, .hero__search-wrap, .hero__quick-links { animation: none; }
 }
 
-/* Hero stagger — fires on page load since hero is always above fold */
-.hero__title       { opacity: 0; animation: fadeInUp .6s cubic-bezier(.22,.68,0,1.2) .05s both; }
-.hero__sub         { opacity: 0; animation: fadeInUp .6s cubic-bezier(.22,.68,0,1.2) .17s both; }
-.hero__form        { opacity: 1; }
-.hero__search-wrap { opacity: 0; animation: fadeInUp .6s cubic-bezier(.22,.68,0,1.2) .28s both; }
-.hero__quick-links { opacity: 0; animation: fadeInUp .6s cubic-bezier(.22,.68,0,1.2) .38s both; }
+/* Hero stagger on load: slide only, no opacity, so the headline counts as
+   painted from the first frame (an opacity-0 start hid it from LCP). */
+.hero__title       { animation: slideUp .6s cubic-bezier(.22,.68,0,1.2) .05s both; }
+.hero__sub         { animation: slideUp .6s cubic-bezier(.22,.68,0,1.2) .12s both; }
+.hero__search-wrap { animation: slideUp .6s cubic-bezier(.22,.68,0,1.2) .2s both; }
+.hero__quick-links { animation: slideUp .6s cubic-bezier(.22,.68,0,1.2) .28s both; }
+@keyframes slideUp { from { transform: translateY(14px); } to { transform: none; } }
 
 /* Stats counter: tabular nums + pulse when JS finishes counting */
 
@@ -2271,8 +2268,14 @@ input:focus-visible,
   transform: translateY(-2px);
 }
 
-/* Page transitions */
-main { animation: fadeInUp .25s ease both; }
+/* Page transitions: same-site navigations cross-fade (cross-document View
+   Transitions; other browsers just navigate). Replaces a fade-in on <main>
+   whose kept transform turned <main> into the containing block for every
+   position:fixed child. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: .22s; }
+}
 
 /* ── Guide departure table ───────────────────────────────────────────
    /vodici/<slug>/ renders a 4-column table of departures with no CSS at
