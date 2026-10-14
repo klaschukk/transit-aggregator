@@ -31,3 +31,16 @@ def test_pair_title_translated_and_in_euro(client):
 def test_single_departure_is_singular(client):
     html = client.get('/en/rute/mostar-budva/').get_data(as_text=True)
     assert '1 departures' not in html.split('</head>')[0]
+
+
+def test_euro_routes_default_body_prices_to_euro(client):
+    euro = client.get('/en/rute/budva-kotor/').get_data(as_text=True)
+    rsd = client.get('/en/rute/beograd-novi-sad/').get_data(as_text=True)
+    assert "else if (true)" in euro.split('</head>')[0]
+    assert "else if (false)" in rsd.split("</head>")[0]
+
+
+def test_currency_cookie_only_on_explicit_pick():
+    js = open('app/static/js/ui-behavior.js', encoding='utf-8').read()
+    assert 'setCcy(initial);' in js and 'setCcy(b.dataset.ccy, true);' in js
+    assert 'if (persist)' in js

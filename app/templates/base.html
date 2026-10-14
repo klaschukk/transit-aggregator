@@ -203,6 +203,8 @@ window.addEventListener('load', function(){
    handler in base.html attributes the conversion to the variant we
    *rendered with*, not whatever the user has toggled to since. #}
 {% set _ccy_variant = ab_variant('currency_default_v1') %}
+{# euro_page (route_detail / city_pair): both ends outside Serbia, e.g. Budva -> Kotor —
+   the fare is a euro fare there, so EUR unless the visitor picked RSD. #}
 <script>
 /* Currency preference — read cookie BEFORE render to avoid FOUC of RSD↔EUR.
    Order:
@@ -216,7 +218,7 @@ window.addEventListener('load', function(){
     var picked = document.cookie.match(/(?:^|; )ccy=(\w+)/);
     if (picked) {
       if (picked[1] === 'eur') document.documentElement.classList.add('ccy-eur');
-    } else if ({{ ('true' if _ccy_variant == 'eur' else 'false') }}) {
+    } else if ({{ ('true' if (_ccy_variant == 'eur' or euro_page|default(false)) else 'false') }}) {
       document.documentElement.classList.add('ccy-eur');
     }
   } catch(e) {}

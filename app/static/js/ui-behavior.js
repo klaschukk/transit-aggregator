@@ -72,9 +72,14 @@
 /* Currency switcher — toggles <html class="ccy-eur"> and persists in cookie.
    CSS shows/hides .ccy-rsd vs .ccy-eur spans rendered by every trip card. */
 (function(){
-  function setCcy(c){
+  /* Only an explicit pill click persists the choice: writing the cookie on
+     every load made the page default (e.g. EUR on a Montenegro route) stick
+     as if the visitor had picked it, across the whole site for a year. */
+  function setCcy(c, persist){
     document.documentElement.classList.toggle('ccy-eur', c === 'eur');
-    try { document.cookie = 'ccy=' + c + '; path=/; max-age=31536000; samesite=lax'; } catch(e){}
+    if (persist) {
+      try { document.cookie = 'ccy=' + c + '; path=/; max-age=31536000; samesite=lax'; } catch(e){}
+    }
     document.querySelectorAll('.js-ccy-btn').forEach(function(b){
       var active = b.dataset.ccy === c;
       b.classList.toggle('lang-pill__item--active', active);
@@ -85,7 +90,7 @@
   setCcy(initial);
   document.querySelectorAll('.js-ccy-btn').forEach(function(b){
     b.addEventListener('click', function(){
-      setCcy(b.dataset.ccy);
+      setCcy(b.dataset.ccy, true);
       // User-confirmed feedback — the prices switch instantly, but a
       // toast confirms the choice "stuck" so the user doesn't keep
       // tapping. Skipped if toast.js hasn't loaded yet (early click).

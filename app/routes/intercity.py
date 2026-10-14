@@ -4,6 +4,7 @@ from datetime import date, datetime, timedelta
 from flask import Blueprint, render_template, abort, request, redirect, url_for, current_app, g
 from app.db import query, query_one, cached_query, db_ready
 from app.slug import normalize_slug
+from app.snippet_price import is_euro_pair
 from app.trip_badges import tag_best_trips
 
 intercity_bp = Blueprint('intercity', __name__)
@@ -362,6 +363,7 @@ def route_detail(slug: str):
         'distance_km': route.get('distance_km'),
     }, ensure_ascii=False)
     return render_template('route_detail.html', route=route, trips=trips,
+                           euro_page=is_euro_pair(route['from_city_slug'], route['to_city_slug']),
                            days=days, selected_day=selected_day,
                            similar_routes=similar_routes,
                            destination_country=destination_country,
@@ -607,6 +609,7 @@ def city_pair(from_city: str, to_city: str):
     }, ensure_ascii=False)
     return render_template('city_pair.html',
                            route=route, trips=trips, route_info=route_info,
+                           euro_page=is_euro_pair(from_city, to_city),
                            next_trip=next_trip, next_in_min=next_in_min,
                            related_pairs=related_pairs,
                            onward_pairs=onward_pairs,
