@@ -164,6 +164,24 @@ if ('serviceWorker' in navigator) {
 
 /* Scroll-reveal is CSS-only now (animation-timeline: view() in app.css). */
 
+/* ── Next departure countdown ────────────────────────────────────────────
+   The "departs in" pill counts down from the server's reading (Belgrade
+   time at render), by elapsed time, not the visitor's clock. When the bus
+   has left the pill goes away rather than show a negative time. */
+(function(){
+  var el = document.querySelector('.next-dep__in[data-in-min]');
+  if (!el) return;
+  var left = parseInt(el.dataset.inMin, 10), t0 = Date.now();
+  if (isNaN(left)) return;
+  function tick() {
+    var m = left - Math.floor((Date.now() - t0) / 60000);
+    if (m <= 0) { el.hidden = true; clearInterval(iv); return; }
+    var h = Math.floor(m / 60), mm = m % 60;
+    el.textContent = el.dataset.label + ' ' + (h ? h + ' ' + el.dataset.unitH + ' ' : '') + mm + ' ' + el.dataset.unitMin;
+  }
+  var iv = setInterval(tick, 20000);
+})();
+
 
 /* ── Capped grids ────────────────────────────────────────────────────────
    Any grid carrying `data-visible-cap="N"` shows its first N children and

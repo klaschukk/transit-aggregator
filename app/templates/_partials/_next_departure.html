@@ -7,7 +7,7 @@
     <span class="next-dep__pulse" aria-hidden="true"></span>
     <h2 class="next-dep__title" id="nextDepTitle">{{ _('route.next_bus') }}</h2>
     {% if next_trip %}
-    <span class="next-dep__in">{{ _('route.departs_in') }} {% if next_in_min >= 60 %}{{ next_in_min // 60 }} {{ _('common.h') }} {% endif %}{{ next_in_min % 60 }} {{ _('common.min') }}</span>
+    <span class="next-dep__in" data-in-min="{{ next_in_min }}" data-label="{{ _('route.departs_in') }}" data-unit-h="{{ _('common.h') }}" data-unit-min="{{ _('common.min') }}">{{ _('route.departs_in') }} {% if next_in_min >= 60 %}{{ next_in_min // 60 }} {{ _('common.h') }} {% endif %}{{ next_in_min % 60 }} {{ _('common.min') }}</span>
     {% endif %}
   </div>
   {% if next_trip %}
