@@ -120,7 +120,14 @@
     map.addControl(new mapboxgl.AttributionControl({ compact: true }));
     if (window.ResizeObserver) new ResizeObserver(function() { map.resize(); }).observe(el);
 
-    function whole() { map.fitBounds(bounds, { padding: pad(), maxZoom: 10, duration: reduce ? 0 : 600 }); }
+    /* The tall desktop map can start below the fold; frame the route in the
+       part that is on screen (never less than 40% of the map). */
+    function visPad() {
+      var p = pad(), r = el.getBoundingClientRect();
+      p.bottom += Math.round(Math.min(Math.max(0, r.bottom - window.innerHeight), r.height * 0.6));
+      return p;
+    }
+    function whole() { map.fitBounds(bounds, { padding: visPad(), maxZoom: 10, duration: reduce ? 0 : 600 }); }
     var resetBtn = el.querySelector('[data-map-reset]'), expandBtn = el.querySelector('[data-map-expand]');
     if (resetBtn) resetBtn.addEventListener('click', whole);
     if (expandBtn) expandBtn.addEventListener('click', function() {
@@ -295,7 +302,7 @@
         paint: { 'line-color': AMBER, 'line-width': 6 } });
       map.addLayer({ id: 'trail-head', type: 'circle', source: 'trail-head',
         paint: { 'circle-radius': 7, 'circle-color': '#ffffff', 'circle-stroke-color': AMBER, 'circle-stroke-width': 3.5 } });
-      var anim = 0, state = '', current = -1;
+      var anim = 0, state = '', current = -1, lastPad = 0;
       function progress(p) {
         var on = ['case', ['<', ['get', 'i'], p], 1, 0.3];
         ['legs-casing', 'legs-road', 'legs-air', 'legs-dir'].forEach(function(id) {
@@ -344,7 +351,8 @@
         state = key;
         if (key === 'all') {
           clearTrail(); mark(-1); progress(feats.length);
-          map.fitBounds(bounds, Object.assign({ padding: pad(), maxZoom: 10 }, cam));
+          map.fitBounds(bounds, Object.assign({ padding: visPad(), maxZoom: 10 }, cam));
+          lastPad = visPad().bottom;
           return;
         }
         var i = parseInt(key.slice(1), 10);
@@ -375,6 +383,12 @@
           }
         }
         go(key);
+        /* Overview while the map slides into view: keep the route in the
+           visible part. */
+        if (key === 'all') {
+          var b = visPad().bottom;
+          if (Math.abs(b - lastPad) > 24) { lastPad = b; map.fitBounds(bounds, { padding: visPad(), maxZoom: 10, duration: 0 }); }
+        }
       }
       window.addEventListener('scroll', function() { if (!ticking) ticking = requestAnimationFrame(onScroll); }, { passive: true });
       onScroll();
