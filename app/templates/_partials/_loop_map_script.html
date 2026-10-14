@@ -280,23 +280,94 @@
         li.addEventListener('mouseenter', on); li.addEventListener('mouseleave', off);
         li.addEventListener('focusin', on); li.addEventListener('focusout', off);
       });
-      /* Scrolling the list walks the map along: the stop in the middle of
-         the screen lights up, and the map pans only if its pin is out of view. */
-      if ('IntersectionObserver' in window) {
-        var current = -1;
-        var io = new IntersectionObserver(function(entries) {
-          entries.forEach(function(en) {
-            if (!en.isIntersecting) return;
-            var k = parseInt(en.target.dataset.n, 10) - 1;
-            if (k === current || !pins[k]) return;
-            if (current >= 0 && pins[current]) pins[current].classList.remove('is-current');
-            current = k; pins[k].classList.add('is-current');
-            var stop = data.stops[k];
-            if (!map.getBounds().contains([stop.lon, stop.lat])) map.easeTo({ center: [stop.lon, stop.lat], duration: reduce ? 0 : 700 });
-          });
-        }, { rootMargin: '-45% 0px -50% 0px' });
-        Array.prototype.forEach.call(document.querySelectorAll('.loop-stop[data-n]'), function(li) { io.observe(li); });
+      /* Scroll story (desktop, where the map rides beside the list): the item
+         crossing the reading line drives the camera. A stop -> fly to it; a
+         bus leg -> frame the leg and draw it from city to city with a moving
+         head; the route behind is bright, the road ahead faded. Above or
+         below the list -> the whole route. */
+      var desk = window.matchMedia ? window.matchMedia('(min-width: 1024px)') : { matches: true };
+      var list = document.querySelector('.loop-layout__list');
+      var items = Array.prototype.slice.call(document.querySelectorAll('.loop-stop[data-n], .loop-leg[data-leg]'));
+      var none = { type: 'FeatureCollection', features: [] };
+      map.addSource('trail', { type: 'geojson', data: none });
+      map.addSource('trail-head', { type: 'geojson', data: none });
+      map.addLayer({ id: 'trail', type: 'line', source: 'trail', layout: round,
+        paint: { 'line-color': AMBER, 'line-width': 6 } });
+      map.addLayer({ id: 'trail-head', type: 'circle', source: 'trail-head',
+        paint: { 'circle-radius': 7, 'circle-color': '#ffffff', 'circle-stroke-color': AMBER, 'circle-stroke-width': 3.5 } });
+      var anim = 0, state = '', current = -1;
+      function progress(p) {
+        var on = ['case', ['<', ['get', 'i'], p], 1, 0.3];
+        ['legs-casing', 'legs-road', 'legs-air', 'legs-dir'].forEach(function(id) {
+          map.setPaintProperty(id, id === 'legs-dir' ? 'icon-opacity' : 'line-opacity', on);
+        });
+        map.setPaintProperty('legs-glow', 'line-opacity', ['case', ['<', ['get', 'i'], p], 0.18, 0]);
       }
+      function clearTrail() {
+        if (anim) cancelAnimationFrame(anim); anim = 0;
+        map.getSource('trail').setData(none); map.getSource('trail-head').setData(none);
+      }
+      function point(c) { return { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: c } }; }
+      function drawLeg(i) {
+        clearTrail();
+        var line = feats[i].geometry.coordinates, last = line.length - 1, t0 = 0, dur = reduce ? 0 : 1600;
+        function frame(now) {
+          if (!t0) t0 = now;
+          var f = dur ? Math.min(1, (now - t0) / dur) : 1;
+          f = f < 0.5 ? 2 * f * f : 1 - Math.pow(-2 * f + 2, 2) / 2;   /* ease in-out */
+          var pos = f * last, k = Math.floor(pos), part = line.slice(0, k + 1);
+          if (k < last) {
+            var a = line[k], b = line[k + 1], u = pos - k;
+            part.push([a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u]);
+          }
+          if (part.length < 2) part.push(part[0]);
+          map.getSource('trail').setData({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: part } });
+          map.getSource('trail-head').setData(point(part[part.length - 1]));
+          anim = f < 1 ? requestAnimationFrame(frame) : 0;
+        }
+        anim = requestAnimationFrame(frame);
+      }
+      function mark(k) {
+        if (current >= 0 && pins[current]) pins[current].classList.remove('is-current');
+        current = k;
+        if (k >= 0 && pins[k]) pins[k].classList.add('is-current');
+      }
+      var cam = { duration: reduce ? 0 : 1500, essential: true };
+      function go(key) {
+        if (key === state) return;
+        state = key;
+        if (key === 'all') {
+          clearTrail(); mark(-1); progress(feats.length);
+          map.fitBounds(bounds, Object.assign({ padding: pad(), maxZoom: 10 }, cam));
+          return;
+        }
+        var i = parseInt(key.slice(1), 10);
+        if (key[0] === 's') {
+          clearTrail(); mark(i); progress(i);
+          map.flyTo(Object.assign({ center: pts[i], zoom: Math.max(8.5, Math.min(map.getZoom() + 1.5, 9.5)) }, cam));
+        } else {
+          mark(-1); progress(i);
+          var line = feats[i].geometry.coordinates, lb = new mapboxgl.LngLatBounds(line[0], line[0]);
+          line.forEach(function(c) { lb.extend(c); });
+          map.fitBounds(lb, Object.assign({ padding: pad(), maxZoom: 9.5 }, cam));
+          drawLeg(i);
+        }
+      }
+      var ticking = 0;
+      function onScroll() {
+        ticking = 0;
+        if (!desk.matches || !list) return;
+        var mid = window.innerHeight * 0.45, r = list.getBoundingClientRect(), key = 'all';
+        if (r.top < mid && r.bottom > mid) {
+          for (var k = 0; k < items.length; k++) {
+            if (items[k].getBoundingClientRect().top > mid) break;
+            key = items[k].dataset.n ? 's' + (parseInt(items[k].dataset.n, 10) - 1) : 'l' + items[k].dataset.leg;
+          }
+        }
+        go(key);
+      }
+      window.addEventListener('scroll', function() { if (!ticking) ticking = requestAnimationFrame(onScroll); }, { passive: true });
+      onScroll();
       /* "Show on map" buttons in the list: fly to the stop (and bring the
          mini-map into view where it is not sticky). */
       Array.prototype.forEach.call(document.querySelectorAll('.loop-stop__locate'), function(btn) {
