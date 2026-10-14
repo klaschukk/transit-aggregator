@@ -50,13 +50,19 @@
 .loop-chip__box:checked + .loop-chip__text { background: var(--color-primary-dark); border-color: var(--color-primary-dark); color: #fff; }
 .loop-chip__box:focus-visible + .loop-chip__text { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 @media (min-width: 720px) {
-  /* Wide, one-row form everywhere except inside the hub hero panel. */
+  /* Wide, one-row form everywhere except inside the hub hero panel:
+     start | swap | finish | days | button, must-see stops and the hint below. */
   :not(.loop-hero__panel) > .loop-form { grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr) 110px auto; align-items: end; padding: var(--space-5); }
-  :not(.loop-hero__panel) > .loop-form .loop-form__field,
-  :not(.loop-hero__panel) > .loop-form .loop-form__btn { grid-column: auto; }
-  :not(.loop-hero__panel) > .loop-form .loop-form__swap { grid-column: auto; grid-row: auto; align-self: end; margin-bottom: 2px; }
+  :not(.loop-hero__panel) > .loop-form .loop-form__field--from { grid-column: 1; grid-row: 1; }
+  :not(.loop-hero__panel) > .loop-form .loop-form__swap { grid-column: 2; grid-row: 1; align-self: end; margin-bottom: 2px; }
   :not(.loop-hero__panel) > .loop-form .loop-form__swap svg { transform: rotate(90deg); }
+  :not(.loop-hero__panel) > .loop-form .loop-form__field--to { grid-column: 3; grid-row: 1; }
+  :not(.loop-hero__panel) > .loop-form .loop-form__field--days { grid-column: 4; grid-row: 1; }
+  :not(.loop-hero__panel) > .loop-form .loop-form__btn { grid-column: 5; grid-row: 1; }
+  :not(.loop-hero__panel) > .loop-form .loop-form__via { grid-column: 1 / -1; grid-row: 2; }
+  :not(.loop-hero__panel) > .loop-form .loop-form__hint { grid-column: 1 / -1; grid-row: 3; }
 }
+.home-section > h2 + .loop-form { margin-top: var(--space-4); }
 
 /* ── Route ribbon + share ── */
 .loop-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
@@ -79,7 +85,7 @@
 .loop-sum__item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg); }
 .loop-sum__icon { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary-light); color: var(--color-primary-darker); }
 .loop-sum__val { display: flex; flex-direction: column; min-width: 0; }
-.loop-sum__item dd { margin: 0; font-size: var(--text-lg); font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.loop-sum__item dd { margin: 0; font-size: 1.125rem; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; }
 .loop-sum__item dt { font-size: var(--text-sm); color: var(--color-text-muted); }
 
 /* ── List + map layout ── */
@@ -104,7 +110,7 @@
 .loop-map__num { fill: #fff; font-size: 14px; font-weight: 700; }
 .loop-map__edge { fill: none; stroke: var(--color-primary); stroke-opacity: .28; stroke-width: 1.4; stroke-linecap: round; }
 .loop-map__dot { fill: #fff; stroke: var(--color-primary-dark); stroke-width: 2.5; }
-.loop-pin { position: relative; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border: 2.5px solid #fff; border-radius: 50%; background: var(--color-primary-dark); color: #fff; font: inherit; font-size: 13px; font-weight: 700; line-height: 1; box-shadow: 0 1px 4px rgba(15, 23, 42, .35); cursor: pointer; transition: transform .2s ease, background .2s ease; }
+.loop-pin { position: relative; display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; padding: 0; border: 2.5px solid #fff; border-radius: 50%; background: var(--color-primary-dark); color: #fff; font: inherit; font-size: 13px; font-weight: 700; line-height: 1; box-shadow: 0 1px 4px rgba(15, 23, 42, .35); cursor: pointer; transition: transform .2s ease, background .2s ease; }
 .loop-pin::after { content: ""; position: absolute; inset: -8px; }
 .loop-pin:hover, .loop-pin:focus-visible, .loop-pin.is-active { background: var(--color-accent); color: var(--color-text); transform: scale(1.2); }
 .loop-pin:focus-visible { outline: 2px solid var(--color-text); outline-offset: 2px; }
