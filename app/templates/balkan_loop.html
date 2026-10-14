@@ -38,6 +38,7 @@
 {% set _hub_url = lang_prefix ~ '/balkan-loop/' %}
 
 {% from '_partials/_breadcrumb.html' import breadcrumb with context %}
+{% from '_partials/_ad_slot.html' import ad_slot with context %}
 
 {% macro planner_form(form_id) %}
 <form class="loop-form" method="get" action="{{ _hub_url }}">
@@ -132,6 +133,11 @@
 <p class="loop-none" role="status">{{ _('planner.none') }}</p>
 {% endif %}
 
+{# One ad per planner page, after the main content it belongs to: the
+   itinerary on a route page, the itinerary cards on the hub. Query-result
+   pages are noindex, so the macro renders nothing there. #}
+{% if mode == 'preset' %}{{ ad_slot('planner_mid', format='responsive') }}{% endif %}
+
 {% if mode == 'preset' and faq %}
 <section class="home-section loop-faq">
   <h2>{{ _('planner.faq_h') }}</h2>
@@ -159,6 +165,8 @@
   {% endif %}
 </section>
 {% endif %}
+
+{% if mode == 'hub' %}{{ ad_slot('planner_hub', format='leaderboard') }}{% endif %}
 
 {% if mode == 'hub' and leg_groups %}
 <section class="home-section">

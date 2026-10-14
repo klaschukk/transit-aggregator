@@ -100,7 +100,7 @@ CITY_COORDS: dict[str, tuple[float, float]] = {
     'Smederevo': (44.66, 20.93), 'Smederevska Palanka': (44.37, 20.96), 'Sofija': (42.70, 23.32),
     'Solun': (40.64, 22.94), 'Sombor': (45.77, 19.11), 'Split': (43.51, 16.44),
     'Sremska Mitrovica': (44.98, 19.61), 'Stara Pazova': (44.99, 20.16), 'Subotica': (46.10, 19.67),
-    'Temerin': (45.41, 19.89), 'Tetovo': (42.01, 20.97), 'Tirana': (41.33, 19.82),
+    'Temerin': (45.41, 19.89), 'Tetovo': (42.01, 20.97), 'Tirana': (41.33, 19.82), 'Skadar': (42.07, 19.51),
     'Tivat': (42.43, 18.70), 'Trebinje': (42.71, 18.34), 'Tuzla': (44.54, 18.68),
     'Užice': (43.86, 19.84), 'Valjevo': (44.27, 19.89), 'Vranje': (42.55, 21.90),
     'Vrbas': (45.57, 19.64), 'Vrsac': (45.12, 21.30), 'Zadar': (44.12, 15.23),

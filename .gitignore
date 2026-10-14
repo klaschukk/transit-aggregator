@@ -61,3 +61,5 @@ data/backups/
 
 # owner-edited affiliate links (see data/affiliates.local.json.example)
 data/affiliates.local.json
+# owner-edited AdSense unit ids (see data/ads.local.json.example)
+data/ads.local.json

@@ -365,6 +365,8 @@ def _loop_render(mode: str, itinerary: dict | None, start: str, end: str, days: 
             'loop': itinerary['loop'],
         }
         extra['map_sketch'] = planner.sketch(pts)
+        base_url = current_app.config['BASE_URL']
+        extra['share_url'] = base_url + (request.full_path.rstrip('?') if mode == 'result' else request.path)
     stops = sorted(({'slug': s, 'name': planner.stop_name(s, lang)} for s in planner.STOPS),
                    key=lambda c: c['name'])
     presets = _loop_preset_cards(lang, skip=preset_slug) if db_ready() else []
@@ -401,7 +403,9 @@ def balkan_loop():
             if net['edges']:
                 hub_map = {'map_data': dict(net, mode='network'),
                            'map_sketch': planner.sketch([(s['lat'], s['lon']) for s in net['stops']])}
-        return _loop_render('hub', None, d_start, d_end, d_days, leg_groups=leg_groups, **hub_map)
+        return _loop_render('hub', None, d_start, d_end, d_days, leg_groups=leg_groups,
+                            og_image_url=f"{current_app.config['BASE_URL']}/og/balkan-loop/planner.png",
+                            **hub_map)
 
     start = normalize_slug(request.args.get('from', '')) or d_start
     end = normalize_slug(request.args.get('to', '')) or d_end

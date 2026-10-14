@@ -218,6 +218,20 @@
   <a href="{{ lang_prefix }}/rute/" class="btn btn--outline home-section__btn">{{ _('home.all_routes') }} →</a>
 </section>
 
+{# ═══════ TRIP PLANNER ═══════ #}
+{% if loop_cards %}
+<section class="home-section container">
+  <h2 class="home-section__title">{{ _('planner.home_h') }}</h2>
+  <p class="page-subtitle">{{ _('planner.home_lead') }}</p>
+  <div class="see-also__list">
+    {% for p in loop_cards %}
+    <a href="{{ lang_prefix }}/balkan-loop/{{ p.slug }}/" class="see-also__link">{{ p.label }}</a>
+    {% endfor %}
+  </div>
+  <a href="{{ lang_prefix }}/balkan-loop/" class="btn btn--outline home-section__btn">{{ _('planner.home_cta') }} →</a>
+</section>
+{% endif %}
+
 {# ═══════ CITY TRANSPORT ═══════ #}
 {% from '_partials/_mode_chip.html' import mode_chip %}
 <section class="home-section container">

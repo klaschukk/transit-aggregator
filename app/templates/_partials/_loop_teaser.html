@@ -1,10 +1,13 @@
-{# One-line link to the Balkan Loop planner on routes whose both ends are loop
-   stops (app/planner.py STOPS). Needs: _from_slug, _to_slug. #}
+{# Link to the Balkan trip planner on routes whose both ends are loop stops
+   (app/planner.py STOPS). Reuses the transfer-offer block styles; no
+   data-partner, so it is not logged as an affiliate click.
+   Needs: _from_slug, _to_slug. #}
 {% if is_loop_stop(_from_slug) and is_loop_stop(_to_slug) %}
-<p class="loop-teaser">
-  <a class="loop-teaser__link" href="{{ lang_prefix }}/balkan-loop/?from={{ _from_slug }}">
-    {{- _('planner.teaser') }}
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><path d="M5 12h14m0 0l-6-6m6 6l-6 6"/></svg>
-  </a>
-</p>
+<section class="transfer-offer loop-teaser" aria-labelledby="loopTeaserH">
+  <h2 class="transfer-offer__h" id="loopTeaserH">{{ _('planner.teaser_h') }}</h2>
+  <p class="transfer-offer__text">{{ _('planner.teaser_text') }}</p>
+  <div class="transfer-offer__actions">
+    <a class="transfer-offer__btn" href="{{ lang_prefix }}/balkan-loop/?from={{ _from_slug }}" rel="nofollow">{{ _('planner.teaser_btn') }}</a>
+  </div>
+</section>
 {% endif %}

@@ -5,7 +5,7 @@ from pathlib import Path
 import uuid
 from datetime import datetime
 
-from flask import Blueprint, render_template, request, make_response, jsonify, current_app, abort, redirect, Response, stream_with_context
+from flask import Blueprint, render_template, request, make_response, jsonify, current_app, abort, redirect, Response, stream_with_context, g
 
 from app.db import query, cached_query, cached_query_one, db_ready
 from app.extensions import limiter, csrf
@@ -169,10 +169,19 @@ def index():
         LIMIT 4
     """) if db_ready() else []
 
+    # Trip-planner teaser: a few curated itineraries (cheap — plans are memoised).
+    loop_cards = []
+    if db_ready():
+        try:
+            from app.routes.info import _loop_preset_cards
+            loop_cards = _loop_preset_cards(getattr(g, 'lang', 'sr'))[:4]
+        except Exception:
+            current_app.logger.exception('home: planner teaser skipped')
+
     return render_template('index.html', popular_routes=popular_routes,
                            cities=cities_list, stats=stats,
                            cities_data=cities_data,
-                           popular_lines=popular_lines)
+                           popular_lines=popular_lines, loop_cards=loop_cards)
 
 
 def _resolve_city_name(raw: str) -> str:
@@ -1448,6 +1457,10 @@ def og_route(slug: str):
 @main_bp.route('/og/balkan-loop/<slug>.png')
 def og_balkan_loop(slug: str):
     from app import planner
+    if slug == 'planner':
+        return _og_cached('balkan-loop-planner', lambda: render_card(
+            'Balkan trip planner', subtitle='Your itinerary by bus',
+            chips=[f'{len(planner.STOPS)} cities', '6 countries', 'direct buses']))
     preset = planner.PRESET_BY_SLUG.get(slug)
     if not preset or not db_ready():
         return _og_fallback()

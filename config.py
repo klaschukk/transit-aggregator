@@ -16,6 +16,24 @@ def _local_aff(key: str) -> str:
         return ''
 
 
+def _ad_slot_id(key: str) -> str:
+    """AdSense ad-unit id for one slot: ADSENSE_SLOT_<KEY> from the environment,
+    else from the optional owner-edited data/ads.local.json (git-ignored). The
+    file exists for the same reason as affiliates.local.json: the systemd unit
+    is root-owned, so a new unit id can be added without touching it."""
+    name = f'ADSENSE_SLOT_{key}'
+    value = os.environ.get(name, '')
+    if value:
+        return value
+    try:
+        with open(BASE_DIR / 'data' / 'ads.local.json', encoding='utf-8') as fh:
+            value = str(json.load(fh).get(name, '') or '').strip()
+    except (OSError, ValueError):
+        return ''
+    # An ad-unit id is digits only; anything else is a paste mistake.
+    return value if value.isdigit() else ''
+
+
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-insecure-key-do-not-use-in-prod')
     # Reject oversized request bodies before parsing (werkzeug → 413). The site
@@ -51,18 +69,18 @@ class Config:
     # AdSense console; missing keys skip rendering (no house ad).
     # Keys must match the strings passed to ad_slot() in templates.
     ADSENSE_SLOTS = {
-        'home_top':           os.environ.get('ADSENSE_SLOT_HOME_TOP', ''),
-        'home_mid':           os.environ.get('ADSENSE_SLOT_HOME_MID', ''),
-        'route_bottom':       os.environ.get('ADSENSE_SLOT_ROUTE_BOTTOM', ''),
-        'city_pair_bottom':   os.environ.get('ADSENSE_SLOT_CITY_PAIR_BOTTOM', ''),
-        'city_transport_mid': os.environ.get('ADSENSE_SLOT_CITY_TRANSPORT_MID', ''),
-        'catalog_in_feed':    os.environ.get('ADSENSE_SLOT_CATALOG_IN_FEED', ''),
-        'guide_sidebar':      os.environ.get('ADSENSE_SLOT_GUIDE_SIDEBAR', ''),
+        'home_top':           _ad_slot_id('HOME_TOP'),
+        'home_mid':           _ad_slot_id('HOME_MID'),
+        'route_bottom':       _ad_slot_id('ROUTE_BOTTOM'),
+        'city_pair_bottom':   _ad_slot_id('CITY_PAIR_BOTTOM'),
+        'city_transport_mid': _ad_slot_id('CITY_TRANSPORT_MID'),
+        'catalog_in_feed':    _ad_slot_id('CATALOG_IN_FEED'),
+        'guide_sidebar':      _ad_slot_id('GUIDE_SIDEBAR'),
         # guides/_guide_base.html actually calls ad_slot('guide_bottom', ...),
         # not 'guide_sidebar' — that key predates the current guide layout and
         # nothing renders it. Kept both: guide_bottom is the live slot, guide_sidebar
         # stays reserved for if a real sidebar unit gets added later.
-        'guide_bottom':       os.environ.get('ADSENSE_SLOT_GUIDE_BOTTOM', ''),
+        'guide_bottom':       _ad_slot_id('GUIDE_BOTTOM'),
         # guides_index.html (the /vodici/ hub) calls a third, differently-named
         # key: 'guides_bottom' (plural) — same bug, different page. Its own env
         # var, ADSENSE_SLOT_GUIDES_BOTTOM, is set to the same AdSense unit ID
@@ -70,20 +88,30 @@ class Config:
         # not something this code enforces, so if one changes the other won't
         # follow automatically. Give guides_bottom its own dedicated unit
         # whenever that becomes worth the AdSense-console trip.
-        'guides_bottom':      os.environ.get('ADSENSE_SLOT_GUIDES_BOTTOM', ''),
-        'search_mid':         os.environ.get('ADSENSE_SLOT_SEARCH_MID', ''),
-        'stop_bottom':        os.environ.get('ADSENSE_SLOT_STOP_BOTTOM', ''),
-        'line_bottom':        os.environ.get('ADSENSE_SLOT_LINE_BOTTOM', ''),
-        'mobile_anchor':      os.environ.get('ADSENSE_SLOT_MOBILE_ANCHOR', ''),
+        'guides_bottom':      _ad_slot_id('GUIDES_BOTTOM'),
+        'search_mid':         _ad_slot_id('SEARCH_MID'),
+        'stop_bottom':        _ad_slot_id('STOP_BOTTOM'),
+        'line_bottom':        _ad_slot_id('LINE_BOTTOM'),
+        'mobile_anchor':      _ad_slot_id('MOBILE_ANCHOR'),
         # Second, mid-content slot on the highest-traffic page types (city
         # lines + stops carry the bulk of organic traffic; routes carry the
         # commercial intent). A mid-content unit lifts impressions on the long
         # SEO pages without breaking ad-density policy — the slot still self-
         # suppresses on noindex/thin pages via the ad_slot macro guard.
-        'route_mid':          os.environ.get('ADSENSE_SLOT_ROUTE_MID', ''),
-        'line_mid':           os.environ.get('ADSENSE_SLOT_LINE_MID', ''),
-        'stop_mid':           os.environ.get('ADSENSE_SLOT_STOP_MID', ''),
-        'city_pair_mid':      os.environ.get('ADSENSE_SLOT_CITY_PAIR_MID', ''),
+        'route_mid':          _ad_slot_id('ROUTE_MID'),
+        'line_mid':           _ad_slot_id('LINE_MID'),
+        'stop_mid':           _ad_slot_id('STOP_MID'),
+        'city_pair_mid':      _ad_slot_id('CITY_PAIR_MID'),
+        # Hub/index pages and the trip planner. These templates called
+        # ad_slot() with keys that had no entry here, so they never rendered
+        # a unit; ids come from data/ads.local.json once the units exist.
+        'city_index_bottom':   _ad_slot_id('CITY_INDEX_BOTTOM'),
+        'carriers_bottom':     _ad_slot_id('CARRIERS_BOTTOM'),
+        'stations_bottom':     _ad_slot_id('STATIONS_BOTTOM'),
+        'destinations_bottom': _ad_slot_id('DESTINATIONS_BOTTOM'),
+        'about_bottom':        _ad_slot_id('ABOUT_BOTTOM'),
+        'planner_hub':         _ad_slot_id('PLANNER_HUB'),
+        'planner_mid':         _ad_slot_id('PLANNER_MID'),
     }
     CONTACT_EMAIL = os.environ.get('CONTACT_EMAIL', '')
     TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')

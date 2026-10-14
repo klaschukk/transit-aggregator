@@ -5,6 +5,12 @@
   {%- if _h %}{{ _h }} {{ _('common.h') }}{% endif %}{% if _h and _m %} {% endif %}{% if _m %}{{ _m }} {{ _('common.min') }}{% endif -%}
 {%- endmacro %}
 
+<div class="loop-actions">
+  <button type="button" class="loop-share" data-copy-url="{{ share_url }}" data-copied="{{ _('planner.copied') }}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M10 13a5 5 0 007.07 0l3-3a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.07 0l-3 3a5 5 0 007.07 7.07l1.5-1.5"/></svg>
+    <span class="loop-share__text" aria-live="polite">{{ _('planner.copy') }}</span>
+  </button>
+</div>
 <dl class="loop-sum">
   <div class="loop-sum__item"><dt>{{ _('planner.sum_stops') }}</dt><dd>{{ itinerary.stops|length }}</dd></div>
   <div class="loop-sum__item"><dt>{{ _('planner.sum_countries') }}</dt><dd>{{ itinerary.countries|length }}</dd></div>
@@ -29,6 +35,9 @@
         <div class="loop-stop__head">
           <h3 class="loop-stop__name">{{ stop.name }}</h3>
           <span class="loop-stop__days">{{ _('planner.days_range').format(a=stop.day_from, b=stop.day_to) }}</span>
+          <button type="button" class="loop-stop__locate" data-n="{{ loop.index }}" aria-label="{{ _('planner.map_show').format(city=stop.name) }}" title="{{ _('planner.map_show').format(city=stop.name) }}" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </button>
         </div>
         <p class="loop-stop__meta">{{ _('planner.country.' ~ stop.country) }} · {{ _('planner.nights').format(n=stop.nights) }}</p>
         <p class="loop-stop__text">{{ _('planner.stop.' ~ stop.slug) }}</p>

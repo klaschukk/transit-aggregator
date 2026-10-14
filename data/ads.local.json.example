@@ -1,0 +1,10 @@
+{
+  "_readme": "Copy to ads.local.json (git-ignored), paste the 10-digit data-ad-slot id of each AdSense display unit, then: scripts/ship_local.sh --fast. An empty value keeps that slot hidden. An environment variable of the same name wins.",
+  "ADSENSE_SLOT_PLANNER_HUB": "",
+  "ADSENSE_SLOT_PLANNER_MID": "",
+  "ADSENSE_SLOT_DESTINATIONS_BOTTOM": "",
+  "ADSENSE_SLOT_CITY_INDEX_BOTTOM": "",
+  "ADSENSE_SLOT_CARRIERS_BOTTOM": "",
+  "ADSENSE_SLOT_STATIONS_BOTTOM": "",
+  "ADSENSE_SLOT_ABOUT_BOTTOM": ""
+}

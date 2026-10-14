@@ -4628,5 +4628,3 @@ body:has(.cookie-banner[data-visible="true"]) .chat-widget { display: none; }
 .transfer-offer__note { margin: var(--space-3, 12px) 0 0; color: var(--color-text-muted, #64748b); font-size: 0.78rem; }
 
 /* Balkan Loop planner: page styles live in planner.css; only the route-page teaser is global. */
-.loop-teaser { margin: var(--space-5) 0; }
-.loop-teaser__link { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; color: var(--color-primary-dark); font-weight: 600; }

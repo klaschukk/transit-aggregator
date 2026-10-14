@@ -120,7 +120,7 @@ def test_hub_renders_in_every_language(client, loop_legs, prefix):
     assert f'{prefix}{PRESET}' in html                  # curated itinerary card
     assert f'{prefix}/rute/dubrovnik-kotor/' in html    # direct-leg index
     assert 'loop-steps' not in html                     # no itinerary duplicated on the hub
-    assert not re.search(r'planner\.(?!css)[a-z_]', html)      # no untranslated key leaked
+    assert not re.search(r'planner\.(?!css|png)[a-z_]', html)      # no untranslated key leaked
     assert _head(html, r'name="robots" content="([^"]+)"').startswith('index')
 
 
@@ -130,7 +130,7 @@ def test_preset_page_renders_in_every_language(client, loop_legs, prefix):
     assert r.status_code == 200
     html = r.data.decode()
     assert 'loop-steps' in html and f'{prefix}/rute/dubrovnik-kotor/' in html
-    assert not re.search(r'planner\.(?!css)[a-z_]', html)
+    assert not re.search(r'planner\.(?!css|png)[a-z_]', html)
     assert _head(html, r'rel="canonical" href="([^"]+)"').endswith(f'{prefix}{PRESET}')
     assert _head(html, r'name="robots" content="([^"]+)"').startswith('index')
 
@@ -280,3 +280,28 @@ def test_sketch_fits_its_box_and_keeps_north_up():
     assert all(40 <= x <= 560 and 40 <= y <= 360 for x, y in pts)
     assert pts[0][1] < pts[1][1] and pts[0][0] < pts[1][0]   # north-west of Tirana
     assert planner.sketch([]) == []
+
+
+def test_planner_pages_carry_one_ad_slot_each(app, client, loop_legs):
+    old = app.config.get('ADSENSE_ID')
+    app.config['ADSENSE_ID'] = 'ca-pub-test'
+    try:
+        hub = client.get('/en/balkan-loop/').data.decode()
+        preset = client.get(f'/en{PRESET}').data.decode()
+        result = client.get('/en/balkan-loop/?from=kotor&to=tirana&days=8').data.decode()
+    finally:
+        app.config['ADSENSE_ID'] = old
+    assert hub.count('data-slot="planner_hub"') == 1 and 'data-slot="planner_mid"' not in hub
+    assert preset.count('data-slot="planner_mid"') == 1 and 'data-slot="planner_hub"' not in preset
+    assert 'class="ad-slot' not in result          # noindex page: no ads
+
+
+def test_route_page_between_loop_stops_links_to_the_planner(client):
+    assert 'loopTeaserH' not in client.get('/en/rute/beograd-novi-sad/').data.decode()
+
+
+def test_copy_link_and_map_tools_are_present(client, loop_legs):
+    page = client.get(f'/en{PRESET}').data.decode()
+    assert f'data-copy-url="http://localhost:5000/en{PRESET}"' in page
+    assert 'data-map-reset' in page and 'data-map-expand' in page
+    assert page.count('class="loop-stop__locate"') == 5
