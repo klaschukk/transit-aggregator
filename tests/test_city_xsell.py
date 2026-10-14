@@ -136,3 +136,10 @@ def test_new_surfaces_are_allowlisted(ana_client, surface):
 def test_tracker_wires_xsell():
     js = open('app/static/js/analytics-tracker.js', encoding='utf-8').read()
     assert '.xsell__buy' in js and "'city_xsell_route'" in js and '.js-xsell' in js
+
+
+def test_stop_search_button_prefills_the_city(client):
+    """od=<stop name> matched no intercity route (Nema rezultata); the city does."""
+    html = client.get('/gradski/beograd/stajaliste/tosin-bunar/').get_data(as_text=True)
+    assert '/pretraga/?od=Beograd"' in html
+    assert 'od=Tosin' not in html
