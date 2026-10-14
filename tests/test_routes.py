@@ -360,3 +360,12 @@ def test_route_detail_hides_departures_left_when_day_over(client, monkeypatch):
     if r.status_code != 200:
         pytest.skip('route page unavailable (no transit.duckdb in this env)')
     assert 'Left today' not in r.data.decode()
+
+
+def test_stop_page_lists_arrivals_before_the_map(client):
+    r = client.get('/gradski/beograd/stajaliste/gandijeva/')
+    if r.status_code != 200 or 'id="arrivalsList"' not in r.data.decode():
+        pytest.skip('stop page without arrivals in this env')
+    page = r.data.decode()
+    assert page.index('id="arrivalsList"') < page.index('id="stopMap"')
+    assert '✓' not in page.split('stats-strip', 1)[1][:2000]

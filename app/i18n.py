@@ -2836,6 +2836,7 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'xsell.sub': {'sr': 'Autobusi iz grada: {city}', 'en': 'Buses from {city}', 'ru': 'Автобусы из города {city}', 'bg': 'Автобуси от {city}'},
     'xsell.in': {'sr': 'za', 'en': 'in', 'ru': 'через', 'bg': 'след'},
     'xsell.none_today': {'sr': 'Danas više nema polazaka', 'en': 'No more today', 'ru': 'Сегодня рейсов больше нет', 'bg': 'Днес няма повече курсове'},
+    'stop.service_hours': {'sr': 'Prvi – poslednji polazak', 'en': 'First – last departure', 'ru': 'Первый – последний рейс', 'bg': 'Първи – последен курс'},
     'route.next_bus': {'sr': 'Sledeći polazak', 'en': 'Next departure', 'ru': 'Ближайший рейс', 'bg': 'Следващ курс'},
     'route.all_departures': {'sr': 'Svi polasci', 'en': 'All departures', 'ru': 'Все рейсы', 'bg': 'Всички курсове'},
     'route.none_left_today': {'sr': 'Danas više nema polazaka.', 'en': 'No more departures today.', 'ru': 'Сегодня рейсов больше нет.', 'bg': 'Днес няма повече курсове.'},

@@ -82,53 +82,14 @@
   </a>
 </div>
 
-{# Stats strip — three signals every stop page can answer concisely:
-   line count, GTFS service window, and "is on map". Mirrors the
+{# Stats strip — line count and the GTFS service window (first – last
+   departure; it was labelled "now", and a "✓ on map" cell said nothing). Mirrors the
    stats_strip on /rute/<slug>/. Cells without data are skipped to
    avoid showing an "0" placeholder. #}
 {{ stats_strip(
   ([{'value': lines_at_stop|length, 'label': _('stop.lines_count_label'), 'icon': 'distance'}] if lines_at_stop else [])
-  + ([{'value': stop_info.first_departure ~ ' – ' ~ stop_info.last_departure, 'label': _('common.now'), 'icon': 'schedule'}] if stop_info and stop_info.first_departure else [])
-  + ([{'value': '✓', 'label': _('stop.coords_label'), 'icon': 'price'}] if stop.lat and stop.lon else [])
+  + ([{'value': stop_info.first_departure ~ ' – ' ~ stop_info.last_departure, 'label': _('stop.service_hours'), 'icon': 'schedule'}] if stop_info and stop_info.first_departure else [])
 ) }}
-
-{# Map + icon hero, kept after stats. Useful for finding the stop
-   geographically; we keep it but no longer treat it as the page hero. #}
-{% if stop.lat and stop.lon %}
-<div class="stop-hero fade-in fade-in--d1">
-  <div class="stop-hero__map">
-    <div class="city-map" id="stopMap" role="region" aria-label="{{ _('a11y.stop_map') }}"></div>
-  </div>
-</div>
-{% endif %}
-
-{# Buy-ticket-style CTA — card mirrors /rute/<slug>/ chrome. The two
-   actions are "search trips from here" (high-intent transit query)
-   and "open in maps" (mobile geo: link, desktop Google Maps URL). #}
-<div class="buy-ticket fade-in fade-in--d1">
-  <div class="buy-ticket__header">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-    <span>{{ _('stop.action_title') }}</span>
-  </div>
-  <div class="buy-ticket__links">
-    {# Intercity search knows cities, not city stops: od=<stop name> always
-       returned "Nema rezultata". Same prefill as the line page. #}
-    <a rel="nofollow" href="{{ lang_prefix }}/pretraga/?od={{ city_label|urlencode }}"
-       class="buy-ticket__btn buy-ticket__btn--dark">
-      {{ _('stop.action_search') }}
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
-    </a>
-    {% if stop.lat and stop.lon %}
-    <a href="https://www.google.com/maps/search/?api=1&query={{ stop.lat }},{{ stop.lon }}"
-       target="_blank" rel="noopener"
-       class="buy-ticket__btn buy-ticket__btn--primary">
-      {{ _('stop.action_maps') }}
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg>
-    </a>
-    {% endif %}
-  </div>
-  <p class="buy-ticket__note">{{ _('stop.action_note') }}</p>
-</div>
 
 {# At bus/train station stops intercity departures come before the city lines. #}
 {% if xsell_top %}{% include '_partials/_city_xsell.html' %}{% endif %}
@@ -184,6 +145,44 @@
   {{ empty_state(icon='stop', text=_('stop.no_lines'),
                  action_url=lang_prefix ~ '/gradski/' ~ city ~ '/', action_label=_('nav.city_transport')) }}
 {% endif %}
+
+{# Map + actions come after the arrivals: people land here from Google to see
+   when their bus comes, and on a phone the list used to start a screen down. #}
+{% if stop.lat and stop.lon %}
+<div class="stop-hero fade-in fade-in--d1">
+  <div class="stop-hero__map">
+    <div class="city-map" id="stopMap" role="region" aria-label="{{ _('a11y.stop_map') }}"></div>
+  </div>
+</div>
+{% endif %}
+
+{# Buy-ticket-style CTA — card mirrors /rute/<slug>/ chrome. The two
+   actions are "search trips from here" (high-intent transit query)
+   and "open in maps" (mobile geo: link, desktop Google Maps URL). #}
+<div class="buy-ticket fade-in fade-in--d1">
+  <div class="buy-ticket__header">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    <span>{{ _('stop.action_title') }}</span>
+  </div>
+  <div class="buy-ticket__links">
+    {# Intercity search knows cities, not city stops: od=<stop name> always
+       returned "Nema rezultata". Same prefill as the line page. #}
+    <a rel="nofollow" href="{{ lang_prefix }}/pretraga/?od={{ city_label|urlencode }}"
+       class="buy-ticket__btn buy-ticket__btn--dark">
+      {{ _('stop.action_search') }}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+    </a>
+    {% if stop.lat and stop.lon %}
+    <a href="https://www.google.com/maps/search/?api=1&query={{ stop.lat }},{{ stop.lon }}"
+       target="_blank" rel="noopener"
+       class="buy-ticket__btn buy-ticket__btn--primary">
+      {{ _('stop.action_maps') }}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg>
+    </a>
+    {% endif %}
+  </div>
+  <p class="buy-ticket__note">{{ _('stop.action_note') }}</p>
+</div>
 
 {% if not xsell_top %}{% include '_partials/_city_xsell.html' %}{% endif %}
 
