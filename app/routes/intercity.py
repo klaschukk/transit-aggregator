@@ -149,6 +149,17 @@ def _departures_left_today(trips: list[dict], now_hhmm: str) -> int:
                if (t.get('departure_time') or '')[:5] > now_hhmm)
 
 
+def _next_departure(trips: list[dict], now_hhmm: str) -> tuple[dict | None, int | None]:
+    """First trip after `now_hhmm` and the minutes until it (trips are sorted
+    by departure time). (None, None) when nothing is left today."""
+    now_m = int(now_hhmm[:2]) * 60 + int(now_hhmm[3:5])
+    for t in trips:
+        dep = (t.get('departure_time') or '')[:5]
+        if len(dep) == 5 and dep > now_hhmm:
+            return t, int(dep[:2]) * 60 + int(dep[3:5]) - now_m
+    return None, None
+
+
 @intercity_bp.route('/rute/<slug>/')
 def route_detail(slug: str):
     route = query_one("""
@@ -277,6 +288,10 @@ def route_detail(slug: str):
     belgrade_now_hhmm = _belgrade_now_hhmm() if selected_day == 0 else None
     departures_left = (_departures_left_today(trips, belgrade_now_hhmm)
                        if selected_day == 0 else 0)
+    # The next catchable departure today, shown first on the page: most
+    # visitors come for "when is the next bus" and the full list starts a
+    # screen and a half down on a phone.
+    next_trip, next_in_min = _next_departure(trips, belgrade_now_hhmm) if selected_day == 0 else (None, None)
 
     # Best-option badges: tag a single cheapest / fastest trip so the card
     # can flag the best pick (see app.trip_badges for the shared rule).
@@ -354,6 +369,7 @@ def route_detail(slug: str):
                            operator_slugs=operator_slugs,
                            price_min=price_min, price_max=price_max,
                            departures_left=departures_left,
+                           next_trip=next_trip, next_in_min=next_in_min,
                            reverse_slug=reverse_slug,
                            reviews=reviews_list, reviews_agg=reviews_agg,
                            city_transport_links=city_transport_links,

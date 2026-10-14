@@ -174,23 +174,38 @@
   {% endif %}
 </div>
 
+{# Next departure first: most visitors come for "when is the next bus", and
+   on a phone the full list starts a screen and a half down. The card is the
+   regular trip card (same buy link logic), clicks are logged as route_next. #}
+{% if selected_day == 0 and trips %}
+<section class="next-dep fade-in" aria-labelledby="nextDepTitle">
+  <div class="next-dep__head">
+    <span class="next-dep__pulse" aria-hidden="true"></span>
+    <h2 class="next-dep__title" id="nextDepTitle">{{ _('route.next_bus') }}</h2>
+    {% if next_trip %}
+    <span class="next-dep__in">{{ _('route.departs_in') }} {% if next_in_min >= 60 %}{{ next_in_min // 60 }} {{ _('common.h') }} {% endif %}{{ next_in_min % 60 }} {{ _('common.min') }}</span>
+    {% endif %}
+  </div>
+  {% if next_trip %}
+    {{ trip_card(next_trip, offers=_offers_trip, buy_label=_('buy.cta'),
+                 route_slug=route.slug, surface='route_next',
+                 from_slug=_from_slug, to_slug=_to_slug,
+                 bt4_fallback_line_id=(_bt4_trip.bt4_line_id if _bt4_trip else None)) }}
+  {% else %}
+  <p class="next-dep__none">{{ _('route.none_left_today') }}
+    <a href="?dan=1" class="next-dep__link">{{ _('day.tomorrow') }} &rarr;</a></p>
+  {% endif %}
+  <a href="#tripList" class="next-dep__all">{{ _('route.all_departures') }} ({{ trips|length }})
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M12 5v14m0 0l-6-6m6 6l6-6"/></svg></a>
+</section>
+{% endif %}
+
 {{ stats_strip(
   ([{'value': route.distance_km, 'label': 'km', 'icon': 'distance'}] if route.distance_km else [])
   + [{'value': route.trip_count|default(0), 'label': _('route.daily_departures'), 'icon': 'schedule'}]
   + ([{'value': (route.min_price_rsd / config.EUR_RSD_RATE)|round|int ~ '€', 'label': _('route.from_price'), 'icon': 'price'}] if route.min_price_rsd else [])
   + ([{'value': departures_left, 'label': _('route.departures_left'), 'icon': 'schedule'}] if (selected_day == 0 and departures_left and departures_left > 0) else [])) }}
 
-{% if map_route_coords %}
-<div class="route-map-wrap fade-in">
-  <div id="routeMap" class="route-map"
-       role="img" aria-label="{{ route.from_city }} → {{ route.to_city }}"
-       data-from-lat="{{ map_route_coords.from.lat }}" data-from-lon="{{ map_route_coords.from.lon }}"
-       data-to-lat="{{ map_route_coords.to.lat }}" data-to-lon="{{ map_route_coords.to.lon }}"
-       data-min-lat="{{ map_route_coords.bounds.min_lat }}" data-min-lon="{{ map_route_coords.bounds.min_lon }}"
-       data-max-lat="{{ map_route_coords.bounds.max_lat }}" data-max-lon="{{ map_route_coords.bounds.max_lon }}"
-       {%- if map_route_coords.pair_key %} data-pair-key="{{ map_route_coords.pair_key }}"{% endif %}></div>
-</div>
-{% endif %}
 
 <!-- Day filter -->
 <div class="filter-chips">
@@ -203,46 +218,6 @@
   {% endfor %}
 </div>
 
-{# The whole box is about buying online — on a route with zero affiliate
-   coverage (Union Ivkoni, srbijatours.com) there's nothing to buy here at
-   all, so showing it renders an empty action box: a header, an honest
-   "book ahead" nudge with nowhere to act on it, and a note that flatly
-   contradicts itself by claiming "purchase happens on partner websites"
-   right below an empty spot where the partner button should be. Hiding
-   the whole thing is both more honest and less clutter than a box with
-   no action in it. #}
-{% if _primary_href %}
-<div class="buy-ticket fade-in">
-  <div class="buy-ticket__header">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20" aria-hidden="true"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2 2 2 0 010 4 2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 00-2-2 2 2 0 010-4 2 2 0 002-2V7a2 2 0 00-2-2H5z"/></svg>
-    <span>{{ _('buy.title') }}</span>
-  </div>
-  {% if route.distance_km and route.distance_km >= 150 and route.trip_count and route.trip_count <= 5 %}
-  {# Honest book-ahead nudge — not fabricated urgency. Real distance +
-     real daily departure count from this route's own row (same numbers
-     the stats strip above already shows), shown only for the ~260
-     long-distance, low-frequency routes where missing a departure
-     genuinely costs a day, not the high-frequency short/commuter routes
-     (Pančevo-Beograd, 79/day) where locals mostly pay the driver in
-     person and advance booking isn't the norm. #}
-  <p class="buy-ticket__urgency">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-    {{ _('buy.book_ahead').format(n=route.trip_count) }}
-  </p>
-  {% endif %}
-  <div class="buy-ticket__links">
-    <a href="{{ _primary_href }}" target="_blank" rel="noopener nofollow sponsored"
-       class="buy-ticket__btn buy-ticket__btn--{{ _primary_partner }}"
-       style="background: {{ _primary_color }};"
-       data-partner="{{ _primary_partner }}"
-       data-route-slug="{{ route.slug }}" data-surface="route_detail_global">
-      {{ _primary_name }}
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg>
-    </a>
-  </div>
-  <p class="buy-ticket__note">{{ _('buy.note') }}</p>
-</div>
-{% endif %}
 
 {% if trips %}
 
@@ -317,6 +292,59 @@
 {% else %}
   {{ empty_state(icon='search', text=_('search.no_results'), sub=_('buy.note'),
                  action_url=lang_prefix ~ '/rute/', action_label=_('nav.all_routes')) }}
+{% endif %}
+
+{# The whole box is about buying online — on a route with zero affiliate
+   coverage (Union Ivkoni, srbijatours.com) there's nothing to buy here at
+   all, so showing it renders an empty action box: a header, an honest
+   "book ahead" nudge with nowhere to act on it, and a note that flatly
+   contradicts itself by claiming "purchase happens on partner websites"
+   right below an empty spot where the partner button should be. Hiding
+   the whole thing is both more honest and less clutter than a box with
+   no action in it. #}
+{% if _primary_href %}
+<div class="buy-ticket fade-in">
+  <div class="buy-ticket__header">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20" aria-hidden="true"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 002 2 2 2 0 010 4 2 2 0 00-2 2v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 00-2-2 2 2 0 010-4 2 2 0 002-2V7a2 2 0 00-2-2H5z"/></svg>
+    <span>{{ _('buy.title') }}</span>
+  </div>
+  {% if route.distance_km and route.distance_km >= 150 and route.trip_count and route.trip_count <= 5 %}
+  {# Honest book-ahead nudge — not fabricated urgency. Real distance +
+     real daily departure count from this route's own row (same numbers
+     the stats strip above already shows), shown only for the ~260
+     long-distance, low-frequency routes where missing a departure
+     genuinely costs a day, not the high-frequency short/commuter routes
+     (Pančevo-Beograd, 79/day) where locals mostly pay the driver in
+     person and advance booking isn't the norm. #}
+  <p class="buy-ticket__urgency">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+    {{ _('buy.book_ahead').format(n=route.trip_count) }}
+  </p>
+  {% endif %}
+  <div class="buy-ticket__links">
+    <a href="{{ _primary_href }}" target="_blank" rel="noopener nofollow sponsored"
+       class="buy-ticket__btn buy-ticket__btn--{{ _primary_partner }}"
+       style="background: {{ _primary_color }};"
+       data-partner="{{ _primary_partner }}"
+       data-route-slug="{{ route.slug }}" data-surface="route_detail_global">
+      {{ _primary_name }}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6m4-3h6v6m-11 5L21 3"/></svg>
+    </a>
+  </div>
+  <p class="buy-ticket__note">{{ _('buy.note') }}</p>
+</div>
+{% endif %}
+
+{% if map_route_coords %}
+<div class="route-map-wrap fade-in">
+  <div id="routeMap" class="route-map"
+       role="img" aria-label="{{ route.from_city }} → {{ route.to_city }}"
+       data-from-lat="{{ map_route_coords.from.lat }}" data-from-lon="{{ map_route_coords.from.lon }}"
+       data-to-lat="{{ map_route_coords.to.lat }}" data-to-lon="{{ map_route_coords.to.lon }}"
+       data-min-lat="{{ map_route_coords.bounds.min_lat }}" data-min-lon="{{ map_route_coords.bounds.min_lon }}"
+       data-max-lat="{{ map_route_coords.bounds.max_lat }}" data-max-lon="{{ map_route_coords.bounds.max_lon }}"
+       {%- if map_route_coords.pair_key %} data-pair-key="{{ map_route_coords.pair_key }}"{% endif %}></div>
+</div>
 {% endif %}
 
 {% include '_partials/_transfer_offer.html' %}

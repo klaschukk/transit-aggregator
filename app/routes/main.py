@@ -521,7 +521,7 @@ def api_ba_click():
     # Surface allowlist — prevents cardinality bloat from bogus values.
     if surface and surface not in (
         'search', 'route_detail', 'city_pair', 'route_detail_global',
-        'city_pair_global', 'search_global', 'planner',
+        'city_pair_global', 'search_global', 'planner', 'route_next',
     ):
         surface = 'other'
 

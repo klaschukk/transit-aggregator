@@ -2832,6 +2832,9 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
     'day.tomorrow': {'sr': 'Sutra', 'en': 'Tomorrow', 'ru': 'Завтра', 'bg': 'Утре'},
     'route.departures_left': {'sr': 'Još danas', 'en': 'Left today', 'ru': 'Ещё сегодня', 'bg': 'Още днес'},
     'route.departs_in': {'sr': 'Polazi za', 'en': 'Departs in', 'ru': 'Отправляется через', 'bg': 'Тръгва след'},
+    'route.next_bus': {'sr': 'Sledeći polazak', 'en': 'Next departure', 'ru': 'Ближайший рейс', 'bg': 'Следващ курс'},
+    'route.all_departures': {'sr': 'Svi polasci', 'en': 'All departures', 'ru': 'Все рейсы', 'bg': 'Всички курсове'},
+    'route.none_left_today': {'sr': 'Danas više nema polazaka.', 'en': 'No more departures today.', 'ru': 'Сегодня рейсов больше нет.', 'bg': 'Днес няма повече курсове.'},
     'day.day_after': {'sr': 'Prekosutra', 'en': 'Day after', 'ru': 'Послезавтра', 'bg': 'Вдругиден'},
 
     'route.similar': {'sr': 'Slične rute iz', 'en': 'Similar routes from', 'ru': 'Похожие маршруты из', 'bg': 'Подобни маршрути от'},

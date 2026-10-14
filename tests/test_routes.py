@@ -304,6 +304,29 @@ def test_departures_left_today_counts_only_upcoming():
     assert _departures_left_today(trips, '00:00') == 3   # all ahead, blanks skipped
 
 
+def test_next_departure_is_the_first_trip_after_now():
+    from app.routes.intercity import _next_departure
+    trips = [{'departure_time': '06:00'}, {'departure_time': ''}, {'departure_time': '12:30:00'},
+             {'departure_time': '21:00'}]
+    assert _next_departure(trips, '10:00') == (trips[2], 150)
+    assert _next_departure(trips, '21:00') == (None, None)    # 21:00 itself has left
+
+
+def test_route_detail_puts_the_next_departure_first(client, monkeypatch):
+    from app.routes import intercity
+    monkeypatch.setattr(intercity, '_belgrade_now_hhmm', lambda: '00:01')
+    r = client.get('/en/rute/beograd-novi-sad/')
+    if r.status_code != 200:
+        pytest.skip('route page unavailable (no transit.duckdb in this env)')
+    page = r.data.decode()
+    assert 'Next departure' in page and 'data-surface="route_next"' in page
+    assert page.index('class="next-dep') < page.index('id="tripList"')
+    monkeypatch.setattr(intercity, '_belgrade_now_hhmm', lambda: '23:59')
+    late = client.get('/en/rute/beograd-novi-sad/').data.decode()
+    assert 'No more departures today.' in late and 'route_next' not in late
+    assert 'class="next-dep' not in client.get('/en/rute/beograd-novi-sad/?dan=1').data.decode()
+
+
 def test_route_detail_shows_departures_left_today(client, monkeypatch):
     """The today tab shows an honest "Left today" count; switching to tomorrow
     hides it (the signal is today-only)."""

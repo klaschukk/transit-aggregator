@@ -540,7 +540,9 @@ body.m-nav-open .site-nav#siteNav {
    already exists; override gap + padding. */
 .stats-strip {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);   /* one row however many stats there are */
   gap: var(--mspace-1);
   padding: var(--mspace-2) var(--mspace-3);
   border-radius: var(--mradius-md);
