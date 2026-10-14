@@ -99,33 +99,13 @@
 <!-- Stats strip — same vocabulary + icons as /rute/<slug>/ -->
 {{ stats_strip([
   {'value': stops|length if stops else 0, 'label': _('line.stop_count_label'), 'icon': 'distance'},
-  {'value': line_type_label, 'label': _('line.type_label')},
 ] + ([{'value': first_dep ~ ' – ' ~ last_dep, 'label': _('line.service_label'), 'icon': 'schedule'}] if first_dep and last_dep else [])
   + ([{'value': '~' ~ headway ~ ' ' ~ _('common.min'), 'label': _('line.frequency_label'), 'icon': 'schedule'}] if headway else [])
 ) }}
 
-<!-- Buy-ticket-style CTA card — two actions to satisfy the "I'm here
-     looking for a way to plan a trip" intent: jump to network search
-     or to the line route map further down. -->
-<div class="buy-ticket fade-in fade-in--d1">
-  <div class="buy-ticket__header">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-    <span>{{ _('line.action_title') }}</span>
-  </div>
-  <div class="buy-ticket__links">
-    <a rel="nofollow" href="{{ lang_prefix }}/pretraga/?od={{ city_label|urlencode }}"
-       class="buy-ticket__btn buy-ticket__btn--dark">
-      {{ _('line.action_search') }}
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
-    </a>
-    <a href="#lineMap" class="buy-ticket__btn buy-ticket__btn--primary">
-      {{ _('line.action_map') }}
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-    </a>
-  </div>
-  <p class="buy-ticket__note">{{ _('stop.action_note') }}</p>
-</div>
-
+{# The 'find out when you leave' box (search + jump-to-map buttons) stood
+   between the stats and the map; the map is right below and the intercity
+   block further down covers search, so it went. #}
 <!-- Map -->
 <div class="city-map-wrap">
   <div class="city-map" id="lineMap" role="region" aria-label="{{ _('a11y.line_map') }}"></div>
