@@ -1,6 +1,8 @@
 """Balkan Loop planner (/balkan-loop/): itineraries come only from direct legs
 that exist, the page stays up on bad input, and partner offers are dormant
 until a link is configured."""
+import re
+
 import pytest
 
 from app import planner
@@ -77,25 +79,110 @@ def test_localised_stop_names():
     assert planner.stop_name('beograd', 'sr') == 'Beograd'
 
 
+def test_route_does_not_double_back():
+    # Budva is past Kotor on the way from Dubrovnik: a plan ending in Kotor must
+    # not overshoot to Budva and come back.
+    legs = _chain('dubrovnik', 'herceg-novi', 'kotor', 'budva')
+    legs.update(_chain('dubrovnik', 'budva'))
+    legs.update(_chain('dubrovnik', 'kotor'))
+    p = planner.plan('dubrovnik', 'kotor', 6, legs, 'en')
+    slugs = [s['slug'] for s in p['stops']]
+    assert slugs[0] == 'dubrovnik' and slugs[-1] == 'kotor' and 'budva' not in slugs
+
+
+def test_preset_slugs_round_trip():
+    for slug, (a, b, n) in planner.PRESET_BY_SLUG.items():
+        assert planner.preset_slug(a, b, n) == slug
+        assert a in planner.STOPS and b in planner.STOPS
+        assert planner.MIN_DAYS <= n <= planner.MAX_DAYS
+
+
 @pytest.fixture()
 def loop_legs(monkeypatch):
     monkeypatch.setattr(planner, 'load_legs', lambda: LEGS)
 
 
+PRESET = '/balkan-loop/dubrovnik-tirana-10-days/'
+
+
+def _head(html, pattern):
+    import re
+    m = re.search(pattern, html, re.S)
+    return m.group(1) if m else None
+
+
 @pytest.mark.parametrize('prefix', ['', '/en', '/ru', '/bg'])
-def test_page_renders_in_every_language(client, loop_legs, prefix):
+def test_hub_renders_in_every_language(client, loop_legs, prefix):
     r = client.get(f'{prefix}/balkan-loop/')
     assert r.status_code == 200
     html = r.data.decode()
     assert 'name="from"' in html and 'name="days"' in html
-    assert f'{prefix}/rute/dubrovnik-kotor/' in html
-    assert 'planner.' not in html  # no untranslated key leaked
+    assert f'{prefix}{PRESET}' in html                  # curated itinerary card
+    assert f'{prefix}/rute/dubrovnik-kotor/' in html    # direct-leg index
+    assert 'loop-steps' not in html                     # no itinerary duplicated on the hub
+    assert not re.search(r'planner\.[a-z_]', html)      # no untranslated key leaked
+    assert _head(html, r'name="robots" content="([^"]+)"').startswith('index')
 
 
-def test_page_without_matching_data_says_so(client, monkeypatch):
-    # No loop corridors in the DB (e.g. the CI seed): the form still renders.
+@pytest.mark.parametrize('prefix', ['', '/en', '/ru', '/bg'])
+def test_preset_page_renders_in_every_language(client, loop_legs, prefix):
+    r = client.get(f'{prefix}{PRESET}')
+    assert r.status_code == 200
+    html = r.data.decode()
+    assert 'loop-steps' in html and f'{prefix}/rute/dubrovnik-kotor/' in html
+    assert not re.search(r'planner\.[a-z_]', html)
+    assert _head(html, r'rel="canonical" href="([^"]+)"').endswith(f'{prefix}{PRESET}')
+    assert _head(html, r'name="robots" content="([^"]+)"').startswith('index')
+
+
+def test_preset_head_is_specific_and_within_limits(client, loop_legs):
+    html = client.get(f'/en{PRESET}').data.decode()
+    title = _head(html, r'<title>(.*?)</title>')
+    desc = _head(html, r'name="description" content="([^"]+)"')
+    assert 'Dubrovnik to Tirana' in title and '10-Day' in title and len(title) <= 62
+    assert 'Dubrovnik' in desc and 70 <= len(desc) <= 160
+    assert html.count('<h1') == 1
+    hub_title = _head(client.get('/en/balkan-loop/').data.decode(), r'<title>(.*?)</title>')
+    assert hub_title != title and len(hub_title) <= 62
+
+
+def test_preset_structured_data_is_valid_and_matches_the_page(client, loop_legs):
+    import json
+    import re
+    html = client.get(f'/en{PRESET}').data.decode()
+    blocks = [json.loads(b) for b in
+              re.findall(r'<script type="application/ld\+json">\s*(.*?)\s*</script>', html, re.S)]
+    by_type = {b['@type']: b for b in blocks}
+    trip = by_type['TouristTrip']
+    names = [i['item']['name'] for i in trip['itinerary']['itemListElement']]
+    assert names == ['Dubrovnik', 'Kotor', 'Budva', 'Podgorica', 'Tirana']
+    faq = by_type['FAQPage']['mainEntity']
+    assert faq and all(q['acceptedAnswer']['text'] for q in faq)
+    for q in faq:   # every marked-up answer is visible on the page
+        assert q['name'] in html
+    assert [i['name'] for i in by_type['BreadcrumbList']['itemListElement']][1] == 'Trip planner'
+
+
+def test_unknown_or_unchainable_preset_is_404(client, monkeypatch):
+    assert client.get('/en/balkan-loop/nowhere-nowhere-5-days/').status_code == 404
     monkeypatch.setattr(planner, 'load_legs', lambda: {})
-    r = client.get('/en/balkan-loop/')
+    assert client.get(f'/en{PRESET}').status_code == 404
+
+
+def test_query_matching_a_preset_redirects_to_its_clean_url(client, loop_legs):
+    r = client.get('/en/balkan-loop/?from=dubrovnik&to=tirana&days=10')
+    assert r.status_code == 301 and r.headers['Location'].endswith(f'/en{PRESET}')
+
+
+def test_other_query_variants_are_noindex(client, loop_legs):
+    html = client.get('/en/balkan-loop/?from=kotor&to=tirana&days=8').data.decode()
+    assert 'loop-steps' in html
+    assert _head(html, r'name="robots" content="([^"]+)"') == 'noindex, follow'
+
+
+def test_result_without_matching_data_says_so(client, monkeypatch):
+    monkeypatch.setattr(planner, 'load_legs', lambda: {})
+    r = client.get('/en/balkan-loop/?from=kotor&to=tirana&days=8')
     assert r.status_code == 200
     html = r.data.decode()
     assert 'No chain of direct buses' in html and 'loop-steps' not in html
@@ -104,20 +191,13 @@ def test_page_without_matching_data_says_so(client, monkeypatch):
 @pytest.mark.parametrize('qs', ['?from=zzz&to=<script>&days=abc', '?days=9999', '?days=-3',
                                 '?from=tirana&to=tirana&days=4'])
 def test_bad_input_never_errors(client, loop_legs, qs):
-    r = client.get('/en/balkan-loop/' + qs)
+    r = client.get('/en/balkan-loop/' + qs, follow_redirects=True)
     assert r.status_code == 200
     assert '<script>&' not in r.data.decode()
 
 
-def test_query_variants_share_one_canonical(client, loop_legs):
-    html = client.get('/en/balkan-loop/?from=kotor&to=tirana&days=8').data.decode()
-    assert 'rel="canonical" href="' in html
-    canonical = html.split('rel="canonical" href="')[1].split('"')[0]
-    assert canonical.endswith('/en/balkan-loop/')
-
-
 def test_offers_are_dormant_by_default(client, loop_legs):
-    html = client.get('/en/balkan-loop/').data.decode()
+    html = client.get(f'/en{PRESET}').data.decode()
     assert 'loop-offer__btn' not in html
 
 
@@ -127,7 +207,7 @@ def test_configured_offers_render_as_sponsored_links(app, client, loop_legs):
     old = {k: app.config.get(k) for k in cfg}
     app.config.update(cfg)
     try:
-        html = client.get('/en/balkan-loop/').data.decode()
+        html = client.get(f'/en{PRESET}').data.decode()
     finally:
         app.config.update(old)
     assert 'https://example.com/stay?q=Dubrovnik' in html
@@ -137,9 +217,25 @@ def test_configured_offers_render_as_sponsored_links(app, client, loop_legs):
     assert 'Sponsored links' in html
 
 
-def test_in_sitemap_and_footer(client):
-    assert '/balkan-loop/' in client.get('/sitemap-core.xml').data.decode()
-    assert '/en/balkan-loop/' in client.get('/en/').data.decode()
+def test_sitemap_lists_hub_and_resolvable_presets(client, loop_legs):
+    xml = client.get('/sitemap-core.xml').data.decode()
+    assert '/balkan-loop/</loc>' in xml
+    assert f'{PRESET}</loc>' in xml
+    assert 'hreflang="en" href="' in xml and f'/en{PRESET}' in xml
+    # LEGS has no Sarajevo: that preset cannot be chained, so it is not submitted.
+    assert 'kotor-sarajevo-7-days' not in xml
+
+
+def test_linked_from_nav_footer_and_destinations(client):
+    home = client.get('/en/').data.decode()
+    assert home.count('/en/balkan-loop/') >= 2          # header nav + footer
+    assert '/en/balkan-loop/' in client.get('/en/destinacije/').data.decode()
+
+
+def test_og_image_for_preset(client, loop_legs):
+    r = client.get('/og/balkan-loop/dubrovnik-tirana-10-days.png')
+    assert r.status_code == 200 and r.mimetype == 'image/png'
+    assert client.get('/og/balkan-loop/nope.png').status_code == 200   # static fallback
 
 
 def test_planner_partners_are_accepted_by_click_log(client):

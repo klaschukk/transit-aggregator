@@ -1177,6 +1177,15 @@ def sitemap_core():
     from app.routes.info import _COUNTRY_HUBS, _GUIDES
     pages += [url(f'/destinacije/{slug}/', 'weekly', '0.7') for slug in _COUNTRY_HUBS]
     pages += [url(f'/vodici/{slug}/', 'monthly', '0.6') for slug in _GUIDES]
+    # Curated Balkan Loop itineraries — only the ones today's timetable still
+    # chains (the page itself 404s otherwise).
+    try:
+        from app import planner
+        if db_ready():
+            pages += [url(f'/balkan-loop/{slug}/', 'weekly', '0.6')
+                      for slug, (a, b, n) in planner.PRESET_BY_SLUG.items() if planner.plan(a, b, n)]
+    except Exception:
+        current_app.logger.exception('sitemap: balkan-loop presets skipped')
     return _urlset(pages)
 
 
@@ -1434,6 +1443,22 @@ def og_route(slug: str):
     if row.get('min_price'):
         chips.append(f"od {int(row['min_price'])} RSD")
     return _og_cached(f'route-{slug}', lambda: render_card(title, subtitle='Direktni autobus', chips=chips))
+
+
+@main_bp.route('/og/balkan-loop/<slug>.png')
+def og_balkan_loop(slug: str):
+    from app import planner
+    preset = planner.PRESET_BY_SLUG.get(slug)
+    if not preset or not db_ready():
+        return _og_fallback()
+    it = planner.plan(*preset, lang='en', eur_rsd=current_app.config['EUR_RSD_RATE'])
+    if not it:
+        return _og_fallback()
+    title = (f"{it['start_name']} loop" if it['loop']
+             else f"{it['start_name']} → {it['end_name']}")
+    chips = [f"{it['days']} days", f"{len(it['stops'])} stops", f"{len(it['legs'])} buses"]
+    return _og_cached(f'balkan-loop-{slug}',
+                      lambda: render_card(title, subtitle='Balkan itinerary by bus', chips=chips))
 
 
 @main_bp.route('/og/voznja/<from_city>-do-<to_city>.png')

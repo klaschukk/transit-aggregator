@@ -269,26 +269,126 @@ def destinations():
 _RV_CITY_LABELS = CITY_LABELS
 
 
-# Shown as one-click examples under the form: (start, end, days).
-_LOOP_PRESETS = (
-    ('dubrovnik', 'tirana', 10),
-    ('kotor', 'sarajevo', 7),
-    ('split', 'ohrid', 14),
-    ('dubrovnik', 'dubrovnik', 14),
-    ('beograd', 'tirana', 21),
-)
+def _loop_hm(minutes: int, lang: str) -> str:
+    """'6 h 52 min' in the page language (same units the templates use)."""
+    from app.i18n import get_text
+    h, m = divmod(int(minutes or 0), 60)
+    parts = []
+    if h:
+        parts.append(f"{h} {get_text('common.h', lang)}")
+    if m or not h:
+        parts.append(f"{m} {get_text('common.min', lang)}")
+    return ' '.join(parts)
+
+
+def _loop_faq(it: dict, lang: str) -> list[dict]:
+    """Questions answered strictly from the itinerary's own numbers; the same
+    list feeds the visible FAQ and the FAQPage JSON-LD."""
+    from app.i18n import get_text
+
+    def t(key: str, **kw) -> str:
+        return get_text(key, lang).format(**kw)
+
+    n_legs, n_stops = len(it['legs']), len(it['stops'])
+    faq = []
+    if not it['loop']:
+        q = t('planner.q_direct', a=it['start_name'], b=it['end_name'])
+        d = it['direct']
+        if d and d.get('duration_min'):
+            faq.append({'q': q, 'a': t('planner.a_direct_yes', n=d['trips'],
+                                       t=_loop_hm(d['duration_min'], lang), k=n_stops)})
+        elif not d and n_stops > 2:
+            via = ', '.join(s['name'] for s in it['stops'][1:-1])
+            faq.append({'q': q, 'a': t('planner.a_direct_no', via=via)})
+    longest = it['longest_leg']
+    if it['bus_minutes'] and longest.get('duration_min'):
+        faq.append({'q': t('planner.q_time'),
+                    'a': t('planner.a_time', t=_loop_hm(it['bus_minutes'], lang), legs=n_legs,
+                           a=longest['from_name'], b=longest['to_name'],
+                           lt=_loop_hm(longest['duration_min'], lang))})
+    if it['bus_eur']:
+        if it['bus_eur_partial']:
+            a = t('planner.a_cost_partial', x=it['priced_legs'], legs=n_legs, p=it['bus_eur'])
+        else:
+            a = t('planner.a_cost', p=it['bus_eur'], legs=n_legs)
+        faq.append({'q': t('planner.q_cost'), 'a': a})
+    nights = ', '.join(f"{s['name']} {s['nights']}" for s in it['stops'])
+    faq.append({'q': t('planner.q_days'),
+                'a': t('planner.a_days', n=it['days'], list=nights, m=it['min_days'])})
+    return faq
+
+
+def _loop_label(it_or_preset: dict, lang: str) -> str:
+    from app.i18n import get_text
+    p = it_or_preset
+    if p['start'] == p['end']:
+        return get_text('planner.preset_loop', lang).format(a=p['start_name'], n=p['days'])
+    return get_text('planner.preset_label', lang).format(a=p['start_name'], b=p['end_name'], n=p['days'])
+
+
+def _loop_preset_cards(lang: str, skip: str = '') -> list[dict]:
+    """Curated itineraries that resolve against today's timetable."""
+    from app import planner
+    from app.i18n import get_text
+    eur = current_app.config['EUR_RSD_RATE']
+    cards = []
+    for slug, (a, b, n) in planner.PRESET_BY_SLUG.items():
+        if slug == skip:
+            continue
+        it = planner.plan(a, b, n, lang=lang, eur_rsd=eur)
+        if not it:
+            continue
+        cards.append({
+            'slug': slug, 'label': _loop_label(it, lang),
+            'chain': ' → '.join(s['name'] for s in it['stops']),
+            'summary': get_text('planner.card_summary', lang).format(
+                k=len(it['stops']), c=len(it['countries']), t=_loop_hm(it['bus_minutes'], lang)),
+        })
+    return cards
+
+
+def _loop_render(mode: str, itinerary: dict | None, start: str, end: str, days: int,
+                 preset_slug: str = '', **extra):
+    from app import planner
+    from app.affiliates.trip_extras import stop_offers, trip_offers
+    lang = getattr(g, 'lang', 'sr')
+    if itinerary:
+        for stop in itinerary['stops']:
+            stop['offers'] = stop_offers(stop['name'])
+    stops = sorted(({'slug': s, 'name': planner.stop_name(s, lang)} for s in planner.STOPS),
+                   key=lambda c: c['name'])
+    presets = _loop_preset_cards(lang, skip=preset_slug) if db_ready() else []
+    if 'seo' not in extra:
+        from app.i18n import get_text
+        extra['seo'] = {'title': get_text('planner.title', lang), 'h1': get_text('planner.h1', lang),
+                        'meta': get_text('planner.meta', lang)}
+    base = current_app.config['BASE_URL'] + getattr(g, 'lang_prefix', '')
+    ld_presets = [{'@type': 'ListItem', 'position': i, 'name': p['label'],
+                   'url': f"{base}/balkan-loop/{p['slug']}/"} for i, p in enumerate(presets, 1)]
+    return render_template(
+        'balkan_loop.html', mode=mode, itinerary=itinerary, stops=stops,
+        presets=presets, ld_presets=ld_presets,
+        start=start, end=end, days=days,
+        min_days=planner.MIN_DAYS, max_days=planner.MAX_DAYS,
+        trip_offers=trip_offers() if itinerary else [], **extra)
 
 
 @info_bp.route('/balkan-loop/')
 def balkan_loop():
-    """Balkan Loop planner: start + end + days -> stop-by-stop route where every
-    leg is a direct bus from the timetable (app/planner.py). Query variants
-    share the bare path as canonical, so only one URL per language is indexed."""
+    """Balkan trip planner hub. Bare URL: form, curated itineraries and every
+    direct leg between loop stops (indexable). With ?from/to/days: the computed
+    route for that request — noindex, or a 301 when it is one of the curated
+    itineraries, which own a clean URL (/balkan-loop/<slug>/)."""
     from app import planner
-    from app.affiliates.trip_extras import stop_offers, trip_offers
 
     lang = getattr(g, 'lang', 'sr')
     d_start, d_end, d_days = planner.DEFAULT_PLAN
+    if not any(k in request.args for k in ('from', 'to', 'days')):
+        leg_groups = []
+        if db_ready():
+            leg_groups = planner.leg_groups(lang=lang, eur_rsd=current_app.config['EUR_RSD_RATE'])
+        return _loop_render('hub', None, d_start, d_end, d_days, leg_groups=leg_groups)
+
     start = normalize_slug(request.args.get('from', '')) or d_start
     end = normalize_slug(request.args.get('to', '')) or d_end
     if start not in planner.STOPS:
@@ -301,24 +401,56 @@ def balkan_loop():
         days = d_days
     days = max(planner.MIN_DAYS, min(planner.MAX_DAYS, days))
 
+    slug = planner.preset_slug(start, end, days)
+    if slug in planner.PRESET_BY_SLUG:
+        return redirect(f"{getattr(g, 'lang_prefix', '')}/balkan-loop/{slug}/", code=301)
+
+    g.meta_robots = 'noindex, follow'
     itinerary = None
     if db_ready():
         itinerary = planner.plan(start, end, days, lang=lang,
                                  eur_rsd=current_app.config['EUR_RSD_RATE'])
-    if itinerary:
-        for stop in itinerary['stops']:
-            stop['offers'] = stop_offers(stop['name'])
+    return _loop_render('result', itinerary, start, end, days)
 
-    stops = sorted(({'slug': s, 'name': planner.stop_name(s, lang)} for s in planner.STOPS),
-                   key=lambda c: c['name'])
-    presets = [{'start': a, 'end': b, 'days': n,
-                'start_name': planner.stop_name(a, lang), 'end_name': planner.stop_name(b, lang)}
-               for a, b, n in _LOOP_PRESETS]
-    return render_template(
-        'balkan_loop.html', itinerary=itinerary, stops=stops, presets=presets,
-        start=start, end=end, days=days,
-        min_days=planner.MIN_DAYS, max_days=planner.MAX_DAYS,
-        trip_offers=trip_offers() if itinerary else [])
+
+@info_bp.route('/balkan-loop/<slug>/')
+def balkan_loop_preset(slug: str):
+    """One curated itinerary on its own indexable URL. 404 when the slug is not
+    curated or today's timetable no longer chains it (no empty landing pages)."""
+    from app import planner
+
+    preset = planner.PRESET_BY_SLUG.get(slug)
+    if not preset:
+        abort(404)
+    if not db_ready():
+        abort(503)
+    lang = getattr(g, 'lang', 'sr')
+    start, end, days = preset
+    itinerary = planner.plan(start, end, days, lang=lang,
+                             eur_rsd=current_app.config['EUR_RSD_RATE'])
+    if not itinerary:
+        abort(404)
+    from app.i18n import get_text
+    sfx = '_loop' if itinerary['loop'] else ''
+    facts = dict(a=itinerary['start_name'], b=itinerary['end_name'], n=days,
+                 k=len(itinerary['stops']), c=len(itinerary['countries']),
+                 legs=len(itinerary['legs']), t=_loop_hm(itinerary['bus_minutes'], lang))
+    intro = get_text('planner.p_intro', lang).format(**facts)
+    if itinerary['bus_eur'] and not itinerary['bus_eur_partial']:
+        intro += ' ' + get_text('planner.p_intro_cost', lang).format(p=itinerary['bus_eur'])
+    seo = {'title': get_text('planner.p_title' + sfx, lang).format(**facts),
+           'h1': get_text('planner.p_h1' + sfx, lang).format(**facts),
+           'meta': get_text('planner.p_meta' + sfx, lang).format(**facts),
+           'intro': intro}
+    faq = _loop_faq(itinerary, lang)
+    ld_stops = [{'@type': 'ListItem', 'position': i, 'item': {'@type': 'City', 'name': s['name']}}
+                for i, s in enumerate(itinerary['stops'], 1)]
+    ld_faq = [{'@type': 'Question', 'name': f['q'],
+               'acceptedAnswer': {'@type': 'Answer', 'text': f['a']}} for f in faq]
+    return _loop_render(
+        'preset', itinerary, start, end, days, preset_slug=slug, seo=seo,
+        faq=faq, ld_stops=ld_stops, ld_faq=ld_faq, label=_loop_label(itinerary, lang),
+        og_image_url=f"{current_app.config['BASE_URL']}/og/balkan-loop/{slug}.png")
 
 
 @info_bp.route('/red-voznje/')
