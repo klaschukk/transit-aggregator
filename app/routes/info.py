@@ -326,11 +326,28 @@ def _loop_label(it_or_preset: dict, lang: str) -> str:
     return get_text('planner.preset_label', lang).format(a=p['start_name'], b=p['end_name'], n=p['days'])
 
 
+def _loop_covers() -> dict[str, str]:
+    """Cover stop per curated itinerary, chosen so neighbouring cards do not all
+    show the same city: the most appealing stop no earlier itinerary used yet."""
+    from app import planner
+    used, covers = set(), {}
+    for slug, (a, b, n) in planner.PRESET_BY_SLUG.items():
+        it = planner.plan(a, b, n)
+        if not it:
+            continue
+        ranked = sorted((s['slug'] for s in it['stops']), key=lambda x: -planner.STOPS[x][1])
+        pick = next((x for x in ranked if x not in used), ranked[0])
+        used.add(pick)
+        covers[slug] = pick
+    return covers
+
+
 def _loop_preset_cards(lang: str, skip: str = '') -> list[dict]:
     """Curated itineraries that resolve against today's timetable."""
     from app import planner
     from app.i18n import get_text
     eur = current_app.config['EUR_RSD_RATE']
+    covers = _loop_covers()
     cards = []
     for slug, (a, b, n) in planner.PRESET_BY_SLUG.items():
         if slug == skip:
@@ -339,7 +356,7 @@ def _loop_preset_cards(lang: str, skip: str = '') -> list[dict]:
         if not it:
             continue
         cards.append({
-            'photo': planner.photo(planner.cover_slug(it)),
+            'photo': planner.photo(covers.get(slug) or planner.cover_slug(it)),
             'thumb': planner.sketch(planner.route_points(it), 96, 64, 9),
             'slug': slug, 'label': _loop_label(it, lang),
             'chain': ' → '.join(s['name'] for s in it['stops']),
@@ -477,8 +494,9 @@ def balkan_loop_preset(slug: str):
                 for i, s in enumerate(itinerary['stops'], 1)]
     ld_faq = [{'@type': 'Question', 'name': f['q'],
                'acceptedAnswer': {'@type': 'Answer', 'text': f['a']}} for f in faq]
+    cover = planner.photo(_loop_covers().get(slug) or planner.cover_slug(itinerary))
     return _loop_render(
-        'preset', itinerary, start, end, days, preset_slug=slug, seo=seo,
+        'preset', itinerary, start, end, days, preset_slug=slug, seo=seo, cover=cover,
         faq=faq, ld_stops=ld_stops, ld_faq=ld_faq, label=_loop_label(itinerary, lang),
         og_image_url=f"{current_app.config['BASE_URL']}/og/balkan-loop/{slug}.png")
 

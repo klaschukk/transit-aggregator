@@ -118,6 +118,11 @@
               <span class="hero__city-name">{{ c.label }}</span>
               <span class="hero__city-meta">{{ c.line_count }} {{ _('common.lines') }}</span>
             </div>
+            <svg class="hero__city-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M3 8h10m-4-4l4 4-4 4"/></svg>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
 
       {% if loop_stops %}
       <div id="hero-panel-loop" class="hero__panel" role="tabpanel" aria-labelledby="hero-tab-loop" hidden>
@@ -142,11 +147,6 @@
         {% endif %}
       </div>
       {% endif %}
-            <svg class="hero__city-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M3 8h10m-4-4l4 4-4 4"/></svg>
-          </a>
-          {% endfor %}
-        </div>
-      </div>
     </div>
   </div>
 </section>
