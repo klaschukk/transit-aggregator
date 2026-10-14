@@ -802,4 +802,9 @@ body:has(.cookie-banner[data-visible="true"]) {
   .home-cities-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .home-cities-grid .home-city-card { min-width: 0; }
 
+  /* The chat button covered trip times and day tabs while reading; it
+     slides away with the bottom nav on scroll-down and is back on scroll-up. */
+  .chat-toggle { transition: box-shadow .2s, transform .25s ease, opacity .25s ease; }
+  body[data-bnav-hidden] .chat-toggle[aria-expanded="false"] { transform: translateY(140%); opacity: 0; pointer-events: none; }
+
 } /* end @media (max-width: 767px) */
