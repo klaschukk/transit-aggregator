@@ -4627,4 +4627,22 @@ body:has(.cookie-banner[data-visible="true"]) .chat-widget { display: none; }
 .transfer-offer__partner { font-weight: 400; opacity: 0.8; }
 .transfer-offer__note { margin: var(--space-3, 12px) 0 0; color: var(--color-text-muted, #64748b); font-size: 0.78rem; }
 
-/* Balkan Loop planner: page styles live in planner.css; only the route-page teaser is global. */
+/* Balkan Loop planner: page styles live in planner.css. Global here: the home
+   hero tab form and the home section of photo cards. */
+.hero-loop { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--color-bg); box-shadow: var(--shadow-lg); }
+.hero-loop__field { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.hero-loop__field--days, .hero-loop__btn { grid-column: 1 / -1; }
+.hero-loop__label { font-size: var(--text-sm); font-weight: 600; color: var(--color-text); }
+.hero-loop__input { height: 48px; padding: 0 var(--space-3); border: 1.5px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg); color: var(--color-text); font: inherit; font-size: 1rem; }
+.hero-loop__input:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.hero-loop__btn { height: 48px; }
+@media (min-width: 720px) { .hero-loop { grid-template-columns: 1fr 1fr 96px auto; align-items: end; } .hero-loop__field--days, .hero-loop__btn { grid-column: auto; } }
+.home-loop { display: grid; grid-template-columns: 1fr; gap: var(--space-4); margin-top: var(--space-4); }
+@media (min-width: 640px) { .home-loop { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.home-loop__card { display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-bg); color: var(--color-text); text-decoration: none; box-shadow: var(--shadow-sm); transition: box-shadow .2s ease, border-color .2s ease; }
+.home-loop__card:hover { border-color: var(--color-primary-300); box-shadow: var(--shadow-lg); }
+.home-loop__img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; background: var(--color-primary-50); }
+.home-loop__title { padding: var(--space-3) var(--space-4) 0; font-weight: 700; }
+.home-loop__meta { padding: var(--space-1) var(--space-4) var(--space-4); font-size: var(--text-sm); color: var(--color-text-muted); }
+.home-loop__credit { margin: var(--space-2) 0 0; font-size: 11px; color: var(--color-text-muted); }
+.home-loop__credit a { color: inherit; }

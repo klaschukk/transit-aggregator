@@ -1,3 +1,4 @@
+{% from '_partials/_loop_photo.html' import photo_img, photo_credit with context %}
 {# Itinerary body: stop/leg timeline with the route map beside it, partner
    offers below. Needs: itinerary, trip_offers, map_data, map_sketch. #}
 {% macro hm(minutes) -%}
@@ -53,6 +54,12 @@
       {% for stop in itinerary.stops %}
       <li class="loop-stop" id="loopStop{{ loop.index }}" data-n="{{ loop.index }}">
         <div class="loop-stop__card">
+          {% if stop.photo %}
+          <figure class="loop-stop__media">
+            {{ photo_img(stop.photo, 'loop-stop__img', '(min-width: 1024px) 560px, 100vw', alt=stop.name) }}
+            {{ photo_credit(stop.photo, 'loop-credit loop-credit--card') }}
+          </figure>
+          {% endif %}
           <div class="loop-stop__head">
             <h3 class="loop-stop__name">{{ stop.name }}</h3>
             <button type="button" class="loop-stop__locate" data-n="{{ loop.index }}" aria-label="{{ _('planner.map_show').format(city=stop.name) }}" title="{{ _('planner.map_show').format(city=stop.name) }}" hidden>

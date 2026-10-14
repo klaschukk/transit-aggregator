@@ -339,6 +339,7 @@ def _loop_preset_cards(lang: str, skip: str = '') -> list[dict]:
         if not it:
             continue
         cards.append({
+            'photo': planner.photo(planner.cover_slug(it)),
             'thumb': planner.sketch(planner.route_points(it), 96, 64, 9),
             'slug': slug, 'label': _loop_label(it, lang),
             'chain': ' → '.join(s['name'] for s in it['stops']),
@@ -356,6 +357,8 @@ def _loop_render(mode: str, itinerary: dict | None, start: str, end: str, days: 
     if itinerary:
         for stop in itinerary['stops']:
             stop['offers'] = stop_offers(stop['name'])
+            stop['photo'] = planner.photo(stop['slug'])
+        extra.setdefault('cover', planner.photo(planner.cover_slug(itinerary)))
         pts = planner.route_points(itinerary)
         extra['map_data'] = {
             'mode': 'route',

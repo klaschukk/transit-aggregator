@@ -73,6 +73,12 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
           {{ _('nav.city_transport') }}
         </button>
+        {% if loop_stops %}
+        <button class="hero__tab" role="tab" id="hero-tab-loop" aria-selected="false" aria-controls="hero-panel-loop" tabindex="-1" data-panel="hero-panel-loop">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" aria-hidden="true"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7a3.5 3.5 0 000-7H9a3.5 3.5 0 010-7h7"/></svg>
+          {{ _('nav.planner') }}
+        </button>
+        {% endif %}
       </div>
 
       <div id="hero-panel-intercity" class="hero__panel" role="tabpanel" aria-labelledby="hero-tab-intercity">
@@ -112,6 +118,30 @@
               <span class="hero__city-name">{{ c.label }}</span>
               <span class="hero__city-meta">{{ c.line_count }} {{ _('common.lines') }}</span>
             </div>
+
+      {% if loop_stops %}
+      <div id="hero-panel-loop" class="hero__panel" role="tabpanel" aria-labelledby="hero-tab-loop" hidden>
+        <form class="hero-loop" method="get" action="{{ lang_prefix }}/balkan-loop/">
+          <label class="hero-loop__field"><span class="hero-loop__label">{{ _('planner.from') }}</span>
+            <select class="hero-loop__input" name="from">{% for c in loop_stops %}<option value="{{ c.slug }}"{% if c.slug == 'dubrovnik' %} selected{% endif %}>{{ c.name }}</option>{% endfor %}</select>
+          </label>
+          <label class="hero-loop__field"><span class="hero-loop__label">{{ _('planner.to') }}</span>
+            <select class="hero-loop__input" name="to">{% for c in loop_stops %}<option value="{{ c.slug }}"{% if c.slug == 'tirana' %} selected{% endif %}>{{ c.name }}</option>{% endfor %}</select>
+          </label>
+          <label class="hero-loop__field hero-loop__field--days"><span class="hero-loop__label">{{ _('planner.days') }}</span>
+            <input class="hero-loop__input" name="days" type="number" inputmode="numeric" min="4" max="21" value="10" required>
+          </label>
+          <button class="btn btn--primary hero-loop__btn" type="submit">{{ _('planner.submit') }}</button>
+        </form>
+        {% if loop_cards %}
+        <div class="hero__quick-links">
+          {% for p in loop_cards %}
+          <a href="{{ lang_prefix }}/balkan-loop/{{ p.slug }}/" class="hero__quick-chip"><span class="hero__quick-pair">{{ p.label }}</span></a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
             <svg class="hero__city-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M3 8h10m-4-4l4 4-4 4"/></svg>
           </a>
           {% endfor %}
@@ -223,15 +253,17 @@
 <section class="home-section container">
   <h2 class="home-section__title">{{ _('planner.home_h') }}</h2>
   <p class="page-subtitle">{{ _('planner.home_lead') }}</p>
-  <div class="home-routes">
+  <div class="home-loop">
     {% for p in loop_cards %}
-    <a href="{{ lang_prefix }}/balkan-loop/{{ p.slug }}/" class="home-route">
-      <div class="home-route__cities"><span class="home-route__from">{{ p.label }}</span></div>
-      <div class="home-route__bottom"><span class="home-route__meta">{{ p.summary }}</span></div>
+    <a href="{{ lang_prefix }}/balkan-loop/{{ p.slug }}/" class="home-loop__card">
+      {% if p.photo %}<img class="home-loop__img" src="{{ url_for('static', filename=p.photo.small) }}" width="640" height="360" alt="" loading="lazy" decoding="async">{% endif %}
+      <span class="home-loop__title">{{ p.label }}</span>
+      <span class="home-loop__meta">{{ p.summary }}</span>
     </a>
     {% endfor %}
   </div>
-  <a href="{{ lang_prefix }}/balkan-loop/" class="btn btn--outline home-section__btn">{{ _('planner.home_cta') }} →</a>
+  <p class="home-loop__credit">{{ _('planner.photo_by') }}: {% for p in loop_cards if p.photo %}<a href="{{ p.photo.source }}" target="_blank" rel="nofollow noopener">{{ p.photo.author }}</a> (<a href="{{ p.photo.license_url }}" target="_blank" rel="nofollow noopener license">{{ p.photo.license }}</a>){% if not loop.last %}, {% endif %}{% endfor %}, Wikimedia Commons.</p>
+  <a href="{{ lang_prefix }}/balkan-loop/" class="btn btn--primary home-section__btn">{{ _('planner.home_cta') }} →</a>
 </section>
 {% endif %}
 

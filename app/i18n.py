@@ -819,6 +819,12 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'маршрутов: {n}',
         'bg': 'линии: {n}',
     },
+    'planner.photo_by': {
+        'sr': 'Foto',
+        'en': 'Photo',
+        'ru': 'Фото',
+        'bg': 'Снимка',
+    },
     'planner.h1': {
         'sr': 'Planer putovanja po Balkanu autobusom',
         'en': 'Balkan trip planner: your itinerary by bus',

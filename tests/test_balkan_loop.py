@@ -337,3 +337,22 @@ def test_hub_hero_has_stats_and_route_page_has_a_ribbon(client, loop_legs):
     page = client.get(f'/en{PRESET}').data.decode()
     assert page.count('class="loop-ribbon__link"') == 5 and 'href="#loopStop3"' in page
     assert page.count('<details class="loop-faq__item"') >= 2
+
+
+def test_photos_carry_their_licence_credit(client, loop_legs):
+    from app import planner
+    for slug in planner.STOPS:
+        ph = planner.photo(slug)
+        assert ph and ph['author'] and ph['license'].startswith('CC') and ph['source'].startswith('https://commons.')
+        assert (planner._PHOTOS_FILE.parent.parent / 'static' / ph['small']).exists()
+    page = client.get(f'/en{PRESET}').data.decode()
+    assert 'class="loop-cover' in page and 'fetchpriority="high"' in page
+    assert page.count('class="loop-stop__img"') == 5
+    assert page.count('loop-credit--card') == 5 and 'rel="nofollow noopener license"' in page
+
+
+def test_home_page_opens_the_planner(client, loop_legs):
+    home = client.get('/en/').data.decode()
+    assert 'id="hero-tab-loop"' in home and 'id="hero-panel-loop"' in home
+    assert 'action="/en/balkan-loop/"' in home
+    assert 1 <= home.count('class="home-loop__card"') <= 3 and 'Wikimedia Commons' in home

@@ -1,0 +1,12 @@
+{# Planner photos (Wikimedia Commons, CC BY-SA): the image and the credit its
+   licence requires — author linked to the file page, licence to its text. #}
+{% macro photo_img(ph, cls, sizes, eager=False, alt='') -%}
+<img class="{{ cls }}" src="{{ url_for('static', filename=ph.small) }}"
+     srcset="{{ url_for('static', filename=ph.small) }} 640w, {{ url_for('static', filename=ph.large) }} 1280w"
+     sizes="{{ sizes }}" width="640" height="360" alt="{{ alt }}"
+     {%- if eager %} fetchpriority="high" decoding="async"{% else %} loading="lazy" decoding="async"{% endif %}>
+{%- endmacro %}
+
+{% macro photo_credit(ph, cls='loop-credit') -%}
+<small class="{{ cls }}">{{ _('planner.photo_by') }}: <a href="{{ ph.source }}" target="_blank" rel="nofollow noopener">{{ ph.author }}</a>, <a href="{{ ph.license_url }}" target="_blank" rel="nofollow noopener license">{{ ph.license }}</a></small>
+{%- endmacro %}

@@ -170,18 +170,23 @@ def index():
     """) if db_ready() else []
 
     # Trip-planner teaser: a few curated itineraries (cheap — plans are memoised).
-    loop_cards = []
+    loop_cards, loop_stops = [], []
     if db_ready():
         try:
+            from app import planner
             from app.routes.info import _loop_preset_cards
-            loop_cards = _loop_preset_cards(getattr(g, 'lang', 'sr'))[:4]
+            lang = getattr(g, 'lang', 'sr')
+            loop_cards = _loop_preset_cards(lang)[:3]
+            loop_stops = sorted(({'slug': s, 'name': planner.stop_name(s, lang)} for s in planner.STOPS),
+                                key=lambda c: c['name'])
         except Exception:
             current_app.logger.exception('home: planner teaser skipped')
 
     return render_template('index.html', popular_routes=popular_routes,
                            cities=cities_list, stats=stats,
                            cities_data=cities_data,
-                           popular_lines=popular_lines, loop_cards=loop_cards)
+                           popular_lines=popular_lines, loop_cards=loop_cards,
+                           loop_stops=loop_stops)
 
 
 def _resolve_city_name(raw: str) -> str:

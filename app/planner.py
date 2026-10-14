@@ -13,7 +13,9 @@ they are worth a stop and how many nights they usually take) — see STOPS.
 """
 from __future__ import annotations
 
+import json
 from functools import lru_cache
+from pathlib import Path
 
 from app.db import cached_query
 
@@ -342,3 +344,28 @@ def network(legs: dict[tuple[str, str], dict] | None = None, lang: str = 'sr') -
                    'lat': _COORDS[slug][0], 'lon': _COORDS[slug][1]} for slug in slugs],
         'edges': [list(e) for e in edges],
     }
+
+
+_PHOTOS_FILE = Path(__file__).parent / 'content' / 'planner_photos.json'
+
+
+@lru_cache(maxsize=1)
+def _photo_credits() -> dict:
+    try:
+        return json.loads(_PHOTOS_FILE.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        return {}
+
+
+def photo(slug: str) -> dict | None:
+    """One Wikimedia Commons photo per stop (app/static/img/planner/<slug>-{640,1280}.webp,
+    16:9 crops) with the attribution its CC BY-SA licence requires, or None."""
+    credit = _photo_credits().get(slug)
+    if not credit:
+        return None
+    return dict(credit, small=f'img/planner/{slug}-640.webp', large=f'img/planner/{slug}-1280.webp')
+
+
+def cover_slug(itinerary: dict) -> str:
+    """The stop whose photo stands for the whole itinerary: the most appealing one."""
+    return max((s['slug'] for s in itinerary['stops']), key=lambda slug: STOPS[slug][1])
