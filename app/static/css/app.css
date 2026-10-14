@@ -1175,6 +1175,15 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
   box-shadow: var(--shadow-sm);
 }
 .hero__tab:not(.hero__tab--active):hover { background: rgba(255,255,255,.2); color: #fff; }
+/* Three tabs (intercity / city / trip planner) do not fit a phone at full
+   size: tighter tabs, icons dropped, and the row scrolls if a translation is
+   still too long, instead of widening the page. */
+@media (max-width: 520px) {
+  .hero__tabs { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .hero__tabs::-webkit-scrollbar { display: none; }
+  .hero__tab { flex: 0 0 auto; padding: var(--space-2) var(--space-3); font-size: var(--text-sm); white-space: nowrap; }
+  .hero__tab svg { display: none; }
+}
 .hero__panel { display: block; }
 .hero__panel[hidden] { display: none; }
 .hero__city-grid {
