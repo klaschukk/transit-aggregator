@@ -1429,6 +1429,7 @@ small { font-size: var(--text-sm); color: var(--color-text-muted); }
      so CLS stays at 0. Mobile: capped height. Desktop: fixed 480px so
      the map fills the full container width without aspect-ratio shrinkage. */
   aspect-ratio: 16 / 10;
+  width: 100%;          /* with auto width, min-height 250px pushed the width to 400px on phones (map 26px past the screen) */
   min-height: 250px;
   max-height: 420px;
   border-radius: var(--radius-lg);
