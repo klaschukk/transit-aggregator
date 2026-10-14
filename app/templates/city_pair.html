@@ -125,6 +125,10 @@
   {'value': route.trip_count|default(0), 'label': _('route.per_day'), 'icon': 'schedule'},
 ] + ([{'value': (route.min_price_rsd / config.EUR_RSD_RATE)|round|int ~ '€', 'label': 'od', 'icon': 'price'}] if route.min_price_rsd else [])) }}
 
+{% set _bt4_trip = (trips | selectattr('bt4_line_id') | list | first) if trips else None %}
+{% set _nd_slug = (route.slug if route and route.slug else _from_slug ~ '-do-' ~ _to_slug) %}{% set _nd_surface = 'city_pair_next' %}{% set _nd_tomorrow = '' %}
+{% include '_partials/_next_departure.html' %}
+
 {% if route.distance_km and route.distance_km >= 150 and route.trip_count and route.trip_count <= 5 %}
 {# Same honest book-ahead nudge as route_detail.html — same threshold
    (real distance + real daily departure count), just placed above the

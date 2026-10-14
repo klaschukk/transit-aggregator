@@ -177,27 +177,9 @@
 {# Next departure first: most visitors come for "when is the next bus", and
    on a phone the full list starts a screen and a half down. The card is the
    regular trip card (same buy link logic), clicks are logged as route_next. #}
-{% if selected_day == 0 and trips %}
-<section class="next-dep fade-in" aria-labelledby="nextDepTitle">
-  <div class="next-dep__head">
-    <span class="next-dep__pulse" aria-hidden="true"></span>
-    <h2 class="next-dep__title" id="nextDepTitle">{{ _('route.next_bus') }}</h2>
-    {% if next_trip %}
-    <span class="next-dep__in">{{ _('route.departs_in') }} {% if next_in_min >= 60 %}{{ next_in_min // 60 }} {{ _('common.h') }} {% endif %}{{ next_in_min % 60 }} {{ _('common.min') }}</span>
-    {% endif %}
-  </div>
-  {% if next_trip %}
-    {{ trip_card(next_trip, offers=_offers_trip, buy_label=_('buy.cta'),
-                 route_slug=route.slug, surface='route_next',
-                 from_slug=_from_slug, to_slug=_to_slug,
-                 bt4_fallback_line_id=(_bt4_trip.bt4_line_id if _bt4_trip else None)) }}
-  {% else %}
-  <p class="next-dep__none">{{ _('route.none_left_today') }}
-    <a href="?dan=1" class="next-dep__link">{{ _('day.tomorrow') }} &rarr;</a></p>
-  {% endif %}
-  <a href="#tripList" class="next-dep__all">{{ _('route.all_departures') }} ({{ trips|length }})
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M12 5v14m0 0l-6-6m6 6l6-6"/></svg></a>
-</section>
+{% if selected_day == 0 %}
+{% set _nd_slug = route.slug %}{% set _nd_surface = 'route_next' %}{% set _nd_tomorrow = '?dan=1' %}
+{% include '_partials/_next_departure.html' %}
 {% endif %}
 
 {{ stats_strip(

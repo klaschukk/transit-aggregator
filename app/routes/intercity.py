@@ -473,6 +473,9 @@ def city_pair(from_city: str, to_city: str):
             ORDER BY t.departure_time
         """, [route['id']])
 
+    # Next catchable departure today, shown above the list (as on /rute/).
+    next_trip, next_in_min = _next_departure(trips, _belgrade_now_hhmm()) if trips else (None, None)
+
     # Compute enrichment data from trips
     route_info: dict = {}
     if trips:
@@ -604,6 +607,7 @@ def city_pair(from_city: str, to_city: str):
     }, ensure_ascii=False)
     return render_template('city_pair.html',
                            route=route, trips=trips, route_info=route_info,
+                           next_trip=next_trip, next_in_min=next_in_min,
                            related_pairs=related_pairs,
                            onward_pairs=onward_pairs,
                            destination_country=destination_country,

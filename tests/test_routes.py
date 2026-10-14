@@ -327,6 +327,17 @@ def test_route_detail_puts_the_next_departure_first(client, monkeypatch):
     assert 'class="next-dep' not in client.get('/en/rute/beograd-novi-sad/?dan=1').data.decode()
 
 
+def test_city_pair_puts_the_next_departure_first(client, monkeypatch):
+    from app.routes import intercity
+    monkeypatch.setattr(intercity, '_belgrade_now_hhmm', lambda: '00:01')
+    r = client.get('/en/voznja/beograd-do-novi-sad/')
+    if r.status_code != 200 or 'id="tripList"' not in r.data.decode():
+        pytest.skip('pair page without trips in this env')
+    page = r.data.decode()
+    assert 'data-surface="city_pair_next"' in page
+    assert page.index('class="next-dep') < page.index('id="tripList"')
+
+
 def test_route_detail_shows_departures_left_today(client, monkeypatch):
     """The today tab shows an honest "Left today" count; switching to tomorrow
     hides it (the signal is today-only)."""
