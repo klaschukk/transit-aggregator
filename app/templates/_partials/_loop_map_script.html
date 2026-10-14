@@ -79,21 +79,46 @@
   if (document.readyState === 'complete') idle();
   else window.addEventListener('load', idle, { once: true });
 
-  var TEAL = '#0d9488', TEAL_DARK = '#0f766e', AMBER = '#f59e0b', INK = '#0f172a';
+  var TEAL = '#0d9488', TEAL_DARK = '#0f766e', AMBER = '#f59e0b', INK = '#0f172a', SLATE = '#94a3b8';
+
+  /* Small raster sprites drawn once on a canvas: a white pill behind city
+     names, a chevron for the direction of travel, and an empty box that keeps
+     labels off the pins. */
+  function sprite(w, h, draw) {
+    var c = document.createElement('canvas'); c.width = w; c.height = h;
+    var x = c.getContext('2d'); draw(x);
+    return x.getImageData(0, 0, w, h);
+  }
+  function roundRect(x, l, t, w, h, r) {
+    x.beginPath(); x.moveTo(l + r, t); x.arcTo(l + w, t, l + w, t + h, r); x.arcTo(l + w, t + h, l, t + h, r);
+    x.arcTo(l, t + h, l, t, r); x.arcTo(l, t, l + w, t, r); x.closePath();
+  }
+  /* A geometry from the cache may run b->a; draw every leg from its start. */
+  function orient(line, a) {
+    var f = line[0], l = line[line.length - 1];
+    return Math.hypot(f[0] - a[0], f[1] - a[1]) <= Math.hypot(l[0] - a[0], l[1] - a[1]) ? line : line.slice().reverse();
+  }
 
   function initMap() {
     if (typeof mapboxgl === 'undefined') return;
     mapboxgl.accessToken = TOKEN;
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var isRoute = data.mode !== 'network';
     var pts = data.stops.map(function(s) { return [s.lon, s.lat]; });
     var bounds = new mapboxgl.LngLatBounds(pts[0], pts[0]);
     pts.forEach(function(p) { bounds.extend(p); });
+    /* Names sit to the right of a point by default, so the right edge needs
+       room for "Herceg Novi". */
+    function pad() {
+      var w = el.clientWidth || 360;
+      return { top: 48, bottom: 40, left: 44, right: Math.round(Math.min(110, w * 0.24)) };
+    }
 
     var map = new mapboxgl.Map({
       container: 'loopMapCanvas',
-      style: 'mapbox://styles/mapbox/light-v11',
+      style: 'mapbox://styles/mapbox/outdoors-v12',
       bounds: bounds,
-      fitBoundsOptions: { padding: { top: 56, bottom: 56, left: 56, right: 56 }, maxZoom: 10 },
+      fitBoundsOptions: { padding: pad(), maxZoom: 10 },
       attributionControl: false,
       cooperativeGestures: true   /* page scroll wins over a one-finger drag */
     });
@@ -101,8 +126,7 @@
     map.addControl(new mapboxgl.AttributionControl({ compact: true }));
     if (window.ResizeObserver) new ResizeObserver(function() { map.resize(); }).observe(el);
 
-    var fit = { padding: { top: 56, bottom: 56, left: 56, right: 56 }, maxZoom: 10, duration: reduce ? 0 : 600 };
-    function whole() { map.fitBounds(bounds, fit); }
+    function whole() { map.fitBounds(bounds, { padding: pad(), maxZoom: 10, duration: reduce ? 0 : 600 }); }
     var resetBtn = el.querySelector('[data-map-reset]'), expandBtn = el.querySelector('[data-map-expand]');
     if (resetBtn) resetBtn.addEventListener('click', whole);
     if (expandBtn) expandBtn.addEventListener('click', function() {
@@ -112,39 +136,54 @@
     });
 
     map.on('load', function() {
-      /* Calm the basemap: our own localized labels replace its town labels,
-         region borders and minor labels only add noise at this scale, and the
-         sea gets a soft tint so the coast reads at a glance. */
+      /* Keep the relief, water and borders of the outdoors style; drop what
+         competes with the route: its own town names (ours are localized),
+         road numbers, contours, POIs. Roads stay as a faint texture. */
       (map.getStyle().layers || []).forEach(function(l) {
         var id = l.id;
-        if (/^settlement-|^admin-1-|^poi-|^road-label|^airport-|^natural-|^waterway-label|^state-label/.test(id)) {
+        if (/^settlement-|^admin-1-|^poi-|^road-label|^road-number|^road-exit|^road-intersection|^airport-|^natural-|^waterway-label|^water-point|^water-line-label|^state-label|^contour|^path-pedestrian-label|^golf-|^ferry-aerialway-label|^gate-label|^transit-label/.test(id)) {
           map.setLayoutProperty(id, 'visibility', 'none');
+        } else if (l.type === 'line' && /^(road|bridge|tunnel)-/.test(id)) {
+          map.setPaintProperty(id, 'line-opacity', 0.45);
         }
       });
-      if (map.getLayer('water')) map.setPaintProperty('water', 'fill-color', '#d5eceb');
-      if (map.getLayer('land')) map.setPaintProperty('land', 'background-color', '#f7f9f8');
-      if (map.getLayer('admin-0-boundary')) map.setPaintProperty('admin-0-boundary', 'line-color', '#b6c2c9');
+      if (map.getLayer('admin-0-boundary')) map.setPaintProperty('admin-0-boundary', 'line-color', '#8b7a99');
       if (map.getLayer('country-label')) {
-        map.setPaintProperty('country-label', 'text-color', '#8a97a3');
+        map.setPaintProperty('country-label', 'text-color', '#4b5563');
         map.setLayoutProperty('country-label', 'text-transform', 'uppercase');
-        map.setLayoutProperty('country-label', 'text-letter-spacing', 0.12);
+        map.setLayoutProperty('country-label', 'text-letter-spacing', 0.14);
         map.setLayoutProperty('country-label', 'text-size', 11);
       }
+
+      map.addImage('loop-pill', sprite(64, 48, function(x) {
+        x.shadowColor = 'rgba(15,23,42,.28)'; x.shadowBlur = 6; x.shadowOffsetY = 2;
+        x.fillStyle = '#ffffff'; roundRect(x, 8, 6, 48, 32, 16); x.fill();
+      }), { pixelRatio: 2, stretchX: [[24, 40]], stretchY: [[20, 24]], content: [16, 10, 48, 34] });
+      map.addImage('loop-chev', sprite(28, 28, function(x) {
+        x.strokeStyle = '#ffffff'; x.lineWidth = 4; x.lineCap = 'round'; x.lineJoin = 'round';
+        x.beginPath(); x.moveTo(9, 6); x.lineTo(18, 14); x.lineTo(9, 22); x.stroke();
+      }), { pixelRatio: 2 });
+      map.addImage('loop-block', sprite(4, 4, function() {}), { pixelRatio: 1 });
+
       map.addSource('stops', { type: 'geojson', data: { type: 'FeatureCollection',
         features: data.stops.map(function(s, i) {
           return { type: 'Feature', properties: { name: s.name, slug: s.slug || '', i: i },
                    geometry: { type: 'Point', coordinates: [s.lon, s.lat] } };
         }) } });
-      if (data.mode === 'network') network(); else route();
-      /* Labels try four sides before giving up, so neighbours on the coast
-         (Kotor, Budva, Herceg Novi) each still get a name where there is room. */
+      if (isRoute) route(); else network();
+      /* City names on white pills. Eight candidate spots each, so the
+         crowded coast (Herceg Novi, Kotor, Budva) still gets names. */
       map.addLayer({ id: 'stop-labels', type: 'symbol', source: 'stops',
-        layout: { 'text-field': ['get', 'name'], 'text-size': 13,
-                  'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
-                  'text-radial-offset': data.mode === 'network' ? 0.85 : 1.25,
-                  'text-justify': 'auto', 'text-padding': 2,
-                  'text-font': ['DIN Pro Bold', 'Arial Unicode MS Bold'] },
-        paint: { 'text-color': INK, 'text-halo-color': '#ffffff', 'text-halo-width': 1.8 } });
+        layout: { 'text-field': ['get', 'name'], 'text-size': 12.5,
+                  'text-font': ['DIN Pro Medium', 'Arial Unicode MS Regular'],
+                  'text-variable-anchor': ['left', 'right', 'top', 'bottom', 'bottom-left', 'top-left', 'bottom-right', 'top-right'],
+                  'text-radial-offset': isRoute ? 2.4 : 2.1, 'text-justify': 'auto', 'text-padding': 2,
+                  'icon-image': 'loop-pill', 'icon-text-fit': 'both', 'icon-text-fit-padding': [3, 7, 3, 7], 'icon-padding': 0 },
+        paint: { 'text-color': INK } });
+      /* Invisible boxes over the pins: placed first (top layer), so a name
+         never covers a neighbouring pin. */
+      map.addLayer({ id: 'stop-block', type: 'symbol', source: 'stops',
+        layout: { 'icon-image': 'loop-block', 'icon-size': isRoute ? 7 : 4.5, 'icon-allow-overlap': true } });
       el.classList.add('is-live');
     });
 
@@ -156,34 +195,40 @@
       });
       function push() { map.getSource('legs').setData({ type: 'FeatureCollection', features: feats }); }
       map.addSource('legs', { type: 'geojson', data: { type: 'FeatureCollection', features: feats } });
-      var round = { 'line-cap': 'round', 'line-join': 'round' };
-      map.addLayer({ id: 'legs-casing', type: 'line', source: 'legs', layout: round,
-        filter: ['==', ['get', 'road'], true], paint: { 'line-color': '#ffffff', 'line-width': 7 } });
-      map.addLayer({ id: 'legs-road', type: 'line', source: 'legs', layout: round,
-        filter: ['==', ['get', 'road'], true], paint: { 'line-color': TEAL, 'line-width': 4 } });
+      var round = { 'line-cap': 'round', 'line-join': 'round' }, road = ['==', ['get', 'road'], true];
+      map.addLayer({ id: 'legs-glow', type: 'line', source: 'legs', layout: round, filter: road,
+        paint: { 'line-color': TEAL, 'line-width': 14, 'line-opacity': 0.18, 'line-blur': 6 } });
+      map.addLayer({ id: 'legs-casing', type: 'line', source: 'legs', layout: round, filter: road,
+        paint: { 'line-color': '#ffffff', 'line-width': 8.5 } });
+      map.addLayer({ id: 'legs-road', type: 'line', source: 'legs', layout: round, filter: road,
+        paint: { 'line-color': TEAL_DARK, 'line-width': 5 } });
       /* Dotted = "as the crow flies", not a claim about the real road. */
       map.addLayer({ id: 'legs-air', type: 'line', source: 'legs', layout: round,
         filter: ['==', ['get', 'road'], false],
-        paint: { 'line-color': TEAL, 'line-width': 3, 'line-dasharray': [0.2, 1.8] } });
+        paint: { 'line-color': TEAL_DARK, 'line-width': 3.5, 'line-dasharray': [0.2, 1.8] } });
       map.addLayer({ id: 'legs-hot', type: 'line', source: 'legs', layout: round,
         filter: ['==', ['get', 'i'], -1], paint: { 'line-color': AMBER, 'line-width': 6 } });
+      map.addLayer({ id: 'legs-dir', type: 'symbol', source: 'legs', filter: road,
+        layout: { 'symbol-placement': 'line', 'symbol-spacing': 70, 'icon-image': 'loop-chev', 'icon-size': 0.55,
+                  'icon-allow-overlap': true, 'icon-ignore-placement': true, 'icon-rotation-alignment': 'map' } });
 
       data.legs.forEach(function(key, i) {
         fetch('/api/route-geometry?pair=' + encodeURIComponent(key))
           .then(function(r) { return r.ok ? r.json() : null; })
           .then(function(j) {
             if (j && j.geometry && j.geometry.length > 1) {
-              feats[i].geometry.coordinates = j.geometry;
+              feats[i].geometry.coordinates = orient(j.geometry, pts[i]);
               feats[i].properties.road = true;
               push();
             }
           }).catch(function() {});
       });
 
-      var pins = data.stops.map(function(s) {
+      var pins = data.stops.map(function(s, i) {
         var wrap = document.createElement('div');
         var b = document.createElement('button');
-        b.type = 'button'; b.className = 'loop-pin'; b.textContent = s.n;
+        b.type = 'button'; b.className = 'loop-pin' + (i === n - 1 && !data.loop ? ' loop-pin--end' : '');
+        b.textContent = s.n;
         b.title = s.name; b.setAttribute('aria-label', s.n + '. ' + s.name);
         wrap.appendChild(b);
         new mapboxgl.Marker({ element: wrap }).setLngLat([s.lon, s.lat]).addTo(map);
@@ -228,13 +273,13 @@
       });
     }
 
-    /* A gentle arc between two points: straight chords across 13 cities
-       collapse into a hairball, arcs keep every link readable. */
+    /* A gentle arc between two points, drawn outward from the hub city so
+       a fan of links from one start stays readable. */
     function arc(a, b) {
       var mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
       var dx = b[0] - a[0], dy = b[1] - a[1];
-      var cx = mx - dy * 0.16, cy = my + dx * 0.16, out = [];
-      for (var t = 0; t <= 1.0001; t += 0.05) {
+      var cx = mx - dy * 0.2, cy = my + dx * 0.2, out = [];
+      for (var t = 0; t <= 1.0001; t += 0.04) {
         var u = 1 - t;
         out.push([u * u * a[0] + 2 * u * t * cx + t * t * b[0],
                   u * u * a[1] + 2 * u * t * cy + t * t * b[1]]);
@@ -242,53 +287,69 @@
       return out;
     }
 
+    /* The whole network at once is a hairball. Only the direct buses out of
+       one city are drawn: the chosen start, or the city under the pointer. */
     function network() {
-      map.addSource('edges', { type: 'geojson', data: { type: 'FeatureCollection',
-        features: data.edges.map(function(e) {
-          return { type: 'Feature', properties: { a: e[0], b: e[1] },
-                   geometry: { type: 'LineString', coordinates: arc(pts[e[0]], pts[e[1]]) } };
-        }) } });
       var round = { 'line-cap': 'round', 'line-join': 'round' };
+      map.addSource('edges', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+      map.addLayer({ id: 'edges-casing', type: 'line', source: 'edges', layout: round,
+        paint: { 'line-color': '#ffffff', 'line-width': 5, 'line-opacity': 0.9 } });
       map.addLayer({ id: 'edges', type: 'line', source: 'edges', layout: round,
-        paint: { 'line-color': TEAL, 'line-opacity': 0.16, 'line-width': 1.2 } });
-      /* Direct buses out of the chosen start: the answer to "where can I go from here". */
-      map.addLayer({ id: 'edges-hot', type: 'line', source: 'edges', layout: round,
-        filter: ['==', ['get', 'a'], -1],
-        paint: { 'line-color': TEAL, 'line-opacity': 0.9, 'line-width': 2.4 } });
+        paint: { 'line-color': TEAL_DARK, 'line-width': 2.5 } });
       map.addLayer({ id: 'net-halo', type: 'circle', source: 'stops',
         filter: ['==', ['get', 'slug'], ''],
-        paint: { 'circle-radius': 15, 'circle-color': TEAL, 'circle-opacity': 0.18 } });
+        paint: { 'circle-radius': 18, 'circle-color': TEAL, 'circle-opacity': 0.22 } });
       map.addLayer({ id: 'net-stops', type: 'circle', source: 'stops',
         paint: { 'circle-radius': 6, 'circle-color': '#ffffff',
-                 'circle-stroke-color': TEAL_DARK, 'circle-stroke-width': 2 } });
+                 'circle-stroke-color': SLATE, 'circle-stroke-width': 2.5 } });
 
       var form = document.querySelector('.loop-form');
       var from = form && form.elements['from'], to = form && form.elements['to'];
-      if (!from || !to) return;
       var index = {};
       data.stops.forEach(function(s, i) { index[s.slug] = i; });
-      var next = 'from';
+      function links(i) {
+        var feats = [], near = [];
+        data.edges.forEach(function(e) {
+          if (e[0] !== i && e[1] !== i) return;
+          var o = e[0] === i ? e[1] : e[0];
+          near.push(data.stops[o].slug);
+          feats.push({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: arc(pts[i], pts[o]) } });
+        });
+        map.getSource('edges').setData({ type: 'FeatureCollection', features: feats });
+        return near;
+      }
+      var hover = -1;
       function paint() {
-        var color = ['match', ['get', 'slug'], from.value, TEAL];
-        var radius = ['match', ['get', 'slug'], from.value, 9];
-        if (to.value !== from.value) { color.push(to.value, AMBER); radius.push(to.value, 9); }
-        color.push('#ffffff'); radius.push(6);
-        map.setPaintProperty('net-stops', 'circle-color', color);
-        map.setPaintProperty('net-stops', 'circle-radius', radius);
-        map.setFilter('net-halo', ['in', ['get', 'slug'], ['literal', [from.value, to.value]]]);
-        var i = index[from.value];
-        map.setFilter('edges-hot', ['any', ['==', ['get', 'a'], i], ['==', ['get', 'b'], i]]);
+        var a = from ? from.value : '', b = to ? to.value : '';
+        var near = links(hover >= 0 ? hover : (a in index ? index[a] : -1));
+        var hot = hover >= 0 ? data.stops[hover].slug : '';
+        var ring = ['case', ['in', ['get', 'slug'], ['literal', near]], TEAL_DARK, SLATE];
+        map.setPaintProperty('net-stops', 'circle-color', ['match', ['get', 'slug'], a || '-', TEAL_DARK, b || '-', AMBER, '#ffffff']);
+        map.setPaintProperty('net-stops', 'circle-radius', ['match', ['get', 'slug'], a || '-', 9, b || '-', 9, hot || '-', 8, 6]);
+        map.setPaintProperty('net-stops', 'circle-stroke-color', ['match', ['get', 'slug'], a || '-', '#ffffff', b || '-', '#ffffff', hot || '-', TEAL_DARK, ring]);
+        map.setPaintProperty('net-stops', 'circle-stroke-width', ['match', ['get', 'slug'], a || '-', 3, b || '-', 3, 2.5]);
+        map.setFilter('net-halo', ['in', ['get', 'slug'], ['literal', [a, b]]]);
+        map.setPaintProperty('net-halo', 'circle-color', ['match', ['get', 'slug'], a || '-', TEAL, AMBER]);
       }
       paint();
+      map.on('mouseenter', 'net-stops', function(e) {
+        map.getCanvas().style.cursor = 'pointer';
+        hover = e.features[0].properties.i; paint();
+      });
+      map.on('mouseleave', 'net-stops', function() {
+        map.getCanvas().style.cursor = '';
+        hover = -1; paint();
+      });
+      if (!from || !to) return;
       from.addEventListener('change', paint); to.addEventListener('change', paint);
+      /* Two taps fill the form: first the start, then the finish. */
+      var next = 'from';
       map.on('click', 'net-stops', function(e) {
         var slug = e.features[0].properties.slug;
         if (next === 'from') { from.value = slug; next = 'to'; }
         else { to.value = slug; next = 'from'; }
-        paint();
+        hover = -1; paint();
       });
-      map.on('mouseenter', 'net-stops', function() { map.getCanvas().style.cursor = 'pointer'; });
-      map.on('mouseleave', 'net-stops', function() { map.getCanvas().style.cursor = ''; });
     }
   }
 })();

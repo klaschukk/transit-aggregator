@@ -4,7 +4,7 @@
 <div class="loop-map" id="loopMap" role="region" aria-label="{{ map_label }}" data-map="{{ map_data|tojson|forceescape }}">
   <svg class="loop-map__poster" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
     {% if map_data.mode == 'network' %}
-      {% for e in map_data.edges %}
+      {% for e in map_data.edges if start in (map_data.stops[e[0]].slug, map_data.stops[e[1]].slug) %}
       {% set _a = map_sketch[e[0]] %}{% set _b = map_sketch[e[1]] %}
       <path class="loop-map__edge" d="M{{ _a[0] }} {{ _a[1] }} Q{{ ((_a[0] + _b[0]) / 2 + (_b[1] - _a[1]) * 0.16)|round(1) }} {{ ((_a[1] + _b[1]) / 2 - (_b[0] - _a[0]) * 0.16)|round(1) }} {{ _b[0] }} {{ _b[1] }}"/>
       {% endfor %}
