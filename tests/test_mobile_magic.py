@@ -262,6 +262,10 @@ def test_no_unannotated_img_tags_in_templates():
             # (kept narrow to this one known element).
             if 'site-logo__icon' in stripped and 'loading="eager"' in stripped:
                 continue
+            # Same reasoning for the trip planner's cover photo: it is the
+            # header of the page (the LCP element), never below the fold.
+            if 'loop-cover__img' in stripped and 'loading="eager"' in stripped:
+                continue
             offenders.append(f'{p.relative_to(root)}:{line_no}: {stripped[:80]}')
     assert not offenders, (
         'Unannotated <img> — add loading="lazy" (below fold) or '

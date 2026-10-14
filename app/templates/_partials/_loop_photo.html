@@ -1,10 +1,14 @@
 {# Planner photos (Wikimedia Commons, CC BY-SA): the image and the credit its
-   licence requires — author linked to the file page, licence to its text. #}
+   licence requires — author linked to the file page, licence to its text.
+   Only the cover header is above the fold, so only it loads eagerly. #}
 {% macro photo_img(ph, cls, sizes, eager=False, alt='') -%}
-<img class="{{ cls }}" src="{{ url_for('static', filename=ph.small) }}"
-     srcset="{{ url_for('static', filename=ph.small) }} 640w, {{ url_for('static', filename=ph.large) }} 1280w"
-     sizes="{{ sizes }}" width="640" height="360" alt="{{ alt }}"
-     {%- if eager %} fetchpriority="high" decoding="async"{% else %} loading="lazy" decoding="async"{% endif %}>
+{%- set _src = url_for('static', filename=ph.small) -%}
+{%- set _set = _src ~ ' 640w, ' ~ url_for('static', filename=ph.large) ~ ' 1280w' -%}
+{%- if eager -%}
+<img class="loop-cover__img" src="{{ _src }}" srcset="{{ _set }}" sizes="{{ sizes }}" width="640" height="360" alt="{{ alt }}" loading="eager" fetchpriority="high" decoding="async">
+{%- else -%}
+<img class="{{ cls }}" src="{{ _src }}" srcset="{{ _set }}" sizes="{{ sizes }}" width="640" height="360" alt="{{ alt }}" loading="lazy" decoding="async">
+{%- endif -%}
 {%- endmacro %}
 
 {% macro photo_credit(ph, cls='loop-credit') -%}
