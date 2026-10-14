@@ -377,6 +377,7 @@ def _loop_render(mode: str, itinerary: dict | None, start: str, end: str, days: 
     base = current_app.config['BASE_URL'] + getattr(g, 'lang_prefix', '')
     ld_presets = [{'@type': 'ListItem', 'position': i, 'name': p['label'],
                    'url': f"{base}/balkan-loop/{p['slug']}/"} for i, p in enumerate(presets, 1)]
+    extra.setdefault('via', ())
     return render_template(
         'balkan_loop.html', mode=mode, itinerary=itinerary, stops=stops,
         presets=presets, ld_presets=ld_presets,
@@ -401,7 +402,10 @@ def balkan_loop():
             leg_groups = planner.leg_groups(lang=lang, eur_rsd=current_app.config['EUR_RSD_RATE'])
             net = planner.network(lang=lang)
             if net['edges']:
-                hub_map = {'map_data': dict(net, mode='network'),
+                hub_map = {'hub_stats': {'cities': len(net['stops']),
+                                         'countries': len({v[0] for v in planner.STOPS.values()}),
+                                         'links': len(net['edges'])},
+                           'map_data': dict(net, mode='network'),
                            'map_sketch': planner.sketch([(s['lat'], s['lon']) for s in net['stops']])}
         return _loop_render('hub', None, d_start, d_end, d_days, leg_groups=leg_groups,
                             og_image_url=f"{current_app.config['BASE_URL']}/og/balkan-loop/planner.png",
@@ -418,17 +422,22 @@ def balkan_loop():
     except (TypeError, ValueError):
         days = d_days
     days = max(planner.MIN_DAYS, min(planner.MAX_DAYS, days))
+    # Must-see stops: repeated ?via=kotor&via=mostar (checkboxes) or one
+    # comma-separated value (hand-written links).
+    raw_via = [normalize_slug(v) for part in request.args.getlist('via')[:12]
+               for v in part.split(',')]
+    via = planner.clean_via(raw_via, start, end)
 
     slug = planner.preset_slug(start, end, days)
-    if slug in planner.PRESET_BY_SLUG:
+    if not via and slug in planner.PRESET_BY_SLUG:
         return redirect(f"{getattr(g, 'lang_prefix', '')}/balkan-loop/{slug}/", code=301)
 
     g.meta_robots = 'noindex, follow'
     itinerary = None
     if db_ready():
-        itinerary = planner.plan(start, end, days, lang=lang,
+        itinerary = planner.plan(start, end, days, lang=lang, via=via,
                                  eur_rsd=current_app.config['EUR_RSD_RATE'])
-    return _loop_render('result', itinerary, start, end, days)
+    return _loop_render('result', itinerary, start, end, days, via=via)
 
 
 @info_bp.route('/balkan-loop/<slug>/')

@@ -42,7 +42,7 @@
 
 {% macro planner_form(form_id) %}
 <form class="loop-form" method="get" action="{{ _hub_url }}">
-  <div class="loop-form__field">
+  <div class="loop-form__field loop-form__field--from">
     <label class="loop-form__label" for="{{ form_id }}From">{{ _('planner.from') }}</label>
     <select class="loop-form__input" id="{{ form_id }}From" name="from">
       {% for c in stops %}<option value="{{ c.slug }}"{% if c.slug == start %} selected{% endif %}>{{ c.name }}</option>{% endfor %}
@@ -51,7 +51,7 @@
   <button type="button" class="loop-form__swap" aria-label="{{ _('a11y.swap_cities') }}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
   </button>
-  <div class="loop-form__field">
+  <div class="loop-form__field loop-form__field--to">
     <label class="loop-form__label" for="{{ form_id }}To">{{ _('planner.to') }}</label>
     <select class="loop-form__input" id="{{ form_id }}To" name="to" aria-describedby="{{ form_id }}Hint">
       {% for c in stops %}<option value="{{ c.slug }}"{% if c.slug == end %} selected{% endif %}>{{ c.name }}</option>{% endfor %}
@@ -62,6 +62,17 @@
     <input class="loop-form__input" id="{{ form_id }}Days" name="days" type="number" inputmode="numeric"
            min="{{ min_days }}" max="{{ max_days }}" value="{{ days }}" required>
   </div>
+  <details class="loop-form__via"{% if via %} open{% endif %}>
+    <summary class="loop-form__via-sum">{{ _('planner.via') }} <span class="loop-form__opt">{{ _('planner.optional') }}</span></summary>
+    <div class="loop-chips">
+      {% for c in stops %}
+      <label class="loop-chip">
+        <input class="loop-chip__box" type="checkbox" name="via" value="{{ c.slug }}"{% if c.slug in via %} checked{% endif %}>
+        <span class="loop-chip__text">{{ c.name }}</span>
+      </label>
+      {% endfor %}
+    </div>
+  </details>
   <button class="btn btn--primary loop-form__btn" type="submit">{{ _('planner.submit') }}</button>
   <p class="loop-form__hint" id="{{ form_id }}Hint">{{ _('planner.loop_hint') }}</p>
 </form>
@@ -80,6 +91,7 @@
       <span class="loop-card__chain">{{ p.chain }}</span>
       <span class="loop-card__sum">{{ p.summary }}</span>
     </div>
+    <svg class="loop-card__go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true"><path d="M5 12h14m0 0l-6-6m6 6l-6 6"/></svg>
   </li>
   {% endfor %}
 </ul>
@@ -99,33 +111,52 @@
 {{ breadcrumb([{'url': lang_prefix ~ '/', 'label': _('breadcrumb.home')}, {'label': _('nav.planner')}]) }}
 {% endif %}
 
-<div class="page-title fade-in">
-  <h1>{{ seo.h1 }}</h1>
-  {% if mode == 'preset' %}
-  <p class="page-subtitle loop-intro">{{ seo.intro }}</p>
-  {% else %}
-  <p class="page-subtitle">{{ _('planner.sub') }}</p>
+{% if mode == 'hub' %}
+{# ── Hub: the form sits beside the network map ── #}
+<div class="loop-hero fade-in">
+  <div class="loop-hero__panel">
+    <p class="loop-eyebrow">{{ _('planner.eyebrow') }}</p>
+    <h1 class="loop-hero__title">{{ seo.h1 }}</h1>
+    <p class="loop-hero__sub">{{ _('planner.sub') }}</p>
+    {{ planner_form('loop') }}
+    {% if hub_stats %}
+    <dl class="loop-stats">
+      <div class="loop-stats__item"><dd>{{ hub_stats.cities }}</dd><dt>{{ _('planner.stat_cities') }}</dt></div>
+      <div class="loop-stats__item"><dd>{{ hub_stats.countries }}</dd><dt>{{ _('planner.sum_countries') }}</dt></div>
+      <div class="loop-stats__item"><dd>{{ hub_stats.links }}</dd><dt>{{ _('planner.stat_links') }}</dt></div>
+    </dl>
+    {% endif %}
+  </div>
+  {% if map_data %}
+  <div class="loop-hero__map loop-net">
+    {% set map_label = _('planner.legs_h') %}
+    {% include '_partials/_loop_map.html' %}
+    <p class="loop-net__hint">
+      <span class="loop-net__key loop-net__key--from" aria-hidden="true"></span>{{ _('planner.from') }}
+      <span class="loop-net__key loop-net__key--to" aria-hidden="true"></span>{{ _('planner.to') }}
+      <span class="loop-net__tip">{{ _('planner.map_hint') }}</span>
+    </p>
+  </div>
   {% endif %}
 </div>
+{% else %}
+<div class="loop-head fade-in">
+  <p class="loop-eyebrow">{{ _('planner.eyebrow') }}</p>
+  <h1 class="loop-head__title">{{ seo.h1 }}</h1>
+  {% if mode == 'preset' %}
+  <p class="loop-intro">{{ seo.intro }}</p>
+  {% else %}
+  <p class="loop-intro">{{ _('planner.sub') }}</p>
+  {% endif %}
+</div>
+{% endif %}
 
-{% if mode != 'preset' %}
+{% if mode == 'result' %}
 {{ planner_form('loop') }}
 {% endif %}
 
-{% if mode == 'hub' and map_data %}
-<section class="loop-net" aria-label="{{ _('planner.legs_h') }}">
-  {% set map_label = _('planner.legs_h') %}
-  {% include '_partials/_loop_map.html' %}
-  <p class="loop-net__hint">
-    <span class="loop-net__key loop-net__key--from" aria-hidden="true"></span>{{ _('planner.from') }}
-    <span class="loop-net__key loop-net__key--to" aria-hidden="true"></span>{{ _('planner.to') }}
-    <span class="loop-net__tip">{{ _('planner.map_hint') }}</span>
-  </p>
-</section>
-{% endif %}
-
 {% if itinerary %}
-<section class="loop-result" aria-labelledby="loopResultH">
+<section class="loop-result fade-in fade-in--d2" aria-labelledby="loopResultH">
   <h2 id="loopResultH"{% if mode == 'preset' %} class="visually-hidden"{% endif %}>{{ _('planner.result_h').format(days=itinerary.days) }}</h2>
   {% include '_partials/_loop_itinerary.html' %}
 </section>
@@ -141,10 +172,17 @@
 {% if mode == 'preset' and faq %}
 <section class="home-section loop-faq">
   <h2>{{ _('planner.faq_h') }}</h2>
-  {% for item in faq %}
-  <h3 class="loop-faq__q">{{ item.q }}</h3>
-  <p class="loop-faq__a">{{ item.a }}</p>
-  {% endfor %}
+  <div class="loop-faq__list">
+    {% for item in faq %}
+    <details class="loop-faq__item"{% if loop.first %} open{% endif %}>
+      <summary class="loop-faq__q">
+        <h3>{{ item.q }}</h3>
+        <svg class="loop-faq__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </summary>
+      <p class="loop-faq__a">{{ item.a }}</p>
+    </details>
+    {% endfor %}
+  </div>
 </section>
 {% endif %}
 
@@ -175,7 +213,10 @@
   <div class="loop-legs">
     {% for grp in leg_groups %}
     <div class="loop-legs__group">
-      <h3 class="loop-legs__from">{{ _('planner.legs_from').format(city=grp.name) }}</h3>
+      <h3 class="loop-legs__from">
+        <span>{{ _('planner.legs_from').format(city=grp.name) }}</span>
+        <span class="loop-legs__count">{{ _('planner.direct_count').format(n=grp.legs|length) }}</span>
+      </h3>
       <ul class="loop-legs__list">
         {% for leg in grp.legs %}
         <li>
@@ -193,9 +234,23 @@
 
 <section class="home-section loop-how">
   <h2>{{ _('planner.how_h') }}</h2>
-  <p>{{ _('planner.how_1') }}</p>
-  <p>{{ _('planner.how_2') }}</p>
-  <p>{{ _('planner.how_3') }}</p>
+  <ol class="loop-how__grid">
+    <li class="loop-how__item">
+      <span class="loop-how__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></svg></span>
+      <h3>{{ _('planner.how_t1') }}</h3>
+      <p>{{ _('planner.how_1') }}</p>
+    </li>
+    <li class="loop-how__item">
+      <span class="loop-how__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+      <h3>{{ _('planner.how_t2') }}</h3>
+      <p>{{ _('planner.how_2') }}</p>
+    </li>
+    <li class="loop-how__item">
+      <span class="loop-how__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></span>
+      <h3>{{ _('planner.how_t3') }}</h3>
+      <p>{{ _('planner.how_3') }}</p>
+    </li>
+  </ol>
 </section>
 
 {% if map_data %}{% include '_partials/_loop_map_script.html' %}{% endif %}

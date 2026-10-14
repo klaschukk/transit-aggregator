@@ -5,7 +5,8 @@
   <svg class="loop-map__poster" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
     {% if map_data.mode == 'network' %}
       {% for e in map_data.edges %}
-      <line class="loop-map__edge" x1="{{ map_sketch[e[0]][0] }}" y1="{{ map_sketch[e[0]][1] }}" x2="{{ map_sketch[e[1]][0] }}" y2="{{ map_sketch[e[1]][1] }}"/>
+      {% set _a = map_sketch[e[0]] %}{% set _b = map_sketch[e[1]] %}
+      <path class="loop-map__edge" d="M{{ _a[0] }} {{ _a[1] }} Q{{ ((_a[0] + _b[0]) / 2 + (_b[1] - _a[1]) * 0.16)|round(1) }} {{ ((_a[1] + _b[1]) / 2 - (_b[0] - _a[0]) * 0.16)|round(1) }} {{ _b[0] }} {{ _b[1] }}"/>
       {% endfor %}
       {% for pt in map_sketch %}
       <circle class="loop-map__dot" cx="{{ pt[0] }}" cy="{{ pt[1] }}" r="6"/>

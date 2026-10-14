@@ -163,7 +163,7 @@ def _score(path: tuple[str, ...], minutes: int, days: int, loop: bool) -> float:
 
 
 def _search(graph: dict[str, tuple[tuple[str, int], ...]], start: str, end: str,
-            days: int) -> tuple[str, ...] | None:
+            days: int, via: frozenset[str] = frozenset()) -> tuple[str, ...] | None:
     loop = start == end
     best: tuple[float, tuple[str, ...]] | None = None
     budget = SEARCH_BUDGET
@@ -178,7 +178,7 @@ def _search(graph: dict[str, tuple[tuple[str, int], ...]], start: str, end: str,
             if nxt == end and len(path) >= (3 if loop else 1):
                 done = path + (nxt,)
                 total = nights + (0 if loop else STOPS[nxt][2])
-                if total <= days:
+                if total <= days and via.issubset(done):
                     sc = _score(done, minutes + dur, days, loop)
                     if best is None or sc > best[0]:
                         best = (sc, done)
@@ -210,18 +210,30 @@ def _nights(stops: tuple[str, ...], days: int) -> tuple[list[int], int]:
 
 
 @lru_cache(maxsize=4096)
-def _best_path(graph_key: tuple, start: str, end: str, days: int) -> tuple[str, ...] | None:
+def _best_path(graph_key: tuple, start: str, end: str, days: int,
+               via: tuple[str, ...] = ()) -> tuple[str, ...] | None:
     graph: dict[str, list[tuple[str, int]]] = {}
     for f, t, dur in graph_key:
         graph.setdefault(f, []).append((t, dur))
     # Most appealing neighbour first, so a budget cut-off still returns a good plan.
     ordered = {f: tuple(sorted(v, key=lambda x: -STOPS[x[0]][1])) for f, v in graph.items()}
-    return _search(ordered, start, end, days)
+    return _search(ordered, start, end, days, frozenset(via))
+
+
+MAX_VIA = 5
+
+
+def clean_via(values, start: str, end: str) -> tuple[str, ...]:
+    """Must-see stops from user input: known slugs only, not the endpoints,
+    de-duplicated, sorted (stable cache key and URL), capped at MAX_VIA."""
+    seen = {v for v in values if v in STOPS and v not in (start, end)}
+    return tuple(sorted(seen))[:MAX_VIA]
 
 
 def plan(start: str, end: str, days: int, legs: dict[tuple[str, str], dict] | None = None,
-         lang: str = 'sr', eur_rsd: float = 117.0) -> dict | None:
-    """Itinerary dict for the template, or None when no chain of direct buses fits."""
+         lang: str = 'sr', eur_rsd: float = 117.0, via: tuple[str, ...] = ()) -> dict | None:
+    """Itinerary dict for the template, or None when no chain of direct buses
+    fits (including: fits only without one of the must-see `via` stops)."""
     if start not in STOPS or end not in STOPS:
         return None
     days = max(MIN_DAYS, min(MAX_DAYS, int(days)))
@@ -229,7 +241,7 @@ def plan(start: str, end: str, days: int, legs: dict[tuple[str, str], dict] | No
     graph_key = tuple(sorted(
         (f, t, leg.get('duration_min') or UNKNOWN_LEG_MIN)
         for (f, t), leg in legs.items() if _usable(leg)))
-    path = _best_path(graph_key, start, end, days)
+    path = _best_path(graph_key, start, end, days, clean_via(via, start, end))
     if not path:
         return None
 

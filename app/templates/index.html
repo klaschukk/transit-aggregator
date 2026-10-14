@@ -223,9 +223,12 @@
 <section class="home-section container">
   <h2 class="home-section__title">{{ _('planner.home_h') }}</h2>
   <p class="page-subtitle">{{ _('planner.home_lead') }}</p>
-  <div class="see-also__list">
+  <div class="home-routes">
     {% for p in loop_cards %}
-    <a href="{{ lang_prefix }}/balkan-loop/{{ p.slug }}/" class="see-also__link">{{ p.label }}</a>
+    <a href="{{ lang_prefix }}/balkan-loop/{{ p.slug }}/" class="home-route">
+      <div class="home-route__cities"><span class="home-route__from">{{ p.label }}</span></div>
+      <div class="home-route__bottom"><span class="home-route__meta">{{ p.summary }}</span></div>
+    </a>
     {% endfor %}
   </div>
   <a href="{{ lang_prefix }}/balkan-loop/" class="btn btn--outline home-section__btn">{{ _('planner.home_cta') }} →</a>

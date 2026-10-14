@@ -5,20 +5,40 @@
   {%- if _h %}{{ _h }} {{ _('common.h') }}{% endif %}{% if _h and _m %} {% endif %}{% if _m %}{{ _m }} {{ _('common.min') }}{% endif -%}
 {%- endmacro %}
 
-<div class="loop-actions">
+<div class="loop-top">
+  <nav class="loop-ribbon" aria-label="{{ _('planner.ribbon') }}">
+    <ol class="loop-ribbon__list">
+      {% for stop in itinerary.stops %}
+      <li class="loop-ribbon__item"><a class="loop-ribbon__link" href="#loopStop{{ loop.index }}"><span class="loop-ribbon__n">{{ loop.index }}</span>{{ stop.name }}</a></li>
+      {% endfor %}
+    </ol>
+  </nav>
   <button type="button" class="loop-share" data-copy-url="{{ share_url }}" data-copied="{{ _('planner.copied') }}">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M10 13a5 5 0 007.07 0l3-3a5 5 0 00-7.07-7.07l-1.5 1.5"/><path d="M14 11a5 5 0 00-7.07 0l-3 3a5 5 0 007.07 7.07l1.5-1.5"/></svg>
     <span class="loop-share__text" aria-live="polite">{{ _('planner.copy') }}</span>
   </button>
 </div>
+
 <dl class="loop-sum">
-  <div class="loop-sum__item"><dt>{{ _('planner.sum_stops') }}</dt><dd>{{ itinerary.stops|length }}</dd></div>
-  <div class="loop-sum__item"><dt>{{ _('planner.sum_countries') }}</dt><dd>{{ itinerary.countries|length }}</dd></div>
+  <div class="loop-sum__item">
+    <span class="loop-sum__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+    <div class="loop-sum__val"><dd>{{ itinerary.stops|length }}</dd><dt>{{ _('planner.sum_stops') }}</dt></div>
+  </div>
+  <div class="loop-sum__item">
+    <span class="loop-sum__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg></span>
+    <div class="loop-sum__val"><dd>{{ itinerary.countries|length }}</dd><dt>{{ _('planner.sum_countries') }}</dt></div>
+  </div>
   {% if itinerary.bus_minutes %}
-  <div class="loop-sum__item"><dt>{{ _('planner.sum_bus') }}</dt><dd>{{ hm(itinerary.bus_minutes) }}</dd></div>
+  <div class="loop-sum__item">
+    <span class="loop-sum__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+    <div class="loop-sum__val"><dd>{{ hm(itinerary.bus_minutes) }}</dd><dt>{{ _('planner.sum_bus') }}</dt></div>
+  </div>
   {% endif %}
   {% if itinerary.bus_eur and not itinerary.bus_eur_partial %}
-  <div class="loop-sum__item"><dt>{{ _('planner.sum_cost') }}</dt><dd>{{ itinerary.bus_eur }} €</dd></div>
+  <div class="loop-sum__item">
+    <span class="loop-sum__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M3 9a2 2 0 012-2h14a2 2 0 012 2v1a2 2 0 000 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2v-1a2 2 0 000-4V9z"/><path d="M14 7v10" stroke-dasharray="2 2"/></svg></span>
+    <div class="loop-sum__val"><dd>{{ itinerary.bus_eur }} €</dd><dt>{{ _('planner.sum_cost') }}</dt></div>
+  </div>
   {% endif %}
 </dl>
 
@@ -32,26 +52,31 @@
     <ol class="loop-steps">
       {% for stop in itinerary.stops %}
       <li class="loop-stop" id="loopStop{{ loop.index }}" data-n="{{ loop.index }}">
-        <div class="loop-stop__head">
-          <h3 class="loop-stop__name">{{ stop.name }}</h3>
-          <span class="loop-stop__days">{{ _('planner.days_range').format(a=stop.day_from, b=stop.day_to) }}</span>
-          <button type="button" class="loop-stop__locate" data-n="{{ loop.index }}" aria-label="{{ _('planner.map_show').format(city=stop.name) }}" title="{{ _('planner.map_show').format(city=stop.name) }}" hidden>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          </button>
+        <div class="loop-stop__card">
+          <div class="loop-stop__head">
+            <h3 class="loop-stop__name">{{ stop.name }}</h3>
+            <button type="button" class="loop-stop__locate" data-n="{{ loop.index }}" aria-label="{{ _('planner.map_show').format(city=stop.name) }}" title="{{ _('planner.map_show').format(city=stop.name) }}" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </button>
+          </div>
+          <p class="loop-stop__pills">
+            <span class="loop-pill loop-pill--days">{{ _('planner.days_range').format(a=stop.day_from, b=stop.day_to) }}</span>
+            <span class="loop-pill">{{ _('planner.nights').format(n=stop.nights) }}</span>
+            <span class="loop-pill">{{ _('planner.country.' ~ stop.country) }}</span>
+          </p>
+          <p class="loop-stop__text">{{ _('planner.stop.' ~ stop.slug) }}</p>
+          {% if stop.offers %}
+          <div class="loop-offer">
+            {% for o in stop.offers %}
+            <a class="loop-offer__btn" href="{{ o.url }}" target="_blank" rel="sponsored nofollow noopener"
+               data-partner="{{ o.key }}" data-route-slug="{{ stop.slug }}" data-surface="planner">
+              {{- _('planner.offer.' ~ o.key).format(city=stop.name) -}}
+              {%- if o.name %} <span class="loop-offer__partner">· {{ o.name }}</span>{% endif %}
+            </a>
+            {% endfor %}
+          </div>
+          {% endif %}
         </div>
-        <p class="loop-stop__meta">{{ _('planner.country.' ~ stop.country) }} · {{ _('planner.nights').format(n=stop.nights) }}</p>
-        <p class="loop-stop__text">{{ _('planner.stop.' ~ stop.slug) }}</p>
-        {% if stop.offers %}
-        <div class="loop-offer">
-          {% for o in stop.offers %}
-          <a class="loop-offer__btn" href="{{ o.url }}" target="_blank" rel="sponsored nofollow noopener"
-             data-partner="{{ o.key }}" data-route-slug="{{ stop.slug }}" data-surface="planner">
-            {{- _('planner.offer.' ~ o.key).format(city=stop.name) -}}
-            {%- if o.name %} <span class="loop-offer__partner">· {{ o.name }}</span>{% endif %}
-          </a>
-          {% endfor %}
-        </div>
-        {% endif %}
       </li>
       {% if not loop.last or itinerary.loop %}
       {% set leg = itinerary.legs[loop.index0] %}

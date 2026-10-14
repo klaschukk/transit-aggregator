@@ -308,3 +308,32 @@ def test_copy_link_and_map_tools_are_present(client, loop_legs):
     assert f'data-copy-url="http://localhost:5000/en{PRESET}"' in page
     assert 'data-map-reset' in page and 'data-map-expand' in page
     assert page.count('class="loop-stop__locate"') == 5
+
+
+def test_must_see_stops_are_honoured_or_no_plan_is_returned():
+    legs = dict(LEGS)
+    legs.update(_chain('budva', 'tirana'))               # shortcut that skips Podgorica
+    without = planner.plan('dubrovnik', 'tirana', 10, legs, 'en')
+    assert 'podgorica' not in [s['slug'] for s in without['stops']]
+    withp = planner.plan('dubrovnik', 'tirana', 10, legs, 'en', via=('podgorica',))
+    assert 'podgorica' in [s['slug'] for s in withp['stops']]
+    # Ohrid lies beyond Tirana on this chain: no plan, not a silently dropped stop.
+    assert planner.plan('dubrovnik', 'tirana', 21, legs, 'en', via=('ohrid',)) is None
+    assert planner.clean_via(['kotor', 'zzz', 'dubrovnik', 'kotor'], 'dubrovnik', 'budva') == ('kotor',)
+
+
+def test_via_in_the_query_reaches_the_plan_and_the_form(client, loop_legs):
+    html = client.get('/en/balkan-loop/?from=dubrovnik&to=tirana&days=12&via=ohrid&via=zzz').data.decode()
+    assert 'No chain of direct buses' in html            # Ohrid lies beyond Tirana on this chain
+    assert re.search(r'name="via" value="ohrid" checked', html)
+    # A preset's own parameters plus a must-see stop is a custom route, not a redirect.
+    r = client.get('/en/balkan-loop/?from=dubrovnik&to=tirana&days=10&via=kotor')
+    assert r.status_code == 200 and 'loop-steps' in r.data.decode()
+
+
+def test_hub_hero_has_stats_and_route_page_has_a_ribbon(client, loop_legs):
+    hub = client.get('/en/balkan-loop/').data.decode()
+    assert 'loop-hero' in hub and 'loop-stats' in hub and hub.count('<h1') == 1
+    page = client.get(f'/en{PRESET}').data.decode()
+    assert page.count('class="loop-ribbon__link"') == 5 and 'href="#loopStop3"' in page
+    assert page.count('<details class="loop-faq__item"') >= 2
