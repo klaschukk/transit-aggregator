@@ -601,7 +601,9 @@ body.m-nav-open .site-nav#siteNav {
 .seo-block { flex-wrap: wrap; }
 .seo-block__more {
   display: inline-flex;
-  flex: 0 0 100%;
+  /* Full row minus the indent: 100% plus the margin pushed the button 59px
+     past the right edge on a 390px phone. */
+  flex: 0 0 calc(100% - 40px - var(--mspace-4));
   justify-content: flex-start;
   margin-left: calc(40px + var(--mspace-4));
   align-items: center;
@@ -791,5 +793,11 @@ body:has(.cookie-banner[data-visible="true"]) {
   outline: 2px solid #fff;
   outline-offset: 2px;
 }
+
+
+  /* Home city cards: two columns must be allowed to shrink below their content
+     (mode badges), or the second card ends ~24px past a 390px screen. */
+  .home-cities-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .home-cities-grid .home-city-card { min-width: 0; }
 
 } /* end @media (max-width: 767px) */
