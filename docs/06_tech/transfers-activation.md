@@ -43,5 +43,18 @@
 и `partner = stay | tours | esim | insurance`:
 `select partner, route_slug, count(*) from ba_clicks where surface='planner' group by 1,2 order by 3 desc;`
 
+### SEO-устройство (2026-10-14)
+
+- `/balkan-loop/` — хаб: форма, карточки готовых маршрутов, индекс всех прямых автобусов между городами кольца. Индексируется.
+- `/balkan-loop/<slug>/` — 7 готовых маршрутов (`planner.PRESETS`), у каждого свои title/description/H1, вводка и FAQ из данных,
+  разметка `TouristTrip` + `FAQPage`, своя OG-картинка (`/og/balkan-loop/<slug>.png`). Если расписание перестало складываться
+  в цепочку, страница отдаёт 404 и сама пропадает из `sitemap-core.xml`.
+- `/balkan-loop/?from=&to=&days=` — результат формы: `noindex, follow`. Если параметры совпали с готовым маршрутом, 301 на его адрес.
+- Новый готовый маршрут = одна строка в `PRESETS`; тексты и разметка соберутся сами. Не добавлять зеркальные (A→B и B→A)
+  и почти одинаковые маршруты: это дубли, а не новые страницы.
+- Качество цепочки настраивается константами в `app/planner.py`: `HOUR_TAX`, `STOP_COST`, `TURN_COST`.
+- Запросы под title подбирались без данных Search Console (API на боксе не настроен). Через 3–4 недели сверить с реальными
+  запросами в GSC и поправить `planner.title` / `planner.p_title` в `app/i18n.py`.
+
 Стоп-условие, о котором договорились 2026-10-14: если к 15 декабря `/en/balkan-loop/` не набирает показов в Search Console,
 дальше в планировщик не вкладываемся.

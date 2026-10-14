@@ -65,7 +65,9 @@
 /gradski/{city}/stajaliste/{slug}/   — остановка (линии + ETA)
 /prevoznici/                         — перевозчики
 /autobuske-stanice/                  — станции
-/balkan-loop/?from&to&days           — планировщик маршрута по Балканам (app/planner.py)
+/balkan-loop/                        — хаб планировщика маршрута по Балканам (app/planner.py)
+/balkan-loop/{slug}/                 — готовый маршрут (planner.PRESETS), индексируется
+/balkan-loop/?from&to&days           — результат формы, noindex
 /o-nama/                             — о проекте
 /kontakt/                            — контакт
 /api/cities?q=                       — автокомплит городов
