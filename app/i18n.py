@@ -687,6 +687,12 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'Все готовые маршруты и планировщик',
         'bg': 'Всички готови маршрути и планерът',
     },
+    'planner.map_hint': {
+        'sr': 'Dodirnite dva grada na mapi: prvi je početak, drugi kraj.',
+        'en': 'Tap two cities on the map: the first is the start, the second the finish.',
+        'ru': 'Нажмите два города на карте: первый станет стартом, второй финишем.',
+        'bg': 'Докоснете два града на картата: първият е начало, вторият край.',
+    },
     'planner.h1': {
         'sr': 'Planer putovanja po Balkanu autobusom',
         'en': 'Balkan trip planner: your itinerary by bus',

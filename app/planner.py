@@ -242,6 +242,7 @@ def plan(start: str, end: str, days: int, legs: dict[tuple[str, str], dict] | No
         out_stops.append({
             'slug': slug, 'name': stop_name(slug, lang), 'db_name': _DB_NAMES[slug],
             'country': STOPS[slug][0], 'nights': n, 'day_from': day, 'day_to': day + n,
+            'lat': _COORDS[slug][0], 'lon': _COORDS[slug][1],
         })
         day += n
 
@@ -292,3 +293,40 @@ def leg_groups(legs: dict[tuple[str, str], dict] | None = None, lang: str = 'sr'
     out = [{'slug': a, 'name': stop_name(a, lang),
             'legs': sorted(items, key=lambda x: x['to_name'])} for a, items in groups.items()]
     return sorted(out, key=lambda g: g['name'])
+
+
+def sketch(points: list[tuple[float, float]], width: int = 600, height: int = 400,
+           pad: int = 40) -> list[tuple[float, float]]:
+    """Project (lat, lon) points into an SVG box, north up, aspect preserved.
+    Drawn server-side as the map's instant poster and as itinerary thumbnails,
+    so the route shape is on screen before (or without) the map library."""
+    if not points:
+        return []
+    k = 0.74  # cos(latitude ~42.5)
+    xs = [lon * k for _lat, lon in points]
+    ys = [-lat for lat, _lon in points]
+    span = max(max(xs) - min(xs), max(ys) - min(ys)) or 1.0
+    scale = min((width - 2 * pad) / span, (height - 2 * pad) / span)
+    off_x = (width - (max(xs) - min(xs)) * scale) / 2
+    off_y = (height - (max(ys) - min(ys)) * scale) / 2
+    return [(round(off_x + (x - min(xs)) * scale, 1), round(off_y + (y - min(ys)) * scale, 1))
+            for x, y in zip(xs, ys)]
+
+
+def route_points(itinerary: dict) -> list[tuple[float, float]]:
+    """(lat, lon) along the itinerary, closing the ring for a loop."""
+    pts = [(s['lat'], s['lon']) for s in itinerary['stops']]
+    return pts + pts[:1] if itinerary['loop'] else pts
+
+
+def network(legs: dict[tuple[str, str], dict] | None = None, lang: str = 'sr') -> dict:
+    """Every loop stop and every stop pair with a direct bus, for the hub map."""
+    legs = load_legs() if legs is None else legs
+    slugs = list(STOPS)
+    index = {slug: i for i, slug in enumerate(slugs)}
+    edges = sorted({tuple(sorted((index[a], index[b]))) for a, b in legs})
+    return {
+        'stops': [{'slug': slug, 'name': stop_name(slug, lang),
+                   'lat': _COORDS[slug][0], 'lon': _COORDS[slug][1]} for slug in slugs],
+        'edges': [list(e) for e in edges],
+    }

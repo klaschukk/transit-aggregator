@@ -120,7 +120,7 @@ def test_hub_renders_in_every_language(client, loop_legs, prefix):
     assert f'{prefix}{PRESET}' in html                  # curated itinerary card
     assert f'{prefix}/rute/dubrovnik-kotor/' in html    # direct-leg index
     assert 'loop-steps' not in html                     # no itinerary duplicated on the hub
-    assert not re.search(r'planner\.[a-z_]', html)      # no untranslated key leaked
+    assert not re.search(r'planner\.(?!css)[a-z_]', html)      # no untranslated key leaked
     assert _head(html, r'name="robots" content="([^"]+)"').startswith('index')
 
 
@@ -130,7 +130,7 @@ def test_preset_page_renders_in_every_language(client, loop_legs, prefix):
     assert r.status_code == 200
     html = r.data.decode()
     assert 'loop-steps' in html and f'{prefix}/rute/dubrovnik-kotor/' in html
-    assert not re.search(r'planner\.[a-z_]', html)
+    assert not re.search(r'planner\.(?!css)[a-z_]', html)
     assert _head(html, r'rel="canonical" href="([^"]+)"').endswith(f'{prefix}{PRESET}')
     assert _head(html, r'name="robots" content="([^"]+)"').startswith('index')
 
@@ -241,3 +241,42 @@ def test_og_image_for_preset(client, loop_legs):
 def test_planner_partners_are_accepted_by_click_log(client):
     r = client.post('/api/ba-click', json={'route_slug': 'kotor', 'surface': 'planner', 'partner': 'stay'})
     assert r.status_code == 204
+
+
+def test_itinerary_page_has_a_map_with_one_pin_per_stop(client, loop_legs):
+    import html as html_mod
+    import json
+    page = client.get(f'/en{PRESET}').data.decode()
+    raw = re.search(r'id="loopMap"[^>]*data-map="([^"]+)"', page).group(1)
+    data = json.loads(html_mod.unescape(raw))
+    assert data['mode'] == 'route'
+    assert [s['name'] for s in data['stops']] == ['Dubrovnik', 'Kotor', 'Budva', 'Podgorica', 'Tirana']
+    assert data['legs'] == ['dubrovnik:kotor', 'kotor:budva', 'budva:podgorica', 'podgorica:tirana']
+    # The server-drawn sketch is there before (and without) the map library.
+    assert page.count('class="loop-map__pin"') == 5 and 'loop-map__line' in page
+    assert all(f'id="loopStop{n}"' in page for n in range(1, 6))
+
+
+def test_hub_map_shows_the_network_and_cards_have_route_thumbnails(client, loop_legs):
+    import html as html_mod
+    import json
+    page = client.get('/en/balkan-loop/').data.decode()
+    raw = re.search(r'id="loopMap"[^>]*data-map="([^"]+)"', page).group(1)
+    data = json.loads(html_mod.unescape(raw))
+    assert data['mode'] == 'network' and len(data['stops']) == len(planner.STOPS)
+    assert len(data['edges']) == 5          # LEGS is a 6-stop chain, both directions
+    assert 'loop-card__thumb' in page and 'loop-form__swap' in page
+
+
+def test_map_library_is_never_loaded_eagerly(client, loop_legs):
+    for url in ('/en/balkan-loop/', f'/en{PRESET}'):
+        page = client.get(url).data.decode()
+        assert '<script src="https://api.mapbox.com' not in page
+        assert 'planner.css' in page
+
+
+def test_sketch_fits_its_box_and_keeps_north_up():
+    pts = planner.sketch([(42.65, 18.09), (41.33, 19.82)], 600, 400, 40)   # Dubrovnik, Tirana
+    assert all(40 <= x <= 560 and 40 <= y <= 360 for x, y in pts)
+    assert pts[0][1] < pts[1][1] and pts[0][0] < pts[1][0]   # north-west of Tirana
+    assert planner.sketch([]) == []

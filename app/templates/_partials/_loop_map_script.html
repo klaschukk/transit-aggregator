@@ -1,0 +1,192 @@
+{# Planner map + form niceties. Mapbox GL is injected on idle/intent, never as
+   a static <script> (tests/test_perf.py). Two modes from #loopMap[data-map]:
+   'route'   numbered pins tied to the stop list, road polylines per leg from
+             the cached /api/route-geometry (dashed straight line until/unless
+             a leg has one);
+   'network' every loop stop + direct-bus pairs; tapping two cities fills the
+             form's start and finish. #}
+<script>
+(function() {
+  /* Swap start/finish — works without the map. */
+  Array.prototype.forEach.call(document.querySelectorAll('.loop-form__swap'), function(btn) {
+    btn.addEventListener('click', function() {
+      var f = btn.form.elements['from'], t = btn.form.elements['to'], v = f.value;
+      f.value = t.value; t.value = v;
+      f.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  });
+
+  var el = document.getElementById('loopMap');
+  var TOKEN = '{{ config.MAPBOX_TOKEN }}';
+  if (!el || !TOKEN) return;
+  var data;
+  try { data = JSON.parse(el.dataset.map); } catch (e) { return; }
+  if (!data.stops || !data.stops.length) return;
+
+  var MB_CSS = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css';
+  var MB_JS  = 'https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js';
+  var loaded = false;
+  function loadMapbox() {
+    if (loaded) return; loaded = true;
+    var css = document.createElement('link');
+    css.rel = 'stylesheet'; css.href = MB_CSS;
+    document.head.appendChild(css);
+    var js = document.createElement('script');
+    js.src = MB_JS; js.onload = initMap;
+    document.head.appendChild(js);
+  }
+  var opts = { passive: true, once: true };
+  el.addEventListener('touchstart', loadMapbox, opts);
+  el.addEventListener('mouseenter', loadMapbox, opts);
+  function idle() {
+    setTimeout(function() {
+      if ('requestIdleCallback' in window) window.requestIdleCallback(loadMapbox, { timeout: 2000 });
+      else loadMapbox();
+    }, 1200);
+  }
+  if (document.readyState === 'complete') idle();
+  else window.addEventListener('load', idle, { once: true });
+
+  var TEAL = '#0d9488', TEAL_DARK = '#0f766e', AMBER = '#f59e0b', INK = '#0f172a';
+
+  function initMap() {
+    if (typeof mapboxgl === 'undefined') return;
+    mapboxgl.accessToken = TOKEN;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var pts = data.stops.map(function(s) { return [s.lon, s.lat]; });
+    var bounds = new mapboxgl.LngLatBounds(pts[0], pts[0]);
+    pts.forEach(function(p) { bounds.extend(p); });
+
+    var map = new mapboxgl.Map({
+      container: 'loopMapCanvas',
+      style: 'mapbox://styles/mapbox/light-v11',
+      bounds: bounds,
+      fitBoundsOptions: { padding: { top: 48, bottom: 56, left: 48, right: 48 }, maxZoom: 10 },
+      attributionControl: false,
+      cooperativeGestures: true   /* page scroll wins over a one-finger drag */
+    });
+    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
+    map.addControl(new mapboxgl.AttributionControl({ compact: true }));
+    if (window.ResizeObserver) new ResizeObserver(function() { map.resize(); }).observe(el);
+
+    map.on('load', function() {
+      /* Our own localized labels replace the basemap's town labels. */
+      ['settlement-major-label', 'settlement-minor-label', 'settlement-subdivision-label'].forEach(function(id) {
+        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', 'none');
+      });
+      map.addSource('stops', { type: 'geojson', data: { type: 'FeatureCollection',
+        features: data.stops.map(function(s) {
+          return { type: 'Feature', properties: { name: s.name, slug: s.slug || '' },
+                   geometry: { type: 'Point', coordinates: [s.lon, s.lat] } };
+        }) } });
+      if (data.mode === 'network') network(); else route();
+      map.addLayer({ id: 'stop-labels', type: 'symbol', source: 'stops',
+        layout: { 'text-field': ['get', 'name'], 'text-size': 13, 'text-anchor': 'top',
+                  'text-offset': [0, data.mode === 'network' ? 0.8 : 1.2],
+                  'text-font': ['DIN Pro Medium', 'Arial Unicode MS Regular'] },
+        paint: { 'text-color': INK, 'text-halo-color': '#ffffff', 'text-halo-width': 1.6 } });
+      el.classList.add('is-live');
+    });
+
+    function route() {
+      var n = pts.length;
+      var feats = data.legs.map(function(key, i) {
+        return { type: 'Feature', properties: { i: i, road: false },
+                 geometry: { type: 'LineString', coordinates: [pts[i], pts[(i + 1) % n]] } };
+      });
+      function push() { map.getSource('legs').setData({ type: 'FeatureCollection', features: feats }); }
+      map.addSource('legs', { type: 'geojson', data: { type: 'FeatureCollection', features: feats } });
+      var round = { 'line-cap': 'round', 'line-join': 'round' };
+      map.addLayer({ id: 'legs-casing', type: 'line', source: 'legs', layout: round,
+        filter: ['==', ['get', 'road'], true], paint: { 'line-color': '#ffffff', 'line-width': 7 } });
+      map.addLayer({ id: 'legs-road', type: 'line', source: 'legs', layout: round,
+        filter: ['==', ['get', 'road'], true], paint: { 'line-color': TEAL, 'line-width': 4 } });
+      /* Dotted = "as the crow flies", not a claim about the real road. */
+      map.addLayer({ id: 'legs-air', type: 'line', source: 'legs', layout: round,
+        filter: ['==', ['get', 'road'], false],
+        paint: { 'line-color': TEAL, 'line-width': 3, 'line-dasharray': [0.2, 1.8] } });
+      map.addLayer({ id: 'legs-hot', type: 'line', source: 'legs', layout: round,
+        filter: ['==', ['get', 'i'], -1], paint: { 'line-color': AMBER, 'line-width': 6 } });
+
+      data.legs.forEach(function(key, i) {
+        fetch('/api/route-geometry?pair=' + encodeURIComponent(key))
+          .then(function(r) { return r.ok ? r.json() : null; })
+          .then(function(j) {
+            if (j && j.geometry && j.geometry.length > 1) {
+              feats[i].geometry.coordinates = j.geometry;
+              feats[i].properties.road = true;
+              push();
+            }
+          }).catch(function() {});
+      });
+
+      var pins = data.stops.map(function(s) {
+        var wrap = document.createElement('div');
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'loop-pin'; b.textContent = s.n;
+        b.title = s.name; b.setAttribute('aria-label', s.n + '. ' + s.name);
+        wrap.appendChild(b);
+        new mapboxgl.Marker({ element: wrap }).setLngLat([s.lon, s.lat]).addTo(map);
+        b.addEventListener('click', function() {
+          var li = document.getElementById('loopStop' + s.n);
+          if (!li) return;
+          li.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+          li.classList.add('is-flash');
+          setTimeout(function() { li.classList.remove('is-flash'); }, 1400);
+        });
+        return b;
+      });
+
+      Array.prototype.forEach.call(document.querySelectorAll('.loop-stop[data-n]'), function(li) {
+        var pin = pins[parseInt(li.dataset.n, 10) - 1];
+        if (!pin) return;
+        function on() { pin.classList.add('is-active'); }
+        function off() { pin.classList.remove('is-active'); }
+        li.addEventListener('mouseenter', on); li.addEventListener('mouseleave', off);
+        li.addEventListener('focusin', on); li.addEventListener('focusout', off);
+      });
+      Array.prototype.forEach.call(document.querySelectorAll('.loop-leg[data-leg]'), function(li) {
+        var i = parseInt(li.dataset.leg, 10);
+        function on() { map.setFilter('legs-hot', ['==', ['get', 'i'], i]); }
+        function off() { map.setFilter('legs-hot', ['==', ['get', 'i'], -1]); }
+        li.addEventListener('mouseenter', on); li.addEventListener('mouseleave', off);
+        li.addEventListener('focusin', on); li.addEventListener('focusout', off);
+      });
+    }
+
+    function network() {
+      map.addSource('edges', { type: 'geojson', data: { type: 'FeatureCollection',
+        features: data.edges.map(function(e) {
+          return { type: 'Feature', properties: {},
+                   geometry: { type: 'LineString', coordinates: [pts[e[0]], pts[e[1]]] } };
+        }) } });
+      map.addLayer({ id: 'edges', type: 'line', source: 'edges',
+        paint: { 'line-color': TEAL, 'line-opacity': 0.35, 'line-width': 1.5 } });
+      map.addLayer({ id: 'net-stops', type: 'circle', source: 'stops',
+        paint: { 'circle-radius': 7, 'circle-color': '#ffffff',
+                 'circle-stroke-color': TEAL_DARK, 'circle-stroke-width': 2 } });
+
+      var form = document.querySelector('.loop-form');
+      var from = form && form.elements['from'], to = form && form.elements['to'];
+      if (!from || !to) return;
+      var next = 'from';
+      function paint() {
+        var expr = ['match', ['get', 'slug'], from.value, TEAL];
+        if (to.value !== from.value) expr.push(to.value, AMBER);
+        expr.push('#ffffff');
+        map.setPaintProperty('net-stops', 'circle-color', expr);
+      }
+      paint();
+      from.addEventListener('change', paint); to.addEventListener('change', paint);
+      map.on('click', 'net-stops', function(e) {
+        var slug = e.features[0].properties.slug;
+        if (next === 'from') { from.value = slug; next = 'to'; }
+        else { to.value = slug; next = 'from'; }
+        paint();
+      });
+      map.on('mouseenter', 'net-stops', function() { map.getCanvas().style.cursor = 'pointer'; });
+      map.on('mouseleave', 'net-stops', function() { map.getCanvas().style.cursor = ''; });
+    }
+  }
+})();
+</script>

@@ -1,0 +1,22 @@
+{# Planner map: a server-drawn SVG sketch is the instant poster; Mapbox GL is
+   layered over it on idle/intent (_loop_map_script.html). Without a token or
+   with the library blocked, the sketch stays. Needs: map_data, map_sketch. #}
+<div class="loop-map" id="loopMap" role="img" aria-label="{{ map_label }}" data-map="{{ map_data|tojson|forceescape }}">
+  <svg class="loop-map__poster" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+    {% if map_data.mode == 'network' %}
+      {% for e in map_data.edges %}
+      <line class="loop-map__edge" x1="{{ map_sketch[e[0]][0] }}" y1="{{ map_sketch[e[0]][1] }}" x2="{{ map_sketch[e[1]][0] }}" y2="{{ map_sketch[e[1]][1] }}"/>
+      {% endfor %}
+      {% for pt in map_sketch %}
+      <circle class="loop-map__dot" cx="{{ pt[0] }}" cy="{{ pt[1] }}" r="6"/>
+      {% endfor %}
+    {% else %}
+      <polyline class="loop-map__line" points="{% for pt in map_sketch %}{{ pt[0] }},{{ pt[1] }} {% endfor %}"/>
+      {% for pt in map_sketch[:map_data.stops|length] %}
+      <circle class="loop-map__pin" cx="{{ pt[0] }}" cy="{{ pt[1] }}" r="13"/>
+      <text class="loop-map__num" x="{{ pt[0] }}" y="{{ pt[1] }}" dy="0.36em" text-anchor="middle">{{ loop.index }}</text>
+      {% endfor %}
+    {% endif %}
+  </svg>
+  <div class="loop-map__canvas" id="loopMapCanvas"></div>
+</div>

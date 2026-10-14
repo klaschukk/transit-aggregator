@@ -1,88 +1,100 @@
-{# Itinerary body: summary strip, stop/leg timeline, partner offers.
-   Needs: itinerary, trip_offers, hm (macro from the caller is not visible in
-   includes, so the duration macro lives here). #}
+{# Itinerary body: stop/leg timeline with the route map beside it, partner
+   offers below. Needs: itinerary, trip_offers, map_data, map_sketch. #}
 {% macro hm(minutes) -%}
   {%- set _h = minutes // 60 %}{% set _m = minutes % 60 -%}
   {%- if _h %}{{ _h }} {{ _('common.h') }}{% endif %}{% if _h and _m %} {% endif %}{% if _m %}{{ _m }} {{ _('common.min') }}{% endif -%}
 {%- endmacro %}
-  <dl class="loop-sum">
-    <div class="loop-sum__item"><dt>{{ _('planner.sum_stops') }}</dt><dd>{{ itinerary.stops|length }}</dd></div>
-    <div class="loop-sum__item"><dt>{{ _('planner.sum_countries') }}</dt><dd>{{ itinerary.countries|length }}</dd></div>
-    {% if itinerary.bus_minutes %}
-    <div class="loop-sum__item"><dt>{{ _('planner.sum_bus') }}</dt><dd>{{ hm(itinerary.bus_minutes) }}</dd></div>
-    {% endif %}
-    {% if itinerary.bus_eur and not itinerary.bus_eur_partial %}
-    <div class="loop-sum__item"><dt>{{ _('planner.sum_cost') }}</dt><dd>{{ itinerary.bus_eur }} €</dd></div>
-    {% endif %}
-  </dl>
 
-  <ol class="loop-steps">
-    {% for stop in itinerary.stops %}
-    <li class="loop-stop">
-      <div class="loop-stop__head">
-        <span class="loop-stop__days">{{ _('planner.days_range').format(a=stop.day_from, b=stop.day_to) }}</span>
-        <h3 class="loop-stop__name">{{ stop.name }}</h3>
-        <span class="loop-stop__meta">{{ _('planner.country.' ~ stop.country) }} · {{ _('planner.nights').format(n=stop.nights) }}</span>
-      </div>
-      <p class="loop-stop__text">{{ _('planner.stop.' ~ stop.slug) }}</p>
-      {% if stop.offers %}
+<dl class="loop-sum">
+  <div class="loop-sum__item"><dt>{{ _('planner.sum_stops') }}</dt><dd>{{ itinerary.stops|length }}</dd></div>
+  <div class="loop-sum__item"><dt>{{ _('planner.sum_countries') }}</dt><dd>{{ itinerary.countries|length }}</dd></div>
+  {% if itinerary.bus_minutes %}
+  <div class="loop-sum__item"><dt>{{ _('planner.sum_bus') }}</dt><dd>{{ hm(itinerary.bus_minutes) }}</dd></div>
+  {% endif %}
+  {% if itinerary.bus_eur and not itinerary.bus_eur_partial %}
+  <div class="loop-sum__item"><dt>{{ _('planner.sum_cost') }}</dt><dd>{{ itinerary.bus_eur }} €</dd></div>
+  {% endif %}
+</dl>
+
+<div class="loop-layout">
+  <div class="loop-layout__map">
+    {% set map_label = itinerary.stops|map(attribute='name')|join(' → ') %}
+    {% include '_partials/_loop_map.html' %}
+  </div>
+
+  <div class="loop-layout__list">
+    <ol class="loop-steps">
+      {% for stop in itinerary.stops %}
+      <li class="loop-stop" id="loopStop{{ loop.index }}" data-n="{{ loop.index }}">
+        <div class="loop-stop__head">
+          <h3 class="loop-stop__name">{{ stop.name }}</h3>
+          <span class="loop-stop__days">{{ _('planner.days_range').format(a=stop.day_from, b=stop.day_to) }}</span>
+        </div>
+        <p class="loop-stop__meta">{{ _('planner.country.' ~ stop.country) }} · {{ _('planner.nights').format(n=stop.nights) }}</p>
+        <p class="loop-stop__text">{{ _('planner.stop.' ~ stop.slug) }}</p>
+        {% if stop.offers %}
+        <div class="loop-offer">
+          {% for o in stop.offers %}
+          <a class="loop-offer__btn" href="{{ o.url }}" target="_blank" rel="sponsored nofollow noopener"
+             data-partner="{{ o.key }}" data-route-slug="{{ stop.slug }}" data-surface="planner">
+            {{- _('planner.offer.' ~ o.key).format(city=stop.name) -}}
+            {%- if o.name %} <span class="loop-offer__partner">· {{ o.name }}</span>{% endif %}
+          </a>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </li>
+      {% if not loop.last or itinerary.loop %}
+      {% set leg = itinerary.legs[loop.index0] %}
+      <li class="loop-leg" data-leg="{{ loop.index0 }}">
+        <span class="loop-leg__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1.5"/><circle cx="16" cy="19" r="1.5"/></svg>
+        </span>
+        <div class="loop-leg__body">
+          <span class="loop-leg__title">{{ _('planner.leg_bus').format(a=leg.from_name, b=leg.to_name) }}</span>
+          <span class="loop-leg__facts">
+            {%- if leg.duration_min %}<strong class="loop-leg__time">{{ hm(leg.duration_min) }}</strong> · {% endif -%}
+            {%- if leg.price_eur %}{{ _('planner.leg_price').format(p=leg.price_eur) }}{% else %}{{ _('planner.leg_price_unknown') }}{% endif -%}
+          </span>
+          <span class="loop-leg__facts">
+            {{- _('planner.leg_trips').format(n=leg.trips) -}}
+            {%- if leg.trips > 1 and leg.first_dep and leg.last_dep %} · {{ _('planner.leg_first_last').format(a=leg.first_dep, b=leg.last_dep) }}{% endif -%}
+          </span>
+        </div>
+        <a class="btn btn--outline loop-leg__cta" href="{{ lang_prefix }}/rute/{{ leg.route_slug }}/">{{ _('planner.leg_cta') }}</a>
+      </li>
+      {% endif %}
+      {% endfor %}
+      {% set _last = itinerary.stops[-1] %}
+      <li class="loop-end">
+        {%- if itinerary.loop -%}
+          {{ _('planner.end_loop').format(d=_last.day_to, city=itinerary.stops[0].name) }}
+        {%- else -%}
+          {{ _('planner.end_day').format(d=_last.day_to, city=_last.name) }}
+        {%- endif -%}
+      </li>
+    </ol>
+
+    {% if itinerary.spare_days %}
+    <p class="loop-note">{{ _('planner.spare').format(n=itinerary.spare_days) }}</p>
+    {% endif %}
+
+    {% if trip_offers %}
+    <div class="loop-trip-offers">
+      <h3 class="loop-trip-offers__h">{{ _('planner.offers_h') }}</h3>
       <div class="loop-offer">
-        {% for o in stop.offers %}
+        {% for o in trip_offers %}
         <a class="loop-offer__btn" href="{{ o.url }}" target="_blank" rel="sponsored nofollow noopener"
-           data-partner="{{ o.key }}" data-route-slug="{{ stop.slug }}" data-surface="planner">
-          {{- _('planner.offer.' ~ o.key).format(city=stop.name) -}}
+           data-partner="{{ o.key }}" data-route-slug="{{ itinerary.start }}-{{ itinerary.end }}" data-surface="planner">
+          {{- _('planner.offer.' ~ o.key) -}}
           {%- if o.name %} <span class="loop-offer__partner">· {{ o.name }}</span>{% endif %}
         </a>
         {% endfor %}
       </div>
-      {% endif %}
-    </li>
-    {% if not loop.last or itinerary.loop %}
-    {% set leg = itinerary.legs[loop.index0] %}
-    <li class="loop-leg">
-      <div class="loop-leg__body">
-        <span class="loop-leg__title">{{ _('planner.leg_bus').format(a=leg.from_name, b=leg.to_name) }}</span>
-        <span class="loop-leg__facts">
-          {%- if leg.duration_min %}{{ _('planner.leg_duration').format(t=hm(leg.duration_min)) }} · {% endif -%}
-          {%- if leg.price_eur %}{{ _('planner.leg_price').format(p=leg.price_eur) }}{% else %}{{ _('planner.leg_price_unknown') }}{% endif -%}
-        </span>
-        <span class="loop-leg__facts">
-          {{- _('planner.leg_trips').format(n=leg.trips) -}}
-          {%- if leg.trips > 1 and leg.first_dep and leg.last_dep %} · {{ _('planner.leg_first_last').format(a=leg.first_dep, b=leg.last_dep) }}{% endif -%}
-        </span>
-      </div>
-      <a class="btn btn--outline loop-leg__cta" href="{{ lang_prefix }}/rute/{{ leg.route_slug }}/">{{ _('planner.leg_cta') }}</a>
-    </li>
-    {% endif %}
-    {% endfor %}
-    {% set _last = itinerary.stops[-1] %}
-    <li class="loop-end">
-      {%- if itinerary.loop -%}
-        {{ _('planner.end_loop').format(d=_last.day_to, city=itinerary.stops[0].name) }}
-      {%- else -%}
-        {{ _('planner.end_day').format(d=_last.day_to, city=_last.name) }}
-      {%- endif -%}
-    </li>
-  </ol>
-
-  {% if itinerary.spare_days %}
-  <p class="loop-note">{{ _('planner.spare').format(n=itinerary.spare_days) }}</p>
-  {% endif %}
-
-  {% if trip_offers %}
-  <div class="loop-trip-offers">
-    <h3 class="loop-trip-offers__h">{{ _('planner.offers_h') }}</h3>
-    <div class="loop-offer">
-      {% for o in trip_offers %}
-      <a class="loop-offer__btn" href="{{ o.url }}" target="_blank" rel="sponsored nofollow noopener"
-         data-partner="{{ o.key }}" data-route-slug="{{ itinerary.start }}-{{ itinerary.end }}" data-surface="planner">
-        {{- _('planner.offer.' ~ o.key) -}}
-        {%- if o.name %} <span class="loop-offer__partner">· {{ o.name }}</span>{% endif %}
-      </a>
-      {% endfor %}
     </div>
+    {% endif %}
+    {% if trip_offers or itinerary.stops|selectattr('offers')|list %}
+    <p class="loop-note">{{ _('transfer.disclosure') }}</p>
+    {% endif %}
   </div>
-  {% endif %}
-  {% if trip_offers or itinerary.stops|selectattr('offers')|list %}
-  <p class="loop-note">{{ _('transfer.disclosure') }}</p>
-  {% endif %}
+</div>

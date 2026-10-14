@@ -339,6 +339,7 @@ def _loop_preset_cards(lang: str, skip: str = '') -> list[dict]:
         if not it:
             continue
         cards.append({
+            'thumb': planner.sketch(planner.route_points(it), 96, 64, 9),
             'slug': slug, 'label': _loop_label(it, lang),
             'chain': ' → '.join(s['name'] for s in it['stops']),
             'summary': get_text('planner.card_summary', lang).format(
@@ -355,6 +356,15 @@ def _loop_render(mode: str, itinerary: dict | None, start: str, end: str, days: 
     if itinerary:
         for stop in itinerary['stops']:
             stop['offers'] = stop_offers(stop['name'])
+        pts = planner.route_points(itinerary)
+        extra['map_data'] = {
+            'mode': 'route',
+            'stops': [{'n': i, 'name': s['name'], 'lat': s['lat'], 'lon': s['lon']}
+                      for i, s in enumerate(itinerary['stops'], 1)],
+            'legs': [f"{leg['from']}:{leg['to']}" for leg in itinerary['legs']],
+            'loop': itinerary['loop'],
+        }
+        extra['map_sketch'] = planner.sketch(pts)
     stops = sorted(({'slug': s, 'name': planner.stop_name(s, lang)} for s in planner.STOPS),
                    key=lambda c: c['name'])
     presets = _loop_preset_cards(lang, skip=preset_slug) if db_ready() else []
@@ -384,10 +394,14 @@ def balkan_loop():
     lang = getattr(g, 'lang', 'sr')
     d_start, d_end, d_days = planner.DEFAULT_PLAN
     if not any(k in request.args for k in ('from', 'to', 'days')):
-        leg_groups = []
+        leg_groups, hub_map = [], {}
         if db_ready():
             leg_groups = planner.leg_groups(lang=lang, eur_rsd=current_app.config['EUR_RSD_RATE'])
-        return _loop_render('hub', None, d_start, d_end, d_days, leg_groups=leg_groups)
+            net = planner.network(lang=lang)
+            if net['edges']:
+                hub_map = {'map_data': dict(net, mode='network'),
+                           'map_sketch': planner.sketch([(s['lat'], s['lon']) for s in net['stops']])}
+        return _loop_render('hub', None, d_start, d_end, d_days, leg_groups=leg_groups, **hub_map)
 
     start = normalize_slug(request.args.get('from', '')) or d_start
     end = normalize_slug(request.args.get('to', '')) or d_end
