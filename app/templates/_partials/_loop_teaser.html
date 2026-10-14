@@ -1,0 +1,10 @@
+{# One-line link to the Balkan Loop planner on routes whose both ends are loop
+   stops (app/planner.py STOPS). Needs: _from_slug, _to_slug. #}
+{% if is_loop_stop(_from_slug) and is_loop_stop(_to_slug) %}
+<p class="loop-teaser">
+  <a class="loop-teaser__link" href="{{ lang_prefix }}/balkan-loop/?from={{ _from_slug }}">
+    {{- _('planner.teaser') }}
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true"><path d="M5 12h14m0 0l-6-6m6 6l-6 6"/></svg>
+  </a>
+</p>
+{% endif %}

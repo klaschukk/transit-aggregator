@@ -1,7 +1,15 @@
 {
-  "_readme": "Copy to affiliates.local.json (git-ignored), fill in, then: sudo systemctl restart prevozni. Only https:// links. Optional placeholders in a URL: {from} {to} {from_name} {to_name}. Leave a URL empty to keep that button hidden.",
+  "_readme": "Copy to affiliates.local.json (git-ignored), fill in, then: sudo systemctl restart prevozni. Only https:// links. Optional placeholders in a URL: {from} {to} {from_name} {to_name}. Planner links (AFF_STAY/TOURS) accept {city}. Leave a URL empty to keep that button hidden.",
   "AFF_TRANSFER_URL": "",
   "AFF_TRANSFER_NAME": "",
   "AFF_CARS_URL": "",
-  "AFF_CARS_NAME": ""
+  "AFF_CARS_NAME": "",
+  "AFF_STAY_URL": "",
+  "AFF_STAY_NAME": "",
+  "AFF_TOURS_URL": "",
+  "AFF_TOURS_NAME": "",
+  "AFF_ESIM_URL": "",
+  "AFF_ESIM_NAME": "",
+  "AFF_INSURANCE_URL": "",
+  "AFF_INSURANCE_NAME": ""
 }

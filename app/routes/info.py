@@ -2,7 +2,7 @@ import html
 import logging
 import re
 
-from flask import Blueprint, abort, redirect, render_template, url_for, g
+from flask import Blueprint, abort, current_app, redirect, render_template, request, url_for, g
 
 from app.db import cached_query, cached_query_one, db_ready
 from app.extensions import limiter
@@ -267,6 +267,58 @@ def destinations():
 
 
 _RV_CITY_LABELS = CITY_LABELS
+
+
+# Shown as one-click examples under the form: (start, end, days).
+_LOOP_PRESETS = (
+    ('dubrovnik', 'tirana', 10),
+    ('kotor', 'sarajevo', 7),
+    ('split', 'ohrid', 14),
+    ('dubrovnik', 'dubrovnik', 14),
+    ('beograd', 'tirana', 21),
+)
+
+
+@info_bp.route('/balkan-loop/')
+def balkan_loop():
+    """Balkan Loop planner: start + end + days -> stop-by-stop route where every
+    leg is a direct bus from the timetable (app/planner.py). Query variants
+    share the bare path as canonical, so only one URL per language is indexed."""
+    from app import planner
+    from app.affiliates.trip_extras import stop_offers, trip_offers
+
+    lang = getattr(g, 'lang', 'sr')
+    d_start, d_end, d_days = planner.DEFAULT_PLAN
+    start = normalize_slug(request.args.get('from', '')) or d_start
+    end = normalize_slug(request.args.get('to', '')) or d_end
+    if start not in planner.STOPS:
+        start = d_start
+    if end not in planner.STOPS:
+        end = d_end
+    try:
+        days = int(request.args.get('days', d_days))
+    except (TypeError, ValueError):
+        days = d_days
+    days = max(planner.MIN_DAYS, min(planner.MAX_DAYS, days))
+
+    itinerary = None
+    if db_ready():
+        itinerary = planner.plan(start, end, days, lang=lang,
+                                 eur_rsd=current_app.config['EUR_RSD_RATE'])
+    if itinerary:
+        for stop in itinerary['stops']:
+            stop['offers'] = stop_offers(stop['name'])
+
+    stops = sorted(({'slug': s, 'name': planner.stop_name(s, lang)} for s in planner.STOPS),
+                   key=lambda c: c['name'])
+    presets = [{'start': a, 'end': b, 'days': n,
+                'start_name': planner.stop_name(a, lang), 'end_name': planner.stop_name(b, lang)}
+               for a, b, n in _LOOP_PRESETS]
+    return render_template(
+        'balkan_loop.html', itinerary=itinerary, stops=stops, presets=presets,
+        start=start, end=end, days=days,
+        min_days=planner.MIN_DAYS, max_days=planner.MAX_DAYS,
+        trip_offers=trip_offers() if itinerary else [])
 
 
 @info_bp.route('/red-voznje/')

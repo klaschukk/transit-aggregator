@@ -62,7 +62,7 @@
 
   /* Partner buy CTAs — log every outbound affiliate click (data-partner) */
   document.addEventListener('click', function(ev){
-    var el = ev.target.closest('.trip-card__buy, .buy-ticket__btn, .partners-block__btn, .transfer-offer__btn');
+    var el = ev.target.closest('.trip-card__buy, .buy-ticket__btn, .partners-block__btn, .transfer-offer__btn, .loop-offer__btn');
     if (!el) return;
     if (!el.dataset.partner) return;  /* skip non-affiliate .buy-ticket__btn (city map CTAs) — no blank ba_clicks */
     var payload = {

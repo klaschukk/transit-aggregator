@@ -105,6 +105,17 @@ class Config:
     AFF_TRANSFER_NAME = os.environ.get('AFF_TRANSFER_NAME') or _local_aff('AFF_TRANSFER_NAME')
     AFF_CARS_URL = os.environ.get('AFF_CARS_URL') or _local_aff('AFF_CARS_URL')
     AFF_CARS_NAME = os.environ.get('AFF_CARS_NAME') or _local_aff('AFF_CARS_NAME')
+    # Balkan Loop planner offers (app/affiliates/trip_extras.py), same contract:
+    # dormant until set. STAY/TOURS render per stop and accept a {city}
+    # placeholder; ESIM/INSURANCE render once per itinerary.
+    AFF_STAY_URL = os.environ.get('AFF_STAY_URL') or _local_aff('AFF_STAY_URL')
+    AFF_STAY_NAME = os.environ.get('AFF_STAY_NAME') or _local_aff('AFF_STAY_NAME')
+    AFF_TOURS_URL = os.environ.get('AFF_TOURS_URL') or _local_aff('AFF_TOURS_URL')
+    AFF_TOURS_NAME = os.environ.get('AFF_TOURS_NAME') or _local_aff('AFF_TOURS_NAME')
+    AFF_ESIM_URL = os.environ.get('AFF_ESIM_URL') or _local_aff('AFF_ESIM_URL')
+    AFF_ESIM_NAME = os.environ.get('AFF_ESIM_NAME') or _local_aff('AFF_ESIM_NAME')
+    AFF_INSURANCE_URL = os.environ.get('AFF_INSURANCE_URL') or _local_aff('AFF_INSURANCE_URL')
+    AFF_INSURANCE_NAME = os.environ.get('AFF_INSURANCE_NAME') or _local_aff('AFF_INSURANCE_NAME')
 
     BOOKAWAY_API_KEY = os.environ.get('BOOKAWAY_API_KEY', '')
     BOOKAWAY_NETWORK_ID = os.environ.get('BOOKAWAY_NETWORK_ID', 'bookaway2')

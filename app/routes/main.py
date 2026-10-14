@@ -507,13 +507,14 @@ def api_ba_click():
     # Surface allowlist — prevents cardinality bloat from bogus values.
     if surface and surface not in (
         'search', 'route_detail', 'city_pair', 'route_detail_global',
-        'city_pair_global', 'search_global',
+        'city_pair_global', 'search_global', 'planner',
     ):
         surface = 'other'
 
     # Partner allowlist — same anti-cardinality guard. Unknown keys bucket to
     # 'other' so the per-partner breakdown stays clean.
-    if partner and partner not in ('bookaway', 'busticket4', 'flixbus', 'transfer', 'cars'):
+    if partner and partner not in ('bookaway', 'busticket4', 'flixbus', 'transfer', 'cars',
+                                   'stay', 'tours', 'esim', 'insurance'):
         partner = 'other'
 
     insert_ba_click(
@@ -1160,6 +1161,7 @@ def sitemap_core():
         url('/autobuske-stanice/', 'monthly', '0.5'),
         url('/red-voznje/', 'weekly', '0.8'),
         url('/destinacije/', 'weekly', '0.7'),
+        url('/balkan-loop/', 'weekly', '0.7'),
         url('/vodici/', 'weekly', '0.6'),
         url('/o-nama/', 'monthly', '0.3'),
         url('/kontakt/', 'monthly', '0.3'),
