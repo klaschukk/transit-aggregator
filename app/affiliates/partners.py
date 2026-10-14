@@ -162,6 +162,17 @@ try:
 except (OSError, ValueError):
     _BT4_PAIR_LINEID = {}
 
+# Per-departure ids {pair: {"HH:MM": lineId}}, same refresh run
+# (data/pipelines/refresh_bt4_lineids.py). The pair map holds ONE departure,
+# so without this every trip row of a route with no per-trip id opened the
+# same departure in the checkout (budva-kotor: the 02:00 bus for all 38 rows).
+_BT4_DEP_PATH = _os.path.join(_os.path.dirname(__file__), 'bt4_departures.json')
+try:
+    with open(_BT4_DEP_PATH, encoding='utf-8') as _fh:
+        _BT4_DEPARTURES: dict = {k: {t: int(i) for t, i in v.items()} for k, v in _json.load(_fh).items()}
+except (OSError, ValueError, AttributeError):
+    _BT4_DEPARTURES = {}
+
 
 class Bookaway(Partner):
     """Primary partner. Strongest Balkans coverage, highest commission band."""
@@ -322,15 +333,39 @@ class BusTicket4(Partner):
 _BT4 = BusTicket4()
 
 
-def bt4_checkout_url(from_slug: str, to_slug: str, line_id, depart_date=None) -> str:
+def _now_belgrade():
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    return datetime.now(ZoneInfo('Europe/Belgrade'))
+
+
+def bt4_line_for(from_slug: str, to_slug: str, dep_time) -> int | None:
+    """BusTicket4 lineId of the departure at `dep_time` ('HH:MM…') on this
+    pair, or None when BT4 has no purchasable departure at exactly that time."""
+    if not dep_time:
+        return None
+    return _BT4_DEPARTURES.get(f'{from_slug}-{to_slug}', {}).get(str(dep_time)[:5])
+
+
+def bt4_checkout_url(from_slug: str, to_slug: str, line_id, depart_date=None, dep_time=None) -> str:
     """Exact busticket4 affiliate checkout for ONE departure, or '' if we can't
     build it (unknown city or missing line_id). Exposed as a Jinja global so the
     per-trip buy button can deep-link straight to that trip's checkout.
-    depart_date (YYYY-MM-DD, e.g. the search form's `datum`) presets the
-    checkout to the user's travel day; omitted/past dates fall back to
-    tomorrow."""
+    depart_date (YYYY-MM-DD, e.g. the search form's `datum` or the route page's
+    day tab) presets the checkout to the user's travel day; omitted/past dates
+    fall back to tomorrow. With dep_time ('HH:MM') a missing date means today
+    (Serbia), and a departure that already left today rolls to tomorrow."""
     if not line_id or from_slug not in _BT4_CITY_ID or to_slug not in _BT4_CITY_ID:
         return ''
+    if dep_time:
+        now = _now_belgrade()
+        try:
+            day = date.fromisoformat(str(depart_date)[:10]) if depart_date else now.date()
+        except ValueError:
+            day = now.date()
+        if day == now.date() and str(dep_time)[:5] <= now.strftime('%H:%M'):
+            day += timedelta(days=1)
+        depart_date = day.isoformat()
     return _BT4.build_url(from_slug, to_slug, '', '', 'trip-card',
                           line_id=line_id, depart_date=depart_date)
 

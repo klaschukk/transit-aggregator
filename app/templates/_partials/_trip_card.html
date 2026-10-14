@@ -17,12 +17,15 @@
 {% set _primary = (offers[0] if offers else None) %}
 {% set _buy_href = _primary.url if _primary else '' %}
 {% set _buy_partner = _primary.partner_key if _primary else '' %}
-{# BusTicket4 checkout: prefer THIS departure's exact line id; otherwise, on a
-   route BusTicket4 sells (bt4_fallback_line_id set), use the route's
-   representative departure so the whole BT4 route stays on BusTicket4. Routes
-   BusTicket4 doesn't sell at all (no fallback) render no buy button. #}
-{% set _bt4_lid = trip.bt4_line_id or bt4_fallback_line_id %}
-{% set _bt4 = bt4_checkout_url(from_slug, to_slug, _bt4_lid, datum) if (from_slug and to_slug and _bt4_lid) else '' %}
+{# BusTicket4 checkout: prefer THIS departure's exact line id (scraped on the
+   trip, else BT4's own id for this pair at this time); otherwise, on a route
+   BusTicket4 sells (bt4_fallback_line_id set), use the route's representative
+   departure so the whole BT4 route stays on BusTicket4. Routes BusTicket4
+   doesn't sell at all (no fallback) render no buy button. The checkout date is
+   `datum` (search / day tab), else today — tomorrow once the bus has left. #}
+{% set _dep_time = (trip.departure_time or '')[:5] %}
+{% set _bt4_lid = trip.bt4_line_id or bt4_line_for(from_slug, to_slug, _dep_time) or bt4_fallback_line_id %}
+{% set _bt4 = bt4_checkout_url(from_slug, to_slug, _bt4_lid, datum, _dep_time) if (from_slug and to_slug and _bt4_lid) else '' %}
 {% if _bt4 %}{% set _buy_href = _bt4 %}{% set _buy_partner = 'busticket4' %}{% endif %}
 {# A/B Exp 1: CTA copy (variant overrides buy_label when caller didn't pass one) #}
 {% set _cta_variant = ab_variant('cta_copy_v1') %}

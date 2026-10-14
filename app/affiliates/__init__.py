@@ -25,7 +25,7 @@ Typical use from a route handler:
     return render_template('route_detail.html', offers=offers, ...)
 """
 from app.affiliates.base import Offer, Partner
-from app.affiliates.partners import Bookaway, BusTicket4, FlixBus, bt4_checkout_url
+from app.affiliates.partners import Bookaway, BusTicket4, FlixBus, bt4_checkout_url, bt4_line_for
 from app.affiliates.resolve import (
     ACTIVE_PARTNERS,
     ab_partner_order,
@@ -42,6 +42,7 @@ __all__ = [
     'Partner',
     'ab_partner_order',
     'bt4_checkout_url',
+    'bt4_line_for',
     'primary_offer',
     'resolve_offers',
 ]

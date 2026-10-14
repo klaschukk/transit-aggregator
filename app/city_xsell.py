@@ -12,6 +12,7 @@ import time
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from app.affiliates import bt4_line_for
 from app.db import cached_query, db_ready
 
 _CLICKS_TTL = 6 * 3600
@@ -93,7 +94,7 @@ def intercity_from_city(city: str, limit: int = 3) -> list[dict]:
                 # Buy link only for the departure shown: a lineId preselects
                 # that exact trip in the BT4 checkout, so borrowing another
                 # trip's id would sell a different time than the row says.
-                r['bt4_line_id'] = t['bt4_line_id']
+                r['bt4_line_id'] = t['bt4_line_id'] or bt4_line_for(city, t['to_city_slug'], dep)
 
     clicks = _route_clicks()
     ranked = sorted((r for r in routes.values() if r['trips_today']),

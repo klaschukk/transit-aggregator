@@ -53,6 +53,11 @@ log = logging.getLogger(__name__)
 
 API = "https://busticket4.me/bus/web_servisi/servisi/rest_bus_search.php?name="
 OUT = Path(__file__).parent.parent.parent / "app" / "affiliates" / "bt4_lineids.json"
+# Per-departure map {pair: {"HH:MM": lineId}} from the same responses (no extra
+# requests). The pair map above holds ONE departure per pair, so every "Kupi"
+# on a route without per-trip ids opened that one departure (budva-kotor: all
+# 38 buttons -> the 02:00 bus); this lets each button open its own time.
+OUT_DEP = OUT.with_name("bt4_departures.json")
 
 
 def _post(name: str, params: dict, timeout: int = 25) -> str:
@@ -96,17 +101,33 @@ def route_pairs() -> list[tuple[str, str]]:
     return [(f, t) for f, t in rows]
 
 
-def lookup(pair: tuple[str, str], cities: dict, departs: list[str]) -> tuple[str, int | None]:
+def _departures_by_time(search_res: list) -> dict[str, int]:
+    """Purchasable departures as {"HH:MM": lineId}. A time served by two
+    different lines (two carriers) is dropped: we can't tell which one the
+    site's trip row is, and the wrong carrier is worse than the pair fallback."""
+    seen: dict[str, int | None] = {}
+    for d in search_res:
+        tm = str(d.get("departure_time") or "")[:5]
+        if (len(tm) != 5 or not d.get("route_id")
+                or str(d.get("purchase_allowed")).lower() != "true"):
+            continue
+        rid = int(d["route_id"])
+        seen[tm] = rid if seen.get(tm, rid) == rid else None
+    return {tm: rid for tm, rid in seen.items() if rid}
+
+
+def lookup(pair: tuple[str, str], cities: dict, departs: list[str]) -> tuple[str, int | None, dict]:
     f, t = pair
     A, B = cities.get(f), cities.get(t)
     if not A or not B:
-        return f"{f}-{t}", None
+        return f"{f}-{t}", None, {}
     # Probe several dates: a pair that runs e.g. Mon/Wed/Fri must NOT be dropped
     # just because the single probe date is a no-service day. Take the first
     # PURCHASABLE departure in the window (its route_id == lineId). The API
-    # lists plenty of departures with purchase_allowed=false — busticket4
-    # doesn't sell those online (ALL Serbia-domestic ones, verified live
-    # 2026-06-11: their checkout renders 0.00 + fee and can't complete), so a
+    # lists departures with purchase_allowed=false — busticket4 doesn't sell
+    # those online (in 2026-06 that was all Serbia-domestic ones; on 2026-10-15
+    # domestic pairs like kragujevac-beograd were purchasable again; their
+    # checkout renders 0.00 + fee and can't complete), so a
     # lineId pointing at one is a dead "Kupi" button, worse than no button.
     # Only a pair with no purchasable departure across the WHOLE window is
     # treated as dead.
@@ -124,10 +145,10 @@ def lookup(pair: tuple[str, str], cities: dict, departs: list[str]) -> tuple[str
                     for d in sr:
                         if (d.get("route_id")
                                 and str(d.get("purchase_allowed")).lower() == "true"):
-                            return f"{f}-{t}", int(d["route_id"])
+                            return f"{f}-{t}", int(d["route_id"]), _departures_by_time(sr)
         except Exception as e:  # noqa: BLE001 — one bad pair must not abort the run
             log.debug("lookup failed %s-%s on %s: %s", f, t, depart, e)
-    return f"{f}-{t}", None
+    return f"{f}-{t}", None, {}
 
 
 def main() -> None:
@@ -151,12 +172,15 @@ def main() -> None:
                for d in range(1, 8)]
 
     out: dict[str, int] = {}
+    out_dep: dict[str, dict[str, int]] = {}
     with cf.ThreadPoolExecutor(max_workers=args.workers) as ex:
         futs = [ex.submit(lookup, p, cities, departs) for p in pairs]
         for i, fut in enumerate(cf.as_completed(futs), 1):
-            key, line_id = fut.result()
+            key, line_id, by_time = fut.result()
             if line_id:
                 out[key] = line_id
+            if by_time:
+                out_dep[key] = dict(sorted(by_time.items()))
             if i % 50 == 0:
                 log.info("…%d/%d  covered=%d", i, len(pairs), len(out))
 
@@ -175,9 +199,11 @@ def main() -> None:
                   len(out), int(args.min_coverage * 100), len(prev))
         return
     OUT.write_text(json.dumps(dict(sorted(out.items())), ensure_ascii=False))
+    OUT_DEP.write_text(json.dumps(dict(sorted(out_dep.items())), ensure_ascii=False))
     added = len(set(out) - set(prev)); removed = len(set(prev) - set(out))
-    log.info("wrote %s  (covered %d/%d pairs; +%d -%d vs previous)",
-             OUT, len(out), len(pairs), added, removed)
+    log.info("wrote %s  (covered %d/%d pairs; +%d -%d vs previous); %s: %d departures",
+             OUT, len(out), len(pairs), added, removed, OUT_DEP.name,
+             sum(len(v) for v in out_dep.values()))
 
 
 if __name__ == "__main__":
