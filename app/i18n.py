@@ -3626,6 +3626,11 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
         'ru': 'отправлений в день',
         'bg': 'тръгвания дневно',
     },
+    # Non-Serbian titles lead with the query searchers type ("Budva to Kotor bus").
+    'route_detail.title_mode_bus': {'sr': '{a} → {b}', 'en': '{a} to {b} bus', 'ru': 'Автобус {a} — {b}', 'bg': 'Автобус {a} — {b}'},
+    'route_detail.title_mode_train': {'sr': '{a} → {b}', 'en': '{a} to {b} train', 'ru': 'Поезд {a} — {b}', 'bg': 'Влак {a} — {b}'},
+    'city_pair.title_pair': {'sr': '{a} → {b}', 'en': '{a} to {b}', 'ru': '{a} — {b}', 'bg': '{a} — {b}'},
+    'route_detail.title_departures_few': {'sr': 'polazaka dnevno', 'en': 'departures daily', 'ru': 'отправления в день', 'bg': 'тръгвания дневно'},
     'route_detail.title_departure_one': {
         'sr': 'polazak dnevno',
         'en': 'departure daily',

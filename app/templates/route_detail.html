@@ -8,9 +8,16 @@
      long/mid  → "{pair}: od {price} RSD {year}"
      short     → "{pair}: {N} polazaka dnevno, od {price} RSD {year}"
    No-price routes keep the previous generic phrasing (with brand suffix). #}
-{% set _pair_name = route.from_city ~ ' → ' ~ route.to_city %}
+{# /en/ /ru/ /bg/: city names as those searchers type them (app/city_names.py)
+   and "X to Y bus" / "Автобус X — Y" titles; Serbian pages keep DB names. #}
+{% set _from_l = city_name(route.from_city, route.from_city_slug, lang) %}
+{% set _to_l = city_name(route.to_city, route.to_city_slug, lang) %}
+{% set _pair_name = _from_l ~ ' → ' ~ _to_l %}
+{% set _all_train = trips and (trips|selectattr('type', 'equalto', 'train')|list|length == trips|length) %}
+{% set _title_pair = _pair_name if lang == 'sr' else _('route_detail.title_mode_train' if _all_train else 'route_detail.title_mode_bus').format(a=_from_l, b=_to_l) %}
 {% set _price_phrase = (_('route_detail.meta_from')|lower ~ ' ' ~ snippet_price(price_min, route.from_city_slug, route.to_city_slug)) if price_min else None %}
-{% set _dep_word = _('route_detail.title_departure_one') if route.trip_count == 1 else _('route_detail.title_departures') %}
+{% set _n = route.trip_count or 0 %}
+{% set _dep_word = _('route_detail.title_departure_one') if _n == 1 else (_('route_detail.title_departures_few') if (_n % 10 in [2, 3, 4] and _n % 100 not in [12, 13, 14]) else _('route_detail.title_departures')) %}
 {# Buy ticket — always visible. Offers come from app.affiliates; the
    first is the primary CTA (priority: availability → commission → UX),
    the rest render in the partners block below the trip list. Computed up
@@ -39,7 +46,7 @@
 {% set _bt4_trip = (trips | selectattr('bt4_line_id') | list | first) if trips else None %}
 {% set _bt4_main = bt4_checkout_url(_from_slug, _to_slug, _bt4_trip.bt4_line_id) if _bt4_trip else '' %}
 {% if _bt4_main %}{% set _primary_href = _bt4_main %}{% set _primary_partner = 'busticket4' %}{% set _primary_name = 'BusTicket4' %}{% set _primary_color = '#166534' %}{% endif %}
-{% block title %}{% if _price_phrase %}{% if _pair_name|length > 20 %}{{ _pair_name }}: {{ _price_phrase }} {{ current_year }}{% else %}{{ _pair_name }}: {% if route.trip_count %}{{ route.trip_count }} {{ _dep_word }}, {% endif %}{{ _price_phrase }} {{ current_year }}{% endif %}{% else %}{% if _pair_name|length > 28 %}{{ _pair_name }}: {{ _('route_detail.title_short') }} {{ current_year }} | Prevozni{% elif _pair_name|length > 20 %}{{ _pair_name }} — {{ _('route_detail.title_short') }} {{ current_year }} | Prevozni{% else %}{{ _pair_name }}: {% if route.trip_count %}{{ route.trip_count }} {{ _dep_word }} {% endif %}{{ current_year }} | Prevozni{% endif %}{% endif %}{% endblock %}
+{% block title %}{% if lang != 'sr' and _price_phrase %}{% set _full = _title_pair ~ ': ' ~ _n ~ ' ' ~ _dep_word ~ ', ' ~ _price_phrase ~ ' ' ~ current_year %}{{ _full if (_n and _full|length <= 62) else (_title_pair ~ ': ' ~ _price_phrase ~ ' ' ~ current_year) }}{% else %}{% if _price_phrase %}{% if _title_pair|length > 20 %}{{ _title_pair }}: {{ _price_phrase }} {{ current_year }}{% else %}{{ _title_pair }}: {% if route.trip_count %}{{ route.trip_count }} {{ _dep_word }}, {% endif %}{{ _price_phrase }} {{ current_year }}{% endif %}{% else %}{% if _title_pair|length > 28 %}{{ _title_pair }}: {{ _('route_detail.title_short') }} {{ current_year }} | Prevozni{% elif _title_pair|length > 20 %}{{ _title_pair }} — {{ _('route_detail.title_short') }} {{ current_year }} | Prevozni{% else %}{{ _title_pair }}: {% if route.trip_count %}{{ route.trip_count }} {{ _dep_word }} {% endif %}{{ current_year }} | Prevozni{% endif %}{% endif %}{% endif %}{% endblock %}
 {% block meta_description %}{{ _('route_detail.meta_prefix') }} {{ _pair_name }}{% if route.distance_km %} ({{ route.distance_km }} km){% endif %}: {% if route.trip_count %}{{ route.trip_count }} {{ _dep_word }}{% if price_min %}, {{ _price_phrase }}{% endif %}. {% endif %}{% if reviews_agg and reviews_agg.n and reviews_agg.n >= 5 %}{{ reviews_agg.avg }}★ ({{ reviews_agg.n }}). {% endif %}{{ _('route_detail.meta_body') if _primary_href else _('route_detail.meta_body_no_partner') }}{% endblock %}
 
 {% block head_extra %}
@@ -150,7 +157,7 @@
 
 <div class="page-title fade-in">
   <h1>
-    {{ route.from_city }} → {{ route.to_city }}
+    {{ _from_l }} → {{ _to_l }}
     <button type="button" class="js-fav-btn fav-btn" aria-label="{{ _('fav.save_aria') }}"
             data-path="/rute/{{ route.slug }}/"
             data-key="rute-{{ route.slug }}"
@@ -158,7 +165,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22" aria-hidden="true"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
     </button>
     <button type="button" class="share-btn" data-share-current
-            data-share-title="{{ route.from_city }} → {{ route.to_city }} | Prevozni"
+            data-share-title="{{ _pair_name }} | Prevozni"
             aria-label="{{ _('a11y.share') }}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true">
         <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>

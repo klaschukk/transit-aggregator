@@ -4,8 +4,11 @@
 {% set _from_slug = from_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
 {% set _to_slug = to_city|lower|replace(' ','-')|replace('š','s')|replace('č','c')|replace('ć','c')|replace('ž','z')|replace('đ','dj') %}
 {% set _offers_trip = affiliate_offers(_from_slug, _to_slug, from_city, to_city, 'city-pair') %}
-{% block title %}{{ from_city }} → {{ to_city }} {{ current_year }}: {{ _('city_pair.title_travel') }}{% if route and route.min_price_rsd %} {{ _('route_detail.meta_from')|lower }} {{ snippet_price(route.min_price_rsd, _from_slug, _to_slug) }}{% endif %} | Prevozni{% endblock %}
-{% block meta_description %}{{ _('city_pair.meta_prefix') }} {{ from_city }} {{ _('city_pair.meta_mid') }} {{ to_city }} {{ current_year }}{% if route and route.trip_count %}: {{ route.trip_count }} {{ _('city_pair.departures_word') }}{% endif %}{% if route and route.min_price_rsd %}, {{ _('route_detail.meta_from')|lower }} {{ snippet_price(route.min_price_rsd, _from_slug, _to_slug) }}{% endif %}.{% if reviews_agg and reviews_agg.n and reviews_agg.n >= 5 %} {{ reviews_agg.avg }}★ ({{ reviews_agg.n }}).{% endif %} {{ _('city_pair.meta_cta') }}{% endblock %}
+{% set _from_l = city_name(from_city, _from_slug, lang) %}
+{% set _to_l = city_name(to_city, _to_slug, lang) %}
+{% set _title_pair = (_from_l ~ ' → ' ~ _to_l) if lang == 'sr' else _('city_pair.title_pair').format(a=_from_l, b=_to_l) %}
+{% block title %}{{ _title_pair }} {{ current_year }}: {{ _('city_pair.title_travel') }}{% if route and route.min_price_rsd %} {{ _('route_detail.meta_from')|lower }} {{ snippet_price(route.min_price_rsd, _from_slug, _to_slug) }}{% endif %} | Prevozni{% endblock %}
+{% block meta_description %}{{ _('city_pair.meta_prefix') }} {{ _from_l }} {{ _('city_pair.meta_mid') }} {{ _to_l }} {{ current_year }}{% if route and route.trip_count %}: {{ route.trip_count }} {{ _('city_pair.departures_word') }}{% endif %}{% if route and route.min_price_rsd %}, {{ _('route_detail.meta_from')|lower }} {{ snippet_price(route.min_price_rsd, _from_slug, _to_slug) }}{% endif %}.{% if reviews_agg and reviews_agg.n and reviews_agg.n >= 5 %} {{ reviews_agg.avg }}★ ({{ reviews_agg.n }}).{% endif %} {{ _('city_pair.meta_cta') }}{% endblock %}
 
 {% block head_extra %}
 {% if route %}
@@ -90,7 +93,7 @@
 
 <div class="page-title fade-in">
   <h1>
-    {{ from_city }} → {{ to_city }}
+    {{ _from_l }} → {{ _to_l }}
     <button type="button" class="js-fav-btn fav-btn" aria-label="{{ _('fav.save_aria') }}"
             data-path="/voznja/{{ _from_slug }}-do-{{ _to_slug }}/"
             data-key="{{ _from_slug }}-do-{{ _to_slug }}"

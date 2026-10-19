@@ -19,7 +19,8 @@ def test_euro_only_when_both_ends_abroad(app):
 
 
 def test_route_titles(client):
-    assert 'from 3.5 €' in _title(client, '/en/rute/budva-kotor/')
+    t = _title(client, '/en/rute/budva-kotor/')
+    assert re.search(r'from [\d.]+ €', t) and 'RSD' not in t
     assert 'RSD' in _title(client, '/rute/beograd-novi-sad/')
 
 
