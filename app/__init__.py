@@ -174,6 +174,9 @@ def create_app(config_name: str | None = None) -> Flask:
     app.jinja_env.globals['snippet_price'] = _snippet_price
     from app.city_names import city_name as _city_name
     app.jinja_env.globals['city_name'] = _city_name
+    from app.seo_titles import route_title_variant as _rtv, sr_departures_word as _sr_dep
+    app.jinja_env.globals['route_title_variant'] = _rtv
+    app.jinja_env.globals['sr_departures_word'] = _sr_dep
 
     # ── Line-number badge: Cyrillic -> Latin at render time only ──────────
     # city_lines.number can carry a Cyrillic letter glued to Latin digits
