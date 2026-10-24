@@ -60,6 +60,10 @@ class Config:
     # Sticky bottom anchor ad on phones. OFF by default: it sat 80px above the
     # bottom nav on every page (owner: "horribly in the way"). Set ADS_MOBILE_ANCHOR=1 to bring it back.
     ADS_MOBILE_ANCHOR = os.environ.get('ADS_MOBILE_ANCHOR', '') == '1'
+    # Google Auto Ads on top of the manual slots. Owner turned it on again 2026-10-24 knowing the
+    # 2026-09-20 result (page felt ad-heavy, revenue only ~+0.5 EUR). ADS_AUTO=0 switches it off without a deploy of code.
+    # Also needs Ads > By site > prevozni.com > Auto ads ON in the AdSense dashboard.
+    ADS_AUTO = os.environ.get('ADS_AUTO', '1') == '1'
     # Publisher ID for /ads.txt (`pub-XXXXXXXXX`). Same numeric body as
     # ADSENSE_ID — kept separate so /ads.txt is independent of whether
     # the site is currently rendering ads (a paused campaign still

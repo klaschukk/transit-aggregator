@@ -107,6 +107,12 @@
 })();
 </script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config.ADSENSE_ID }}" crossorigin="anonymous"></script>
+{# Auto ads (owner, 2026-10-24): Google adds its own units on top of the manual ad_slot()s. Queued on the
+   same adsbygoogle array the NPA/consent flag above already set, so unconsented visitors get
+   non-personalized ads. Off switch: ADS_AUTO=0 (config.py). #}
+{% if config.get('ADS_AUTO') %}<script>
+(adsbygoogle = window.adsbygoogle || []).push({google_ad_client: "{{ config.ADSENSE_ID }}", enable_page_level_ads: true});
+</script>{% endif %}
 {# Adblock detector — sets a cookie if `adsbygoogle` is still undefined
    5s after page load. House ads check the cookie on the next request
    and skip the slot script entirely so adblock users see the house
